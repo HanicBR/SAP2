@@ -21,16 +21,33 @@ const bumpStat = (bucket: Record<string, number>, key: string) => {
 // Expects header: X-Server-Key: <apiKey>
 // Body: { events: [{ serverId?, gameMode, type, timestamp, steamId?, playerName?, rawText, metadata, sessionId?, map?, serverName?, roundId? }] }
 
+const parseJsonBody = (raw: any): any => {
+  if (raw == null) return undefined;
+  if (typeof raw === 'string') {
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return undefined;
+    }
+  }
+  return raw;
+};
+
 router.post('/logs', async (req, res) => {
   const apiKey = req.header('x-server-key') || req.header('X-Server-Key');
-  const events = (req.body as any)?.events as any[];
+  const parsedBody = parseJsonBody((req as any).body);
+  const events = (parsedBody as any)?.events as any[];
 
   if (!apiKey) {
     return res.status(401).json({ error: 'Missing server API key' });
   }
 
   if (!Array.isArray(events) || events.length === 0) {
-    return res.status(400).json({ error: 'No events to ingest' });
+    return res.status(400).json({
+      error: 'No events to ingest',
+      received: Array.isArray(events) ? events.length : 0,
+      bodyType: typeof parsedBody,
+    });
   }
 
   // Find server by apiKey hash

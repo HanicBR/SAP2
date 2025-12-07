@@ -129,14 +129,24 @@ router.post('/heartbeat', async (req, res) => {
       return res.status(403).json({ error: 'Invalid server key' });
     }
 
-    const { map, playerCount } = req.body as {
-      map?: string;
-      playerCount?: number;
-    };
+    // Body pode chegar como string
+    let body: any = (req as any).body;
+    if (body && typeof body === 'string') {
+      try {
+        body = JSON.parse(body);
+      } catch {
+        body = undefined;
+      }
+    }
+
+    const map = (body && (body.map || body.Map || body.mapName)) || (req.query as any)?.map;
+    const playerCountRaw =
+      (body && (body.playerCount ?? body.PlayerCount ?? body.count)) || (req.query as any)?.playerCount;
+    const playerCount =
+      typeof playerCountRaw === 'string' ? parseInt(playerCountRaw, 10) : (playerCountRaw as number | undefined);
 
     const now = new Date();
 
-    // Update core status fields
     const updateData: any = {
       lastHeartbeat: now,
       status: 'ONLINE',
@@ -153,7 +163,6 @@ router.post('/heartbeat', async (req, res) => {
       data: updateData,
     });
 
-    // Optional: also store snapshot for analytics if playerCount provided
     if (typeof playerCount === 'number' && !isNaN(playerCount) && playerCount >= 0) {
       const client = (prisma as any).playerSnapshot as
         | { create: (args: any) => Promise<any> }
