@@ -20,7 +20,7 @@ const TutorialMurder: React.FC = () => {
             Tutorial <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-purple-600">Murder</span>
           </h1>
           <p className="text-xl text-zinc-400 max-w-2xl">
-            Um assassino à solta. Uma arma escondida. Pistas espalhadas. Descubra quem é o criminoso antes que ele mate todos.
+            Um assassino à solta22222222. Uma arma escondida. Pistas espalhadas. Descubra quem é o criminoso antes que ele mate todos.
           </p>
         </div>
       </div>
