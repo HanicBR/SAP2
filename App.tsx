@@ -44,6 +44,9 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }
 
   const user = JSON.parse(userStr);
+  if (user.mustChangePassword) {
+    return <Navigate to="/admin/login" replace />;
+  }
   
   // Regular users cannot access admin panel
   if (user.role === UserRole.USER) {
@@ -59,6 +62,9 @@ const SuperAdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) 
     if (!userStr) return <Navigate to="/admin/login" replace />;
     
     const user = JSON.parse(userStr);
+    if (user.mustChangePassword) {
+        return <Navigate to="/admin/login" replace />;
+    }
     if (user.role !== UserRole.SUPERADMIN) {
         return <Navigate to="/admin/dashboard" replace />;
     }

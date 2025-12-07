@@ -272,10 +272,11 @@ export const ApiService = {
 
   changePassword: async (currentPassword: string, newPassword: string): Promise<User> => {
     if (!hasApi) throw new Error('API base URL not configured');
-    return apiFetch<User>('/auth/change-password', {
+    const result = await apiFetch<{ user: User }>('/auth/change-password', {
       method: 'POST',
       body: JSON.stringify({ currentPassword, newPassword }),
     });
+    return result.user;
   },
 
   // --- SITE CONFIGURATION ---

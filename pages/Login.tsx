@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ApiService } from '../services/api';
 import { Icons } from '../components/Icon';
@@ -16,6 +16,23 @@ const Login: React.FC = () => {
   const [changingPassword, setChangingPassword] = useState(false);
   const [pendingUser, setPendingUser] = useState<User | null>(null);
   const navigate = useNavigate();
+
+  // Se já estiver logado e exigir troca de senha, abre modal ao carregar a página
+  useEffect(() => {
+    const stored = localStorage.getItem('backstabber_user');
+    const token = localStorage.getItem('backstabber_token');
+    if (!stored || !token) return;
+    try {
+      const parsed = JSON.parse(stored) as User;
+      if (parsed.mustChangePassword) {
+        setPendingUser(parsed);
+        setForcePasswordModal(true);
+        setCurrentPassword('');
+      }
+    } catch {
+      // ignore parse errors
+    }
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -157,6 +174,9 @@ const Login: React.FC = () => {
                   setForcePasswordModal(false);
                   setNewPassword('');
                   setPendingUser(null);
+                  localStorage.removeItem('backstabber_user');
+                  localStorage.removeItem('backstabber_token');
+                  navigate('/admin/login');
                 }}
                 className="px-4 py-2 text-sm font-bold text-zinc-400 hover:text-white bg-zinc-800 border border-zinc-700 rounded"
               >
@@ -168,7 +188,7 @@ const Login: React.FC = () => {
                   setChangingPassword(true);
                   try {
                     const updated = await ApiService.changePassword(currentPassword, newPassword);
-                    const finalUser = { ...(pendingUser || updated), mustChangePassword: false };
+                    const finalUser = { ...(pendingUser || updated), ...updated, mustChangePassword: false };
                     localStorage.setItem('backstabber_user', JSON.stringify(finalUser));
                     setForcePasswordModal(false);
                     setNewPassword('');
