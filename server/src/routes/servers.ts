@@ -117,58 +117,63 @@ router.post('/:id/regenerate-key', authMiddleware, requireRole(UserRole.SUPERADM
 
 // Heartbeat endpoint for game servers (auth via X-Server-Key)
 router.post('/heartbeat', async (req, res) => {
-  const apiKey = (req.header('x-server-key') || req.header('X-Server-Key')) as string | undefined;
-  if (!apiKey) {
-    return res.status(401).json({ error: 'Missing server API key' });
-  }
-
-  const allServers = await prisma.gameServer.findMany({ select: { id: true, apiKeyHash: true } });
-  const server = allServers.find((s) => s.apiKeyHash && compareApiKey(apiKey, s.apiKeyHash));
-  if (!server) {
-    return res.status(403).json({ error: 'Invalid server key' });
-  }
-
-  const { map, playerCount } = req.body as {
-    map?: string;
-    playerCount?: number;
-  };
-
-  const now = new Date();
-
-  // Update core status fields
-  const updateData: any = {
-    lastHeartbeat: now,
-    status: 'ONLINE',
-  };
-  if (typeof playerCount === 'number' && playerCount >= 0) {
-    updateData.currentPlayers = Math.floor(playerCount);
-  }
-  if (map) {
-    updateData.currentMap = map;
-  }
-
-  await prisma.gameServer.update({
-    where: { id: server.id },
-    data: updateData,
-  });
-
-  // Optional: also store snapshot for analytics if playerCount provided
-  if (typeof playerCount === 'number' && !isNaN(playerCount) && playerCount >= 0) {
-    const client = (prisma as any).playerSnapshot as
-      | { create: (args: any) => Promise<any> }
-      | undefined;
-    if (client) {
-      await client.create({
-        data: {
-          serverId: server.id,
-          timestamp: now,
-          count: Math.floor(playerCount),
-        },
-      });
+  try {
+    const apiKey = (req.header('x-server-key') || req.header('X-Server-Key')) as string | undefined;
+    if (!apiKey) {
+      return res.status(401).json({ error: 'Missing server API key' });
     }
-  }
 
-  return res.json({ ok: true });
+    const allServers = await prisma.gameServer.findMany({ select: { id: true, apiKeyHash: true } });
+    const server = allServers.find((s) => s.apiKeyHash && compareApiKey(apiKey, s.apiKeyHash));
+    if (!server) {
+      return res.status(403).json({ error: 'Invalid server key' });
+    }
+
+    const { map, playerCount } = req.body as {
+      map?: string;
+      playerCount?: number;
+    };
+
+    const now = new Date();
+
+    // Update core status fields
+    const updateData: any = {
+      lastHeartbeat: now,
+      status: 'ONLINE',
+    };
+    if (typeof playerCount === 'number' && playerCount >= 0) {
+      updateData.currentPlayers = Math.floor(playerCount);
+    }
+    if (map) {
+      updateData.currentMap = map;
+    }
+
+    await prisma.gameServer.update({
+      where: { id: server.id },
+      data: updateData,
+    });
+
+    // Optional: also store snapshot for analytics if playerCount provided
+    if (typeof playerCount === 'number' && !isNaN(playerCount) && playerCount >= 0) {
+      const client = (prisma as any).playerSnapshot as
+        | { create: (args: any) => Promise<any> }
+        | undefined;
+      if (client) {
+        await client.create({
+          data: {
+            serverId: server.id,
+            timestamp: now,
+            count: Math.floor(playerCount),
+          },
+        });
+      }
+    }
+
+    return res.json({ ok: true });
+  } catch (err: any) {
+    console.error('Heartbeat error', err);
+    return res.status(500).json({ error: 'Heartbeat failed', detail: err?.message });
+  }
 });
 
 router.get('/:id/analytics', async (req, res) => {

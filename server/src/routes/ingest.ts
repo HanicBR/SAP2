@@ -48,8 +48,9 @@ router.post('/logs', async (req, res) => {
   const rawTextFilters = logsConfig?.rawTextFilters || [];
 
   const cleanEvents = events
-    .map((e) => {
-      if (!e.rawText || !e.type) return null;
+    .map((e, idx) => {
+      const rawText = e.rawText || e.text || e.message || '';
+      const type = e.type || e.eventType || e.EventType || 'UNKNOWN';
       const ts = e.timestamp ? new Date(e.timestamp) : new Date();
       const meta = {
         ...(e.metadata || {}),
@@ -58,6 +59,7 @@ router.post('/logs', async (req, res) => {
         serverName: e.serverName || e.ServerName || server.name,
         roundId: e.roundId || e.RoundId,
         playerCount: e.playerCount || e.PlayerCount || e.count || undefined,
+        index: idx,
       };
       const rawMode = (e.gameMode || e.mode || e.game_mode || '').toString().toUpperCase();
       const resolvedMode =
@@ -68,57 +70,21 @@ router.post('/logs', async (req, res) => {
           : rawMode === GameMode.TTT
           ? GameMode.TTT
           : server.mode || GameMode.TTT;
-      const evt = {
+      return {
         serverId: server.id,
         gameMode: resolvedMode,
-        type: e.type,
+        type,
         timestamp: ts,
         steamId: e.steamId || null,
         playerName: e.playerName || null,
-        rawText: e.rawText,
+        rawText: rawText || type, // garante texto mínimo para não ser descartado
         metadata: meta,
       } as any;
-
-      // Ignore rules (toolName, command, rawText contains)
-      const type = String(evt.type || '').toUpperCase();
-      const metaAny = evt.metadata as any;
-
-      if (type === 'TOOL_USE' && ignoredTools.length && metaAny?.toolName) {
-        const toolName = String(metaAny.toolName);
-        const toolLower = toolName.toLowerCase();
-        const matched = ignoredTools.find((t) => toolLower.includes(String(t).toLowerCase()));
-        if (matched) {
-          bumpStat(ignoreStats.tools, matched);
-          return null;
-        }
-      }
-
-      if ((type === 'COMMAND' || type === 'ULX') && ignoredCommands.length && metaAny?.command) {
-        const cmdName = String(metaAny.command);
-        const cmdLower = cmdName.toLowerCase();
-        const matched = ignoredCommands.find((c) => cmdLower.includes(String(c).toLowerCase()));
-        if (matched) {
-          bumpStat(ignoreStats.commands, matched);
-          return null;
-        }
-      }
-
-      if (rawTextFilters.length && evt.rawText) {
-        const raw = String(evt.rawText);
-        const rawLower = raw.toLowerCase();
-        const matched = rawTextFilters.find((s) => rawLower.includes(String(s).toLowerCase()));
-        if (matched) {
-          bumpStat(ignoreStats.rawText, matched);
-          return null;
-        }
-      }
-
-      return evt;
     })
     .filter(Boolean) as any[];
 
   if (!cleanEvents.length) {
-    return res.status(400).json({ error: 'No valid events' });
+    return res.status(400).json({ error: 'No valid events', received: events.length });
   }
 
   await prisma.log.createMany({
