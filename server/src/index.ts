@@ -20,6 +20,9 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 4000;
 
+// Trust upstream proxy (Nginx) so rate limiting sees correct client IPs
+app.set('trust proxy', true);
+
 app.use(cors({ origin: '*', credentials: true }));
 app.use(express.json());
 app.use(helmet());
