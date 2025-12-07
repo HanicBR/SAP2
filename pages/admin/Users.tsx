@@ -84,6 +84,25 @@ const Users: React.FC = () => {
     }
   };
 
+  const handleDeleteUser = async (user: User) => {
+    if (user.id === currentUser?.id) {
+      alert("VocÇ¦ nÇœo pode remover a si mesmo.");
+      return;
+    }
+    if (!window.confirm(`Remover o usuÇ­rio ${user.username}?`)) return;
+
+    await ApiService.deleteUser(user.id);
+
+    // Atualiza a lista local e ajusta paginaÇõÇœo, depois sincroniza com o backend
+    setUsers((prev) => {
+      const next = prev.filter((u) => u.id !== user.id);
+      const totalPages = Math.max(1, Math.ceil(next.length / itemsPerPage));
+      setCurrentPage((page) => Math.min(page, totalPages));
+      return next;
+    });
+    loadUsers();
+  };
+
   const getRoleBadge = (role: UserRole) => {
     switch (role) {
       case UserRole.SUPERADMIN:
@@ -181,14 +200,7 @@ const Users: React.FC = () => {
                          </button>
                          <button
                             onClick={async () => {
-                              if (user.id === currentUser?.id) {
-                                alert("Você não pode remover a si mesmo.");
-                                return;
-                              }
-                              if (window.confirm(`Remover o usuário ${user.username}?`)) {
-                                await ApiService.deleteUser(user.id);
-                                loadUsers();
-                              }
+                              await handleDeleteUser(user);
                             }}
                             className="inline-flex items-center px-2 py-1 bg-red-900/30 border border-red-800 text-xs text-red-400 rounded hover:bg-red-900/50"
                             disabled={user.id === currentUser.id}
