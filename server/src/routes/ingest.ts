@@ -36,7 +36,13 @@ const parseJsonBody = (raw: any): any => {
 router.post('/logs', async (req, res) => {
   const apiKey = req.header('x-server-key') || req.header('X-Server-Key');
   const parsedBody = parseJsonBody((req as any).body);
-  const events = (parsedBody as any)?.events as any[];
+
+  let events: any[] | undefined;
+  if (Array.isArray((parsedBody as any)?.events)) {
+    events = (parsedBody as any).events;
+  } else if (Array.isArray(parsedBody)) {
+    events = parsedBody; // aceita array direto
+  }
 
   if (!apiKey) {
     return res.status(401).json({ error: 'Missing server API key' });
@@ -47,6 +53,12 @@ router.post('/logs', async (req, res) => {
       error: 'No events to ingest',
       received: Array.isArray(events) ? events.length : 0,
       bodyType: typeof parsedBody,
+      preview:
+        typeof (req as any).body === 'string'
+          ? String((req as any).body).slice(0, 200)
+          : parsedBody
+          ? JSON.stringify(parsedBody).slice(0, 200)
+          : '',
     });
   }
 
