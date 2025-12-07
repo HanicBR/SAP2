@@ -1,0 +1,183 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPERADMIN
+}
+
+enum GameMode {
+  TTT
+  SANDBOX
+  MURDER
+}
+
+enum ServerStatus {
+  ONLINE
+  OFFLINE
+  MAINTENANCE
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  email        String   @unique
+  passwordHash String
+  role         UserRole
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+
+  transactions Transaction[]
+}
+
+model SiteConfig {
+  id        Int      @id @default(1)
+  data      Json
+  updatedAt DateTime @updatedAt
+}
+
+model GameServer {
+  id             String       @id @default(cuid())
+  name           String
+  ip             String
+  port           Int
+  mode           GameMode
+  status         ServerStatus @default(OFFLINE)
+  currentPlayers Int          @default(0)
+  maxPlayers     Int
+  apiKeyHash     String?
+  currentMap     String?
+  lastHeartbeat  DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  logs            Log[]
+  playerSnapshots PlayerSnapshot[]
+}
+
+model PlayerProfile {
+  steamId          String       @id
+  name             String
+  avatarUrl        String?
+  lastSeen         DateTime     @default(now())
+  firstSeen        DateTime     @default(now())
+  totalConnections Int          @default(0)
+  playTimeHours    Int          @default(0)
+  isVip            Boolean      @default(false)
+  vipPlan          String?
+  vipExpiry        DateTime?
+  ip               String?
+  geo              Json?
+  serverStats      Json?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  notes            PlayerNote[]
+  punishments      Punishment[]
+}
+
+model PlayerNote {
+  id        String   @id @default(cuid())
+  steamId   String
+  content   String
+  staffName String
+  createdAt DateTime @default(now())
+
+  player PlayerProfile @relation(fields: [steamId], references: [steamId], onDelete: Cascade)
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum TransactionCategory {
+  VIP_SALE
+  SERVER_HOSTING
+  DOMAIN_WEB
+  DEV_PLUGIN
+  OTHER
+}
+
+model Transaction {
+  id                String              @id @default(cuid())
+  date              DateTime            @default(now())
+  amount            Float
+  type              TransactionType
+  category          TransactionCategory
+  description       String
+  proofUrl          String?
+  relatedSteamId    String?
+  relatedPlayerName String?
+  vipPlan           String?
+  vipDurationDays   Int?
+  createdBy         String
+  createdAt         DateTime            @default(now())
+
+  user User @relation(fields: [createdBy], references: [id])
+}
+
+enum PunishmentType {
+  BAN
+  MUTE
+  GAG
+  KICK
+  WARN
+}
+
+model Punishment {
+  id        String         @id @default(cuid())
+  steamId   String
+  type      PunishmentType
+  reason    String
+  staffName String
+  date      DateTime       @default(now())
+  duration  String?
+  active    Boolean        @default(true)
+
+  player PlayerProfile @relation(fields: [steamId], references: [steamId], onDelete: Cascade)
+}
+
+enum LogType {
+  CONNECT
+  DISCONNECT
+  CHAT
+  COMMAND
+  ULX
+  KILL
+  DAMAGE
+  PROP_SPAWN
+  TOOL_USE
+  ROUND_START
+  ROUND_END
+  GAME_EVENT
+}
+
+model Log {
+  id         String   @id @default(cuid())
+  serverId   String
+  gameMode   GameMode
+  type       LogType
+  timestamp  DateTime
+  steamId    String?
+  playerName String?
+  rawText    String
+  metadata   Json
+
+  server GameServer @relation(fields: [serverId], references: [id], onDelete: Cascade)
+}
+
+model PlayerSnapshot {
+  id        String   @id @default(cuid())
+  serverId  String
+  timestamp DateTime @default(now())
+  count     Int
+
+  server GameServer @relation(fields: [serverId], references: [id], onDelete: Cascade)
+}
