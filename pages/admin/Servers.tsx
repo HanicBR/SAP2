@@ -60,8 +60,8 @@ const ServerCard = memo(({ server, isSuperAdmin, plainKey, onRegenerateKey }: { 
 
             {isSuperAdmin && (
                   <div className="bg-zinc-950 p-3 rounded border border-zinc-800 flex items-center gap-2">
-                    <code className="bg-black px-2 py-1 rounded text-xs font-mono text-zinc-400 truncate w-28 md:w-36 border border-zinc-800">
-                        {plainKey || '••••••••'}
+                    <code className="bg-black px-2 py-1 rounded text-xs font-mono text-zinc-300 border border-zinc-800 break-all">
+                        {plainKey || 'Gere para visualizar'}
                     </code>
                     <div className="flex items-center gap-1">
                       <button 
@@ -217,7 +217,14 @@ const Servers: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [plainKeys, setPlainKeys] = useState<Record<string, string>>({});
+  const [plainKeys, setPlainKeys] = useState<Record<string, string>>(() => {
+    try {
+      const stored = localStorage.getItem('backstabber_server_keys');
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  });
 
   useEffect(() => {
     const userStr = localStorage.getItem('backstabber_user');
@@ -225,6 +232,15 @@ const Servers: React.FC = () => {
 
     loadServers();
   }, []);
+
+  // Persiste as chaves em localStorage para que continuem visíveis após recarregar
+  useEffect(() => {
+    try {
+      localStorage.setItem('backstabber_server_keys', JSON.stringify(plainKeys));
+    } catch {
+      // ignore storage errors
+    }
+  }, [plainKeys]);
 
   const loadServers = useCallback(() => {
     ApiService.getServers().then(data => {
@@ -272,7 +288,7 @@ const Servers: React.FC = () => {
              <p className="text-zinc-500">Carregando servidores...</p>
           ) : (
             servers.map(server => (
-               <ServerCard 
+              <ServerCard 
                   key={server.id} 
                   server={server} 
                   isSuperAdmin={isSuperAdmin} 

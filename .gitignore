@@ -28,3 +28,5 @@ server/dist
 *.njsproj
 *.sln
 *.sw?
+
+bs_ttt_ingest.lua
