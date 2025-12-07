@@ -22,6 +22,15 @@ const Users: React.FC = () => {
   const [newRole, setNewRole] = useState<UserRole>(UserRole.USER);
   const [createLoading, setCreateLoading] = useState(false);
 
+  // Edit/Delete modal state
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editUser, setEditUser] = useState<User | null>(null);
+  const [editUsername, setEditUsername] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editPassword, setEditPassword] = useState('');
+  const [editRole, setEditRole] = useState<UserRole>(UserRole.USER);
+  const [editLoading, setEditLoading] = useState(false);
+
   useEffect(() => {
     const userStr = localStorage.getItem('backstabber_user');
     if (userStr) {
@@ -119,7 +128,7 @@ const Users: React.FC = () => {
                 <th className="px-6 py-3 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider">Cargo Atual</th>
                 <th className="px-6 py-3 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider">Data Criação</th>
                 {currentUser?.role === UserRole.SUPERADMIN && (
-                   <th className="px-6 py-3 text-right text-xs font-bold text-zinc-500 uppercase tracking-wider">Alterar Cargo</th>
+                   <th className="px-6 py-3 text-right text-xs font-bold text-zinc-500 uppercase tracking-wider">Ações</th>
                 )}
               </tr>
             </thead>
@@ -145,8 +154,8 @@ const Users: React.FC = () => {
                       {new Date(user.createdAt).toLocaleDateString()}
                     </td>
                     {currentUser?.role === UserRole.SUPERADMIN && (
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                         <select 
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                         <select
                             className="bg-zinc-950 border border-zinc-700 text-zinc-300 text-xs rounded px-2 py-1 focus:outline-none focus:border-red-500"
                             value={user.role}
                             onChange={(e) => handleRoleChange(user.id, e.target.value as UserRole)}
@@ -156,6 +165,36 @@ const Users: React.FC = () => {
                             <option value={UserRole.ADMIN}>Admin</option>
                             <option value={UserRole.SUPERADMIN}>Super Admin</option>
                          </select>
+                         <button
+                            onClick={() => {
+                              setEditUser(user);
+                              setEditUsername(user.username);
+                              setEditEmail(user.email);
+                              setEditRole(user.role);
+                              setEditPassword('');
+                              setIsEditModalOpen(true);
+                            }}
+                            className="inline-flex items-center px-2 py-1 bg-zinc-800 border border-zinc-700 text-xs text-white rounded hover:bg-zinc-700"
+                            disabled={user.id === currentUser.id}
+                         >
+                            <Icons.Edit className="w-3 h-3 mr-1" /> Editar
+                         </button>
+                         <button
+                            onClick={async () => {
+                              if (user.id === currentUser?.id) {
+                                alert("Você não pode remover a si mesmo.");
+                                return;
+                              }
+                              if (window.confirm(`Remover o usuário ${user.username}?`)) {
+                                await ApiService.deleteUser(user.id);
+                                loadUsers();
+                              }
+                            }}
+                            className="inline-flex items-center px-2 py-1 bg-red-900/30 border border-red-800 text-xs text-red-400 rounded hover:bg-red-900/50"
+                            disabled={user.id === currentUser.id}
+                         >
+                            <Icons.Trash className="w-3 h-3 mr-1" /> Remover
+                         </button>
                       </td>
                     )}
                   </tr>
@@ -255,6 +294,108 @@ const Users: React.FC = () => {
               </div>
             </div>
           </div>
+      )}
+
+      {/* EDIT USER MODAL */}
+      {isEditModalOpen && editUser && (
+        <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+          <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 bg-black/80 transition-opacity" aria-hidden="true" onClick={() => setIsEditModalOpen(false)}></div>
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div className="inline-block align-bottom bg-zinc-900 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-zinc-800">
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                setEditLoading(true);
+                try {
+                  await ApiService.updateUser(editUser.id, {
+                    username: editUsername,
+                    email: editEmail,
+                    role: editRole,
+                    password: editPassword || undefined,
+                  });
+                  setIsEditModalOpen(false);
+                  setEditPassword('');
+                  loadUsers();
+                } catch {
+                  alert('Erro ao atualizar usuário.');
+                } finally {
+                  setEditLoading(false);
+                }
+              }}>
+                <div className="bg-zinc-900 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                  <h3 className="text-lg leading-6 font-bold text-white uppercase mb-4" id="modal-title">
+                    Editar Usuário
+                  </h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold text-zinc-500 uppercase mb-1">Nome de Usuário</label>
+                      <input
+                        type="text"
+                        required
+                        className="w-full bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm focus:outline-none focus:border-red-500"
+                        value={editUsername}
+                        onChange={(e) => setEditUsername(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-zinc-500 uppercase mb-1">Email</label>
+                      <input
+                        type="email"
+                        required
+                        className="w-full bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm focus:outline-none focus:border-red-500"
+                        value={editEmail}
+                        onChange={(e) => setEditEmail(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-zinc-500 uppercase mb-1">Nova Senha (opcional)</label>
+                      <input
+                        type="password"
+                        className="w-full bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm focus:outline-none focus:border-red-500"
+                        value={editPassword}
+                        onChange={(e) => setEditPassword(e.target.value)}
+                        placeholder="Deixe em branco para não alterar"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-zinc-500 uppercase mb-1">Cargo</label>
+                      <select
+                        className="w-full bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm focus:outline-none focus:border-red-500"
+                        value={editRole}
+                        onChange={(e) => setEditRole(e.target.value as UserRole)}
+                        disabled={editUser.id === currentUser?.id}
+                      >
+                        <option value={UserRole.USER}>User</option>
+                        <option value={UserRole.ADMIN}>Admin</option>
+                        <option value={UserRole.SUPERADMIN}>Super Admin</option>
+                      </select>
+                      {editUser.id === currentUser?.id && (
+                        <p className="text-xs text-red-400 mt-1">Você não pode alterar seu próprio cargo.</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-zinc-800/50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse border-t border-zinc-800">
+                  <button
+                    type="submit"
+                    disabled={editLoading}
+                    className="w-full inline-flex justify-center rounded border border-transparent shadow-sm px-4 py-2 bg-red-700 text-base font-bold text-white hover:bg-red-600 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm uppercase tracking-wider disabled:opacity-50"
+                  >
+                    {editLoading ? 'Salvando...' : 'Salvar'}
+                  </button>
+                  <button
+                    type="button"
+                    className="mt-3 w-full inline-flex justify-center rounded border border-zinc-600 shadow-sm px-4 py-2 bg-transparent text-base font-medium text-zinc-300 hover:text-white hover:bg-zinc-800 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                    onClick={() => setIsEditModalOpen(false)}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

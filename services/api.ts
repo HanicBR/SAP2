@@ -241,6 +241,22 @@ export const ApiService = {
     return null;
   },
 
+  updateUser: async (
+    userId: string,
+    data: { username?: string; email?: string; role?: UserRole; password?: string },
+  ): Promise<User> => {
+    if (!hasApi) throw new Error('API base URL not configured');
+    return apiFetch<User>(`/users/${userId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  },
+
+  deleteUser: async (userId: string): Promise<void> => {
+    if (!hasApi) throw new Error('API base URL not configured');
+    await apiFetch<void>(`/users/${userId}`, { method: 'DELETE' });
+  },
+
   // --- SITE CONFIGURATION ---
   getSiteConfig: async (): Promise<SiteConfig> => {
     if (hasApi) {
