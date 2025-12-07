@@ -91,16 +91,23 @@ const Users: React.FC = () => {
     }
     if (!window.confirm(`Remover o usuÇ­rio ${user.username}?`)) return;
 
-    await ApiService.deleteUser(user.id);
-
-    // Atualiza a lista local e ajusta paginaÇõÇœo, depois sincroniza com o backend
+    // Otimista: remove da lista imediatamente; se falhar, volta e recarrega
+    let previousUsers: User[] = [];
     setUsers((prev) => {
+      previousUsers = prev;
       const next = prev.filter((u) => u.id !== user.id);
       const totalPages = Math.max(1, Math.ceil(next.length / itemsPerPage));
       setCurrentPage((page) => Math.min(page, totalPages));
       return next;
     });
-    loadUsers();
+
+    try {
+      await ApiService.deleteUser(user.id);
+      loadUsers();
+    } catch (err) {
+      alert('Erro ao remover usuÇ­rio.');
+      setUsers(previousUsers);
+    }
   };
 
   const getRoleBadge = (role: UserRole) => {
