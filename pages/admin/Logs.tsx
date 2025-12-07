@@ -16,6 +16,7 @@ interface RoundGroup {
   endTime?: string;
   winner?: string;
   duration?: number;
+  roundNumber?: number;
 }
 
 interface SessionGroup {
@@ -253,7 +254,7 @@ const RoundCard = React.memo(({ group, onQuickIgnore }: { group: RoundGroup; onQ
              </div>
              <div>
                 <span className="text-sm font-black uppercase tracking-wider block">
-                   Rodada {group.id.split('_')[1] || '?'}
+                   Rodada {group.roundNumber ?? group.id.split('_')[1] ?? '?'}
                 </span>
                 {group.winner && (
                    <span className="text-xs font-bold opacity-80">
@@ -453,7 +454,8 @@ const Logs: React.FC = () => {
                     type: 'ROUND',
                     mode: GameMode.TTT,
                     events: [],
-                    startTime: log.timestamp
+                    startTime: log.timestamp,
+                    roundNumber: log.metadata.roundNumber,
                  };
               }
               groups[log.metadata.roundId].events.push(log);
@@ -471,8 +473,13 @@ const Logs: React.FC = () => {
         });
 
         // Convert groups map to array and sort events inside
-        Object.values(groups).forEach(g => {
+        const groupArr = Object.values(groups);
+        groupArr.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+        groupArr.forEach((g, idx) => {
            g.events.sort((a,b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+            if (g.roundNumber == null) {
+              g.roundNumber = idx + 1; // fallback sequencial
+            }
            result.push(g);
         });
         looseLogs.forEach(l => result.push(l));
