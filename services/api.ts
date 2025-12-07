@@ -55,7 +55,20 @@ const apiFetch = async <T>(path: string, options: RequestInit = {}): Promise<T> 
     throw new Error(message);
   }
 
-  return response.json() as Promise<T>;
+  // Handles empty/204 responses gracefully
+  if (response.status === 204) {
+    return undefined as T;
+  }
+  const text = await response.text();
+  if (!text) {
+    return undefined as T;
+  }
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    // If it is plain text, return as any
+    return text as unknown as T;
+  }
 };
 
 // Mock Databases in Memory (fallback when backend is not available)
