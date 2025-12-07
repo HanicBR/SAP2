@@ -153,53 +153,29 @@ export const ApiService = {
 
   // Auth System
   login: async (emailOrUser: string, password: string): Promise<User | null> => {
-    if (hasApi) {
-      try {
-        const result = await apiFetch<{ user: User; token: string }>('/auth/login', {
-          method: 'POST',
-          body: JSON.stringify({ emailOrUser, password }),
-        });
-        localStorage.setItem('backstabber_token', result.token);
-        return result.user;
-      } catch (error) {
-        console.error('API login failed, falling back to mock auth:', error);
-      }
+    if (!hasApi) {
+      throw new Error('API base URL not configured');
     }
 
-    // Fallback mock implementation
-    await delay(600);
-    const user = usersDb.find(
-      u => (u.email === emailOrUser || u.username === emailOrUser) && password.length >= 3
-    );
-    return user || null;
+    const result = await apiFetch<{ user: User; token: string }>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ emailOrUser, password }),
+    });
+    localStorage.setItem('backstabber_token', result.token);
+    return result.user;
   },
 
   register: async (username: string, email: string, password: string): Promise<User> => {
-    if (hasApi) {
-      try {
-        const result = await apiFetch<{ user: User; token: string }>('/auth/register', {
-          method: 'POST',
-          body: JSON.stringify({ username, email, password }),
-        });
-        localStorage.setItem('backstabber_token', result.token);
-        return result.user;
-      } catch (error) {
-        console.error('API register failed, falling back to mock register:', error);
-      }
+    if (!hasApi) {
+      throw new Error('API base URL not configured');
     }
 
-    // Fallback mock implementation
-    await delay(800);
-    const newUser: User = {
-      id: `u_${Date.now()}`,
-      username,
-      email,
-      role: UserRole.USER, // Default role
-      createdAt: new Date().toISOString(),
-      avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`
-    };
-    usersDb.push(newUser);
-    return newUser;
+    const result = await apiFetch<{ user: User; token: string }>('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ username, email, password }),
+    });
+    localStorage.setItem('backstabber_token', result.token);
+    return result.user;
   },
   
   createUser: async (username: string, email: string, password: string, role: UserRole): Promise<User> => {
