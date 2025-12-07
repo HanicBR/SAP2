@@ -86,10 +86,10 @@ const Users: React.FC = () => {
 
   const handleDeleteUser = async (user: User) => {
     if (user.id === currentUser?.id) {
-      alert("VocÇ¦ nÇœo pode remover a si mesmo.");
+      alert("Você não pode remover a si mesmo.");
       return;
     }
-    if (!window.confirm(`Remover o usuÇ­rio ${user.username}?`)) return;
+    if (!window.confirm(`Remover o usuário ${user.username}?`)) return;
 
     // Otimista: remove da lista imediatamente; se falhar, volta e recarrega
     let previousUsers: User[] = [];
@@ -105,7 +105,7 @@ const Users: React.FC = () => {
       await ApiService.deleteUser(user.id);
       loadUsers();
     } catch (err) {
-      alert('Erro ao remover usuÇ­rio.');
+      alert('Erro ao remover usuário.');
       setUsers(previousUsers);
     }
   };
