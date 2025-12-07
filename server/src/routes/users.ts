@@ -59,6 +59,7 @@ router.post('/', requireRole(UserRole.SUPERADMIN), async (req, res) => {
       role,
       avatarUrl,
       passwordHash,
+      mustChangePassword: true,
     },
   });
 

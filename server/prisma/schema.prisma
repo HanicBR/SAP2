@@ -32,6 +32,7 @@ model User {
   passwordHash String
   role         UserRole
   avatarUrl    String?
+  mustChangePassword Boolean @default(false)
   createdAt    DateTime @default(now())
 
   transactions Transaction[]

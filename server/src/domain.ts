@@ -9,6 +9,7 @@ export interface User {
   username: string;
   email: string;
   role: UserRole;
+  mustChangePassword?: boolean;
   createdAt: string;
   avatarUrl?: string;
 }

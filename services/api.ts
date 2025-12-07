@@ -257,6 +257,14 @@ export const ApiService = {
     await apiFetch<void>(`/users/${userId}`, { method: 'DELETE' });
   },
 
+  changePassword: async (currentPassword: string, newPassword: string): Promise<User> => {
+    if (!hasApi) throw new Error('API base URL not configured');
+    return apiFetch<User>('/auth/change-password', {
+      method: 'POST',
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+  },
+
   // --- SITE CONFIGURATION ---
   getSiteConfig: async (): Promise<SiteConfig> => {
     if (hasApi) {

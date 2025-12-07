@@ -3,13 +3,18 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ApiService } from '../services/api';
 import { Icons } from '../components/Icon';
-import { UserRole } from '../types';
+import { User, UserRole } from '../types';
 
 const Login: React.FC = () => {
   const [emailOrUser, setEmailOrUser] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [forcePasswordModal, setForcePasswordModal] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [pendingUser, setPendingUser] = useState<User | null>(null);
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -22,9 +27,15 @@ const Login: React.FC = () => {
         
         if (user) {
             localStorage.setItem('backstabber_user', JSON.stringify(user));
-            
+
+            if (user.mustChangePassword) {
+              setPendingUser(user);
+              setCurrentPassword(password);
+              setForcePasswordModal(true);
+              return;
+            }
+
             if (user.role === UserRole.USER) {
-                // Regular users go to home page for now, as they don't have dashboard access
                 navigate('/');
             } else {
                 navigate('/admin/dashboard');
@@ -109,6 +120,78 @@ const Login: React.FC = () => {
              </Link>
         </div>
       </div>
+
+      {forcePasswordModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+          <div className="bg-zinc-900 border border-zinc-800 rounded shadow-2xl p-6 w-full max-w-md space-y-4">
+            <h3 className="text-xl font-bold text-white flex items-center gap-2">
+              <Icons.Lock className="w-5 h-5 text-red-500" /> Defina uma nova senha
+            </h3>
+            <p className="text-sm text-zinc-400">
+              Sua conta exige alteração de senha. A nova senha precisa ter pelo menos 6 caracteres.
+            </p>
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs text-zinc-500 font-bold uppercase mb-1 block">Senha atual</label>
+                <input
+                  type="password"
+                  className="w-full bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm focus:outline-none focus:border-red-500"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="text-xs text-zinc-500 font-bold uppercase mb-1 block">Nova senha</label>
+                <input
+                  type="password"
+                  className="w-full bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm focus:outline-none focus:border-red-500"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Nova senha"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => {
+                  setForcePasswordModal(false);
+                  setNewPassword('');
+                  setPendingUser(null);
+                }}
+                className="px-4 py-2 text-sm font-bold text-zinc-400 hover:text-white bg-zinc-800 border border-zinc-700 rounded"
+              >
+                Cancelar
+              </button>
+              <button
+                disabled={changingPassword || newPassword.length < 6}
+                onClick={async () => {
+                  setChangingPassword(true);
+                  try {
+                    const updated = await ApiService.changePassword(currentPassword, newPassword);
+                    const finalUser = { ...(pendingUser || updated), mustChangePassword: false };
+                    localStorage.setItem('backstabber_user', JSON.stringify(finalUser));
+                    setForcePasswordModal(false);
+                    setNewPassword('');
+                    setPendingUser(null);
+                    if (finalUser.role === UserRole.USER) {
+                      navigate('/');
+                    } else {
+                      navigate('/admin/dashboard');
+                    }
+                  } catch (err: any) {
+                    alert(err?.message || 'Erro ao alterar senha');
+                  } finally {
+                    setChangingPassword(false);
+                  }
+                }}
+                className="px-4 py-2 text-sm font-bold text-white bg-red-600 hover:bg-red-500 border border-red-700 rounded disabled:opacity-50"
+              >
+                {changingPassword ? 'Salvando...' : 'Salvar nova senha'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

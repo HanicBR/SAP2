@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../db/client';
 import { User, UserRole } from '../domain';
+import { authMiddleware } from '../middleware/auth';
 
 const router = Router();
 
@@ -97,6 +98,7 @@ router.post('/register', async (req, res) => {
       role: UserRole.USER,
       avatarUrl,
       passwordHash,
+      mustChangePassword: false,
     },
   });
 
@@ -114,6 +116,42 @@ router.post('/register', async (req, res) => {
 router.get('/me', (req, res) => {
   // For simplicity this endpoint can be implemented later using authMiddleware
   return res.status(501).json({ error: 'Not implemented' });
+});
+
+// Change password (autenticado)
+router.post('/change-password', authMiddleware, async (req, res) => {
+  const user = req.user;
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+  const { currentPassword, newPassword } = req.body as {
+    currentPassword?: string;
+    newPassword?: string;
+  };
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ error: 'Missing fields' });
+  }
+  if (newPassword.length < 6) {
+    return res.status(400).json({ error: 'Password must be at least 6 characters' });
+  }
+
+  const userRecord = await prisma.user.findUnique({ where: { id: user.id } });
+  if (!userRecord) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  const ok = bcrypt.compareSync(currentPassword, userRecord.passwordHash);
+  if (!ok) {
+    return res.status(401).json({ error: 'Invalid current password' });
+  }
+
+  const newHash = bcrypt.hashSync(newPassword, 10);
+  const updated = await prisma.user.update({
+    where: { id: user.id },
+    data: { passwordHash: newHash, mustChangePassword: false },
+  });
+
+  return res.json({ user: toPublicUser(updated) });
 });
 
 export default router;

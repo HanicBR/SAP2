@@ -214,6 +214,7 @@ export async function bootstrap() {
           passwordHash: adminHash,
           role: UserRole.SUPERADMIN,
           avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin_std',
+          mustChangePassword: false,
         },
         {
           username: 'staff',
@@ -221,6 +222,7 @@ export async function bootstrap() {
           passwordHash: staffHash,
           role: UserRole.ADMIN,
           avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=staff',
+          mustChangePassword: false,
         },
       ],
     });
