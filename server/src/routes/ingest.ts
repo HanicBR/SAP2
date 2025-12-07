@@ -1,9 +1,13 @@
-import { Router } from 'express';
+import express, { Router } from 'express';
 import { prisma } from '../db/client';
 import { GameMode, SiteConfig } from '../domain';
 import { compareApiKey } from '../utils/apiKey';
 
 const router = Router();
+
+// Alguns servidores (ex.: GMod HTTP) enviam o corpo como string sem Content-Length adequado.
+// Forçamos um parser de texto aqui para sempre termos acesso ao corpo bruto.
+router.use(express.text({ type: '*/*', limit: '2mb' }));
 
 // In-memory stats for ignored logs (reset on server restart)
 const ignoreStats = {
