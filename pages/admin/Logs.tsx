@@ -415,7 +415,7 @@ const TTTSessionHeaderCard = React.memo(({ header }: { header: TTTSessionHeader 
   return (
     <div className="mt-6 mb-2 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded flex items-center justify-between">
       <div className="flex items-center gap-3">
-        <Icons.MapPin className="w-4 h-4 text-zinc-500" />
+        <Icons.Map className="w-4 h-4 text-zinc-500" />
         <div>
           <div className="text-xs font-bold uppercase text-zinc-400">Sessão TTT</div>
           <div className="text-sm text-zinc-100">
