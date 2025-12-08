@@ -455,7 +455,7 @@ const Logs: React.FC = () => {
                     mode: GameMode.TTT,
                     events: [],
                     startTime: log.timestamp,
-                    roundNumber: log.metadata.roundNumber,
+                    roundNumber: log.metadata.roundNumber || log.roundNumber,
                  };
               }
               groups[log.metadata.roundId].events.push(log);
@@ -477,9 +477,7 @@ const Logs: React.FC = () => {
         groupArr.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
         groupArr.forEach((g, idx) => {
            g.events.sort((a,b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-            if (g.roundNumber == null) {
-              g.roundNumber = idx + 1; // fallback sequencial
-            }
+            g.roundNumber = idx + 1; // numeração sequencial para exibição
            result.push(g);
         });
         looseLogs.forEach(l => result.push(l));
