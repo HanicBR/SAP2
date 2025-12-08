@@ -165,6 +165,14 @@ export interface LogMetadata {
   
   // TTT Round Info
   roundId?: string;
+  roundNumber?: number;
+  sessionId?: string;
+  serverSessionId?: string;
+  sessionStart?: string;
+  map?: string;
+  serverName?: string;
+  playerCount?: number;
+  rdmSuspect?: boolean;
   winner?: 'traitor' | 'innocent' | 'timeout';
   durationSeconds?: number;
 }

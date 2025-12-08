@@ -23,7 +23,7 @@ const bumpStat = (bucket: Record<string, number>, key: string) => {
 
 // Simple ingestion endpoint for server-side log forwarding
 // Expects header: X-Server-Key: <apiKey>
-// Body: { events: [{ serverId?, gameMode, type, timestamp, steamId?, playerName?, rawText, metadata, sessionId?, map?, serverName?, roundId? }] }
+// Body: { events: [{ serverId?, gameMode, type, timestamp, steamId?, playerName?, rawText, metadata, sessionId?/serverSessionId?, sessionStart?, map?, serverName?, roundId?, roundNumber?, playerCount? }] }
 
 const parseJsonBody = (raw: any): any => {
   if (raw == null) return undefined;
@@ -85,13 +85,53 @@ router.post('/logs', async (req, res) => {
       const rawText = e.rawText || e.text || e.message || '';
       const type = e.type || e.eventType || e.EventType || 'UNKNOWN';
       const ts = e.timestamp ? new Date(e.timestamp) : new Date();
+
+      const sessionId =
+        e.serverSessionId ||
+        e.sessionId ||
+        e.SessionId ||
+        e.session_id ||
+        (e.metadata && (e.metadata.serverSessionId || e.metadata.sessionId));
+
+      const sessionStart =
+        e.sessionStart ||
+        e.session_start ||
+        (e.metadata && (e.metadata.sessionStart || e.metadata.session_start));
+
+      const roundId = e.roundId || e.RoundId || (e.metadata && e.metadata.roundId);
+
+      const roundNumberRaw =
+        e.roundNumber ??
+        (e.metadata && (e.metadata.roundNumber as any));
+      const roundNumber =
+        typeof roundNumberRaw === 'number'
+          ? roundNumberRaw
+          : typeof roundNumberRaw === 'string'
+          ? parseInt(roundNumberRaw, 10)
+          : undefined;
+
+      const playerCountRaw =
+        e.playerCount ||
+        e.PlayerCount ||
+        e.count ||
+        (e.metadata && (e.metadata.playerCount as any));
+      const playerCount =
+        typeof playerCountRaw === 'number'
+          ? playerCountRaw
+          : typeof playerCountRaw === 'string'
+          ? parseInt(playerCountRaw, 10)
+          : undefined;
+
       const meta = {
         ...(e.metadata || {}),
-        sessionId: e.sessionId || e.SessionId || e.session_id,
+        sessionId,
+        serverSessionId: sessionId,
+        sessionStart,
         map: e.map || e.mapName || e.Map || e.level,
         serverName: e.serverName || e.ServerName || server.name,
-        roundId: e.roundId || e.RoundId,
-        playerCount: e.playerCount || e.PlayerCount || e.count || undefined,
+        roundId,
+        roundNumber,
+        playerCount: playerCount === undefined || Number.isNaN(playerCount) ? undefined : playerCount,
         index: idx,
       };
       const rawMode = (e.gameMode || e.mode || e.game_mode || '').toString().toUpperCase();

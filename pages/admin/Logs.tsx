@@ -17,6 +17,10 @@ interface RoundGroup {
   winner?: string;
   duration?: number;
   roundNumber?: number;
+  sessionId?: string;
+  map?: string;
+  sessionStart?: string;
+  totalRoundsInSession?: number;
 }
 
 interface SessionGroup {
@@ -247,14 +251,19 @@ const RoundCard = React.memo(({ group, onQuickIgnore }: { group: RoundGroup; onQ
           className={`p-3 border-b border-zinc-800 flex justify-between items-center cursor-pointer hover:bg-zinc-800/50 transition-colors ${group.winner ? winnerColor : 'bg-zinc-900'}`}
           onClick={() => setExpanded(!expanded)}
        >
-          <div className="flex items-center gap-4">
+         <div className="flex items-center gap-4">
              <div className="flex items-center gap-2">
                 <Icons.Clock className="w-4 h-4 opacity-70" />
                 <span className="font-mono text-sm text-zinc-400">{new Date(group.startTime).toLocaleTimeString()}</span>
              </div>
              <div>
                 <span className="text-sm font-black uppercase tracking-wider block">
-                   Rodada {group.roundNumber ?? group.id.split('_')[1] ?? '?'}
+                   Rodada {group.roundNumber ?? '?'}
+                   {typeof group.totalRoundsInSession === 'number' && group.totalRoundsInSession > 0 && (
+                     <span className="text-xs font-normal text-zinc-500 ml-1">
+                       / {group.totalRoundsInSession}
+                     </span>
+                   )}
                 </span>
                 {group.winner && (
                    <span className="text-xs font-bold opacity-80">
@@ -441,48 +450,100 @@ const Logs: React.FC = () => {
      // 4. Grouping Logic
      const result: LogItem[] = [];
      
-     if (selectedMode === GameMode.TTT) {
-        // TTT: Group by Rounds
-        const groups: Record<string, RoundGroup> = {};
-        const looseLogs: LogEntry[] = [];
+    if (selectedMode === GameMode.TTT) {
+       const groups: Record<string, RoundGroup> = {};
+       const looseLogs: LogEntry[] = [];
 
-        filtered.forEach(log => {
-           if (log.metadata?.roundId) {
-              if (!groups[log.metadata.roundId]) {
-                 groups[log.metadata.roundId] = {
-                    id: log.metadata.roundId,
-                    type: 'ROUND',
-                    mode: GameMode.TTT,
-                    events: [],
-                    startTime: log.timestamp,
-                    roundNumber: log.metadata.roundNumber || log.roundNumber,
-                 };
-              }
-              groups[log.metadata.roundId].events.push(log);
-              
-              // Extract round summary info
-              if (log.type === LogType.ROUND_START) groups[log.metadata.roundId].startTime = log.timestamp;
-              if (log.type === LogType.ROUND_END) {
-                 groups[log.metadata.roundId].endTime = log.timestamp;
-                 groups[log.metadata.roundId].winner = log.metadata.winner;
-              }
+       filtered.forEach((log) => {
+         const meta: any = log.metadata || {};
+         const roundId = meta.roundId as string | undefined;
 
-           } else {
-              looseLogs.push(log);
+         if (roundId) {
+           if (!groups[roundId]) {
+             let roundNumber: number | undefined;
+             if (typeof meta.roundNumber === "number") {
+               roundNumber = meta.roundNumber;
+             } else if (typeof meta.roundNumber === "string") {
+               const parsed = parseInt(meta.roundNumber, 10);
+               if (!isNaN(parsed)) roundNumber = parsed;
+             }
+
+             groups[roundId] = {
+               id: roundId,
+               type: "ROUND",
+               mode: GameMode.TTT,
+               events: [],
+               startTime: log.timestamp,
+               roundNumber,
+               sessionId: meta.serverSessionId || meta.sessionId,
+               map: meta.map,
+               sessionStart: meta.sessionStart,
+             };
            }
-        });
 
-        // Convert groups map to array and sort events inside
-        const groupArr = Object.values(groups);
-        groupArr.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
-        groupArr.forEach((g, idx) => {
-           g.events.sort((a,b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-            g.roundNumber = idx + 1; // numeração sequencial para exibição
+           const group = groups[roundId];
+           group.events.push(log);
+
+           if (!group.roundNumber) {
+             if (typeof meta.roundNumber === "number") {
+               group.roundNumber = meta.roundNumber;
+             } else if (typeof meta.roundNumber === "string") {
+               const parsed2 = parseInt(meta.roundNumber, 10);
+               if (!isNaN(parsed2)) group.roundNumber = parsed2;
+             }
+           }
+
+           if (!group.map && meta.map) {
+             group.map = meta.map;
+           }
+           if (!group.sessionId && (meta.serverSessionId || meta.sessionId)) {
+             group.sessionId = meta.serverSessionId || meta.sessionId;
+           }
+           if (!group.sessionStart && meta.sessionStart) {
+             group.sessionStart = meta.sessionStart;
+           }
+
+           if (log.type === LogType.ROUND_START) {
+             group.startTime = log.timestamp;
+           } else if (log.type === LogType.ROUND_END) {
+             group.endTime = log.timestamp;
+             group.winner = meta.winner;
+           }
+         } else {
+           looseLogs.push(log);
+         }
+       });
+
+       const allGroups = Object.values(groups);
+       const sessions: Record<string, RoundGroup[]> = {};
+
+       allGroups.forEach((g) => {
+         const sessionKey = (g.sessionId || "LEGACY") + "::" + (g.map || "DESCONHECIDO");
+         if (!sessions[sessionKey]) sessions[sessionKey] = [];
+         sessions[sessionKey].push(g);
+       });
+
+       Object.values(sessions).forEach((sessionGroups) => {
+         sessionGroups.sort(
+           (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
+         );
+         const total = sessionGroups.length;
+         sessionGroups.forEach((g, idx) => {
+           g.events.sort(
+             (a, b) =>
+               new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+           );
+           if (!g.roundNumber || g.roundNumber <= 0) {
+             g.roundNumber = idx + 1;
+           }
+           g.totalRoundsInSession = total;
            result.push(g);
-        });
-        looseLogs.forEach(l => result.push(l));
+         });
+       });
 
-     } else if (selectedMode === GameMode.SANDBOX) {
+       looseLogs.forEach((l) => result.push(l));
+
+    } else if (selectedMode === GameMode.SANDBOX) {
         // Sandbox: Group by Player Sessions
         // Note: In real app this is complex. Here we use 'steamId' + 'Connect' event as delimiters or just group by SteamID for demo
         // For this Mock, we will group purely by unique SteamID appearing in the filtered logs to create "Player Cards"
