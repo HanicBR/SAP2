@@ -46,9 +46,9 @@ router.post('/import', async (req, res) => {
   }
 
   const parsed = parseLegacyLog(content, {
-    defaultGameMode: defaultGameMode || server.mode,
-    timezoneOffsetMinutes,
-    baseDate,
+    defaultGameMode: (defaultGameMode || server.mode) as GameMode | string,
+    timezoneOffsetMinutes: timezoneOffsetMinutes ?? undefined,
+    baseDate: baseDate ?? undefined,
     formatHint,
   });
 
@@ -98,4 +98,3 @@ router.post('/import', async (req, res) => {
 });
 
 export default router;
-

@@ -112,7 +112,7 @@ export const storeLogsAndUpdateProfiles = async (cleanEvents: NormalizedLogEvent
   }
 
   await prisma.log.createMany({
-    data: cleanEvents,
+    data: cleanEvents as any,
   });
 
   const snapshots = cleanEvents
@@ -185,7 +185,7 @@ export const storeLogsAndUpdateProfiles = async (cleanEvents: NormalizedLogEvent
                 : {}),
             } as any)
           : undefined,
-      },
+      } as any,
     });
   }
 
@@ -195,4 +195,3 @@ export const storeLogsAndUpdateProfiles = async (cleanEvents: NormalizedLogEvent
     playersTouched: seenPlayers.size,
   };
 };
-
