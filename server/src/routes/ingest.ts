@@ -86,12 +86,16 @@ router.post('/logs', async (req, res) => {
       const type = e.type || e.eventType || e.EventType || 'UNKNOWN';
       const ts = e.timestamp ? new Date(e.timestamp) : new Date();
 
-      const sessionId =
+      const serverSessionId =
         e.serverSessionId ||
+        (e.metadata && (e.metadata as any).serverSessionId);
+
+      const sessionId =
         e.sessionId ||
         e.SessionId ||
         e.session_id ||
-        (e.metadata && (e.metadata.serverSessionId || e.metadata.sessionId));
+        (e.metadata && (e.metadata as any).sessionId) ||
+        serverSessionId;
 
       const sessionStart =
         e.sessionStart ||
@@ -125,7 +129,7 @@ router.post('/logs', async (req, res) => {
       const meta = {
         ...(e.metadata || {}),
         sessionId,
-        serverSessionId: sessionId,
+        serverSessionId,
         sessionStart,
         map: e.map || e.mapName || e.Map || e.level,
         serverName: e.serverName || e.ServerName || server.name,

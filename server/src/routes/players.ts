@@ -129,6 +129,55 @@ const buildGameModeStats = (steamId: string, logs: any[]) => {
   return stats;
 };
 
+const computePlaytimeHours = (logs: { type: string; timestamp: Date; metadata: unknown }[]): number => {
+  if (!logs.length) return 0;
+
+  const sorted = [...logs].sort(
+    (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
+  );
+
+  const sessionsById: Record<string, { start?: number; end?: number }> = {};
+  let lastConnectFallback: number | undefined;
+  let totalMs = 0;
+
+  sorted.forEach((l) => {
+    const ts = l.timestamp.getTime();
+    const meta: any = l.metadata || {};
+    const sessionId: string | undefined = meta.sessionId;
+
+    if (sessionId) {
+      if (!sessionsById[sessionId]) sessionsById[sessionId] = {};
+      const sess = sessionsById[sessionId];
+      if (l.type === 'CONNECT') {
+        sess.start = ts;
+      } else if (l.type === 'DISCONNECT') {
+        sess.end = ts;
+      }
+    } else {
+      if (l.type === 'CONNECT') {
+        lastConnectFallback = ts;
+      } else if (l.type === 'DISCONNECT' && lastConnectFallback !== undefined) {
+        totalMs += Math.max(0, ts - lastConnectFallback);
+        lastConnectFallback = undefined;
+      }
+    }
+  });
+
+  const now = Date.now();
+  Object.values(sessionsById).forEach((s) => {
+    if (s.start !== undefined) {
+      const end = s.end ?? now;
+      totalMs += Math.max(0, end - s.start);
+    }
+  });
+
+  if (lastConnectFallback !== undefined) {
+    totalMs += Math.max(0, now - lastConnectFallback);
+  }
+
+  return Math.round(totalMs / (1000 * 60 * 60));
+};
+
 router.get('/', async (req, res) => {
   const search = (req.query.search as string) || '';
   const serverFilter = (req.query.serverId as string) || '';
@@ -188,6 +237,7 @@ router.get('/:steamId', async (req, res) => {
       type: true,
       metadata: true,
       steamId: true,
+      timestamp: true,
     },
   });
 
@@ -216,6 +266,8 @@ router.get('/:steamId', async (req, res) => {
   const allLogs = [...logsByActor, ...logsAsAttacker];
   const gameModeStats = allLogs.length ? buildGameModeStats(steamId, allLogs) : {};
 
+  const playTimeHours = computePlaytimeHours(logsByActor as any);
+
   // Load punishments via raw query to avoid relying on generated Prisma model
   let punishments: any[] = [];
   try {
@@ -233,6 +285,7 @@ router.get('/:steamId', async (req, res) => {
 
   return res.json({
     ...toPlayer(player),
+    playTimeHours,
     notes: player.notes.map((n) => ({
       id: n.id,
       content: n.content,
