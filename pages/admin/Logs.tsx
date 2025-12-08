@@ -34,7 +34,17 @@ interface SessionGroup {
   ip?: string;
 }
 
-type LogItem = LogEntry | RoundGroup | SessionGroup;
+interface TTTSessionHeader {
+  id: string;
+  type: 'TTT_SESSION';
+  mode: GameMode;
+  map?: string;
+  sessionId?: string;
+  sessionStart?: string;
+  roundCount: number;
+}
+
+type LogItem = LogEntry | RoundGroup | SessionGroup | TTTSessionHeader;
 
 // --- OPTIMIZATION: HELPER FUNCTIONS MOVED OUTSIDE COMPONENT ---
 
@@ -240,6 +250,11 @@ const RoundCard = React.memo(({ group, onQuickIgnore }: { group: RoundGroup; onQ
   
   // Calculate RDM count for summary
   const rdms = group.events.filter(e => isRDM(e)).length;
+
+  const mapLabel = group.map || 'Mapa desconhecido';
+  const sessionStartLabel = group.sessionStart
+    ? new Date(group.sessionStart).toLocaleTimeString()
+    : undefined;
   
   const winnerColor = group.winner === 'traitor' 
     ? 'text-red-500 border-red-900/50 bg-red-900/10' 
@@ -264,6 +279,15 @@ const RoundCard = React.memo(({ group, onQuickIgnore }: { group: RoundGroup; onQ
                        / {group.totalRoundsInSession}
                      </span>
                    )}
+                </span>
+                <span className="text-xs text-zinc-500 block mt-0.5">
+                  {mapLabel}
+                  {sessionStartLabel && (
+                    <>
+                      {' '}
+                      • sessão iniciada às {sessionStartLabel}
+                    </>
+                  )}
                 </span>
                 {group.winner && (
                    <span className="text-xs font-bold opacity-80">
@@ -381,6 +405,34 @@ const SessionCard = React.memo(({ group, onQuickIgnore }: { group: SessionGroup;
   );
 });
 
+// --- COMPONENT: TTT SESSION HEADER (Memoized) ---
+const TTTSessionHeaderCard = React.memo(({ header }: { header: TTTSessionHeader }) => {
+  const mapLabel = header.map || 'Mapa desconhecido';
+  const sessionStartLabel = header.sessionStart
+    ? new Date(header.sessionStart).toLocaleString()
+    : 'Horário desconhecido';
+
+  return (
+    <div className="mt-6 mb-2 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <Icons.MapPin className="w-4 h-4 text-zinc-500" />
+        <div>
+          <div className="text-xs font-bold uppercase text-zinc-400">Sessão TTT</div>
+          <div className="text-sm text-zinc-100">
+            {mapLabel}{' '}
+            <span className="text-xs text-zinc-500">
+              • iniciada em {sessionStartLabel}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div className="text-xs text-zinc-400 font-mono">
+        {header.roundCount} rodada{header.roundCount === 1 ? '' : 's'}
+      </div>
+    </div>
+  );
+});
+
 // --- MAIN PAGE COMPONENT ---
 const Logs: React.FC = () => {
   const [rawLogs, setRawLogs] = useState<LogEntry[]>([]);
@@ -447,9 +499,9 @@ const Logs: React.FC = () => {
         filtered = filtered.filter(l => l.type === logTypeFilter);
      }
 
-     // 4. Grouping Logic
-     const result: LogItem[] = [];
-     
+    // 4. Grouping Logic
+    const result: LogItem[] = [];
+    
     if (selectedMode === GameMode.TTT) {
        const groups: Record<string, RoundGroup> = {};
        const looseLogs: LogEntry[] = [];
@@ -523,11 +575,24 @@ const Logs: React.FC = () => {
          sessions[sessionKey].push(g);
        });
 
-       Object.values(sessions).forEach((sessionGroups) => {
+       Object.entries(sessions).forEach(([sessionKey, sessionGroups]) => {
          sessionGroups.sort(
            (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
          );
          const total = sessionGroups.length;
+
+         const first = sessionGroups[0];
+         const header: TTTSessionHeader = {
+           id: `ttt_sess_${sessionKey}`,
+           type: 'TTT_SESSION',
+           mode: GameMode.TTT,
+           map: first.map,
+           sessionId: first.sessionId,
+           sessionStart: first.sessionStart || first.startTime,
+           roundCount: total,
+         };
+         result.push(header);
+
          sessionGroups.forEach((g, idx) => {
            g.events.sort(
              (a, b) =>
@@ -819,7 +884,14 @@ const Logs: React.FC = () => {
          ) : (
             <div className="flex-1 p-4">
                {currentItems.map((item, index) => {
-                  if ('type' in item && item.type === 'ROUND') {
+                  if ('type' in item && item.type === 'TTT_SESSION') {
+                     return (
+                       <TTTSessionHeaderCard
+                         key={item.id}
+                         header={item as TTTSessionHeader}
+                       />
+                     );
+                  } else if ('type' in item && item.type === 'ROUND') {
                      return (
                        <RoundCard
                          key={item.id}
