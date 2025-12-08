@@ -34,17 +34,21 @@ interface SessionGroup {
   ip?: string;
 }
 
-interface TTTSessionHeader {
+interface TTTMapGroup {
   id: string;
-  type: 'TTT_SESSION';
+  type: 'TTT_MAP';
   mode: GameMode;
   map?: string;
   sessionId?: string;
   sessionStart?: string;
-  roundCount: number;
+  startTime: string;
+  rounds: RoundGroup[];
+  totalRounds: number;
+  rdmCountTotal: number;
+  eventsTotal: number;
 }
 
-type LogItem = LogEntry | RoundGroup | SessionGroup | TTTSessionHeader;
+type LogItem = LogEntry | RoundGroup | SessionGroup | TTTMapGroup;
 
 // --- OPTIMIZATION: HELPER FUNCTIONS MOVED OUTSIDE COMPONENT ---
 
@@ -405,33 +409,68 @@ const SessionCard = React.memo(({ group, onQuickIgnore }: { group: SessionGroup;
   );
 });
 
-// --- COMPONENT: TTT SESSION HEADER (Memoized) ---
-const TTTSessionHeaderCard = React.memo(({ header }: { header: TTTSessionHeader }) => {
-  const mapLabel = header.map || 'Mapa desconhecido';
-  const sessionStartLabel = header.sessionStart
-    ? new Date(header.sessionStart).toLocaleString()
-    : 'Horário desconhecido';
+// --- COMPONENT: TTT MAP GROUP (Sessão de mapa TTT) ---
+const TTTMapGroupCard = React.memo(
+  ({ group, onQuickIgnore }: { group: TTTMapGroup; onQuickIgnore?: (log: LogEntry) => void }) => {
+    const [expanded, setExpanded] = useState(true);
 
-  return (
-    <div className="mt-6 mb-2 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        <Icons.Map className="w-4 h-4 text-zinc-500" />
-        <div>
-          <div className="text-xs font-bold uppercase text-zinc-400">Sessão TTT</div>
-          <div className="text-sm text-zinc-100">
-            {mapLabel}{' '}
-            <span className="text-xs text-zinc-500">
-              • iniciada em {sessionStartLabel}
+    const mapLabel = group.map || 'Mapa desconhecido';
+    const sessionStartLabel = group.sessionStart
+      ? new Date(group.sessionStart).toLocaleString()
+      : 'Horário desconhecido';
+
+    return (
+      <div className="bg-zinc-950 border border-zinc-800 rounded-lg overflow-hidden mb-4 shadow-sm">
+        <div
+          className="px-3 py-2 border-b border-zinc-800 flex justify-between items-center cursor-pointer hover:bg-zinc-900 transition-colors"
+          onClick={() => setExpanded(!expanded)}
+        >
+          <div className="flex items-center gap-3">
+            <Icons.Map className="w-4 h-4 text-zinc-500" />
+            <div>
+              <div className="text-xs font-bold uppercase text-zinc-400">Sessão TTT</div>
+              <div className="text-sm text-zinc-100">
+                {mapLabel}{' '}
+                <span className="text-xs text-zinc-500">
+                  • iniciada em {sessionStartLabel}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 text-xs text-zinc-400">
+            {group.rdmCountTotal > 0 && (
+              <span className="flex items-center font-bold text-red-500 bg-red-950 px-2 py-1 rounded border border-red-900">
+                <Icons.AlertTriangle className="w-3 h-3 mr-1" /> {group.rdmCountTotal} RDMs
+              </span>
+            )}
+            <span className="font-mono">
+              {group.totalRounds} rodada{group.totalRounds === 1 ? '' : 's'}
             </span>
+            <span className="font-mono">
+              {group.eventsTotal} evento{group.eventsTotal === 1 ? '' : 's'}
+            </span>
+            <Icons.List
+              className={`w-4 h-4 text-zinc-500 transition-transform ${
+                expanded ? 'rotate-180' : ''
+              }`}
+            />
           </div>
         </div>
+
+        {expanded && (
+          <div className="bg-zinc-950">
+            {group.rounds.map((round) => (
+              <RoundCard key={round.id} group={round} onQuickIgnore={onQuickIgnore} />
+            ))}
+          </div>
+        )}
       </div>
-      <div className="text-xs text-zinc-400 font-mono">
-        {header.roundCount} rodada{header.roundCount === 1 ? '' : 's'}
-      </div>
-    </div>
-  );
-});
+    );
+  },
+);
+
+// --- COMPONENT: TTT SESSION HEADER (Memoized) ---
+
 
 // --- MAIN PAGE COMPONENT ---
 const Logs: React.FC = () => {
@@ -575,35 +614,42 @@ const Logs: React.FC = () => {
          sessions[sessionKey].push(g);
        });
 
-        Object.entries(sessions).forEach(([sessionKey, sessionGroups]) => {
-          sessionGroups.sort(
-            (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
-          );
-          const total = sessionGroups.length;
+       Object.entries(sessions).forEach(([sessionKey, sessionGroups]) => {
+         sessionGroups.sort(
+           (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
+         );
+         const total = sessionGroups.length;
+
+         // Ordena eventos dentro de cada rodada e acumula métricas
+         let eventsTotal = 0;
+         let rdmCountTotal = 0;
+         sessionGroups.forEach((g, idx) => {
+           g.events.sort(
+             (a, b) =>
+               new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+           );
+           g.roundNumber = idx + 1;
+           g.totalRoundsInSession = total;
+           eventsTotal += g.events.length;
+           rdmCountTotal += g.events.filter((e) => isRDM(e)).length;
+         });
 
          const first = sessionGroups[0];
-         const header: TTTSessionHeader = {
-           id: `ttt_sess_${sessionKey}`,
-           type: 'TTT_SESSION',
+         const mapGroup: TTTMapGroup = {
+           id: `ttt_map_${sessionKey}`,
+           type: 'TTT_MAP',
            mode: GameMode.TTT,
            map: first.map,
            sessionId: first.sessionId,
            sessionStart: first.sessionStart || first.startTime,
-           roundCount: total,
+           startTime: first.startTime,
+           rounds: sessionGroups,
+           totalRounds: total,
+           rdmCountTotal,
+           eventsTotal,
          };
-          result.push(header);
 
-          sessionGroups.forEach((g, idx) => {
-            g.events.sort(
-              (a, b) =>
-                new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-            );
-           // Para exibição, numeramos as rodadas sequencialmente dentro da sessão/mapa,
-           // independentemente do roundNumber original do servidor.
-           g.roundNumber = idx + 1;
-           g.totalRoundsInSession = total;
-           result.push(g);
-         });
+         result.push(mapGroup);
        });
 
        looseLogs.forEach((l) => result.push(l));
@@ -884,11 +930,12 @@ const Logs: React.FC = () => {
          ) : (
             <div className="flex-1 p-4">
                {currentItems.map((item, index) => {
-                  if ('type' in item && item.type === 'TTT_SESSION') {
+                  if ('type' in item && item.type === 'TTT_MAP') {
                      return (
-                       <TTTSessionHeaderCard
+                       <TTTMapGroupCard
                          key={item.id}
-                         header={item as TTTSessionHeader}
+                         group={item as TTTMapGroup}
+                         onQuickIgnore={handleQuickIgnore}
                        />
                      );
                   } else if ('type' in item && item.type === 'ROUND') {
@@ -932,3 +979,5 @@ const Logs: React.FC = () => {
 };
 
 export default Logs;
+
+
