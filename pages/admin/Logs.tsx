@@ -575,11 +575,11 @@ const Logs: React.FC = () => {
          sessions[sessionKey].push(g);
        });
 
-       Object.entries(sessions).forEach(([sessionKey, sessionGroups]) => {
-         sessionGroups.sort(
-           (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
-         );
-         const total = sessionGroups.length;
+        Object.entries(sessions).forEach(([sessionKey, sessionGroups]) => {
+          sessionGroups.sort(
+            (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
+          );
+          const total = sessionGroups.length;
 
          const first = sessionGroups[0];
          const header: TTTSessionHeader = {
@@ -591,16 +591,16 @@ const Logs: React.FC = () => {
            sessionStart: first.sessionStart || first.startTime,
            roundCount: total,
          };
-         result.push(header);
+          result.push(header);
 
-         sessionGroups.forEach((g, idx) => {
-           g.events.sort(
-             (a, b) =>
-               new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-           );
-           if (!g.roundNumber || g.roundNumber <= 0) {
-             g.roundNumber = idx + 1;
-           }
+          sessionGroups.forEach((g, idx) => {
+            g.events.sort(
+              (a, b) =>
+                new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+            );
+           // Para exibição, numeramos as rodadas sequencialmente dentro da sessão/mapa,
+           // independentemente do roundNumber original do servidor.
+           g.roundNumber = idx + 1;
            g.totalRoundsInSession = total;
            result.push(g);
          });
