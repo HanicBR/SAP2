@@ -30,7 +30,7 @@ const getRankFromPoints = (points: number): string => {
   return 'Bronze';
 };
 
-const buildGameModeStats = (steamId: string, logs: any[]) => {
+const buildGameModeStats = (steamId: string, logs: any[], roundEndLogs?: any[]) => {
   const stats: any = {};
 
   const byMode = {
@@ -46,32 +46,124 @@ const buildGameModeStats = (steamId: string, logs: any[]) => {
     let deaths = 0;
     const roundIds = new Set<string>();
 
-    for (const log of killLogs) {
+    for (const log of tttLogs) {
       const meta = ((log as any).metadata || {}) as any;
-      if (meta.attackerSteamId === steamId) {
-        kills++;
-      }
-      if (log.steamId === steamId || meta.victimSteamId === steamId) {
-        deaths++;
-      }
+
+      // Rounds em que o jogador participou (qualquer evento com roundId)
       const rid = meta.roundId;
       if (typeof rid === 'string' && rid) {
         roundIds.add(rid);
       }
+
+      // Contagem básica de kills / deaths (apenas em KILL)
+      if (log.type === 'KILL') {
+        if (meta.attackerSteamId === steamId) {
+          kills++;
+        }
+        if (log.steamId === steamId || meta.victimSteamId === steamId) {
+          deaths++;
+        }
+      }
     }
 
     const roundsPlayed = roundIds.size;
+
+    // Mapear role principal do jogador por round
+    const roleByRound: Record<string, 'traitor' | 'detective' | 'innocent' | undefined> = {};
+
+    const pickRole = (...roles: (string | undefined)[]) => {
+      const norm = roles
+        .filter(Boolean)
+        .map((r) => r!.toString().toLowerCase());
+      if (norm.includes('traitor')) return 'traitor' as const;
+      if (norm.includes('detective')) return 'detective' as const;
+      if (norm.includes('innocent')) return 'innocent' as const;
+      return undefined;
+    };
+
+    for (const log of tttLogs) {
+      const meta = ((log as any).metadata || {}) as any;
+      const rid = meta.roundId;
+      if (typeof rid !== 'string' || !rid) continue;
+
+      const existing = roleByRound[rid];
+      if (existing) continue;
+
+      const baseRole =
+        (log as any).steamId === steamId ? (meta.role as string | undefined) : undefined;
+
+      const attackerRole =
+        meta.attackerSteamId === steamId ? (meta.attackerRole as string | undefined) : undefined;
+
+      const victimRole =
+        meta.victimSteamId === steamId ? (meta.victimRole as string | undefined) : undefined;
+
+      const resolved = pickRole(baseRole, attackerRole, victimRole);
+      if (resolved) {
+        roleByRound[rid] = resolved;
+      }
+    }
+
+    // Mapear vencedor por round a partir de ROUND_END
+    const winners: Record<string, 'traitor' | 'innocent' | 'timeout' | undefined> = {};
+    (roundEndLogs || [])
+      .filter((l) => (l.gameMode || '').toString() === 'TTT' && l.type === 'ROUND_END')
+      .forEach((log) => {
+        const meta = ((log as any).metadata || {}) as any;
+        const rid = meta.roundId;
+        if (typeof rid !== 'string' || !rid) return;
+        const raw = (meta.winner || meta.result || '').toString().toUpperCase();
+        if (!raw) return;
+        if (raw.includes('TRAITOR')) winners[rid] = 'traitor';
+        else if (raw.includes('INNOCENT')) winners[rid] = 'innocent';
+        else if (raw.includes('TIME')) winners[rid] = 'timeout';
+      });
+
+    let roundsWon = 0;
+    let traitorRounds = 0;
+    let traitorWins = 0;
+    let detectiveRounds = 0;
+    let detectiveWins = 0;
+    let innocentRounds = 0;
+    let innocentWins = 0;
+
+    roundIds.forEach((rid) => {
+      const role = roleByRound[rid];
+      const winner = winners[rid];
+      if (!role) return;
+
+      const isTraitor = role === 'traitor';
+      const isDetective = role === 'detective';
+      const isInnocent = role === 'innocent';
+
+      if (isTraitor) traitorRounds++;
+      if (isDetective) detectiveRounds++;
+      if (isInnocent) innocentRounds++;
+
+      let won = false;
+      if (winner === 'traitor' && isTraitor) won = true;
+      if (winner === 'innocent' && (isInnocent || isDetective)) won = true;
+      if (winner === 'timeout' && (isInnocent || isDetective)) won = true;
+
+      if (won) {
+        roundsWon++;
+        if (isTraitor) traitorWins++;
+        if (isDetective) detectiveWins++;
+        if (isInnocent) innocentWins++;
+      }
+    });
+
     const points = kills * 100 + Math.max(0, kills - deaths) * 20 + roundsPlayed * 10;
 
     stats.ttt = {
       roundsPlayed,
-      roundsWon: 0,
-      traitorRounds: 0,
-      traitorWins: 0,
-      detectiveRounds: 0,
-      detectiveWins: 0,
-      innocentRounds: 0,
-      innocentWins: 0,
+      roundsWon,
+      traitorRounds,
+      traitorWins,
+      detectiveRounds,
+      detectiveWins,
+      innocentRounds,
+      innocentWins,
       kills,
       deaths,
       points,
@@ -135,6 +227,8 @@ const computePlaytimeHours = (logs: { type: string; timestamp: Date; metadata: u
   const sorted = [...logs].sort(
     (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
   );
+  const lastTs = sorted[sorted.length - 1]?.timestamp.getTime();
+  if (!lastTs) return 0;
 
   const sessionsById: Record<string, { start?: number; end?: number }> = {};
   let lastConnectFallback: number | undefined;
@@ -163,16 +257,15 @@ const computePlaytimeHours = (logs: { type: string; timestamp: Date; metadata: u
     }
   });
 
-  const now = Date.now();
   Object.values(sessionsById).forEach((s) => {
     if (s.start !== undefined) {
-      const end = s.end ?? now;
+      const end = s.end ?? lastTs;
       totalMs += Math.max(0, end - s.start);
     }
   });
 
   if (lastConnectFallback !== undefined) {
-    totalMs += Math.max(0, now - lastConnectFallback);
+    totalMs += Math.max(0, lastTs - lastConnectFallback);
   }
 
   return Math.round(totalMs / (1000 * 60 * 60));
@@ -264,7 +357,26 @@ router.get('/:steamId', async (req, res) => {
   }
 
   const allLogs = [...logsByActor, ...logsAsAttacker];
-  const gameModeStats = allLogs.length ? buildGameModeStats(steamId, allLogs) : {};
+
+  // Load ROUND_END logs for TTT to compute wins/derrotas por rodada
+  let roundEndLogs: any[] | undefined;
+  if (allLogs.length) {
+    roundEndLogs = await prisma.log.findMany({
+      where: {
+        gameMode: 'TTT',
+        type: 'ROUND_END',
+      },
+      select: {
+        gameMode: true,
+        type: true,
+        metadata: true,
+      },
+    });
+  }
+
+  const gameModeStats = allLogs.length
+    ? buildGameModeStats(steamId, allLogs, roundEndLogs)
+    : {};
 
   const playTimeHours = computePlaytimeHours(logsByActor as any);
 
