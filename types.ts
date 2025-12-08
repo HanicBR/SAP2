@@ -192,6 +192,17 @@ export interface LogEntry {
 // Legacy support if needed, but LogEntry is preferred
 export interface ServerEvent extends LogEntry {} 
 
+export interface LegacyImportSummary {
+  format: 'ULX' | 'TAGGED';
+  linesParsed: number;
+  eventsGenerated: number;
+  eventsInserted: number;
+  playersTouched: number;
+  byType: Record<string, number>;
+  dryRun: boolean;
+  errors?: { line: number; text: string; reason: string }[];
+}
+
 export interface VipPlan {
   id: string;
   name: string;

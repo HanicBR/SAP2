@@ -1,7 +1,7 @@
 
 
 import { MOCK_SERVERS, MOCK_EVENTS, MOCK_STATS, VIP_PLANS, MOCK_SUSPICIOUS_GROUPS, MOCK_PLAYERS, MOCK_USERS, MOCK_TRANSACTIONS, generateServerAnalytics, DEFAULT_SITE_CONFIG } from '../constants';
-import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType } from '../types';
+import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, LegacyImportSummary } from '../types';
 
 // Utility to simulate network delay (used as fallback)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -399,6 +399,25 @@ export const ApiService = {
       liveActivity,
       financialStats
     };
+  },
+
+  importLegacyLogs: async (payload: {
+    serverId: string;
+    content: string;
+    formatHint?: 'AUTO' | 'ULX' | 'TAGGED';
+    defaultGameMode?: GameMode;
+    timezoneOffsetMinutes?: number;
+    baseDate?: string;
+    dryRun?: boolean;
+  }): Promise<LegacyImportSummary> => {
+    if (!hasApi) {
+      throw new Error('API base URL not configured');
+    }
+
+    return apiFetch<LegacyImportSummary>('/admin/legacy-logs/import', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
   },
 
   getEvents: async (filter?: string): Promise<ServerEvent[]> => {

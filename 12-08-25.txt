@@ -1,0 +1,2254 @@
+<Logging continued from "data/ulx_logs/12-07-25.txt">
+[00:00:01] Client "G4LD1N0W'S" spawned in server <STEAM_0:0:629080060> (took 191 seconds).
+[00:00:10] Beleléu killed Clã | BR | ALAKAZAN using player
+[00:00:15] (tsay from Clã | BR | ALAKAZAN) vc não viu
+[00:00:18] (tsay from Clã | BR | ALAKAZAN) mas não vou reportar
+[00:00:22] Vikemper suicided!
+[00:01:04] Client "BOB PORONG4" connected.
+[00:01:05] Mr.B-O-M-B-A-S-T-I-C: atira de golden no indio
+[00:01:12] Mr.B-O-M-B-A-S-T-I-C: ctz que é ele
+[00:01:20] Mr.B-O-M-B-A-S-T-I-C killed Gatogames435 using weapon_ttt_tmp
+[00:01:45] CzK suicided!
+[00:02:24] DomoKing has forced Themself to join the world of the living.
+[00:02:29] Dropped "CzK" from server<STEAM_0:0:241832796>
+[00:02:35] Client "BOB PORONG4" spawned in server <STEAM_0:1:636697846> (took 91 seconds).
+[00:03:06] Beleléu killed Gatogames435 using player
+[00:03:10] Playdude_569 killed Mr.B-O-M-B-A-S-T-I-C using player
+[00:03:11] CaPiT_ killed Índio Véio using weapon_ttt_tmp
+[00:03:53] کп.k killed BOB PORONG4 using player
+[00:04:02] کп.k killed Beleléu using player
+[00:04:02] Beleléu: KOS! KOS! KOS!
+[00:04:05] Coronel do MST killed کп.k using player
+[00:04:05] Dropped "BOB PORONG4" from server<STEAM_0:1:636697846>
+[00:04:41] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[00:04:41] Clã | BR | ALAKAZAN killed perzo using weapon_ttt_mp5
+[00:04:41] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[00:04:54] Playdude_569 suicided!
+[00:05:00] Nikolania: tem um bicho aqui voando em mim
+[00:05:26] Índio Véio killed Naoeopedro using weapon_ttt_g3sg1
+[00:05:30] Dropped "Playdude_569" from server<STEAM_0:1:925555447>
+[00:05:58] (TEAM) Nikolania: oxi só tem eu
+[00:06:53] Nikolania killed Coronel do MST using weapon_ttt_ak47
+[00:07:05] Nikolania killed Clã | BR | ALAKAZAN using weapon_ttt_ak47
+[00:07:09] DomoKing killed Nikolania using weapon_ttt_mp5
+[00:07:22] Mr.B-O-M-B-A-S-T-I-C: reviveu
+[00:07:36] Nikolania: q
+[00:07:38] Nikolania: kkkkk
+[00:07:44] Nikolania: nem eu entendi
+[00:07:46] Nikolania: kkkk
+[00:08:01] Nikolania killed CaPiT_ using weapon_ttt_famas
+[00:08:06] Mr.B-O-M-B-A-S-T-I-C killed Nikolania using player
+[00:08:10] Nikolania: sem bala
+[00:08:11] Vikemper killed Nsei using player
+[00:08:12] dsad killed Vikemper using player
+[00:08:16] Prod4vi killed dsad using player
+[00:08:16] DomoKing killed Prod4vi using weapon_ttt_g3sg1
+[00:08:17] Gatogames435 killed G4LD1N0W'S using weapon_ttt_tmp
+[00:08:21] Gatogames435 killed Mr.B-O-M-B-A-S-T-I-C using weapon_ttt_tmp
+[00:08:40] Beleléu: ( ͡° ͜ʖ ͡°)
+[00:09:57] Nikolania: o alaka
+[00:09:59] Nikolania: falo nada
+[00:10:17] کп.k killed dsad using player
+[00:10:21] کп.k killed Naoeopedro using player
+[00:10:25] Índio Véio killed perzo using weapon_ttt_g3sg1
+[00:10:33] Nikolania: depois pfv
+[00:10:35] Mr.B-O-M-B-A-S-T-I-C killed Índio Véio using player
+[00:10:36] Coronel do MST killed کп.k using player
+[00:10:37] Nikolania: deixa eu matar 1
+[00:10:52] Vikemper killed Coronel do MST using weapon_ttt_smg
+[00:10:57] Prod4vi killed G4LD1N0W'S using weapon_ttt_sg552
+[00:11:13] Client "edu.setembro28" connected.
+[00:11:14] Gatogames435: retiro kos dele
+[00:11:15] Gatogames435: retiro kos dele
+[00:11:15] Mr.B-O-M-B-A-S-T-I-C suicided!
+[00:11:21] Vikemper killed Clã | BR | ALAKAZAN using weapon_ttt_smg
+[00:11:29] Beleléu killed Vikemper using weapon_ttt_tmp
+[00:11:39] Beleléu killed Vikemper using weapon_ttt_tmp
+[00:11:57] Gatogames435: a
+[00:11:58] Nikolania: 2
+[00:12:23] Prod4vi killed DomoKing using weapon_ttt_awp
+[00:12:32] Nikolania: wcade o povo
+[00:12:46] G4LD1N0W'S: !dm
+[00:12:56] G4LD1N0W'S: !dm
+[00:12:58] Client "edu.setembro28" spawned in server <STEAM_0:0:235612275> (took 105 seconds).
+[00:13:05] G4LD1N0W'S: !dm
+[00:13:05] Nikolania killed Gatogames435 using player
+[00:13:07] Nsei killed Nikolania using player
+[00:13:31] Nikolania: kos Naoeopedro
+[00:13:33] Nikolania: n sei
+[00:13:54] Nikolania killed Beleléu using weapon_ttt_m16
+[00:14:16] Prod4vi killed Nsei using weapon_ttt_sg552
+[00:14:17] Prod4vi killed CaPiT_ using weapon_ttt_sg552
+[00:14:29] Nikolania: matei só 2
+[00:14:34] Nikolania: queria levar só o Gatogames435
+[00:14:42] Nikolania: vcs parece que tem dificuldade com eles
+[00:14:46] Nikolania: ele
+[00:14:55] Nikolania: é igual quando o zabinho tá auqi
+[00:14:58] کп.k killed Coronel do MST using weapon_ttt_ak47
+[00:14:58] Índio Véio killed Naoeopedro using player
+[00:14:59] Nikolania: foco nele
+[00:15:02] کп.k killed G4LD1N0W'S using weapon_ttt_ak47
+[00:15:08] کп.k killed Nsei using weapon_ttt_ak47
+[00:15:17] Mr.B-O-M-B-A-S-T-I-C killed کп.k using player
+[00:15:45] CaPiT_ killed Mr.B-O-M-B-A-S-T-I-C using weapon_ttt_mp5
+[00:16:07] Beleléu killed Gatogames435 using env_explosion
+[00:16:09] Nikolania: oxi
+[00:16:42] Nikolania: achei awp no chjap
+[00:16:46] Índio Véio killed dsad using weapon_ttt_silencedscout_revised
+[00:16:52] edu.setembro28 killed Nikolania using player
+[00:16:54] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[00:16:55] Clã | BR | ALAKAZAN killed Beleléu using player
+[00:16:55] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[00:16:56] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[00:16:56] Nikolania: o D doente
+[00:16:59] Nikolania: n é possivel
+[00:17:03] Dropped "Naoeopedro" from server<STEAM_0:0:786508801>
+[00:17:06] Mr.B-O-M-B-A-S-T-I-C: Sim
+[00:18:41] Dropped "dsad" from server<STEAM_0:1:516238316>
+[00:18:45] Índio Véio killed Prod4vi using weapon_ttt_g3sg1
+[00:18:46] edu.setembro28 killed Índio Véio using player
+[00:18:53] edu.setembro28 killed Índio Véio using player
+[00:18:59] Vikemper killed edu.setembro28 using weapon_ttt_ak47
+[00:19:00] DomoKing killed Clã | BR | ALAKAZAN using weapon_ttt_ak47
+[00:19:13] CaPiT_: Estou PROVEM!!! 
+[00:19:33] Nikolania: dna
+[00:19:34] Nikolania: dnv
+[00:19:39] Nikolania: to cansado de ser t
+[00:19:43] Nikolania: Retiro o KOS! É viado, mas não traidor.
+[00:19:50] Nikolania: Retiro o KOS! É viado, mas não traidor.
+[00:19:55] Nikolania: terrorista
+[00:20:02] Nikolania: T de terrorista
+[00:20:09] Vikemper killed Índio Véio using weapon_ttt_knife
+[00:20:12] perzo killed Coronel do MST using player
+[00:20:16] Clã | BR | ALAKAZAN killed Vikemper using weapon_ttt_mp5
+[00:20:16] Gatogames435: retiro kos dele
+[00:20:19] Gatogames435: retiro kos dele
+[00:20:19] Nikolania killed Mr.B-O-M-B-A-S-T-I-C using player
+[00:20:20] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[00:20:22] Nikolania killed Clã | BR | ALAKAZAN using player
+[00:20:23] Beleléu killed Nikolania using player
+[00:20:31] Nikolania: tu vem junto kkkkk
+[00:20:31] Client "Whatsappbatlepass" connected.
+[00:20:37] perzo killed G4LD1N0W'S using weapon_ttt_supersheep
+[00:20:37] perzo killed edu.setembro28 using weapon_ttt_supersheep
+[00:20:38] Nikolania: sorte que a arma é ruim
+[00:20:42] Nikolania: ia levar geral ali
+[00:21:06] perzo killed کп.k using player
+[00:21:15] Nikolania: só queria tu alaka
+[00:21:17] Nikolania: o povo entendeu
+[00:21:35] Gatogames435 killed perzo using player
+[00:21:39] Nikolania: incorporou o zabinho ai
+[00:21:41] Client "Kled" connected.
+[00:21:45] Nsei killed Prod4vi using player
+[00:21:48] Gatogames435 killed Nsei using player
+[00:21:52] Beleléu killed DomoKing using player
+[00:21:57] Nikolania: ele n deu
+[00:21:59] Nikolania: isso é errado
+[00:22:08] Client "Doctor." connected.
+[00:22:11] Client "Kled" spawned in server <STEAM_0:1:94843625> (took 30 seconds).
+[00:22:11] Dropped "Kled" from server<STEAM_0:1:94843625>
+[00:22:21] perzo killed Coronel do MST using player
+[00:22:21] Nikolania: kled tá a 2h tentando entrar kkkk
+[00:22:31] Mr.B-O-M-B-A-S-T-I-C killed Prod4vi using weapon_ttt_tmp
+[00:22:35] Client "Doctor." spawned in server <STEAM_0:0:75383614> (took 27 seconds).
+[00:22:42] Client "Kled" connected.
+[00:22:47] Dropped "Prod4vi" from server<STEAM_0:0:964431498>
+[00:22:52] Gatogames435: retiro kos dele
+[00:22:55] Clã | BR | ALAKAZAN killed perzo using weapon_ttt_g3sg1
+[00:22:59] Índio Véio killed Clã | BR | ALAKAZAN using weapon_ttt_aug
+[00:23:01] Mr.B-O-M-B-A-S-T-I-C killed Índio Véio using weapon_ttt_tmp
+[00:23:03] Client "Kled" spawned in server <STEAM_0:1:94843625> (took 21 seconds).
+[00:23:03] Dropped "Kled" from server<STEAM_0:1:94843625>
+[00:23:11] DomoKing killed Mr.B-O-M-B-A-S-T-I-C using player
+[00:23:29] Beleléu killed Nikolania using env_explosion
+[00:23:37] Mr.B-O-M-B-A-S-T-I-C: !menu
+[00:23:56] Clã | BR | ALAKAZAN: É FODA
+[00:24:12] Clã | BR | ALAKAZAN: !menu
+[00:24:16] Beleléu killed CaPiT_ using ent_boomerangclose
+[00:24:26] Gatogames435 killed DomoKing using weapon_ttt_ak47
+[00:24:28] Client "baitola" connected.
+[00:24:32] کп.k: (AUTOMATED MESSAGE) I have been moved to the Spectator team because I was idle/AFK.
+[00:24:33] کп.k suicided!
+[00:24:40] Gatogames435 killed edu.setembro28 using weapon_ttt_ak47
+[00:24:48] (tsay from Clã | BR | ALAKAZAN) a
+[00:24:54] Client "baitola" spawned in server <STEAM_0:1:95115941> (took 26 seconds).
+[00:24:57] Beleléu killed Nsei using player
+[00:25:12] Nikolania: kos Beleléu
+[00:25:18] Nikolania: pera
+[00:25:20] Gatogames435 killed Beleléu using weapon_ttt_ak47
+[00:25:22] Nikolania: kos bel
+[00:25:26] Nikolania killed Gatogames435 using player
+[00:25:32] Vikemper killed Nikolania using weapon_ttt_m16
+[00:25:40] Nikolania: eu fui revivido e pude usar o chat
+[00:25:46] Nikolania: dlç
+[00:25:48] baitola: ALGUEM ME EMPRESTA UM CU?
+[00:25:51] Client "Whatsappbatlepass" spawned in server <STEAM_0:1:830914435> (took 320 seconds).
+[00:25:54] Server is shutting down/changing levels.
+
+
+
+[00:26:02] New map: ttt_alstoybarn_night
+[00:26:16] Client "Beleléu" spawned in server <STEAM_0:0:171399836> (took 18 seconds).
+[00:26:19] Client "کп.k" spawned in server <STEAM_0:1:544967099> (took 21 seconds).
+[00:26:19] Client "Clã | BR | ALAKAZAN" spawned in server <STEAM_0:1:61770335> (took 21 seconds).
+[00:26:19] Client "Gatogames435" spawned in server <STEAM_0:1:911684499> (took 21 seconds).
+[00:26:20] Client "DomoKing" spawned in server <STEAM_0:0:49457308> (took 22 seconds).
+[00:26:21] Client "Mr.B-O-M-B-A-S-T-I-C" spawned in server <STEAM_0:0:70118207> (took 23 seconds).
+[00:26:24] کп.k suicided!
+[00:26:24] Client "baitola" spawned in server <STEAM_0:1:95115941> (took 26 seconds).
+[00:26:27] Client "Doctor." spawned in server <STEAM_0:0:75383614> (took 29 seconds).
+[00:26:28] Client "Coronel do MST" spawned in server <STEAM_0:1:91390051> (took 30 seconds).
+[00:26:28] Client "Nsei" spawned in server <STEAM_0:1:17104997> (took 30 seconds).
+[00:26:28] Client "Vikemper" spawned in server <STEAM_0:0:919226779> (took 30 seconds).
+[00:26:30] Client "Índio Véio" spawned in server <STEAM_0:1:850650515> (took 32 seconds).
+[00:26:40] Client "perzo" spawned in server <STEAM_0:0:228517767> (took 42 seconds).
+[00:26:44] Doctor.: RETIRO O KOS! RETIRO O KOS!
+[00:26:45] Vikemper: !rtv
+[00:26:51] Client "CaPiT_" spawned in server <STEAM_0:1:598667835> (took 53 seconds).
+[00:26:54] Client "G4LD1N0W'S" spawned in server <STEAM_0:0:629080060> (took 56 seconds).
+[00:26:57] Client "Whatsappbatlepass" spawned in server <STEAM_0:1:830914435> (took 59 seconds).
+[00:27:00] Client "edu.setembro28" spawned in server <STEAM_0:0:235612275> (took 62 seconds).
+[00:27:32] Client "Nikolania" spawned in server <STEAM_0:1:163906537> (took 94 seconds).
+[00:28:00] G4LD1N0W'S killed Vikemper using trigger_hurt
+[00:28:09] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[00:28:10] G4LD1N0W'S killed Clã | BR | ALAKAZAN using weapon_ttt_m16
+[00:28:10] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[00:28:10] Gatogames435 killed G4LD1N0W'S using weapon_ttt_m16
+[00:28:19] baitola: TRAIDOR MATA GARAIO TRAIDOR MATA GARAIO
+[00:28:33] Gatogames435 killed perzo using weapon_ttt_m16
+[00:28:34] Mr.B-O-M-B-A-S-T-I-C killed Whatsappbatlepass using weapon_ttt_knife
+[00:28:37] Mr.B-O-M-B-A-S-T-I-C killed baitola using weapon_zm_shotgun
+[00:28:45] perzo killed Gatogames435 using player
+[00:28:49] Índio Véio killed perzo using weapon_zm_rifle
+[00:28:52] edu.setembro28 killed Mr.B-O-M-B-A-S-T-I-C using player
+[00:28:54] Dropped "baitola" from server<STEAM_0:1:95115941>
+[00:28:55] Doctor. killed edu.setembro28 using weapon_zm_revolver
+[00:28:56] Índio Véio killed DomoKing using weapon_zm_rifle
+[00:28:59] CaPiT_ killed Doctor. using weapon_ttt_m16
+[00:29:01] Índio Véio killed CaPiT_ using weapon_zm_rifle
+[00:29:02] Client "Kled" connected.
+[00:29:19] Client "Kled" spawned in server <STEAM_0:1:95115941> (took 17 seconds).
+[00:29:34] Nikolania: parabens Kled por conseguir entrar kkkk
+[00:29:39] Nikolania: 3h
+[00:29:42] Nikolania: tetando
+[00:29:45] Doctor.: RETIRO O KOS! RETIRO O KOS!
+[00:29:54] Kled: Donato Dias removed all access rights from Kico
+[00:30:00] (TEAM) Kled: me bloquearo
+[00:30:02] Gatogames435 killed Coronel do MST using player
+[00:30:11] Mr.B-O-M-B-A-S-T-I-C suicided!
+[00:30:16] Doctor.: Ele é traidor! Podem Matar! MATA!!!!
+[00:30:23] Doctor.: RETIRO O KOS! RETIRO O KOS!
+[00:30:45] edu.setembro28 killed Doctor. using weapon_zm_rifle
+[00:30:59] Vikemper killed CaPiT_ using weapon_ttt_m16
+[00:31:01] edu.setembro28 killed Vikemper using weapon_zm_revolver
+[00:31:01] Nikolania: Retiro o KOS! É viado, mas não traidor.
+[00:31:04] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[00:31:05] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[00:31:05] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[00:31:06] Clã | BR | ALAKAZAN killed edu.setembro28 using weapon_ttt_m16
+[00:31:42] Beleléu: (AUTOMATED MESSAGE) I have been moved to the Spectator team because I was idle/AFK.
+[00:31:42] Beleléu suicided!
+[00:31:48] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[00:31:48] Clã | BR | ALAKAZAN killed Índio Véio using weapon_ttt_m16
+[00:31:59] Nikolania: acho que o domo tbm é
+[00:32:01] Nikolania: tavam juntos
+[00:32:07] Client "JOTAPEEE" connected.
+[00:32:21] Gatogames435 killed Whatsappbatlepass using player
+[00:32:21] Dropped "Doctor." from server<STEAM_0:0:75383614>
+[00:32:22] Kled: TRAIDOR MATA GARAIO TRAIDOR MATA GARAIO
+[00:32:24] Kled: TRAIDOR MATA GARAIO TRAIDOR MATA GARAIO
+[00:32:37] Client "Doctor." connected.
+[00:32:37] Kled: TRAIDOR MATA GARAIO TRAIDOR MATA GARAIO
+[00:32:48] Gatogames435 killed Clã | BR | ALAKAZAN using player
+[00:32:58] Nikolania killed Gatogames435 using player
+[00:33:04] Client "Doctor." spawned in server <STEAM_0:0:75383614> (took 27 seconds).
+[00:33:05] Nsei killed Gatogames435 using player
+[00:33:08] Kled killed Nikolania using weapon_zm_rifle
+[00:33:13] Nikolania: esse pulo tá bugadão
+[00:33:16] perzo killed Nsei using player
+[00:33:20] Kled killed DomoKing using player
+[00:34:16] perzo killed Nsei using player
+[00:34:19] DomoKing killed CaPiT_ using trigger_hurt
+[00:34:23] Nikolania: aé
+[00:34:31] Nikolania: tester ativado
+[00:34:42] Clã | BR | ALAKAZAN killed Kled using weapon_zm_revolver
+[00:35:08] Dropped "Doctor." from server<STEAM_0:0:75383614>
+[00:35:08] Client "JOTAPEEE" spawned in server <STEAM_0:0:151368048> (took 181 seconds).
+[00:35:24] (TEAM) Gatogames435: e
+[00:35:24] Clã | BR | ALAKAZAN killed Coronel do MST using trigger_hurt
+[00:35:31] Clã | BR | ALAKAZAN killed edu.setembro28 using weapon_zm_revolver
+[00:35:33] Whatsappbatlepass killed Mr.B-O-M-B-A-S-T-I-C using player
+[00:35:39] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[00:35:40] DomoKing killed Gatogames435 using weapon_ttt_aug
+[00:35:46] Nikolania killed Clã | BR | ALAKAZAN using player
+[00:35:54] Índio Véio killed perzo using player
+[00:36:04] Clã | BR | ALAKAZAN: !M9K]
+[00:36:05] Índio Véio killed perzo using player
+[00:36:31] DomoKing killed Vikemper using weapon_ttt_aug
+[00:36:40] DomoKing killed Índio Véio using weapon_ttt_aug
+[00:36:53] DomoKing killed G4LD1N0W'S using weapon_ttt_aug
+[00:37:02] DomoKing killed Nikolania using weapon_ttt_aug
+[00:37:06] Nikolania: errei o hs
+[00:37:08] Client "Doctor." connected.
+[00:37:17] Nikolania: achei q era a sniper com dano longo
+[00:37:19] Nikolania: te deu hs alaka
+[00:37:20] Nikolania: nem da
+[00:37:23] Nikolania: dei hs
+[00:37:29] Nikolania: de pistola
+[00:37:32] DomoKing killed Whatsappbatlepass using weapon_ttt_aug
+[00:37:34] Client "Doctor." spawned in server <STEAM_0:0:75383614> (took 26 seconds).
+[00:38:11] Nikolania: desert n tá pegando munição ou é só pra mim?
+[00:38:19] Nikolania: blz
+[00:38:27] Nikolania killed G4LD1N0W'S using weapon_zm_rifle
+[00:39:05] perzo killed Vikemper using weapon_ttt_m16
+[00:39:06] Doctor.: adms meu microfone nao funciona n ogmod o q eu faço
+[00:39:09] Client "viko-vik" connected.
+[00:39:12] Gatogames435: o L
+[00:39:16] perzo killed Mr.B-O-M-B-A-S-T-I-C using weapon_ttt_m16
+[00:39:18] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[00:39:18] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[00:39:19] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[00:39:20] Nikolania: mata ele aqui
+[00:39:21] perzo killed Clã | BR | ALAKAZAN using weapon_ttt_m16
+[00:39:22] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[00:39:26] Nikolania: quero ponto dele
+[00:39:31] JOTAPEEE killed perzo using weapon_ttt_m16
+[00:39:49] Doctor.: Ele é traidor! Podem Matar! MATA!!!!
+[00:39:50] Doctor.: RETIRO O KOS! RETIRO O KOS!
+[00:39:51] Nikolania: mata o afk ali
+[00:39:52] Nikolania: quero ponto
+[00:40:19] Coronel do MST: (AUTOMATED MESSAGE) I have been moved to the Spectator team because I was idle/AFK.
+[00:40:19] Coronel do MST suicided!
+[00:40:21] Nikolania killed Nsei using player
+[00:40:29] Dropped "Doctor." from server<STEAM_0:0:75383614>
+[00:40:47] Kled killed CaPiT_ using weapon_zm_rifle
+[00:41:08] Clã | BR | ALAKAZAN: !menu
+[00:41:11] Kled killed JOTAPEEE using weapon_zm_revolver
+[00:41:27] Kled killed Whatsappbatlepass using weapon_zm_rifle
+[00:41:35] Kled killed edu.setembro28 using weapon_zm_revolver
+[00:41:51] Dropped "edu.setembro28" from server<STEAM_0:0:235612275>
+[00:42:05] Nikolania: do easter egg
+[00:42:18] Nikolania killed DomoKing using player
+[00:42:25] Gatogames435 killed Nikolania using player
+[00:42:38] Client "Doctor." connected.
+[00:43:03] Client "Doctor." spawned in server <STEAM_0:0:75383614> (took 25 seconds).
+[00:43:04] Gatogames435 killed Kled using player
+[00:43:30] CaPiT_: Docto WHO?
+[00:43:37] CaPiT_: Doctor WHO?
+[00:43:51] Kled: tem arma de vip?
+[00:43:59] Kled: que sefida
+[00:44:13] Kled: precisa nao
+[00:44:15] Nikolania: o coisa mata
+[00:44:17] Nikolania: n sabia
+[00:44:21] Nikolania: ia ficar brincando
+[00:44:31] Nikolania: a mola da -50
+[00:44:31] Clã | BR | ALAKAZAN: !menu
+[00:44:33] Clã | BR | ALAKAZAN gave m9k_winchester73 to Themself
+[00:44:33] Clã | BR | ALAKAZAN: !menu
+[00:44:39] Clã | BR | ALAKAZAN: !giveammo 120
+[00:44:46] Clã | BR | ALAKAZAN: !giveammo  120
+[00:44:50] Clã | BR | ALAKAZAN gave Themself 120 rounds
+[00:44:50] Clã | BR | ALAKAZAN: !giveammo ^  120
+[00:45:00] Clã | BR | ALAKAZAN set the hp for Mr.B-O-M-B-A-S-T-I-C to 300
+[00:45:00] Clã | BR | ALAKAZAN: !hp mr 300
+[00:45:07] Clã | BR | ALAKAZAN killed Mr.B-O-M-B-A-S-T-I-C using player
+[00:45:16] Clã | BR | ALAKAZAN: !resapwn mr
+[00:45:19] JOTAPEEE killed Clã | BR | ALAKAZAN using weapon_zm_rifle
+[00:45:22] Clã | BR | ALAKAZAN respawned Themself!
+[00:45:22] Clã | BR | ALAKAZAN: !respawn alaka
+[00:45:28] کп.k killed Nikolania using weapon_taser_derens
+[00:45:29] Clã | BR | ALAKAZAN respawned Mr.B-O-M-B-A-S-T-I-C!
+[00:45:29] Clã | BR | ALAKAZAN: !respawn mr
+[00:45:33] Clã | BR | ALAKAZAN teleported Mr.B-O-M-B-A-S-T-I-C
+[00:45:33] Clã | BR | ALAKAZAN: !tp mr
+[00:45:37] کп.k: Não.
+[00:45:39] کп.k suicided!
+[00:45:39] Clã | BR | ALAKAZAN set the hp for Mr.B-O-M-B-A-S-T-I-C to 3000
+[00:45:39] Clã | BR | ALAKAZAN: !hp mr 3000
+[00:45:56] Índio Véio killed CaPiT_ using weapon_ttt_sg550
+[00:46:06] Mr.B-O-M-B-A-S-T-I-C suicided!
+[00:46:07] Clã | BR | ALAKAZAN suicided!
+[00:46:08] Dropped "CaPiT_" from server<STEAM_0:1:598667835>
+[00:46:17] Clã | BR | ALAKAZAN set the karma for Everyone to 300
+[00:46:17] Clã | BR | ALAKAZAN: !karma * 300
+[00:46:19] Clã | BR | ALAKAZAN set the karma for Everyone to 3000
+[00:46:19] Clã | BR | ALAKAZAN: !karma * 3000
+[00:46:30] Índio Véio killed DomoKing using weapon_ttt_sg550
+[00:46:41] Kled killed Doctor. using weapon_zm_revolver
+[00:46:47] Vikemper killed Kled using weapon_zm_rifle
+[00:46:47] JOTAPEEE killed Gatogames435 using weapon_zm_rifle
+[00:46:51] Nsei killed Vikemper using player
+[00:47:24] Nsei killed Whatsappbatlepass using player
+[00:47:28] JOTAPEEE killed perzo using weapon_ttt_awp
+[00:47:33] JOTAPEEE killed Nsei using weapon_ttt_awp
+[00:47:54] Clã | BR | ALAKAZAN: .!Force T alakazan
+[00:48:00] Nikolania: mapa equilibrado
+[00:48:27] Client "viko-vik" connected.
+[00:48:33] Dropped "Beleléu" from server<STEAM_0:0:171399836>
+[00:48:37] کп.k killed Whatsappbatlepass using weapon_ttt_minigun
+[00:48:38] کп.k killed Gatogames435 using weapon_ttt_minigun
+[00:48:46] کп.k killed Nsei using weapon_ttt_minigun
+[00:48:57] کп.k killed perzo using weapon_ttt_minigun
+[00:49:00] Nikolania: começou o round e morri
+[00:49:33] کп.k killed Vikemper using weapon_ttt_minigun
+[00:49:45] Client "viko-vik" spawned in server <STEAM_0:0:601078810> (took 78 seconds).
+[00:49:54] کп.k killed Clã | BR | ALAKAZAN using weapon_ttt_minigun
+[00:51:05] کп.k killed G4LD1N0W'S using weapon_ttt_minigun
+[00:51:12] Clã | BR | ALAKAZAN: !menu
+[00:51:19] کп.k killed DomoKing using weapon_ttt_minigun
+[00:51:31] کп.k killed Índio Véio using weapon_ttt_minigun
+[00:51:45] Clã | BR | ALAKAZAN banned Doctor. permanently (so por meme)
+[00:51:47] Clã | BR | ALAKAZAN banned Coronel do MST permanently (so por meme)
+[00:51:48] Clã | BR | ALAKAZAN banned DomoKing permanently (so por meme)
+[00:51:50] Clã | BR | ALAKAZAN banned G4LD1N0W'S permanently (so por meme)
+[00:52:53] Dropped "viko-vik" from server<STEAM_0:0:601078810>
+[00:52:56] Clã | BR | ALAKAZAN:  Dominei a habilidade de ficar tão incrivelmente imóvel, que me torno invisível aos olhos
+[00:53:00] کп.k killed Mr.B-O-M-B-A-S-T-I-C using env_explosion
+[00:53:06] کп.k killed JOTAPEEE using weapon_ttt_minigun
+[00:53:07] Gatogames435: Sim.
+[00:53:15] Dropped "JOTAPEEE" from server<STEAM_0:0:151368048>
+[00:53:35] Client "kadusqw" connected.
+[00:54:43] Nikolania: tem radar sim po
+[00:55:21] کп.k killed Doctor. using weapon_ttt_minigun
+[00:55:23] کп.k: Não.
+[00:55:23] کп.k suicided!
+[00:55:25] Clã | BR | ALAKAZAN: snk eu tinha que falar pra ti "Dominei a habilidade de ficar tão incrivelmente imóvel, que me torno invisível aos olhos"    
+[00:55:27] Nikolania: tu tinha radar snake?
+[00:55:34] Client "kadusqw" spawned in server <STEAM_0:1:538175276> (took 119 seconds).
+[00:55:34] Dropped "kadusqw" from server<STEAM_0:1:538175276>
+[00:55:54] Doctor.: culpa do fael
+[00:55:54] Server is shutting down/changing levels.
+
+
+
+[00:56:00] New map: ttt_alstoybarn_day
+[00:56:11] Client "کп.k" spawned in server <STEAM_0:1:544967099> (took 14 seconds).
+[00:56:13] Client "Gatogames435" spawned in server <STEAM_0:1:911684499> (took 16 seconds).
+[00:56:13] Client "DomoKing" spawned in server <STEAM_0:0:49457308> (took 16 seconds).
+[00:56:14] Client "Clã | BR | ALAKAZAN" spawned in server <STEAM_0:1:61770335> (took 17 seconds).
+[00:56:16] Client "Doctor." spawned in server <STEAM_0:0:75383614> (took 19 seconds).
+[00:56:16] Client "Kled" spawned in server <STEAM_0:1:95115941> (took 19 seconds).
+[00:56:16] Client "Mr.B-O-M-B-A-S-T-I-C" spawned in server <STEAM_0:0:70118207> (took 19 seconds).
+[00:56:20] Client "Vikemper" spawned in server <STEAM_0:0:919226779> (took 23 seconds).
+[00:56:22] Client "Índio Véio" spawned in server <STEAM_0:1:850650515> (took 25 seconds).
+[00:56:22] Client "perzo" spawned in server <STEAM_0:0:228517767> (took 25 seconds).
+[00:56:22] Client "G4LD1N0W'S" spawned in server <STEAM_0:0:629080060> (took 25 seconds).
+[00:56:24] Client "Nsei" spawned in server <STEAM_0:1:17104997> (took 27 seconds).
+[00:56:28] Client "Whatsappbatlepass" spawned in server <STEAM_0:1:830914435> (took 31 seconds).
+[00:56:35] Client "Coronel do MST" spawned in server <STEAM_0:1:91390051> (took 38 seconds).
+[00:56:40] Doctor.: isso é culpa do fael vamos comer o bumbum dele com farofa
+[00:56:40] Coronel do MST suicided!
+[00:56:41] Vikemper: !rtv
+[00:56:59] Coronel do MST: !unspec 
+[00:57:11] Coronel do MST has forced Themself to join the world of the living.
+[00:57:11] Coronel do MST: !unspec ^
+[00:57:11] Nsei suicided!
+[00:57:12] Whatsappbatlepass: y
+[00:57:18] Dropped "Coronel do MST" from server<STEAM_0:1:91390051>
+[00:57:31] Doctor. killed Kled using env_explosion
+[00:57:39] Client "Nikolania" spawned in server <STEAM_0:1:163906537> (took 102 seconds).
+[00:57:44] Client "Mn Preto" connected.
+[00:57:51] Dropped "Nsei" from server<STEAM_0:1:17104997>
+[00:57:53] Client "Mn Preto" connected.
+[00:58:46] perzo suicided!
+[00:58:46] perzo killed Doctor. using env_explosion
+[00:58:55] Client "Mn Preto" spawned in server <STEAM_0:0:474961325> (took 62 seconds).
+[00:59:02] کп.k killed Whatsappbatlepass using weapon_zm_rifle
+[00:59:13] کп.k: Não.
+[00:59:14] Kled: !rtv
+[00:59:24] کп.k: matei t prr
+[00:59:29] کп.k: MATEI T
+[00:59:30] Dropped "Kled" from server<STEAM_0:1:95115941>
+[00:59:32] (TEAM) کп.k: O Whatsappbatlepass
+[01:00:12] Índio Véio: retiro kos snk
+[01:00:50] Clã | BR | ALAKAZAN killed Vikemper using weapon_zm_revolver
+[01:00:52] Dropped "Doctor." from server<STEAM_0:0:75383614>
+[01:00:56] Gatogames435 killed Mr.B-O-M-B-A-S-T-I-C using player
+[01:01:00] Gatogames435 killed Clã | BR | ALAKAZAN using player
+[01:01:02] Dropped "Mn Preto" from server<STEAM_0:0:474961325>
+[01:01:05] Gatogames435 killed کп.k using player
+[01:01:37] Clã | BR | ALAKAZAN killed Gatogames435 using weapon_zm_revolver
+[01:01:38] کп.k killed Mr.B-O-M-B-A-S-T-I-C using player
+[01:01:41] Vikemper killed Clã | BR | ALAKAZAN using weapon_ttt_m16
+[01:01:43] DomoKing killed کп.k using player
+[01:01:47] Dropped "کп.k" from server<STEAM_0:1:544967099>
+[01:02:07] Índio Véio killed Nikolania using weapon_zm_rifle
+[01:02:13] Client "eojohnbx" connected.
+[01:02:39] Mr.B-O-M-B-A-S-T-I-C: STEAM_0:1:544967099)
+[01:03:25] Índio Véio killed Vikemper using ent_boomerangclose
+[01:03:34] Índio Véio killed G4LD1N0W'S using ent_boomerang_bounce
+[01:03:39] perzo suicided!
+[01:03:56] Clã | BR | ALAKAZAN: !aslay  STEAM_0:1:544967099 1 rdm em ino
+[01:04:04] Clã | BR | ALAKAZAN: !aslay  STEAM_0:1:544967099  rdm em ino 1
+[01:04:06] Clã | BR | ALAKAZAN: !menu
+[01:04:25] Clã | BR | ALAKAZAN: !menu
+[01:04:30] Clã | BR | ALAKAZAN added 1 autoslays to STEAM_0:1:544967099 (rdm em ino)
+[01:04:33] DomoKing killed Whatsappbatlepass using player
+[01:04:42] Índio Véio killed DomoKing using ent_boomerangclose
+[01:04:48] DomoKing killed Índio Véio using player
+[01:04:58] Nikolania: o de sempre
+[01:05:05] Gatogames435 was killed by env_explosion
+[01:05:09] Nikolania: segunda é dia de folgar
+[01:06:10] Clã | BR | ALAKAZAN killed G4LD1N0W'S using weapon_zm_improvised
+[01:06:15] Clã | BR | ALAKAZAN killed Mr.B-O-M-B-A-S-T-I-C using player
+[01:06:23] Clã | BR | ALAKAZAN killed Vikemper using player
+[01:06:35] Clã | BR | ALAKAZAN killed DomoKing using player
+[01:06:40] Clã | BR | ALAKAZAN killed Whatsappbatlepass using player
+[01:06:42] Gatogames435 killed Índio Véio using player
+[01:06:50] Gatogames435 killed Clã | BR | ALAKAZAN using weapon_zm_revolver
+[01:06:53] Gatogames435: supunhetas-mos que ele seja t....
+[01:06:54] Gatogames435: supunhetas-mos que ele seja t....
+[01:06:56] Gatogames435: supunhetas-mos que ele seja t....
+[01:07:14] Nikolania: ventilador veio podi
+[01:07:27] Vikemper killed Clã | BR | ALAKAZAN using weapon_zm_revolver
+[01:07:39] Nikolania killed Índio Véio using player
+[01:07:41] Vikemper suicided!
+[01:07:41] Clã | BR | ALAKAZAN exploded Vikemper
+[01:07:41] Clã | BR | ALAKAZAN: !explode vike
+[01:07:48] Client "XxElfantasmaxX" connected.
+[01:07:59] (tsay from Clã | BR | ALAKAZAN) tchauuuuuuuuuu
+[01:08:06] (tsay from Clã | BR | ALAKAZAN) é hora de dar tchau
+[01:08:09] Nikolania: tbm
+[01:08:29] Nikolania: moeda vermelha
+[01:08:39] Mr.B-O-M-B-A-S-T-I-C killed Gatogames435 using weapon_ttt_supersheep
+[01:08:53] Nikolania: to pruvem
+[01:08:56] Nikolania: matei o indio
+[01:09:00] (tsay from Clã | BR | ALAKAZAN) kos o cara ali o
+[01:09:01] (tsay from Clã | BR | ALAKAZAN) kos o cara ali o]
+[01:09:04] (tsay from Clã | BR | ALAKAZAN) kos o cara ali o
+[01:09:17] Mr.B-O-M-B-A-S-T-I-C killed Nikolania using player
+[01:09:23] Mr.B-O-M-B-A-S-T-I-C killed G4LD1N0W'S using weapon_zm_revolver
+[01:09:24] DomoKing killed Mr.B-O-M-B-A-S-T-I-C using player
+[01:09:27] (tsay from Clã | BR | ALAKAZAN) O O CABALA LA CABALA CABALA
+[01:09:28] (tsay from Clã | BR | ALAKAZAN) O O CABALA LA CABALA CABALA
+[01:09:28] (tsay from Clã | BR | ALAKAZAN) O O CABALA LA CABALA CABALA
+[01:09:29] Whatsappbatlepass killed DomoKing using player
+[01:09:29] (tsay from Clã | BR | ALAKAZAN) O O CABALA LA CABALA CABALA
+[01:09:29] (tsay from Clã | BR | ALAKAZAN) O O CABALA LA CABALA CABALA
+[01:09:30] (tsay from Clã | BR | ALAKAZAN) O O CABALA LA CABALA CABALA
+[01:09:31] Gatogames435: !
+[01:10:09] Nikolania killed Gatogames435 using player
+[01:10:11] Clã | BR | ALAKAZAN set the scale for Themself to 0
+[01:10:11] Clã | BR | ALAKAZAN: !scale ^ 0.5
+[01:10:15] Mr.B-O-M-B-A-S-T-I-C killed Nikolania using player
+[01:10:30] Vikemper killed Whatsappbatlepass using trigger_hurt
+[01:10:36] Clã | BR | ALAKAZAN: !menu
+[01:10:39] Clã | BR | ALAKAZAN: !menu
+[01:10:40] Clã | BR | ALAKAZAN: !menu
+[01:10:47] Clã | BR | ALAKAZAN: !menu
+[01:10:48] Clã | BR | ALAKAZAN: !menu
+[01:10:59] Clã | BR | ALAKAZAN set the walk speed for Themself to 1429
+[01:11:00] Clã | BR | ALAKAZAN: !menu
+[01:11:17] Clã | BR | ALAKAZAN: !menu
+[01:11:21] Clã | BR | ALAKAZAN set the walk speed for Themself to 1000
+[01:11:23] Vikemper killed Índio Véio using weapon_ttt_knife
+[01:11:26] Vikemper killed DomoKing using weapon_ttt_m16
+[01:11:28] Nikolania: ae
+[01:11:33] Vikemper killed G4LD1N0W'S using weapon_ttt_m16
+[01:11:45] Nikolania: klkkk
+[01:11:49] Clã | BR | ALAKAZAN: !menu
+[01:11:54] Clã | BR | ALAKAZAN: !menu
+[01:11:55] Vikemper killed Mr.B-O-M-B-A-S-T-I-C using weapon_ttt_m16
+[01:12:07] Clã | BR | ALAKAZAN suicided!
+[01:12:07] Clã | BR | ALAKAZAN played sound vo/citadel/al_struggle05.wav
+[01:12:13] Nikolania: nice
+[01:12:22] Clã | BR | ALAKAZAN: !menu
+[01:12:25] Clã | BR | ALAKAZAN reset the walk and run speed for Themself
+[01:12:31] Clã | BR | ALAKAZAN set the scale for Themself to 1
+[01:12:31] Clã | BR | ALAKAZAN: !scale ^ 1
+[01:12:33] Nikolania: esse é o tomanho do caça ao super?
+[01:12:43] Clã | BR | ALAKAZAN killed Gatogames435 using weapon_zm_revolver
+[01:12:44] Nikolania: até hj n vi
+[01:13:18] Nikolania killed Clã | BR | ALAKAZAN using weapon_zm_revolver
+[01:13:23] Clã | BR | ALAKAZAN respawned Themself!
+[01:13:23] Clã | BR | ALAKAZAN: !respawn alaka
+[01:13:30] Vikemper killed Clã | BR | ALAKAZAN using weapon_zm_revolver
+[01:13:32] Nikolania: eu vi
+[01:13:47] G4LD1N0W'S killed Vikemper using weapon_zm_rifle
+[01:13:47] Vikemper suicided!
+[01:13:47] Clã | BR | ALAKAZAN exploded Vikemper
+[01:13:47] Clã | BR | ALAKAZAN: !explode vi
+[01:13:54] (tsay from Clã | BR | ALAKAZAN) ta pruvem mesmoo
+[01:14:11] Client "CzK" connected.
+[01:14:52] (tsay from Clã | BR | ALAKAZAN) olha o mic do cara
+[01:14:53] G4LD1N0W'S killed Nikolania using weapon_zm_rifle
+[01:14:55] (tsay from Clã | BR | ALAKAZAN) pqp
+[01:14:55] Nikolania: n pega
+[01:15:01] Client "Rush_" connected.
+[01:15:08] (tsay from Clã | BR | ALAKAZAN) g4 ta ruim seu mic ai porra
+[01:15:19] Client "CzK" spawned in server <STEAM_0:0:241832796> (took 68 seconds).
+[01:15:22] Nikolania: m16 de longe tá ruim d+ tá loco
+[01:15:29] Nikolania: frezzei e mirei na cara e n pega
+[01:15:36] Nikolania: tbm vejo
+[01:15:39] Nikolania: coisa boa
+[01:15:41] Client "Rush_" spawned in server <STEAM_0:1:616185689> (took 40 seconds).
+[01:15:55] Nikolania: acho q n
+[01:16:05] Nikolania: eu tava de costas pulando
+[01:16:06] Dropped "CzK" from server<STEAM_0:0:241832796>
+[01:16:10] Nikolania: já vi zabinho bugar assim
+[01:16:17] G4LD1N0W'S killed Índio Véio using weapon_zm_rifle
+[01:16:39] Nikolania: x1 de cegos
+[01:16:45] G4LD1N0W'S killed DomoKing using weapon_zm_rifle
+[01:16:48] Nikolania: boa kkkk
+[01:16:52] Nikolania: tá tentando?
+[01:17:53] Nikolania: G4LD1N0W'S jogando com medo
+[01:18:17] Nikolania: errou kkkk
+[01:18:19] Nikolania: n creio
+[01:18:20] Gatogames435: kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk
+[01:18:23] Índio Véio: kkkkkkk
+[01:18:29] G4LD1N0W'S killed Mr.B-O-M-B-A-S-T-I-C using weapon_ttt_thriller
+[01:18:40] perzo killed G4LD1N0W'S using weapon_ttt_m16
+[01:18:42] Nikolania: pino do pino
+[01:18:54] Nikolania: boa noite senhores
+[01:18:58] Dropped "Mr.B-O-M-B-A-S-T-I-C" from server<STEAM_0:0:70118207>
+[01:18:59] Dropped "perzo" from server<STEAM_0:0:228517767>
+[01:19:06] Dropped "DomoKing" from server<STEAM_0:0:49457308>
+[01:19:10] Dropped "Nikolania" from server<STEAM_0:1:163906537>
+[01:19:12] Dropped "Gatogames435" from server<STEAM_0:1:911684499>
+[01:19:14] Server is shutting down/changing levels.
+
+
+
+[01:19:20] New map: ttt_67thway_v14
+[01:19:39] Client "Clã | BR | ALAKAZAN" spawned in server <STEAM_0:1:61770335> (took 22 seconds).
+[01:19:45] Client "Rush_" spawned in server <STEAM_0:1:616185689> (took 28 seconds).
+[01:19:54] Client "Vikemper" spawned in server <STEAM_0:0:919226779> (took 37 seconds).
+[01:19:59] Client "Índio Véio" spawned in server <STEAM_0:1:850650515> (took 42 seconds).
+[01:20:20] Client "G4LD1N0W'S" spawned in server <STEAM_0:0:629080060> (took 63 seconds).
+[01:21:03] Rush_ killed Índio Véio using player
+[01:21:23] Clã | BR | ALAKAZAN teleported to Vikemper
+[01:21:23] Clã | BR | ALAKAZAN: !goto vi
+[01:21:24] Clã | BR | ALAKAZAN killed Vikemper using weapon_ttt_knife
+[01:21:26] Rush_ killed Clã | BR | ALAKAZAN using player
+[01:22:14] Vikemper killed G4LD1N0W'S using player
+[01:22:20] Clã | BR | ALAKAZAN set the karma for Everyone to 3000
+[01:22:20] Clã | BR | ALAKAZAN: !karma * 3000
+[01:22:26] Vikemper killed Clã | BR | ALAKAZAN using player
+[01:22:33] Vikemper killed Índio Véio using player
+[01:22:34] Dropped "Clã | BR | ALAKAZAN" from server<STEAM_0:1:61770335>
+[01:22:54] Rush_ killed Vikemper using player
+[01:22:54] Dropped "G4LD1N0W'S" from server<STEAM_0:0:629080060>
+[01:23:00] Dropped "Vikemper" from server<STEAM_0:0:919226779>
+[01:24:22] Rush_ killed Índio Véio using player
+[01:25:22] Índio Véio killed Rush_ using ent_boomerangclose
+[01:25:31] Dropped "Índio Véio" from server<STEAM_0:1:850650515>
+[01:25:35] Dropped "Rush_" from server<STEAM_0:1:616185689>
+[02:20:42] Client "Duck coffee" connected.
+[02:22:10] Client "Duck coffee" spawned in server <STEAM_0:1:784632795> (took 88 seconds).
+[02:23:38] Duck coffee: !doar
+[02:26:37] Dropped "Duck coffee" from server<STEAM_0:1:784632795>
+[05:20:37] Client "mikan" connected.
+[12:35:17] Client "PigBoyBR" connected.
+[12:36:21] Client "PigBoyBR" spawned in server <STEAM_0:1:553416565> (took 64 seconds).
+[12:38:55] Dropped "PigBoyBR" from server<STEAM_0:1:553416565>
+[12:41:55] Client "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" connected.
+[12:43:38] Client "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" spawned in server <STEAM_0:0:96403864> (took 103 seconds).
+[12:52:02] Dropped "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" from server<STEAM_0:0:96403864>
+[13:27:46] Client "Vikemper" connected.
+[13:28:58] Client "Vikemper" spawned in server <STEAM_0:0:919226779> (took 72 seconds).
+[13:35:50] Client "Clã | BR | ALAKAZAN" connected.
+[13:36:08] Client "Clã | BR | ALAKAZAN" spawned in server <STEAM_0:1:61770335> (took 18 seconds).
+[13:36:46] Server is shutting down/changing levels.
+
+
+
+[13:36:51] New map: ttt_fastfood_a6
+[13:37:07] Client "Clã | BR | ALAKAZAN" spawned in server <STEAM_0:1:61770335> (took 19 seconds).
+[13:37:16] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[13:37:20] Clã | BR | ALAKAZAN suicided!
+[13:37:20] Clã | BR | ALAKAZAN respawned Themself
+[13:37:20] Clã | BR | ALAKAZAN: !frespawn ^
+[13:37:24] Client "Vikemper" spawned in server <STEAM_0:0:919226779> (took 36 seconds).
+[13:42:11] Client "Thon" connected.
+[13:42:12] Vikemper killed Clã | BR | ALAKAZAN using player
+[13:42:31] Clã | BR | ALAKAZAN: /DETETIVES
+[13:42:54] Clã | BR | ALAKAZAN killed Vikemper using player
+[13:44:00] Clã | BR | ALAKAZAN killed Vikemper using player
+[13:45:12] Vikemper killed Clã | BR | ALAKAZAN using weapon_ttt_famas
+[13:45:32] Client "Thon" spawned in server <STEAM_0:0:17289162> (took 201 seconds).
+[13:45:56] Clã | BR | ALAKAZAN killed Vikemper using weapon_ttt_knife
+[13:45:59] Client "POB Original" connected.
+[13:46:00] Clã | BR | ALAKAZAN killed Thon using player
+[13:47:09] Clã | BR | ALAKAZAN killed Vikemper using weapon_ttt_knife_murder
+[13:47:10] Thon killed Clã | BR | ALAKAZAN using weapon_zm_revolver_murder
+[13:47:25] Client "POB Original" spawned in server <STEAM_0:0:521262796> (took 86 seconds).
+[13:47:27] Clã | BR | ALAKAZAN whipped Everyone 100 times with 0 damage
+[13:47:27] Clã | BR | ALAKAZAN: !Whip * 100
+[13:47:43] Server is shutting down/changing levels.
+
+
+
+[13:47:48] New map: ttt_titanic
+[13:48:02] Client "Clã | BR | ALAKAZAN" spawned in server <STEAM_0:1:61770335> (took 17 seconds).
+[13:48:16] Client "POB Original" spawned in server <STEAM_0:0:521262796> (took 31 seconds).
+[13:48:21] Client "Vikemper" spawned in server <STEAM_0:0:919226779> (took 36 seconds).
+[13:48:22] Clã | BR | ALAKAZAN: !frespwan ^
+[13:48:27] Clã | BR | ALAKAZAN suicided!
+[13:48:27] Clã | BR | ALAKAZAN respawned Themself
+[13:48:27] Clã | BR | ALAKAZAN: !frespawn ^
+[13:48:57] Clã | BR | ALAKAZAN respawned Themself
+[13:48:57] Clã | BR | ALAKAZAN: !frespawn ^
+[13:49:44] Vikemper killed Clã | BR | ALAKAZAN using player
+[13:49:48] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[13:49:52] (tsay from Clã | BR | ALAKAZAN) pode ta no jogo
+[13:49:52] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[13:50:00] Clã | BR | ALAKAZAN has forced Themself to spectate.
+[13:50:00] Clã | BR | ALAKAZAN: !fspec ^
+[13:50:11] POB Original killed Vikemper using weapon_ttt_aug
+[13:51:34] Vikemper killed POB Original using weapon_ttt_thriller
+[13:52:27] Client "JN" connected.
+[13:53:08] Client "Duck coffee" connected.
+[13:53:09] Client "JN" spawned in server <STEAM_0:0:229920886> (took 42 seconds).
+[13:54:02] Vikemper killed POB Original using player
+[13:54:13] Client "Duck coffee" spawned in server <STEAM_0:1:784632795> (took 65 seconds).
+[13:54:43] JN killed POB Original using weapon_ttt_tmp
+[13:54:46] JN killed Vikemper using weapon_ttt_tmp
+[13:54:49] Dropped "POB Original" from server<STEAM_0:0:521262796>
+[13:54:52] JN killed Duck coffee using weapon_ttt_tmp
+[13:55:57] JN: KOS! KOS! KOS!
+[13:55:58] Vikemper killed JN using weapon_ttt_tmp
+[13:58:58] Vikemper killed Duck coffee using player
+[13:59:39] Vikemper killed Duck coffee using weapon_ttt_ak47
+[14:00:38] Server is shutting down/changing levels.
+
+
+
+[14:00:45] New map: ttt_67thway_v14
+[14:01:01] Client "Clã | BR | ALAKAZAN" spawned in server <STEAM_0:1:61770335> (took 20 seconds).
+[14:01:05] Client "Vikemper" spawned in server <STEAM_0:0:919226779> (took 24 seconds).
+[14:01:06] Client "JN" spawned in server <STEAM_0:0:229920886> (took 25 seconds).
+[14:01:11] Client "Duck coffee" spawned in server <STEAM_0:1:784632795> (took 30 seconds).
+[14:02:02] JN killed Duck coffee using weapon_ttt_m16
+[14:02:12] JN killed Vikemper using weapon_ttt_pistol
+[14:03:28] JN was killed by trigger_hurt
+[14:03:33] Duck coffee killed Vikemper using weapon_zm_sledge
+[14:04:28] JN killed Duck coffee using weapon_ttt_m4a1_s
+[14:04:46] JN killed Vikemper using weapon_ttt_m16
+[14:05:54] Vikemper killed JN using weapon_zm_pistol
+[14:06:42] Duck coffee killed Vikemper using weapon_ttt_m16
+[14:07:12] Vikemper was killed by prop_physics
+[14:07:21] JN killed Duck coffee using player
+[14:07:33] Vikemper suicided!
+[14:07:33] Vikemper killed JN using prop_physics
+[14:08:17] Vikemper killed JN using weapon_zm_shotgun
+[14:08:22] Vikemper killed Duck coffee using weapon_zm_shotgun
+[14:08:50] Server is shutting down/changing levels.
+
+
+
+[14:08:55] New map: ttt_community_pool_overhaul_b3
+[14:09:10] Client "Clã | BR | ALAKAZAN" spawned in server <STEAM_0:1:61770335> (took 18 seconds).
+[14:09:16] Client "JN" spawned in server <STEAM_0:0:229920886> (took 24 seconds).
+[14:09:17] Client "Vikemper" spawned in server <STEAM_0:0:919226779> (took 25 seconds).
+[14:09:20] Client "Duck coffee" spawned in server <STEAM_0:1:784632795> (took 28 seconds).
+[14:10:06] JN killed Vikemper using player
+[14:13:02] Duck coffee killed JN using weapon_ttt_tmp
+[14:14:05] JN killed Vikemper using weapon_ttt_g3sg1
+[14:14:09] Duck coffee killed JN using player
+[14:15:01] JN killed Duck coffee using player
+[14:15:02] Client "✪ Sushi" connected.
+[14:15:21] Vikemper killed JN using weapon_ttt_ak47
+[14:15:50] Client "✪ Sushi" spawned in server <STEAM_0:0:80002025> (took 48 seconds).
+[14:16:03] JN killed Vikemper using weapon_ttt_glock
+[14:16:10] JN killed Duck coffee using weapon_ttt_glock
+[14:16:10] ✪ Sushi removed all access rights from ✪ Sushi
+[14:16:34] ✪ Sushi killed JN using player
+[14:16:54] Dropped "✪ Sushi" from server<STEAM_0:0:80002025>
+[14:17:23] JN killed Duck coffee using player
+[14:17:27] JN killed Vikemper using player
+[14:18:07] JN killed Vikemper using ttt_knife_proj
+[14:18:23] JN killed Duck coffee using ttt_knife_proj
+[14:18:56] Server is shutting down/changing levels.
+
+
+
+[14:19:02] New map: ttt_alspenthouse
+[14:19:18] Client "Clã | BR | ALAKAZAN" spawned in server <STEAM_0:1:61770335> (took 19 seconds).
+[14:19:26] Client "JN" spawned in server <STEAM_0:0:229920886> (took 27 seconds).
+[14:19:30] Client "Duck coffee" spawned in server <STEAM_0:1:784632795> (took 31 seconds).
+[14:19:35] Client "Vikemper" spawned in server <STEAM_0:0:919226779> (took 36 seconds).
+[14:20:15] Client "Carlos" connected.
+[14:20:36] JN killed Vikemper using player
+[14:20:39] JN killed Duck coffee using player
+[14:20:44] Client "Carlos" spawned in server <STEAM_0:1:81775393> (took 29 seconds).
+[14:21:03] Carlos: boa tarde
+[14:21:19] Carlos: já almoçei é boa tarde
+[14:21:26] JN killed Carlos using player
+[14:21:43] Vikemper killed Duck coffee using player
+[14:22:00] Vikemper was killed by trigger_hurt
+[14:22:09] JN was killed by trigger_hurt
+[14:23:09] JN killed Vikemper using weapon_ttt_g3sg1
+[14:23:18] JN killed Duck coffee using weapon_ttt_g3sg1
+[14:23:23] Carlos killed JN using player
+[14:23:37] Carlos: é em prop
+[14:23:48] Client "frango inteiro seara" connected.
+[14:24:02] JN killed Vikemper using player
+[14:24:11] JN killed Carlos using player
+[14:24:17] JN killed Duck coffee using player
+[14:24:48] JN killed Vikemper using player
+[14:24:53] JN killed Duck coffee using player
+[14:25:39] Client "frango inteiro seara" spawned in server <STEAM_0:1:168639344> (took 111 seconds).
+[14:26:00] Vikemper killed Duck coffee using weapon_ttt_minigun
+[14:26:05] Dropped "Carlos" from server<STEAM_0:1:81775393>
+[14:26:30] JN killed Vikemper using ttt_slam_satchel
+[14:27:03] Server is shutting down/changing levels.
+
+
+
+[14:27:08] New map: ttt_atlantis
+[14:27:19] Client "Mumuk1ll3r" connected.
+[14:27:23] Client "Clã | BR | ALAKAZAN" spawned in server <STEAM_0:1:61770335> (took 18 seconds).
+[14:27:29] Client "JN" spawned in server <STEAM_0:0:229920886> (took 24 seconds).
+[14:27:30] Client "frango inteiro seara" spawned in server <STEAM_0:1:168639344> (took 25 seconds).
+[14:27:31] Client "Duck coffee" spawned in server <STEAM_0:1:784632795> (took 26 seconds).
+[14:27:38] Client "Vikemper" spawned in server <STEAM_0:0:919226779> (took 33 seconds).
+[14:27:50] Client "MATHEUS" connected.
+[14:28:36] JN killed frango inteiro seara using player
+[14:28:50] Vikemper killed JN using player
+[14:28:53] Dropped "frango inteiro seara" from server<STEAM_0:1:168639344>
+[14:29:14] Client "Mumuk1ll3r" spawned in server <STEAM_0:0:537847536> (took 115 seconds).
+[14:29:16] JN killed Vikemper using player
+[14:29:25] Client "MATHEUS" spawned in server <STEAM_0:0:630196448> (took 95 seconds).
+[14:30:04] Duck coffee killed JN using player
+[14:30:46] JN killed Vikemper using player
+[14:30:54] JN killed Duck coffee using player
+[14:32:12] JN: vike
+[14:32:17] JN: mic acabo 
+[14:32:57] Client "pizza" connected.
+[14:33:44] MATHEUS killed JN using player
+[14:34:29] Client "pizza" spawned in server <STEAM_0:1:586090265> (took 92 seconds).
+[14:35:02] pizza: /boost
+[14:35:27] Mumuk1ll3r: KOS NESSE SAFADO
+[14:36:32] MATHEUS: oi
+[14:36:42] Client "Nsei" connected.
+[14:37:00] MATHEUS: so eu kkkk
+[14:37:25] Mumuk1ll3r: KOS NESSE SAFADO
+[14:37:25] Mumuk1ll3r killed MATHEUS using player
+[14:37:31] MATHEUS: eu tava 
+[14:37:35] Client "Nsei" spawned in server <STEAM_0:1:17104997> (took 53 seconds).
+[14:37:37] MATHEUS: casando
+[14:37:45] pizza suicided!
+[14:38:16] JN killed Duck coffee using player
+[14:38:16] Clã | BR | ALAKAZAN added 2 autoslays to JN (rdm em T)
+[14:38:16] Mumuk1ll3r: KOS NESSE SAFADO
+[14:38:17] JN killed Mumuk1ll3r using player
+[14:38:29] JN killed Vikemper using player
+[14:38:37] JN killed MATHEUS using player
+[14:38:44] Mumuk1ll3r: KOS NESSE SAFADO
+[14:38:56] pizza: arte
+[14:39:07] JN killed Nsei using player
+[14:39:42] JN suicided!
+[14:39:48] pizza: como funciona a crosshair?
+[14:40:19] (tsay from Clã | BR | ALAKAZAN) to mamando
+[14:40:31] pizza: /boost
+[14:40:35] Mumuk1ll3r killed Duck coffee using player
+[14:41:13] JN: !kk
+[14:41:16] JN: !kk
+[14:41:28] pizza: porque quando pega a python dropa todas as armas?
+[14:41:39] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[14:41:43] JN: KOS! KOS! KOS!
+[14:41:44] (tsay from Clã | BR | ALAKAZAN) ta como primaria
+[14:41:47] pizza: bah
+[14:42:01] Mumuk1ll3r killed pizza using player
+[14:42:01] (tsay from Clã | BR | ALAKAZAN) eu to mamando ja falei
+[14:42:20] pizza: alakazam como que muda a crosshair quero colocar cor bonita
+[14:42:24] JN: ! mira
+[14:42:31] (tsay from Clã | BR | ALAKAZAN) TEM QUE MAMAR NÉ, 30 GRAUS PQP
+[14:43:10] Mumuk1ll3r killed Vikemper using weapon_ttt_ak47
+[14:43:24] Nsei killed Mumuk1ll3r using player
+[14:43:29] Mumuk1ll3r killed Nsei using ttt_firegrenade_proj
+[14:43:30] Mumuk1ll3r killed MATHEUS using env_fire
+[14:43:38] Clã | BR | ALAKAZAN has forced Themself to join the world of the living.
+[14:43:38] (TEAM) Clã | BR | ALAKAZAN: !UNSPEC ^
+[14:43:59] Client "Matheus_dcac" connected.
+[14:43:59] JN suicided!
+[14:44:23] Clã | BR | ALAKAZAN gave Everyone 3000 rounds
+[14:44:23] Clã | BR | ALAKAZAN: !GIVEAMMO * 3000
+[14:44:34] Nsei killed MATHEUS using weapon_ttt_minigun
+[14:44:37] Nsei killed Duck coffee using weapon_ttt_minigun
+[14:44:44] Clã | BR | ALAKAZAN: !menu
+[14:44:57] Clã | BR | ALAKAZAN set the armor for Themself,Duck coffee,JN,MATHEUS,Mumuk1ll3r,Vikemper,pizza to 255
+[14:44:58] Clã | BR | ALAKAZAN set the armor for Themself,Duck coffee,JN,MATHEUS,Mumuk1ll3r,Vikemper,pizza to 255
+[14:45:00] Nsei killed Vikemper using weapon_ttt_minigun
+[14:45:21] Nsei killed Mumuk1ll3r using weapon_ttt_minigun
+[14:45:31] Clã | BR | ALAKAZAN killed Nsei using ttt_slam_satchel
+[14:45:37] Clã | BR | ALAKAZAN killed pizza using player
+[14:45:40] Client "Tarney" connected.
+[14:45:47] Clã | BR | ALAKAZAN: EZ NE
+[14:46:04] Server is shutting down/changing levels.
+
+
+
+[14:46:10] New map: ttt_aircraft_ccf_r2_fix2
+[14:46:24] Client "Clã | BR | ALAKAZAN" spawned in server <STEAM_0:1:61770335> (took 18 seconds).
+[14:46:26] Client "JN" spawned in server <STEAM_0:0:229920886> (took 20 seconds).
+[14:46:28] Client "Mumuk1ll3r" spawned in server <STEAM_0:0:537847536> (took 22 seconds).
+[14:46:28] Client "pizza" spawned in server <STEAM_0:1:586090265> (took 22 seconds).
+[14:46:30] Client "Vikemper" spawned in server <STEAM_0:0:919226779> (took 24 seconds).
+[14:46:31] Client "Duck coffee" spawned in server <STEAM_0:1:784632795> (took 25 seconds).
+[14:46:32] Client "Nsei" spawned in server <STEAM_0:1:17104997> (took 26 seconds).
+[14:46:35] Client "MATHEUS" spawned in server <STEAM_0:0:630196448> (took 29 seconds).
+[14:46:55] Clã | BR | ALAKAZAN: cara é bom da 40 fps
+[14:47:18] Clã | BR | ALAKAZAN: o meu é um r 7
+[14:47:22] Clã | BR | ALAKAZAN: q
+[14:47:22] Clã | BR | ALAKAZAN: ?
+[14:47:24] Vikemper killed pizza using weapon_ttt_knife
+[14:47:28] Clã | BR | ALAKAZAN: aa sim
+[14:47:33] Clã | BR | ALAKAZAN: no futuro
+[14:47:35] Clã | BR | ALAKAZAN: mas não agora
+[14:47:44] Clã | BR | ALAKAZAN: cara ta indo
+[14:47:44] Mumuk1ll3r: Acabou o vc...
+[14:47:48] Vikemper killed JN using player
+[14:47:48] Mumuk1ll3r: KOS NESSE SAFADO
+[14:47:49] Clã | BR | ALAKAZAN: vai ter mais]
+[14:47:50] Mumuk1ll3r: KOS NESSE SAFADO
+[14:47:54] Clã | BR | ALAKAZAN: mas não por agora
+[14:47:59] Clã | BR | ALAKAZAN: ainda mais final de ano
+[14:48:22] JN: KOS! KOS! KOS!
+[14:48:37] Mumuk1ll3r killed Vikemper using player
+[14:48:48] pizza: é 4
+[14:48:51] Clã | BR | ALAKAZAN was killed by trigger_hurt
+[14:49:03] Clã | BR | ALAKAZAN: pq vou mamar agora
+[14:49:09] Clã | BR | ALAKAZAN: REMOVI O KOS!!!REMOVI O KOS!!!
+[14:49:24] Mumuk1ll3r: KOS NESSE SAFADO
+[14:51:07] Duck coffee killed Mumuk1ll3r using player
+[14:51:08] Mumuk1ll3r: KOS NESSE SAFADO
+[14:52:09] Nsei killed MATHEUS using player
+[14:52:24] (TEAM) MATHEUS: que isso
+[14:52:30] JN: KOS! KOS! KOS!
+[14:52:32] Mumuk1ll3r: KOS NESSE SAFADO
+[14:52:33] Mumuk1ll3r: KOS NESSE SAFADO
+[14:52:39] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[14:52:40] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[14:52:41] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[14:53:04] Nsei killed Duck coffee using player
+[14:53:12] JN: KOS! KOS! KOS!
+[14:53:18] Mumuk1ll3r: KOS NESSE SAFADO
+[14:53:20] Nsei suicided!
+[14:53:20] Mumuk1ll3r: KOS NESSE SAFADO
+[14:53:49] Clã | BR | ALAKAZAN killed Duck coffee using player
+[14:53:53] MATHEUS: to triste com voce nao sei 
+[14:53:53] Nsei killed Clã | BR | ALAKAZAN using player
+[14:53:59] MATHEUS: baka
+[14:54:07] (tsay from Clã | BR | ALAKAZAN) ele ta usando aqui
+[14:54:12] Clã | BR | ALAKAZAN to admins: asq
+[14:54:35] (tsay from Clã | BR | ALAKAZAN) meu aliado é o cara alio
+[14:54:37] (tsay from Clã | BR | ALAKAZAN) meu aliado é o cara alio
+[14:54:38] (tsay from Clã | BR | ALAKAZAN) meu aliado é o cara alio
+[14:54:38] (tsay from Clã | BR | ALAKAZAN) meu aliado é o cara alio
+[14:54:41] Vikemper killed JN using player
+[14:54:48] (tsay from Clã | BR | ALAKAZAN) o o cabala oo cabala
+[14:54:55] pizza: /boost
+[14:55:03] Vikemper killed Mumuk1ll3r using weapon_taser_derens
+[14:55:22] Vikemper killed MATHEUS using player
+[14:55:25] Nsei killed Vikemper using player
+[14:55:48] Clã | BR | ALAKAZAN added 1 autoslays to Vikemper (rdm em ino)
+[14:55:57] Vikemper suicided!
+[14:56:44] Duck coffee was killed by trigger_hurt
+[14:56:51] pizza killed JN using prop_physics
+[14:56:52] Clã | BR | ALAKAZAN gave Themself 300 rounds
+[14:56:52] Clã | BR | ALAKAZAN: !giveammo ^ 300
+[14:57:18] Nsei killed MATHEUS using player
+[14:57:19] Clã | BR | ALAKAZAN gave Themself 300 rounds
+[14:57:19] Clã | BR | ALAKAZAN: !giveammo ^ 300
+[14:57:27] Nsei killed pizza using player
+[14:57:38] MATHEUS: o nsei e apaixonado por mim
+[14:57:45] pizza: prop
+[14:57:53] Clã | BR | ALAKAZAN set the hp for Mumuk1ll3r to 100
+[14:57:53] Clã | BR | ALAKAZAN: !hp mum 100
+[14:58:01] Clã | BR | ALAKAZAN suicided!
+[14:58:08] Client "Tarney" spawned in server <STEAM_0:1:547388600> (took 722 seconds).
+[14:58:42] Mumuk1ll3r killed Nsei using player
+[14:59:46] Mumuk1ll3r killed Nsei using player
+[15:00:33] Client "Gatogames435" connected.
+[15:00:46] pizza: !mirea
+[15:00:46] Duck coffee killed Tarney using player
+[15:00:53] Vikemper killed Clã | BR | ALAKAZAN using player
+[15:01:07] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[15:01:22] (tsay from Clã | BR | ALAKAZAN) é os cabala que atirou em ti
+[15:01:30] (tsay from Clã | BR | ALAKAZAN) é os cabala que atirou em ti
+[15:01:31] (tsay from Clã | BR | ALAKAZAN) é os cabala que atirou em ti
+[15:01:31] (tsay from Clã | BR | ALAKAZAN) é os cabala que atirou em ti
+[15:01:32] (tsay from Clã | BR | ALAKAZAN) é os cabala que atirou em ti
+[15:01:32] (tsay from Clã | BR | ALAKAZAN) é os cabala que atirou em ti
+[15:01:33] (tsay from Clã | BR | ALAKAZAN) é os cabala que atirou em ti
+[15:01:33] (tsay from Clã | BR | ALAKAZAN) é os cabala que atirou em ti
+[15:01:33] (tsay from Clã | BR | ALAKAZAN) é os cabala que atirou em ti
+[15:01:38] Client "Gatogames435" spawned in server <STEAM_0:1:911684499> (took 65 seconds).
+[15:01:46] Tarney: falaro
+[15:03:33] Client "tutuzinhorod" connected.
+[15:04:06] JN killed Vikemper using prop_physics
+[15:04:15] Tarney: kkkkkkkkkk
+[15:04:39] JN killed pizza using player
+[15:04:47] Client "tutuzinhorod" spawned in server <STEAM_0:0:531673747> (took 74 seconds).
+[15:04:53] Mumuk1ll3r killed Nsei using player
+[15:04:57] (tsay from Clã | BR | ALAKAZAN) KOS GATO
+[15:05:00] Gatogames435: meu deus
+[15:05:12] pizza: é tudo uma grande obra de arte
+[15:05:15] Client "retrovisor" connected.
+[15:05:16] Gatogames435: Sim.
+[15:05:29] JN killed MATHEUS using player
+[15:05:32] Duck coffee killed JN using player
+[15:06:18] Vikemper: kos gato
+[15:06:21] JN: KOS! KOS! KOS!
+[15:06:22] Nsei: MATA ELE
+[15:06:23] Gatogames435: Nao.
+[15:06:27] Vikemper: kos gato
+[15:06:28] Client "retrovisor" spawned in server <STEAM_0:0:632640027> (took 73 seconds).
+[15:06:30] Vikemper: kos gato
+[15:06:31] Gatogames435: Nao.
+[15:06:32] JN: KOS! KOS! KOS!
+[15:06:33] Vikemper: kos gato
+[15:06:33] JN: KOS! KOS! KOS!
+[15:06:34] Gatogames435: Nao.
+[15:06:38] JN: Sim.
+[15:06:39] Mumuk1ll3r: KOS NESSE SAFADO
+[15:06:43] Gatogames435: Nao.
+[15:07:11] (tsay from Clã | BR | ALAKAZAN) ENTÃO N
+[15:07:16] (tsay from Clã | BR | ALAKAZAN) NÃO TEM HOMIM AQUI
+[15:07:29] Mumuk1ll3r killed Duck coffee using player
+[15:08:40] Mumuk1ll3r: KOS NESSE SAFADO
+[15:08:58] Mumuk1ll3r killed MATHEUS using player
+[15:09:01] JN: era o matheus, e o duck, o matheus reviveu dps q matei :(
+[15:09:58] Gatogames435: nao existe "rdm justo"
+[15:10:08] Gatogames435: rdm e rdm
+[15:10:37] MATHEUS was killed by trigger_hurt
+[15:10:39] Vikemper suicided!
+[15:10:47] Gatogames435: ESTOU PROVEN MATEI T OU TESTEI
+[15:10:47] Gatogames435: ESTOU PROVEN MATEI T OU TESTEI
+[15:10:48] Gatogames435: ESTOU PROVEN MATEI T OU TESTEI
+[15:10:49] Gatogames435: ESTOU PROVEN MATEI T OU TESTEI
+[15:10:50] Gatogames435: ESTOU PROVEN MATEI T OU TESTEI
+[15:11:09] Dropped "MATHEUS" from server<STEAM_0:0:630196448>
+[15:11:56] Tarney killed Nsei using weapon_zm_shotgun
+[15:12:07] Gatogames435: dna
+[15:12:15] Clã | BR | ALAKAZAN killed Tarney using player
+[15:12:40] Gatogames435: tem sim
+[15:12:43] pizza killed Clã | BR | ALAKAZAN using player
+[15:12:43] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[15:13:26] Gatogames435: e o duck
+[15:13:51] Gatogames435: supunhetas-mos que ele seja t....
+[15:13:52] Gatogames435: ESTOU PROVEN MATEI T OU TESTEI
+[15:13:52] Gatogames435: ESTOU PROVEN MATEI T OU TESTEI
+[15:13:53] Gatogames435: ESTOU PROVEN MATEI T OU TESTEI
+[15:14:13] pizza killed JN using player
+[15:14:36] retrovisor killed Gatogames435 using player
+[15:14:37] Mumuk1ll3r killed retrovisor using player
+[15:14:38] pizza killed Mumuk1ll3r using weapon_ttt_tmp
+[15:14:46] Gatogames435: tinha 3 t?
+[15:14:51] Gatogames435: uai
+[15:14:52] tutuzinhorod killed pizza using player
+[15:15:00] Gatogames435: fiz a conta errado
+[15:15:03] Duck coffee killed tutuzinhorod using player
+[15:15:05] pizza killed Duck coffee using weapon_ttt_tmp
+[15:15:09] Clã | BR | ALAKAZAN: !menu
+[15:15:18] pizza: ligma
+[15:15:19] Clã | BR | ALAKAZAN gave m9k_remington7615p to Themself
+[15:15:23] Clã | BR | ALAKAZAN: !menu
+[15:15:24] Clã | BR | ALAKAZAN gave m9k_remington7615p to Themself
+[15:15:24] Clã | BR | ALAKAZAN: !menu
+[15:15:41] Duck coffee killed pizza using weapon_ttt_knife
+[15:15:43] Vikemper killed Tarney using ttt_knife_proj
+[15:15:45] Nsei killed JN using ttt_knife_proj
+[15:15:46] Gatogames435 killed Nsei using weapon_ttt_knife
+[15:15:48] Gatogames435 killed Duck coffee using weapon_ttt_knife
+[15:15:58] Clã | BR | ALAKAZAN killed tutuzinhorod using weapon_ttt_knife
+[15:16:10] Gatogames435 killed retrovisor using weapon_ttt_knife
+[15:16:32] Dropped "retrovisor" from server<STEAM_0:0:632640027>
+[15:16:44] Clã | BR | ALAKAZAN killed Vikemper using ttt_knife_proj
+[15:16:59] Gatogames435 killed Clã | BR | ALAKAZAN using weapon_ttt_knife
+[15:17:10] Gatogames435 killed Mumuk1ll3r using weapon_ttt_galil
+[15:17:19] Gatogames435: br clue
+[15:17:23] Gatogames435: pouca gente
+[15:17:32] Server is shutting down/changing levels.
+
+
+
+[15:17:37] New map: ttt_lttp_kakariko_a5
+[15:17:51] Client "Gatogames435" spawned in server <STEAM_0:1:911684499> (took 17 seconds).
+[15:17:53] Client "Mumuk1ll3r" spawned in server <STEAM_0:0:537847536> (took 19 seconds).
+[15:17:56] Client "Vikemper" spawned in server <STEAM_0:0:919226779> (took 22 seconds).
+[15:17:57] Client "JN" spawned in server <STEAM_0:0:229920886> (took 23 seconds).
+[15:17:57] Client "Clã | BR | ALAKAZAN" spawned in server <STEAM_0:1:61770335> (took 23 seconds).
+[15:17:59] Client "Nsei" spawned in server <STEAM_0:1:17104997> (took 25 seconds).
+[15:18:03] Client "Duck coffee" spawned in server <STEAM_0:1:784632795> (took 29 seconds).
+[15:18:08] Client "PigBoyBR" connected.
+[15:18:12] Client "tutuzinhorod" spawned in server <STEAM_0:0:531673747> (took 38 seconds).
+[15:18:16] Client "pizza" spawned in server <STEAM_0:1:586090265> (took 42 seconds).
+[15:18:17] Gatogames435: e bug
+[15:18:19] pizza suicided!
+[15:18:19] Clã | BR | ALAKAZAN: REMOVI O KOS!!!REMOVI O KOS!!!
+[15:18:32] Client "PigBoyBR" spawned in server <STEAM_0:1:553416565> (took 24 seconds).
+[15:18:34] Client "Tarney" spawned in server <STEAM_0:1:547388600> (took 60 seconds).
+[15:19:16] Vikemper killed PigBoyBR using player
+[15:19:19] JN killed Vikemper using player
+[15:19:19] tutuzinhorod killed JN using player
+[15:19:23] Mumuk1ll3r: KOS NESSE SAFADO
+[15:19:24] Tarney killed Mumuk1ll3r using player
+[15:19:49] Mumuk1ll3r: KOS NESSE SAFADO
+[15:19:54] Tarney killed Nsei using player
+[15:20:03] Gatogames435 killed Clã | BR | ALAKAZAN using player
+[15:20:09] Gatogames435: ixi
+[15:20:10] (tsay from Clã | BR | ALAKAZAN) parabéns gato
+[15:20:11] Gatogames435: fiz merda
+[15:20:15] Gatogames435: kkkkkkkkkkk
+[15:20:27] Gatogames435 killed Tarney using player
+[15:20:30] Duck coffee killed tutuzinhorod using weapon_ttt_revolver
+[15:21:04] Clã | BR | ALAKAZAN: !kk
+[15:21:07] Client "*_Martinelli_*" connected.
+[15:22:26] Clã | BR | ALAKAZAN: !giveaamo 300
+[15:22:37] Clã | BR | ALAKAZAN gave Themself 300 rounds
+[15:22:37] Clã | BR | ALAKAZAN: !giveammo  ^ 300
+[15:22:44] Vikemper killed JN using weapon_zm_improvised
+[15:22:50] Duck coffee killed Vikemper using weapon_ttt_m3
+[15:22:52] Gatogames435 killed Duck coffee using player
+[15:23:16] tutuzinhorod killed Mumuk1ll3r using weapon_ttt_ak47
+[15:23:16] Mumuk1ll3r: KOS NESSE SAFADO
+[15:23:17] Gatogames435: ele falou no mic
+[15:23:36] Dropped "Mumuk1ll3r" from server<STEAM_0:0:537847536>
+[15:23:48] tutuzinhorod killed Tarney using weapon_ttt_ak47
+[15:23:56] Client "*_Martinelli_*" spawned in server <STEAM_0:1:517497920> (took 169 seconds).
+[15:24:04] Gatogames435 killed PigBoyBR using player
+[15:24:15] Nsei killed tutuzinhorod using player
+[15:24:20] Clã | BR | ALAKAZAN killed Nsei using weapon_ttt_famas
+[15:24:25] Gatogames435 killed Clã | BR | ALAKAZAN using player
+[15:24:44] Clã | BR | ALAKAZAN: !menu
+[15:24:45] *_Martinelli_*: como fala no micro 
+[15:24:49] Clã | BR | ALAKAZAN set bhop mode for Themself to 1
+[15:24:49] Clã | BR | ALAKAZAN: !menu
+[15:24:51] Clã | BR | ALAKAZAN: !menu
+[15:25:02] Gatogames435: ativa pra mim ai o bhop
+[15:25:19] Clã | BR | ALAKAZAN set the walk speed for Themself to 300
+[15:25:20] Clã | BR | ALAKAZAN set the walk speed for Themself to 300
+[15:25:20] Clã | BR | ALAKAZAN: !menu
+[15:25:21] Clã | BR | ALAKAZAN: !menu
+[15:25:24] Clã | BR | ALAKAZAN set the walk speed for Themself to 1000
+[15:26:20] Vikemper killed JN using weapon_ttt_knife
+[15:26:32] JN: !RTV
+[15:26:46] Nsei killed Gatogames435 using weapon_ttt_silencedscout_revised
+[15:26:47] Vikemper killed *_Martinelli_* using player
+[15:27:38] Vikemper killed Duck coffee using player
+[15:27:44] tutuzinhorod killed PigBoyBR using weapon_ttt_aug
+[15:27:54] Vikemper killed tutuzinhorod using player
+[15:27:56] Clã | BR | ALAKAZAN suicided!
+[15:27:57] Clã | BR | ALAKAZAN: !menu
+[15:28:00] Clã | BR | ALAKAZAN reset the walk and run speed for Themself
+[15:28:02] Nsei killed Tarney using player
+[15:28:06] Clã | BR | ALAKAZAN reset the walk and run speed for Everyone
+[15:28:06] Clã | BR | ALAKAZAN reset the walk and run speed for Everyone
+[15:28:06] Clã | BR | ALAKAZAN reset the walk and run speed for Everyone
+[15:28:06] Clã | BR | ALAKAZAN reset the walk and run speed for Everyone
+[15:28:06] Clã | BR | ALAKAZAN reset the walk and run speed for Everyone
+[15:28:06] Clã | BR | ALAKAZAN reset the walk and run speed for Everyone
+[15:28:06] Clã | BR | ALAKAZAN reset the walk and run speed for Everyone
+[15:28:06] Clã | BR | ALAKAZAN reset the walk and run speed for Everyone
+[15:28:06] Clã | BR | ALAKAZAN reset the walk and run speed for Everyone
+[15:28:06] Clã | BR | ALAKAZAN reset the walk and run speed for Everyone
+[15:28:06] Clã | BR | ALAKAZAN reset the walk and run speed for Everyone
+[15:28:14] Nsei killed Vikemper using weapon_ttt_silencedscout_revised
+[15:28:15] Clã | BR | ALAKAZAN set bhop mode for Everyone to 0
+[15:28:25] Clã | BR | ALAKAZAN has forced Themself to spectate.
+[15:28:25] Clã | BR | ALAKAZAN: !fspec ^
+[15:28:25] Clã | BR | ALAKAZAN suicided!
+[15:28:34] pizza: ativa bhop
+[15:29:08] pizza killed *_Martinelli_* using player
+[15:29:14] Dropped "*_Martinelli_*" from server<STEAM_0:1:517497920>
+[15:29:16] pizza: bro começo a me atira do nada
+[15:29:35] pizza: porque matei um T seu idiota
+[15:29:43] Gatogames435 killed pizza using player
+[15:29:57] Client "João" connected.
+[15:30:04] Clã | BR | ALAKAZAN set the scale for Everyone to 2
+[15:30:04] Clã | BR | ALAKAZAN: !SCALE * 2
+[15:30:09] Gatogames435 killed JN using player
+[15:30:37] Clã | BR | ALAKAZAN: !menu
+[15:30:42] Gatogames435 killed PigBoyBR using player
+[15:30:44] Clã | BR | ALAKAZAN: !menu
+[15:30:59] (tsay from Clã | BR | ALAKAZAN) BUGOU A TRAP N DA
+[15:31:05] Gatogames435 killed Duck coffee using weapon_ttt_famas
+[15:31:12] Clã | BR | ALAKAZAN: !menu
+[15:31:51] Client "João" spawned in server <STEAM_0:0:418542054> (took 114 seconds).
+[15:32:19] tutuzinhorod killed Nsei using player
+[15:32:49] Gatogames435 killed Vikemper using weapon_ttt_famas
+[15:33:39] Clã | BR | ALAKAZAN: !menu
+[15:34:09] Gatogames435 killed Tarney using weapon_ttt_famas
+[15:34:29] Client "Neurozze" connected.
+[15:34:32] Client "CR4" connected.
+[15:34:48] Gatogames435 killed tutuzinhorod using weapon_ttt_famas
+[15:34:49] Clã | BR | ALAKAZAN set the scale for Everyone to 1
+[15:34:49] Clã | BR | ALAKAZAN: !SCALE * 1
+[15:35:13] Clã | BR | ALAKAZAN added 1 autoslays to tutuzinhorod (RDM EM INO)
+[15:35:16] Gatogames435: !rtv
+[15:35:20] Duck coffee: !rtm
+[15:35:20] Nsei: !rtv
+[15:35:23] tutuzinhorod suicided!
+[15:35:24] tutuzinhorod: !rtv
+[15:35:25] Vikemper: !rtv
+[15:35:27] pizza: !rtv
+[15:35:27] João: !rtv
+[15:35:28] Duck coffee: !rtv
+[15:35:28] PigBoyBR: !rtv
+[15:35:35] Tarney killed Vikemper using player
+[15:35:38] Nsei: !rtv
+[15:35:40] pizza: !rtv
+[15:35:41] PigBoyBR: /kill
+[15:35:45] Gatogames435: !rtv
+[15:36:00] Tarney killed PigBoyBR using player
+[15:36:01] Nsei killed Tarney using player
+[15:36:01] Gatogames435: so ativa a ocarina
+[15:36:06] Gatogames435: ativa a trap de t
+[15:36:27] João killed Duck coffee using player
+[15:36:41] Gatogames435: kos joao
+[15:36:42] Gatogames435: retiro kos dele
+[15:36:43] Gatogames435: retiro kos dele
+[15:36:44] Gatogames435: retiro kos dele
+[15:36:45] Gatogames435: retiro kos dele
+[15:36:47] JN: KOS! KOS! KOS!
+[15:36:48] JN: KOS! KOS! KOS!
+[15:37:02] Client "Neurozze" spawned in server <STEAM_0:1:788007742> (took 153 seconds).
+[15:37:05] João killed JN using player
+[15:37:12] João killed Nsei using player
+[15:37:16] Gatogames435: da pra ver nada
+[15:37:18] Clã | BR | ALAKAZAN: !menu
+[15:37:22] Dropped "tutuzinhorod" from server<STEAM_0:0:531673747>
+[15:37:39] Gatogames435 killed pizza using player
+[15:38:04] pizza: tem que reporta o gato
+[15:38:08] pizza: safado
+[15:38:19] Gatogames435 killed João using player
+[15:38:22] Clã | BR | ALAKAZAN: !menu
+[15:38:26] Clã | BR | ALAKAZAN has forced Themself to join the world of the living.
+[15:38:26] Clã | BR | ALAKAZAN: !UNSPEC ^
+[15:38:35] Clã | BR | ALAKAZAN set jump power for Themself to 2
+[15:38:39] Clã | BR | ALAKAZAN: !menu
+[15:38:41] Clã | BR | ALAKAZAN set jump power for Themself to 1
+[15:38:46] Clã | BR | ALAKAZAN: !menu
+[15:38:54] Clã | BR | ALAKAZAN: !menu
+[15:38:54] pizza: nunca se perdoa o gato
+[15:38:56] Clã | BR | ALAKAZAN set jump power for Themself to 100
+[15:39:05] Gatogames435 killed João using weapon_zm_revolver_murder
+[15:39:05] Gatogames435 suicided!
+[15:39:05] (Console) slayed Gatogames435
+[15:39:09] Clã | BR | ALAKAZAN: !menu
+[15:39:09] Server is shutting down/changing levels.
+
+
+
+[15:39:15] New map: ttt_clue_se
+[15:39:25] Client "Bocon Slayer" connected.
+[15:39:31] Client "Clã | BR | ALAKAZAN" spawned in server <STEAM_0:1:61770335> (took 19 seconds).
+[15:39:32] Client "Gatogames435" spawned in server <STEAM_0:1:911684499> (took 20 seconds).
+[15:39:35] Client "JN" spawned in server <STEAM_0:0:229920886> (took 23 seconds).
+[15:39:36] Clã | BR | ALAKAZAN: !menu
+[15:39:37] Client "PigBoyBR" spawned in server <STEAM_0:1:553416565> (took 25 seconds).
+[15:39:38] Client "pizza" spawned in server <STEAM_0:1:586090265> (took 26 seconds).
+[15:39:38] Client "Duck coffee" spawned in server <STEAM_0:1:784632795> (took 26 seconds).
+[15:39:42] Client "João" spawned in server <STEAM_0:0:418542054> (took 30 seconds).
+[15:39:45] Client "Vikemper" spawned in server <STEAM_0:0:919226779> (took 33 seconds).
+[15:39:52] Clã | BR | ALAKAZAN set jump power for Themself to 1
+[15:39:52] Client "Nsei" spawned in server <STEAM_0:1:17104997> (took 40 seconds).
+[15:39:57] João: /boost
+[15:39:59] Clã | BR | ALAKAZAN set jump power for Themself to 300
+[15:40:06] Client "Bocon Slayer" spawned in server <STEAM_0:1:560694712> (took 41 seconds).
+[15:40:19] Bocon Slayer suicided!
+[15:40:21] Clã | BR | ALAKAZAN: !menu
+[15:40:25] Clã | BR | ALAKAZAN: !menu
+[15:40:26] Clã | BR | ALAKAZAN set jump power for Themself to 100
+[15:40:27] Clã | BR | ALAKAZAN: !menu
+[15:40:28] Dropped "Bocon Slayer" from server<STEAM_0:1:560694712>
+[15:40:29] Client "Tarney" spawned in server <STEAM_0:1:547388600> (took 77 seconds).
+[15:40:35] Clã | BR | ALAKAZAN: !menu
+[15:40:38] Clã | BR | ALAKAZAN set jump power for Themself to 200
+[15:40:50] Clã | BR | ALAKAZAN: !menu
+[15:40:56] Clã | BR | ALAKAZAN disabled player collision
+[15:40:57] Clã | BR | ALAKAZAN: !menu
+[15:41:19] Gatogames435 killed Nsei using player
+[15:41:19] Clã | BR | ALAKAZAN: !menu
+[15:41:22] Clã | BR | ALAKAZAN: !menu
+[15:41:24] Clã | BR | ALAKAZAN: !menu
+[15:41:25] Clã | BR | ALAKAZAN: !menu
+[15:41:30] Clã | BR | ALAKAZAN: !menu
+[15:41:31] Clã | BR | ALAKAZAN: !menu
+[15:41:34] Clã | BR | ALAKAZAN: !menu
+[15:41:35] Clã | BR | ALAKAZAN Enabled player collision
+[15:41:35] Clã | BR | ALAKAZAN: !menu
+[15:41:38] Gatogames435 killed pizza using player
+[15:41:42] Clã | BR | ALAKAZAN: !menu
+[15:41:45] Gatogames435 killed Vikemper using player
+[15:42:05] PigBoyBR killed Duck coffee using player
+[15:42:19] Clã | BR | ALAKAZAN: !menu
+[15:42:22] Clã | BR | ALAKAZAN: !menu
+[15:42:25] PigBoyBR killed Clã | BR | ALAKAZAN using weapon_ttt_galil
+[15:42:32] Clã | BR | ALAKAZAN: !menu
+[15:42:41] Clã | BR | ALAKAZAN: !menu
+[15:43:00] Clã | BR | ALAKAZAN: PIZZA
+[15:43:05] Gatogames435 killed João using player
+[15:43:05] Clã | BR | ALAKAZAN: PERDOOU O GATO ?
+[15:43:12] JN killed Gatogames435 using player
+[15:43:13] pizza: não
+[15:43:14] pizza: eu acho
+[15:43:18] JN killed PigBoyBR using player
+[15:43:26] JN killed PigBoyBR using player
+[15:43:27] Clã | BR | ALAKAZAN added 1 autoslays to Gatogames435 (RDM EM INO)
+[15:43:30] pizza: se ta escrito que ta perdoado é missclick
+[15:43:42] Clã | BR | ALAKAZAN: !menu
+[15:43:44] Clã | BR | ALAKAZAN froze all props
+[15:43:44] Clã | BR | ALAKAZAN: !menu
+[15:43:54] Clã | BR | ALAKAZAN: OLHA Q TOP
+[15:43:54] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[15:43:59] Clã | BR | ALAKAZAN: OS PROP NÃO PDOE SER PEGO MAIS
+[15:44:00] Gatogames435: da para bate uma
+[15:44:01] Gatogames435 suicided!
+[15:44:02] Client "pablo baiano" connected.
+[15:44:11] Vikemper killed Tarney using player
+[15:44:23] Clã | BR | ALAKAZAN: !menu
+[15:44:23] Clã | BR | ALAKAZAN froze all props
+[15:44:24] Clã | BR | ALAKAZAN: !menu
+[15:44:30] pizza killed Duck coffee using player
+[15:44:37] Clã | BR | ALAKAZAN: UE NÃO SÃO TODOS
+[15:44:48] pizza killed PigBoyBR using player
+[15:45:02] Clã | BR | ALAKAZAN: !menu
+[15:45:05] Client "pablo baiano" spawned in server <STEAM_0:1:454925322> (took 63 seconds).
+[15:45:05] Tarney: vike
+[15:45:23] Clã | BR | ALAKAZAN set the color for Themself to black
+[15:45:27] pizza killed Nsei using player
+[15:45:37] Vikemper killed JN using player
+[15:45:43] João killed pizza using player
+[15:45:49] João killed pizza using player
+[15:45:53] Client "Replaye" connected.
+[15:45:55] pizza: arte
+[15:46:10] pizza: deveria voltar as arma depois de spawnar no mesmo local de morte
+[15:46:46] Vikemper killed Clã | BR | ALAKAZAN using player
+[15:47:05] Clã | BR | ALAKAZAN: !menu
+[15:47:17] Clã | BR | ALAKAZAN set the color for João to blue
+[15:47:36] pizza: eu confio]
+[15:47:44] João killed Vikemper using player
+[15:47:46] Clã | BR | ALAKAZAN: !menu
+[15:47:48] pizza: fdep
+[15:47:52] João killed Vikemper using player
+[15:47:55] Clã | BR | ALAKAZAN: !menu
+[15:47:56] Clã | BR | ALAKAZAN reset the color for João
+[15:47:56] pizza: injustiça
+[15:47:56] Clã | BR | ALAKAZAN: !menu
+[15:47:58] Gatogames435: KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
+[15:47:59] Clã | BR | ALAKAZAN: !menu
+[15:48:03] pizza: arte
+[15:48:04] pizza: arte
+[15:48:05] pizza: arte
+[15:48:09] Clã | BR | ALAKAZAN set the color for Themself to black
+[15:48:10] Clã | BR | ALAKAZAN: .!Force T alakazan
+[15:48:17] Gatogames435: nunca tomou freeze?
+[15:48:29] Clã | BR | ALAKAZAN: !menu
+[15:48:31] Clã | BR | ALAKAZAN: !menu
+[15:48:32] Gatogames435: era freeze sim
+[15:48:34] Clã | BR | ALAKAZAN: !menu
+[15:48:38] Clã | BR | ALAKAZAN set the color for JN to blue
+[15:48:38] Clã | BR | ALAKAZAN: !menu
+[15:48:42] Client "Bocon Slayer" connected.
+[15:48:45] Gatogames435: endoido
+[15:48:47] pablo baiano killed JN using weapon_ttt_knife
+[15:49:04] Tarney killed Nsei using weapon_ttt_mp5
+[15:49:05] Clã | BR | ALAKAZAN: !menu
+[15:49:11] Client "Bocon Slayer" spawned in server <STEAM_0:1:560694712> (took 29 seconds).
+[15:49:15] Clã | BR | ALAKAZAN: !menu
+[15:49:18] PigBoyBR was killed by prop_physics
+[15:49:21] pizza killed Clã | BR | ALAKAZAN using prop_physics
+[15:49:24] (TEAM) Bocon Slayer: guys 
+[15:49:31] (TEAM) JN: oi
+[15:49:39] Clã | BR | ALAKAZAN: !menu
+[15:49:41] Bocon Slayer: i cant play, its a bug or a ban?
+[15:49:42] pablo baiano killed Gatogames435 using player
+[15:49:50] Vikemper killed pizza using weapon_ttt_ak47
+[15:49:55] Clã | BR | ALAKAZAN: !menu
+[15:49:56] JN: idk
+[15:49:57] Gatogames435: jogo maravilhoso
+[15:50:01] pizza: bloquea tiro com prop é muito bom
+[15:50:04] Gatogames435: laga no meio do meu tiro
+[15:50:09] João killed Vikemper using weapon_ttt_ak47
+[15:50:16] Tarney killed Duck coffee using weapon_ttt_mp5
+[15:50:18] João killed pablo baiano using weapon_ttt_ak47
+[15:50:19] João killed Tarney using weapon_ttt_ak47
+[15:50:24] JN: press f3, and see if you are with perm spec active
+[15:50:26] João killed pablo baiano using weapon_ttt_ak47
+[15:51:01] Bocon Slayer suicided!
+[15:51:16] Client "Replaye" spawned in server <STEAM_0:1:464058629> (took 323 seconds).
+[15:51:17] Dropped "Bocon Slayer" from server<STEAM_0:1:560694712>
+[15:51:28] PigBoyBR killed pizza using player
+[15:51:58] Clã | BR | ALAKAZAN froze all props
+[15:51:58] Clã | BR | ALAKAZAN: !menu
+[15:52:26] Clã | BR | ALAKAZAN: !menu
+[15:52:50] Clã | BR | ALAKAZAN set the color for Themself to black
+[15:53:28] Gatogames435: slam aqui
+[15:54:59] Client "Rush_" connected.
+[15:55:18] Tarney: n sei oq e isso
+[15:55:29] Client "Rush_" spawned in server <STEAM_0:1:616185689> (took 30 seconds).
+[15:56:10] Vikemper suicided!
+[15:56:19] Clã | BR | ALAKAZAN suicided!
+[15:56:23] Gatogames435: golden
+[15:57:14] PigBoyBR killed Tarney using weapon_ttt_knife
+[15:58:18] PigBoyBR killed Nsei using weapon_ttt_ak47
+[15:58:30] Gatogames435 killed PigBoyBR using player
+[15:58:43] Gatogames435 killed Duck coffee using weapon_ttt_p228
+[15:58:46] JN killed Gatogames435 using player
+[15:58:48] JN killed João using player
+[15:58:51] pablo baiano killed JN using player
+[15:58:52] Gatogames435: enrolaçao
+[15:58:53] Dropped "Rush_" from server<STEAM_0:1:616185689>
+[15:58:55] Gatogames435: porra
+[15:59:39] PigBoyBR killed pablo baiano using player
+[15:59:41] Vikemper suicided!
+[15:59:51] João killed Gatogames435 using player
+[15:59:59] Clã | BR | ALAKAZAN: !menu
+[16:00:01] Clã | BR | ALAKAZAN set the color for Themself to black
+[16:00:11] Clã | BR | ALAKAZAN: !menu
+[16:00:20] João killed Nsei using player
+[16:00:22] JN killed João using player
+[16:00:27] Clã | BR | ALAKAZAN froze all props
+[16:00:32] PigBoyBR killed JN using player
+[16:00:32] Clã | BR | ALAKAZAN: !menu
+[16:00:33] Clã | BR | ALAKAZAN unfroze all props
+[16:00:34] Clã | BR | ALAKAZAN froze all props
+[16:00:34] Clã | BR | ALAKAZAN: !menu
+[16:00:40] Clã | BR | ALAKAZAN: !menu
+[16:00:41] Clã | BR | ALAKAZAN froze all props
+[16:00:44] Clã | BR | ALAKAZAN was killed by prop_physics
+[16:00:47] João: .!fspec seu nick
+[16:00:53] João killed Tarney using ttt_c4
+[16:00:53] João killed Replaye using ttt_c4
+[16:01:05] Vikemper has forced Themself to spectate.
+[16:01:05] Vikemper: !fspec vik
+[16:01:05] Nsei has forced Themself to spectate.
+[16:01:05] Nsei: !fspec Nsei
+[16:01:12] pizza killed João using ttt_slam_satchel
+[16:01:16] Duck coffee killed pizza using player
+[16:01:26] pizza: tudo é uma obra de arte
+[16:02:08] PigBoyBR killed Duck coffee using player
+[16:02:08] Duck coffee killed PigBoyBR using ttt_slam_satchel
+[16:02:16] Dropped "Tarney" from server<STEAM_0:1:547388600>
+[16:02:46] PigBoyBR killed Duck coffee using weapon_ttt_awp
+[16:02:46] Clã | BR | ALAKAZAN killed JN using weapon_ttt_awp
+[16:02:48] Clã | BR | ALAKAZAN killed Gatogames435 using weapon_ttt_awp
+[16:02:51] PigBoyBR killed João using weapon_ttt_awp
+[16:02:53] pizza killed Replaye using weapon_ttt_awp
+[16:03:02] pizza killed Clã | BR | ALAKAZAN using weapon_ttt_awp
+[16:03:08] João: toda vez q atiro minha tela fica embaçando
+[16:03:10] João: da pra ver nd
+[16:03:21] (tsay from Clã | BR | ALAKAZAN) SEM CAMPERAR
+[16:03:21] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[16:03:22] (tsay from Clã | BR | ALAKAZAN) SEM CAMPERAR
+[16:03:22] (tsay from Clã | BR | ALAKAZAN) SEM CAMPERAR
+[16:03:23] (tsay from Clã | BR | ALAKAZAN) SEM CAMPERAR
+[16:03:23] (tsay from Clã | BR | ALAKAZAN) SEM CAMPERAR
+[16:03:23] (tsay from Clã | BR | ALAKAZAN) SEM CAMPERAR
+[16:03:24] (tsay from Clã | BR | ALAKAZAN) SEM CAMPERAR
+[16:03:24] (tsay from Clã | BR | ALAKAZAN) SEM CAMPERAR
+[16:03:33] João: da tp todo mundo no meio
+[16:03:39] Client "jumper" connected.
+[16:03:41] pizza: bruh
+[16:03:44] Dropped "João" from server<STEAM_0:0:418542054>
+[16:03:51] PigBoyBR killed pablo baiano using weapon_zm_improvised
+[16:04:24] Server is shutting down/changing levels.
+
+
+
+[16:04:30] New map: ttt_skyscraper_2015_v1p_f4
+[16:04:45] Client "Clã | BR | ALAKAZAN" spawned in server <STEAM_0:1:61770335> (took 19 seconds).
+[16:04:49] Client "Gatogames435" spawned in server <STEAM_0:1:911684499> (took 23 seconds).
+[16:04:50] Client "pizza" spawned in server <STEAM_0:1:586090265> (took 24 seconds).
+[16:04:50] Client "JN" spawned in server <STEAM_0:0:229920886> (took 24 seconds).
+[16:04:51] Client "Replaye" spawned in server <STEAM_0:1:464058629> (took 25 seconds).
+[16:04:54] Client "PigBoyBR" spawned in server <STEAM_0:1:553416565> (took 28 seconds).
+[16:04:55] Client "Duck coffee" spawned in server <STEAM_0:1:784632795> (took 29 seconds).
+[16:05:08] Client "Nsei" spawned in server <STEAM_0:1:17104997> (took 42 seconds).
+[16:05:10] Nsei suicided!
+[16:05:12] Client "pablo baiano" spawned in server <STEAM_0:1:454925322> (took 46 seconds).
+[16:05:43] Client "Vikemper" spawned in server <STEAM_0:0:919226779> (took 77 seconds).
+[16:05:53] JN killed Replaye using player
+[16:05:56] Gatogames435: uai
+[16:05:59] JN killed Gatogames435 using player
+[16:06:10] JN killed Clã | BR | ALAKAZAN using player
+[16:06:31] Dropped "Gatogames435" from server<STEAM_0:1:911684499>
+[16:06:46] pizza killed JN using weapon_ttt_ak47
+[16:06:47] Client "jumper" spawned in server <STEAM_0:0:84372730> (took 141 seconds).
+[16:06:59] PigBoyBR killed Duck coffee using weapon_ttt_tmp
+[16:08:07] pablo baiano killed PigBoyBR using player
+[16:08:12] Client "paçoquita" connected.
+[16:08:13] PigBoyBR: Retiro KOS
+[16:08:16] JN: KOS! KOS! KOS!
+[16:08:23] pizza killed pablo baiano using weapon_ttt_ak47
+[16:08:46] Client "Tomy18xx" connected.
+[16:09:08] Clã | BR | ALAKAZAN: !FREEZEPROP
+[16:09:09] Clã | BR | ALAKAZAN: !menu
+[16:09:14] JN killed jumper using prop_physics
+[16:09:18] JN killed Duck coffee using player
+[16:09:20] JN killed PigBoyBR using player
+[16:09:21] JN killed Clã | BR | ALAKAZAN using player
+[16:09:29] Client "paçoquita" spawned in server <STEAM_0:0:133719220> (took 77 seconds).
+[16:09:30] Clã | BR | ALAKAZAN: ]
+[16:10:01] pizza killed Replaye using weapon_ttt_tmp
+[16:10:07] Client "Gatogames435" connected.
+[16:10:08] pizza killed pablo baiano using weapon_ttt_tmp
+[16:10:12] JN killed pizza using player
+[16:10:20] Clã | BR | ALAKAZAN: !menu
+[16:10:25] Clã | BR | ALAKAZAN froze all props
+[16:10:25] Clã | BR | ALAKAZAN: !menu
+[16:10:27] paçoquita: !vip
+[16:10:47] pablo baiano killed JN using player
+[16:10:57] PigBoyBR: Retiro KOS
+[16:11:03] Client "Matheuson12" connected.
+[16:11:05] Dropped "Duck coffee" from server<STEAM_0:1:784632795>
+[16:11:07] Client "Matheuson12" connected.
+[16:11:10] PigBoyBR killed paçoquita using player
+[16:11:13] Client "Gatogames435" spawned in server <STEAM_0:1:911684499> (took 66 seconds).
+[16:11:19] jumper killed pablo baiano using player
+[16:11:22] PigBoyBR killed jumper using player
+[16:11:41] Client "Tomy18xx" spawned in server <STEAM_0:1:713431071> (took 175 seconds).
+[16:12:11] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[16:12:12] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[16:12:14] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[16:12:15] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[16:12:16] Clã | BR | ALAKAZAN killed PigBoyBR using player
+[16:12:16] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[16:12:24] pizza killed Clã | BR | ALAKAZAN using weapon_ttt_tmp
+[16:12:48] Nsei: !uspec Nsei
+[16:12:52] Nsei: !uspec
+[16:12:56] Dropped "Tomy18xx" from server<STEAM_0:1:713431071>
+[16:13:12] Clã | BR | ALAKAZAN: !menu
+[16:13:12] Client "Kaiser Pedro" connected.
+[16:13:23] Clã | BR | ALAKAZAN forced Gatogames435 to become the role of a traitor.
+[16:13:23] Clã | BR | ALAKAZAN: !menu
+[16:13:46] JN suicided!
+[16:13:48] Gatogames435 killed paçoquita using player
+[16:13:53] PigBoyBR was killed by env_explosion
+[16:13:54] Clã | BR | ALAKAZAN killed jumper using player
+[16:13:56] Clã | BR | ALAKAZAN killed Replaye using player
+[16:14:14] Gatogames435 killed pizza using player
+[16:14:15] Clã | BR | ALAKAZAN killed pablo baiano using player
+[16:14:21] Gatogames435 killed Clã | BR | ALAKAZAN using player
+[16:14:34] pizza: tem que executar esse gatogames
+[16:14:39] Client "Pan Con nutella" connected.
+[16:14:39] Client "Matheuson12" spawned in server <STEAM_0:1:796902429> (took 212 seconds).
+[16:14:43] Clã | BR | ALAKAZAN: !menu
+[16:14:50] Clã | BR | ALAKAZAN froze all props
+[16:14:50] Clã | BR | ALAKAZAN: !FREEZEPROPs
+[16:14:51] Clã | BR | ALAKAZAN: !menu
+[16:15:11] Nsei has forced Themself to join the world of the living.
+[16:15:22] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[16:15:23] pablo baiano killed Clã | BR | ALAKAZAN using weapon_ttt_tmp
+[16:16:02] pablo baiano killed Replaye using weapon_ttt_tmp
+[16:16:21] Client "Kaiser Pedro" spawned in server <STEAM_0:0:504393355> (took 189 seconds).
+[16:16:28] pizza was killed by trigger_hurt
+[16:16:36] Kaiser Pedro: finalmente um servidor brasileiro
+[16:16:56] paçoquita killed pablo baiano using player
+[16:17:11] Gatogames435 killed Matheuson12 using trigger_hurt
+[16:17:14] jumper killed paçoquita using player
+[16:17:14] Gatogames435 killed jumper using player
+[16:17:15] JN killed Gatogames435 using player
+[16:17:15] Kaiser Pedro: pergunta como que liga o chat de voz?
+[16:17:17] PigBoyBR killed JN using weapon_ttt_tmp
+[16:17:21] JN: X
+[16:17:29] JN: segura x ppra falar
+[16:17:52] Replaye was killed by env_explosion
+[16:17:55] jumper killed PigBoyBR using player
+[16:18:02] jumper killed Matheuson12 using player
+[16:18:40] jumper killed paçoquita using env_explosion
+[16:18:40] jumper killed Gatogames435 using env_explosion
+[16:19:01] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[16:19:02] Clã | BR | ALAKAZAN killed jumper using player
+[16:22:47] pizza killed Nsei using weapon_ttt_tmp
+[16:22:53] JN killed pizza using player
+[16:22:54] Kaiser Pedro killed JN using player
+[16:23:01] pizza: cara
+[16:23:06] pizza: que merda esse tempo lento
+[16:23:09] Gatogames435: !menu
+[16:23:19] Dropped "JN" from server<STEAM_0:0:229920886>
+[16:23:27] pizza: a nao cara
+[16:23:27] (csay from Gatogames435) vontade de da ghosting so para acabar mais rapido
+[16:23:37] Clã | BR | ALAKAZAN killed Kaiser Pedro using player
+[16:23:43] pablo baiano killed Clã | BR | ALAKAZAN using player
+[16:24:10] Server is shutting down/changing levels.
+
+
+
+[16:24:17] New map: ttt_grovestreet_los
+[16:24:30] Client "armednoob_" connected.
+[16:24:35] Client "Clã | BR | ALAKAZAN" spawned in server <STEAM_0:1:61770335> (took 22 seconds).
+[16:24:35] Client "PigBoyBR" spawned in server <STEAM_0:1:553416565> (took 22 seconds).
+[16:24:38] Client "Gatogames435" spawned in server <STEAM_0:1:911684499> (took 25 seconds).
+[16:24:45] Client "pablo baiano" spawned in server <STEAM_0:1:454925322> (took 32 seconds).
+[16:24:45] Client "jumper" spawned in server <STEAM_0:0:84372730> (took 32 seconds).
+[16:24:45] Client "Vikemper" spawned in server <STEAM_0:0:919226779> (took 32 seconds).
+[16:24:47] Client "pizza" spawned in server <STEAM_0:1:586090265> (took 34 seconds).
+[16:24:47] Clã | BR | ALAKAZAN has forced Themself to spectate.
+[16:24:47] Clã | BR | ALAKAZAN: !fspec ^
+[16:24:47] Clã | BR | ALAKAZAN suicided!
+[16:24:49] Vikemper suicided!
+[16:24:51] Client "Matheuson12" spawned in server <STEAM_0:1:796902429> (took 38 seconds).
+[16:24:53] Client "Nsei" spawned in server <STEAM_0:1:17104997> (took 40 seconds).
+[16:24:55] Client "paçoquita" spawned in server <STEAM_0:0:133719220> (took 42 seconds).
+[16:25:06] Client "Replaye" spawned in server <STEAM_0:1:464058629> (took 53 seconds).
+[16:25:08] Client "Kaiser Pedro" spawned in server <STEAM_0:0:504393355> (took 55 seconds).
+[16:26:04] pizza killed jumper using prop_physics
+[16:26:11] PigBoyBR killed Replaye using player
+[16:26:15] Nsei killed pizza using player
+[16:26:17] Nsei killed Kaiser Pedro using player
+[16:26:17] PigBoyBR killed Matheuson12 using player
+[16:26:19] pablo baiano killed paçoquita using player
+[16:26:22] pablo baiano killed Nsei using player
+[16:26:54] Kaiser Pedro killed Matheuson12 using weapon_ttt_tmp
+[16:26:55] Kaiser Pedro killed jumper using weapon_ttt_tmp
+[16:27:58] pablo baiano killed Kaiser Pedro using player
+[16:27:59] Gatogames435 killed pablo baiano using player
+[16:28:18] Gatogames435 killed Replaye using player
+[16:28:55] Gatogames435 killed PigBoyBR using player
+[16:29:11] Client "TheHunterAkuma" connected.
+[16:29:15] Gatogames435 killed Nsei using player
+[16:29:45] Client "BolivianoJamλica" connected.
+[16:29:56] Gatogames435 killed pizza using player
+[16:30:10] paçoquita killed Gatogames435 using player
+[16:30:34] pablo baiano: RETIRO
+[16:30:37] PigBoyBR: Retiro KOS
+[16:30:39] pablo baiano: RETIRO
+[16:30:40] pablo baiano: RETIRO
+[16:31:38] Client "emanuelmeme" connected.
+[16:31:50] jumper: <avatar>: <lg>RETIRO</lg>
+[16:32:49] Gatogames435 killed paçoquita using player
+[16:32:53] jumper: <avatar=STEAM_0:1:911684499><c=200,200,0>Gatogames435</c>: eu gosto de atrasar partida
+[16:33:29] paçoquita killed Matheuson12 using weapon_ttt_goldengun
+[16:35:14] pablo baiano killed Replaye using weapon_ttt_tmp
+[16:35:18] Client "alejjjimmy1980" connected.
+[16:35:19] jumper killed pizza using player
+[16:35:20] pablo baiano killed jumper using weapon_ttt_tmp
+[16:35:20] Gatogames435 killed Nsei using player
+[16:35:34] pizza: so avisar que as lixera nao tem aerodinamica elas nao sao boa pra dar prop kill
+[16:35:42] Client "gordo homem livre" connected.
+[16:36:23] Clã | BR | ALAKAZAN added 2 autoslays to pizza (rdm em T)
+[16:36:33] pizza killed Replaye using prop_physics
+[16:36:47] PigBoyBR killed Nsei using weapon_ttt_awp
+[16:37:00] Clã | BR | ALAKAZAN froze all props
+[16:37:00] Clã | BR | ALAKAZAN: !freezeprops
+[16:37:18] jumper killed Kaiser Pedro using env_explosion
+[16:37:20] Matheuson12 killed pizza using player
+[16:37:22] jumper killed paçoquita using player
+[16:37:23] PigBoyBR killed Matheuson12 using weapon_ttt_ak47
+[16:37:30] Gatogames435 killed jumper using player
+[16:37:32] PigBoyBR killed Gatogames435 using weapon_ttt_ak47
+[16:37:33] Dropped "Matheuson12" from server<STEAM_0:1:796902429>
+[16:37:44] Client "Tanaka" connected.
+[16:38:29] PigBoyBR killed pablo baiano using weapon_ttt_ak47
+[16:38:35] jumper killed PigBoyBR using player
+[16:38:44] Client "evelinsusane" connected.
+[16:39:05] pizza suicided!
+[16:39:09] Clã | BR | ALAKAZAN froze all props
+[16:39:09] Clã | BR | ALAKAZAN: !freezeprops
+[16:39:11] paçoquita killed Kaiser Pedro using player
+[16:39:16] pablo baiano killed Nsei using player
+[16:39:16] PigBoyBR killed Gatogames435 using player
+[16:39:18] Client "Tanaka" spawned in server <STEAM_0:1:74183168> (took 94 seconds).
+[16:39:55] PigBoyBR killed Replaye using weapon_ttt_famas
+[16:40:01] Client "gordo homem livre" spawned in server <STEAM_0:1:936898988> (took 259 seconds).
+[16:40:06] jumper killed PigBoyBR using player
+[16:40:13] jumper killed paçoquita using player
+[16:40:18] gordo homem livre: eai kaiser
+[16:40:27] Kaiser Pedro: opa gordo
+[16:40:46] Kaiser Pedro: mn si quize pra fala melhor segura o X pra fala pelo chat de voz
+[16:41:05] Dropped "Kaiser Pedro" from server<STEAM_0:0:504393355>
+[16:41:14] jumper killed paçoquita using player
+[16:41:32] Dropped "pablo baiano" from server<STEAM_0:1:454925322>
+[16:41:50] pizza suicided!
+[16:41:50] Client "retrovisor" connected.
+[16:41:54] paçoquita killed jumper using weapon_zm_revolver
+[16:41:59] Replaye killed paçoquita using weapon_ttt_usp
+[16:42:00] Client "BolivianoJamλica" spawned in server <STEAM_0:1:446500528> (took 735 seconds).
+[16:42:06] Gatogames435 killed gordo homem livre using weapon_ttt_glock
+[16:42:11] PigBoyBR killed Tanaka using weapon_ttt_usp
+[16:42:16] Client "DomoKing" connected.
+[16:42:23] gordo homem livre: tendi porra nenhuma
+[16:42:29] PigBoyBR killed Nsei using player
+[16:42:38] PigBoyBR killed Replaye using weapon_ttt_p228
+[16:42:38] gordo homem livre: dnd o cara me metrlalho
+[16:42:49] Client "DomoKing" spawned in server <STEAM_0:0:49457308> (took 33 seconds).
+[16:42:52] Client "retrovisor" spawned in server <STEAM_0:0:632640027> (took 62 seconds).
+[16:43:22] Gatogames435 killed PigBoyBR using player
+[16:43:55] Server is shutting down/changing levels.
+
+
+
+[16:44:00] New map: ttt_community_pool
+[16:44:14] Client "PigBoyBR" spawned in server <STEAM_0:1:553416565> (took 17 seconds).
+[16:44:14] Client "Clã | BR | ALAKAZAN" spawned in server <STEAM_0:1:61770335> (took 17 seconds).
+[16:44:17] Client "Gatogames435" spawned in server <STEAM_0:1:911684499> (took 20 seconds).
+[16:44:17] Client "DomoKing" spawned in server <STEAM_0:0:49457308> (took 20 seconds).
+[16:44:19] Client "pizza" spawned in server <STEAM_0:1:586090265> (took 22 seconds).
+[16:44:19] Client "Vikemper" spawned in server <STEAM_0:0:919226779> (took 22 seconds).
+[16:44:19] Client "Nsei" spawned in server <STEAM_0:1:17104997> (took 22 seconds).
+[16:44:22] Vikemper suicided!
+[16:44:22] Client "paçoquita" spawned in server <STEAM_0:0:133719220> (took 25 seconds).
+[16:44:22] Client "Tanaka" spawned in server <STEAM_0:1:74183168> (took 25 seconds).
+[16:44:26] Client "gordo homem livre" spawned in server <STEAM_0:1:936898988> (took 29 seconds).
+[16:44:28] Clã | BR | ALAKAZAN has forced Themself to join the world of the living.
+[16:44:28] Clã | BR | ALAKAZAN: !UNSPEC ^
+[16:44:28] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[16:44:33] Clã | BR | ALAKAZAN suicided!
+[16:44:33] Clã | BR | ALAKAZAN respawned Themself
+[16:44:33] Clã | BR | ALAKAZAN: !FRESPAWN ^
+[16:44:33] Client "retrovisor" spawned in server <STEAM_0:0:632640027> (took 36 seconds).
+[16:44:35] Client "jumper" spawned in server <STEAM_0:0:84372730> (took 38 seconds).
+[16:44:37] Client "Replaye" spawned in server <STEAM_0:1:464058629> (took 40 seconds).
+[16:44:52] DomoKing: ban alaka
+[16:44:52] Clã | BR | ALAKAZAN froze all props
+[16:44:52] Clã | BR | ALAKAZAN: !freezeprops
+[16:45:01] pizza: alakazam
+[16:45:05] pizza: deixe os prop se moverem
+[16:45:10] pizza: agora
+[16:45:33] retrovisor was killed by env_explosion
+[16:45:40] Replaye killed Nsei using player
+[16:45:42] Gatogames435 killed Replaye using player
+[16:45:45] Clã | BR | ALAKAZAN killed Gatogames435 using player
+[16:45:50] DomoKing killed Clã | BR | ALAKAZAN using player
+[16:46:20] PigBoyBR killed pizza using player
+[16:46:32] (TEAM) DomoKing: 8
+[16:46:38] retrovisor: !ss
+[16:46:45] retrovisor: !kk
+[16:46:58] Nsei: !ss
+[16:47:14] (TEAM) PigBoyBR: !ss
+[16:47:19] Nsei has forced Themself to spectate.
+[16:47:29] (TEAM) PigBoyBR: escrever
+[16:47:32] Clã | BR | ALAKAZAN killed paçoquita using player
+[16:47:52] Client "Voz Fina" connected.
+[16:48:07] jumper: ss
+[16:48:09] jumper: !ss
+[16:48:18] PigBoyBR killed jumper using player
+[16:48:32] Clã | BR | ALAKAZAN killed gordo homem livre using player
+[16:48:43] Gatogames435: !ss
+[16:48:45] Clã | BR | ALAKAZAN killed Tanaka using player
+[16:48:48] DomoKing killed Clã | BR | ALAKAZAN using player
+[16:48:50] Dropped "gordo homem livre" from server<STEAM_0:1:936898988>
+[16:48:58] retrovisor: calma rapaz
+[16:49:12] DomoKing killed PigBoyBR using player
+[16:49:50] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[16:49:52] Clã | BR | ALAKAZAN killed paçoquita using player
+[16:50:05] jumper killed Clã | BR | ALAKAZAN using player
+[16:50:14] Client "Voz Fina" spawned in server <STEAM_0:1:615745157> (took 142 seconds).
+[16:50:57] Clã | BR | ALAKAZAN: !menu
+[16:50:57] Clã | BR | ALAKAZAN: !menu
+[16:51:00] Client "BolivianoJamλica" spawned in server <STEAM_0:1:446500528> (took 423 seconds).
+[16:51:04] Gatogames435: para de seguir 1 2 3
+[16:51:35] Clã | BR | ALAKAZAN: !menu
+[16:51:56] pizza: vo mata o gato
+[16:52:23] Clã | BR | ALAKAZAN: !menu
+[16:52:25] Gatogames435 killed pizza using player
+[16:52:27] PigBoyBR killed Tanaka using player
+[16:53:52] PigBoyBR killed Gatogames435 using player
+[16:53:57] DomoKing killed retrovisor using player
+[16:54:01] DomoKing killed jumper using player
+[16:54:07] Dropped "Voz Fina" from server<STEAM_0:1:615745157>
+[16:54:30] Replaye killed DomoKing using player
+[16:54:49] PigBoyBR killed Replaye using player
+[16:54:53] DomoKing killed PigBoyBR using player
+[16:55:25] Clã | BR | ALAKAZAN froze all props
+[16:55:25] Clã | BR | ALAKAZAN: !freezeprops
+[16:55:37] Replaye killed jumper using weapon_ttt_tmp
+[16:56:05] pizza: mata ele
+[16:56:10] pizza: dou freeze pra quem matar o gato
+[16:56:30] Replaye killed pizza using weapon_ttt_tmp
+[16:56:32] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[16:56:34] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[16:56:35] Gatogames435 killed Replaye using player
+[16:57:29] DomoKing killed BolivianoJamλica using player
+[16:57:32] Gatogames435 killed Clã | BR | ALAKAZAN using player
+[16:57:33] DomoKing killed PigBoyBR using player
+[16:57:34] retrovisor killed Gatogames435 using player
+[16:57:37] retrovisor killed DomoKing using player
+[16:57:44] Tanaka killed paçoquita using weapon_ttt_ak47
+[16:57:46] Clã | BR | ALAKAZAN froze all props
+[16:57:46] Clã | BR | ALAKAZAN: !freezeprops
+[16:57:47] BolivianoJamλica: owo
+[16:58:26] Replaye killed PigBoyBR using player
+[16:59:42] pizza killed Replaye using weapon_ttt_tmp
+[16:59:56] Client "Beleléu" connected.
+[17:00:12] paçoquita: [00:00] paçagrana [inocente] caiu e perdeu 167 HP'
+[17:00:14] Client "Beleléu" spawned in server <STEAM_0:0:171399836> (took 18 seconds).
+[17:00:44] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[17:00:44] Clã | BR | ALAKAZAN killed pizza using player
+[17:00:44] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[17:00:47] DomoKing killed BolivianoJamλica using player
+[17:00:48] retrovisor killed Tanaka using player
+[17:00:48] jumper killed retrovisor using player
+[17:00:49] DomoKing killed Gatogames435 using player
+[17:00:52] jumper killed DomoKing using weapon_ttt_pistol
+[17:00:59] Clã | BR | ALAKAZAN killed paçoquita using player
+[17:01:10] Client "pamellaalvim" connected.
+[17:01:54] retrovisor: n fui eu que atirei jumento
+[17:01:56] Clã | BR | ALAKAZAN killed PigBoyBR using env_explosion
+[17:01:57] jumper killed Replaye using player
+[17:01:58] BolivianoJamλica killed Clã | BR | ALAKAZAN using player
+[17:01:58] Tanaka killed jumper using player
+[17:01:59] Gatogames435 killed pizza using player
+[17:02:08] Clã | BR | ALAKAZAN killed DomoKing using player
+[17:02:14] Tanaka killed Gatogames435 using player
+[17:02:23] Tanaka killed paçoquita using player
+[17:02:29] Tanaka killed BolivianoJamλica using env_explosion
+[17:02:38] BolivianoJamλica: Q ERA ESO
+[17:02:42] BolivianoJamλica: ajaaja
+[17:02:44] Clã | BR | ALAKAZAN killed Beleléu using player
+[17:02:47] Tanaka killed Clã | BR | ALAKAZAN using player
+[17:02:50] BolivianoJamλica: un ave me mató q troll
+[17:02:54] Tanaka killed retrovisor using player
+[17:03:25] jumper killed Replaye using player
+[17:03:25] DomoKing killed paçoquita using player
+[17:03:30] Gatogames435 killed DomoKing using player
+[17:03:35] BolivianoJamλica killed Clã | BR | ALAKAZAN using player
+[17:03:39] pizza killed BolivianoJamλica using weapon_ttt_m16
+[17:03:40] Gatogames435 killed pizza using player
+[17:03:40] PigBoyBR killed Tanaka using player
+[17:03:42] Gatogames435 killed jumper using player
+[17:03:48] PigBoyBR killed retrovisor using player
+[17:03:50] Gatogames435 killed PigBoyBR using player
+[17:03:54] Gatogames435 killed Beleléu using player
+[17:04:07] retrovisor: as val é muito bom
+[17:04:13] Clã | BR | ALAKAZAN added 1 autoslays to jumper (rdm em ino)
+[17:04:28] Server is shutting down/changing levels.
+
+
+
+[17:04:32] New map: ttt_minecraft_b5
+[17:04:44] Client "Beleléu" spawned in server <STEAM_0:0:171399836> (took 15 seconds).
+[17:04:45] Client "Gatogames435" spawned in server <STEAM_0:1:911684499> (took 16 seconds).
+[17:04:46] Client "DomoKing" spawned in server <STEAM_0:0:49457308> (took 17 seconds).
+[17:04:46] Client "Clã | BR | ALAKAZAN" spawned in server <STEAM_0:1:61770335> (took 17 seconds).
+[17:04:46] Client "PigBoyBR" spawned in server <STEAM_0:1:553416565> (took 17 seconds).
+[17:04:48] Client "Vikemper" spawned in server <STEAM_0:0:919226779> (took 19 seconds).
+[17:04:49] Client "Replaye" spawned in server <STEAM_0:1:464058629> (took 20 seconds).
+[17:04:50] Client "jumper" spawned in server <STEAM_0:0:84372730> (took 21 seconds).
+[17:04:51] Vikemper suicided!
+[17:04:52] Client "Nsei" spawned in server <STEAM_0:1:17104997> (took 23 seconds).
+[17:04:55] Nsei suicided!
+[17:04:56] Client "Tanaka" spawned in server <STEAM_0:1:74183168> (took 27 seconds).
+[17:04:56] Client "paçoquita" spawned in server <STEAM_0:0:133719220> (took 27 seconds).
+[17:05:26] Client "retrovisor" spawned in server <STEAM_0:0:632640027> (took 57 seconds).
+[17:05:32] jumper suicided!
+[17:06:33] Clã | BR | ALAKAZAN froze all props
+[17:06:56] paçoquita killed Replaye using player
+[17:07:08] retrovisor killed PigBoyBR using player
+[17:07:23] retrovisor killed paçoquita using player
+[17:07:26] Vikemper has forced Themself to join the world of the living.
+[17:07:26] Vikemper: !unspec vik
+[17:07:29] retrovisor killed Clã | BR | ALAKAZAN using player
+[17:08:22] Gatogames435: !menu
+[17:08:27] PigBoyBR: !menu
+[17:08:34] (csay from Gatogames435) pulo duplo bugo ._.
+[17:09:18] DomoKing killed retrovisor using player
+[17:09:24] retrovisor: kskksksks
+[17:09:28] Beleléu: RETIRO O KOS!!!!!
+[17:09:29] retrovisor: tu n fez nada carai
+[17:09:31] PigBoyBR: Retiro KOS
+[17:09:32] PigBoyBR: Retiro KOS
+[17:09:34] Tanaka killed DomoKing using player
+[17:09:40] retrovisor: por isso achou facl akkaka
+[17:10:26] Client "Ex-cória" connected.
+[17:10:50] DomoKing was killed by entityflame
+[17:10:55] retrovisor: é kos?
+[17:11:05] PigBoyBR killed paçoquita using player
+[17:11:12] Dropped "paçoquita" from server<STEAM_0:0:133719220>
+[17:11:13] Client "Ex-cória" spawned in server <STEAM_0:1:59788480> (took 47 seconds).
+[17:11:35] Vikemper killed Clã | BR | ALAKAZAN using weapon_ttt_m16
+[17:11:38] Beleléu killed jumper using player
+[17:11:38] Gatogames435 killed Vikemper using weapon_ttt_m16
+[17:11:39] Gatogames435 killed Beleléu using weapon_ttt_m16
+[17:11:40] PigBoyBR killed Gatogames435 using player
+[17:11:41] Replaye killed Tanaka using player
+[17:11:42] PigBoyBR killed Replaye using player
+[17:11:45] retrovisor killed PigBoyBR using player
+[17:11:51] Dropped "Tanaka" from server<STEAM_0:1:74183168>
+[17:12:08] Clã | BR | ALAKAZAN added 2 autoslays to Vikemper (RDM EM t)
+[17:12:10] Vikemper suicided!
+[17:12:52] jumper killed retrovisor using player
+[17:12:59] Ex-cória: GATO SUS
+[17:13:00] Client "_Skeleton_" connected.
+[17:13:01] Ex-cória: DEMAIS
+[17:13:39] Client "piottokaue" connected.
+[17:14:00] jumper killed PigBoyBR using player
+[17:14:23] Ex-cória: atira no gato
+[17:14:25] Ex-cória: plmds
+[17:14:42] PigBoyBR: to cego ainda
+[17:15:01] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[17:15:01] Clã | BR | ALAKAZAN killed Replaye using player
+[17:15:02] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[17:15:02] Gatogames435 killed Ex-cória using player
+[17:15:30] Gatogames435 killed Clã | BR | ALAKAZAN using weapon_ttt_m16
+[17:15:50] Client "_Skeleton_" spawned in server <STEAM_0:1:939094948> (took 170 seconds).
+[17:15:52] jumper killed DomoKing using player
+[17:16:03] Gatogames435 killed Beleléu using weapon_ttt_m16
+[17:16:13] Ex-cória added 1 autoslays to Clã | BR | ALAKAZAN (RDM em Ino)
+[17:16:13] Ex-cória: !aslay alaka 1 RDM em Ino
+[17:16:15] jumper killed Gatogames435 using player
+[17:16:39] Vikemper suicided!
+[17:16:39] Clã | BR | ALAKAZAN suicided!
+[17:16:59] Ex-cória killed _Skeleton_ using env_explosion
+[17:17:09] jumper killed Ex-cória using player
+[17:17:16] Gatogames435 killed jumper using player
+[17:17:23] Ex-cória killed PigBoyBR using player
+[17:17:36] DomoKing killed Ex-cória using player
+[17:17:38] Ex-cória: foda
+[17:17:51] Ex-cória: sei não
+[17:17:51] Beleléu: KOS! KOS! KOS!
+[17:17:51] Gatogames435 killed Beleléu using player
+[17:17:58] Ex-cória: tem uma no meio
+[17:18:03] Ex-cória: outra ali na água
+[17:18:06] Gatogames435 killed Replaye using player
+[17:18:19] Ex-cória: eu tava com 3 tiro na deagle
+[17:18:22] Nsei has forced Themself to join the world of the living.
+[17:18:23] Ex-cória: e 1 na sniper
+[17:18:26] Ex-cória: peguei a pdw
+[17:18:28] Ex-cória: 2 bala
+[17:18:30] Ex-cória: tava foda
+[17:18:59] Gatogames435 killed retrovisor using player
+[17:19:10] retrovisor: 51
+[17:19:22] retrovisor: eu itnha caido de um lugar alto kkk
+[17:19:45] Clã | BR | ALAKAZAN: TINHa 51- 51 de dano que ele deu = morte
+[17:20:03] Clã | BR | ALAKAZAN: matematica
+[17:20:07] Gatogames435 killed DomoKing using player
+[17:20:33] Vikemper was killed by trigger_hurt
+[17:20:41] Gatogames435 was killed by trigger_hurt
+[17:21:19] Gatogames435 killed _Skeleton_ using func_physbox
+[17:21:21] Ex-cória killed Gatogames435 using player
+[17:22:19] Ex-cória: Siri um fazendo barra
+[17:22:21] Vikemper killed jumper using func_physbox
+[17:22:32] Replaye killed Vikemper using weapon_ttt_m16
+[17:23:32] PigBoyBR killed Nsei using player
+[17:24:37] Ex-cória killed PigBoyBR using player
+[17:24:43] Beleléu: KOS! KOS! KOS!
+[17:24:43] Beleléu: KOS! KOS! KOS!
+[17:24:44] Beleléu: KOS! KOS! KOS!
+[17:24:44] DomoKing killed Ex-cória using player
+[17:24:56] Ex-cória killed Beleléu using weapon_ttt_thriller
+[17:25:07] retrovisor killed Replaye using player
+[17:25:12] DomoKing killed retrovisor using player
+[17:25:20] Clã | BR | ALAKAZAN killed DomoKing using player
+[17:25:32] Clã | BR | ALAKAZAN added 2 autoslays to Vikemper (rdm em T)
+[17:25:33] Gatogames435 was killed by entityflame
+[17:25:48] Vikemper suicided!
+[17:26:17] Beleléu: ( ͡° ͜ʖ ͡°)
+[17:26:20] PigBoyBR: Retiro KOS
+[17:26:20] Ex-cória: (° ͜ʖ°)
+[17:26:23] Gatogames435: ( ͡° ͜ʖ ͡°)
+[17:26:34] jumper: [VIP] 
+[17:26:48] jumper: <avatar>: <lg>RETIRO</lg>
+[17:27:30] Beleléu was killed by trigger_hurt
+[17:28:20] PigBoyBR was killed by trigger_hurt
+[17:28:27] jumper: <avatar>: <lg>RETIRO</lg>
+[17:28:53] Replaye was killed by trigger_hurt
+[17:29:21] retrovisor was killed by trigger_hurt
+[17:29:41] Nsei was killed by trigger_hurt
+[17:29:46] Dropped "_Skeleton_" from server<STEAM_0:1:939094948>
+[17:29:54] DomoKing was killed by trigger_hurt
+[17:29:58] retrovisor: caracaaa eu n sabia que ele era tão pequeno KKKKKKK
+[17:30:24] DomoKing to admins: NEM FUDENDO
+[17:30:27] DomoKing to admins: QUE N TE VI
+[17:31:21] Server is shutting down/changing levels.
+
+
+
+[17:31:30] New map: ttt_chaves_reborn
+[17:31:49] Client "Ex-cória" spawned in server <STEAM_0:1:59788480> (took 22 seconds).
+[17:31:51] Client "Beleléu" spawned in server <STEAM_0:0:171399836> (took 24 seconds).
+[17:31:53] Client "DomoKing" spawned in server <STEAM_0:0:49457308> (took 26 seconds).
+[17:31:55] Client "Clã | BR | ALAKAZAN" spawned in server <STEAM_0:1:61770335> (took 28 seconds).
+[17:32:00] Client "PigBoyBR" spawned in server <STEAM_0:1:553416565> (took 33 seconds).
+[17:32:01] Client "Gatogames435" spawned in server <STEAM_0:1:911684499> (took 34 seconds).
+[17:32:22] Client "jumper" spawned in server <STEAM_0:0:84372730> (took 55 seconds).
+[17:32:26] Client "Nsei" spawned in server <STEAM_0:1:17104997> (took 59 seconds).
+[17:32:36] Client "Vikemper" spawned in server <STEAM_0:0:919226779> (took 69 seconds).
+[17:32:37] Vikemper suicided!
+[17:32:45] Client "Replaye" spawned in server <STEAM_0:1:464058629> (took 78 seconds).
+[17:33:12] Client "mikan" connected.
+[17:33:36] jumper was killed by func_physbox
+[17:33:45] Client "loukii" connected.
+[17:33:48] Client "retrovisor" spawned in server <STEAM_0:0:632640027> (took 141 seconds).
+[17:34:14] jumper: /fpsboost
+[17:34:17] jumper: /boost
+[17:34:40] Beleléu killed Ex-cória using weapon_ttt_knife
+[17:34:41] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[17:34:41] Gatogames435 killed Beleléu using player
+[17:34:42] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[17:35:08] Nsei killed DomoKing using player
+[17:35:14] Clã | BR | ALAKAZAN killed Beleléu using player
+[17:35:17] Gatogames435 killed Clã | BR | ALAKAZAN using player
+[17:35:25] Gatogames435 killed Nsei using player
+[17:36:59] Vikemper killed Beleléu using weapon_ttt_knife
+[17:37:02] Client "CLOBALT" connected.
+[17:37:09] Client "mikan" connected.
+[17:37:42] retrovisor: que belo mapa
+[17:38:43] Clã | BR | ALAKAZAN killed Gatogames435 using prop_physics
+[17:38:45] jumper killed Clã | BR | ALAKAZAN using player
+[17:39:01] Client "mikan" spawned in server <STEAM_0:0:74447319> (took 112 seconds).
+[17:39:06] Ex-cória killed Clã | BR | ALAKAZAN using player
+[17:39:06] Ex-cória: Traitor! Traitor! Traitor!
+[17:39:14] Ex-cória: ELE REVIVEU
+[17:39:15] Ex-cória: MEEE
+[17:39:36] Vikemper killed Nsei using player
+[17:39:37] Dropped "mikan" from server<STEAM_0:0:74447319>
+[17:39:38] Ex-cória: essa ump é boa demais
+[17:39:41] DomoKing killed Vikemper using weapon_ttt_famas
+[17:39:57] Client "tutuzinhorod" connected.
+[17:40:03] Ex-cória: da ID
+[17:40:14] jumper killed Vikemper using player
+[17:40:17] jumper killed retrovisor using player
+[17:40:17] PigBoyBR killed DomoKing using player
+[17:40:19] Ex-cória killed PigBoyBR using player
+[17:40:27] jumper killed Ex-cória using player
+[17:40:27] Replaye killed jumper using player
+[17:41:16] Gatogames435 was killed by func_physbox
+[17:41:36] Client "|Zabinho|" connected.
+[17:41:42] Client "mikan" connected.
+[17:42:15] jumper killed Replaye using player
+[17:43:01] Client "mikan" spawned in server <STEAM_0:0:74447319> (took 79 seconds).
+[17:43:08] Client "|Zabinho|" spawned in server <STEAM_0:1:435387119> (took 92 seconds).
+[17:43:16] Client "CLOBALT" spawned in server <STEAM_0:1:629406804> (took 374 seconds).
+[17:43:16] Dropped "CLOBALT" from server<STEAM_0:1:629406804>
+[17:43:43] Dropped "mikan" from server<STEAM_0:0:74447319>
+[17:43:50] |Zabinho|: !kk
+[17:44:16] jumper killed Clã | BR | ALAKAZAN using player
+[17:44:31] (tsay from Clã | BR | ALAKAZAN) ele retirou
+[17:44:33] Ex-cória: me da essa golden
+[17:44:34] Client "tutuzinhorod" spawned in server <STEAM_0:0:531673747> (took 277 seconds).
+[17:44:36] Ex-cória: ME DA
+[17:44:36] Beleléu killed PigBoyBR using player
+[17:44:36] Beleléu: KOS! KOS! KOS!
+[17:44:36] (tsay from Clã | BR | ALAKAZAN) tenho gravado
+[17:44:39] Beleléu killed Vikemper using player
+[17:44:39] Ex-cória killed jumper using player
+[17:44:41] Nsei killed retrovisor using player
+[17:44:41] Beleléu killed Ex-cória using player
+[17:44:48] DomoKing killed Beleléu using player
+[17:45:02] Ex-cória added 1 autoslays to jumper (RDM em Ino)
+[17:45:12] jumper suicided!
+[17:45:51] Clã | BR | ALAKAZAN was killed by func_physbox
+[17:45:53] (tsay from Clã | BR | ALAKAZAN) KKKKKKKKKK
+[17:46:08] |Zabinho| killed Beleléu using weapon_ttt_ak47
+[17:46:23] |Zabinho| killed Gatogames435 using weapon_ttt_ak47
+[17:46:24] |Zabinho| killed tutuzinhorod using weapon_ttt_ak47
+[17:46:25] |Zabinho| killed Replaye using weapon_ttt_ak47
+[17:46:30] Ex-cória: Traitor! Traitor! Traitor!
+[17:46:30] retrovisor killed Ex-cória using player
+[17:46:39] PigBoyBR killed retrovisor using weapon_ttt_galil
+[17:46:41] |Zabinho| killed Vikemper using weapon_ttt_ak47
+[17:46:46] |Zabinho| killed DomoKing using weapon_ttt_ak47
+[17:46:46] Client "CLOBALT" connected.
+[17:46:48] Nsei killed PigBoyBR using player
+[17:46:53] |Zabinho| killed Nsei using weapon_ttt_ak47
+[17:46:54] retrovisor: carai g36 da 8 de dano pelo amor de Deus kkakakkaka
+[17:47:00] |Zabinho| killed Nsei using weapon_ttt_ak47
+[17:47:25] Client "CLOBALT" spawned in server <STEAM_0:1:629406804> (took 39 seconds).
+[17:47:25] Dropped "CLOBALT" from server<STEAM_0:1:629406804>
+[17:47:55] Clã | BR | ALAKAZAN killed Vikemper using player
+[17:48:19] Clã | BR | ALAKAZAN killed Gatogames435 using player
+[17:48:20] Clã | BR | ALAKAZAN killed tutuzinhorod using player
+[17:48:34] Beleléu: KOS! KOS! KOS!
+[17:48:34] Replaye killed Beleléu using player
+[17:48:35] |Zabinho| killed Clã | BR | ALAKAZAN using player
+[17:48:36] Replaye killed retrovisor using player
+[17:48:39] jumper killed Replaye using player
+[17:48:39] PigBoyBR killed jumper using player
+[17:48:48] DomoKing killed Clã | BR | ALAKAZAN using weapon_ttt_ak47
+[17:49:13] Clã | BR | ALAKAZAN has forced Ex-cória to spectate.
+[17:49:13] Clã | BR | ALAKAZAN: !FSPEC EX
+[17:49:14] Ex-cória suicided!
+[17:49:17] Nsei killed DomoKing using player
+[17:49:19] PigBoyBR killed |Zabinho| using player
+[17:49:22] Nsei killed PigBoyBR using player
+[17:49:56] Nsei killed jumper using ttt_knife_proj
+[17:49:56] Beleléu killed retrovisor using weapon_ttt_knife
+[17:49:57] tutuzinhorod killed Nsei using weapon_ttt_knife
+[17:49:58] PigBoyBR killed Clã | BR | ALAKAZAN using weapon_ttt_knife
+[17:50:04] |Zabinho| killed Replaye using weapon_ttt_knife
+[17:50:06] Beleléu killed |Zabinho| using weapon_ttt_knife
+[17:50:06] Gatogames435 killed Ex-cória using weapon_ttt_knife
+[17:50:08] tutuzinhorod killed PigBoyBR using weapon_ttt_knife
+[17:50:08] Clã | BR | ALAKAZAN respawned Themself!
+[17:50:08] Clã | BR | ALAKAZAN: !rESPAWN ALAKA
+[17:50:12] DomoKing killed Clã | BR | ALAKAZAN using weapon_ttt_knife
+[17:50:13] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[17:50:14] Clã | BR | ALAKAZAN respawned Themself!
+[17:50:14] Clã | BR | ALAKAZAN: !rESPAWN ALAKA
+[17:50:15] Beleléu killed Gatogames435 using weapon_ttt_knife
+[17:50:17] Beleléu killed tutuzinhorod using weapon_ttt_knife
+[17:50:18] Client "LK" connected.
+[17:50:26] Clã | BR | ALAKAZAN suicided!
+[17:50:28] DomoKing killed Vikemper using weapon_ttt_knife
+[17:50:32] Beleléu killed DomoKing using weapon_ttt_knife
+[17:50:53] Replaye suicided!
+[17:50:57] Vikemper has forced Themself to spectate.
+[17:50:57] Vikemper: !fspec vik
+[17:50:57] Vikemper suicided!
+[17:50:59] Server is shutting down/changing levels.
+
+
+
+[17:51:05] New map: ttt_67thway_v14
+[17:51:18] Client "Beleléu" spawned in server <STEAM_0:0:171399836> (took 16 seconds).
+[17:51:21] Client "Clã | BR | ALAKAZAN" spawned in server <STEAM_0:1:61770335> (took 19 seconds).
+[17:51:23] Client "Replaye" spawned in server <STEAM_0:1:464058629> (took 21 seconds).
+[17:51:23] Client "DomoKing" spawned in server <STEAM_0:0:49457308> (took 21 seconds).
+[17:51:24] Client "PigBoyBR" spawned in server <STEAM_0:1:553416565> (took 22 seconds).
+[17:51:26] Client "Gatogames435" spawned in server <STEAM_0:1:911684499> (took 24 seconds).
+[17:51:26] Client "|Zabinho|" spawned in server <STEAM_0:1:435387119> (took 24 seconds).
+[17:51:29] Client "Vikemper" spawned in server <STEAM_0:0:919226779> (took 27 seconds).
+[17:51:32] Client "Nsei" spawned in server <STEAM_0:1:17104997> (took 30 seconds).
+[17:51:32] Vikemper suicided!
+[17:51:33] Client "LK" spawned in server <STEAM_0:0:218160108> (took 31 seconds).
+[17:51:33] Client "jumper" spawned in server <STEAM_0:0:84372730> (took 31 seconds).
+[17:51:34] Beleléu: !rtv
+[17:51:35] Client "Ex-cória" spawned in server <STEAM_0:1:59788480> (took 33 seconds).
+[17:51:49] (TEAM) Nsei: !rtv
+[17:51:56] Client "tutuzinhorod" spawned in server <STEAM_0:0:531673747> (took 54 seconds).
+[17:51:59] Client "pamellaalvim" connected.
+[17:52:11] Ex-cória: MEY PING
+[17:52:13] Ex-cória: COMO
+[17:52:21] Ex-cória: EU TENHO IDOSO EM CASA
+[17:52:22] Client "retrovisor" spawned in server <STEAM_0:0:632640027> (took 80 seconds).
+[17:52:26] |Zabinho|: olha o meu ping cara
+[17:52:27] Beleléu was killed by trigger_hurt
+[17:52:28] Client "sémen" connected.
+[17:52:29] PigBoyBR: ai
+[17:52:34] Dropped "Beleléu" from server<STEAM_0:0:171399836>
+[17:52:39] Ex-cória killed Clã | BR | ALAKAZAN using weapon_ttt_knife
+[17:52:39] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[17:52:43] LK killed Ex-cória using player
+[17:52:52] Client "Beleléu" connected.
+[17:52:53] LK killed tutuzinhorod using player
+[17:52:54] Ex-cória: claro que a arma que eu tinha era uma 12
+[17:52:55] Client "Tanaka" connected.
+[17:52:56] Ex-cória: se fuder
+[17:53:01] (tsay from Clã | BR | ALAKAZAN) EU TO DANDO DDOS EM TI
+[17:53:04] Client "Beleléu" spawned in server <STEAM_0:0:171399836> (took 12 seconds).
+[17:53:08] |Zabinho| killed Replaye using weapon_ttt_ak47
+[17:53:10] (tsay from Clã | BR | ALAKAZAN) LEMBRA DO COMANDO QUE FALEI
+[17:53:13] Nsei killed LK using player
+[17:53:13] jumper killed Nsei using weapon_zm_sledge
+[17:53:15] Gatogames435 killed jumper using weapon_ttt_m16
+[17:53:15] |Zabinho| killed PigBoyBR using weapon_ttt_ak47
+[17:53:24] |Zabinho| killed DomoKing using weapon_ttt_p228
+[17:53:26] Client "Tanaka" spawned in server <STEAM_0:1:74183168> (took 31 seconds).
+[17:53:27] Beleléu was killed by trigger_hurt
+[17:53:45] |Zabinho| killed Nsei using weapon_ttt_tmp
+[17:53:52] Ex-cória: OLHA MEU PING
+[17:53:58] Ex-cória: AAAAAAAAAAAAAAA
+[17:54:23] |Zabinho|: pago 2gb de net pra isso vtmc
+[17:54:34] Ex-cória: pago 1gb
+[17:54:35] Tanaka: 112 de ping
+[17:54:38] Tanaka: que porra é essa
+[17:55:03] Dropped "PigBoyBR" from server<STEAM_0:1:553416565>
+[17:55:10] Client "sémen" spawned in server <STEAM_0:0:629088052> (took 162 seconds).
+[17:55:13] Beleléu killed Clã | BR | ALAKAZAN using player
+[17:55:25] |Zabinho| killed retrovisor using weapon_ttt_tmp
+[17:55:27] Ex-cória: Traitor! Traitor! Traitor!
+[17:55:28] Ex-cória: Traitor! Traitor! Traitor!
+[17:55:29] Ex-cória killed |Zabinho| using player
+[17:55:29] Ex-cória: Traitor! Traitor! Traitor!
+[17:55:30] Gatogames435 killed Ex-cória using weapon_ttt_mp5
+[17:56:00] jumper killed Replaye using env_explosion
+[17:56:15] Client "Sr.noche" connected.
+[17:56:17] Gatogames435: retiro kos dele
+[17:56:18] Beleléu killed Gatogames435 using nc_ttt_vss
+[17:57:07] Beleléu: ( ͡° ͜ʖ ͡°)
+[17:57:23] Beleléu killed Tanaka using player
+[17:57:29] Beleléu killed DomoKing using player
+[17:57:50] jumper killed tutuzinhorod using player
+[17:58:46] Client "Sr.noche" spawned in server <STEAM_0:1:594579247> (took 151 seconds).
+[17:59:12] LK killed Beleléu using weapon_ttt_tmp
+[17:59:20] jumper killed LK using weapon_zm_mac10
+[17:59:24] Beleléu: ( ͡° ͜ʖ ͡°)
+[18:00:09] Replaye killed |Zabinho| using player
+[18:00:34] Replaye suicided!
+[18:00:49] Gatogames435 killed Nsei using player
+[18:00:53] Gatogames435 killed Clã | BR | ALAKAZAN using player
+[18:00:53] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[18:01:22] Ex-cória: OLHA MEU PING
+[18:01:24] Ex-cória: SOCORRO
+[18:01:42] Tanaka: alguem paga a host pfv
+[18:01:43] Ex-cória: PARA DE ME DAR DDOS ALAKAZN
+[18:02:12] Ex-cória killed retrovisor using player
+[18:02:42] Gatogames435 killed Beleléu using player
+[18:02:42] Ex-cória suicided!
+[18:02:42] Ex-cória killed tutuzinhorod using env_explosion
+[18:02:46] DomoKing to admins: se liga na estrategia
+[18:02:51] Dropped "sémen" from server<STEAM_0:0:629088052>
+[18:03:28] Ex-cória to admins: acho que a pomba evaporou o corpo do dt
+[18:04:08] Nsei: bugaram dnv o tp
+[18:04:23] Client "mikan" connected.
+[18:04:32] Gatogames435 killed Tanaka using player
+[18:04:50] Clã | BR | ALAKAZAN teleported DomoKing
+[18:04:50] Clã | BR | ALAKAZAN: !tp domo
+[18:04:59] Sr.noche was killed by trigger_hurt
+[18:05:05] Sr.noche: XD
+[18:05:18] Clã | BR | ALAKAZAN teleported DomoKing
+[18:05:18] Clã | BR | ALAKAZAN: !tp domo
+[18:05:26] DomoKing to admins: se liga na estrategia
+[18:05:48] Ex-cória to admins: to vendo
+[18:05:52] Clã | BR | ALAKAZAN teleported DomoKing
+[18:05:52] Clã | BR | ALAKAZAN: !tp domo
+[18:06:21] Client "Pro sin ser pro" connected.
+[18:06:53] jumper killed DomoKing using player
+[18:06:59] Client "CaPiT_" connected.
+[18:07:08] retrovisor: o tanaka morto KKK
+[18:07:46] Gatogames435 killed jumper using weapon_zm_rifle
+[18:08:15] Clã | BR | ALAKAZAN: !menu
+[18:08:22] Vikemper: !unspec
+[18:08:27] Vikemper has forced Themself to join the world of the living.
+[18:08:27] Vikemper: !unspec vik
+[18:08:42] Tanaka: !menu
+[18:09:37] Gatogames435 killed LK using weapon_zm_rifle
+[18:09:45] Client "CaPiT_" spawned in server <STEAM_0:1:598667835> (took 166 seconds).
+[18:09:57] retrovisor was killed by trigger_hurt
+[18:10:30] Client "mikan" connected.
+[18:10:47] Beleléu killed Replaye using nc_ttt_vss
+[18:11:00] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[18:11:00] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[18:11:01] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[18:11:13] Gatogames435 killed tutuzinhorod using player
+[18:11:17] |Zabinho| killed DomoKing using player
+[18:11:21] jumper killed |Zabinho| using weapon_ttt_pistol
+[18:11:25] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[18:11:26] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[18:11:27] Clã | BR | ALAKAZAN: <c=255,0,0>KOS NELE KOS NELE</c>
+[18:11:28] Clã | BR | ALAKAZAN killed Sr.noche using weapon_ttt_g3sg1
+[18:11:29] |Zabinho| to admins: mds alakazan
+[18:11:33] |Zabinho| to admins: tira essas porra de arma
+[18:11:37] |Zabinho| to admins: dando 11 de dano por tiro
+[18:11:42] Beleléu killed Tanaka using nc_ttt_vss
+[18:11:42] Dropped "tutuzinhorod" from server<STEAM_0:0:531673747>
+[18:11:52] Dropped "Sr.noche" from server<STEAM_0:1:594579247>
+[18:12:18] Client "Chokito" connected.
+[18:12:24] Beleléu killed Vikemper using player
+[18:12:44] Beleléu killed Nsei using player
+[18:12:48] Client "mikan" spawned in server <STEAM_0:0:74447319> (took 138 seconds).
+[18:12:54] Client "Chokito" spawned in server <STEAM_0:0:851994549> (took 36 seconds).
+[18:13:27] Beleléu killed Gatogames435 using player
+[18:13:32] Dropped "mikan" from server<STEAM_0:0:74447319>
+[18:14:35] Beleléu killed retrovisor using player
+[18:14:37] LK killed Beleléu using weapon_ttt_tmp
+[18:14:38] Client "JN" connected.
+[18:15:01] jumper killed Beleléu using weapon_ttt_sg552
+[18:15:03] jumper killed CaPiT_ using weapon_ttt_sg552
+[18:15:04] Clã | BR | ALAKAZAN killed Ex-cória using player
+[18:15:08] |Zabinho|: [01:01] |Zabinho| [traitor] has damaged DomoKing [detective] for 6 HP with AN-94
+[18:15:21] Client "JN" spawned in server <STEAM_0:0:229920886> (took 43 seconds).
+[18:15:25] Beleléu: [02:31] Beleléu [traidor] acertou Nsei [inocente] 9 HP com HK G3A3
+[18:15:57] Client "GABOALAIN" connected.
+[18:16:16] CaPiT_ was killed by trigger_hurt
+[18:16:27] Clã | BR | ALAKAZAN: !menu
+[18:16:30] Beleléu killed |Zabinho| using env_explosion
+[18:16:35] LK killed Chokito using weapon_zm_rifle
+[18:16:38] Dropped "Chokito" from server<STEAM_0:0:851994549>
+[18:16:40] Clã | BR | ALAKAZAN gave m9k_an94 to Themself
+[18:16:45] |Zabinho| to admins: me spawna ai
+[18:16:48] Clã | BR | ALAKAZAN respawned |Zabinho|!
+[18:16:48] Clã | BR | ALAKAZAN: !respawn za
+[18:16:50] Clã | BR | ALAKAZAN: !tp za
+[18:16:52] Clã | BR | ALAKAZAN: !tp za
+[18:16:53] Clã | BR | ALAKAZAN teleported |Zabinho|
+[18:16:53] Clã | BR | ALAKAZAN: !tp zab
+[18:17:10] Clã | BR | ALAKAZAN: !menu
+[18:17:20] Clã | BR | ALAKAZAN: !menu
+[18:17:21] Clã | BR | ALAKAZAN: !menu
+[18:17:24] Clã | BR | ALAKAZAN: !menu

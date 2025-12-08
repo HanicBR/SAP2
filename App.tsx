@@ -26,6 +26,7 @@ const PlayerProfile = lazy(() => import('./pages/admin/PlayerProfile'));
 const Users = lazy(() => import('./pages/admin/Users'));
 const Financial = lazy(() => import('./pages/admin/Financial'));
 const Settings = lazy(() => import('./pages/admin/Settings'));
+const ImportLogs = lazy(() => import('./pages/admin/ImportLogs'));
 
 // Loading Spinner Component
 const PageLoader = () => (
@@ -102,6 +103,9 @@ const App: React.FC = () => {
           } />
           <Route path="/admin/logs" element={
             <AdminRoute><Logs /></AdminRoute>
+          } />
+          <Route path="/admin/import-logs" element={
+            <AdminRoute><ImportLogs /></AdminRoute>
           } />
           <Route path="/admin/servers" element={
             <AdminRoute><Servers /></AdminRoute>

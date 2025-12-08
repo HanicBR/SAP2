@@ -13,6 +13,7 @@ import logsRoutes from './routes/logs';
 import ingestRoutes from './routes/ingest';
 import transactionsRoutes from './routes/transactions';
 import suspiciousRoutes from './routes/suspicious';
+import legacyLogsRoutes from './routes/legacyLogs';
 import { bootstrap } from './bootstrap';
 
 dotenv.config();
@@ -55,6 +56,7 @@ app.use('/api/players', playersRoutes);
 app.use('/api/logs', logsRoutes);
 app.use('/api/suspicious', suspiciousRoutes);
 app.use('/api/ingest', ingestLimiter, ingestRoutes);
+app.use('/api/admin/legacy-logs', apiLimiter, legacyLogsRoutes);
 app.use('/api/transactions', transactionsRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
