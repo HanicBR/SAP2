@@ -112,11 +112,38 @@ const buildGameModeStats = (steamId: string, logs: any[], roundEndLogs?: any[]) 
         const meta = ((log as any).metadata || {}) as any;
         const rid = meta.roundId;
         if (typeof rid !== 'string' || !rid) return;
-        const raw = (meta.winner || meta.result || '').toString().toUpperCase();
-        if (!raw) return;
-        if (raw.includes('TRAITOR')) winners[rid] = 'traitor';
-        else if (raw.includes('INNOCENT')) winners[rid] = 'innocent';
-        else if (raw.includes('TIME')) winners[rid] = 'timeout';
+
+        const rawVal = (meta.winner ?? meta.result) as unknown;
+        if (rawVal === undefined || rawVal === null || rawVal === '') return;
+
+        // TTT usa constantes numéricas: WIN_TRAITOR = 2, WIN_INNOCENT = 3, WIN_TIMELIMIT = 4
+        const mapNumeric = (n: number) => {
+          if (n === 2) return 'traitor' as const;
+          if (n === 3) return 'innocent' as const;
+          if (n === 4) return 'timeout' as const;
+          return undefined;
+        };
+
+        let winner: 'traitor' | 'innocent' | 'timeout' | undefined;
+
+        if (typeof rawVal === 'number') {
+          winner = mapNumeric(rawVal);
+        } else if (typeof rawVal === 'string' && rawVal.trim() !== '') {
+          const trimmed = rawVal.trim();
+          const maybeNum = parseInt(trimmed, 10);
+          if (!Number.isNaN(maybeNum)) {
+            winner = mapNumeric(maybeNum);
+          } else {
+            const upper = trimmed.toUpperCase();
+            if (upper.includes('TRAITOR')) winner = 'traitor';
+            else if (upper.includes('INNOCENT')) winner = 'innocent';
+            else if (upper.includes('TIME')) winner = 'timeout';
+          }
+        }
+
+        if (winner) {
+          winners[rid] = winner;
+        }
       });
 
     let roundsWon = 0;
