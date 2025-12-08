@@ -29,7 +29,7 @@ router.get('/', async (_req, res) => {
       where: { type: 'ROUND_END' },
     });
 
-    const activeBans = 0; // Não temos bans ainda; manter 0.
+    const activeBans = 0; // Ainda não temos bans; manter 0.
 
     const chartRaw = await prisma.log.groupBy({
       by: ['serverId'],
@@ -56,28 +56,47 @@ router.get('/', async (_req, res) => {
       serverName: l.serverId,
     }));
 
-    // Map stats reais nos últimos 30 dias
+    // Map stats reais nos últimos 30 dias (contando ciclos de mapa, não cada log)
     const recentLogs = await prisma.log.findMany({
       where: { timestamp: { gte: thirtyDaysAgo } },
+      orderBy: { timestamp: 'asc' },
     });
 
     const mapStatsByMode: Record<string, { [map: string]: number }> = {};
+    const lastMapByServerMode: Record<string, string | undefined> = {};
+
     recentLogs.forEach((log) => {
-      const mode =
+      const modeKey =
         log.gameMode === 'MURDER'
           ? GameMode.MURDER
           : log.gameMode === 'SANDBOX'
           ? GameMode.SANDBOX
           : GameMode.TTT;
       const meta = (log as any).metadata || {};
-      const mapName = meta.map || meta.mapName || meta.Map || meta.level || 'Desconhecido';
-      if (!mapStatsByMode[mode]) mapStatsByMode[mode] = {};
-      mapStatsByMode[mode][mapName] = (mapStatsByMode[mode][mapName] || 0) + 1;
+      const mapName: string =
+        meta.map || meta.mapName || meta.Map || meta.level || 'Desconhecido';
+
+      const serverId = log.serverId || 'unknown';
+      const key = `${serverId}:${modeKey}`;
+      const lastMap = lastMapByServerMode[key];
+
+      // Conta uma vez por "ciclo" de mapa por servidor+modo:
+      // quando o mapa muda, incrementa o contador daquele mapa.
+      if (mapName && mapName !== lastMap) {
+        if (!mapStatsByMode[modeKey]) mapStatsByMode[modeKey] = {};
+        mapStatsByMode[modeKey][mapName] =
+          (mapStatsByMode[modeKey][mapName] || 0) + 1;
+        lastMapByServerMode[key] = mapName;
+      }
     });
 
     const mapStats: Record<string, any[]> = {};
     Object.entries(mapStatsByMode).forEach(([mode, maps]) => {
-      const total = Object.values(maps).reduce((acc: number, n: any) => acc + (n as number), 0) || 1;
+      const total =
+        Object.values(maps).reduce(
+          (acc: number, n: any) => acc + (n as number),
+          0,
+        ) || 1;
       mapStats[mode] = Object.entries(maps)
         .sort((a, b) => (b[1] as number) - (a[1] as number))
         .slice(0, 10)
