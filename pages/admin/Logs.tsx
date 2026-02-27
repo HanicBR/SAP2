@@ -563,6 +563,8 @@ const Logs: React.FC = () => {
   const [logTypeFilter, setLogTypeFilter] = useState<string>('ALL');
   const [actorTypeFilter, setActorTypeFilter] = useState<ActorTypeFilter>('ALL');
   const [targetSearch, setTargetSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [debouncedTargetSearch, setDebouncedTargetSearch] = useState('');
   const [pagingMode, setPagingMode] = useState<'page' | 'cursor'>('page');
 
   const [siteConfig, setSiteConfig] = useState<SiteConfig | null>(null);
@@ -599,17 +601,31 @@ const Logs: React.FC = () => {
     setCursorPage(1);
   }, [search, selectedMode, logTypeFilter, actorTypeFilter, targetSearch, pagingMode]);
 
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [search]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedTargetSearch(targetSearch);
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [targetSearch]);
+
   const loadLogs = useCallback(async () => {
     const requestId = ++requestSeq.current;
     setLoading(true);
 
     try {
       const result = await ApiService.getEventsQuery({
-        search: search.trim() || undefined,
+        search: debouncedSearch.trim() || undefined,
         mode: selectedMode === 'ALL' ? undefined : selectedMode,
         type: logTypeFilter === 'ALL' ? undefined : logTypeFilter,
         actorType: actorTypeFilter === 'ALL' ? undefined : actorTypeFilter,
-        target: targetSearch.trim() || undefined,
+        target: debouncedTargetSearch.trim() || undefined,
         limit: itemsPerPage,
         ...(pagingMode === 'page'
           ? { page: currentPage }
@@ -637,11 +653,11 @@ const Logs: React.FC = () => {
       }
     }
   }, [
-    search,
+    debouncedSearch,
     selectedMode,
     logTypeFilter,
     actorTypeFilter,
-    targetSearch,
+    debouncedTargetSearch,
     itemsPerPage,
     pagingMode,
     currentPage,
