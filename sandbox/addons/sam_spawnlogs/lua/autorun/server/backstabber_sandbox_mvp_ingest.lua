@@ -34,6 +34,8 @@ local c_max_payload_bytes = CreateConVar("bsb_max_payload_bytes", "524288", FCVA
 local c_max_retry_attempts = CreateConVar("bsb_max_retry_attempts", "0", FCVAR_ARCHIVE, "Max retry attempts for ingest batches (0 = infinite).")
 local c_queue_warn_size = CreateConVar("bsb_queue_warn_size", "1000", FCVAR_ARCHIVE, "Warn when ingest queue backlog reaches this size.")
 local c_prop_spawn_enable = CreateConVar("bsb_prop_spawn_enable", "1", FCVAR_ARCHIVE, "Enable PROP_SPAWN ingest events.")
+local c_prop_spawn_max_per_window = CreateConVar("bsb_prop_spawn_max_per_window", "0", FCVAR_ARCHIVE, "Max PROP_SPAWN events per player per window (0 = unlimited).")
+local c_prop_spawn_window_seconds = CreateConVar("bsb_prop_spawn_window_seconds", "10", FCVAR_ARCHIVE, "PROP_SPAWN rate-limit window in seconds.")
 local c_debug = CreateConVar("bsb_ingest_debug", "0", FCVAR_ARCHIVE, "Enable debug logs for ingest addon.")
 
 local ULID_ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
@@ -48,6 +50,7 @@ local flush_if_needed
 local discarded_batches_total = 0
 local discarded_events_total = 0
 local queue_warn_next = 0
+local prop_spawn_window_by_steamid = {}
 
 local sessions_by_steamid = {}
 local pending_disconnect_reason_by_steamid = {}
@@ -810,11 +813,148 @@ local function get_entity_position(ent)
 	}
 end
 
+local function get_prop_spawn_max_per_window()
+	return math_max(0, c_prop_spawn_max_per_window:GetInt())
+end
+
+local function get_prop_spawn_window_seconds()
+	return math_max(1, c_prop_spawn_window_seconds:GetFloat())
+end
+
+local function summarize_spawn_kind(kind_counts)
+	local unique = 0
+	local first_kind = nil
+	for kind, count in pairs(kind_counts or {}) do
+		if (tonumber(count) or 0) > 0 then
+			unique = unique + 1
+			if first_kind == nil then
+				first_kind = tostring(kind)
+			end
+		end
+	end
+
+	if unique == 0 then return "UNKNOWN" end
+	if unique == 1 then return first_kind or "UNKNOWN" end
+	return "MIXED"
+end
+
+local function flush_prop_spawn_window(steamid, force)
+	local sid = normalize_steamid(steamid)
+	if not sid then return end
+
+	local record = prop_spawn_window_by_steamid[sid]
+	if not record then return end
+	local now = RealTime()
+	if not force and (now - (record.window_started_at or now)) < (record.window_seconds or 1) then
+		return
+	end
+
+	prop_spawn_window_by_steamid[sid] = nil
+
+	if (record.dropped_count or 0) <= 0 then return end
+
+	local kind_counts = {}
+	for kind, count in pairs(record.kind_counts or {}) do
+		kind_counts[tostring(kind)] = tonumber(count) or 0
+	end
+
+	local event = build_base_event("GAME_EVENT", "SPAWN", "player")
+	event.steamId = sid
+	event.playerName = tostring(record.player_name or ("SteamID " .. sid))
+	event.metadata.eventKind = "PROP_SPAWN_BURST"
+	event.metadata.windowSeconds = tonumber(record.window_seconds) or get_prop_spawn_window_seconds()
+	event.metadata.limitPerWindow = tonumber(record.max_per_window) or get_prop_spawn_max_per_window()
+	event.metadata.allowedCount = tonumber(record.allowed_count) or 0
+	event.metadata.droppedCount = tonumber(record.dropped_count) or 0
+	event.metadata.totalObserved = event.metadata.allowedCount + event.metadata.droppedCount
+	event.metadata.spawnKind = summarize_spawn_kind(kind_counts)
+	event.metadata.spawnKinds = kind_counts
+	event.rawText = string_format(
+		"%s prop spawn burst dropped=%d allowed=%d window=%.1fs limit=%d kind=%s",
+		event.playerName or "Unknown",
+		event.metadata.droppedCount,
+		event.metadata.allowedCount,
+		event.metadata.windowSeconds,
+		event.metadata.limitPerWindow,
+		tostring(event.metadata.spawnKind or "UNKNOWN")
+	)
+	push_event(event)
+end
+
+local function start_prop_spawn_window(ply, sid)
+	local window_seconds = get_prop_spawn_window_seconds()
+	local max_per_window = get_prop_spawn_max_per_window()
+	local window_token = new_ulid()
+	local record = {
+		window_started_at = RealTime(),
+		window_seconds = window_seconds,
+		max_per_window = max_per_window,
+		allowed_count = 0,
+		dropped_count = 0,
+		kind_counts = {},
+		player_name = is_valid_player(ply) and ply:Nick() or ("SteamID " .. sid),
+		window_token = window_token,
+	}
+	prop_spawn_window_by_steamid[sid] = record
+
+	timer.Simple(window_seconds + 0.05, function()
+		local current = prop_spawn_window_by_steamid[sid]
+		if not current then return end
+		if current.window_token ~= window_token then return end
+		flush_prop_spawn_window(sid, false)
+	end)
+
+	return record
+end
+
+local function consume_prop_spawn_token(ply, spawn_kind)
+	local max_per_window = get_prop_spawn_max_per_window()
+	if max_per_window <= 0 then
+		return true
+	end
+
+	local sid = normalize_steamid(is_valid_player(ply) and ply:SteamID() or nil)
+	if not sid then
+		return true
+	end
+
+	local record = prop_spawn_window_by_steamid[sid]
+	local now = RealTime()
+	if record and (now - (record.window_started_at or now)) >= (record.window_seconds or 1) then
+		flush_prop_spawn_window(sid, true)
+		record = nil
+	end
+	if not record then
+		record = start_prop_spawn_window(ply, sid)
+	end
+
+	local kind = tostring(spawn_kind or "UNKNOWN")
+	record.kind_counts[kind] = (record.kind_counts[kind] or 0) + 1
+	record.player_name = is_valid_player(ply) and ply:Nick() or record.player_name
+
+	if (record.allowed_count or 0) < (record.max_per_window or max_per_window) then
+		record.allowed_count = (record.allowed_count or 0) + 1
+		return true
+	end
+
+	record.dropped_count = (record.dropped_count or 0) + 1
+	if record.dropped_count == 1 then
+		debug_log(string_format(
+			"prop spawn throttled sid=%s window=%.1fs limit=%d",
+			sid,
+			tonumber(record.window_seconds) or 0,
+			tonumber(record.max_per_window) or 0
+		))
+	end
+	return false
+end
+
 local function add_spawn_event(ply, spawn_kind, ent, explicit_model)
 	if not c_enable:GetBool() then return end
 	if not c_prop_spawn_enable:GetBool() then return end
 	if not is_valid_player(ply) then return end
 	if is_bot_player(ply) then return end
+	if not consume_prop_spawn_token(ply, spawn_kind) then return end
 
 	local class_name = get_entity_class(ent) or "unknown"
 	local model_name = tostring(explicit_model or get_entity_model(ent) or "unknown")
