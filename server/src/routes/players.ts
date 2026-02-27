@@ -92,11 +92,19 @@ const getRankFromPoints = (points: number): string => {
 
 const buildGameModeStats = (steamId: string, logs: any[], roundEndLogs?: any[]) => {
   const stats: any = {};
+  const seenLogIds = new Set<string>();
+  const dedupedLogs = logs.filter((log) => {
+    const id = String((log as any)?.id || '');
+    if (!id) return true;
+    if (seenLogIds.has(id)) return false;
+    seenLogIds.add(id);
+    return true;
+  });
 
   const byMode = {
-    TTT: logs.filter((l) => l.gameMode === 'TTT'),
-    MURDER: logs.filter((l) => l.gameMode === 'MURDER'),
-    SANDBOX: logs.filter((l) => l.gameMode === 'SANDBOX'),
+    TTT: dedupedLogs.filter((l) => l.gameMode === 'TTT'),
+    MURDER: dedupedLogs.filter((l) => l.gameMode === 'MURDER'),
+    SANDBOX: dedupedLogs.filter((l) => l.gameMode === 'SANDBOX'),
   };
 
   const tttLogs = byMode.TTT;
@@ -260,26 +268,72 @@ const buildGameModeStats = (steamId: string, logs: any[], roundEndLogs?: any[]) 
 
   const murderLogs = byMode.MURDER;
   if (murderLogs.length) {
-    const killLogs = murderLogs.filter((l) => l.type === 'KILL');
     const roundIds = new Set<string>();
-    const murdererRoundIds = new Set<string>();
+    const roleByRound: Record<string, 'murderer' | 'bystander' | undefined> = {};
 
-    for (const log of killLogs) {
+    for (const log of murderLogs) {
       const meta = ((log as any).metadata || {}) as any;
       const rid = meta.roundId;
-      if (typeof rid === 'string' && rid) {
-        roundIds.add(rid);
-        if (meta.attackerSteamId === steamId) {
-          murdererRoundIds.add(rid);
-        }
+      if (typeof rid !== 'string' || !rid) continue;
+      roundIds.add(rid);
+
+      if (roleByRound[rid]) continue;
+
+      const roles = [
+        (log as any).steamId === steamId ? (meta.role as string | undefined) : undefined,
+        meta.attackerSteamId === steamId ? (meta.attackerRole as string | undefined) : undefined,
+        meta.victimSteamId === steamId ? (meta.victimRole as string | undefined) : undefined,
+      ]
+        .filter(Boolean)
+        .map((r) => String(r).toLowerCase());
+
+      if (roles.includes('murderer')) {
+        roleByRound[rid] = 'murderer';
+      } else if (roles.includes('bystander') || roles.includes('innocent')) {
+        roleByRound[rid] = 'bystander';
       }
     }
 
-    const roundsPlayed = roundIds.size;
-    const murdererRounds = murdererRoundIds.size;
-    const murdererWins = murdererRounds;
-    const bystanderWins = 0;
+    const winnersByRound: Record<string, 'murderer' | 'bystander' | undefined> = {};
+    (roundEndLogs || [])
+      .filter((l) => (l.gameMode || '').toString() === 'MURDER' && l.type === 'ROUND_END')
+      .forEach((log) => {
+        const meta = ((log as any).metadata || {}) as any;
+        const rid = meta.roundId;
+        if (typeof rid !== 'string' || !rid) return;
 
+        const rawWinner = String(meta.winner ?? meta.result ?? '')
+          .trim()
+          .toUpperCase();
+        if (!rawWinner) return;
+        if (rawWinner.includes('MURDER')) {
+          winnersByRound[rid] = 'murderer';
+          return;
+        }
+        if (rawWinner.includes('BYSTANDER') || rawWinner.includes('INNOCENT')) {
+          winnersByRound[rid] = 'bystander';
+        }
+      });
+
+    let murdererRounds = 0;
+    let murdererWins = 0;
+    let bystanderWins = 0;
+    roundIds.forEach((rid) => {
+      const role = roleByRound[rid];
+      const winner = winnersByRound[rid];
+
+      if (role === 'murderer') {
+        murdererRounds += 1;
+        if (winner === 'murderer') murdererWins += 1;
+        return;
+      }
+
+      if (role === 'bystander' && winner === 'bystander') {
+        bystanderWins += 1;
+      }
+    });
+
+    const roundsPlayed = roundIds.size;
     if (roundsPlayed || murdererRounds || murdererWins || bystanderWins) {
       stats.murder = {
         roundsPlayed,
@@ -294,7 +348,54 @@ const buildGameModeStats = (steamId: string, logs: any[], roundEndLogs?: any[]) 
   if (sandboxLogs.length) {
     const propsSpawned = sandboxLogs.filter((l) => l.type === 'PROP_SPAWN').length;
     const totalSessions = sandboxLogs.filter((l) => l.type === 'CONNECT').length;
-    const totalPlayTimeHours = 0;
+    const sandboxSessionLogs = sandboxLogs.filter(
+      (l) => l.type === 'CONNECT' || l.type === 'DISCONNECT',
+    );
+
+    const sessionStartsById: Record<string, number> = {};
+    let fallbackStart: number | undefined;
+    let totalMs = 0;
+    const sortedSandboxSessionLogs = [...sandboxSessionLogs].sort(
+      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+    );
+
+    sortedSandboxSessionLogs.forEach((log) => {
+      const ts = new Date(log.timestamp).getTime();
+      const meta = ((log as any).metadata || {}) as any;
+      const sessionId = typeof meta.sessionId === 'string' && meta.sessionId ? meta.sessionId : undefined;
+
+      if (log.type === 'CONNECT') {
+        if (sessionId) {
+          sessionStartsById[sessionId] = ts;
+        } else {
+          fallbackStart = ts;
+        }
+        return;
+      }
+
+      if (log.type === 'DISCONNECT') {
+        if (sessionId && sessionStartsById[sessionId] !== undefined) {
+          totalMs += Math.max(0, ts - sessionStartsById[sessionId]);
+          delete sessionStartsById[sessionId];
+          return;
+        }
+        if (fallbackStart !== undefined) {
+          totalMs += Math.max(0, ts - fallbackStart);
+          fallbackStart = undefined;
+        }
+      }
+    });
+
+    const lastTimestamp = sortedSandboxSessionLogs.length
+      ? new Date(sortedSandboxSessionLogs[sortedSandboxSessionLogs.length - 1].timestamp).getTime()
+      : Date.now();
+    Object.values(sessionStartsById).forEach((startTs) => {
+      totalMs += Math.max(0, lastTimestamp - startTs);
+    });
+    if (fallbackStart !== undefined) {
+      totalMs += Math.max(0, lastTimestamp - fallbackStart);
+    }
+    const totalPlayTimeHours = Number((totalMs / (1000 * 60 * 60)).toFixed(2));
 
     if (propsSpawned || totalSessions || totalPlayTimeHours) {
       stats.sandbox = {
@@ -589,6 +690,8 @@ router.get('/:steamId', async (req, res) => {
   const logsByActor = await prisma.log.findMany({
     where: { steamId },
     select: {
+      id: true,
+      serverId: true,
       gameMode: true,
       type: true,
       metadata: true,
@@ -609,10 +712,13 @@ router.get('/:steamId', async (req, res) => {
         } as any,
       } as any,
       select: {
+        id: true,
+        serverId: true,
         gameMode: true,
         type: true,
         metadata: true,
         steamId: true,
+        timestamp: true,
       },
     });
   } catch {
@@ -624,12 +730,16 @@ router.get('/:steamId', async (req, res) => {
   // Load ROUND_END logs for TTT to compute wins/derrotas por rodada
   let roundEndLogs: any[] | undefined;
   if (allLogs.length) {
+    const statsRoundWindowDays = 90;
+    const statsRoundSince = new Date(Date.now() - statsRoundWindowDays * 24 * 60 * 60 * 1000);
     roundEndLogs = await prisma.log.findMany({
       where: {
-        gameMode: 'TTT',
+        gameMode: { in: ['TTT', 'MURDER'] },
         type: 'ROUND_END',
+        timestamp: { gte: statsRoundSince },
       },
       select: {
+        id: true,
         gameMode: true,
         type: true,
         metadata: true,
