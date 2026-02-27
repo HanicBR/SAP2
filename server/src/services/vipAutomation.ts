@@ -9,6 +9,7 @@ export interface VipAutomationBuildInput {
   vipPlan?: string | null;
   vipExpiry?: Date | string | null;
   serverId?: string | null;
+  metadata?: Record<string, unknown>;
 }
 
 export interface VipAutomationBuildResult {
@@ -264,6 +265,7 @@ const buildVipAutomation = async (
     serverId: serverResolution.serverId,
     command: renderResult.command,
     metadata: {
+      ...(input.metadata || {}),
       source: 'vip_automation',
       action: input.action,
       steamId: String(input.steamId || '').trim(),

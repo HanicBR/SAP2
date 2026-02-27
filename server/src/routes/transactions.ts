@@ -3,6 +3,7 @@ import { prisma } from '../db/client';
 import { authMiddleware, requireRole } from '../middleware/auth';
 import { UserRole } from '../domain';
 import { TransactionType, TransactionCategory } from '@prisma/client';
+import { dispatchVipAutomationAction } from '../services/vipAutomation';
 
 const router = Router();
 
@@ -97,6 +98,16 @@ router.post('/', async (req, res) => {
     },
   });
 
+  let vipDispatch:
+    | {
+        queued: boolean;
+        skipped?: boolean;
+        reason?: string;
+        serverId?: string;
+        actionId?: string;
+      }
+    | undefined;
+
   // Se for venda de VIP, marca player como VIP
   if (type === 'INCOME' && relatedSteamId && vipPlan) {
     const expiry = new Date();
@@ -124,12 +135,41 @@ router.post('/', async (req, res) => {
         vipExpiry: expiry,
       },
     });
+
+    try {
+      const dispatch = await dispatchVipAutomationAction({
+        action: 'GRANT',
+        steamId: relatedSteamId,
+        vipPlan,
+        vipExpiry: expiry,
+        metadata: {
+          trigger: 'transaction_create',
+          transactionId: tx.id,
+          category,
+        },
+      });
+
+      vipDispatch = {
+        queued: dispatch.queued,
+        ...(dispatch.skipped ? { skipped: true } : {}),
+        ...(dispatch.reason ? { reason: dispatch.reason } : {}),
+        ...(dispatch.serverId ? { serverId: dispatch.serverId } : {}),
+        ...(dispatch.actionId ? { actionId: dispatch.actionId } : {}),
+      };
+    } catch (err: any) {
+      console.error('VIP automation dispatch failed', err);
+      vipDispatch = {
+        queued: false,
+        reason: 'dispatch_error',
+      };
+    }
   }
 
   return res.status(201).json({
     ...tx,
     date: tx.date.toISOString(),
     createdAt: tx.createdAt.toISOString(),
+    ...(vipDispatch ? { dispatch: vipDispatch } : {}),
   });
 });
 
