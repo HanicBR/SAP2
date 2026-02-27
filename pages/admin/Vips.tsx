@@ -1,6 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ApiService } from '../../services/api';
-import { VipAdminItem, VipAutomationActionItem, VipAutomationActionStatus } from '../../types';
+import {
+  VipAdminItem,
+  VipAutomationActionItem,
+  VipAutomationActionStatus,
+  VipAutomationConfig,
+} from '../../types';
 import { Icons } from '../../components/Icon';
 import { useConfig } from '../../contexts/ConfigContext';
 
@@ -24,13 +29,21 @@ const Vips: React.FC = () => {
   const [actions, setActions] = useState<VipAutomationActionItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionsLoading, setActionsLoading] = useState(true);
+  const [automationLoading, setAutomationLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [reconcileBusy, setReconcileBusy] = useState(false);
+  const [automationSaving, setAutomationSaving] = useState(false);
   const [feedback, setFeedback] = useState('');
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<'ALL' | 'ACTIVE' | 'EXPIRED'>('ALL');
   const [actionStatus, setActionStatus] = useState<'ALL' | VipAutomationActionStatus>('ALL');
   const [actionSteamId, setActionSteamId] = useState('');
+  const [automationConfig, setAutomationConfig] = useState<VipAutomationConfig>({
+    enabled: false,
+    grantTemplate: '',
+    revokeTemplate: '',
+    source: 'env',
+  });
 
   const [grantSteamId, setGrantSteamId] = useState('');
   const [grantName, setGrantName] = useState('');
@@ -96,8 +109,20 @@ const Vips: React.FC = () => {
     }
   };
 
+  const loadAutomationConfig = async () => {
+    setAutomationLoading(true);
+    try {
+      const result = await ApiService.getVipAutomationConfig();
+      setAutomationConfig(result);
+    } catch (err: any) {
+      setFeedback(err?.message || 'Erro ao carregar config da automacao VIP');
+    } finally {
+      setAutomationLoading(false);
+    }
+  };
+
   const refreshAll = async () => {
-    await Promise.all([loadData(), loadActions()]);
+    await Promise.all([loadData(), loadActions(), loadAutomationConfig()]);
   };
 
   useEffect(() => {
@@ -121,6 +146,10 @@ const Vips: React.FC = () => {
   useEffect(() => {
     loadActions();
   }, [actionStatus]);
+
+  useEffect(() => {
+    loadAutomationConfig();
+  }, []);
 
   const handleGrant = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -234,6 +263,26 @@ const Vips: React.FC = () => {
     }
   };
 
+  const handleSaveAutomationConfig = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAutomationSaving(true);
+    setFeedback('');
+    try {
+      const updated = await ApiService.updateVipAutomationConfig({
+        enabled: automationConfig.enabled,
+        sandboxServerId: automationConfig.sandboxServerId?.trim() || undefined,
+        grantTemplate: automationConfig.grantTemplate,
+        revokeTemplate: automationConfig.revokeTemplate,
+      });
+      setAutomationConfig(updated);
+      setFeedback('Configuracao da automacao VIP salva.');
+    } catch (err: any) {
+      setFeedback(err?.message || 'Erro ao salvar config da automacao VIP');
+    } finally {
+      setAutomationSaving(false);
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -244,7 +293,7 @@ const Vips: React.FC = () => {
         <button
           onClick={refreshAll}
           className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-4 py-2 rounded text-sm font-bold uppercase tracking-wider flex items-center"
-          disabled={loading || actionsLoading}
+          disabled={loading || actionsLoading || automationLoading}
         >
           <Icons.RefreshCw className="w-4 h-4 mr-2" />
           Atualizar
@@ -254,6 +303,71 @@ const Vips: React.FC = () => {
       {feedback ? (
         <div className="bg-zinc-900 border border-zinc-700 rounded p-3 text-sm text-zinc-300">{feedback}</div>
       ) : null}
+
+      <form onSubmit={handleSaveAutomationConfig} className="bg-zinc-900 border border-zinc-800 rounded p-4 space-y-3">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+          <h2 className="text-sm uppercase font-bold text-zinc-300">Automacao VIP no servidor</h2>
+          <span className="text-xs text-zinc-500">source={automationConfig.source || 'env'}</span>
+        </div>
+        <label className="flex items-center gap-2 text-sm text-zinc-300">
+          <input
+            type="checkbox"
+            checked={automationConfig.enabled}
+            onChange={(e) =>
+              setAutomationConfig((prev) => ({
+                ...prev,
+                enabled: e.target.checked,
+              }))
+            }
+          />
+          Ativar envio automatico de comando VIP
+        </label>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <input
+            value={automationConfig.sandboxServerId || ''}
+            onChange={(e) =>
+              setAutomationConfig((prev) => ({
+                ...prev,
+                sandboxServerId: e.target.value,
+              }))
+            }
+            className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm font-mono"
+            placeholder="Server ID Sandbox (opcional)"
+          />
+          <div className="text-xs text-zinc-500 flex items-center">
+            Tokens: {'{{steamId}}'}, {'{{vipPlanServer}}'}, {'{{vipExpiryUnix}}'}
+          </div>
+          <input
+            value={automationConfig.grantTemplate}
+            onChange={(e) =>
+              setAutomationConfig((prev) => ({
+                ...prev,
+                grantTemplate: e.target.value,
+              }))
+            }
+            className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm font-mono md:col-span-2"
+            placeholder='Template GRANT. Ex: sam setrank {{steamId}} {{vipPlanServer}}'
+          />
+          <input
+            value={automationConfig.revokeTemplate}
+            onChange={(e) =>
+              setAutomationConfig((prev) => ({
+                ...prev,
+                revokeTemplate: e.target.value,
+              }))
+            }
+            className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm font-mono md:col-span-2"
+            placeholder='Template REVOKE. Ex: sam setrank {{steamId}} "user"'
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={automationSaving}
+          className="bg-brand hover:bg-brand-dark text-white px-4 py-2 rounded text-sm font-bold uppercase disabled:opacity-60"
+        >
+          Salvar automacao
+        </button>
+      </form>
 
       <div className="bg-zinc-900 border border-zinc-800 rounded p-4 flex flex-wrap gap-2 items-center">
         <span className="text-xs uppercase font-bold text-zinc-400">VIP expirado</span>

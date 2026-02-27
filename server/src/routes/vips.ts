@@ -3,7 +3,11 @@ import { prisma } from '../db/client';
 import { VipAutomationActionStatus } from '@prisma/client';
 import { authMiddleware, requireRole } from '../middleware/auth';
 import { UserRole } from '../domain';
-import { dispatchVipAutomationAction } from '../services/vipAutomation';
+import {
+  dispatchVipAutomationAction,
+  getVipAutomationAdminConfig,
+  setVipAutomationAdminConfig,
+} from '../services/vipAutomation';
 import { reconcileExpiredVips } from '../services/vipExpiryReconciler';
 
 const router = Router();
@@ -161,6 +165,33 @@ router.get('/', async (req, res) => {
     items,
     total: items.length,
   });
+});
+
+router.get('/automation-config', async (_req, res) => {
+  const config = await getVipAutomationAdminConfig();
+  return res.json(config);
+});
+
+router.put('/automation-config', async (req, res) => {
+  try {
+    const body = (req as any).body || {};
+    const enabled = parseBoolean(body.enabled, false);
+    const grantTemplate = String(body.grantTemplate || '').trim();
+    const revokeTemplate = String(body.revokeTemplate || '').trim();
+    const sandboxServerId = String(body.sandboxServerId || '').trim() || undefined;
+
+    const updated = await setVipAutomationAdminConfig({
+      enabled,
+      grantTemplate,
+      revokeTemplate,
+      ...(sandboxServerId ? { sandboxServerId } : {}),
+    });
+    return res.json(updated);
+  } catch (err: any) {
+    return res.status(400).json({
+      error: err?.message ? String(err.message) : 'invalid_vip_automation_config',
+    });
+  }
 });
 
 router.get('/actions', async (req, res) => {

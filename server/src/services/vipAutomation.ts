@@ -39,6 +39,14 @@ type VipAutomationEnvConfig = {
   revokeTemplate: string | undefined;
 };
 
+export interface VipAutomationAdminConfig {
+  enabled: boolean;
+  sandboxServerId?: string;
+  grantTemplate: string;
+  revokeTemplate: string;
+  source: 'env' | 'site_config';
+}
+
 type VipAutomationBuildOptions = {
   allowRawTokens: boolean;
   enforceSingleLineCommand: boolean;
@@ -57,6 +65,17 @@ const parseBoolEnv = (value: string | undefined, fallback = false): boolean => {
     .toLowerCase();
   if (!normalized) return fallback;
   return normalized === '1' || normalized === 'true' || normalized === 'yes' || normalized === 'on';
+};
+
+const parseBoolUnknown = (value: unknown): boolean | undefined => {
+  if (typeof value === 'boolean') return value;
+  const normalized = String(value ?? '')
+    .trim()
+    .toLowerCase();
+  if (!normalized) return undefined;
+  if (['1', 'true', 'yes', 'on'].includes(normalized)) return true;
+  if (['0', 'false', 'no', 'off'].includes(normalized)) return false;
+  return undefined;
 };
 
 const quoteConsoleArg = (value: string) => {
@@ -90,6 +109,55 @@ const getEnvConfig = (): VipAutomationEnvConfig => {
   };
 };
 
+const readSiteVipAutomationOverride = async (): Promise<Partial<VipAutomationEnvConfig>> => {
+  const row = await prisma.siteConfig.findUnique({
+    where: { id: 1 },
+    select: { data: true },
+  });
+
+  const root =
+    row?.data && typeof row.data === 'object' && !Array.isArray(row.data)
+      ? (row.data as Record<string, unknown>)
+      : null;
+  if (!root) return {};
+
+  const raw = root.vipAutomation;
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {};
+  const data = raw as Record<string, unknown>;
+
+  const enabled = parseBoolUnknown(data.enabled);
+  const sandboxServerId = String(data.sandboxServerId || '').trim() || undefined;
+  const grantTemplate = String(data.grantTemplate || '').trim() || undefined;
+  const revokeTemplate = String(data.revokeTemplate || '').trim() || undefined;
+
+  return {
+    ...(enabled !== undefined ? { enabled } : {}),
+    ...(sandboxServerId ? { sandboxServerId } : {}),
+    ...(grantTemplate ? { grantTemplate } : {}),
+    ...(revokeTemplate ? { revokeTemplate } : {}),
+  };
+};
+
+const getRuntimeConfig = async (): Promise<VipAutomationEnvConfig & { source: 'env' | 'site_config' }> => {
+  const env = getEnvConfig();
+  try {
+    const override = await readSiteVipAutomationOverride();
+    if (!Object.keys(override).length) {
+      return { ...env, source: 'env' };
+    }
+    return {
+      enabled: override.enabled ?? env.enabled,
+      sandboxServerId: override.sandboxServerId ?? env.sandboxServerId,
+      grantTemplate: override.grantTemplate ?? env.grantTemplate,
+      revokeTemplate: override.revokeTemplate ?? env.revokeTemplate,
+      source: 'site_config',
+    };
+  } catch (err: any) {
+    console.error('VIP automation config fallback to env', err?.message || err);
+    return { ...env, source: 'env' };
+  }
+};
+
 const parseExpiry = (raw: Date | string | null | undefined): Date | null => {
   if (!raw) return null;
   if (raw instanceof Date) return Number.isNaN(raw.getTime()) ? null : raw;
@@ -116,6 +184,9 @@ const extractTemplateTokens = (template: string): string[] => {
   });
   return tokens;
 };
+
+const templateHasRawTokens = (template: string) =>
+  extractTemplateTokens(template).some((token) => /raw$/i.test(token));
 
 const renderTemplate = (
   template: string,
@@ -273,11 +344,84 @@ export const getVipAutomationMetrics = () => ({
   lastFailureReason: metrics.lastFailureReason || undefined,
 });
 
+export const getVipAutomationAdminConfig = async (): Promise<VipAutomationAdminConfig> => {
+  const config = await getRuntimeConfig();
+  return {
+    enabled: config.enabled,
+    ...(config.sandboxServerId ? { sandboxServerId: config.sandboxServerId } : {}),
+    grantTemplate: config.grantTemplate || '',
+    revokeTemplate: config.revokeTemplate || '',
+    source: config.source,
+  };
+};
+
+export const setVipAutomationAdminConfig = async (input: {
+  enabled: boolean;
+  sandboxServerId?: string | null;
+  grantTemplate: string;
+  revokeTemplate: string;
+}): Promise<VipAutomationAdminConfig> => {
+  const enabled = input.enabled === true;
+  const sandboxServerId = String(input.sandboxServerId || '').trim() || undefined;
+  const grantTemplate = String(input.grantTemplate || '').trim();
+  const revokeTemplate = String(input.revokeTemplate || '').trim();
+
+  if (enabled && (!grantTemplate || !revokeTemplate)) {
+    throw new Error('missing_template_when_enabled');
+  }
+
+  if (templateHasRawTokens(grantTemplate) || templateHasRawTokens(revokeTemplate)) {
+    throw new Error('raw_tokens_not_allowed_in_dispatch');
+  }
+
+  if (/[\r\n]/.test(grantTemplate) || /[\r\n]/.test(revokeTemplate)) {
+    throw new Error('template_contains_newline');
+  }
+
+  const existing = await prisma.siteConfig.findUnique({
+    where: { id: 1 },
+    select: { data: true },
+  });
+
+  const root =
+    existing?.data && typeof existing.data === 'object' && !Array.isArray(existing.data)
+      ? (existing.data as Record<string, unknown>)
+      : {};
+
+  const nextVipAutomation: Record<string, unknown> = {
+    enabled,
+    grantTemplate,
+    revokeTemplate,
+  };
+  if (sandboxServerId) {
+    nextVipAutomation.sandboxServerId = sandboxServerId;
+  }
+
+  const nextData: Record<string, unknown> = {
+    ...root,
+    vipAutomation: nextVipAutomation,
+  };
+
+  await prisma.siteConfig.upsert({
+    where: { id: 1 },
+    update: { data: nextData as any },
+    create: { id: 1, data: nextData as any },
+  });
+
+  return {
+    enabled,
+    ...(sandboxServerId ? { sandboxServerId } : {}),
+    grantTemplate,
+    revokeTemplate,
+    source: 'site_config',
+  };
+};
+
 const buildVipAutomation = async (
   input: VipAutomationBuildInput,
   options: VipAutomationBuildOptions,
 ): Promise<VipAutomationBuildResult> => {
-  const config = getEnvConfig();
+  const config = await getRuntimeConfig();
   if (!config.enabled) {
     return {
       ok: false,
@@ -301,7 +445,7 @@ const buildVipAutomation = async (
   }
 
   if (!options.allowRawTokens) {
-    const hasRawToken = extractTemplateTokens(template).some((token) => /raw$/i.test(token));
+    const hasRawToken = templateHasRawTokens(template);
     if (hasRawToken) {
       bumpCommandBuildFailure('raw_tokens_not_allowed_in_dispatch');
       return {

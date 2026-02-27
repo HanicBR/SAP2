@@ -224,6 +224,14 @@ export interface VipReconcileResponse {
   items: VipReconcileItem[];
 }
 
+export interface VipAutomationConfig {
+  enabled: boolean;
+  sandboxServerId?: string;
+  grantTemplate: string;
+  revokeTemplate: string;
+  source?: 'env' | 'site_config';
+}
+
 // --- LOGS & EVENTS SYSTEM ---
 
 export enum LogType {
@@ -561,5 +569,11 @@ export interface SiteConfig {
     ignoredTools?: string[];
     ignoredCommands?: string[];
     rawTextFilters?: string[];
+  };
+  vipAutomation?: {
+    enabled: boolean;
+    sandboxServerId?: string;
+    grantTemplate: string;
+    revokeTemplate: string;
   };
 }

@@ -177,4 +177,10 @@ export interface SiteConfig {
     ignoredCommands?: string[];
     rawTextFilters?: string[];
   };
+  vipAutomation?: {
+    enabled: boolean;
+    sandboxServerId?: string;
+    grantTemplate: string;
+    revokeTemplate: string;
+  };
 }

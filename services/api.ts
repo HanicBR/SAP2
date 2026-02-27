@@ -1,7 +1,7 @@
 
 
 import { MOCK_SERVERS, MOCK_EVENTS, MOCK_STATS, VIP_PLANS, MOCK_SUSPICIOUS_GROUPS, MOCK_PLAYERS, MOCK_USERS, MOCK_TRANSACTIONS, generateServerAnalytics, DEFAULT_SITE_CONFIG } from '../constants';
-import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse } from '../types';
+import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig } from '../types';
 
 // Utility to simulate network delay (used as fallback)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -724,6 +724,58 @@ export const ApiService = {
     return {
       items: items.slice(0, limit),
       total: items.length,
+    };
+  },
+
+  getVipAutomationConfig: async (): Promise<VipAutomationConfig> => {
+    if (hasApi) {
+      return apiFetch<VipAutomationConfig>('/vips/automation-config');
+    }
+
+    await delay(100);
+    const local = siteConfigDb.vipAutomation;
+    return {
+      enabled: local?.enabled === true,
+      sandboxServerId: local?.sandboxServerId,
+      grantTemplate: local?.grantTemplate || '',
+      revokeTemplate: local?.revokeTemplate || '',
+      source: 'site_config',
+    };
+  },
+
+  updateVipAutomationConfig: async (data: {
+    enabled: boolean;
+    sandboxServerId?: string;
+    grantTemplate: string;
+    revokeTemplate: string;
+  }): Promise<VipAutomationConfig> => {
+    if (hasApi) {
+      return apiFetch<VipAutomationConfig>('/vips/automation-config', {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    }
+
+    await delay(100);
+    siteConfigDb = {
+      ...siteConfigDb,
+      vipAutomation: {
+        enabled: data.enabled,
+        ...(String(data.sandboxServerId || '').trim()
+          ? { sandboxServerId: String(data.sandboxServerId || '').trim() }
+          : {}),
+        grantTemplate: String(data.grantTemplate || ''),
+        revokeTemplate: String(data.revokeTemplate || ''),
+      },
+    };
+    try {
+      localStorage.setItem('backstabber_site_config', JSON.stringify(siteConfigDb));
+    } catch {
+      // ignore storage errors
+    }
+    return {
+      ...siteConfigDb.vipAutomation,
+      source: 'site_config',
     };
   },
 

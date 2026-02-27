@@ -18,6 +18,7 @@ const toArrayOrFallback = <T,>(value: unknown, fallback: T[]): T[] =>
 const normalizeSiteConfig = (raw?: Partial<SiteConfig>): SiteConfig => {
   const next = (raw || {}) as Partial<SiteConfig>;
   const nextVip = (next.vip || {}) as Partial<SiteConfig['vip']>;
+  const nextVipAutomation = next.vipAutomation;
   const defaultVip = DEFAULT_SITE_CONFIG.vip;
 
   return {
@@ -56,6 +57,18 @@ const normalizeSiteConfig = (raw?: Partial<SiteConfig>): SiteConfig => {
       ...(DEFAULT_SITE_CONFIG.logs || {}),
       ...(next.logs || {}),
     },
+    ...(nextVipAutomation
+      ? {
+          vipAutomation: {
+            enabled: nextVipAutomation.enabled === true,
+            ...(String(nextVipAutomation.sandboxServerId || '').trim()
+              ? { sandboxServerId: String(nextVipAutomation.sandboxServerId || '').trim() }
+              : {}),
+            grantTemplate: String(nextVipAutomation.grantTemplate || '').trim(),
+            revokeTemplate: String(nextVipAutomation.revokeTemplate || '').trim(),
+          },
+        }
+      : {}),
   };
 };
 
