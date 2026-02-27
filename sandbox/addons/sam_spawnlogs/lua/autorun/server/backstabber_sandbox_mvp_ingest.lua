@@ -838,6 +838,16 @@ local function summarize_spawn_kind(kind_counts)
 	return "MIXED"
 end
 
+local function describe_spawn_kind_pt(kind)
+	local normalized = string_upper(tostring(kind or "UNKNOWN"))
+	if normalized == "PROP" then return "props" end
+	if normalized == "SENT" then return "entidades scriptadas" end
+	if normalized == "NPC" then return "NPCs" end
+	if normalized == "VEHICLE" then return "veiculos" end
+	if normalized == "MIXED" then return "tipos mistos" end
+	return "tipo desconhecido"
+end
+
 local function flush_prop_spawn_window(steamid, force)
 	local sid = normalize_steamid(steamid)
 	if not sid then return end
@@ -870,13 +880,13 @@ local function flush_prop_spawn_window(steamid, force)
 	event.metadata.spawnKind = summarize_spawn_kind(kind_counts)
 	event.metadata.spawnKinds = kind_counts
 	event.rawText = string_format(
-		"%s prop spawn burst dropped=%d allowed=%d window=%.1fs limit=%d kind=%s",
-		event.playerName or "Unknown",
+		"%s ultrapassou o limite de spawn: %d bloqueados e %d registrados nos ultimos %.1f segundos (limite: %d, tipo: %s).",
+		event.playerName or "Jogador",
 		event.metadata.droppedCount,
 		event.metadata.allowedCount,
 		event.metadata.windowSeconds,
 		event.metadata.limitPerWindow,
-		tostring(event.metadata.spawnKind or "UNKNOWN")
+		describe_spawn_kind_pt(event.metadata.spawnKind)
 	)
 	push_event(event)
 end
