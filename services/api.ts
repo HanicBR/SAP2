@@ -746,7 +746,7 @@ export const ApiService = {
 
   createPunishment: async (
     steamId: string,
-    data: { type: PunishmentType; reason: string; duration?: string; active?: boolean; staffName: string },
+    data: { type: PunishmentType; reason: string; duration?: string; active?: boolean; staffName?: string },
   ): Promise<void> => {
     if (hasApi) {
       await apiFetch(`/players/${steamId}/punishments`, {

@@ -4,6 +4,7 @@ import { authMiddleware, requireRole } from '../middleware/auth';
 import { UserRole } from '../domain';
 
 const router = Router();
+const VALID_PUNISHMENT_TYPES = new Set(['BAN', 'MUTE', 'GAG', 'KICK', 'WARN']);
 
 const toDomainMode = (mode: string): string =>
   mode === 'SANDBOX' ? 'Sandbox' : mode === 'MURDER' ? 'Murder' : 'TTT';
@@ -503,16 +504,6 @@ const buildActivityHistory = (
     }
   });
 
-  const nowMs = now.getTime();
-  Object.values(sessionsById).forEach((sess) => {
-    if (sess.start !== undefined) {
-      addDuration(sess.dayKey, Math.max(0, nowMs - sess.start));
-    }
-  });
-  if (fallbackStart !== undefined) {
-    addDuration(fallbackDayKey, Math.max(0, nowMs - fallbackStart));
-  }
-
   return orderedKeys.map((key) => {
     const bucket = buckets[key] || { date: key, hoursPlayed: 0, sessions: 0 };
     return {
@@ -567,13 +558,14 @@ const countShortSessions = (
 const computePlaytimeHours = (logs: { type: string; timestamp: Date; metadata: unknown }[]): number => {
   if (!logs.length) return 0;
 
-  const sorted = [...logs].sort(
+  const sessionLogs = logs.filter((log) => log.type === 'CONNECT' || log.type === 'DISCONNECT');
+  if (!sessionLogs.length) return 0;
+
+  const sorted = [...sessionLogs].sort(
     (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
   );
-  const lastTs = sorted[sorted.length - 1]?.timestamp.getTime();
-  if (!lastTs) return 0;
 
-  const sessionsById: Record<string, { start?: number; end?: number }> = {};
+  const sessionsById: Record<string, { start?: number }> = {};
   let lastConnectFallback: number | undefined;
   let totalMs = 0;
 
@@ -588,7 +580,10 @@ const computePlaytimeHours = (logs: { type: string; timestamp: Date; metadata: u
       if (l.type === 'CONNECT') {
         sess.start = ts;
       } else if (l.type === 'DISCONNECT') {
-        sess.end = ts;
+        if (sess.start !== undefined) {
+          totalMs += Math.max(0, ts - sess.start);
+          delete sessionsById[sessionId];
+        }
       }
     } else {
       if (l.type === 'CONNECT') {
@@ -600,18 +595,7 @@ const computePlaytimeHours = (logs: { type: string; timestamp: Date; metadata: u
     }
   });
 
-  Object.values(sessionsById).forEach((s) => {
-    if (s.start !== undefined) {
-      const end = s.end ?? lastTs;
-      totalMs += Math.max(0, end - s.start);
-    }
-  });
-
-  if (lastConnectFallback !== undefined) {
-    totalMs += Math.max(0, lastTs - lastConnectFallback);
-  }
-
-  return Math.round(totalMs / (1000 * 60 * 60));
+  return Number((totalMs / (1000 * 60 * 60)).toFixed(2));
 };
 
 const computeSessionMetricsByServer = (
@@ -663,22 +647,6 @@ const computeSessionMetricsByServer = (
         totalsMsByServer[serverId] = (totalsMsByServer[serverId] || 0) + Math.max(0, ts - fallbackStart);
         fallbackByServer[serverId] = undefined;
       }
-    }
-  });
-
-  const nowMs = Date.now();
-  Object.values(sessionsById).forEach((sess) => {
-    if (sess.start !== undefined && sess.serverId) {
-      ensureServer(sess.serverId);
-      totalsMsByServer[sess.serverId] =
-        (totalsMsByServer[sess.serverId] || 0) + Math.max(0, nowMs - sess.start);
-    }
-  });
-
-  Object.entries(fallbackByServer).forEach(([serverId, start]) => {
-    if (start !== undefined) {
-      ensureServer(serverId);
-      totalsMsByServer[serverId] = (totalsMsByServer[serverId] || 0) + Math.max(0, nowMs - start);
     }
   });
 
@@ -1170,8 +1138,17 @@ router.post(
       staffName?: string;
     };
 
-    if (!type || !reason || !staffName) {
-      return res.status(400).json({ error: 'Missing fields' });
+    const parsedType = String(type || '').trim().toUpperCase();
+    const parsedReason = String(reason || '').trim();
+    const parsedDuration = String(duration || '').trim();
+    const resolvedStaffName =
+      String(req.user?.username || '').trim() || String(staffName || '').trim() || 'Sistema';
+
+    if (!VALID_PUNISHMENT_TYPES.has(parsedType)) {
+      return res.status(400).json({ error: 'Invalid punishment type' });
+    }
+    if (!parsedReason) {
+      return res.status(400).json({ error: 'Missing reason' });
     }
 
     const player = await prisma.playerProfile.findUnique({ where: { steamId } });
@@ -1180,20 +1157,23 @@ router.post(
     }
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const created = (await prisma.$queryRaw<any[]>`
-        INSERT INTO "Punishment" ("steamId","type","reason","staffName","date","duration","active")
-        VALUES (${steamId}, ${type}, ${reason}, ${staffName}, NOW(), ${duration ?? null}, ${active ?? true})
-        RETURNING id, "steamId", type, reason, "staffName", "date", duration, active
-      `) as any[];
+      const p = await prisma.punishment.create({
+        data: {
+          steamId,
+          type: parsedType as any,
+          reason: parsedReason,
+          staffName: resolvedStaffName,
+          duration: parsedDuration || null,
+          active: typeof active === 'boolean' ? active : true,
+        },
+      });
 
-      const p = created[0];
       return res.status(201).json({
         id: p.id,
         type: p.type,
         reason: p.reason,
         staffName: p.staffName,
-        date: p.date instanceof Date ? p.date.toISOString() : new Date(p.date).toISOString(),
+        date: p.date.toISOString(),
         duration: p.duration || undefined,
         active: Boolean(p.active),
       });

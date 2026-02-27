@@ -158,13 +158,12 @@ const PlayerProfile: React.FC = () => {
         reason: reason.trim(),
         duration,
         active: true,
-        // Em produção, pegaria o nome do admin logado
-        staffName: 'AdminUser',
       });
       const updatedPlayer = await ApiService.getPlayerBySteamId(player.steamId);
       setPlayer(updatedPlayer);
-    } catch {
-      alert('Erro ao aplicar punição.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro desconhecido';
+      alert(`Erro ao aplicar punicao: ${message}`);
     }
   };
 
