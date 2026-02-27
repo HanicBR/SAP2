@@ -6,6 +6,7 @@ import { useParams, Link } from 'react-router-dom';
 import { ApiService } from '../../services/api';
 import { Player, ServerEvent, GameServer, SuspiciousGroup } from '../../types';
 import { Icons } from '../../components/Icon';
+import { formatLogMessage } from '../../components/logMessage';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, 
   AreaChart, Area 
@@ -766,7 +767,7 @@ const PlayerProfile: React.FC = () => {
                               {log.type}
                            </td>
                            <td className="px-6 py-4 text-sm text-zinc-400 max-w-md truncate">
-                              {log.rawText}
+                              {formatLogMessage(log)}
                            </td>
                         </tr>
                      ))

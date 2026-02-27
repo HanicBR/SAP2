@@ -5,6 +5,7 @@ import { LogEntry, LogType, GameMode, SiteConfig } from '../../types';
 import { Icons } from '../../components/Icon';
 import { Pagination } from '../../components/Pagination';
 import { Link } from 'react-router-dom';
+import { formatLogMessage } from '../../components/logMessage';
 
 // --- TYPE DEFINITIONS ---
 interface RoundGroup {
@@ -178,14 +179,9 @@ const LogRow = React.memo(({
                <span className="text-yellow-500/80 font-mono text-xs">{log.metadata.propModel}</span>
             </span>
          ) : (
-           <span className="text-zinc-400">
-              {log.playerName && (
-                <span className="mr-1">
-                   <PlayerLink name={log.playerName} steamId={log.steamId} role="none" />
-                </span>
-              )}
-              {log.rawText.replace(log.playerName || '', '').trim()}
-           </span>
+            <span className="text-zinc-400">
+               {formatLogMessage(log)}
+            </span>
          )}
       </div>
       

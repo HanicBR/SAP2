@@ -155,6 +155,7 @@ export interface LogMetadata {
   punishmentType?: 'BAN' | 'KICK' | 'WARN' | 'MUTE' | 'GAG';
   action?: string;
   targetSteamId?: string;
+  targetName?: string;
   reason?: string;
   durationText?: string;
   durationMinutes?: number | null;
