@@ -292,7 +292,7 @@ const PlayerProfile: React.FC = () => {
                   >
                      Copiar SteamID
                   </button>
-                  <button className="px-4 py-2 bg-red-900/20 hover:bg-red-900/40 text-red-500 rounded text-sm font-bold uppercase transition-colors border border-red-900/50 flex items-center">
+                  <button onClick={handleApplyPunishment} className="px-4 py-2 bg-red-900/20 hover:bg-red-900/40 text-red-500 rounded text-sm font-bold uppercase transition-colors border border-red-900/50 flex items-center">
                      <Icons.Gavel className="w-4 h-4 mr-2" />
                      Aplicar Punição
                   </button>
