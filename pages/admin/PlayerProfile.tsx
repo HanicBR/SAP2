@@ -34,9 +34,14 @@ const PlayerProfile: React.FC = () => {
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
   const [editingNoteContent, setEditingNoteContent] = useState('');
   const [showPunishmentForm, setShowPunishmentForm] = useState(false);
-  const [punishmentType, setPunishmentType] = useState<'BAN' | 'MUTE' | 'GAG' | 'KICK' | 'WARN'>('WARN');
+  const [punishmentType, setPunishmentType] = useState<'BAN' | 'MUTE' | 'GAG' | 'KICK'>('BAN');
   const [punishmentReason, setPunishmentReason] = useState('');
   const [punishmentDuration, setPunishmentDuration] = useState('');
+  const [punishmentSubmitting, setPunishmentSubmitting] = useState(false);
+  const [punishmentFormError, setPunishmentFormError] = useState('');
+  const [deactivationReasonView, setDeactivationReasonView] = useState<Punishment | null>(null);
+  const [showCopyFallback, setShowCopyFallback] = useState(false);
+  const [copyToast, setCopyToast] = useState<{ message: string; tone: 'success' | 'error' } | null>(null);
   const logsPerPage = 50;
   const punishmentsPerPage = 20;
 
@@ -115,6 +120,14 @@ const PlayerProfile: React.FC = () => {
     fetchPlayerPunishments();
   }, [player?.steamId, punishmentsPage]);
 
+  useEffect(() => {
+    if (!copyToast) return;
+    const timeoutId = window.setTimeout(() => {
+      setCopyToast(null);
+    }, 2200);
+    return () => window.clearTimeout(timeoutId);
+  }, [copyToast]);
+
   const reloadPunishments = async (targetPage?: number) => {
     if (!player?.steamId) return;
     const page = targetPage || punishmentsPage;
@@ -170,45 +183,51 @@ const PlayerProfile: React.FC = () => {
     setPlayer(updatedPlayer);
   };
 
-  const handleApplyPunishment = async () => {
+  const openApplyPunishmentModal = () => {
+    setPunishmentType('BAN');
+    setPunishmentReason('');
+    setPunishmentDuration('');
+    setPunishmentFormError('');
+    setShowPunishmentForm(true);
+  };
+
+  const closeApplyPunishmentModal = () => {
+    if (punishmentSubmitting) return;
+    setShowPunishmentForm(false);
+  };
+
+  const submitPunishmentForm = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     if (!player) return;
 
-    const typeInput = window.prompt(
-      'Tipo de punicao (BAN, MUTE, GAG, KICK):',
-      'BAN',
-    );
-    if (!typeInput) return;
-    const type = typeInput.toUpperCase();
-    if (!['BAN', 'MUTE', 'GAG', 'KICK'].includes(type)) {
-      alert('Tipo de punicao invalido.');
+    const parsedReason = punishmentReason.trim();
+    if (!parsedReason) {
+      setPunishmentFormError('Informe um motivo para a punicao.');
       return;
     }
 
-    const reason = window.prompt('Motivo da punicao:');
-    if (!reason || !reason.trim()) return;
+    const parsedDuration =
+      punishmentType === 'KICK' ? undefined : punishmentDuration.trim() || undefined;
 
-    let duration: string | undefined;
-    if (type !== 'KICK') {
-      const durationInput = window.prompt(
-        'Duracao em minutos (ex.: 1, 10, 60). Deixe vazio para permanente:',
-      );
-      duration = durationInput && durationInput.trim() ? durationInput.trim() : undefined;
-    }
-
+    setPunishmentSubmitting(true);
+    setPunishmentFormError('');
     try {
       await ApiService.createPunishment(player.steamId, {
-        type: type as any,
-        reason: reason.trim(),
-        duration,
+        type: punishmentType as any,
+        reason: parsedReason,
+        duration: parsedDuration,
         active: true,
       });
       const updatedPlayer = await ApiService.getPlayerBySteamId(player.steamId);
       setPlayer(updatedPlayer);
       await reloadPunishments(1);
       setPunishmentsPage(1);
+      setShowPunishmentForm(false);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Erro desconhecido';
-      alert(`Erro ao aplicar punicao: ${message}`);
+      setPunishmentFormError(`Nao foi possivel aplicar a punicao: ${message}`);
+    } finally {
+      setPunishmentSubmitting(false);
     }
   };
 
@@ -243,14 +262,7 @@ const PlayerProfile: React.FC = () => {
   };
 
   const handleViewDeactivationReason = (punishment: Punishment) => {
-    const reason = punishment.deactivationReason && punishment.deactivationReason.trim()
-      ? punishment.deactivationReason.trim()
-      : 'Sem motivo informado.';
-    const by = punishment.deactivatedBy ? `\nPor: ${punishment.deactivatedBy}` : '';
-    const at = punishment.deactivatedAt
-      ? `\nQuando: ${new Date(punishment.deactivatedAt).toLocaleString()}`
-      : '';
-    window.alert(`Motivo da desativacao:\n${reason}${by}${at}`);
+    setDeactivationReasonView(punishment);
   };
 
 
@@ -296,19 +308,20 @@ const PlayerProfile: React.FC = () => {
      return 'text-orange-600 from-orange-900/40';
   };
 
-  const handleCopySteamId = () => {
+  const handleCopySteamId = async () => {
     if (!player) return;
 
     try {
-      if (navigator && 'clipboard' in navigator) {
-        navigator.clipboard.writeText(player.steamId).catch(() => {
-          window.prompt('SteamID do jogador:', player.steamId);
-        });
-      } else {
-        window.prompt('SteamID do jogador:', player.steamId);
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(player.steamId);
+        setCopyToast({ message: 'SteamID copiado com sucesso.', tone: 'success' });
+        return;
       }
+      setShowCopyFallback(true);
+      setCopyToast({ message: 'Copie o SteamID manualmente.', tone: 'error' });
     } catch {
-      window.prompt('SteamID do jogador:', player.steamId);
+      setShowCopyFallback(true);
+      setCopyToast({ message: 'Nao foi possivel copiar automaticamente.', tone: 'error' });
     }
   };
 
@@ -396,7 +409,7 @@ const PlayerProfile: React.FC = () => {
                   >
                      Copiar SteamID
                   </button>
-                  <button onClick={handleApplyPunishment} className="px-4 py-2 bg-red-900/20 hover:bg-red-900/40 text-red-500 rounded text-sm font-bold uppercase transition-colors border border-red-900/50 flex items-center">
+                  <button onClick={openApplyPunishmentModal} className="px-4 py-2 bg-red-900/20 hover:bg-red-900/40 text-red-500 rounded text-sm font-bold uppercase transition-colors border border-red-900/50 flex items-center">
                      <Icons.Gavel className="w-4 h-4 mr-2" />
                      Aplicar Punição
                   </button>
@@ -985,6 +998,210 @@ const PlayerProfile: React.FC = () => {
             onPageChange={setLogsPage}
          />
       </div>
+
+      {showPunishmentForm && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={closeApplyPunishmentModal} />
+          <div className="relative w-full max-w-lg rounded-xl border border-zinc-700 bg-zinc-900 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-zinc-800 px-5 py-4">
+              <h3 className="text-sm font-bold uppercase text-zinc-200">Aplicar Punicao</h3>
+              <button
+                type="button"
+                onClick={closeApplyPunishmentModal}
+                className="rounded border border-zinc-700 p-1 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+                aria-label="Fechar modal"
+              >
+                <Icons.X className="h-4 w-4" />
+              </button>
+            </div>
+            <form onSubmit={submitPunishmentForm} className="space-y-4 p-5">
+              <div>
+                <label className="mb-1 block text-xs font-bold uppercase text-zinc-400">Tipo</label>
+                <select
+                  value={punishmentType}
+                  onChange={(e) => setPunishmentType(e.target.value as 'BAN' | 'MUTE' | 'GAG' | 'KICK')}
+                  className="w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 focus:border-red-700 focus:outline-none"
+                >
+                  <option value="BAN">BAN</option>
+                  <option value="MUTE">MUTE</option>
+                  <option value="GAG">GAG</option>
+                  <option value="KICK">KICK</option>
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-bold uppercase text-zinc-400">Motivo</label>
+                <textarea
+                  value={punishmentReason}
+                  onChange={(e) => setPunishmentReason(e.target.value)}
+                  placeholder="Descreva o motivo da punicao"
+                  rows={3}
+                  className="w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:border-red-700 focus:outline-none"
+                />
+              </div>
+              {punishmentType !== 'KICK' ? (
+                <div>
+                  <label className="mb-1 block text-xs font-bold uppercase text-zinc-400">
+                    Duracao em minutos (opcional)
+                  </label>
+                  <input
+                    type="text"
+                    value={punishmentDuration}
+                    onChange={(e) => setPunishmentDuration(e.target.value)}
+                    placeholder="Ex.: 1, 10, 60 (vazio = permanente)"
+                    className="w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:border-red-700 focus:outline-none"
+                  />
+                </div>
+              ) : (
+                <div className="rounded border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs text-zinc-500">
+                  KICK e imediato e nao possui duracao.
+                </div>
+              )}
+              {punishmentFormError && (
+                <div className="rounded border border-red-900/50 bg-red-950/30 px-3 py-2 text-sm text-red-400">
+                  {punishmentFormError}
+                </div>
+              )}
+              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  onClick={closeApplyPunishmentModal}
+                  disabled={punishmentSubmitting}
+                  className="rounded border border-zinc-700 px-4 py-2 text-xs font-bold uppercase text-zinc-300 hover:bg-zinc-800 disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={punishmentSubmitting}
+                  className="rounded border border-red-900/50 bg-red-900/20 px-4 py-2 text-xs font-bold uppercase text-red-400 hover:bg-red-900/30 disabled:opacity-50"
+                >
+                  {punishmentSubmitting ? 'Aplicando...' : 'Aplicar Punicao'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {deactivationReasonView && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setDeactivationReasonView(null)} />
+          <div className="relative w-full max-w-md rounded-xl border border-zinc-700 bg-zinc-900 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-zinc-800 px-5 py-4">
+              <h3 className="text-sm font-bold uppercase text-zinc-200">Motivo da Desativacao</h3>
+              <button
+                type="button"
+                onClick={() => setDeactivationReasonView(null)}
+                className="rounded border border-zinc-700 p-1 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+                aria-label="Fechar modal"
+              >
+                <Icons.X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="space-y-3 p-5 text-sm text-zinc-300">
+              <div className="rounded border border-zinc-800 bg-zinc-950 px-3 py-2">
+                {deactivationReasonView.deactivationReason && deactivationReasonView.deactivationReason.trim()
+                  ? deactivationReasonView.deactivationReason
+                  : 'Sem motivo informado.'}
+              </div>
+              <div className="text-xs text-zinc-500">
+                {deactivationReasonView.deactivatedBy ? `Por: ${deactivationReasonView.deactivatedBy}` : 'Por: nao informado'}
+              </div>
+              <div className="text-xs text-zinc-500">
+                {deactivationReasonView.deactivatedAt
+                  ? `Quando: ${new Date(deactivationReasonView.deactivatedAt).toLocaleString()}`
+                  : 'Quando: nao informado'}
+              </div>
+              <div className="pt-2 text-right">
+                <button
+                  type="button"
+                  onClick={() => setDeactivationReasonView(null)}
+                  className="rounded border border-zinc-700 px-4 py-2 text-xs font-bold uppercase text-zinc-300 hover:bg-zinc-800"
+                >
+                  Fechar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showCopyFallback && player && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowCopyFallback(false)} />
+          <div className="relative w-full max-w-md rounded-xl border border-zinc-700 bg-zinc-900 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-zinc-800 px-5 py-4">
+              <h3 className="text-sm font-bold uppercase text-zinc-200">Copiar SteamID</h3>
+              <button
+                type="button"
+                onClick={() => setShowCopyFallback(false)}
+                className="rounded border border-zinc-700 p-1 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+                aria-label="Fechar modal"
+              >
+                <Icons.X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="space-y-4 p-5">
+              <p className="text-sm text-zinc-400">
+                Nao foi possivel copiar automaticamente. Selecione e copie manualmente:
+              </p>
+              <input
+                readOnly
+                value={player.steamId}
+                onFocus={(e) => e.target.select()}
+                className="w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2 font-mono text-sm text-zinc-100 focus:border-red-700 focus:outline-none"
+              />
+              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowCopyFallback(false)}
+                  className="rounded border border-zinc-700 px-4 py-2 text-xs font-bold uppercase text-zinc-300 hover:bg-zinc-800"
+                >
+                  Fechar
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      if (navigator?.clipboard?.writeText) {
+                        await navigator.clipboard.writeText(player.steamId);
+                        setCopyToast({ message: 'SteamID copiado com sucesso.', tone: 'success' });
+                        setShowCopyFallback(false);
+                      }
+                    } catch {
+                      setCopyToast({ message: 'Ainda nao foi possivel copiar automaticamente.', tone: 'error' });
+                    }
+                  }}
+                  className="rounded border border-red-900/50 bg-red-900/20 px-4 py-2 text-xs font-bold uppercase text-red-400 hover:bg-red-900/30"
+                >
+                  Tentar Copiar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {copyToast && (
+        <div className="fixed bottom-4 left-4 right-4 z-[60] sm:left-auto sm:right-4 sm:w-auto">
+          <div
+            className={`flex items-center gap-2 rounded-lg border px-4 py-3 text-sm shadow-2xl ${
+              copyToast.tone === 'success'
+                ? 'border-emerald-900/60 bg-emerald-950/90 text-emerald-300'
+                : 'border-red-900/60 bg-red-950/90 text-red-300'
+            }`}
+            role="status"
+            aria-live="polite"
+          >
+            {copyToast.tone === 'success' ? (
+              <Icons.Check className="h-4 w-4" />
+            ) : (
+              <Icons.AlertTriangle className="h-4 w-4" />
+            )}
+            <span>{copyToast.message}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
