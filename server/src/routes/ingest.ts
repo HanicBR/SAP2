@@ -38,6 +38,47 @@ const parseJsonBody = (raw: any): any => {
   return raw;
 };
 
+const normalizeIgnoreList = (values: string[] = []): string[] => {
+  return values
+    .map((value) => String(value || '').trim().toLowerCase())
+    .filter((value) => value.length > 0);
+};
+
+const shouldIgnoreEvent = (
+  event: { type?: string; rawText?: string; metadata?: Record<string, unknown> },
+  ignoredTools: string[],
+  ignoredCommands: string[],
+  rawTextFilters: string[],
+) => {
+  const type = String(event.type || '').toUpperCase();
+  const metadata = event.metadata || {};
+  const rawText = String(event.rawText || '').toLowerCase();
+
+  if (type === 'TOOL_USE') {
+    const toolName = String((metadata as any).toolName || '').trim().toLowerCase();
+    if (toolName && ignoredTools.includes(toolName)) {
+      return true;
+    }
+  }
+
+  if (type === 'COMMAND' || type === 'ULX') {
+    const command = String((metadata as any).command || '').trim().toLowerCase();
+    if (command && ignoredCommands.includes(command)) {
+      return true;
+    }
+  }
+
+  if (rawText && rawTextFilters.length > 0) {
+    for (const filterText of rawTextFilters) {
+      if (rawText.includes(filterText)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+};
+
 router.post('/logs', async (req, res) => {
   const apiKey = req.header('x-server-key') || req.header('X-Server-Key');
   const parsedBody = parseJsonBody((req as any).body);
@@ -79,9 +120,9 @@ router.post('/logs', async (req, res) => {
   // Load site config for ignore rules (reserved for future use)
   const siteConfig = await prisma.siteConfig.findUnique({ where: { id: 1 } });
   const logsConfig = (siteConfig?.data as unknown as SiteConfig | undefined)?.logs;
-  const ignoredTools = logsConfig?.ignoredTools || [];
-  const ignoredCommands = logsConfig?.ignoredCommands || [];
-  const rawTextFilters = logsConfig?.rawTextFilters || [];
+  const ignoredTools = normalizeIgnoreList(logsConfig?.ignoredTools || []);
+  const ignoredCommands = normalizeIgnoreList(logsConfig?.ignoredCommands || []);
+  const rawTextFilters = normalizeIgnoreList(logsConfig?.rawTextFilters || []);
 
   const cleanEvents = normalizeEventsForServer(events, {
     id: server.id,
@@ -93,7 +134,15 @@ router.post('/logs', async (req, res) => {
     return res.status(400).json({ error: 'No valid events', received: events.length });
   }
 
-  const result = await storeLogsAndUpdateProfiles(cleanEvents);
+  const eventsToStore = cleanEvents.filter(
+    (event) => !shouldIgnoreEvent(event as any, ignoredTools, ignoredCommands, rawTextFilters),
+  );
+
+  if (!eventsToStore.length) {
+    return res.json({ ingested: 0 });
+  }
+
+  const result = await storeLogsAndUpdateProfiles(eventsToStore);
   return res.json({ ingested: result.ingested });
 });
 
@@ -103,4 +152,3 @@ router.get('/stats', async (_req, res) => {
 });
 
 export default router;
-
