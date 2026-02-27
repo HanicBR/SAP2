@@ -1,5 +1,5 @@
 ﻿
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { ApiService } from '../../services/api';
 import { LogEntry, LogType, GameMode, SiteConfig } from '../../types';
 import { Icons } from '../../components/Icon';
@@ -231,7 +231,7 @@ const SpamCluster = React.memo(({ logs, onQuickIgnore }: { logs: LogEntry[]; onQ
           <div className="flex-1 text-sm text-yellow-200/80">
              <span className="font-bold text-yellow-500">
                 <PlayerLink name={first.playerName} steamId={first.steamId} />
-             </span> spawnou <span className="font-bold">{count} props</span> em sequÃªncia.
+             </span> spawnou <span className="font-bold">{count} props</span> em sequência.
           </div>
           <div className="text-xs text-yellow-500/50 font-bold uppercase">{expanded ? 'Recolher' : 'Expandir'}</div>
        </div>
@@ -287,7 +287,7 @@ const RoundCard = React.memo(({ group, onQuickIgnore }: { group: RoundGroup; onQ
                   {sessionStartLabel && (
                     <>
                       {' '}
-                      â€¢ sessÃ£o iniciada Ã s {sessionStartLabel}
+                      • sessão iniciada às {sessionStartLabel}
                     </>
                   )}
                 </span>
@@ -378,12 +378,12 @@ const SessionCard = React.memo(({ group, onQuickIgnore }: { group: SessionGroup;
              </div>
              <div>
                 <p className="text-sm font-bold text-white">
-                   SessÃ£o de <PlayerLink name={group.playerName} steamId={group.steamId} />
+                   Sessão de <PlayerLink name={group.playerName} steamId={group.steamId} />
                 </p>
                 <div className="flex gap-2 text-xs text-zinc-500 font-mono">
                    <span>{group.ip}</span>
-                   <span>â€¢</span>
-                   <span>InÃ­cio: {new Date(group.startTime).toLocaleTimeString()}</span>
+                   <span>•</span>
+                   <span>Início: {new Date(group.startTime).toLocaleTimeString()}</span>
                 </div>
              </div>
           </div>
@@ -407,7 +407,7 @@ const SessionCard = React.memo(({ group, onQuickIgnore }: { group: SessionGroup;
   );
 });
 
-// --- COMPONENT: TTT MAP GROUP (SessÃ£o de mapa TTT) ---
+// --- COMPONENT: TTT MAP GROUP (Sessão de mapa TTT) ---
 const TTTMapGroupCard = React.memo(
   ({ group, onQuickIgnore }: { group: TTTMapGroup; onQuickIgnore?: (log: LogEntry) => void }) => {
     const [expanded, setExpanded] = useState(true);
@@ -415,7 +415,7 @@ const TTTMapGroupCard = React.memo(
     const mapLabel = group.map || 'Mapa desconhecido';
     const sessionStartLabel = group.sessionStart
       ? new Date(group.sessionStart).toLocaleString()
-      : 'HorÃ¡rio desconhecido';
+      : 'Horário desconhecido';
 
     return (
       <div className="bg-zinc-950 border border-zinc-800 rounded-lg overflow-hidden mb-4 shadow-sm">
@@ -426,11 +426,11 @@ const TTTMapGroupCard = React.memo(
           <div className="flex items-center gap-3">
             <Icons.Map className="w-4 h-4 text-zinc-500" />
             <div>
-              <div className="text-xs font-bold uppercase text-zinc-400">SessÃ£o TTT</div>
+              <div className="text-xs font-bold uppercase text-zinc-400">Sessão TTT</div>
               <div className="text-sm text-zinc-100">
                 {mapLabel}{' '}
                 <span className="text-xs text-zinc-500">
-                  â€¢ iniciada em {sessionStartLabel}
+                  • iniciada em {sessionStartLabel}
                 </span>
               </div>
             </div>
@@ -474,6 +474,7 @@ const TTTMapGroupCard = React.memo(
 const Logs: React.FC = () => {
   const [rawLogs, setRawLogs] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const requestSeq = useRef(0);
   
   // Filters
   const [search, setSearch] = useState('');
@@ -481,6 +482,7 @@ const Logs: React.FC = () => {
   const [logTypeFilter, setLogTypeFilter] = useState<string>('ALL');
   const [actorTypeFilter, setActorTypeFilter] = useState<ActorTypeFilter>('ALL');
   const [targetSearch, setTargetSearch] = useState('');
+  const [pagingMode, setPagingMode] = useState<'page' | 'cursor'>('page');
 
   const [siteConfig, setSiteConfig] = useState<SiteConfig | null>(null);
   const [ignoreToolsInput, setIgnoreToolsInput] = useState('');
@@ -490,10 +492,14 @@ const Logs: React.FC = () => {
   
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalItemsServer, setTotalItemsServer] = useState(0);
+  const [cursorToken, setCursorToken] = useState<string | null>(null);
+  const [cursorNext, setCursorNext] = useState<string | null>(null);
+  const [cursorTrail, setCursorTrail] = useState<Array<string | null>>([]);
+  const [cursorPage, setCursorPage] = useState(1);
   const itemsPerPage = 20;
 
   useEffect(() => {
-    loadLogs();
     ApiService.getSiteConfig().then((cfg) => {
       setSiteConfig(cfg);
       const logsCfg = cfg.logs || {};
@@ -504,79 +510,73 @@ const Logs: React.FC = () => {
     ApiService.getIngestStats().then((stats) => setIgnoreStats(stats));
   }, []);
 
-  const loadLogs = () => {
-    setLoading(true);
-    // In real app, we would pass filters to API here
-    ApiService.getEvents({ limit: 2000 }).then(data => {
-      setRawLogs(data as LogEntry[]);
-      setLoading(false);
-    });
-  };
-
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, selectedMode, logTypeFilter, actorTypeFilter, targetSearch]);
+    setCursorToken(null);
+    setCursorNext(null);
+    setCursorTrail([]);
+    setCursorPage(1);
+  }, [search, selectedMode, logTypeFilter, actorTypeFilter, targetSearch, pagingMode]);
+
+  const loadLogs = useCallback(async () => {
+    const requestId = ++requestSeq.current;
+    setLoading(true);
+
+    try {
+      const result = await ApiService.getEventsQuery({
+        search: search.trim() || undefined,
+        mode: selectedMode === 'ALL' ? undefined : selectedMode,
+        type: logTypeFilter === 'ALL' ? undefined : logTypeFilter,
+        actorType: actorTypeFilter === 'ALL' ? undefined : actorTypeFilter,
+        target: targetSearch.trim() || undefined,
+        limit: itemsPerPage,
+        ...(pagingMode === 'page'
+          ? { page: currentPage }
+          : { cursor: cursorToken }),
+      });
+
+      if (requestId !== requestSeq.current) return;
+
+      setRawLogs((result.items || []) as LogEntry[]);
+      setCursorNext(result.nextCursor || null);
+      if (pagingMode === 'page') {
+        setTotalItemsServer(result.total || 0);
+      } else {
+        setTotalItemsServer(0);
+      }
+    } catch (error) {
+      if (requestId !== requestSeq.current) return;
+      console.error('Falha ao carregar logs:', error);
+      setRawLogs([]);
+      setCursorNext(null);
+      setTotalItemsServer(0);
+    } finally {
+      if (requestId === requestSeq.current) {
+        setLoading(false);
+      }
+    }
+  }, [
+    search,
+    selectedMode,
+    logTypeFilter,
+    actorTypeFilter,
+    targetSearch,
+    itemsPerPage,
+    pagingMode,
+    currentPage,
+    cursorToken,
+  ]);
+
+  useEffect(() => {
+    loadLogs();
+  }, [loadLogs]);
 
   // --- MEMOIZED GROUPING & FILTERING LOGIC ---
   // This performs the heavy lifting of sorting, filtering, and structuring the logs
   const processedData = useMemo(() => {
-     let filtered = rawLogs;
+     const filtered = rawLogs;
 
-     // 1. Text Search
-     if (search.trim()) {
-        const lower = search.toLowerCase().trim();
-        filtered = filtered.filter((l) => {
-          const metadata = (l.metadata || {}) as any;
-          const searchableText = [
-            l.playerName,
-            l.steamId,
-            l.rawText,
-            formatLogMessage(l),
-            metadata.message,
-            metadata.command,
-            metadata.reason,
-            metadata.targetName,
-            metadata.targetSteamId,
-            Array.isArray(metadata.argsRaw) ? metadata.argsRaw.join(' ') : undefined,
-            Array.isArray(metadata.argsParsed) ? metadata.argsParsed.join(' ') : undefined,
-          ]
-            .filter(Boolean)
-            .map((value) => String(value).toLowerCase())
-            .join(' ');
-
-          return searchableText.includes(lower);
-        });
-     }
-
-     // 2. Mode Filter
-     if (selectedMode !== 'ALL') {
-        filtered = filtered.filter(l => l.gameMode === selectedMode);
-     }
-
-     // 3. Type Filter
-     if (logTypeFilter !== 'ALL') {
-        filtered = filtered.filter(l => l.type === logTypeFilter);
-     }
-
-     // 4. Actor Type Filter
-     if (actorTypeFilter !== 'ALL') {
-        filtered = filtered.filter(l => {
-          const actorType = String((l.metadata as any)?.actorType || '').toLowerCase();
-          return actorType === actorTypeFilter;
-        });
-     }
-
-     // 5. Target Filter
-     if (targetSearch) {
-       const lowerTarget = targetSearch.toLowerCase();
-       filtered = filtered.filter(l => {
-         const targetName = String((l.metadata as any)?.targetName || '').toLowerCase();
-         const targetSteamId = String((l.metadata as any)?.targetSteamId || '').toLowerCase();
-         return targetName.includes(lowerTarget) || targetSteamId.includes(lowerTarget);
-       });
-     }
-
-    // 6. Grouping Logic
+    // Grouping Logic
     const result: LogItem[] = [];
     
     if (selectedMode === GameMode.TTT) {
@@ -658,7 +658,7 @@ const Logs: React.FC = () => {
          );
          const total = sessionGroups.length;
 
-         // Ordena eventos dentro de cada rodada e acumula mÃ©tricas
+         // Ordena eventos dentro de cada rodada e acumula métricas
          let eventsTotal = 0;
          let rdmCountTotal = 0;
          sessionGroups.forEach((g, idx) => {
@@ -739,7 +739,7 @@ const Logs: React.FC = () => {
         return new Date(tB).getTime() - new Date(tA).getTime();
      });
 
-  }, [rawLogs, search, selectedMode, logTypeFilter, actorTypeFilter, targetSearch]);
+  }, [rawLogs, selectedMode]);
 
   const activeFilters = useMemo(() => {
     const filters: string[] = [];
@@ -754,9 +754,7 @@ const Logs: React.FC = () => {
   const hasActiveFilters = activeFilters.length > 0;
 
   // Pagination Logic
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = processedData.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = processedData;
 
   // Handlers
   const handlePageChange = useCallback((page: number) => {
@@ -764,12 +762,35 @@ const Logs: React.FC = () => {
      window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
+  const handleCursorNext = () => {
+    if (!cursorNext) return;
+    setCursorTrail((prev) => [...prev, cursorToken]);
+    setCursorToken(cursorNext);
+    setCursorPage((prev) => prev + 1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCursorPrev = () => {
+    if (!cursorTrail.length) return;
+    const nextTrail = [...cursorTrail];
+    const previousToken = nextTrail.pop() ?? null;
+    setCursorTrail(nextTrail);
+    setCursorToken(previousToken);
+    setCursorPage((prev) => Math.max(1, prev - 1));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleClearFilters = () => {
     setSearch('');
     setSelectedMode('ALL');
     setLogTypeFilter('ALL');
     setActorTypeFilter('ALL');
     setTargetSearch('');
+    setCurrentPage(1);
+    setCursorToken(null);
+    setCursorNext(null);
+    setCursorTrail([]);
+    setCursorPage(1);
   };
 
   const handleSaveIgnoreRules = async () => {
@@ -791,7 +812,7 @@ const Logs: React.FC = () => {
 
     const updated = await ApiService.updateSiteConfig(next);
     setSiteConfig(updated);
-    alert('Regras de ignorar logs salvas. Novos eventos que baterem nessas regras nÃ£o serÃ£o armazenados.');
+    alert('Regras de ignorar logs salvas. Novos eventos que baterem nessas regras não serão armazenados.');
     const stats = await ApiService.getIngestStats();
     setIgnoreStats(stats);
   };
@@ -836,7 +857,7 @@ const Logs: React.FC = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <h1 className="text-2xl font-bold text-white flex items-center">
           <Icons.List className="w-6 h-6 mr-3 text-red-500" />
-          Centro de InvestigaÃ§Ã£o
+          Centro de Investigação
         </h1>
         
         <div className="flex bg-zinc-900 p-1 rounded border border-zinc-800">
@@ -864,7 +885,7 @@ const Logs: React.FC = () => {
               <input 
                  type="text" 
                  className="w-full bg-zinc-950 border border-zinc-700 rounded pl-10 pr-4 py-2 text-sm text-white placeholder-zinc-500 focus:border-red-500 focus:outline-none"
-                 placeholder="Pesquisar por Nick, SteamID, comando, motivo ou conteudo..."
+                 placeholder="Pesquisar por Nick, SteamID, comando, motivo ou conteúdo..."
                  value={search}
                  onChange={(e) => setSearch(e.target.value)}
               />
@@ -925,14 +946,25 @@ const Logs: React.FC = () => {
                 ? `Filtros ativos: ${activeFilters.join(' | ')}`
                 : 'Sem filtros adicionais ativos.'}
             </p>
-            <button
-              type="button"
-              onClick={handleClearFilters}
-              disabled={!hasActiveFilters}
-              className="self-start md:self-auto px-3 py-1.5 rounded border border-zinc-700 text-[10px] font-bold uppercase text-zinc-300 hover:border-zinc-500 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              Limpar filtros
-            </button>
+            <div className="flex items-center gap-2">
+              <select
+                value={pagingMode}
+                onChange={(e) => setPagingMode(e.target.value as 'page' | 'cursor')}
+                className="bg-zinc-950 border border-zinc-700 rounded px-2 py-1.5 text-[10px] font-bold uppercase text-white focus:border-red-500 focus:outline-none"
+                title="Modo de paginação"
+              >
+                <option value="page">Página</option>
+                <option value="cursor">Cursor</option>
+              </select>
+              <button
+                type="button"
+                onClick={handleClearFilters}
+                disabled={!hasActiveFilters}
+                className="self-start md:self-auto px-3 py-1.5 rounded border border-zinc-700 text-[10px] font-bold uppercase text-zinc-300 hover:border-zinc-500 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Limpar filtros
+              </button>
+            </div>
           </div>
         </div>
 
@@ -941,7 +973,7 @@ const Logs: React.FC = () => {
             <div className="flex items-center gap-2">
               <Icons.Shield className="w-4 h-4 text-red-500" />
               <span className="text-xs text-zinc-400 font-bold uppercase tracking-wider">
-                Filtros de Spam (nÃ£o salvar logs novos)
+                Filtros de Spam (não salvar logs novos)
               </span>
             </div>
             {ignoreStats && (
@@ -1074,12 +1106,36 @@ const Logs: React.FC = () => {
             </div>
          )}
          
-         <Pagination 
-            currentPage={currentPage}
-            totalItems={processedData.length}
-            itemsPerPage={itemsPerPage}
-            onPageChange={handlePageChange}
-         />
+         {pagingMode === 'page' ? (
+           <Pagination
+             currentPage={currentPage}
+             totalItems={totalItemsServer}
+             itemsPerPage={itemsPerPage}
+             onPageChange={handlePageChange}
+           />
+         ) : (
+           <div className="border-t border-zinc-800 p-3 flex items-center justify-between">
+             <button
+               type="button"
+               onClick={handleCursorPrev}
+               disabled={cursorTrail.length === 0}
+               className="px-3 py-1.5 rounded border border-zinc-700 text-xs font-bold uppercase text-zinc-300 hover:border-zinc-500 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
+             >
+               Anterior
+             </button>
+             <span className="text-xs text-zinc-500 uppercase font-bold">
+               Cursor {cursorPage}
+             </span>
+             <button
+               type="button"
+               onClick={handleCursorNext}
+               disabled={!cursorNext}
+               className="px-3 py-1.5 rounded border border-zinc-700 text-xs font-bold uppercase text-zinc-300 hover:border-zinc-500 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
+             >
+               Próximo
+             </button>
+           </div>
+         )}
       </div>
     </div>
   );

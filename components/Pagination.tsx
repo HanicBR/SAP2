@@ -1,4 +1,4 @@
-
+﻿
 import React from 'react';
 import { Icons } from './Icon';
 
@@ -96,3 +96,4 @@ export const Pagination: React.FC<PaginationProps> = ({
     </div>
   );
 };
+

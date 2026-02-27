@@ -1,7 +1,7 @@
 
 
 import { MOCK_SERVERS, MOCK_EVENTS, MOCK_STATS, VIP_PLANS, MOCK_SUSPICIOUS_GROUPS, MOCK_PLAYERS, MOCK_USERS, MOCK_TRANSACTIONS, generateServerAnalytics, DEFAULT_SITE_CONFIG } from '../constants';
-import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, LegacyImportSummary } from '../types';
+import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, LegacyImportSummary, LogsQueryParams, LogsQueryResponse } from '../types';
 
 // Utility to simulate network delay (used as fallback)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -410,6 +410,127 @@ export const ApiService = {
     });
   },
 
+  getEventsQuery: async (query: LogsQueryParams = {}): Promise<LogsQueryResponse> => {
+    const normalized: LogsQueryParams = { ...query };
+    if (normalized.mode === 'ALL') delete normalized.mode;
+    if (normalized.actorType === 'ALL') delete normalized.actorType;
+
+    if (hasApi) {
+      try {
+        const params = new URLSearchParams();
+        if (normalized.search) params.set('search', normalized.search);
+        if (normalized.serverId) params.set('serverId', normalized.serverId);
+        if (normalized.type) params.set('type', normalized.type);
+        if (normalized.mode) params.set('mode', String(normalized.mode));
+        if (normalized.from) params.set('from', normalized.from);
+        if (normalized.to) params.set('to', normalized.to);
+        if (normalized.actorType) params.set('actorType', normalized.actorType);
+        if (normalized.target) params.set('target', normalized.target);
+        if (typeof normalized.limit === 'number' && Number.isFinite(normalized.limit) && normalized.limit > 0) {
+          params.set('limit', String(Math.floor(normalized.limit)));
+        }
+        if (typeof normalized.page === 'number' && Number.isFinite(normalized.page) && normalized.page > 0) {
+          params.set('page', String(Math.floor(normalized.page)));
+        }
+        if (normalized.cursor) {
+          params.set('cursor', normalized.cursor);
+        }
+
+        const suffix = params.toString() ? `?${params.toString()}` : '';
+        return await apiFetch<LogsQueryResponse>(`/logs/query${suffix}`);
+      } catch (error) {
+        console.error('API getEventsQuery failed, falling back to mock getEventsQuery:', error);
+      }
+    }
+
+    await delay(250);
+
+    const limit = Math.max(1, Math.min(200, Math.floor(normalized.limit || 20)));
+    const page = Math.max(1, Math.floor(normalized.page || 1));
+    const lowerSearch = (normalized.search || '').toLowerCase();
+    const lowerTarget = (normalized.target || '').toLowerCase();
+    const lowerActor = (normalized.actorType || '').toLowerCase();
+
+    let events = [...MOCK_EVENTS];
+    if (lowerSearch) {
+      events = events.filter((e) => {
+        const m: any = e.metadata || {};
+        const searchable = [
+          e.playerName,
+          e.steamId,
+          e.rawText,
+          m.message,
+          m.command,
+          m.reason,
+          m.targetName,
+          m.targetSteamId,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        return searchable.includes(lowerSearch);
+      });
+    }
+    if (normalized.serverId) {
+      events = events.filter((e) => e.serverId === normalized.serverId);
+    }
+    if (normalized.type) {
+      events = events.filter((e) => e.type === normalized.type);
+    }
+    if (normalized.mode && normalized.mode !== 'ALL') {
+      const modeRaw = String(normalized.mode).toLowerCase();
+      const modeNormalized = modeRaw === 'sandbox' ? GameMode.SANDBOX : modeRaw === 'murder' ? GameMode.MURDER : GameMode.TTT;
+      events = events.filter((e) => e.gameMode === modeNormalized);
+    }
+    if (lowerActor) {
+      events = events.filter((e) => String((e.metadata as any)?.actorType || '').toLowerCase() === lowerActor);
+    }
+    if (lowerTarget) {
+      events = events.filter((e) => {
+        const m: any = e.metadata || {};
+        return (
+          String(m.targetName || '').toLowerCase().includes(lowerTarget) ||
+          String(m.targetSteamId || '').toLowerCase().includes(lowerTarget) ||
+          String(e.rawText || '').toLowerCase().includes(lowerTarget)
+        );
+      });
+    }
+
+    events.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+    if (normalized.cursor) {
+      const startIndex = events.findIndex((e) => e.id === normalized.cursor);
+      const start = startIndex >= 0 ? startIndex + 1 : 0;
+      const sliced = events.slice(start, start + limit + 1);
+      const hasMore = sliced.length > limit;
+      const items = hasMore ? sliced.slice(0, limit) : sliced;
+      return {
+        mode: 'cursor',
+        limit,
+        hasMore,
+        nextCursor: hasMore ? items[items.length - 1]?.id || null : null,
+        items,
+      };
+    }
+
+    const total = events.length;
+    const totalPages = Math.max(1, Math.ceil(total / limit));
+    const safePage = Math.min(page, totalPages);
+    const start = (safePage - 1) * limit;
+    const items = events.slice(start, start + limit);
+
+    return {
+      mode: 'page',
+      page: safePage,
+      limit,
+      total,
+      totalPages,
+      hasMore: safePage < totalPages,
+      nextCursor: items.length ? items[items.length - 1].id : null,
+      items,
+    };
+  },
+
   getEvents: async (
     filter?:
       | string
@@ -423,48 +544,12 @@ export const ApiService = {
         },
   ): Promise<ServerEvent[]> => {
     const query = typeof filter === 'string' ? { search: filter } : filter || {};
-
-    if (hasApi) {
-      try {
-        const params = new URLSearchParams();
-        if (query.search) params.set('search', query.search);
-        if (query.serverId) params.set('serverId', query.serverId);
-        if (query.type) params.set('type', query.type);
-        if (query.from) params.set('from', query.from);
-        if (query.to) params.set('to', query.to);
-        if (typeof query.limit === 'number' && Number.isFinite(query.limit) && query.limit > 0) {
-          params.set('limit', String(Math.floor(query.limit)));
-        }
-
-        const suffix = params.toString() ? `?${params.toString()}` : '';
-        const logs = await apiFetch<ServerEvent[]>(`/logs${suffix}`);
-        return logs;
-      } catch (error) {
-        console.error('API getEvents failed, falling back to mock getEvents:', error);
-      }
-    }
-
-    await delay(400);
-    let events = [...MOCK_EVENTS];
-    if (query.search) {
-      const lowerSearch = query.search.toLowerCase();
-      events = events.filter(e => 
-        (e.playerName && e.playerName.toLowerCase().includes(lowerSearch)) || 
-        (e.steamId && e.steamId.toLowerCase().includes(lowerSearch)) ||
-        e.rawText.toLowerCase().includes(lowerSearch) ||
-        e.type.toLowerCase().includes(lowerSearch)
-      );
-    }
-    if (query.serverId) {
-      events = events.filter((e) => e.serverId === query.serverId);
-    }
-    if (query.type) {
-      events = events.filter((e) => e.type === query.type);
-    }
-    if (typeof query.limit === 'number' && Number.isFinite(query.limit) && query.limit > 0) {
-      events = events.slice(0, Math.floor(query.limit));
-    }
-    return events;
+    const response = await ApiService.getEventsQuery({
+      ...query,
+      limit: query.limit ?? 1000,
+      page: 1,
+    });
+    return response.items;
   },
 
   getPlayers: async (search?: string, serverFilter?: string, vipFilter?: boolean): Promise<Player[]> => {

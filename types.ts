@@ -206,6 +206,31 @@ export interface LogEntry {
 // Legacy support if needed, but LogEntry is preferred
 export interface ServerEvent extends LogEntry {} 
 
+export interface LogsQueryParams {
+  search?: string;
+  serverId?: string;
+  type?: string;
+  mode?: GameMode | 'ALL' | 'TTT' | 'SANDBOX' | 'MURDER' | 'Sandbox' | 'Murder';
+  from?: string;
+  to?: string;
+  actorType?: 'player' | 'console' | 'system' | 'ALL';
+  target?: string;
+  limit?: number;
+  page?: number;
+  cursor?: string | null;
+}
+
+export interface LogsQueryResponse {
+  mode: 'page' | 'cursor';
+  items: ServerEvent[];
+  limit: number;
+  hasMore: boolean;
+  nextCursor?: string | null;
+  page?: number;
+  total?: number;
+  totalPages?: number;
+}
+
 export interface LegacyImportSummary {
   format: 'ULX' | 'TAGGED';
   linesParsed: number;
