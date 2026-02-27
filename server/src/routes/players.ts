@@ -185,6 +185,97 @@ const mapPunishmentRecord = (p: any, deactivation?: PunishmentDeactivation) => {
   };
 };
 
+const buildPunishmentLogsTargetWhere = (steamId: string, playerName?: string) => {
+  const clauses: any[] = [
+    {
+      metadata: {
+        path: ['targetSteamId'],
+        equals: steamId,
+      } as any,
+    },
+  ];
+
+  const normalizedName = String(playerName || '').trim();
+  if (normalizedName) {
+    clauses.push({
+      metadata: {
+        path: ['targetName'],
+        equals: normalizedName,
+      } as any,
+    });
+    clauses.push({
+      metadata: {
+        path: ['targetName'],
+        string_contains: normalizedName,
+      } as any,
+    });
+  }
+
+  return {
+    type: 'PUNISH',
+    OR: clauses,
+  } as any;
+};
+
+const mapPunishmentLogRecord = (log: any) => {
+  const meta: any = log.metadata || {};
+  const timestamp = log.timestamp instanceof Date ? log.timestamp : new Date(log.timestamp);
+  const action = String(meta.action || '').trim().toUpperCase();
+  const sourceTag = String(meta.sourceTag || '').trim().toUpperCase();
+
+  let parsedType = String(meta.punishmentType || '').trim().toUpperCase();
+  if (!parsedType) {
+    if (action === 'UNBAN') parsedType = 'BAN';
+    else if (action === 'UNMUTE') parsedType = 'MUTE';
+    else if (action === 'UNGAG') parsedType = 'GAG';
+    else parsedType = action || 'PUNISH';
+  }
+
+  const durationText = meta.durationText ? String(meta.durationText) : undefined;
+  let status: 'ACTIVE' | 'REVOKED' | 'EXPIRED' | 'EXECUTED' = 'EXECUTED';
+  let active = false;
+
+  const isRevocationAction =
+    action === 'UNBAN' || action === 'UNMUTE' || action === 'UNGAG' || action === 'UNPUNISH' || sourceTag === 'PUNISHMENT_DEACTIVATE';
+
+  if (isRevocationAction) {
+    status = 'REVOKED';
+    active = false;
+  } else if (parsedType === 'BAN' || parsedType === 'MUTE' || parsedType === 'GAG') {
+    if (punishmentIsTimedExpired(timestamp, durationText)) {
+      status = 'EXPIRED';
+      active = false;
+    } else {
+      status = 'ACTIVE';
+      active = true;
+    }
+  } else if (parsedType === 'KICK' || parsedType === 'WARN') {
+    status = 'EXECUTED';
+    active = false;
+  }
+
+  const reason =
+    meta.reason && String(meta.reason).trim()
+      ? String(meta.reason)
+      : meta.command && String(meta.command).trim()
+      ? String(meta.command)
+      : 'Sem motivo';
+
+  return {
+    id: `log_${log.id}`,
+    type: parsedType,
+    reason,
+    staffName: String(log.playerName || 'Console'),
+    date: timestamp.toISOString(),
+    duration: durationText,
+    active,
+    status,
+    deactivationReason: status === 'REVOKED' && meta.reason ? String(meta.reason) : undefined,
+    deactivatedAt: status === 'REVOKED' ? timestamp.toISOString() : undefined,
+    deactivatedBy: status === 'REVOKED' && log.playerName ? String(log.playerName) : undefined,
+  };
+};
+
 const mapLog = (log: any) => ({
   id: log.id,
   serverId: log.serverId,
@@ -870,23 +961,69 @@ const computeSessionMetricsByServer = (
   };
 };
 
-const fetchPaginatedPunishments = async (steamId: string, page: number, limit: number) => {
-  const total = await prisma.punishment.count({
+const MAX_PUNISHMENT_HISTORY_DB_ROWS = 2000;
+const MAX_PUNISHMENT_HISTORY_LOG_ROWS = 5000;
+
+const fetchPaginatedPunishments = async (
+  steamId: string,
+  playerName: string | undefined,
+  page: number,
+  limit: number,
+) => {
+  const dbTotalRaw = await prisma.punishment.count({
     where: { steamId },
   });
+  const dbTake = Math.min(dbTotalRaw, MAX_PUNISHMENT_HISTORY_DB_ROWS);
+  const dbRows = await prisma.punishment.findMany({
+    where: { steamId },
+    orderBy: [{ date: 'desc' }, { id: 'desc' }],
+    take: dbTake,
+  });
+
+  const deactivationMap = await loadPunishmentDeactivations(dbRows.map((p) => p.id));
+  const dbItems = dbRows.map((p) => mapPunishmentRecord(p, deactivationMap.get(p.id)));
+  const dbIdSet = new Set(dbRows.map((p) => p.id));
+
+  const logWhere = buildPunishmentLogsTargetWhere(steamId, playerName);
+  const logTotalRaw = await prisma.log.count({
+    where: logWhere,
+  });
+  const logTake = Math.min(logTotalRaw, MAX_PUNISHMENT_HISTORY_LOG_ROWS);
+  const logRows = await prisma.log.findMany({
+    where: logWhere,
+    orderBy: [{ timestamp: 'desc' }, { id: 'desc' }],
+    take: logTake,
+    select: {
+      id: true,
+      timestamp: true,
+      playerName: true,
+      metadata: true,
+    },
+  });
+
+  const logItems = logRows
+    .filter((log) => {
+      const meta: any = log.metadata || {};
+      const sourceTag = String(meta.sourceTag || '').trim().toUpperCase();
+      const punishmentId = String(meta.punishmentId || '').trim();
+      if (sourceTag === 'PUNISHMENT_DEACTIVATE' && punishmentId && dbIdSet.has(punishmentId)) {
+        return false;
+      }
+      return true;
+    })
+    .map((log) => mapPunishmentLogRecord(log));
+
+  const combined = [...dbItems, ...logItems].sort((a, b) => {
+    const diff = new Date(b.date).getTime() - new Date(a.date).getTime();
+    if (diff !== 0) return diff;
+    return String(b.id).localeCompare(String(a.id));
+  });
+
+  const total = combined.length;
   const totalPages = Math.max(1, Math.ceil(total / limit));
   const safePage = Math.min(Math.max(1, page), totalPages);
   const skip = (safePage - 1) * limit;
-
-  const rows = await prisma.punishment.findMany({
-    where: { steamId },
-    orderBy: [{ date: 'desc' }, { id: 'desc' }],
-    skip,
-    take: limit,
-  });
-
-  const deactivationMap = await loadPunishmentDeactivations(rows.map((p) => p.id));
-  const items = rows.map((p) => mapPunishmentRecord(p, deactivationMap.get(p.id)));
+  const items = combined.slice(skip, skip + limit);
 
   return {
     page: safePage,
@@ -1032,51 +1169,7 @@ router.get('/:steamId', async (req, res) => {
   });
   const sessionMetrics = computeSessionMetricsByServer(serverSessionLogs as any);
 
-  const punishmentsPreview = await fetchPaginatedPunishments(steamId, 1, 20);
-
-  let punishmentsFromLogs: any[] = [];
-  if (punishmentsPreview.total === 0) {
-    try {
-      const punishLogs = await prisma.log.findMany({
-        where: {
-          type: 'PUNISH',
-          metadata: {
-            path: ['targetSteamId'],
-            equals: steamId,
-          } as any,
-        } as any,
-        orderBy: [{ timestamp: 'desc' }, { id: 'desc' }],
-        take: 200,
-        select: {
-          id: true,
-          timestamp: true,
-          playerName: true,
-          metadata: true,
-        },
-      });
-
-      punishmentsFromLogs = punishLogs.map((log) => {
-        const meta: any = log.metadata || {};
-        const mappedType = String(meta.action || meta.punishmentType || 'PUNISH')
-          .trim()
-          .toUpperCase();
-        const mappedDate = log.timestamp instanceof Date ? log.timestamp : new Date(log.timestamp);
-        const mappedStatus = mappedType === 'KICK' || mappedType === 'WARN' ? 'EXECUTED' : 'ACTIVE';
-        return {
-          id: `log_${log.id}`,
-          type: mappedType,
-          reason: String(meta.reason || meta.command || 'Sem motivo'),
-          staffName: String(log.playerName || 'Console'),
-          date: mappedDate.toISOString(),
-          duration: meta.durationText ? String(meta.durationText) : undefined,
-          active: mappedStatus === 'ACTIVE',
-          status: mappedStatus,
-        };
-      });
-    } catch {
-      punishmentsFromLogs = [];
-    }
-  }
+  const punishmentsPreview = await fetchPaginatedPunishments(steamId, player.name, 1, 20);
 
   const activityWindowDays = 14;
   const activitySince = new Date(Date.now() - activityWindowDays * 24 * 60 * 60 * 1000);
@@ -1098,6 +1191,7 @@ router.get('/:steamId', async (req, res) => {
 
   const moderationWindowDays = 30;
   const moderationSince = new Date(Date.now() - moderationWindowDays * 24 * 60 * 60 * 1000);
+  const punishLogsTargetWhere = buildPunishmentLogsTargetWhere(steamId, player.name);
   const [chatCount, commandCount, propBurstCount, punishCount, lastPunishLog] = await Promise.all([
     prisma.log.count({
       where: {
@@ -1126,22 +1220,14 @@ router.get('/:steamId', async (req, res) => {
     }),
     prisma.log.count({
       where: {
+        ...punishLogsTargetWhere,
         timestamp: { gte: moderationSince },
-        type: 'PUNISH',
-        metadata: {
-          path: ['targetSteamId'],
-          equals: steamId,
-        } as any,
       } as any,
     }),
     prisma.log.findFirst({
       where: {
+        ...punishLogsTargetWhere,
         timestamp: { gte: moderationSince },
-        type: 'PUNISH',
-        metadata: {
-          path: ['targetSteamId'],
-          equals: steamId,
-        } as any,
       } as any,
       orderBy: [{ timestamp: 'desc' }, { id: 'desc' }],
       select: { timestamp: true },
@@ -1189,9 +1275,7 @@ router.get('/:steamId', async (req, res) => {
       date: n.createdAt.toISOString(),
     })),
     gameModeStats: Object.keys(gameModeStats).length ? gameModeStats : undefined,
-    punishments: punishmentsPreview.total
-      ? punishmentsPreview.items
-      : punishmentsFromLogs,
+    punishments: punishmentsPreview.items,
     activityHistory,
     moderationSummary: {
       windowDays: moderationWindowDays,
@@ -1304,75 +1388,24 @@ router.get('/:steamId/punishments', async (req, res) => {
   const limit = parsePositiveInt(req.query.limit, 20, 100);
   const page = parsePositiveInt(req.query.page, 1, 100000);
 
-  const player = await prisma.playerProfile.findUnique({ where: { steamId }, select: { steamId: true } });
+  const player = await prisma.playerProfile.findUnique({
+    where: { steamId },
+    select: { steamId: true, name: true },
+  });
   if (!player) {
     return res.status(404).json({ error: 'Player not found' });
   }
 
-  const paged = await fetchPaginatedPunishments(steamId, page, limit);
-  if (paged.total > 0) {
-    return res.json({
-      mode: 'page',
-      page: paged.page,
-      limit: paged.limit,
-      total: paged.total,
-      totalPages: paged.totalPages,
-      hasMore: paged.hasMore,
-      items: paged.items,
-    });
-  }
-
-  const logsWhere = {
-    type: 'PUNISH',
-    metadata: {
-      path: ['targetSteamId'],
-      equals: steamId,
-    } as any,
-  } as any;
-  const total = await prisma.log.count({ where: logsWhere });
-  const totalPages = Math.max(1, Math.ceil(total / limit));
-  const safePage = Math.min(page, totalPages);
-  const skip = (safePage - 1) * limit;
-  const logs = await prisma.log.findMany({
-    where: logsWhere,
-    orderBy: [{ timestamp: 'desc' }, { id: 'desc' }],
-    skip,
-    take: limit,
-    select: {
-      id: true,
-      timestamp: true,
-      playerName: true,
-      metadata: true,
-    },
-  });
-
-  const items = logs.map((log) => {
-    const meta: any = log.metadata || {};
-    const mappedType = String(meta.action || meta.punishmentType || 'PUNISH')
-      .trim()
-      .toUpperCase();
-    const mappedDate = log.timestamp instanceof Date ? log.timestamp : new Date(log.timestamp);
-    const mappedStatus = mappedType === 'KICK' || mappedType === 'WARN' ? 'EXECUTED' : 'ACTIVE';
-    return {
-      id: `log_${log.id}`,
-      type: mappedType,
-      reason: String(meta.reason || meta.command || 'Sem motivo'),
-      staffName: String(log.playerName || 'Console'),
-      date: mappedDate.toISOString(),
-      duration: meta.durationText ? String(meta.durationText) : undefined,
-      active: mappedStatus === 'ACTIVE',
-      status: mappedStatus,
-    };
-  });
+  const paged = await fetchPaginatedPunishments(steamId, player.name, page, limit);
 
   return res.json({
     mode: 'page',
-    page: safePage,
-    limit,
-    total,
-    totalPages,
-    hasMore: safePage < totalPages,
-    items,
+    page: paged.page,
+    limit: paged.limit,
+    total: paged.total,
+    totalPages: paged.totalPages,
+    hasMore: paged.hasMore,
+    items: paged.items,
   });
 });
 
