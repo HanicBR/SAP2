@@ -89,6 +89,41 @@ const isRDM = (log: LogEntry) => {
          log.metadata.victimRole === 'innocent';
 };
 
+const normalizeLabel = (value?: string): string | undefined => {
+  const parsed = String(value ?? '').trim();
+  return parsed.length > 0 ? parsed : undefined;
+};
+
+const isLikelyBotLabel = (value?: string): boolean => {
+  const normalized = normalizeLabel(value);
+  if (!normalized) return false;
+  const lower = normalized.toLowerCase();
+  return /^bot\d*$/i.test(lower) || lower === 'bot';
+};
+
+const resolveTargetSteamIdForLink = (log: LogEntry): string | undefined => {
+  const targetSteamId = normalizeLabel(log.metadata.targetSteamId);
+  if (!targetSteamId) return undefined;
+
+  const targetName = normalizeLabel(log.metadata.targetName);
+  const actorSteamId = normalizeLabel(log.steamId);
+  const actorName = normalizeLabel(log.playerName);
+
+  if (targetName) {
+    if (targetName.includes(',') || /\(\+\d+\)/.test(targetName)) return undefined;
+    if (isLikelyBotLabel(targetName)) return undefined;
+  }
+
+  if (actorSteamId && targetSteamId === actorSteamId) {
+    const sameAsActorName =
+      !!targetName && !!actorName && targetName.toLowerCase() === actorName.toLowerCase();
+    const explicitSelf = !!targetName && /^(me|self)$/i.test(targetName);
+    if (!sameAsActorName && !explicitSelf) return undefined;
+  }
+
+  return targetSteamId;
+};
+
 const formatDuration = (durationMs: number): string => {
   if (!Number.isFinite(durationMs) || durationMs <= 0) return '0s';
   const totalSeconds = Math.floor(durationMs / 1000);
@@ -135,6 +170,8 @@ const LogRow = React.memo(({
   onQuickIgnore?: (log: LogEntry) => void;
 }) => {
   const rdm = isRDM(log);
+  const targetSteamIdForLink = resolveTargetSteamIdForLink(log);
+  const targetLabel = log.metadata.targetName || log.metadata.targetSteamId;
   
   return (
     <div className={`p-2 hover:bg-zinc-800/50 flex items-start text-sm border-l-2 ${rdm ? 'border-red-600 bg-red-900/10' : 'border-transparent'} transition-colors group`}>
@@ -197,12 +234,12 @@ const LogRow = React.memo(({
                <PlayerLink name={log.playerName} steamId={log.steamId} role="none" />
                <span className="text-zinc-500 mx-1">executou</span>
                <span className="text-purple-300 font-mono">{log.metadata.command || 'comando'}</span>
-               {log.metadata.targetName || log.metadata.targetSteamId ? (
+               {targetLabel ? (
                  <>
                    <span className="text-zinc-500 mx-1">em</span>
                    <PlayerLink
-                     name={log.metadata.targetName || log.metadata.targetSteamId}
-                     steamId={log.metadata.targetSteamId}
+                     name={targetLabel}
+                     steamId={targetSteamIdForLink}
                      role="none"
                    />
                  </>
@@ -213,12 +250,12 @@ const LogRow = React.memo(({
                <PlayerLink name={log.playerName} steamId={log.steamId} role="none" />
                <span className="text-zinc-500 mx-1">aplicou</span>
                <span className="text-red-400 font-mono">{log.metadata.action || log.metadata.punishmentType || 'PUNIÇÃO'}</span>
-               {log.metadata.targetName || log.metadata.targetSteamId ? (
+               {targetLabel ? (
                  <>
                    <span className="text-zinc-500 mx-1">em</span>
                    <PlayerLink
-                     name={log.metadata.targetName || log.metadata.targetSteamId}
-                     steamId={log.metadata.targetSteamId}
+                     name={targetLabel}
+                     steamId={targetSteamIdForLink}
                      role="none"
                    />
                  </>
