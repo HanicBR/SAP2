@@ -79,6 +79,13 @@ const buildSamPunishmentDeactivateCommand = (
   return null;
 };
 
+const punishmentIsTimedExpired = (date: Date, duration?: string | null): boolean => {
+  const minutes = toDurationMinutes(duration || undefined);
+  if (!minutes) return false;
+  const expiresAtMs = date.getTime() + minutes * 60 * 1000;
+  return Date.now() >= expiresAtMs;
+};
+
 const isPunishmentCurrentlyActive = (
   type: string,
   active: boolean,
@@ -93,6 +100,89 @@ const isPunishmentCurrentlyActive = (
   if (!minutes) return true;
   const expiresAtMs = date.getTime() + minutes * 60 * 1000;
   return Date.now() < expiresAtMs;
+};
+
+type PunishmentDeactivation = {
+  reason?: string;
+  at?: string;
+  by?: string;
+};
+
+const resolvePunishmentStatus = (
+  type: string,
+  active: boolean,
+  date: Date,
+  duration?: string | null,
+  deactivation?: PunishmentDeactivation,
+): 'ACTIVE' | 'REVOKED' | 'EXPIRED' | 'EXECUTED' => {
+  const parsedType = String(type || '').toUpperCase();
+  if (parsedType === 'KICK' || parsedType === 'WARN') return 'EXECUTED';
+  if (deactivation) return 'REVOKED';
+  if (punishmentIsTimedExpired(date, duration)) return 'EXPIRED';
+  if (!active) return 'REVOKED';
+  return 'ACTIVE';
+};
+
+const loadPunishmentDeactivations = async (punishmentIds: string[]) => {
+  const ids = punishmentIds.filter((id) => String(id || '').trim() !== '');
+  const map = new Map<string, PunishmentDeactivation>();
+  if (!ids.length) return map;
+
+  const orClauses = ids.map((id) => ({
+    metadata: {
+      path: ['punishmentId'],
+      equals: id,
+    } as any,
+  }));
+
+  const logs = await prisma.log.findMany({
+    where: {
+      type: 'PUNISH',
+      metadata: {
+        path: ['sourceTag'],
+        equals: 'PUNISHMENT_DEACTIVATE',
+      } as any,
+      OR: orClauses as any,
+    } as any,
+    orderBy: [{ timestamp: 'desc' }, { id: 'desc' }],
+    select: {
+      timestamp: true,
+      playerName: true,
+      metadata: true,
+    },
+  });
+
+  logs.forEach((log) => {
+    const meta: any = log.metadata || {};
+    const punishmentId = String(meta.punishmentId || '').trim();
+    if (!punishmentId || map.has(punishmentId)) return;
+    const entry: PunishmentDeactivation = {};
+    if (meta.reason) entry.reason = String(meta.reason);
+    if (log.timestamp) entry.at = log.timestamp.toISOString();
+    if (log.playerName) entry.by = String(log.playerName);
+    map.set(punishmentId, entry);
+  });
+
+  return map;
+};
+
+const mapPunishmentRecord = (p: any, deactivation?: PunishmentDeactivation) => {
+  const date = p.date instanceof Date ? p.date : new Date(p.date);
+  const active = isPunishmentCurrentlyActive(p.type, Boolean(p.active), date, p.duration);
+  const status = resolvePunishmentStatus(p.type, active, date, p.duration, deactivation);
+  return {
+    id: p.id,
+    type: p.type,
+    reason: p.reason,
+    staffName: p.staffName,
+    date: date.toISOString(),
+    duration: p.duration || undefined,
+    active,
+    status,
+    deactivationReason: deactivation?.reason,
+    deactivatedAt: deactivation?.at,
+    deactivatedBy: deactivation?.by,
+  };
 };
 
 const mapLog = (log: any) => ({
@@ -780,6 +870,34 @@ const computeSessionMetricsByServer = (
   };
 };
 
+const fetchPaginatedPunishments = async (steamId: string, page: number, limit: number) => {
+  const total = await prisma.punishment.count({
+    where: { steamId },
+  });
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const safePage = Math.min(Math.max(1, page), totalPages);
+  const skip = (safePage - 1) * limit;
+
+  const rows = await prisma.punishment.findMany({
+    where: { steamId },
+    orderBy: [{ date: 'desc' }, { id: 'desc' }],
+    skip,
+    take: limit,
+  });
+
+  const deactivationMap = await loadPunishmentDeactivations(rows.map((p) => p.id));
+  const items = rows.map((p) => mapPunishmentRecord(p, deactivationMap.get(p.id)));
+
+  return {
+    page: safePage,
+    limit,
+    total,
+    totalPages,
+    hasMore: safePage < totalPages,
+    items,
+  };
+};
+
 router.get('/', async (req, res) => {
   const search = (req.query.search as string) || '';
   const serverFilter = (req.query.serverId as string) || '';
@@ -914,23 +1032,10 @@ router.get('/:steamId', async (req, res) => {
   });
   const sessionMetrics = computeSessionMetricsByServer(serverSessionLogs as any);
 
-  // Load punishments via raw query to avoid relying on generated Prisma model
-  let punishments: any[] = [];
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    punishments = (await prisma.$queryRaw<any[]>`
-      SELECT id, "steamId", type, reason, "staffName", "date", duration, active
-      FROM "Punishment"
-      WHERE "steamId" = ${steamId}
-      ORDER BY "date" DESC
-    `) as any[];
-  } catch (e) {
-    // If the table does not exist or query fails, just return without punishments
-    punishments = [];
-  }
+  const punishmentsPreview = await fetchPaginatedPunishments(steamId, 1, 20);
 
   let punishmentsFromLogs: any[] = [];
-  if (!punishments.length) {
+  if (punishmentsPreview.total === 0) {
     try {
       const punishLogs = await prisma.log.findMany({
         where: {
@@ -955,14 +1060,17 @@ router.get('/:steamId', async (req, res) => {
         const mappedType = String(meta.action || meta.punishmentType || 'PUNISH')
           .trim()
           .toUpperCase();
+        const mappedDate = log.timestamp instanceof Date ? log.timestamp : new Date(log.timestamp);
+        const mappedStatus = mappedType === 'KICK' || mappedType === 'WARN' ? 'EXECUTED' : 'ACTIVE';
         return {
           id: `log_${log.id}`,
           type: mappedType,
           reason: String(meta.reason || meta.command || 'Sem motivo'),
           staffName: String(log.playerName || 'Console'),
-          date: log.timestamp.toISOString(),
+          date: mappedDate.toISOString(),
           duration: meta.durationText ? String(meta.durationText) : undefined,
-          active: false,
+          active: mappedStatus === 'ACTIVE',
+          status: mappedStatus,
         };
       });
     } catch {
@@ -1081,21 +1189,8 @@ router.get('/:steamId', async (req, res) => {
       date: n.createdAt.toISOString(),
     })),
     gameModeStats: Object.keys(gameModeStats).length ? gameModeStats : undefined,
-    punishments: punishments.length
-      ? punishments.map((p) => ({
-          id: p.id,
-          type: p.type,
-          reason: p.reason,
-          staffName: p.staffName,
-          date: p.date instanceof Date ? p.date.toISOString() : new Date(p.date).toISOString(),
-          duration: p.duration || undefined,
-          active: isPunishmentCurrentlyActive(
-            p.type,
-            Boolean(p.active),
-            p.date instanceof Date ? p.date : new Date(p.date),
-            p.duration,
-          ),
-        }))
+    punishments: punishmentsPreview.total
+      ? punishmentsPreview.items
       : punishmentsFromLogs,
     activityHistory,
     moderationSummary: {
@@ -1202,6 +1297,83 @@ router.get('/:steamId/related-accounts', async (req, res) => {
   }
 
   return res.json(null);
+});
+
+router.get('/:steamId/punishments', async (req, res) => {
+  const { steamId } = req.params as { steamId: string };
+  const limit = parsePositiveInt(req.query.limit, 20, 100);
+  const page = parsePositiveInt(req.query.page, 1, 100000);
+
+  const player = await prisma.playerProfile.findUnique({ where: { steamId }, select: { steamId: true } });
+  if (!player) {
+    return res.status(404).json({ error: 'Player not found' });
+  }
+
+  const paged = await fetchPaginatedPunishments(steamId, page, limit);
+  if (paged.total > 0) {
+    return res.json({
+      mode: 'page',
+      page: paged.page,
+      limit: paged.limit,
+      total: paged.total,
+      totalPages: paged.totalPages,
+      hasMore: paged.hasMore,
+      items: paged.items,
+    });
+  }
+
+  const logsWhere = {
+    type: 'PUNISH',
+    metadata: {
+      path: ['targetSteamId'],
+      equals: steamId,
+    } as any,
+  } as any;
+  const total = await prisma.log.count({ where: logsWhere });
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const safePage = Math.min(page, totalPages);
+  const skip = (safePage - 1) * limit;
+  const logs = await prisma.log.findMany({
+    where: logsWhere,
+    orderBy: [{ timestamp: 'desc' }, { id: 'desc' }],
+    skip,
+    take: limit,
+    select: {
+      id: true,
+      timestamp: true,
+      playerName: true,
+      metadata: true,
+    },
+  });
+
+  const items = logs.map((log) => {
+    const meta: any = log.metadata || {};
+    const mappedType = String(meta.action || meta.punishmentType || 'PUNISH')
+      .trim()
+      .toUpperCase();
+    const mappedDate = log.timestamp instanceof Date ? log.timestamp : new Date(log.timestamp);
+    const mappedStatus = mappedType === 'KICK' || mappedType === 'WARN' ? 'EXECUTED' : 'ACTIVE';
+    return {
+      id: `log_${log.id}`,
+      type: mappedType,
+      reason: String(meta.reason || meta.command || 'Sem motivo'),
+      staffName: String(log.playerName || 'Console'),
+      date: mappedDate.toISOString(),
+      duration: meta.durationText ? String(meta.durationText) : undefined,
+      active: mappedStatus === 'ACTIVE',
+      status: mappedStatus,
+    };
+  });
+
+  return res.json({
+    mode: 'page',
+    page: safePage,
+    limit,
+    total,
+    totalPages,
+    hasMore: safePage < totalPages,
+    items,
+  });
 });
 
 router.post('/:steamId/notes', authMiddleware, requireRole(UserRole.ADMIN), async (req, res) => {
@@ -1360,6 +1532,13 @@ router.post(
         date: p.date.toISOString(),
         duration: p.duration || undefined,
         active: isPunishmentCurrentlyActive(p.type, Boolean(p.active), p.date, p.duration),
+        status: resolvePunishmentStatus(
+          p.type,
+          Boolean(p.active),
+          p.date,
+          p.duration,
+          undefined,
+        ),
         dispatch,
       });
     } catch (e) {
@@ -1453,6 +1632,10 @@ router.patch(
       date: updated.date.toISOString(),
       duration: updated.duration || undefined,
       active: false,
+      status: 'REVOKED',
+      deactivationReason: parsedReason || undefined,
+      deactivatedAt: new Date().toISOString(),
+      deactivatedBy: String(req.user?.username || 'Console'),
       dispatch,
     });
   },

@@ -4,7 +4,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ApiService } from '../../services/api';
-import { Player, ServerEvent, GameServer, SuspiciousGroup } from '../../types';
+import { Player, ServerEvent, GameServer, SuspiciousGroup, Punishment } from '../../types';
 import { Icons } from '../../components/Icon';
 import { formatLogMessage } from '../../components/logMessage';
 import { Pagination } from '../../components/Pagination';
@@ -20,6 +20,10 @@ const PlayerProfile: React.FC = () => {
   const [logsLoading, setLogsLoading] = useState(false);
   const [logsPage, setLogsPage] = useState(1);
   const [logsTotal, setLogsTotal] = useState(0);
+  const [punishments, setPunishments] = useState<Punishment[]>([]);
+  const [punishmentsLoading, setPunishmentsLoading] = useState(false);
+  const [punishmentsPage, setPunishmentsPage] = useState(1);
+  const [punishmentsTotal, setPunishmentsTotal] = useState(0);
   const [servers, setServers] = useState<GameServer[]>([]);
   const [loading, setLoading] = useState(true);
   const [suspiciousGroup, setSuspiciousGroup] = useState<SuspiciousGroup | null>(null);
@@ -34,6 +38,7 @@ const PlayerProfile: React.FC = () => {
   const [punishmentReason, setPunishmentReason] = useState('');
   const [punishmentDuration, setPunishmentDuration] = useState('');
   const logsPerPage = 50;
+  const punishmentsPerPage = 20;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,9 +60,12 @@ const PlayerProfile: React.FC = () => {
           );
           setSuspiciousGroup(relatedAccounts);
           setLogsPage(1);
+          setPunishmentsPage(1);
         } else {
           setLogs([]);
           setLogsTotal(0);
+          setPunishments([]);
+          setPunishmentsTotal(0);
         }
       } finally {
         setLoading(false);
@@ -86,6 +94,38 @@ const PlayerProfile: React.FC = () => {
 
     fetchPlayerLogs();
   }, [player?.steamId, logsPage]);
+
+  useEffect(() => {
+    const fetchPlayerPunishments = async () => {
+      if (!player?.steamId) return;
+      setPunishmentsLoading(true);
+      try {
+        const response = await ApiService.getPlayerPunishments(
+          player.steamId,
+          punishmentsPage,
+          punishmentsPerPage,
+        );
+        setPunishments(response.items || []);
+        setPunishmentsTotal(response.total || 0);
+      } finally {
+        setPunishmentsLoading(false);
+      }
+    };
+
+    fetchPlayerPunishments();
+  }, [player?.steamId, punishmentsPage]);
+
+  const reloadPunishments = async (targetPage?: number) => {
+    if (!player?.steamId) return;
+    const page = targetPage || punishmentsPage;
+    const response = await ApiService.getPlayerPunishments(
+      player.steamId,
+      page,
+      punishmentsPerPage,
+    );
+    setPunishments(response.items || []);
+    setPunishmentsTotal(response.total || 0);
+  };
 
   const handleAddNote = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -164,6 +204,8 @@ const PlayerProfile: React.FC = () => {
       });
       const updatedPlayer = await ApiService.getPlayerBySteamId(player.steamId);
       setPlayer(updatedPlayer);
+      await reloadPunishments(1);
+      setPunishmentsPage(1);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Erro desconhecido';
       alert(`Erro ao aplicar punicao: ${message}`);
@@ -184,10 +226,31 @@ const PlayerProfile: React.FC = () => {
       );
       const updatedPlayer = await ApiService.getPlayerBySteamId(player.steamId);
       setPlayer(updatedPlayer);
+      await reloadPunishments();
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Erro desconhecido';
       alert(`Erro ao desativar punicao: ${message}`);
     }
+  };
+
+  const getPunishmentStatusLabel = (punishment: Punishment) => {
+    const status = String(punishment.status || '').toUpperCase();
+    if (status === 'ACTIVE') return 'Ativa';
+    if (status === 'REVOKED') return 'Desativada';
+    if (status === 'EXPIRED') return 'Encerrada';
+    if (status === 'EXECUTED') return 'Concluida';
+    return punishment.active ? 'Ativa' : 'Inativa';
+  };
+
+  const handleViewDeactivationReason = (punishment: Punishment) => {
+    const reason = punishment.deactivationReason && punishment.deactivationReason.trim()
+      ? punishment.deactivationReason.trim()
+      : 'Sem motivo informado.';
+    const by = punishment.deactivatedBy ? `\nPor: ${punishment.deactivatedBy}` : '';
+    const at = punishment.deactivatedAt
+      ? `\nQuando: ${new Date(punishment.deactivatedAt).toLocaleString()}`
+      : '';
+    window.alert(`Motivo da desativacao:\n${reason}${by}${at}`);
   };
 
 
@@ -756,9 +819,9 @@ const PlayerProfile: React.FC = () => {
                     <Icons.Gavel className="w-4 h-4 mr-2" /> Histórico de Punições
                  </h3>
                  <span className={`text-xs font-bold px-2 py-0.5 rounded ${
-                    (player.punishments?.length || 0) > 0 ? 'bg-red-900/20 text-red-500' : 'bg-green-900/20 text-green-500'
+                    punishmentsTotal > 0 ? 'bg-red-900/20 text-red-500' : 'bg-green-900/20 text-green-500'
                  }`}>
-                    {player.punishments?.length || 0} Registros
+                    {punishmentsTotal} Registros
                  </span>
               </div>
               <div className="overflow-x-auto">
@@ -775,13 +838,15 @@ const PlayerProfile: React.FC = () => {
                        </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-800 bg-zinc-900">
-                       {player.punishments && player.punishments.length > 0 ? (
-                          player.punishments.map(punishment => (
+                       {punishmentsLoading ? (
+                          <tr><td colSpan={7} className="px-6 py-8 text-center text-zinc-500 italic">Carregando punicoes...</td></tr>
+                       ) : punishments.length > 0 ? (
+                          punishments.map(punishment => (
                              <tr key={punishment.id} className="hover:bg-zinc-800/50">
                                 <td className="px-4 py-3 whitespace-nowrap">
                                    <span className={`text-xs font-bold px-2 py-0.5 rounded border ${
                                       punishment.type === 'BAN' ? 'bg-red-900/20 text-red-500 border-red-900/30' :
-                                      punishment.type === 'WARN' ? 'bg-yellow-900/20 text-yellow-500 border-yellow-900/30' :
+                                      punishment.type === 'MUTE' || punishment.type === 'GAG' ? 'bg-orange-900/20 text-orange-400 border-orange-900/30' :
                                       'bg-zinc-800 text-zinc-400 border-zinc-700'
                                    }`}>
                                       {punishment.type}
@@ -792,19 +857,30 @@ const PlayerProfile: React.FC = () => {
                                 <td className="px-4 py-3 text-sm text-zinc-500 font-mono text-xs">{new Date(punishment.date).toLocaleDateString()}</td>
                                 <td className="px-4 py-3 text-sm text-zinc-400">{punishment.duration || '-'}</td>
                                 <td className="px-4 py-3 whitespace-nowrap">
-                                   {punishment.active ? (
-                                      <span className="text-red-500 text-xs font-bold uppercase">Ativo</span>
-                                   ) : (
-                                      <span className="text-zinc-600 text-xs font-bold uppercase">Expirado</span>
-                                   )}
+                                  <span className={`text-xs font-bold uppercase ${
+                                    getPunishmentStatusLabel(punishment) === 'Ativa'
+                                      ? 'text-red-500'
+                                      : getPunishmentStatusLabel(punishment) === 'Desativada'
+                                      ? 'text-amber-400'
+                                      : 'text-zinc-500'
+                                  }`}>
+                                    {getPunishmentStatusLabel(punishment)}
+                                  </span>
                                 </td>
                                 <td className="px-4 py-3 whitespace-nowrap">
-                                   {punishment.active && ['BAN', 'MUTE', 'GAG'].includes(String(punishment.type || '').toUpperCase()) ? (
+                                   {String(punishment.status || '').toUpperCase() === 'ACTIVE' && ['BAN', 'MUTE', 'GAG'].includes(String(punishment.type || '').toUpperCase()) ? (
                                       <button
                                         onClick={() => handleDeactivatePunishment(punishment.id, punishment.type)}
                                         className="px-2 py-1 text-xs font-bold uppercase rounded border border-zinc-700 text-zinc-300 hover:bg-zinc-800"
                                       >
                                         Desativar
+                                      </button>
+                                   ) : String(punishment.status || '').toUpperCase() === 'REVOKED' ? (
+                                      <button
+                                        onClick={() => handleViewDeactivationReason(punishment)}
+                                        className="px-2 py-1 text-xs font-bold uppercase rounded border border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+                                      >
+                                        Ver motivo
                                       </button>
                                    ) : (
                                       <span className="text-zinc-600 text-xs">-</span>
@@ -818,6 +894,12 @@ const PlayerProfile: React.FC = () => {
                     </tbody>
                  </table>
               </div>
+              <Pagination
+                 currentPage={punishmentsPage}
+                 totalItems={punishmentsTotal}
+                 itemsPerPage={punishmentsPerPage}
+                 onPageChange={setPunishmentsPage}
+              />
            </div>
            
            {/* Chart below punishments */}

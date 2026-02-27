@@ -42,6 +42,10 @@ export interface Punishment {
   date: string; // ISO
   duration?: string; // e.g. "2 hours", "Permanent"
   active: boolean;
+  status?: 'ACTIVE' | 'REVOKED' | 'EXPIRED' | 'EXECUTED';
+  deactivationReason?: string;
+  deactivatedAt?: string;
+  deactivatedBy?: string;
 }
 
 export interface StaffNote {

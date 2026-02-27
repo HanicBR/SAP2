@@ -1,7 +1,7 @@
 
 
 import { MOCK_SERVERS, MOCK_EVENTS, MOCK_STATS, VIP_PLANS, MOCK_SUSPICIOUS_GROUPS, MOCK_PLAYERS, MOCK_USERS, MOCK_TRANSACTIONS, generateServerAnalytics, DEFAULT_SITE_CONFIG } from '../constants';
-import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, LegacyImportSummary, LogsQueryParams, LogsQueryResponse } from '../types';
+import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse } from '../types';
 
 // Utility to simulate network delay (used as fallback)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -653,6 +653,48 @@ export const ApiService = {
     return player || null;
   },
 
+  getPlayerPunishments: async (
+    steamId: string,
+    page = 1,
+    limit = 20,
+  ): Promise<{
+    mode: 'page';
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasMore: boolean;
+    items: Punishment[];
+  }> => {
+    if (hasApi) {
+      const params = new URLSearchParams();
+      params.set('page', String(Math.max(1, page)));
+      params.set('limit', String(Math.max(1, Math.min(100, limit))));
+      return apiFetch(`/players/${steamId}/punishments?${params.toString()}`);
+    }
+
+    await delay(200);
+    const player = playersDb.find((p) => p.steamId === steamId);
+    const allItems = [...(player?.punishments || [])].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    );
+    const safeLimit = Math.max(1, Math.min(100, limit));
+    const total = allItems.length;
+    const totalPages = Math.max(1, Math.ceil(total / safeLimit));
+    const safePage = Math.min(Math.max(1, page), totalPages);
+    const start = (safePage - 1) * safeLimit;
+    const end = start + safeLimit;
+    return {
+      mode: 'page',
+      page: safePage,
+      limit: safeLimit,
+      total,
+      totalPages,
+      hasMore: safePage < totalPages,
+      items: allItems.slice(start, end),
+    };
+  },
+
   getSuspiciousAccounts: async (): Promise<SuspiciousGroup[]> => {
     if (hasApi) {
       const data = await apiFetch<SuspiciousGroup[]>('/suspicious');
@@ -767,7 +809,9 @@ export const ApiService = {
         staffName: data.staffName || 'Sistema',
         date: new Date().toISOString(),
         duration: data.duration,
-        active: data.active ?? true,
+        active: data.type === PunishmentType.BAN || data.type === PunishmentType.MUTE || data.type === PunishmentType.GAG,
+        status:
+          data.type === PunishmentType.KICK || data.type === PunishmentType.WARN ? 'EXECUTED' : 'ACTIVE',
       });
     }
   },
@@ -793,6 +837,9 @@ export const ApiService = {
         player.punishments[idx] = {
           ...player.punishments[idx],
           active: false,
+          status: 'REVOKED',
+          deactivationReason: reason,
+          deactivatedAt: new Date().toISOString(),
         };
       }
     }
