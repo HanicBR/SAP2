@@ -416,31 +416,27 @@ export const ApiService = {
     if (normalized.actorType === 'ALL') delete normalized.actorType;
 
     if (hasApi) {
-      try {
-        const params = new URLSearchParams();
-        if (normalized.search) params.set('search', normalized.search);
-        if (normalized.serverId) params.set('serverId', normalized.serverId);
-        if (normalized.type) params.set('type', normalized.type);
-        if (normalized.mode) params.set('mode', String(normalized.mode));
-        if (normalized.from) params.set('from', normalized.from);
-        if (normalized.to) params.set('to', normalized.to);
-        if (normalized.actorType) params.set('actorType', normalized.actorType);
-        if (normalized.target) params.set('target', normalized.target);
-        if (typeof normalized.limit === 'number' && Number.isFinite(normalized.limit) && normalized.limit > 0) {
-          params.set('limit', String(Math.floor(normalized.limit)));
-        }
-        if (typeof normalized.page === 'number' && Number.isFinite(normalized.page) && normalized.page > 0) {
-          params.set('page', String(Math.floor(normalized.page)));
-        }
-        if (normalized.cursor) {
-          params.set('cursor', normalized.cursor);
-        }
-
-        const suffix = params.toString() ? `?${params.toString()}` : '';
-        return await apiFetch<LogsQueryResponse>(`/logs/query${suffix}`);
-      } catch (error) {
-        console.error('API getEventsQuery failed, falling back to mock getEventsQuery:', error);
+      const params = new URLSearchParams();
+      if (normalized.search) params.set('search', normalized.search);
+      if (normalized.serverId) params.set('serverId', normalized.serverId);
+      if (normalized.type) params.set('type', normalized.type);
+      if (normalized.mode) params.set('mode', String(normalized.mode));
+      if (normalized.from) params.set('from', normalized.from);
+      if (normalized.to) params.set('to', normalized.to);
+      if (normalized.actorType) params.set('actorType', normalized.actorType);
+      if (normalized.target) params.set('target', normalized.target);
+      if (typeof normalized.limit === 'number' && Number.isFinite(normalized.limit) && normalized.limit > 0) {
+        params.set('limit', String(Math.floor(normalized.limit)));
       }
+      if (typeof normalized.page === 'number' && Number.isFinite(normalized.page) && normalized.page > 0) {
+        params.set('page', String(Math.floor(normalized.page)));
+      }
+      if (normalized.cursor) {
+        params.set('cursor', normalized.cursor);
+      }
+
+      const suffix = params.toString() ? `?${params.toString()}` : '';
+      return await apiFetch<LogsQueryResponse>(`/logs/query${suffix}`);
     }
 
     await delay(250);
@@ -559,20 +555,16 @@ export const ApiService = {
     const normalized = query || {};
 
     if (hasApi) {
-      try {
-        const params = new URLSearchParams();
-        if (normalized.scope) params.set('scope', normalized.scope);
-        if (typeof normalized.limit === 'number' && Number.isFinite(normalized.limit) && normalized.limit > 0) {
-          params.set('limit', String(Math.floor(normalized.limit)));
-        }
-        if (typeof normalized.page === 'number' && Number.isFinite(normalized.page) && normalized.page > 0) {
-          params.set('page', String(Math.floor(normalized.page)));
-        }
-        const suffix = params.toString() ? `?${params.toString()}` : '';
-        return await apiFetch<LogsQueryResponse>(`/players/${steamId}/logs${suffix}`);
-      } catch (error) {
-        console.error('API getPlayerLogs failed, falling back to mock getPlayerLogs:', error);
+      const params = new URLSearchParams();
+      if (normalized.scope) params.set('scope', normalized.scope);
+      if (typeof normalized.limit === 'number' && Number.isFinite(normalized.limit) && normalized.limit > 0) {
+        params.set('limit', String(Math.floor(normalized.limit)));
       }
+      if (typeof normalized.page === 'number' && Number.isFinite(normalized.page) && normalized.page > 0) {
+        params.set('page', String(Math.floor(normalized.page)));
+      }
+      const suffix = params.toString() ? `?${params.toString()}` : '';
+      return await apiFetch<LogsQueryResponse>(`/players/${steamId}/logs${suffix}`);
     }
 
     await delay(250);
@@ -620,16 +612,12 @@ export const ApiService = {
 
   getPlayers: async (search?: string, serverFilter?: string, vipFilter?: boolean): Promise<Player[]> => {
     if (hasApi) {
-      try {
-        const params = new URLSearchParams();
-        if (search) params.append('search', search);
-        if (serverFilter) params.append('serverId', serverFilter);
-        if (vipFilter !== undefined) params.append('isVip', String(vipFilter));
-        const players = await apiFetch<Player[]>(`/players?${params.toString()}`);
-        return players;
-      } catch (error) {
-        console.error('API getPlayers failed, falling back to mock getPlayers:', error);
-      }
+      const params = new URLSearchParams();
+      if (search) params.append('search', search);
+      if (serverFilter) params.append('serverId', serverFilter);
+      if (vipFilter !== undefined) params.append('isVip', String(vipFilter));
+      const players = await apiFetch<Player[]>(`/players?${params.toString()}`);
+      return players;
     }
 
     await delay(500);
@@ -656,12 +644,8 @@ export const ApiService = {
 
   getPlayerBySteamId: async (steamId: string): Promise<Player | null> => {
     if (hasApi) {
-      try {
-        const player = await apiFetch<Player>(`/players/${steamId}`);
-        return player;
-      } catch (error) {
-        console.error('API getPlayerBySteamId failed, falling back to mock getPlayerBySteamId:', error);
-      }
+      const player = await apiFetch<Player>(`/players/${steamId}`);
+      return player;
     }
 
     await delay(400);
@@ -671,12 +655,8 @@ export const ApiService = {
 
   getSuspiciousAccounts: async (): Promise<SuspiciousGroup[]> => {
     if (hasApi) {
-      try {
-        const data = await apiFetch<SuspiciousGroup[]>('/suspicious');
-        return data;
-      } catch (error) {
-        console.error('API getSuspiciousAccounts failed, falling back to mock getSuspiciousAccounts:', error);
-      }
+      const data = await apiFetch<SuspiciousGroup[]>('/suspicious');
+      return data;
     }
     await delay(700);
     return [...MOCK_SUSPICIOUS_GROUPS];
@@ -697,15 +677,11 @@ export const ApiService = {
 
   addPlayerNote: async (steamId: string, content: string, staffName: string): Promise<void> => {
     if (hasApi) {
-      try {
-        await apiFetch(`/players/${steamId}/notes`, {
-          method: 'POST',
-          body: JSON.stringify({ content, staffName }),
-        });
-        return;
-      } catch (error) {
-        console.error('API addPlayerNote failed, falling back to mock addPlayerNote:', error);
-      }
+      await apiFetch(`/players/${steamId}/notes`, {
+        method: 'POST',
+        body: JSON.stringify({ content, staffName }),
+      });
+      return;
     }
 
     await delay(300);
@@ -723,15 +699,11 @@ export const ApiService = {
 
   updatePlayerNote: async (steamId: string, noteId: string, content: string): Promise<void> => {
     if (hasApi) {
-      try {
-        await apiFetch(`/players/${steamId}/notes/${noteId}`, {
-          method: 'PATCH',
-          body: JSON.stringify({ content }),
-        });
-        return;
-      } catch (error) {
-        console.error('API updatePlayerNote failed, falling back to mock updatePlayerNote:', error);
-      }
+      await apiFetch(`/players/${steamId}/notes/${noteId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ content }),
+      });
+      return;
     }
 
     await delay(200);
@@ -749,14 +721,10 @@ export const ApiService = {
 
   deletePlayerNote: async (steamId: string, noteId: string): Promise<void> => {
     if (hasApi) {
-      try {
-        await apiFetch(`/players/${steamId}/notes/${noteId}`, {
-          method: 'DELETE',
-        });
-        return;
-      } catch (error) {
-        console.error('API deletePlayerNote failed, falling back to mock deletePlayerNote:', error);
-      }
+      await apiFetch(`/players/${steamId}/notes/${noteId}`, {
+        method: 'DELETE',
+      });
+      return;
     }
 
     await delay(200);
@@ -771,15 +739,11 @@ export const ApiService = {
     data: { type: PunishmentType; reason: string; duration?: string; active?: boolean; staffName: string },
   ): Promise<void> => {
     if (hasApi) {
-      try {
-        await apiFetch(`/players/${steamId}/punishments`, {
-          method: 'POST',
-          body: JSON.stringify(data),
-        });
-        return;
-      } catch (error) {
-        console.error('API createPunishment failed, falling back to mock createPunishment:', error);
-      }
+      await apiFetch(`/players/${steamId}/punishments`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      return;
     }
 
     await delay(200);
