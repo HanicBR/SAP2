@@ -221,14 +221,14 @@ const Vips: React.FC = () => {
       });
       setFeedback(
         dryRun
-          ? `Dry-run expirados: encontrados=${summary.expiredCount}.`
-          : `Reconciliação: encontrados=${summary.expiredCount}, atualizados=${summary.updatedCount}, dispatchQueued=${summary.dispatchQueuedCount}, dispatchNotQueued=${summary.dispatchNotQueuedCount}.`,
+          ? `Simulação de VIPs expirados: encontrados=${summary.expiredCount}.`
+          : `Processamento de VIPs expirados: encontrados=${summary.expiredCount}, atualizados=${summary.updatedCount}, dispatchQueued=${summary.dispatchQueuedCount}, dispatchNotQueued=${summary.dispatchNotQueuedCount}.`,
       );
       if (!dryRun) {
         await refreshAll();
       }
     } catch (err: any) {
-      setFeedback(err?.message || 'Erro ao reconciliar VIPs expirados');
+      setFeedback(err?.message || 'Erro ao processar VIPs expirados');
     } finally {
       setReconcileBusy(false);
     }
@@ -256,14 +256,17 @@ const Vips: React.FC = () => {
       ) : null}
 
       <div className="bg-zinc-900 border border-zinc-800 rounded p-4 flex flex-wrap gap-2 items-center">
-        <span className="text-xs uppercase font-bold text-zinc-400">Expiração automática</span>
+        <span className="text-xs uppercase font-bold text-zinc-400">VIP expirado</span>
+        <span className="text-xs text-zinc-500">
+          Remove VIP vencido no painel e dispara REVOKE para o servidor.
+        </span>
         <button
           type="button"
           onClick={() => handleReconcileExpired(true)}
           disabled={reconcileBusy}
           className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3 py-2 rounded text-xs font-bold uppercase disabled:opacity-60"
         >
-          Dry-run expirados
+          Simular expirados
         </button>
         <button
           type="button"
@@ -271,7 +274,7 @@ const Vips: React.FC = () => {
           disabled={reconcileBusy}
           className="bg-yellow-700 hover:bg-yellow-600 text-white px-3 py-2 rounded text-xs font-bold uppercase disabled:opacity-60"
         >
-          Reconciliar agora
+          Remover expirados agora
         </button>
       </div>
 

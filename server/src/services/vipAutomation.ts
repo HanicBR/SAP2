@@ -97,6 +97,17 @@ const parseExpiry = (raw: Date | string | null | undefined): Date | null => {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 };
 
+const mapVipPlanToServerGroup = (vipPlan: string): string => {
+  const plan = String(vipPlan || '').trim();
+  const normalized = plan.toLowerCase();
+
+  if (normalized === 'vip bronze') return 'VIP';
+  if (normalized === 'vip prata') return 'VIP+';
+  if (normalized === 'vip ouro') return 'VIP++';
+
+  return plan;
+};
+
 const extractTemplateTokens = (template: string): string[] => {
   const tokens: string[] = [];
   String(template).replace(/\{\{\s*([A-Za-z0-9_]+)\s*\}\}/g, (_match, token) => {
@@ -117,6 +128,7 @@ const renderTemplate = (
   }
 
   const vipPlan = String(input.vipPlan || '').trim();
+  const vipPlanServer = mapVipPlanToServerGroup(vipPlan);
   const vipExpiry = parseExpiry(input.vipExpiry);
   const expiryIso = vipExpiry ? vipExpiry.toISOString() : '';
   const expiryUnix = vipExpiry ? Math.floor(vipExpiry.getTime() / 1000) : 0;
@@ -124,12 +136,15 @@ const renderTemplate = (
 
   // Supported template tokens:
   // {{steamId}}, {{steamIdRaw}}, {{vipPlan}}, {{vipPlanRaw}},
+  // {{vipPlanServer}}, {{vipPlanServerRaw}},
   // {{vipExpiryIso}}, {{vipExpiryIsoRaw}}, {{vipExpiryUnix}}, {{action}}
   const tokenMap: Record<string, string> = {
     steamId: quoteConsoleArg(steamId),
     steamIdRaw: steamId,
     vipPlan: quoteConsoleArg(vipPlan),
     vipPlanRaw: vipPlan,
+    vipPlanServer: quoteConsoleArg(vipPlanServer),
+    vipPlanServerRaw: vipPlanServer,
     vipExpiryIso: quoteConsoleArg(expiryIso),
     vipExpiryIsoRaw: expiryIso,
     vipExpiryUnix: expiryUnix > 0 ? String(expiryUnix) : '',
