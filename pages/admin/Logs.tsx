@@ -104,8 +104,9 @@ const formatDuration = (durationMs: number): string => {
 // --- COMPONENT: PLAYER LINK ---
 const PlayerLink = ({ name, steamId, role }: { name?: string, steamId?: string, role?: string }) => {
   const colorClass = getRoleColor(role);
-  
-  if (!name) return <span className="text-zinc-500">Desconhecido</span>;
+  const display = name || steamId;
+
+  if (!display) return <span className="text-zinc-500">Desconhecido</span>;
 
   if (steamId) {
     return (
@@ -113,14 +114,14 @@ const PlayerLink = ({ name, steamId, role }: { name?: string, steamId?: string, 
         to={`/admin/players/${steamId}`}
         onClick={(e) => e.stopPropagation()} 
         className={`${colorClass} hover:underline hover:text-cyan-400 transition-colors cursor-pointer`}
-        title={`Ver perfil de ${name} (${steamId})`}
+        title={`Ver perfil de ${display} (${steamId})`}
       >
-        {name}
+        {display}
       </Link>
     );
   }
 
-  return <span className={colorClass}>{name}</span>;
+  return <span className={colorClass}>{display}</span>;
 };
 
 // --- COMPONENT: LOG ROW (Memoized) ---
@@ -186,15 +187,63 @@ const LogRow = React.memo(({
               <span className="text-zinc-500 text-xs ml-1">(-{log.metadata.damage} HP)</span>
            </span>
          ) : log.type === LogType.PROP_SPAWN ? (
+             <span>
+                <PlayerLink name={log.playerName} steamId={log.steamId} role="none" />
+                <span className="text-zinc-500 mx-1">spawnou</span>
+                <span className="text-yellow-500/80 font-mono text-xs">{log.metadata.propModel}</span>
+             </span>
+         ) : log.type === LogType.COMMAND || log.type === LogType.ULX ? (
             <span>
                <PlayerLink name={log.playerName} steamId={log.steamId} role="none" />
-               <span className="text-zinc-500 mx-1">spawnou</span>
-               <span className="text-yellow-500/80 font-mono text-xs">{log.metadata.propModel}</span>
+               <span className="text-zinc-500 mx-1">executou</span>
+               <span className="text-purple-300 font-mono">{log.metadata.command || 'comando'}</span>
+               {log.metadata.targetName || log.metadata.targetSteamId ? (
+                 <>
+                   <span className="text-zinc-500 mx-1">em</span>
+                   <PlayerLink
+                     name={log.metadata.targetName || log.metadata.targetSteamId}
+                     steamId={log.metadata.targetSteamId}
+                     role="none"
+                   />
+                 </>
+               ) : null}
+            </span>
+         ) : log.type === LogType.PUNISH ? (
+            <span>
+               <PlayerLink name={log.playerName} steamId={log.steamId} role="none" />
+               <span className="text-zinc-500 mx-1">aplicou</span>
+               <span className="text-red-400 font-mono">{log.metadata.action || log.metadata.punishmentType || 'PUNIÇÃO'}</span>
+               {log.metadata.targetName || log.metadata.targetSteamId ? (
+                 <>
+                   <span className="text-zinc-500 mx-1">em</span>
+                   <PlayerLink
+                     name={log.metadata.targetName || log.metadata.targetSteamId}
+                     steamId={log.metadata.targetSteamId}
+                     role="none"
+                   />
+                 </>
+               ) : null}
+               {log.metadata.reason ? (
+                 <span className="text-zinc-500"> ({log.metadata.reason})</span>
+               ) : null}
+            </span>
+         ) : log.type === LogType.CONNECT ? (
+            <span>
+               <PlayerLink name={log.playerName} steamId={log.steamId} role="none" />
+               <span className="text-zinc-500 mx-1">conectou</span>
+            </span>
+         ) : log.type === LogType.DISCONNECT ? (
+            <span>
+               <PlayerLink name={log.playerName} steamId={log.steamId} role="none" />
+               <span className="text-zinc-500 mx-1">desconectou</span>
+               {log.metadata.reason ? (
+                 <span className="text-zinc-500">({log.metadata.reason})</span>
+               ) : null}
             </span>
          ) : (
-            <span className="text-zinc-400">
-               {formatLogMessage(log)}
-            </span>
+             <span className="text-zinc-400">
+                {formatLogMessage(log)}
+             </span>
          )}
       </div>
       
