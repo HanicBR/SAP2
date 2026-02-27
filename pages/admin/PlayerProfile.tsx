@@ -7,6 +7,7 @@ import { ApiService } from '../../services/api';
 import { Player, ServerEvent, GameServer, SuspiciousGroup } from '../../types';
 import { Icons } from '../../components/Icon';
 import { formatLogMessage } from '../../components/logMessage';
+import { Pagination } from '../../components/Pagination';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, 
   AreaChart, Area 
@@ -16,6 +17,9 @@ const PlayerProfile: React.FC = () => {
   const { steamId } = useParams<{ steamId: string }>();
   const [player, setPlayer] = useState<Player | null>(null);
   const [logs, setLogs] = useState<ServerEvent[]>([]);
+  const [logsLoading, setLogsLoading] = useState(false);
+  const [logsPage, setLogsPage] = useState(1);
+  const [logsTotal, setLogsTotal] = useState(0);
   const [servers, setServers] = useState<GameServer[]>([]);
   const [loading, setLoading] = useState(true);
   const [suspiciousGroup, setSuspiciousGroup] = useState<SuspiciousGroup | null>(null);
@@ -29,6 +33,7 @@ const PlayerProfile: React.FC = () => {
   const [punishmentType, setPunishmentType] = useState<'BAN' | 'MUTE' | 'GAG' | 'KICK' | 'WARN'>('WARN');
   const [punishmentReason, setPunishmentReason] = useState('');
   const [punishmentDuration, setPunishmentDuration] = useState('');
+  const logsPerPage = 50;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -45,13 +50,7 @@ const PlayerProfile: React.FC = () => {
         setServers(allServers);
 
         if (playerData) {
-          const [playerLogs, suspiciousGroups] = await Promise.all([
-            ApiService.getEvents(playerData.steamId),
-            ApiService.getSuspiciousAccounts().catch(() => null)
-          ]);
-
-          setLogs(playerLogs);
-
+          const suspiciousGroups = await ApiService.getSuspiciousAccounts().catch(() => null);
           if (suspiciousGroups) {
             const group = suspiciousGroups.find(g =>
               g.players.some(p => p.steamId === playerData.steamId)
@@ -60,6 +59,10 @@ const PlayerProfile: React.FC = () => {
           } else {
             setSuspiciousGroup(null);
           }
+          setLogsPage(1);
+        } else {
+          setLogs([]);
+          setLogsTotal(0);
         }
       } finally {
         setLoading(false);
@@ -68,6 +71,26 @@ const PlayerProfile: React.FC = () => {
 
     fetchData();
   }, [steamId]);
+
+  useEffect(() => {
+    const fetchPlayerLogs = async () => {
+      if (!player?.steamId) return;
+      setLogsLoading(true);
+      try {
+        const response = await ApiService.getPlayerLogs(player.steamId, {
+          scope: 'all',
+          page: logsPage,
+          limit: logsPerPage,
+        });
+        setLogs(response.items || []);
+        setLogsTotal(response.total || 0);
+      } finally {
+        setLogsLoading(false);
+      }
+    };
+
+    fetchPlayerLogs();
+  }, [player?.steamId, logsPage]);
 
   const handleAddNote = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -737,9 +760,12 @@ const PlayerProfile: React.FC = () => {
             <h3 className="text-lg font-bold text-white flex items-center">
                <Icons.List className="w-5 h-5 mr-2 text-zinc-500" /> Logs Recentes
             </h3>
-            <Link to="/admin/logs" className="text-xs text-zinc-500 hover:text-white uppercase font-bold">
-               Ver todos os logs
-            </Link>
+            <div className="text-right">
+              <div className="text-xs text-zinc-500 uppercase font-bold">{logsTotal} registros</div>
+              <Link to="/admin/logs" className="text-xs text-zinc-500 hover:text-white uppercase font-bold">
+                 Ver todos os logs
+              </Link>
+            </div>
          </div>
          <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-zinc-800">
@@ -752,7 +778,9 @@ const PlayerProfile: React.FC = () => {
                   </tr>
                </thead>
                <tbody className="divide-y divide-zinc-800 bg-zinc-900">
-                  {logs.length === 0 ? (
+                  {logsLoading ? (
+                     <tr><td colSpan={4} className="px-6 py-8 text-center text-zinc-500 italic">Carregando logs...</td></tr>
+                  ) : logs.length === 0 ? (
                      <tr><td colSpan={4} className="px-6 py-8 text-center text-zinc-500 italic">Nenhum log recente encontrado.</td></tr>
                   ) : (
                      logs.map((log) => (
@@ -775,6 +803,12 @@ const PlayerProfile: React.FC = () => {
                </tbody>
             </table>
          </div>
+         <Pagination
+            currentPage={logsPage}
+            totalItems={logsTotal}
+            itemsPerPage={logsPerPage}
+            onPageChange={setLogsPage}
+         />
       </div>
     </div>
   );

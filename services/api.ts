@@ -552,6 +552,72 @@ export const ApiService = {
     return response.items;
   },
 
+  getPlayerLogs: async (
+    steamId: string,
+    query?: { scope?: 'actor' | 'target' | 'all'; page?: number; limit?: number },
+  ): Promise<LogsQueryResponse> => {
+    const normalized = query || {};
+
+    if (hasApi) {
+      try {
+        const params = new URLSearchParams();
+        if (normalized.scope) params.set('scope', normalized.scope);
+        if (typeof normalized.limit === 'number' && Number.isFinite(normalized.limit) && normalized.limit > 0) {
+          params.set('limit', String(Math.floor(normalized.limit)));
+        }
+        if (typeof normalized.page === 'number' && Number.isFinite(normalized.page) && normalized.page > 0) {
+          params.set('page', String(Math.floor(normalized.page)));
+        }
+        const suffix = params.toString() ? `?${params.toString()}` : '';
+        return await apiFetch<LogsQueryResponse>(`/players/${steamId}/logs${suffix}`);
+      } catch (error) {
+        console.error('API getPlayerLogs failed, falling back to mock getPlayerLogs:', error);
+      }
+    }
+
+    await delay(250);
+
+    const limit = Math.max(1, Math.min(200, Math.floor(normalized.limit || 50)));
+    const page = Math.max(1, Math.floor(normalized.page || 1));
+    const scope = normalized.scope || 'all';
+    const sid = String(steamId || '').trim();
+
+    const events = [...MOCK_EVENTS];
+    const matchesActor = (e: any) =>
+      e.steamId === sid || String(e?.metadata?.attackerSteamId || '') === sid;
+    const matchesTarget = (e: any) =>
+      String(e?.metadata?.targetSteamId || '') === sid || String(e?.metadata?.victimSteamId || '') === sid;
+
+    const filtered = events
+      .filter((e: any) => {
+        if (scope === 'actor') return matchesActor(e);
+        if (scope === 'target') return matchesTarget(e);
+        return matchesActor(e) || matchesTarget(e);
+      })
+      .sort((a, b) => {
+        const t = new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+        if (t !== 0) return t;
+        return String(b.id).localeCompare(String(a.id));
+      });
+
+    const total = filtered.length;
+    const totalPages = Math.max(1, Math.ceil(total / limit));
+    const safePage = Math.min(page, totalPages);
+    const start = (safePage - 1) * limit;
+    const items = filtered.slice(start, start + limit);
+
+    return {
+      mode: 'page',
+      page: safePage,
+      limit,
+      total,
+      totalPages,
+      hasMore: safePage < totalPages,
+      nextCursor: items.length ? items[items.length - 1].id : null,
+      items,
+    };
+  },
+
   getPlayers: async (search?: string, serverFilter?: string, vipFilter?: boolean): Promise<Player[]> => {
     if (hasApi) {
       try {
