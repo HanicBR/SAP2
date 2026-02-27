@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ApiService } from '../../services/api';
 import {
+  GameMode,
+  GameServer,
   VipAdminItem,
   VipAutomationActionItem,
   VipAutomationActionStatus,
@@ -23,13 +25,55 @@ const formatCommand = (raw?: string) => {
   return `${parsed.slice(0, 67)}...`;
 };
 
+const automationStatusLabel = (status: VipAutomationActionStatus) => {
+  if (status === 'QUEUED') return 'Enfileirado';
+  if (status === 'FAILED') return 'Falhou';
+  return 'Ignorado';
+};
+
+const automationActionLabel = (action: 'GRANT' | 'REVOKE') =>
+  action === 'GRANT' ? 'Conceder' : 'Revogar';
+
+const automationReasonLabel = (reason?: string) => {
+  const code = String(reason || '').trim();
+  if (!code) return '-';
+  if (code.startsWith('unknown_template_token:')) {
+    return `Token de template desconhecido: ${code.slice('unknown_template_token:'.length)}`;
+  }
+  const known: Record<string, string> = {
+    vip_automation_disabled: 'Automacao VIP desativada',
+    missing_grant_template: 'Template de concessao ausente',
+    missing_revoke_template: 'Template de revogacao ausente',
+    missing_steam_id: 'SteamID ausente',
+    empty_command: 'Comando vazio',
+    raw_tokens_not_allowed_in_dispatch: 'Tokens Raw nao permitidos no envio real',
+    command_contains_newline: 'Comando invalido (contendo quebra de linha)',
+    sandbox_server_not_found: 'Servidor Sandbox nao encontrado',
+    sandbox_server_invalid_mode: 'Servidor selecionado nao e Sandbox',
+    sandbox_server_missing: 'Nenhum servidor Sandbox disponivel',
+    enqueue_failed: 'Falha ao enfileirar comando',
+    dispatch_error: 'Erro no envio da automacao',
+    mock_mode: 'Modo mock (sem envio real)',
+  };
+  return known[code] || code;
+};
+
+const dispatchResultLabel = (dispatch?: { queued: boolean; skipped?: boolean; reason?: string }) => {
+  if (!dispatch) return 'sem automacao';
+  if (dispatch.queued) return 'enfileirada';
+  if (dispatch.skipped) return 'ignorada';
+  return 'falhou';
+};
+
 const Vips: React.FC = () => {
   const { config } = useConfig();
   const [items, setItems] = useState<VipAdminItem[]>([]);
   const [actions, setActions] = useState<VipAutomationActionItem[]>([]);
+  const [servers, setServers] = useState<GameServer[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionsLoading, setActionsLoading] = useState(true);
   const [automationLoading, setAutomationLoading] = useState(true);
+  const [serversLoading, setServersLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [reconcileBusy, setReconcileBusy] = useState(false);
   const [automationSaving, setAutomationSaving] = useState(false);
@@ -77,6 +121,18 @@ const Vips: React.FC = () => {
     return uniqueByValue.length ? uniqueByValue : [{ value: '30', label: '30 dias (Mensal)' }];
   }, [config.vip.billingOptions]);
 
+  const sandboxServers = useMemo(
+    () => servers.filter((server) => server.mode === GameMode.SANDBOX),
+    [servers],
+  );
+
+  const hasSelectedSandboxServer = useMemo(
+    () =>
+      !!automationConfig.sandboxServerId &&
+      sandboxServers.some((server) => server.id === automationConfig.sandboxServerId),
+    [automationConfig.sandboxServerId, sandboxServers],
+  );
+
   const loadData = async () => {
     setLoading(true);
     try {
@@ -121,8 +177,20 @@ const Vips: React.FC = () => {
     }
   };
 
+  const loadServers = async () => {
+    setServersLoading(true);
+    try {
+      const result = await ApiService.getServers();
+      setServers(result);
+    } catch (err: any) {
+      setFeedback(err?.message || 'Erro ao carregar servidores');
+    } finally {
+      setServersLoading(false);
+    }
+  };
+
   const refreshAll = async () => {
-    await Promise.all([loadData(), loadActions(), loadAutomationConfig()]);
+    await Promise.all([loadData(), loadActions(), loadAutomationConfig(), loadServers()]);
   };
 
   useEffect(() => {
@@ -151,6 +219,10 @@ const Vips: React.FC = () => {
     loadAutomationConfig();
   }, []);
 
+  useEffect(() => {
+    loadServers();
+  }, []);
+
   const handleGrant = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
@@ -164,7 +236,9 @@ const Vips: React.FC = () => {
       });
       setFeedback(
         result.dispatch
-          ? `VIP concedido. dispatch=${result.dispatch.queued ? 'queued' : `not_queued (${result.dispatch.reason || 'unknown'})`}`
+          ? `VIP concedido. Automacao ${dispatchResultLabel(result.dispatch)}${
+              result.dispatch.reason ? ` (${automationReasonLabel(result.dispatch.reason)})` : ''
+            }.`
           : 'VIP concedido.',
       );
       setGrantSteamId('');
@@ -189,7 +263,9 @@ const Vips: React.FC = () => {
       });
       setFeedback(
         result.dispatch
-          ? `VIP estendido. dispatch=${result.dispatch.queued ? 'queued' : `not_queued (${result.dispatch.reason || 'unknown'})`}`
+          ? `VIP estendido. Automacao ${dispatchResultLabel(result.dispatch)}${
+              result.dispatch.reason ? ` (${automationReasonLabel(result.dispatch.reason)})` : ''
+            }.`
           : 'VIP estendido.',
       );
       await refreshAll();
@@ -212,7 +288,9 @@ const Vips: React.FC = () => {
       });
       setFeedback(
         result.dispatch
-          ? `VIP revogado. dispatch=${result.dispatch.queued ? 'queued' : `not_queued (${result.dispatch.reason || 'unknown'})`}`
+          ? `VIP revogado. Automacao ${dispatchResultLabel(result.dispatch)}${
+              result.dispatch.reason ? ` (${automationReasonLabel(result.dispatch.reason)})` : ''
+            }.`
           : 'VIP revogado.',
       );
       await refreshAll();
@@ -229,7 +307,9 @@ const Vips: React.FC = () => {
     try {
       const result = await ApiService.retryVipAutomationAction(actionId);
       setFeedback(
-        `Retry ${actionId}: ${result.dispatch.queued ? 'queued' : `not_queued (${result.dispatch.reason || 'unknown'})`}`,
+        `Tentativa ${actionId}: automacao ${dispatchResultLabel(result.dispatch)}${
+          result.dispatch.reason ? ` (${automationReasonLabel(result.dispatch.reason)})` : ''
+        }.`,
       );
       await refreshAll();
     } catch (err: any) {
@@ -293,7 +373,7 @@ const Vips: React.FC = () => {
         <button
           onClick={refreshAll}
           className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-4 py-2 rounded text-sm font-bold uppercase tracking-wider flex items-center"
-          disabled={loading || actionsLoading || automationLoading}
+          disabled={loading || actionsLoading || automationLoading || serversLoading}
         >
           <Icons.RefreshCw className="w-4 h-4 mr-2" />
           Atualizar
@@ -323,17 +403,34 @@ const Vips: React.FC = () => {
           Ativar envio automatico de comando VIP
         </label>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <input
+          <select
             value={automationConfig.sandboxServerId || ''}
             onChange={(e) =>
               setAutomationConfig((prev) => ({
                 ...prev,
-                sandboxServerId: e.target.value,
+                sandboxServerId: e.target.value || undefined,
               }))
             }
             className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm font-mono"
-            placeholder="Server ID Sandbox (opcional)"
-          />
+            disabled={serversLoading}
+          >
+            <option value="">Automatico (primeiro Sandbox online)</option>
+            {sandboxServers.map((server) => (
+              <option key={server.id} value={server.id}>
+                {server.name} - {server.id}
+              </option>
+            ))}
+            {automationConfig.sandboxServerId && !hasSelectedSandboxServer ? (
+              <option value={automationConfig.sandboxServerId}>
+                Atual (nao listado): {automationConfig.sandboxServerId}
+              </option>
+            ) : null}
+          </select>
+          <div className="text-xs text-zinc-500 flex items-center">
+            {serversLoading
+              ? 'Carregando servidores...'
+              : `${sandboxServers.length} servidor(es) Sandbox disponivel(is)`}
+          </div>
           <div className="text-xs text-zinc-500 flex items-center">
             Tokens: {'{{steamId}}'}, {'{{vipPlanServer}}'}, {'{{vipExpiryUnix}}'}
           </div>
@@ -612,9 +709,9 @@ const Vips: React.FC = () => {
               className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm"
             >
               <option value="ALL">Todos</option>
-              <option value="QUEUED">Queued</option>
-              <option value="FAILED">Failed</option>
-              <option value="SKIPPED">Skipped</option>
+              <option value="QUEUED">Enfileirado</option>
+              <option value="FAILED">Falhou</option>
+              <option value="SKIPPED">Ignorado</option>
             </select>
             <button
               onClick={loadActions}
@@ -655,7 +752,7 @@ const Vips: React.FC = () => {
                 actions.map((action) => (
                   <tr key={action.id} className="hover:bg-zinc-800/40">
                     <td className="px-4 py-3 text-xs text-zinc-300">{formatDateTime(action.createdAt)}</td>
-                    <td className="px-4 py-3 text-xs text-zinc-300">{action.action}</td>
+                    <td className="px-4 py-3 text-xs text-zinc-300">{automationActionLabel(action.action)}</td>
                     <td className="px-4 py-3 text-xs text-zinc-400 font-mono">{action.steamId}</td>
                     <td className="px-4 py-3">
                       <span
@@ -667,10 +764,10 @@ const Vips: React.FC = () => {
                             : 'bg-yellow-900/30 text-yellow-400 border border-yellow-800'
                         }`}
                       >
-                        {action.status}
+                        {automationStatusLabel(action.status)}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-xs text-zinc-400">{action.reason || '-'}</td>
+                    <td className="px-4 py-3 text-xs text-zinc-400">{automationReasonLabel(action.reason)}</td>
                     <td className="px-4 py-3 text-xs text-zinc-400 font-mono">{formatCommand(action.command)}</td>
                     <td className="px-4 py-3 text-right">
                       <button
@@ -678,7 +775,7 @@ const Vips: React.FC = () => {
                         disabled={busy || action.status === 'QUEUED'}
                         className="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3 py-1 rounded disabled:opacity-60"
                       >
-                        Retry
+                        Tentar novamente
                       </button>
                     </td>
                   </tr>
