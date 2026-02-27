@@ -50,6 +50,7 @@ interface TTTMapGroup {
 }
 
 type LogItem = LogEntry | RoundGroup | SessionGroup | TTTMapGroup;
+type ActorTypeFilter = 'ALL' | 'player' | 'console' | 'system';
 
 // --- OPTIMIZATION: HELPER FUNCTIONS MOVED OUTSIDE COMPONENT ---
 
@@ -478,6 +479,8 @@ const Logs: React.FC = () => {
   const [search, setSearch] = useState('');
   const [selectedMode, setSelectedMode] = useState<GameMode | 'ALL'>('ALL');
   const [logTypeFilter, setLogTypeFilter] = useState<string>('ALL');
+  const [actorTypeFilter, setActorTypeFilter] = useState<ActorTypeFilter>('ALL');
+  const [targetSearch, setTargetSearch] = useState('');
 
   const [siteConfig, setSiteConfig] = useState<SiteConfig | null>(null);
   const [ignoreToolsInput, setIgnoreToolsInput] = useState('');
@@ -510,6 +513,10 @@ const Logs: React.FC = () => {
     });
   };
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, selectedMode, logTypeFilter, actorTypeFilter, targetSearch]);
+
   // --- MEMOIZED GROUPING & FILTERING LOGIC ---
   // This performs the heavy lifting of sorting, filtering, and structuring the logs
   const processedData = useMemo(() => {
@@ -535,7 +542,25 @@ const Logs: React.FC = () => {
         filtered = filtered.filter(l => l.type === logTypeFilter);
      }
 
-    // 4. Grouping Logic
+     // 4. Actor Type Filter
+     if (actorTypeFilter !== 'ALL') {
+        filtered = filtered.filter(l => {
+          const actorType = String((l.metadata as any)?.actorType || '').toLowerCase();
+          return actorType === actorTypeFilter;
+        });
+     }
+
+     // 5. Target Filter
+     if (targetSearch) {
+       const lowerTarget = targetSearch.toLowerCase();
+       filtered = filtered.filter(l => {
+         const targetName = String((l.metadata as any)?.targetName || '').toLowerCase();
+         const targetSteamId = String((l.metadata as any)?.targetSteamId || '').toLowerCase();
+         return targetName.includes(lowerTarget) || targetSteamId.includes(lowerTarget);
+       });
+     }
+
+    // 6. Grouping Logic
     const result: LogItem[] = [];
     
     if (selectedMode === GameMode.TTT) {
@@ -698,7 +723,7 @@ const Logs: React.FC = () => {
         return new Date(tB).getTime() - new Date(tA).getTime();
      });
 
-  }, [rawLogs, search, selectedMode, logTypeFilter]);
+  }, [rawLogs, search, selectedMode, logTypeFilter, actorTypeFilter, targetSearch]);
 
   // Pagination Logic
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -824,6 +849,37 @@ const Logs: React.FC = () => {
                   </button>
                ))}
            </div>
+        </div>
+
+        <div className="bg-zinc-900 p-4 rounded border border-zinc-800 grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-[11px] font-bold text-zinc-500 uppercase mb-1">
+              Tipo de Ator
+            </label>
+            <select
+              value={actorTypeFilter}
+              onChange={(e) => setActorTypeFilter(e.target.value as ActorTypeFilter)}
+              className="w-full bg-zinc-950 border border-zinc-700 rounded px-2 py-2 text-xs text-white focus:border-red-500 focus:outline-none"
+            >
+              <option value="ALL">Todos</option>
+              <option value="player">Player</option>
+              <option value="console">Console</option>
+              <option value="system">System</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-bold text-zinc-500 uppercase mb-1">
+              Alvo (Nick/SteamID)
+            </label>
+            <input
+              type="text"
+              value={targetSearch}
+              onChange={(e) => setTargetSearch(e.target.value)}
+              placeholder="Ex: Bot03 ou STEAM_0:1:..."
+              className="w-full bg-zinc-950 border border-zinc-700 rounded px-2 py-2 text-xs text-white placeholder-zinc-500 focus:border-red-500 focus:outline-none"
+            />
+          </div>
         </div>
 
         <div className="bg-zinc-900 p-4 rounded border border-zinc-800 space-y-3">
