@@ -382,6 +382,96 @@ const getRankFromPoints = (points: number): string => {
   return 'Bronze';
 };
 
+const chunkStrings = (items: string[], size: number): string[][] => {
+  const safeSize = Math.max(1, size);
+  const chunks: string[][] = [];
+  for (let i = 0; i < items.length; i += safeSize) {
+    chunks.push(items.slice(i, i + safeSize));
+  }
+  return chunks;
+};
+
+const extractRecentRoundIdsByMode = (logs: any[], since: Date): { TTT: string[]; MURDER: string[] } => {
+  const sinceMs = since.getTime();
+  const byMode = {
+    TTT: new Set<string>(),
+    MURDER: new Set<string>(),
+  };
+
+  logs.forEach((log) => {
+    const mode = String(log?.gameMode || '')
+      .trim()
+      .toUpperCase();
+    if (mode !== 'TTT' && mode !== 'MURDER') return;
+
+    const ts = new Date(log?.timestamp).getTime();
+    if (!Number.isFinite(ts) || ts < sinceMs) return;
+
+    const meta: any = (log?.metadata || {}) as any;
+    const roundId = typeof meta.roundId === 'string' ? meta.roundId.trim() : '';
+    if (!roundId) return;
+
+    if (mode === 'TTT') byMode.TTT.add(roundId);
+    if (mode === 'MURDER') byMode.MURDER.add(roundId);
+  });
+
+  return {
+    TTT: Array.from(byMode.TTT),
+    MURDER: Array.from(byMode.MURDER),
+  };
+};
+
+const fetchRoundEndLogsForPlayerRounds = async (
+  roundIdsByMode: { TTT: string[]; MURDER: string[] },
+  since: Date,
+) => {
+  const CHUNK_SIZE = 150;
+
+  const runModeQuery = async (mode: 'TTT' | 'MURDER', roundIds: string[]) => {
+    if (!roundIds.length) return [] as any[];
+
+    const chunks = chunkStrings(roundIds, CHUNK_SIZE);
+    const results = await Promise.all(
+      chunks.map((chunk) =>
+        prisma.log.findMany({
+          where: {
+            gameMode: mode as any,
+            type: 'ROUND_END',
+            timestamp: { gte: since },
+            OR: chunk.map((roundId) => ({
+              metadata: {
+                path: ['roundId'],
+                equals: roundId,
+              } as any,
+            })) as any,
+          } as any,
+          select: {
+            id: true,
+            gameMode: true,
+            type: true,
+            metadata: true,
+          },
+        }),
+      ),
+    );
+
+    return results.flat();
+  };
+
+  const [tttLogs, murderLogs] = await Promise.all([
+    runModeQuery('TTT', roundIdsByMode.TTT),
+    runModeQuery('MURDER', roundIdsByMode.MURDER),
+  ]);
+
+  const dedupedById = new Map<string, any>();
+  [...tttLogs, ...murderLogs].forEach((log) => {
+    const id = String(log?.id || '');
+    if (!id || dedupedById.has(id)) return;
+    dedupedById.set(id, log);
+  });
+  return Array.from(dedupedById.values());
+};
+
 const buildGameModeStats = (steamId: string, logs: any[], roundEndLogs?: any[]) => {
   const stats: any = {};
   const seenLogIds = new Set<string>();
@@ -1176,19 +1266,12 @@ router.get('/:steamId', async (req, res) => {
   if (allLogs.length) {
     const statsRoundWindowDays = 90;
     const statsRoundSince = new Date(Date.now() - statsRoundWindowDays * 24 * 60 * 60 * 1000);
-    roundEndLogs = await prisma.log.findMany({
-      where: {
-        gameMode: { in: ['TTT', 'MURDER'] },
-        type: 'ROUND_END',
-        timestamp: { gte: statsRoundSince },
-      },
-      select: {
-        id: true,
-        gameMode: true,
-        type: true,
-        metadata: true,
-      },
-    });
+    const recentRoundIdsByMode = extractRecentRoundIdsByMode(allLogs, statsRoundSince);
+    if (recentRoundIdsByMode.TTT.length || recentRoundIdsByMode.MURDER.length) {
+      roundEndLogs = await fetchRoundEndLogsForPlayerRounds(recentRoundIdsByMode, statsRoundSince);
+    } else {
+      roundEndLogs = [];
+    }
   }
 
   const gameModeStats = allLogs.length
