@@ -308,6 +308,96 @@ const buildGameModeStats = (steamId: string, logs: any[], roundEndLogs?: any[]) 
   return stats;
 };
 
+const buildActivityHistory = (
+  logs: { id?: string; type: string; timestamp: Date; metadata: unknown }[],
+  days: number,
+) => {
+  const now = new Date();
+  const buckets: Record<string, { date: string; hoursPlayed: number; sessions: number }> = {};
+  const orderedKeys: string[] = [];
+
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(now);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    const label = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+    orderedKeys.push(key);
+    buckets[key] = {
+      date: label,
+      hoursPlayed: 0,
+      sessions: 0,
+    };
+  }
+
+  const sessionsById: Record<string, { start?: number; dayKey?: string }> = {};
+  let fallbackStart: number | undefined;
+  let fallbackDayKey: string | undefined;
+
+  const addDuration = (dayKey: string | undefined, ms: number) => {
+    if (!dayKey || !buckets[dayKey]) return;
+    if (ms <= 0) return;
+    buckets[dayKey].hoursPlayed += ms / (1000 * 60 * 60);
+  };
+
+  logs.forEach((log) => {
+    const ts = log.timestamp.getTime();
+    const dayKey = log.timestamp.toISOString().slice(0, 10);
+    const meta: any = log.metadata || {};
+    const sessionId = typeof meta.sessionId === 'string' && meta.sessionId ? meta.sessionId : undefined;
+
+    if (log.type === 'CONNECT') {
+      if (buckets[dayKey]) {
+        buckets[dayKey].sessions += 1;
+      }
+      if (sessionId) {
+        sessionsById[sessionId] = {
+          start: ts,
+          dayKey,
+        };
+      } else {
+        fallbackStart = ts;
+        fallbackDayKey = dayKey;
+      }
+      return;
+    }
+
+    if (log.type === 'DISCONNECT') {
+      if (sessionId && sessionsById[sessionId]?.start !== undefined) {
+        const started = sessionsById[sessionId];
+        addDuration(started.dayKey, Math.max(0, ts - (started.start as number)));
+        delete sessionsById[sessionId];
+        return;
+      }
+
+      if (fallbackStart !== undefined) {
+        addDuration(fallbackDayKey, Math.max(0, ts - fallbackStart));
+        fallbackStart = undefined;
+        fallbackDayKey = undefined;
+      }
+    }
+  });
+
+  const nowMs = now.getTime();
+  Object.values(sessionsById).forEach((sess) => {
+    if (sess.start !== undefined) {
+      addDuration(sess.dayKey, Math.max(0, nowMs - sess.start));
+    }
+  });
+  if (fallbackStart !== undefined) {
+    addDuration(fallbackDayKey, Math.max(0, nowMs - fallbackStart));
+  }
+
+  return orderedKeys.map((key) => {
+    const bucket = buckets[key] || { date: key, hoursPlayed: 0, sessions: 0 };
+    return {
+      date: bucket.date,
+      hoursPlayed: Number(bucket.hoursPlayed.toFixed(2)),
+      sessions: bucket.sessions,
+    };
+  });
+};
+
 const computePlaytimeHours = (logs: { type: string; timestamp: Date; metadata: unknown }[]): number => {
   if (!logs.length) return 0;
 
@@ -482,6 +572,24 @@ router.get('/:steamId', async (req, res) => {
     punishments = [];
   }
 
+  const activityWindowDays = 14;
+  const activitySince = new Date(Date.now() - activityWindowDays * 24 * 60 * 60 * 1000);
+  const activityLogs = await prisma.log.findMany({
+    where: {
+      steamId,
+      timestamp: { gte: activitySince },
+      type: { in: ['CONNECT', 'DISCONNECT'] },
+    },
+    select: {
+      id: true,
+      type: true,
+      timestamp: true,
+      metadata: true,
+    },
+    orderBy: [{ timestamp: 'asc' }, { id: 'asc' }],
+  });
+  const activityHistory = buildActivityHistory(activityLogs as any, activityWindowDays);
+
   return res.json({
     ...toPlayer(player),
     playTimeHours,
@@ -501,6 +609,7 @@ router.get('/:steamId', async (req, res) => {
       duration: p.duration || undefined,
       active: Boolean(p.active),
     })),
+    activityHistory,
   });
 });
 
