@@ -9,8 +9,7 @@ import { Icons } from '../../components/Icon';
 import { formatLogMessage } from '../../components/logMessage';
 import { Pagination } from '../../components/Pagination';
 import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, 
-  AreaChart, Area 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend
 } from 'recharts';
 
 const PlayerProfile: React.FC = () => {
@@ -24,6 +23,7 @@ const PlayerProfile: React.FC = () => {
   const [punishmentsLoading, setPunishmentsLoading] = useState(false);
   const [punishmentsPage, setPunishmentsPage] = useState(1);
   const [punishmentsTotal, setPunishmentsTotal] = useState(0);
+  const [activityWindowDays, setActivityWindowDays] = useState<7 | 14 | 30 | 90>(30);
   const [servers, setServers] = useState<GameServer[]>([]);
   const [loading, setLoading] = useState(true);
   const [suspiciousGroup, setSuspiciousGroup] = useState<SuspiciousGroup | null>(null);
@@ -52,7 +52,7 @@ const PlayerProfile: React.FC = () => {
       
       try {
         const [playerData, allServers] = await Promise.all([
-          ApiService.getPlayerBySteamId(steamId),
+          ApiService.getPlayerBySteamId(steamId, { activityWindowDays }),
           ApiService.getServers()
         ]);
 
@@ -78,7 +78,7 @@ const PlayerProfile: React.FC = () => {
     };
 
     fetchData();
-  }, [steamId]);
+  }, [steamId, activityWindowDays]);
 
   useEffect(() => {
     const fetchPlayerLogs = async () => {
@@ -146,10 +146,10 @@ const PlayerProfile: React.FC = () => {
 
     setSubmittingNote(true);
     // In a real app we'd get the current admin user
-    await ApiService.addPlayerNote(player.steamId, newNote, 'AdminUser');
+    await ApiService.addPlayerNote(player.steamId, newNote);
     
     // Refresh player data to see the note
-    const updatedPlayer = await ApiService.getPlayerBySteamId(player.steamId);
+    const updatedPlayer = await ApiService.getPlayerBySteamId(player.steamId, { activityWindowDays });
     setPlayer(updatedPlayer);
     
     setNewNote('');
@@ -169,7 +169,7 @@ const PlayerProfile: React.FC = () => {
   const handleSaveEditNote = async (noteId: string) => {
     if (!player || !editingNoteContent.trim()) return;
     await ApiService.updatePlayerNote(player.steamId, noteId, editingNoteContent.trim());
-    const updatedPlayer = await ApiService.getPlayerBySteamId(player.steamId);
+    const updatedPlayer = await ApiService.getPlayerBySteamId(player.steamId, { activityWindowDays });
     setPlayer(updatedPlayer);
     cancelEditNote();
   };
@@ -179,7 +179,7 @@ const PlayerProfile: React.FC = () => {
     if (!window.confirm('Tem certeza que deseja remover esta nota?')) return;
 
     await ApiService.deletePlayerNote(player.steamId, noteId);
-    const updatedPlayer = await ApiService.getPlayerBySteamId(player.steamId);
+    const updatedPlayer = await ApiService.getPlayerBySteamId(player.steamId, { activityWindowDays });
     setPlayer(updatedPlayer);
   };
 
@@ -218,7 +218,7 @@ const PlayerProfile: React.FC = () => {
         duration: parsedDuration,
         active: true,
       });
-      const updatedPlayer = await ApiService.getPlayerBySteamId(player.steamId);
+      const updatedPlayer = await ApiService.getPlayerBySteamId(player.steamId, { activityWindowDays });
       setPlayer(updatedPlayer);
       await reloadPunishments(1);
       setPunishmentsPage(1);
@@ -243,7 +243,7 @@ const PlayerProfile: React.FC = () => {
         punishmentId,
         reasonInput && reasonInput.trim() ? reasonInput.trim() : undefined,
       );
-      const updatedPlayer = await ApiService.getPlayerBySteamId(player.steamId);
+      const updatedPlayer = await ApiService.getPlayerBySteamId(player.steamId, { activityWindowDays });
       setPlayer(updatedPlayer);
       await reloadPunishments();
     } catch (error) {
@@ -346,6 +346,43 @@ const PlayerProfile: React.FC = () => {
         connections: stats.connections
       }))
     : [];
+
+  const activityHistory = player.activityHistory || [];
+  const activityServerIds = Array.from(
+    new Set(
+      activityHistory.flatMap((entry) => Object.keys(entry.serverHours || {})),
+    ),
+  );
+  const activityPalette = [
+    '#ef4444',
+    '#f59e0b',
+    '#22c55e',
+    '#3b82f6',
+    '#a855f7',
+    '#14b8a6',
+    '#f97316',
+    '#e11d48',
+  ];
+  const activitySeries = activityServerIds.map((serverId, index) => ({
+    serverId,
+    key: `series_${index}`,
+    color: activityPalette[index % activityPalette.length],
+  }));
+  const activityChartData = activityHistory.map((entry) => {
+    const row: Record<string, number | string> = {
+      date: entry.date,
+      total: Number(entry.hoursPlayed || 0),
+    };
+    activitySeries.forEach((series) => {
+      row[series.key] = Number(entry.serverHours?.[series.serverId] || 0);
+    });
+    return row;
+  });
+  const activitySeriesLabelByKey: Record<string, string> = {};
+  activitySeries.forEach((series) => {
+    activitySeriesLabelByKey[series.key] =
+      series.serverId === 'unknown' ? 'Servidor desconhecido' : getServerName(series.serverId);
+  });
 
   const suspicious = !!suspiciousGroup;
 
@@ -671,29 +708,61 @@ const PlayerProfile: React.FC = () => {
         </div>
       )}
 
-      {/* Activity Timeline */}
-      {player.activityHistory && (
+            {/* Activity Timeline */}
+      {activityHistory.length > 0 && (
          <div className="bg-zinc-900 border border-zinc-800 rounded overflow-hidden p-6">
-            <h3 className="text-sm font-bold text-zinc-300 uppercase mb-6 flex items-center">
-               <Icons.Activity className="w-4 h-4 mr-2" /> Atividade Recente (Últimos 14 dias)
-            </h3>
-            <div className="h-64 w-full">
+            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <h3 className="text-sm font-bold text-zinc-300 uppercase flex items-center">
+                 <Icons.Activity className="w-4 h-4 mr-2" /> Atividade Recente (Ultimos {activityWindowDays} dias)
+              </h3>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold uppercase text-zinc-500">Periodo</span>
+                <select
+                  value={activityWindowDays}
+                  onChange={(e) => setActivityWindowDays(Number(e.target.value) as 7 | 14 | 30 | 90)}
+                  className="rounded border border-zinc-700 bg-zinc-950 px-2 py-1 text-xs font-bold text-zinc-300 focus:border-red-700 focus:outline-none"
+                >
+                  <option value={7}>7 dias</option>
+                  <option value={14}>14 dias</option>
+                  <option value={30}>30 dias</option>
+                  <option value={90}>90 dias</option>
+                </select>
+              </div>
+            </div>
+            <div className="h-72 w-full">
                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={player.activityHistory}>
-                     <defs>
-                        <linearGradient id="colorHours" x1="0" y1="0" x2="0" y2="1">
-                           <stop offset="5%" stopColor="#b91c1c" stopOpacity={0.8}/>
-                           <stop offset="95%" stopColor="#b91c1c" stopOpacity={0}/>
-                        </linearGradient>
-                     </defs>
+                  <BarChart data={activityChartData}>
                      <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
                      <XAxis dataKey="date" stroke="#71717a" tick={{fontSize: 10}} />
                      <YAxis stroke="#71717a" tick={{fontSize: 12}} />
                      <Tooltip 
                         contentStyle={{ backgroundColor: '#09090b', border: '1px solid #3f3f46', color: '#f4f4f5' }}
+                        formatter={(value, name) => {
+                          const numeric = typeof value === 'number' ? value : Number(value || 0);
+                          const label = activitySeriesLabelByKey[String(name)] || 'Total';
+                          return [`${numeric.toFixed(2)}h`, label];
+                        }}
+                        labelFormatter={(label) => `Dia ${label}`}
                      />
-                     <Area type="monotone" dataKey="hoursPlayed" stroke="#b91c1c" fillOpacity={1} fill="url(#colorHours)" />
-                  </AreaChart>
+                     {activitySeries.length > 0 ? (
+                        <>
+                          <Legend
+                            formatter={(value) => activitySeriesLabelByKey[String(value)] || String(value)}
+                          />
+                          {activitySeries.map((series) => (
+                            <Bar
+                              key={series.key}
+                              dataKey={series.key}
+                              stackId="hours"
+                              fill={series.color}
+                              radius={[4, 4, 0, 0]}
+                            />
+                          ))}
+                        </>
+                     ) : (
+                        <Bar dataKey="total" fill="#b91c1c" radius={[4, 4, 0, 0]} />
+                     )}
+                  </BarChart>
                </ResponsiveContainer>
             </div>
          </div>
@@ -1207,3 +1276,5 @@ const PlayerProfile: React.FC = () => {
 };
 
 export default PlayerProfile;
+
+

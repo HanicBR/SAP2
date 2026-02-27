@@ -95,6 +95,7 @@ export interface ActivityHistoryItem {
   date: string; // YYYY-MM-DD
   hoursPlayed: number;
   sessions: number;
+  serverHours?: Record<string, number>;
 }
 
 export interface ModerationSummary {

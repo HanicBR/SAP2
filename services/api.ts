@@ -22,6 +22,18 @@ const getAuthToken = (): string | null => {
   }
 };
 
+const getStoredUsername = (): string | null => {
+  try {
+    const raw = localStorage.getItem('backstabber_user');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { username?: string };
+    const username = String(parsed?.username || '').trim();
+    return username || null;
+  } catch {
+    return null;
+  }
+};
+
 const apiFetch = async <T>(path: string, options: RequestInit = {}): Promise<T> => {
   if (!hasApi || !API_BASE_URL) {
     throw new Error('API base URL not configured');
@@ -642,9 +654,17 @@ export const ApiService = {
     return players;
   },
 
-  getPlayerBySteamId: async (steamId: string): Promise<Player | null> => {
+  getPlayerBySteamId: async (
+    steamId: string,
+    options?: { activityWindowDays?: 7 | 14 | 30 | 90 },
+  ): Promise<Player | null> => {
     if (hasApi) {
-      const player = await apiFetch<Player>(`/players/${steamId}`);
+      const params = new URLSearchParams();
+      if (options?.activityWindowDays) {
+        params.set('activityWindowDays', String(options.activityWindowDays));
+      }
+      const suffix = params.toString() ? `?${params.toString()}` : '';
+      const player = await apiFetch<Player>(`/players/${steamId}${suffix}`);
       return player;
     }
 
@@ -727,11 +747,12 @@ export const ApiService = {
     return result.apiKey;
   },
 
-  addPlayerNote: async (steamId: string, content: string, staffName: string): Promise<void> => {
+  addPlayerNote: async (steamId: string, content: string, staffName?: string): Promise<void> => {
     if (hasApi) {
+      const parsedStaff = String(staffName || '').trim() || undefined;
       await apiFetch(`/players/${steamId}/notes`, {
         method: 'POST',
-        body: JSON.stringify({ content, staffName }),
+        body: JSON.stringify({ content, staffName: parsedStaff }),
       });
       return;
     }
@@ -740,10 +761,11 @@ export const ApiService = {
     const player = playersDb.find(p => p.steamId === steamId);
     if (player) {
       if (!player.notes) player.notes = [];
+      const resolvedStaffName = String(staffName || '').trim() || getStoredUsername() || 'Sistema';
       player.notes.unshift({
         id: `note_${Date.now()}`,
         content,
-        staffName,
+        staffName: resolvedStaffName,
         date: new Date().toISOString()
       });
     }

@@ -16,6 +16,12 @@ const parsePositiveInt = (value: unknown, fallback: number, max: number): number
   return Math.min(parsed, max);
 };
 
+const parseActivityWindowDays = (value: unknown, fallback: 7 | 14 | 30 | 90 = 30): 7 | 14 | 30 | 90 => {
+  const parsed = Number.parseInt(String(value ?? ''), 10);
+  if (parsed === 7 || parsed === 14 || parsed === 30 || parsed === 90) return parsed;
+  return fallback;
+};
+
 const quoteConsoleArg = (value: string) => {
   const raw = String(value || '');
   return `"${raw.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
@@ -697,11 +703,14 @@ const buildGameModeStats = (steamId: string, logs: any[], roundEndLogs?: any[]) 
 };
 
 const buildActivityHistory = (
-  logs: { id?: string; type: string; timestamp: Date; metadata: unknown }[],
+  logs: { id?: string; serverId?: string; type: string; timestamp: Date; metadata: unknown }[],
   days: number,
 ) => {
   const now = new Date();
-  const buckets: Record<string, { date: string; hoursPlayed: number; sessions: number }> = {};
+  const buckets: Record<
+    string,
+    { date: string; hoursPlayed: number; sessions: number; serverHours: Record<string, number> }
+  > = {};
   const orderedKeys: string[] = [];
 
   for (let i = days - 1; i >= 0; i--) {
@@ -715,22 +724,27 @@ const buildActivityHistory = (
       date: label,
       hoursPlayed: 0,
       sessions: 0,
+      serverHours: {},
     };
   }
 
-  const sessionsById: Record<string, { start?: number; dayKey?: string }> = {};
-  let fallbackStart: number | undefined;
-  let fallbackDayKey: string | undefined;
+  const sessionsById: Record<string, { start?: number; dayKey?: string; serverId?: string }> = {};
+  const fallbackByServer: Record<string, { start?: number; dayKey?: string }> = {};
 
-  const addDuration = (dayKey: string | undefined, ms: number) => {
+  const addDuration = (dayKey: string | undefined, serverId: string | undefined, ms: number) => {
     if (!dayKey || !buckets[dayKey]) return;
     if (ms <= 0) return;
-    buckets[dayKey].hoursPlayed += ms / (1000 * 60 * 60);
+    const parsedServerId = String(serverId || '').trim() || 'unknown';
+    const hours = ms / (1000 * 60 * 60);
+    buckets[dayKey].hoursPlayed += hours;
+    buckets[dayKey].serverHours[parsedServerId] =
+      (buckets[dayKey].serverHours[parsedServerId] || 0) + hours;
   };
 
   logs.forEach((log) => {
     const ts = log.timestamp.getTime();
     const dayKey = log.timestamp.toISOString().slice(0, 10);
+    const serverId = String(log.serverId || '').trim() || 'unknown';
     const meta: any = log.metadata || {};
     const sessionId = typeof meta.sessionId === 'string' && meta.sessionId ? meta.sessionId : undefined;
 
@@ -741,18 +755,23 @@ const buildActivityHistory = (
       if (sessionId) {
         if (sessionsById[sessionId]?.start !== undefined) {
           const previous = sessionsById[sessionId];
-          addDuration(previous.dayKey, Math.max(0, ts - (previous.start as number)));
+          addDuration(
+            previous.dayKey,
+            previous.serverId || serverId,
+            Math.max(0, ts - (previous.start as number)),
+          );
         }
         sessionsById[sessionId] = {
           start: ts,
           dayKey,
+          serverId,
         };
       } else {
-        if (fallbackStart !== undefined) {
-          addDuration(fallbackDayKey, Math.max(0, ts - fallbackStart));
+        if (fallbackByServer[serverId]?.start !== undefined) {
+          const previous = fallbackByServer[serverId];
+          addDuration(previous.dayKey, serverId, Math.max(0, ts - (previous.start as number)));
         }
-        fallbackStart = ts;
-        fallbackDayKey = dayKey;
+        fallbackByServer[serverId] = { start: ts, dayKey };
       }
       return;
     }
@@ -760,25 +779,34 @@ const buildActivityHistory = (
     if (log.type === 'DISCONNECT') {
       if (sessionId && sessionsById[sessionId]?.start !== undefined) {
         const started = sessionsById[sessionId];
-        addDuration(started.dayKey, Math.max(0, ts - (started.start as number)));
+        addDuration(
+          started.dayKey,
+          started.serverId || serverId,
+          Math.max(0, ts - (started.start as number)),
+        );
         delete sessionsById[sessionId];
         return;
       }
 
-      if (fallbackStart !== undefined) {
-        addDuration(fallbackDayKey, Math.max(0, ts - fallbackStart));
-        fallbackStart = undefined;
-        fallbackDayKey = undefined;
+      if (fallbackByServer[serverId]?.start !== undefined) {
+        const started = fallbackByServer[serverId];
+        addDuration(started.dayKey, serverId, Math.max(0, ts - (started.start as number)));
+        fallbackByServer[serverId] = {};
       }
     }
   });
 
   return orderedKeys.map((key) => {
-    const bucket = buckets[key] || { date: key, hoursPlayed: 0, sessions: 0 };
+    const bucket = buckets[key] || { date: key, hoursPlayed: 0, sessions: 0, serverHours: {} };
+    const serverHours: Record<string, number> = {};
+    Object.keys(bucket.serverHours || {}).forEach((serverId) => {
+      serverHours[serverId] = Number((bucket.serverHours[serverId] || 0).toFixed(2));
+    });
     return {
       date: bucket.date,
       hoursPlayed: Number(bucket.hoursPlayed.toFixed(2)),
       sessions: bucket.sessions,
+      serverHours,
     };
   });
 };
@@ -1171,7 +1199,7 @@ router.get('/:steamId', async (req, res) => {
 
   const punishmentsPreview = await fetchPaginatedPunishments(steamId, player.name, 1, 20);
 
-  const activityWindowDays = 14;
+  const activityWindowDays = parseActivityWindowDays(req.query.activityWindowDays, 30);
   const activitySince = new Date(Date.now() - activityWindowDays * 24 * 60 * 60 * 1000);
   const activityLogs = await prisma.log.findMany({
     where: {
@@ -1181,6 +1209,7 @@ router.get('/:steamId', async (req, res) => {
     },
     select: {
       id: true,
+      serverId: true,
       type: true,
       timestamp: true,
       metadata: true,
@@ -1413,9 +1442,13 @@ router.post('/:steamId/notes', authMiddleware, requireRole(UserRole.ADMIN), asyn
   const { steamId } = req.params as { steamId: string };
   const { content, staffName } = req.body as { content?: string; staffName?: string };
 
-  if (!content || !staffName) {
+  const parsedContent = String(content || '').trim();
+  if (!parsedContent) {
     return res.status(400).json({ error: 'Missing fields' });
   }
+
+  const resolvedStaffName =
+    String(req.user?.username || '').trim() || String(staffName || '').trim() || 'Sistema';
 
   const player = await prisma.playerProfile.findUnique({ where: { steamId } });
   if (!player) {
@@ -1425,8 +1458,8 @@ router.post('/:steamId/notes', authMiddleware, requireRole(UserRole.ADMIN), asyn
   const note = await prisma.playerNote.create({
     data: {
       steamId,
-      content,
-      staffName,
+      content: parsedContent,
+      staffName: resolvedStaffName,
     },
   });
 
