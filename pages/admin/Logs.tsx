@@ -1,4 +1,4 @@
-
+﻿
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { ApiService } from '../../services/api';
 import { LogEntry, LogType, GameMode, SiteConfig } from '../../types';
@@ -231,7 +231,7 @@ const SpamCluster = React.memo(({ logs, onQuickIgnore }: { logs: LogEntry[]; onQ
           <div className="flex-1 text-sm text-yellow-200/80">
              <span className="font-bold text-yellow-500">
                 <PlayerLink name={first.playerName} steamId={first.steamId} />
-             </span> spawnou <span className="font-bold">{count} props</span> em sequência.
+             </span> spawnou <span className="font-bold">{count} props</span> em sequÃªncia.
           </div>
           <div className="text-xs text-yellow-500/50 font-bold uppercase">{expanded ? 'Recolher' : 'Expandir'}</div>
        </div>
@@ -287,7 +287,7 @@ const RoundCard = React.memo(({ group, onQuickIgnore }: { group: RoundGroup; onQ
                   {sessionStartLabel && (
                     <>
                       {' '}
-                      • sessão iniciada às {sessionStartLabel}
+                      â€¢ sessÃ£o iniciada Ã s {sessionStartLabel}
                     </>
                   )}
                 </span>
@@ -378,12 +378,12 @@ const SessionCard = React.memo(({ group, onQuickIgnore }: { group: SessionGroup;
              </div>
              <div>
                 <p className="text-sm font-bold text-white">
-                   Sessão de <PlayerLink name={group.playerName} steamId={group.steamId} />
+                   SessÃ£o de <PlayerLink name={group.playerName} steamId={group.steamId} />
                 </p>
                 <div className="flex gap-2 text-xs text-zinc-500 font-mono">
                    <span>{group.ip}</span>
-                   <span>•</span>
-                   <span>Início: {new Date(group.startTime).toLocaleTimeString()}</span>
+                   <span>â€¢</span>
+                   <span>InÃ­cio: {new Date(group.startTime).toLocaleTimeString()}</span>
                 </div>
              </div>
           </div>
@@ -407,7 +407,7 @@ const SessionCard = React.memo(({ group, onQuickIgnore }: { group: SessionGroup;
   );
 });
 
-// --- COMPONENT: TTT MAP GROUP (Sessão de mapa TTT) ---
+// --- COMPONENT: TTT MAP GROUP (SessÃ£o de mapa TTT) ---
 const TTTMapGroupCard = React.memo(
   ({ group, onQuickIgnore }: { group: TTTMapGroup; onQuickIgnore?: (log: LogEntry) => void }) => {
     const [expanded, setExpanded] = useState(true);
@@ -415,7 +415,7 @@ const TTTMapGroupCard = React.memo(
     const mapLabel = group.map || 'Mapa desconhecido';
     const sessionStartLabel = group.sessionStart
       ? new Date(group.sessionStart).toLocaleString()
-      : 'Horário desconhecido';
+      : 'HorÃ¡rio desconhecido';
 
     return (
       <div className="bg-zinc-950 border border-zinc-800 rounded-lg overflow-hidden mb-4 shadow-sm">
@@ -426,11 +426,11 @@ const TTTMapGroupCard = React.memo(
           <div className="flex items-center gap-3">
             <Icons.Map className="w-4 h-4 text-zinc-500" />
             <div>
-              <div className="text-xs font-bold uppercase text-zinc-400">Sessão TTT</div>
+              <div className="text-xs font-bold uppercase text-zinc-400">SessÃ£o TTT</div>
               <div className="text-sm text-zinc-100">
                 {mapLabel}{' '}
                 <span className="text-xs text-zinc-500">
-                  • iniciada em {sessionStartLabel}
+                  â€¢ iniciada em {sessionStartLabel}
                 </span>
               </div>
             </div>
@@ -507,7 +507,7 @@ const Logs: React.FC = () => {
   const loadLogs = () => {
     setLoading(true);
     // In real app, we would pass filters to API here
-    ApiService.getEvents().then(data => {
+    ApiService.getEvents({ limit: 2000 }).then(data => {
       setRawLogs(data as LogEntry[]);
       setLoading(false);
     });
@@ -523,13 +523,29 @@ const Logs: React.FC = () => {
      let filtered = rawLogs;
 
      // 1. Text Search
-     if (search) {
-        const lower = search.toLowerCase();
-        filtered = filtered.filter(l => 
-           l.playerName?.toLowerCase().includes(lower) || 
-           l.steamId?.toLowerCase().includes(lower) || 
-           l.rawText.toLowerCase().includes(lower)
-        );
+     if (search.trim()) {
+        const lower = search.toLowerCase().trim();
+        filtered = filtered.filter((l) => {
+          const metadata = (l.metadata || {}) as any;
+          const searchableText = [
+            l.playerName,
+            l.steamId,
+            l.rawText,
+            formatLogMessage(l),
+            metadata.message,
+            metadata.command,
+            metadata.reason,
+            metadata.targetName,
+            metadata.targetSteamId,
+            Array.isArray(metadata.argsRaw) ? metadata.argsRaw.join(' ') : undefined,
+            Array.isArray(metadata.argsParsed) ? metadata.argsParsed.join(' ') : undefined,
+          ]
+            .filter(Boolean)
+            .map((value) => String(value).toLowerCase())
+            .join(' ');
+
+          return searchableText.includes(lower);
+        });
      }
 
      // 2. Mode Filter
@@ -642,7 +658,7 @@ const Logs: React.FC = () => {
          );
          const total = sessionGroups.length;
 
-         // Ordena eventos dentro de cada rodada e acumula métricas
+         // Ordena eventos dentro de cada rodada e acumula mÃ©tricas
          let eventsTotal = 0;
          let rdmCountTotal = 0;
          sessionGroups.forEach((g, idx) => {
@@ -725,6 +741,18 @@ const Logs: React.FC = () => {
 
   }, [rawLogs, search, selectedMode, logTypeFilter, actorTypeFilter, targetSearch]);
 
+  const activeFilters = useMemo(() => {
+    const filters: string[] = [];
+    if (search.trim()) filters.push(`Busca: "${search.trim()}"`);
+    if (selectedMode !== 'ALL') filters.push(`Modo: ${selectedMode}`);
+    if (logTypeFilter !== 'ALL') filters.push(`Tipo: ${logTypeFilter}`);
+    if (actorTypeFilter !== 'ALL') filters.push(`Ator: ${actorTypeFilter}`);
+    if (targetSearch.trim()) filters.push(`Alvo: "${targetSearch.trim()}"`);
+    return filters;
+  }, [search, selectedMode, logTypeFilter, actorTypeFilter, targetSearch]);
+
+  const hasActiveFilters = activeFilters.length > 0;
+
   // Pagination Logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -735,6 +763,14 @@ const Logs: React.FC = () => {
      setCurrentPage(page);
      window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
+
+  const handleClearFilters = () => {
+    setSearch('');
+    setSelectedMode('ALL');
+    setLogTypeFilter('ALL');
+    setActorTypeFilter('ALL');
+    setTargetSearch('');
+  };
 
   const handleSaveIgnoreRules = async () => {
     if (!siteConfig) return;
@@ -755,7 +791,7 @@ const Logs: React.FC = () => {
 
     const updated = await ApiService.updateSiteConfig(next);
     setSiteConfig(updated);
-    alert('Regras de ignorar logs salvas. Novos eventos que baterem nessas regras não serão armazenados.');
+    alert('Regras de ignorar logs salvas. Novos eventos que baterem nessas regras nÃ£o serÃ£o armazenados.');
     const stats = await ApiService.getIngestStats();
     setIgnoreStats(stats);
   };
@@ -800,7 +836,7 @@ const Logs: React.FC = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <h1 className="text-2xl font-bold text-white flex items-center">
           <Icons.List className="w-6 h-6 mr-3 text-red-500" />
-          Centro de Investigação
+          Centro de InvestigaÃ§Ã£o
         </h1>
         
         <div className="flex bg-zinc-900 p-1 rounded border border-zinc-800">
@@ -828,7 +864,7 @@ const Logs: React.FC = () => {
               <input 
                  type="text" 
                  className="w-full bg-zinc-950 border border-zinc-700 rounded pl-10 pr-4 py-2 text-sm text-white placeholder-zinc-500 focus:border-red-500 focus:outline-none"
-                 placeholder="Pesquisar por Nick, SteamID ou Conteúdo..."
+                 placeholder="Pesquisar por Nick, SteamID, comando, motivo ou conteudo..."
                  value={search}
                  onChange={(e) => setSearch(e.target.value)}
               />
@@ -851,34 +887,52 @@ const Logs: React.FC = () => {
            </div>
         </div>
 
-        <div className="bg-zinc-900 p-4 rounded border border-zinc-800 grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div>
-            <label className="block text-[11px] font-bold text-zinc-500 uppercase mb-1">
-              Tipo de Ator
-            </label>
-            <select
-              value={actorTypeFilter}
-              onChange={(e) => setActorTypeFilter(e.target.value as ActorTypeFilter)}
-              className="w-full bg-zinc-950 border border-zinc-700 rounded px-2 py-2 text-xs text-white focus:border-red-500 focus:outline-none"
-            >
-              <option value="ALL">Todos</option>
-              <option value="player">Player</option>
-              <option value="console">Console</option>
-              <option value="system">System</option>
-            </select>
+        <div className="bg-zinc-900 p-4 rounded border border-zinc-800 space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[11px] font-bold text-zinc-500 uppercase mb-1">
+                Tipo de Ator
+              </label>
+              <select
+                value={actorTypeFilter}
+                onChange={(e) => setActorTypeFilter(e.target.value as ActorTypeFilter)}
+                className="w-full bg-zinc-950 border border-zinc-700 rounded px-2 py-2 text-xs text-white focus:border-red-500 focus:outline-none"
+              >
+                <option value="ALL">Todos</option>
+                <option value="player">Player</option>
+                <option value="console">Console</option>
+                <option value="system">System</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-zinc-500 uppercase mb-1">
+                Alvo (Nick/SteamID)
+              </label>
+              <input
+                type="text"
+                value={targetSearch}
+                onChange={(e) => setTargetSearch(e.target.value)}
+                placeholder="Ex: Bot03 ou STEAM_0:1:..."
+                className="w-full bg-zinc-950 border border-zinc-700 rounded px-2 py-2 text-xs text-white placeholder-zinc-500 focus:border-red-500 focus:outline-none"
+              />
+            </div>
           </div>
 
-          <div>
-            <label className="block text-[11px] font-bold text-zinc-500 uppercase mb-1">
-              Alvo (Nick/SteamID)
-            </label>
-            <input
-              type="text"
-              value={targetSearch}
-              onChange={(e) => setTargetSearch(e.target.value)}
-              placeholder="Ex: Bot03 ou STEAM_0:1:..."
-              className="w-full bg-zinc-950 border border-zinc-700 rounded px-2 py-2 text-xs text-white placeholder-zinc-500 focus:border-red-500 focus:outline-none"
-            />
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+            <p className="text-[11px] text-zinc-500">
+              {hasActiveFilters
+                ? `Filtros ativos: ${activeFilters.join(' | ')}`
+                : 'Sem filtros adicionais ativos.'}
+            </p>
+            <button
+              type="button"
+              onClick={handleClearFilters}
+              disabled={!hasActiveFilters}
+              className="self-start md:self-auto px-3 py-1.5 rounded border border-zinc-700 text-[10px] font-bold uppercase text-zinc-300 hover:border-zinc-500 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Limpar filtros
+            </button>
           </div>
         </div>
 
@@ -887,7 +941,7 @@ const Logs: React.FC = () => {
             <div className="flex items-center gap-2">
               <Icons.Shield className="w-4 h-4 text-red-500" />
               <span className="text-xs text-zinc-400 font-bold uppercase tracking-wider">
-                Filtros de Spam (não salvar logs novos)
+                Filtros de Spam (nÃ£o salvar logs novos)
               </span>
             </div>
             {ignoreStats && (
@@ -1032,5 +1086,7 @@ const Logs: React.FC = () => {
 };
 
 export default Logs;
+
+
 
 

@@ -11,6 +11,9 @@ router.get('/', async (req, res) => {
   const type = (req.query.type as string) || '';
   const from = (req.query.from as string) || '';
   const to = (req.query.to as string) || '';
+  const limitRaw = Number.parseInt(String(req.query.limit || ''), 10);
+  const take =
+    Number.isFinite(limitRaw) && limitRaw > 0 ? Math.min(limitRaw, 5000) : 1000;
 
   const where: any = {};
 
@@ -39,7 +42,7 @@ router.get('/', async (req, res) => {
   const logs = await prisma.log.findMany({
     where,
     orderBy: { timestamp: 'desc' },
-    take: 200,
+    take,
   });
 
   const toDomainMode = (m: any): GameMode =>

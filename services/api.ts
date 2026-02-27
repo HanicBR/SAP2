@@ -410,11 +410,34 @@ export const ApiService = {
     });
   },
 
-  getEvents: async (filter?: string): Promise<ServerEvent[]> => {
+  getEvents: async (
+    filter?:
+      | string
+      | {
+          search?: string;
+          serverId?: string;
+          type?: string;
+          from?: string;
+          to?: string;
+          limit?: number;
+        },
+  ): Promise<ServerEvent[]> => {
+    const query = typeof filter === 'string' ? { search: filter } : filter || {};
+
     if (hasApi) {
       try {
-        const params = filter ? `?search=${encodeURIComponent(filter)}` : '';
-        const logs = await apiFetch<ServerEvent[]>(`/logs${params}`);
+        const params = new URLSearchParams();
+        if (query.search) params.set('search', query.search);
+        if (query.serverId) params.set('serverId', query.serverId);
+        if (query.type) params.set('type', query.type);
+        if (query.from) params.set('from', query.from);
+        if (query.to) params.set('to', query.to);
+        if (typeof query.limit === 'number' && Number.isFinite(query.limit) && query.limit > 0) {
+          params.set('limit', String(Math.floor(query.limit)));
+        }
+
+        const suffix = params.toString() ? `?${params.toString()}` : '';
+        const logs = await apiFetch<ServerEvent[]>(`/logs${suffix}`);
         return logs;
       } catch (error) {
         console.error('API getEvents failed, falling back to mock getEvents:', error);
@@ -423,13 +446,23 @@ export const ApiService = {
 
     await delay(400);
     let events = [...MOCK_EVENTS];
-    if (filter) {
+    if (query.search) {
+      const lowerSearch = query.search.toLowerCase();
       events = events.filter(e => 
-        (e.playerName && e.playerName.toLowerCase().includes(filter.toLowerCase())) || 
-        (e.steamId && e.steamId.includes(filter)) ||
-        e.rawText.toLowerCase().includes(filter.toLowerCase()) ||
-        e.type.includes(filter)
+        (e.playerName && e.playerName.toLowerCase().includes(lowerSearch)) || 
+        (e.steamId && e.steamId.toLowerCase().includes(lowerSearch)) ||
+        e.rawText.toLowerCase().includes(lowerSearch) ||
+        e.type.toLowerCase().includes(lowerSearch)
       );
+    }
+    if (query.serverId) {
+      events = events.filter((e) => e.serverId === query.serverId);
+    }
+    if (query.type) {
+      events = events.filter((e) => e.type === query.type);
+    }
+    if (typeof query.limit === 'number' && Number.isFinite(query.limit) && query.limit > 0) {
+      events = events.slice(0, Math.floor(query.limit));
     }
     return events;
   },
