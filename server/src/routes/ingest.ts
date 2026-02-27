@@ -44,12 +44,14 @@ const normalizeIgnoreList = (values: string[] = []): string[] => {
     .filter((value) => value.length > 0);
 };
 
-const shouldIgnoreEvent = (
+type IgnoreBucket = keyof typeof ignoreStats;
+
+const getIgnoreMatch = (
   event: { type?: string; rawText?: string; metadata?: Record<string, unknown> },
   ignoredTools: string[],
   ignoredCommands: string[],
   rawTextFilters: string[],
-) => {
+): { bucket: IgnoreBucket; key: string } | null => {
   const type = String(event.type || '').toUpperCase();
   const metadata = event.metadata || {};
   const rawText = String(event.rawText || '').toLowerCase();
@@ -57,26 +59,26 @@ const shouldIgnoreEvent = (
   if (type === 'TOOL_USE') {
     const toolName = String((metadata as any).toolName || '').trim().toLowerCase();
     if (toolName && ignoredTools.includes(toolName)) {
-      return true;
+      return { bucket: 'tools', key: toolName };
     }
   }
 
   if (type === 'COMMAND' || type === 'ULX') {
     const command = String((metadata as any).command || '').trim().toLowerCase();
     if (command && ignoredCommands.includes(command)) {
-      return true;
+      return { bucket: 'commands', key: command };
     }
   }
 
   if (rawText && rawTextFilters.length > 0) {
     for (const filterText of rawTextFilters) {
       if (rawText.includes(filterText)) {
-        return true;
+        return { bucket: 'rawText', key: filterText };
       }
     }
   }
 
-  return false;
+  return null;
 };
 
 router.post('/logs', async (req, res) => {
@@ -134,9 +136,12 @@ router.post('/logs', async (req, res) => {
     return res.status(400).json({ error: 'No valid events', received: events.length });
   }
 
-  const eventsToStore = cleanEvents.filter(
-    (event) => !shouldIgnoreEvent(event as any, ignoredTools, ignoredCommands, rawTextFilters),
-  );
+  const eventsToStore = cleanEvents.filter((event) => {
+    const ignoreMatch = getIgnoreMatch(event as any, ignoredTools, ignoredCommands, rawTextFilters);
+    if (!ignoreMatch) return true;
+    bumpStat(ignoreStats[ignoreMatch.bucket], ignoreMatch.key);
+    return false;
+  });
 
   if (!eventsToStore.length) {
     return res.json({ ingested: 0 });
