@@ -880,7 +880,7 @@ local function flush_prop_spawn_window(steamid, force)
 	event.metadata.spawnKind = summarize_spawn_kind(kind_counts)
 	event.metadata.spawnKinds = kind_counts
 	event.rawText = string_format(
-		"%s ultrapassou o limite de spawn: %d bloqueados e %d registrados nos ultimos %.1f segundos (limite: %d, tipo: %s).",
+		"%s ultrapassou o limite de logs por spawn de props: %d bloqueados e %d registrados nos ultimos %.1f segundos (limite: %d, tipo: %s).",
 		event.playerName or "Jogador",
 		event.metadata.droppedCount,
 		event.metadata.allowedCount,
