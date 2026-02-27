@@ -50,15 +50,10 @@ const PlayerProfile: React.FC = () => {
         setServers(allServers);
 
         if (playerData) {
-          const suspiciousGroups = await ApiService.getSuspiciousAccounts().catch(() => null);
-          if (suspiciousGroups) {
-            const group = suspiciousGroups.find(g =>
-              g.players.some(p => p.steamId === playerData.steamId)
-            );
-            setSuspiciousGroup(group || null);
-          } else {
-            setSuspiciousGroup(null);
-          }
+          const relatedAccounts = await ApiService.getPlayerRelatedAccounts(playerData.steamId).catch(
+            () => null,
+          );
+          setSuspiciousGroup(relatedAccounts);
           setLogsPage(1);
         } else {
           setLogs([]);

@@ -662,6 +662,16 @@ export const ApiService = {
     return [...MOCK_SUSPICIOUS_GROUPS];
   },
 
+  getPlayerRelatedAccounts: async (steamId: string): Promise<SuspiciousGroup | null> => {
+    if (hasApi) {
+      return await apiFetch<SuspiciousGroup | null>(`/players/${steamId}/related-accounts`);
+    }
+    await delay(200);
+    const groups = await ApiService.getSuspiciousAccounts();
+    const match = groups.find((g) => g.players.some((p) => p.steamId === steamId));
+    return match || null;
+  },
+
   regenerateApiKey: async (serverId: string): Promise<string> => {
     if (!hasApi) {
       throw new Error('API base URL not configured');

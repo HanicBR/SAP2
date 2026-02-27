@@ -65,6 +65,30 @@ const buildPlayerLogsWhere = (steamId: string, scope: 'actor' | 'target' | 'all'
   return { OR: [...actorClauses, ...targetClauses] };
 };
 
+const isValidIpv4 = (ip?: string | null) => {
+  if (!ip) return false;
+  const parts = ip.split('.');
+  if (parts.length !== 4) return false;
+  return parts.every((part) => {
+    const n = Number(part);
+    return !Number.isNaN(n) && n >= 0 && n <= 255;
+  });
+};
+
+const toSubnet24Prefix = (ip: string) => {
+  const parts = ip.split('.');
+  return `${parts[0]}.${parts[1]}.${parts[2]}.`;
+};
+
+const formatLocation = (geo: any) => {
+  if (!geo || typeof geo !== 'object') return 'Localizacao desconhecida';
+  const city = typeof geo.city === 'string' ? geo.city : '';
+  const state = typeof geo.state === 'string' ? geo.state : '';
+  const country = typeof geo.country === 'string' ? geo.country : '';
+  const text = [city, state, country].filter(Boolean).join(', ');
+  return text || 'Localizacao desconhecida';
+};
+
 const toPlayer = (p: any) => ({
   steamId: p.steamId,
   name: p.name,
@@ -1002,6 +1026,57 @@ router.get('/:steamId/logs', async (req, res) => {
     nextCursor: logs[logs.length - 1]?.id ?? null,
     items: logs.map(mapLog),
   });
+});
+
+router.get('/:steamId/related-accounts', async (req, res) => {
+  const { steamId } = req.params as { steamId: string };
+  const player = await prisma.playerProfile.findUnique({
+    where: { steamId },
+  });
+  if (!player) {
+    return res.status(404).json({ error: 'Player not found' });
+  }
+  if (!isValidIpv4(player.ip)) {
+    return res.json(null);
+  }
+
+  const sameIpPlayers = await prisma.playerProfile.findMany({
+    where: { ip: player.ip },
+    orderBy: { lastSeen: 'desc' },
+  });
+  if (sameIpPlayers.length >= 2) {
+    return res.json({
+      id: `ip_${player.ip}`,
+      level: 'HIGH',
+      commonIpOrSubnet: player.ip,
+      location: formatLocation(player.geo),
+      lastActivity: sameIpPlayers[0]?.lastSeen?.toISOString?.() || new Date().toISOString(),
+      players: sameIpPlayers.map(toPlayer),
+    });
+  }
+
+  const subnetPrefix = toSubnet24Prefix(player.ip as string);
+  const sameSubnetPlayers = await prisma.playerProfile.findMany({
+    where: {
+      ip: {
+        startsWith: subnetPrefix,
+      },
+    },
+    orderBy: { lastSeen: 'desc' },
+  });
+  const filteredSubnetPlayers = sameSubnetPlayers.filter((p) => isValidIpv4(p.ip));
+  if (filteredSubnetPlayers.length >= 2) {
+    return res.json({
+      id: `subnet_${subnetPrefix}0/24`,
+      level: 'MODERATE',
+      commonIpOrSubnet: `${subnetPrefix}0/24`,
+      location: formatLocation(player.geo),
+      lastActivity: filteredSubnetPlayers[0]?.lastSeen?.toISOString?.() || new Date().toISOString(),
+      players: filteredSubnetPlayers.map(toPlayer),
+    });
+  }
+
+  return res.json(null);
 });
 
 router.post('/:steamId/notes', authMiddleware, requireRole(UserRole.ADMIN), async (req, res) => {
