@@ -32,6 +32,7 @@ local c_flush_seconds = CreateConVar("bsb_flush_seconds", "2", FCVAR_ARCHIVE, "B
 local c_heartbeat_seconds = CreateConVar("bsb_heartbeat_seconds", "30", FCVAR_ARCHIVE, "Heartbeat interval in seconds.")
 local c_max_payload_bytes = CreateConVar("bsb_max_payload_bytes", "524288", FCVAR_ARCHIVE, "Max JSON body bytes per ingest request.")
 local c_max_retry_attempts = CreateConVar("bsb_max_retry_attempts", "0", FCVAR_ARCHIVE, "Max retry attempts for ingest batches (0 = infinite).")
+local c_queue_warn_size = CreateConVar("bsb_queue_warn_size", "1000", FCVAR_ARCHIVE, "Warn when ingest queue backlog reaches this size.")
 local c_debug = CreateConVar("bsb_ingest_debug", "0", FCVAR_ARCHIVE, "Enable debug logs for ingest addon.")
 
 local ULID_ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
@@ -45,6 +46,7 @@ local sending_batch = nil
 local flush_if_needed
 local discarded_batches_total = 0
 local discarded_events_total = 0
+local queue_warn_next = 0
 
 local sessions_by_steamid = {}
 local pending_disconnect_reason_by_steamid = {}
@@ -556,6 +558,18 @@ local function push_event(event)
 
 	queue[#queue + 1] = event
 	last_enqueue_realtime = RealTime()
+	local warn_size = math_max(1, c_queue_warn_size:GetInt())
+	if queue_warn_next < warn_size then
+		queue_warn_next = warn_size
+	end
+	if #queue >= queue_warn_next then
+		print(string_format(
+			"[BSB-INGEST] queue backlog high size=%d inFlight=%s",
+			#queue,
+			tostring(send_in_flight)
+		))
+		queue_warn_next = #queue + 100
+	end
 	if #queue >= math_max(1, math_min(200, c_batch_size:GetInt())) then
 		debug_log("batch threshold reached: " .. tostring(#queue))
 	end
@@ -582,6 +596,9 @@ local function pop_batch()
 
 	for _ = 1, #batch do
 		table.remove(queue, 1)
+	end
+	if #queue < math_max(1, c_queue_warn_size:GetInt()) then
+		queue_warn_next = math_max(1, c_queue_warn_size:GetInt())
 	end
 
 	return batch
