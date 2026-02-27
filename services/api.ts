@@ -1,7 +1,7 @@
 
 
 import { MOCK_SERVERS, MOCK_EVENTS, MOCK_STATS, VIP_PLANS, MOCK_SUSPICIOUS_GROUPS, MOCK_PLAYERS, MOCK_USERS, MOCK_TRANSACTIONS, generateServerAnalytics, DEFAULT_SITE_CONFIG } from '../constants';
-import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse } from '../types';
+import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse } from '../types';
 
 // Utility to simulate network delay (used as fallback)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -652,6 +652,291 @@ export const ApiService = {
     }
 
     return players;
+  },
+
+  getVips: async (query?: {
+    search?: string;
+    status?: 'ALL' | 'ACTIVE' | 'EXPIRED';
+    expiringInDays?: number;
+    limit?: number;
+  }): Promise<VipAdminListResponse> => {
+    const normalized = query || {};
+    if (hasApi) {
+      const params = new URLSearchParams();
+      if (normalized.search) params.set('search', normalized.search);
+      if (normalized.status) params.set('status', normalized.status);
+      if (typeof normalized.expiringInDays === 'number') {
+        params.set('expiringInDays', String(normalized.expiringInDays));
+      }
+      if (typeof normalized.limit === 'number') {
+        params.set('limit', String(normalized.limit));
+      }
+      const suffix = params.toString() ? `?${params.toString()}` : '';
+      return apiFetch<VipAdminListResponse>(`/vips${suffix}`);
+    }
+
+    await delay(250);
+    const now = Date.now();
+    const status = (normalized.status || 'ALL').toUpperCase();
+    const expiringCutoffMs =
+      typeof normalized.expiringInDays === 'number' && normalized.expiringInDays > 0
+        ? now + normalized.expiringInDays * 24 * 60 * 60 * 1000
+        : 0;
+
+    const items: VipAdminItem[] = [...playersDb]
+      .filter((player) => player.isVip || !!player.vipExpiry)
+      .filter((player) => {
+        if (!normalized.search) return true;
+        const q = normalized.search.toLowerCase();
+        return player.name.toLowerCase().includes(q) || player.steamId.toLowerCase().includes(q);
+      })
+      .map((player) => {
+        const expiryMs = player.vipExpiry ? new Date(player.vipExpiry).getTime() : 0;
+        const expired = !!expiryMs && expiryMs <= now;
+        return {
+          steamId: player.steamId,
+          name: player.name,
+          avatarUrl: player.avatarUrl,
+          isVip: player.isVip,
+          vipPlan: player.vipPlan,
+          vipExpiry: player.vipExpiry,
+          lastSeen: player.lastSeen,
+          vipStatus: player.isVip ? (expired ? 'EXPIRED' : 'ACTIVE') : 'INACTIVE',
+        };
+      })
+      .filter((item) => {
+        if (status === 'ACTIVE') return item.isVip && item.vipStatus === 'ACTIVE';
+        if (status === 'EXPIRED') return item.isVip && item.vipStatus === 'EXPIRED';
+        return true;
+      })
+      .filter((item) => {
+        if (!expiringCutoffMs || !item.vipExpiry) return true;
+        const expiryMs = new Date(item.vipExpiry).getTime();
+        return expiryMs > now && expiryMs <= expiringCutoffMs;
+      })
+      .sort((a, b) => {
+        const aExpiry = a.vipExpiry ? new Date(a.vipExpiry).getTime() : Number.MAX_SAFE_INTEGER;
+        const bExpiry = b.vipExpiry ? new Date(b.vipExpiry).getTime() : Number.MAX_SAFE_INTEGER;
+        return aExpiry - bExpiry;
+      });
+
+    const limit = Math.max(1, Math.min(500, Math.floor(normalized.limit || 100)));
+    return {
+      items: items.slice(0, limit),
+      total: items.length,
+    };
+  },
+
+  getVipAutomationActions: async (query?: {
+    status?: 'ALL' | VipAutomationActionStatus;
+    steamId?: string;
+    limit?: number;
+  }): Promise<VipAutomationActionListResponse> => {
+    const normalized = query || {};
+    if (hasApi) {
+      const params = new URLSearchParams();
+      if (normalized.status) params.set('status', normalized.status);
+      if (normalized.steamId) params.set('steamId', normalized.steamId);
+      if (typeof normalized.limit === 'number') params.set('limit', String(normalized.limit));
+      const suffix = params.toString() ? `?${params.toString()}` : '';
+      return apiFetch<VipAutomationActionListResponse>(`/vips/actions${suffix}`);
+    }
+
+    await delay(150);
+    return {
+      items: [],
+      total: 0,
+    };
+  },
+
+  retryVipAutomationAction: async (
+    actionId: string,
+    serverId?: string,
+  ): Promise<{ id: string; dispatch: VipDispatchInfo }> => {
+    if (hasApi) {
+      return apiFetch(`/vips/actions/${actionId}/retry`, {
+        method: 'POST',
+        body: JSON.stringify(serverId ? { serverId } : {}),
+      });
+    }
+
+    await delay(150);
+    return {
+      id: actionId,
+      dispatch: {
+        queued: false,
+        skipped: true,
+        reason: 'mock_mode',
+      },
+    };
+  },
+
+  reconcileExpiredVips: async (data?: {
+    dryRun?: boolean;
+    enqueue?: boolean;
+    limit?: number;
+    serverId?: string;
+  }): Promise<VipReconcileResponse> => {
+    if (hasApi) {
+      return apiFetch<VipReconcileResponse>(`/vips/reconcile-expired`, {
+        method: 'POST',
+        body: JSON.stringify(data || {}),
+      });
+    }
+
+    await delay(150);
+    return {
+      dryRun: !!data?.dryRun,
+      limit: Math.max(1, Math.min(500, Math.floor(data?.limit || 100))),
+      now: new Date().toISOString(),
+      expiredCount: 0,
+      updatedCount: 0,
+      updateFailures: 0,
+      dispatchQueuedCount: 0,
+      dispatchNotQueuedCount: 0,
+      items: [],
+    };
+  },
+
+  grantVip: async (data: {
+    steamId: string;
+    name?: string;
+    vipPlan: string;
+    vipDurationDays?: number;
+    vipExpiry?: string;
+    enqueue?: boolean;
+    serverId?: string;
+  }): Promise<VipAdminItem & { dispatch?: VipDispatchInfo }> => {
+    if (hasApi) {
+      return apiFetch(`/vips/grant`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    }
+
+    await delay(200);
+    const steamId = String(data.steamId || '').trim();
+    const plan = String(data.vipPlan || '').trim();
+    const name = String(data.name || '').trim();
+    const durationDays = Math.max(1, Math.floor(data.vipDurationDays || 30));
+    const expiry = data.vipExpiry
+      ? new Date(data.vipExpiry)
+      : new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000);
+
+    const idx = playersDb.findIndex((p) => p.steamId === steamId);
+    if (idx === -1) {
+      playersDb.push({
+        steamId,
+        name: name || steamId,
+        avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(steamId)}`,
+        lastSeen: new Date().toISOString(),
+        firstSeen: new Date().toISOString(),
+        totalConnections: 0,
+        playTimeHours: 0,
+        isVip: true,
+        vipPlan: plan,
+        vipExpiry: expiry.toISOString(),
+      });
+    } else {
+      playersDb[idx] = {
+        ...playersDb[idx],
+        name: name || playersDb[idx].name,
+        isVip: true,
+        vipPlan: plan,
+        vipExpiry: expiry.toISOString(),
+      };
+    }
+
+    const player = playersDb.find((p) => p.steamId === steamId)!;
+    return {
+      steamId: player.steamId,
+      name: player.name,
+      avatarUrl: player.avatarUrl,
+      isVip: player.isVip,
+      vipPlan: player.vipPlan,
+      vipExpiry: player.vipExpiry,
+      vipStatus: 'ACTIVE',
+      dispatch: { queued: false, skipped: true, reason: 'mock_mode' },
+    };
+  },
+
+  extendVip: async (data: {
+    steamId: string;
+    vipPlan?: string;
+    vipDurationDays?: number;
+    enqueue?: boolean;
+    serverId?: string;
+  }): Promise<VipAdminItem & { dispatch?: VipDispatchInfo }> => {
+    if (hasApi) {
+      return apiFetch(`/vips/extend`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    }
+
+    await delay(200);
+    const steamId = String(data.steamId || '').trim();
+    const player = playersDb.find((p) => p.steamId === steamId);
+    if (!player) {
+      throw new Error('Player not found');
+    }
+
+    const now = Date.now();
+    const currentExpiry = player.vipExpiry ? new Date(player.vipExpiry).getTime() : now;
+    const baseMs = currentExpiry > now ? currentExpiry : now;
+    const days = Math.max(1, Math.floor(data.vipDurationDays || 30));
+    const nextExpiry = new Date(baseMs + days * 24 * 60 * 60 * 1000).toISOString();
+
+    player.isVip = true;
+    player.vipPlan = data.vipPlan || player.vipPlan || 'VIP';
+    player.vipExpiry = nextExpiry;
+
+    return {
+      steamId: player.steamId,
+      name: player.name,
+      avatarUrl: player.avatarUrl,
+      isVip: player.isVip,
+      vipPlan: player.vipPlan,
+      vipExpiry: player.vipExpiry,
+      vipStatus: 'ACTIVE',
+      dispatch: { queued: false, skipped: true, reason: 'mock_mode' },
+    };
+  },
+
+  revokeVip: async (data: {
+    steamId: string;
+    enqueue?: boolean;
+    serverId?: string;
+    reason?: string;
+  }): Promise<VipAdminItem & { dispatch?: VipDispatchInfo }> => {
+    if (hasApi) {
+      return apiFetch(`/vips/revoke`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    }
+
+    await delay(200);
+    const steamId = String(data.steamId || '').trim();
+    const player = playersDb.find((p) => p.steamId === steamId);
+    if (!player) {
+      throw new Error('Player not found');
+    }
+
+    player.isVip = false;
+    player.vipPlan = undefined;
+    player.vipExpiry = undefined;
+
+    return {
+      steamId: player.steamId,
+      name: player.name,
+      avatarUrl: player.avatarUrl,
+      isVip: player.isVip,
+      vipPlan: player.vipPlan,
+      vipExpiry: player.vipExpiry,
+      vipStatus: 'INACTIVE',
+      dispatch: { queued: false, skipped: true, reason: 'mock_mode' },
+    };
   },
 
   getPlayerBySteamId: async (

@@ -25,6 +25,7 @@ const Players = lazy(() => import('./pages/admin/Players'));
 const PlayerProfile = lazy(() => import('./pages/admin/PlayerProfile'));
 const Users = lazy(() => import('./pages/admin/Users'));
 const Financial = lazy(() => import('./pages/admin/Financial'));
+const Vips = lazy(() => import('./pages/admin/Vips'));
 const Settings = lazy(() => import('./pages/admin/Settings'));
 const ImportLogs = lazy(() => import('./pages/admin/ImportLogs'));
 
@@ -94,6 +95,9 @@ const App: React.FC = () => {
           } />
           <Route path="/admin/financial" element={
             <AdminRoute><Financial /></AdminRoute>
+          } />
+          <Route path="/admin/vips" element={
+            <AdminRoute><Vips /></AdminRoute>
           } />
           <Route path="/admin/players" element={
             <AdminRoute><Players /></AdminRoute>

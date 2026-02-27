@@ -25,6 +25,17 @@ enum ServerStatus {
   MAINTENANCE
 }
 
+enum VipAutomationActionType {
+  GRANT
+  REVOKE
+}
+
+enum VipAutomationActionStatus {
+  QUEUED
+  FAILED
+  SKIPPED
+}
+
 model User {
   id           String   @id @default(cuid())
   username     String   @unique
@@ -81,6 +92,30 @@ model PlayerProfile {
   updatedAt        DateTime     @updatedAt
   notes            PlayerNote[]
   punishments      Punishment[]
+}
+
+model VipAutomationAction {
+  id              String                    @id @default(cuid())
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+  action          VipAutomationActionType
+  status          VipAutomationActionStatus
+  steamId         String
+  vipPlan         String?
+  vipExpiry       DateTime?
+  serverId        String?
+  command         String?
+  metadata        Json?
+  reason          String?
+  queuedActionId  String?
+  retryOfActionId String?
+  retriedAt       DateTime?
+  retries         Int                       @default(0)
+
+  @@index([createdAt])
+  @@index([steamId, createdAt])
+  @@index([status, createdAt])
+  @@index([retryOfActionId])
 }
 
 model PlayerNote {

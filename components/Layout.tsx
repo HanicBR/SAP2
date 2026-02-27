@@ -152,6 +152,7 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
   const navItems = [
     { name: 'Dashboard', path: '/admin/dashboard', icon: Icons.BarChart },
     { name: 'Financeiro', path: '/admin/financial', icon: Icons.DollarSign },
+    { name: 'VIPs', path: '/admin/vips', icon: Icons.Crown },
     { name: 'Jogadores', path: '/admin/players', icon: Icons.UserGroup },
     { name: 'Logs e Eventos', path: '/admin/logs', icon: Icons.List },
     { name: 'Servidores', path: '/admin/servers', icon: Icons.Server },

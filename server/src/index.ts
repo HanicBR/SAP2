@@ -14,7 +14,9 @@ import ingestRoutes from './routes/ingest';
 import transactionsRoutes from './routes/transactions';
 import suspiciousRoutes from './routes/suspicious';
 import legacyLogsRoutes from './routes/legacyLogs';
+import vipsRoutes from './routes/vips';
 import { bootstrap } from './bootstrap';
+import { startVipExpiryReconcilerJob } from './services/vipExpiryReconciler';
 
 dotenv.config();
 
@@ -58,6 +60,7 @@ app.use('/api/suspicious', suspiciousRoutes);
 app.use('/api/ingest', ingestLimiter, ingestRoutes);
 app.use('/api/admin/legacy-logs', apiLimiter, legacyLogsRoutes);
 app.use('/api/transactions', transactionsRoutes);
+app.use('/api/vips', vipsRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error('Unhandled error', err);
@@ -66,6 +69,11 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 
 const start = async () => {
   await bootstrap();
+  const stopVipExpiryReconciler = startVipExpiryReconcilerJob();
+
+  process.once('SIGTERM', () => stopVipExpiryReconciler());
+  process.once('SIGINT', () => stopVipExpiryReconciler());
+
   app.listen(port, () => {
     console.log(`API server listening on port ${port}`);
   });

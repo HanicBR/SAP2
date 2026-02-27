@@ -152,6 +152,78 @@ export interface Player {
   riskAssessment?: RiskAssessment;
 }
 
+export interface VipDispatchInfo {
+  queued: boolean;
+  skipped?: boolean;
+  reason?: string;
+  serverId?: string;
+  actionId?: string;
+  vipActionId?: string;
+}
+
+export interface VipAdminItem {
+  steamId: string;
+  name: string;
+  avatarUrl?: string;
+  isVip: boolean;
+  vipPlan?: string;
+  vipExpiry?: string;
+  lastSeen?: string;
+  vipStatus?: 'ACTIVE' | 'EXPIRED' | 'INACTIVE';
+}
+
+export interface VipAdminListResponse {
+  items: VipAdminItem[];
+  total: number;
+}
+
+export type VipAutomationActionStatus = 'QUEUED' | 'FAILED' | 'SKIPPED';
+
+export interface VipAutomationActionItem {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  action: 'GRANT' | 'REVOKE';
+  status: VipAutomationActionStatus;
+  steamId: string;
+  vipPlan?: string;
+  vipExpiry?: string;
+  serverId?: string;
+  command?: string;
+  reason?: string;
+  queuedActionId?: string;
+  retryOfActionId?: string;
+  retriedAt?: string;
+  retries: number;
+}
+
+export interface VipAutomationActionListResponse {
+  items: VipAutomationActionItem[];
+  total: number;
+}
+
+export interface VipReconcileItem {
+  steamId: string;
+  name: string;
+  vipPlan?: string;
+  vipExpiry?: string;
+  updated: boolean;
+  dispatch?: VipDispatchInfo;
+  error?: string;
+}
+
+export interface VipReconcileResponse {
+  dryRun: boolean;
+  limit: number;
+  now: string;
+  expiredCount: number;
+  updatedCount: number;
+  updateFailures: number;
+  dispatchQueuedCount: number;
+  dispatchNotQueuedCount: number;
+  items: VipReconcileItem[];
+}
+
 // --- LOGS & EVENTS SYSTEM ---
 
 export enum LogType {

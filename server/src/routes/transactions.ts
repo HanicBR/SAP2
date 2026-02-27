@@ -105,6 +105,7 @@ router.post('/', async (req, res) => {
         reason?: string;
         serverId?: string;
         actionId?: string;
+        vipActionId?: string;
       }
     | undefined;
 
@@ -155,6 +156,7 @@ router.post('/', async (req, res) => {
         ...(dispatch.reason ? { reason: dispatch.reason } : {}),
         ...(dispatch.serverId ? { serverId: dispatch.serverId } : {}),
         ...(dispatch.actionId ? { actionId: dispatch.actionId } : {}),
+        ...(dispatch.vipActionId ? { vipActionId: dispatch.vipActionId } : {}),
       };
     } catch (err: any) {
       console.error('VIP automation dispatch failed', err);

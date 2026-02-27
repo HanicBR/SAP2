@@ -1,4 +1,8 @@
 import { prisma } from '../db/client';
+import {
+  VipAutomationActionStatus as PrismaVipAutomationActionStatus,
+  VipAutomationActionType as PrismaVipAutomationActionType,
+} from '@prisma/client';
 import { enqueueServerAction, ServerAction } from './serverActions';
 
 export type VipAutomationActionType = 'GRANT' | 'REVOKE';
@@ -9,6 +13,7 @@ export interface VipAutomationBuildInput {
   vipPlan?: string | null;
   vipExpiry?: Date | string | null;
   serverId?: string | null;
+  retryOfActionId?: string | null;
   metadata?: Record<string, unknown>;
 }
 
@@ -24,6 +29,7 @@ export interface VipAutomationBuildResult {
 export interface VipAutomationDispatchResult extends VipAutomationBuildResult {
   queued: boolean;
   actionId?: string;
+  vipActionId?: string;
 }
 
 type VipAutomationEnvConfig = {
@@ -186,6 +192,65 @@ const resolveSandboxServerId = async (
   return { ok: true, serverId: fallbackSandbox.id };
 };
 
+type VipAutomationAuditInput = {
+  status: PrismaVipAutomationActionStatus;
+  reason?: string | undefined;
+  serverId?: string | undefined;
+  command?: string | undefined;
+  queuedActionId?: string | undefined;
+  metadata?: Record<string, unknown> | undefined;
+};
+
+const sanitizeMetadata = (
+  metadata: Record<string, unknown> | undefined,
+): Record<string, unknown> | undefined => {
+  if (!metadata) return undefined;
+  try {
+    return JSON.parse(JSON.stringify(metadata)) as Record<string, unknown>;
+  } catch {
+    return undefined;
+  }
+};
+
+const toPrismaActionType = (action: VipAutomationActionType): PrismaVipAutomationActionType =>
+  action === 'REVOKE' ? PrismaVipAutomationActionType.REVOKE : PrismaVipAutomationActionType.GRANT;
+
+const createVipAutomationAudit = async (
+  input: VipAutomationBuildInput,
+  data: VipAutomationAuditInput,
+): Promise<string | undefined> => {
+  const steamId = String(input.steamId || '').trim();
+  if (!steamId) return undefined;
+
+  const vipPlan = String(input.vipPlan || '').trim() || null;
+  const vipExpiry = parseExpiry(input.vipExpiry);
+  const retryOfActionId = String(input.retryOfActionId || '').trim() || null;
+  const metadata = sanitizeMetadata(data.metadata);
+
+  try {
+    const created = await prisma.vipAutomationAction.create({
+      data: {
+        action: toPrismaActionType(input.action),
+        status: data.status,
+        steamId,
+        vipPlan,
+        vipExpiry,
+        serverId: String(data.serverId || '').trim() || null,
+        command: String(data.command || '').trim() || null,
+        metadata: metadata ? (metadata as any) : null,
+        reason: String(data.reason || '').trim() || null,
+        queuedActionId: String(data.queuedActionId || '').trim() || null,
+        retryOfActionId,
+      },
+      select: { id: true },
+    });
+    return created.id;
+  } catch (err: any) {
+    console.error('VIP automation audit create failed', err?.message || err);
+    return undefined;
+  }
+};
+
 export const getVipAutomationMetrics = () => ({
   vip_command_build_failures: metrics.vip_command_build_failures,
   byReason: { ...metrics.byReason },
@@ -290,9 +355,20 @@ export const dispatchVipAutomationAction = async (
     enforceSingleLineCommand: true,
   });
   if (!preview.ok || preview.skipped || !preview.serverId || !preview.command) {
+    const vipActionId = await createVipAutomationAudit(input, {
+      status: preview.skipped
+        ? PrismaVipAutomationActionStatus.SKIPPED
+        : PrismaVipAutomationActionStatus.FAILED,
+      reason: preview.reason || (!preview.ok ? 'build_failed' : 'dispatch_precondition_failed'),
+      serverId: preview.serverId,
+      command: preview.command,
+      metadata: preview.metadata,
+    });
+
     return {
       ...preview,
       queued: false,
+      ...(vipActionId ? { vipActionId } : {}),
     };
   }
 
@@ -303,17 +379,35 @@ export const dispatchVipAutomationAction = async (
   );
 
   if (!action) {
+    const vipActionId = await createVipAutomationAudit(input, {
+      status: PrismaVipAutomationActionStatus.FAILED,
+      reason: 'enqueue_failed',
+      serverId: preview.serverId,
+      command: preview.command,
+      metadata: preview.metadata,
+    });
+
     return {
       ok: false,
       skipped: false,
       queued: false,
       reason: 'enqueue_failed',
+      ...(vipActionId ? { vipActionId } : {}),
     };
   }
+
+  const vipActionId = await createVipAutomationAudit(input, {
+    status: PrismaVipAutomationActionStatus.QUEUED,
+    serverId: preview.serverId,
+    command: preview.command,
+    queuedActionId: action.id,
+    metadata: preview.metadata,
+  });
 
   return {
     ...preview,
     queued: true,
     actionId: action.id,
+    ...(vipActionId ? { vipActionId } : {}),
   };
 };
