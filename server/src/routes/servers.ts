@@ -3,8 +3,15 @@ import { prisma } from '../db/client';
 import { GameMode, ServerStatus, UserRole } from '../domain';
 import { authMiddleware, requireRole } from '../middleware/auth';
 import { hashApiKey, compareApiKey } from '../utils/apiKey';
+import { drainServerActions } from '../services/serverActions';
 
 const router = Router();
+
+const findServerByApiKey = async (apiKey?: string) => {
+  if (!apiKey) return null;
+  const allServers = await prisma.gameServer.findMany({ select: { id: true, apiKeyHash: true } });
+  return allServers.find((s) => s.apiKeyHash && compareApiKey(apiKey, s.apiKeyHash)) || null;
+};
 
 const toDomainServer = (s: any) => {
   const mode =
@@ -123,8 +130,7 @@ router.post('/heartbeat', async (req, res) => {
       return res.status(401).json({ error: 'Missing server API key' });
     }
 
-    const allServers = await prisma.gameServer.findMany({ select: { id: true, apiKeyHash: true } });
-    const server = allServers.find((s) => s.apiKeyHash && compareApiKey(apiKey, s.apiKeyHash));
+    const server = await findServerByApiKey(apiKey);
     if (!server) {
       return res.status(403).json({ error: 'Invalid server key' });
     }
@@ -182,6 +188,34 @@ router.post('/heartbeat', async (req, res) => {
   } catch (err: any) {
     console.error('Heartbeat error', err);
     return res.status(500).json({ error: 'Heartbeat failed', detail: err?.message });
+  }
+});
+
+// Pull pending actions for this server (auth via X-Server-Key)
+router.post('/actions/pull', async (req, res) => {
+  try {
+    const apiKey = (req.header('x-server-key') || req.header('X-Server-Key')) as string | undefined;
+    if (!apiKey) {
+      return res.status(401).json({ error: 'Missing server API key' });
+    }
+
+    const server = await findServerByApiKey(apiKey);
+    if (!server) {
+      return res.status(403).json({ error: 'Invalid server key' });
+    }
+
+    const body = (req as any).body || {};
+    const limitRaw = typeof body?.limit === 'number' ? body.limit : Number.parseInt(String(body?.limit || ''), 10);
+    const limit = Number.isFinite(limitRaw) && limitRaw > 0 ? Math.min(limitRaw, 100) : 20;
+    const actions = drainServerActions(server.id, limit);
+
+    return res.json({
+      ok: true,
+      actions,
+    });
+  } catch (err: any) {
+    console.error('Actions pull error', err);
+    return res.status(500).json({ error: 'Actions pull failed', detail: err?.message });
   }
 });
 

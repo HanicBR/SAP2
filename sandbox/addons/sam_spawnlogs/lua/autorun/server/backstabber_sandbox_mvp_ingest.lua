@@ -26,10 +26,13 @@ local INGEST_SCHEMA_VERSION = 1
 local c_enable = CreateConVar("bsb_ingest_enable", "0", FCVAR_ARCHIVE, "Enable Backstabber Sandbox MVP ingest.")
 local c_ingest_url = CreateConVar("bsb_ingest_url", "http://127.0.0.1:4000/api/ingest/logs", FCVAR_ARCHIVE, "Backstabber ingest endpoint.")
 local c_heartbeat_url = CreateConVar("bsb_heartbeat_url", "http://127.0.0.1:4000/api/servers/heartbeat", FCVAR_ARCHIVE, "Backstabber heartbeat endpoint.")
+local c_actions_url = CreateConVar("bsb_actions_url", "http://127.0.0.1:4000/api/servers/actions/pull", FCVAR_ARCHIVE, "Backstabber server actions pull endpoint.")
 local c_server_key = CreateConVar("bsb_server_key", "", FCVAR_ARCHIVE, "Backstabber server API key.")
 local c_batch_size = CreateConVar("bsb_batch_size", "100", FCVAR_ARCHIVE, "Max events per ingest request.")
 local c_flush_seconds = CreateConVar("bsb_flush_seconds", "2", FCVAR_ARCHIVE, "Batch flush interval in seconds.")
 local c_heartbeat_seconds = CreateConVar("bsb_heartbeat_seconds", "30", FCVAR_ARCHIVE, "Heartbeat interval in seconds.")
+local c_actions_enable = CreateConVar("bsb_actions_enable", "1", FCVAR_ARCHIVE, "Enable server-side action pull (punishments from panel).")
+local c_actions_seconds = CreateConVar("bsb_actions_seconds", "3", FCVAR_ARCHIVE, "Actions poll interval in seconds.")
 local c_max_payload_bytes = CreateConVar("bsb_max_payload_bytes", "524288", FCVAR_ARCHIVE, "Max JSON body bytes per ingest request.")
 local c_max_retry_attempts = CreateConVar("bsb_max_retry_attempts", "0", FCVAR_ARCHIVE, "Max retry attempts for ingest batches (0 = infinite).")
 local c_queue_warn_size = CreateConVar("bsb_queue_warn_size", "1000", FCVAR_ARCHIVE, "Warn when ingest queue backlog reaches this size.")
@@ -758,6 +761,49 @@ local function send_heartbeat()
 	})
 end
 
+local function poll_server_actions()
+	if not c_enable:GetBool() then return end
+	if not c_actions_enable:GetBool() then return end
+
+	local actions_url = c_actions_url:GetString()
+	local key = c_server_key:GetString()
+	if actions_url == "" or key == "" then return end
+
+	HTTP({
+		url = actions_url,
+		method = "POST",
+		headers = {
+			["Content-Type"] = "application/json",
+			["X-Server-Key"] = key,
+		},
+		body = "{\"limit\":20}",
+		success = function(code, response_body)
+			if code < 200 or code >= 300 then
+				debug_log(string_format("actions http error=%d body=%s", code, tostring(response_body or "")))
+				return
+			end
+
+			local parsed = util.JSONToTable(tostring(response_body or ""))
+			if not parsed or not istable(parsed.actions) then return end
+
+			for i = 1, #parsed.actions do
+				local action = parsed.actions[i]
+				if istable(action) then
+					local command = tostring(action.command or "")
+					command = command:gsub("^%s+", ""):gsub("%s+$", "")
+					if command ~= "" then
+						debug_log(string_format("executing action id=%s cmd=%s", tostring(action.id or "?"), command))
+						game.ConsoleCommand(command .. "\n")
+					end
+				end
+			end
+		end,
+		failed = function(err)
+			debug_log("actions poll failed: " .. tostring(err))
+		end
+	})
+end
+
 local function is_sam_chat_command(text)
 	if not sam or not sam.command or not sam.command.get_command then return false end
 	if not text or text == "" then return false end
@@ -1308,6 +1354,10 @@ end)
 
 timer.Create("bsb_ingest_heartbeat", math_max(5, c_heartbeat_seconds:GetFloat()), 0, function()
 	send_heartbeat()
+end)
+
+timer.Create("bsb_ingest_actions_poll", math_max(2, c_actions_seconds:GetFloat()), 0, function()
+	poll_server_actions()
 end)
 
 hook.Add("ShutDown", "bsb_ingest_shutdown_flush", function()

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { prisma } from '../db/client';
 import { authMiddleware, requireRole } from '../middleware/auth';
 import { UserRole } from '../domain';
+import { enqueueServerAction } from '../services/serverActions';
 
 const router = Router();
 const VALID_PUNISHMENT_TYPES = new Set(['BAN', 'MUTE', 'GAG', 'KICK', 'WARN']);
@@ -13,6 +14,59 @@ const parsePositiveInt = (value: unknown, fallback: number, max: number): number
   const parsed = Number.parseInt(String(value ?? ''), 10);
   if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
   return Math.min(parsed, max);
+};
+
+const quoteConsoleArg = (value: string) => {
+  const raw = String(value || '');
+  return `"${raw.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+};
+
+const toDurationMinutes = (duration?: string): number => {
+  if (!duration) return 0;
+  const raw = String(duration || '').trim().toLowerCase();
+  if (!raw) return 0;
+  const direct = Number.parseInt(raw, 10);
+  if (Number.isFinite(direct) && direct > 0) return direct;
+
+  const match = raw.match(/(\d+)/);
+  if (!match) return 0;
+  const matchedValue = match[1];
+  if (!matchedValue) return 0;
+  const value = Number.parseInt(matchedValue, 10);
+  if (!Number.isFinite(value) || value <= 0) return 0;
+
+  if (raw.includes('hora')) return value * 60;
+  if (raw.includes('dia')) return value * 24 * 60;
+  return value;
+};
+
+const buildSamPunishmentCommand = (
+  type: string,
+  steamId: string,
+  reason: string,
+  duration?: string,
+): string | null => {
+  const parsedType = String(type || '').toUpperCase();
+  const sid = quoteConsoleArg(steamId);
+  const parsedReason = quoteConsoleArg(reason || 'Sem motivo');
+  const minutes = toDurationMinutes(duration);
+
+  if (parsedType === 'KICK') {
+    return `sam kick ${sid} ${parsedReason}`;
+  }
+  if (parsedType === 'BAN') {
+    return `sam ban ${sid} ${Math.max(0, minutes)} ${parsedReason}`;
+  }
+  if (parsedType === 'MUTE') {
+    return `sam mute ${sid} ${Math.max(0, minutes)} ${parsedReason}`;
+  }
+  if (parsedType === 'GAG') {
+    return `sam gag ${sid} ${Math.max(0, minutes)} ${parsedReason}`;
+  }
+  if (parsedType === 'WARN') {
+    return `sam warn ${sid} ${parsedReason}`;
+  }
+  return null;
 };
 
 const mapLog = (log: any) => ({
@@ -391,8 +445,16 @@ const buildGameModeStats = (steamId: string, logs: any[], roundEndLogs?: any[]) 
 
       if (log.type === 'CONNECT') {
         if (sessionId) {
+          // Treat repeated CONNECT for same session as implicit map-change boundary.
+          if (sessionStartsById[sessionId] !== undefined) {
+            totalMs += Math.max(0, ts - sessionStartsById[sessionId]);
+          }
           sessionStartsById[sessionId] = ts;
         } else {
+          // Fallback without sessionId: CONNECT after CONNECT closes previous open segment.
+          if (fallbackStart !== undefined) {
+            totalMs += Math.max(0, ts - fallbackStart);
+          }
           fallbackStart = ts;
         }
         return;
@@ -411,15 +473,8 @@ const buildGameModeStats = (steamId: string, logs: any[], roundEndLogs?: any[]) 
       }
     });
 
-    const lastTimestamp = sortedSandboxSessionLogs.length
-      ? new Date(sortedSandboxSessionLogs[sortedSandboxSessionLogs.length - 1].timestamp).getTime()
-      : Date.now();
-    Object.values(sessionStartsById).forEach((startTs) => {
-      totalMs += Math.max(0, lastTimestamp - startTs);
-    });
-    if (fallbackStart !== undefined) {
-      totalMs += Math.max(0, lastTimestamp - fallbackStart);
-    }
+    // Do not auto-close dangling sessions at "last log timestamp":
+    // this can inflate playtime heavily when DISCONNECT is missing.
     const totalPlayTimeHours = Number((totalMs / (1000 * 60 * 60)).toFixed(2));
 
     if (propsSpawned || totalSessions || totalPlayTimeHours) {
@@ -477,11 +532,18 @@ const buildActivityHistory = (
         buckets[dayKey].sessions += 1;
       }
       if (sessionId) {
+        if (sessionsById[sessionId]?.start !== undefined) {
+          const previous = sessionsById[sessionId];
+          addDuration(previous.dayKey, Math.max(0, ts - (previous.start as number)));
+        }
         sessionsById[sessionId] = {
           start: ts,
           dayKey,
         };
       } else {
+        if (fallbackStart !== undefined) {
+          addDuration(fallbackDayKey, Math.max(0, ts - fallbackStart));
+        }
         fallbackStart = ts;
         fallbackDayKey = dayKey;
       }
@@ -529,8 +591,16 @@ const countShortSessions = (
 
     if (log.type === 'CONNECT') {
       if (sessionId) {
+        if (sessionsById[sessionId] !== undefined) {
+          const duration = Math.max(0, ts - sessionsById[sessionId]);
+          if (duration <= maxSessionMs) shortCount += 1;
+        }
         sessionsById[sessionId] = ts;
       } else {
+        if (fallbackStart !== undefined) {
+          const duration = Math.max(0, ts - fallbackStart);
+          if (duration <= maxSessionMs) shortCount += 1;
+        }
         fallbackStart = ts;
       }
       return;
@@ -578,6 +648,9 @@ const computePlaytimeHours = (logs: { type: string; timestamp: Date; metadata: u
       if (!sessionsById[sessionId]) sessionsById[sessionId] = {};
       const sess = sessionsById[sessionId];
       if (l.type === 'CONNECT') {
+        if (sess.start !== undefined) {
+          totalMs += Math.max(0, ts - sess.start);
+        }
         sess.start = ts;
       } else if (l.type === 'DISCONNECT') {
         if (sess.start !== undefined) {
@@ -587,6 +660,9 @@ const computePlaytimeHours = (logs: { type: string; timestamp: Date; metadata: u
       }
     } else {
       if (l.type === 'CONNECT') {
+        if (lastConnectFallback !== undefined) {
+          totalMs += Math.max(0, ts - lastConnectFallback);
+        }
         lastConnectFallback = ts;
       } else if (l.type === 'DISCONNECT' && lastConnectFallback !== undefined) {
         totalMs += Math.max(0, ts - lastConnectFallback);
@@ -623,8 +699,18 @@ const computeSessionMetricsByServer = (
     if (log.type === 'CONNECT') {
       connectionsByServer[serverId] = (connectionsByServer[serverId] || 0) + 1;
       if (sessionId) {
+        const previous = sessionsById[sessionId];
+        if (previous?.start !== undefined && previous.serverId) {
+          ensureServer(previous.serverId);
+          totalsMsByServer[previous.serverId] =
+            (totalsMsByServer[previous.serverId] || 0) + Math.max(0, ts - previous.start);
+        }
         sessionsById[sessionId] = { start: ts, serverId };
       } else {
+        if (fallbackByServer[serverId] !== undefined) {
+          totalsMsByServer[serverId] =
+            (totalsMsByServer[serverId] || 0) + Math.max(0, ts - (fallbackByServer[serverId] as number));
+        }
         fallbackByServer[serverId] = ts;
       }
       return;
@@ -786,12 +872,9 @@ router.get('/:steamId', async (req, res) => {
 
   const playTimeHours = computePlaytimeHours(logsByActor as any);
 
-  const serverStatsWindowDays = 90;
-  const serverStatsSince = new Date(Date.now() - serverStatsWindowDays * 24 * 60 * 60 * 1000);
   const serverSessionLogs = await prisma.log.findMany({
     where: {
       steamId,
-      timestamp: { gte: serverStatsSince },
       type: { in: ['CONNECT', 'DISCONNECT'] },
     },
     select: {
@@ -818,6 +901,47 @@ router.get('/:steamId', async (req, res) => {
   } catch (e) {
     // If the table does not exist or query fails, just return without punishments
     punishments = [];
+  }
+
+  let punishmentsFromLogs: any[] = [];
+  if (!punishments.length) {
+    try {
+      const punishLogs = await prisma.log.findMany({
+        where: {
+          type: 'PUNISH',
+          metadata: {
+            path: ['targetSteamId'],
+            equals: steamId,
+          } as any,
+        } as any,
+        orderBy: [{ timestamp: 'desc' }, { id: 'desc' }],
+        take: 200,
+        select: {
+          id: true,
+          timestamp: true,
+          playerName: true,
+          metadata: true,
+        },
+      });
+
+      punishmentsFromLogs = punishLogs.map((log) => {
+        const meta: any = log.metadata || {};
+        const mappedType = String(meta.action || meta.punishmentType || 'PUNISH')
+          .trim()
+          .toUpperCase();
+        return {
+          id: `log_${log.id}`,
+          type: mappedType,
+          reason: String(meta.reason || meta.command || 'Sem motivo'),
+          staffName: String(log.playerName || 'Console'),
+          date: log.timestamp.toISOString(),
+          duration: meta.durationText ? String(meta.durationText) : undefined,
+          active: false,
+        };
+      });
+    } catch {
+      punishmentsFromLogs = [];
+    }
   }
 
   const activityWindowDays = 14;
@@ -931,15 +1055,17 @@ router.get('/:steamId', async (req, res) => {
       date: n.createdAt.toISOString(),
     })),
     gameModeStats: Object.keys(gameModeStats).length ? gameModeStats : undefined,
-    punishments: punishments.map((p) => ({
-      id: p.id,
-      type: p.type,
-      reason: p.reason,
-      staffName: p.staffName,
-      date: p.date instanceof Date ? p.date.toISOString() : new Date(p.date).toISOString(),
-      duration: p.duration || undefined,
-      active: Boolean(p.active),
-    })),
+    punishments: punishments.length
+      ? punishments.map((p) => ({
+          id: p.id,
+          type: p.type,
+          reason: p.reason,
+          staffName: p.staffName,
+          date: p.date instanceof Date ? p.date.toISOString() : new Date(p.date).toISOString(),
+          duration: p.duration || undefined,
+          active: Boolean(p.active),
+        }))
+      : punishmentsFromLogs,
     activityHistory,
     moderationSummary: {
       windowDays: moderationWindowDays,
@@ -1168,6 +1294,28 @@ router.post(
         },
       });
 
+      const latestPlayerLog = await prisma.log.findFirst({
+        where: { steamId },
+        orderBy: [{ timestamp: 'desc' }, { id: 'desc' }],
+        select: { serverId: true },
+      });
+
+      const command = buildSamPunishmentCommand(parsedType, steamId, parsedReason, parsedDuration || undefined);
+      let dispatch: { queued: boolean; serverId?: string; actionId?: string } = { queued: false };
+      if (latestPlayerLog?.serverId && command) {
+        const action = enqueueServerAction(latestPlayerLog.serverId, command, {
+          steamId,
+          punishmentType: parsedType,
+        });
+        if (action) {
+          dispatch = {
+            queued: true,
+            serverId: latestPlayerLog.serverId,
+            actionId: action.id,
+          };
+        }
+      }
+
       return res.status(201).json({
         id: p.id,
         type: p.type,
@@ -1176,6 +1324,7 @@ router.post(
         date: p.date.toISOString(),
         duration: p.duration || undefined,
         active: Boolean(p.active),
+        dispatch,
       });
     } catch (e) {
       console.error('Failed to create punishment', e);
