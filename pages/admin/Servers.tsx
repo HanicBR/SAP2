@@ -252,10 +252,15 @@ const Servers: React.FC = () => {
   const handleRegenerateKey = useCallback(async (serverId: string) => {
     if(!window.confirm("ATENÇÃO: Gerar uma nova chave API fará com que o servidor perca a conexão. Continuar?")) return;
     
-    const newKey = await ApiService.regenerateApiKey(serverId);
-    setPlainKeys(prev => ({ ...prev, [serverId]: newKey }));
-    loadServers();
-    alert(`Nova chave gerada:\n${newKey}`);
+    try {
+      const newKey = await ApiService.regenerateApiKey(serverId);
+      setPlainKeys(prev => ({ ...prev, [serverId]: newKey }));
+      loadServers();
+      alert(`Nova chave gerada:\n${newKey}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Falha ao regenerar chave';
+      alert(`Erro ao regenerar chave API: ${message}`);
+    }
   }, [loadServers]);
 
   const handleCreateSuccess = useCallback((created: GameServer) => {

@@ -117,32 +117,13 @@ export const ApiService = {
   },
 
   createServer: async (data: { name: string, ip: string, port: number, mode: GameMode, maxPlayers: number }): Promise<GameServer> => {
-    if (hasApi) {
-      try {
-        const created = await apiFetch<GameServer>('/servers', {
-          method: 'POST',
-          body: JSON.stringify(data),
-        });
-        return created;
-      } catch (error) {
-        console.error('API createServer failed, falling back to mock createServer:', error);
-      }
+    if (!hasApi) {
+      throw new Error('API base URL not configured');
     }
-
-    await delay(800);
-    const newServer: GameServer = {
-      id: `srv_${Date.now()}`,
-      name: data.name,
-      ip: data.ip,
-      port: data.port,
-      mode: data.mode,
-      status: ServerStatus.OFFLINE, // Starts offline
-      currentPlayers: 0,
-      maxPlayers: data.maxPlayers,
-      apiKey: `sk_live_${Date.now()}_${Math.random().toString(36).substring(7)}`
-    };
-    serversDb.push(newServer);
-    return newServer;
+    return apiFetch<GameServer>('/servers', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   },
 
   getServerAnalytics: async (serverId: string, range: '24h' | '7d' | '30d'): Promise<ServerAnalytics> => {
@@ -509,24 +490,16 @@ export const ApiService = {
   },
 
   regenerateApiKey: async (serverId: string): Promise<string> => {
-    if (hasApi) {
-      try {
-        const result = await apiFetch<{ apiKey: string }>(`/servers/${serverId}/regenerate-key`, {
-          method: 'POST',
-        });
-        return result.apiKey;
-      } catch (error) {
-        console.error('API regenerateApiKey failed, falling back to mock regenerateApiKey:', error);
-      }
+    if (!hasApi) {
+      throw new Error('API base URL not configured');
     }
-
-    await delay(800);
-    const newKey = `sk_live_${serverId}_${Math.random().toString(36).substring(7)}`;
-    const idx = serversDb.findIndex(s => s.id === serverId);
-    if (idx !== -1) {
-       serversDb[idx] = { ...serversDb[idx], apiKey: newKey };
+    const result = await apiFetch<{ apiKey: string }>(`/servers/${serverId}/regenerate-key`, {
+      method: 'POST',
+    });
+    if (!result?.apiKey) {
+      throw new Error('API did not return a new key');
     }
-    return newKey;
+    return result.apiKey;
   },
 
   addPlayerNote: async (steamId: string, content: string, staffName: string): Promise<void> => {
