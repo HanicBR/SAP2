@@ -93,6 +93,15 @@ export interface ActivityHistoryItem {
   sessions: number;
 }
 
+export interface ModerationSummary {
+  windowDays: number;
+  chatCount: number;
+  commandCount: number;
+  punishCount: number;
+  propBurstCount: number;
+  lastPunishAt?: string;
+}
+
 export interface Player {
   steamId: string;
   name: string;
@@ -121,6 +130,7 @@ export interface Player {
   // New Stats Fields
   gameModeStats?: GameModeStats;
   activityHistory?: ActivityHistoryItem[];
+  moderationSummary?: ModerationSummary;
 }
 
 // --- LOGS & EVENTS SYSTEM ---

@@ -805,6 +805,58 @@ router.get('/:steamId', async (req, res) => {
   });
   const activityHistory = buildActivityHistory(activityLogs as any, activityWindowDays);
 
+  const moderationWindowDays = 30;
+  const moderationSince = new Date(Date.now() - moderationWindowDays * 24 * 60 * 60 * 1000);
+  const [chatCount, commandCount, propBurstCount, punishCount, lastPunishLog] = await Promise.all([
+    prisma.log.count({
+      where: {
+        steamId,
+        timestamp: { gte: moderationSince },
+        type: 'CHAT',
+      },
+    }),
+    prisma.log.count({
+      where: {
+        steamId,
+        timestamp: { gte: moderationSince },
+        type: 'COMMAND',
+      },
+    }),
+    prisma.log.count({
+      where: {
+        steamId,
+        timestamp: { gte: moderationSince },
+        type: 'GAME_EVENT',
+        metadata: {
+          path: ['eventKind'],
+          equals: 'PROP_SPAWN_BURST',
+        } as any,
+      } as any,
+    }),
+    prisma.log.count({
+      where: {
+        timestamp: { gte: moderationSince },
+        type: 'PUNISH',
+        metadata: {
+          path: ['targetSteamId'],
+          equals: steamId,
+        } as any,
+      } as any,
+    }),
+    prisma.log.findFirst({
+      where: {
+        timestamp: { gte: moderationSince },
+        type: 'PUNISH',
+        metadata: {
+          path: ['targetSteamId'],
+          equals: steamId,
+        } as any,
+      } as any,
+      orderBy: [{ timestamp: 'desc' }, { id: 'desc' }],
+      select: { timestamp: true },
+    }),
+  ]);
+
   return res.json({
     ...toPlayer(player),
     playTimeHours: sessionMetrics.playTimeHours || playTimeHours,
@@ -828,6 +880,14 @@ router.get('/:steamId', async (req, res) => {
       active: Boolean(p.active),
     })),
     activityHistory,
+    moderationSummary: {
+      windowDays: moderationWindowDays,
+      chatCount,
+      commandCount,
+      punishCount,
+      propBurstCount,
+      lastPunishAt: lastPunishLog?.timestamp ? lastPunishLog.timestamp.toISOString() : undefined,
+    },
   });
 });
 

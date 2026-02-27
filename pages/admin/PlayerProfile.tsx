@@ -345,6 +345,35 @@ const PlayerProfile: React.FC = () => {
          </div>
       </div>
 
+      {player.moderationSummary && (
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="bg-zinc-900 p-4 rounded border border-zinc-800">
+            <p className="text-xs text-zinc-500 uppercase font-bold mb-1">Chat ({player.moderationSummary.windowDays}d)</p>
+            <p className="text-2xl font-mono text-white">{player.moderationSummary.chatCount}</p>
+          </div>
+          <div className="bg-zinc-900 p-4 rounded border border-zinc-800">
+            <p className="text-xs text-zinc-500 uppercase font-bold mb-1">Comandos ({player.moderationSummary.windowDays}d)</p>
+            <p className="text-2xl font-mono text-white">{player.moderationSummary.commandCount}</p>
+          </div>
+          <div className="bg-zinc-900 p-4 rounded border border-zinc-800">
+            <p className="text-xs text-zinc-500 uppercase font-bold mb-1">Punicoes Recebidas ({player.moderationSummary.windowDays}d)</p>
+            <p className="text-2xl font-mono text-white">{player.moderationSummary.punishCount}</p>
+          </div>
+          <div className="bg-zinc-900 p-4 rounded border border-zinc-800">
+            <p className="text-xs text-zinc-500 uppercase font-bold mb-1">Burst de Props ({player.moderationSummary.windowDays}d)</p>
+            <p className="text-2xl font-mono text-white">{player.moderationSummary.propBurstCount}</p>
+          </div>
+          <div className="bg-zinc-900 p-4 rounded border border-zinc-800">
+            <p className="text-xs text-zinc-500 uppercase font-bold mb-1">Ultima Punicao</p>
+            <p className="text-sm text-zinc-300">
+              {player.moderationSummary.lastPunishAt
+                ? new Date(player.moderationSummary.lastPunishAt).toLocaleDateString()
+                : 'Nenhuma'}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* GAME MODE SPECIFIC STATS */}
       {player.gameModeStats && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
