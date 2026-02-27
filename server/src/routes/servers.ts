@@ -4,6 +4,7 @@ import { GameMode, ServerStatus, UserRole } from '../domain';
 import { authMiddleware, requireRole } from '../middleware/auth';
 import { hashApiKey, compareApiKey } from '../utils/apiKey';
 import { drainServerActions } from '../services/serverActions';
+import { getVipAutomationMetrics, previewVipAutomationBuild, VipAutomationActionType } from '../services/vipAutomation';
 
 const router = Router();
 
@@ -120,6 +121,48 @@ router.post('/:id/regenerate-key', authMiddleware, requireRole(UserRole.SUPERADM
   }
 
   return res.json({ apiKey });
+});
+
+// Preview VIP automation command (does not enqueue actions)
+router.post('/actions/vip/preview', authMiddleware, requireRole(UserRole.ADMIN), async (req, res) => {
+  try {
+    const {
+      action,
+      steamId,
+      vipPlan,
+      vipExpiry,
+      serverId,
+    } = (req as any).body || {};
+
+    const parsedAction = String(action || '').trim().toUpperCase();
+    if (parsedAction !== 'GRANT' && parsedAction !== 'REVOKE') {
+      return res.status(400).json({ error: 'Invalid action. Use GRANT or REVOKE.' });
+    }
+
+    const payload: Parameters<typeof previewVipAutomationBuild>[0] = {
+      action: parsedAction as VipAutomationActionType,
+      steamId: String(steamId || '').trim(),
+      ...(vipPlan !== undefined ? { vipPlan: String(vipPlan) } : {}),
+      ...(vipExpiry !== undefined ? { vipExpiry } : {}),
+      ...(serverId !== undefined ? { serverId: String(serverId) } : {}),
+    };
+
+    const result = await previewVipAutomationBuild(payload);
+
+    if (!result.ok && !result.skipped) {
+      return res.status(400).json(result);
+    }
+
+    return res.json(result);
+  } catch (err: any) {
+    console.error('VIP automation preview error', err);
+    return res.status(500).json({ error: 'VIP automation preview failed', detail: err?.message });
+  }
+});
+
+// VIP automation metrics (build failures)
+router.get('/actions/vip/metrics', authMiddleware, requireRole(UserRole.ADMIN), async (_req, res) => {
+  return res.json(getVipAutomationMetrics());
 });
 
 // Heartbeat endpoint for game servers (auth via X-Server-Key)
