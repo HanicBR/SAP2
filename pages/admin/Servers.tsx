@@ -260,6 +260,9 @@ const Servers: React.FC = () => {
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Falha ao regenerar chave';
       alert(`Erro ao regenerar chave API: ${message}`);
+      if (/sessão expirada/i.test(message)) {
+        window.location.hash = '#/admin/login';
+      }
     }
   }, [loadServers]);
 

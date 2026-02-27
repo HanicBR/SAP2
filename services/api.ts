@@ -52,6 +52,15 @@ const apiFetch = async <T>(path: string, options: RequestInit = {}): Promise<T> 
     } catch {
       // ignore parse error, keep default message
     }
+    if (response.status === 401 && /token/i.test(message)) {
+      try {
+        localStorage.removeItem('backstabber_token');
+        localStorage.removeItem('backstabber_user');
+      } catch {
+        // ignore storage errors
+      }
+      throw new Error('Sessão expirada. Faça login novamente.');
+    }
     throw new Error(message);
   }
 
