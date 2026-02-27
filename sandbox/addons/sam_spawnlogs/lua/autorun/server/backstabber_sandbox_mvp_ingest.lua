@@ -31,6 +31,7 @@ local c_batch_size = CreateConVar("bsb_batch_size", "100", FCVAR_ARCHIVE, "Max e
 local c_flush_seconds = CreateConVar("bsb_flush_seconds", "2", FCVAR_ARCHIVE, "Batch flush interval in seconds.")
 local c_heartbeat_seconds = CreateConVar("bsb_heartbeat_seconds", "30", FCVAR_ARCHIVE, "Heartbeat interval in seconds.")
 local c_max_payload_bytes = CreateConVar("bsb_max_payload_bytes", "524288", FCVAR_ARCHIVE, "Max JSON body bytes per ingest request.")
+local c_max_retry_attempts = CreateConVar("bsb_max_retry_attempts", "0", FCVAR_ARCHIVE, "Max retry attempts for ingest batches (0 = infinite).")
 local c_debug = CreateConVar("bsb_ingest_debug", "0", FCVAR_ARCHIVE, "Enable debug logs for ingest addon.")
 
 local ULID_ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
@@ -42,6 +43,8 @@ local send_in_flight = false
 local last_enqueue_realtime = 0
 local sending_batch = nil
 local flush_if_needed
+local discarded_batches_total = 0
+local discarded_events_total = 0
 
 local sessions_by_steamid = {}
 local pending_disconnect_reason_by_steamid = {}
@@ -591,6 +594,24 @@ local function retry_delay_seconds(attempt)
 	return base + jitter
 end
 
+local function get_max_retry_attempts()
+	return math_max(0, c_max_retry_attempts:GetInt())
+end
+
+local function mark_batch_discarded(batch, attempt, reason)
+	local batch_size = (batch and #batch) or 0
+	discarded_batches_total = discarded_batches_total + 1
+	discarded_events_total = discarded_events_total + batch_size
+	print(string_format(
+		"[BSB-INGEST] discarded after max retries attempt=%d reason=%s batchSize=%d discardedBatches=%d discardedEvents=%d",
+		attempt,
+		tostring(reason or "unknown"),
+		batch_size,
+		discarded_batches_total,
+		discarded_events_total
+	))
+end
+
 local function dispatch_batch(batch, attempt)
 	if not batch or #batch == 0 then
 		send_in_flight = false
@@ -633,6 +654,14 @@ local function dispatch_batch(batch, attempt)
 			end
 
 			local next_attempt = attempt + 1
+			local max_retry_attempts = get_max_retry_attempts()
+			if max_retry_attempts > 0 and next_attempt > max_retry_attempts then
+				mark_batch_discarded(batch, next_attempt, "http_" .. tostring(code))
+				send_in_flight = false
+				sending_batch = nil
+				flush_if_needed(true)
+				return
+			end
 			local delay = retry_delay_seconds(next_attempt)
 			debug_log(string_format("batch http error=%d retry in %.2fs", code, delay))
 			timer.Simple(delay, function()
@@ -641,6 +670,14 @@ local function dispatch_batch(batch, attempt)
 		end,
 		failed = function(err)
 			local next_attempt = attempt + 1
+			local max_retry_attempts = get_max_retry_attempts()
+			if max_retry_attempts > 0 and next_attempt > max_retry_attempts then
+				mark_batch_discarded(batch, next_attempt, tostring(err))
+				send_in_flight = false
+				sending_batch = nil
+				flush_if_needed(true)
+				return
+			end
 			local delay = retry_delay_seconds(next_attempt)
 			debug_log(string_format("batch failed err=%s retry in %.2fs", tostring(err), delay))
 			timer.Simple(delay, function()
