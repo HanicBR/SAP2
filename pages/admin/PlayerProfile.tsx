@@ -308,6 +308,21 @@ const PlayerProfile: React.FC = () => {
      return 'text-orange-600 from-orange-900/40';
   };
 
+  const formatAverageSessionDuration = (totalPlayTimeHours: number, totalSessions: number) => {
+    const parsedHours = Number(totalPlayTimeHours || 0);
+    const parsedSessions = Number(totalSessions || 0);
+    if (!Number.isFinite(parsedHours) || !Number.isFinite(parsedSessions) || parsedHours <= 0 || parsedSessions <= 0) {
+      return '0 min';
+    }
+
+    const avgHours = parsedHours / parsedSessions;
+    const avgMinutes = avgHours * 60;
+    if (avgHours >= 1) return `${avgHours.toFixed(1)}h`;
+    if (avgMinutes >= 1) return `${avgMinutes.toFixed(1)} min`;
+    const avgSeconds = avgMinutes * 60;
+    return `${Math.max(1, Math.round(avgSeconds))} s`;
+  };
+
   const handleCopySteamId = async () => {
     if (!player) return;
 
@@ -690,7 +705,10 @@ const PlayerProfile: React.FC = () => {
                       </div>
                       <div className="text-right">
                           <p className="text-xl text-white font-mono font-bold">
-                            {(player.gameModeStats.sandbox.totalPlayTimeHours / Math.max(1, player.gameModeStats.sandbox.totalSessions)).toFixed(1)}h
+                            {formatAverageSessionDuration(
+                              player.gameModeStats.sandbox.totalPlayTimeHours,
+                              player.gameModeStats.sandbox.totalSessions,
+                            )}
                           </p>
                           <p className="text-xs text-zinc-500 uppercase">Média p/ Sessão</p>
                       </div>
@@ -1276,5 +1294,6 @@ const PlayerProfile: React.FC = () => {
 };
 
 export default PlayerProfile;
+
 
 

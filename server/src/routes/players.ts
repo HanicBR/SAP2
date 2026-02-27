@@ -638,7 +638,23 @@ const buildGameModeStats = (steamId: string, logs: any[], roundEndLogs?: any[]) 
 
   const sandboxLogs = byMode.SANDBOX;
   if (sandboxLogs.length) {
-    const propsSpawned = sandboxLogs.filter((l) => l.type === 'PROP_SPAWN').length;
+    const toSafeInt = (value: unknown): number => {
+      const parsed = Number.parseInt(String(value ?? ''), 10);
+      if (!Number.isFinite(parsed) || parsed < 0) return 0;
+      return parsed;
+    };
+
+    const directPropSpawnCount = sandboxLogs.filter((l) => l.type === 'PROP_SPAWN').length;
+    const burstDroppedTotal = sandboxLogs.reduce((sum, log) => {
+      if (log.type !== 'GAME_EVENT') return sum;
+      const meta = ((log as any).metadata || {}) as any;
+      const eventKind = String(meta.eventKind || '')
+        .trim()
+        .toUpperCase();
+      if (eventKind !== 'PROP_SPAWN_BURST') return sum;
+      return sum + toSafeInt(meta.droppedCount);
+    }, 0);
+    const propsSpawned = directPropSpawnCount + burstDroppedTotal;
     const totalSessions = sandboxLogs.filter((l) => l.type === 'CONNECT').length;
     const sandboxSessionLogs = sandboxLogs.filter(
       (l) => l.type === 'CONNECT' || l.type === 'DISCONNECT',
