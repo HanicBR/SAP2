@@ -209,14 +209,53 @@ router.get('/query', async (req, res) => {
 
   // Advanced filters fallback (metadata-based) done server-side in batches.
   const chunkSize = 500;
-  const skipMatches = (page - 1) * limit;
+  const scanMaxIterations = 2000;
+  const countMatches = async (): Promise<number> => {
+    let matchedCount = 0;
+    let scanCursor: string | null = null;
+    let ended = false;
+    let guard = 0;
+
+    while (!ended && guard < scanMaxIterations) {
+      guard += 1;
+      const batch: any[] = await prisma.log.findMany({
+        where,
+        orderBy: [{ timestamp: 'desc' }, { id: 'desc' }],
+        take: chunkSize,
+        ...(scanCursor ? { cursor: { id: scanCursor }, skip: 1 } : {}),
+      });
+
+      if (!batch.length) {
+        ended = true;
+        break;
+      }
+
+      for (const log of batch) {
+        if (matchesAdvancedFilters(log, actorTypeFilter, targetFilter)) {
+          matchedCount += 1;
+        }
+      }
+
+      scanCursor = batch[batch.length - 1]?.id ?? null;
+      if (batch.length < chunkSize) {
+        ended = true;
+      }
+    }
+
+    return matchedCount;
+  };
+
+  const total = await countMatches();
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const safePage = Math.min(page, totalPages);
+  const skipMatches = (safePage - 1) * limit;
   const selected: any[] = [];
-  let matchedCount = 0;
+  let matchedSeen = 0;
   let scanCursor: string | null = null;
   let ended = false;
   let guard = 0;
 
-  while (!ended && guard < 2000) {
+  while (!ended && guard < scanMaxIterations && selected.length < limit) {
     guard += 1;
 
     const batch: any[] = await prisma.log.findMany({
@@ -233,10 +272,10 @@ router.get('/query', async (req, res) => {
 
     for (const log of batch) {
       if (!matchesAdvancedFilters(log, actorTypeFilter, targetFilter)) continue;
-
-      matchedCount += 1;
-      if (matchedCount > skipMatches && selected.length < limit) {
+      matchedSeen += 1;
+      if (matchedSeen > skipMatches) {
         selected.push(log);
+        if (selected.length >= limit) break;
       }
     }
 
@@ -245,10 +284,6 @@ router.get('/query', async (req, res) => {
       ended = true;
     }
   }
-
-  const total = matchedCount;
-  const totalPages = Math.max(1, Math.ceil(total / limit));
-  const safePage = Math.min(page, totalPages);
 
   return res.json({
     mode: 'page',
