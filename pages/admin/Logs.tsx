@@ -89,6 +89,18 @@ const isRDM = (log: LogEntry) => {
          log.metadata.victimRole === 'innocent';
 };
 
+const formatDuration = (durationMs: number): string => {
+  if (!Number.isFinite(durationMs) || durationMs <= 0) return '0s';
+  const totalSeconds = Math.floor(durationMs / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  if (minutes > 0) return `${minutes}m ${seconds}s`;
+  return `${seconds}s`;
+};
+
 // --- COMPONENT: PLAYER LINK ---
 const PlayerLink = ({ name, steamId, role }: { name?: string, steamId?: string, role?: string }) => {
   const colorClass = getRoleColor(role);
@@ -327,6 +339,34 @@ const RoundCard = React.memo(({ group, onQuickIgnore }: { group: RoundGroup; onQ
 const SessionCard = React.memo(({ group, onQuickIgnore }: { group: SessionGroup; onQuickIgnore?: (log: LogEntry) => void }) => {
   const [expanded, setExpanded] = useState(true);
 
+  const summary = useMemo(() => {
+     const events = group.events || [];
+     const first = events[0];
+     const last = events.length > 0 ? events[events.length - 1] : undefined;
+     const startAt = first ? new Date(first.timestamp) : new Date(group.startTime);
+     const endAt = last ? new Date(last.timestamp) : startAt;
+     const durationMs = Math.max(endAt.getTime() - startAt.getTime(), 0);
+
+     let commandCount = 0;
+     let punishCount = 0;
+     let chatCount = 0;
+
+     for (const event of events) {
+       if (event.type === LogType.COMMAND || event.type === LogType.ULX) commandCount += 1;
+       if (event.type === LogType.PUNISH) punishCount += 1;
+       if (event.type === LogType.CHAT) chatCount += 1;
+     }
+
+     return {
+       startAt,
+       endAt,
+       durationLabel: formatDuration(durationMs),
+       commandCount,
+       punishCount,
+       chatCount,
+     };
+  }, [group.events, group.startTime]);
+
   // Group prop spawns into clusters for Sandbox
   const groupedEvents = useMemo(() => {
      const result: (LogEntry | LogEntry[])[] = [];
@@ -376,22 +416,49 @@ const SessionCard = React.memo(({ group, onQuickIgnore }: { group: SessionGroup;
              <div className="p-2 bg-blue-900/20 rounded-full">
                 <Icons.UserGroup className="w-4 h-4 text-blue-500" />
              </div>
-             <div>
-                <p className="text-sm font-bold text-white">
+              <div>
+                 <p className="text-sm font-bold text-white">
                    Sessão de <PlayerLink name={group.playerName} steamId={group.steamId} />
-                </p>
-                <div className="flex gap-2 text-xs text-zinc-500 font-mono">
-                   <span>{group.ip}</span>
-                   <span>•</span>
-                   <span>Início: {new Date(group.startTime).toLocaleTimeString()}</span>
-                </div>
-             </div>
+                 </p>
+                 <div className="flex gap-2 text-xs text-zinc-500 font-mono">
+                    <span>{group.ip}</span>
+                    <span>•</span>
+                    <span>Início: {summary.startAt.toLocaleTimeString()}</span>
+                 </div>
+              </div>
+           </div>
+           <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-zinc-600">{group.events.length} logs</span>
+              <Icons.List className={`w-4 h-4 text-zinc-500 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+           </div>
+        </div>
+
+        <div className="px-3 py-2 border-b border-zinc-800/60 bg-zinc-950/40 grid grid-cols-2 md:grid-cols-6 gap-2 text-[11px]">
+          <div className="rounded border border-zinc-800 bg-zinc-950 px-2 py-1">
+            <span className="text-zinc-500 uppercase block">Início</span>
+            <span className="text-zinc-200 font-mono">{summary.startAt.toLocaleTimeString()}</span>
           </div>
-          <div className="flex items-center gap-2">
-             <span className="text-xs font-bold text-zinc-600">{group.events.length} logs</span>
-             <Icons.List className={`w-4 h-4 text-zinc-500 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+          <div className="rounded border border-zinc-800 bg-zinc-950 px-2 py-1">
+            <span className="text-zinc-500 uppercase block">Fim</span>
+            <span className="text-zinc-200 font-mono">{summary.endAt.toLocaleTimeString()}</span>
           </div>
-       </div>
+          <div className="rounded border border-zinc-800 bg-zinc-950 px-2 py-1">
+            <span className="text-zinc-500 uppercase block">Duração</span>
+            <span className="text-zinc-200 font-mono">{summary.durationLabel}</span>
+          </div>
+          <div className="rounded border border-zinc-800 bg-zinc-950 px-2 py-1">
+            <span className="text-zinc-500 uppercase block">Comandos</span>
+            <span className="text-zinc-200 font-mono">{summary.commandCount}</span>
+          </div>
+          <div className="rounded border border-zinc-800 bg-zinc-950 px-2 py-1">
+            <span className="text-zinc-500 uppercase block">Punições</span>
+            <span className="text-zinc-200 font-mono">{summary.punishCount}</span>
+          </div>
+          <div className="rounded border border-zinc-800 bg-zinc-950 px-2 py-1">
+            <span className="text-zinc-500 uppercase block">Chat</span>
+            <span className="text-zinc-200 font-mono">{summary.chatCount}</span>
+          </div>
+        </div>
 
         {expanded && (
            <div className="divide-y divide-zinc-800/50">
