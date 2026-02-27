@@ -428,6 +428,20 @@ const SessionCard = React.memo(({ group, onQuickIgnore }: { group: SessionGroup;
               </div>
            </div>
            <div className="flex items-center gap-2">
+              <div className="hidden md:flex items-center gap-1">
+                <span className="px-1.5 py-0.5 rounded border border-zinc-800 bg-zinc-950 text-[10px] font-mono text-zinc-400">
+                  DUR {summary.durationLabel}
+                </span>
+                <span className="px-1.5 py-0.5 rounded border border-zinc-800 bg-zinc-950 text-[10px] font-mono text-zinc-400">
+                  CMD {summary.commandCount}
+                </span>
+                <span className="px-1.5 py-0.5 rounded border border-zinc-800 bg-zinc-950 text-[10px] font-mono text-zinc-400">
+                  PUN {summary.punishCount}
+                </span>
+                <span className="px-1.5 py-0.5 rounded border border-zinc-800 bg-zinc-950 text-[10px] font-mono text-zinc-400">
+                  CHAT {summary.chatCount}
+                </span>
+              </div>
               <span className="text-xs font-bold text-zinc-600">{group.events.length} logs</span>
               <Icons.List className={`w-4 h-4 text-zinc-500 transition-transform ${expanded ? 'rotate-180' : ''}`} />
            </div>
