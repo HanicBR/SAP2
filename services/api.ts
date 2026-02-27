@@ -764,11 +764,37 @@ export const ApiService = {
         id: `pun_${Date.now()}`,
         type: data.type,
         reason: data.reason,
-        staffName: data.staffName,
+        staffName: data.staffName || 'Sistema',
         date: new Date().toISOString(),
         duration: data.duration,
         active: data.active ?? true,
       });
+    }
+  },
+
+  deactivatePunishment: async (
+    steamId: string,
+    punishmentId: string,
+    reason?: string,
+  ): Promise<void> => {
+    if (hasApi) {
+      await apiFetch(`/players/${steamId}/punishments/${punishmentId}/deactivate`, {
+        method: 'PATCH',
+        body: JSON.stringify({ reason }),
+      });
+      return;
+    }
+
+    await delay(200);
+    const player = playersDb.find((p) => p.steamId === steamId);
+    if (player?.punishments) {
+      const idx = player.punishments.findIndex((p) => p.id === punishmentId);
+      if (idx !== -1) {
+        player.punishments[idx] = {
+          ...player.punishments[idx],
+          active: false,
+        };
+      }
     }
   },
 

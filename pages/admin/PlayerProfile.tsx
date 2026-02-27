@@ -134,23 +134,26 @@ const PlayerProfile: React.FC = () => {
     if (!player) return;
 
     const typeInput = window.prompt(
-      'Tipo de punição (BAN, MUTE, GAG, KICK, WARN):',
-      'WARN',
+      'Tipo de punicao (BAN, MUTE, GAG, KICK):',
+      'BAN',
     );
     if (!typeInput) return;
     const type = typeInput.toUpperCase();
-    if (!['BAN', 'MUTE', 'GAG', 'KICK', 'WARN'].includes(type)) {
-      alert('Tipo de punição inválido.');
+    if (!['BAN', 'MUTE', 'GAG', 'KICK'].includes(type)) {
+      alert('Tipo de punicao invalido.');
       return;
     }
 
-    const reason = window.prompt('Motivo da punição:');
+    const reason = window.prompt('Motivo da punicao:');
     if (!reason || !reason.trim()) return;
 
-    const durationInput = window.prompt(
-      'Duração (ex: "3 dias", "Permanente") – opcional:',
-    );
-    const duration = durationInput && durationInput.trim() ? durationInput.trim() : undefined;
+    let duration: string | undefined;
+    if (type !== 'KICK') {
+      const durationInput = window.prompt(
+        'Duracao em minutos (ex.: 1, 10, 60). Deixe vazio para permanente:',
+      );
+      duration = durationInput && durationInput.trim() ? durationInput.trim() : undefined;
+    }
 
     try {
       await ApiService.createPunishment(player.steamId, {
@@ -166,6 +169,27 @@ const PlayerProfile: React.FC = () => {
       alert(`Erro ao aplicar punicao: ${message}`);
     }
   };
+
+  const handleDeactivatePunishment = async (punishmentId: string, type: string) => {
+    if (!player) return;
+    const normalizedType = String(type || "").toUpperCase();
+    if (!['BAN', 'MUTE', 'GAG'].includes(normalizedType)) return;
+
+    const reasonInput = window.prompt('Motivo da desativacao (opcional):', '');
+    try {
+      await ApiService.deactivatePunishment(
+        player.steamId,
+        punishmentId,
+        reasonInput && reasonInput.trim() ? reasonInput.trim() : undefined,
+      );
+      const updatedPlayer = await ApiService.getPlayerBySteamId(player.steamId);
+      setPlayer(updatedPlayer);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro desconhecido';
+      alert(`Erro ao desativar punicao: ${message}`);
+    }
+  };
+
 
   const getServerName = (id: string) => {
     const srv = servers.find(s => s.id === id);
@@ -747,6 +771,7 @@ const PlayerProfile: React.FC = () => {
                           <th className="px-4 py-3 text-left text-xs font-bold text-zinc-500 uppercase">Data</th>
                           <th className="px-4 py-3 text-left text-xs font-bold text-zinc-500 uppercase">Duração</th>
                           <th className="px-4 py-3 text-left text-xs font-bold text-zinc-500 uppercase">Status</th>
+                          <th className="px-4 py-3 text-left text-xs font-bold text-zinc-500 uppercase">Acoes</th>
                        </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-800 bg-zinc-900">
@@ -773,10 +798,22 @@ const PlayerProfile: React.FC = () => {
                                       <span className="text-zinc-600 text-xs font-bold uppercase">Expirado</span>
                                    )}
                                 </td>
+                                <td className="px-4 py-3 whitespace-nowrap">
+                                   {punishment.active && ['BAN', 'MUTE', 'GAG'].includes(String(punishment.type || '').toUpperCase()) ? (
+                                      <button
+                                        onClick={() => handleDeactivatePunishment(punishment.id, punishment.type)}
+                                        className="px-2 py-1 text-xs font-bold uppercase rounded border border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+                                      >
+                                        Desativar
+                                      </button>
+                                   ) : (
+                                      <span className="text-zinc-600 text-xs">-</span>
+                                   )}
+                                </td>
                              </tr>
                           ))
                        ) : (
-                          <tr><td colSpan={6} className="px-6 py-8 text-center text-zinc-500 italic">Nenhuma punição registrada.</td></tr>
+                          <tr><td colSpan={7} className="px-6 py-8 text-center text-zinc-500 italic">Nenhuma punição registrada.</td></tr>
                        )}
                     </tbody>
                  </table>

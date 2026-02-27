@@ -5,7 +5,7 @@ import { UserRole } from '../domain';
 import { enqueueServerAction } from '../services/serverActions';
 
 const router = Router();
-const VALID_PUNISHMENT_TYPES = new Set(['BAN', 'MUTE', 'GAG', 'KICK', 'WARN']);
+const VALID_PUNISHMENT_TYPES = new Set(['BAN', 'MUTE', 'GAG', 'KICK']);
 
 const toDomainMode = (mode: string): string =>
   mode === 'SANDBOX' ? 'Sandbox' : mode === 'MURDER' ? 'Murder' : 'TTT';
@@ -55,7 +55,7 @@ const buildSamPunishmentCommand = (
     return `sam kick ${sid} ${parsedReason}`;
   }
   if (parsedType === 'BAN') {
-    return `sam ban ${sid} ${Math.max(0, minutes)} ${parsedReason}`;
+    return `sam banid ${sid} ${Math.max(0, minutes)} ${parsedReason}`;
   }
   if (parsedType === 'MUTE') {
     return `sam mute ${sid} ${Math.max(0, minutes)} ${parsedReason}`;
@@ -63,10 +63,36 @@ const buildSamPunishmentCommand = (
   if (parsedType === 'GAG') {
     return `sam gag ${sid} ${Math.max(0, minutes)} ${parsedReason}`;
   }
-  if (parsedType === 'WARN') {
-    return `sam warn ${sid} ${parsedReason}`;
-  }
   return null;
+};
+
+const buildSamPunishmentDeactivateCommand = (
+  type: string,
+  steamId: string,
+): string | null => {
+  const parsedType = String(type || '').toUpperCase();
+  const sid = quoteConsoleArg(steamId);
+
+  if (parsedType === 'BAN') return `sam unban ${sid}`;
+  if (parsedType === 'MUTE') return `sam unmute ${sid}`;
+  if (parsedType === 'GAG') return `sam ungag ${sid}`;
+  return null;
+};
+
+const isPunishmentCurrentlyActive = (
+  type: string,
+  active: boolean,
+  date: Date,
+  duration?: string | null,
+): boolean => {
+  const parsedType = String(type || '').toUpperCase();
+  if (!active) return false;
+  if (parsedType === 'KICK' || parsedType === 'WARN') return false;
+
+  const minutes = toDurationMinutes(duration || undefined);
+  if (!minutes) return true;
+  const expiresAtMs = date.getTime() + minutes * 60 * 1000;
+  return Date.now() < expiresAtMs;
 };
 
 const mapLog = (log: any) => ({
@@ -1063,7 +1089,12 @@ router.get('/:steamId', async (req, res) => {
           staffName: p.staffName,
           date: p.date instanceof Date ? p.date.toISOString() : new Date(p.date).toISOString(),
           duration: p.duration || undefined,
-          active: Boolean(p.active),
+          active: isPunishmentCurrentlyActive(
+            p.type,
+            Boolean(p.active),
+            p.date instanceof Date ? p.date : new Date(p.date),
+            p.duration,
+          ),
         }))
       : punishmentsFromLogs,
     activityHistory,
@@ -1283,14 +1314,19 @@ router.post(
     }
 
     try {
+      const shouldStartActive =
+        typeof active === 'boolean'
+          ? active
+          : parsedType === 'BAN' || parsedType === 'MUTE' || parsedType === 'GAG';
+
       const p = await prisma.punishment.create({
         data: {
           steamId,
           type: parsedType as any,
           reason: parsedReason,
           staffName: resolvedStaffName,
-          duration: parsedDuration || null,
-          active: typeof active === 'boolean' ? active : true,
+          duration: parsedType === 'KICK' ? null : parsedDuration || null,
+          active: shouldStartActive,
         },
       });
 
@@ -1323,13 +1359,102 @@ router.post(
         staffName: p.staffName,
         date: p.date.toISOString(),
         duration: p.duration || undefined,
-        active: Boolean(p.active),
+        active: isPunishmentCurrentlyActive(p.type, Boolean(p.active), p.date, p.duration),
         dispatch,
       });
     } catch (e) {
       console.error('Failed to create punishment', e);
       return res.status(500).json({ error: 'Failed to create punishment' });
     }
+  },
+);
+
+router.patch(
+  '/:steamId/punishments/:punishmentId/deactivate',
+  authMiddleware,
+  requireRole(UserRole.ADMIN),
+  async (req, res) => {
+    const { steamId, punishmentId } = req.params as { steamId: string; punishmentId: string };
+    const { reason } = req.body as { reason?: string };
+    const parsedReason = String(reason || '').trim();
+
+    const punishment = await prisma.punishment.findUnique({ where: { id: punishmentId } });
+    if (!punishment || punishment.steamId !== steamId) {
+      return res.status(404).json({ error: 'Punishment not found' });
+    }
+
+    const updated = await prisma.punishment.update({
+      where: { id: punishmentId },
+      data: { active: false },
+    });
+
+    const latestPlayerLog = await prisma.log.findFirst({
+      where: { steamId },
+      orderBy: [{ timestamp: 'desc' }, { id: 'desc' }],
+      select: { serverId: true, gameMode: true },
+    });
+
+    const command = buildSamPunishmentDeactivateCommand(updated.type, steamId);
+    let dispatch: { queued: boolean; serverId?: string; actionId?: string } = { queued: false };
+    if (latestPlayerLog?.serverId && command) {
+      const action = enqueueServerAction(latestPlayerLog.serverId, command, {
+        steamId,
+        punishmentType: updated.type,
+        reason: parsedReason || undefined,
+      });
+      if (action) {
+        dispatch = {
+          queued: true,
+          serverId: latestPlayerLog.serverId,
+          actionId: action.id,
+        };
+      }
+    }
+
+    try {
+      const serverContext =
+        latestPlayerLog ||
+        (await prisma.log.findFirst({
+          orderBy: [{ timestamp: 'desc' }, { id: 'desc' }],
+          select: { serverId: true, gameMode: true },
+        }));
+      if (serverContext?.serverId && serverContext?.gameMode) {
+        const actionLabel =
+          updated.type === 'BAN' ? 'UNBAN' : updated.type === 'MUTE' ? 'UNMUTE' : updated.type === 'GAG' ? 'UNGAG' : 'UNPUNISH';
+        const actorName = String(req.user?.username || 'Console');
+        await prisma.log.create({
+          data: {
+            serverId: serverContext.serverId,
+            gameMode: serverContext.gameMode as any,
+            type: 'PUNISH',
+            timestamp: new Date(),
+            playerName: actorName,
+            rawText: `${actorName} removeu ${actionLabel} de ${steamId}${parsedReason ? ` motivo=${parsedReason}` : ''}`,
+            metadata: {
+              source: 'admin_panel',
+              sourceTag: 'PUNISHMENT_DEACTIVATE',
+              action: actionLabel,
+              targetSteamId: steamId,
+              reason: parsedReason || undefined,
+              punishmentId,
+            } as any,
+          } as any,
+        });
+      }
+    } catch {
+      // best effort audit event
+    }
+
+    return res.json({
+      id: updated.id,
+      type: updated.type,
+      reason: updated.reason,
+      staffName: updated.staffName,
+      date: updated.date.toISOString(),
+      duration: updated.duration || undefined,
+      active: false,
+      dispatch,
+    });
   },
 );
 
