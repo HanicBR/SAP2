@@ -26,7 +26,7 @@ local INGEST_SCHEMA_VERSION = 1
 local c_enable = CreateConVar("bsb_ingest_enable", "0", FCVAR_ARCHIVE, "Enable Backstabber Sandbox MVP ingest.")
 local c_ingest_url = CreateConVar("bsb_ingest_url", "http://127.0.0.1:4000/api/ingest/logs", FCVAR_ARCHIVE, "Backstabber ingest endpoint.")
 local c_heartbeat_url = CreateConVar("bsb_heartbeat_url", "http://127.0.0.1:4000/api/servers/heartbeat", FCVAR_ARCHIVE, "Backstabber heartbeat endpoint.")
-local c_actions_url = CreateConVar("bsb_actions_url", "http://127.0.0.1:4000/api/servers/actions/pull", FCVAR_ARCHIVE, "Backstabber server actions pull endpoint.")
+local c_actions_url = CreateConVar("bsb_actions_url", "", FCVAR_ARCHIVE, "Backstabber server actions pull endpoint.")
 local c_server_key = CreateConVar("bsb_server_key", "", FCVAR_ARCHIVE, "Backstabber server API key.")
 local c_batch_size = CreateConVar("bsb_batch_size", "100", FCVAR_ARCHIVE, "Max events per ingest request.")
 local c_flush_seconds = CreateConVar("bsb_flush_seconds", "2", FCVAR_ARCHIVE, "Batch flush interval in seconds.")
@@ -54,6 +54,8 @@ local discarded_batches_total = 0
 local discarded_events_total = 0
 local queue_warn_next = 0
 local prop_spawn_window_by_steamid = {}
+local actions_poll_blocked_local = false
+local actions_poll_warn_next = 0
 
 local sessions_by_steamid = {}
 local pending_disconnect_reason_by_steamid = {}
@@ -105,6 +107,27 @@ end
 
 local function now_ms()
 	return os.time() * 1000 + math_floor((SysTime() % 1) * 1000)
+end
+
+local function is_local_resource_url(raw_url)
+	local lower = string_lower(tostring(raw_url or ""))
+	if lower == "" then return false end
+
+	local host_port = string_match(lower, "^https?://([^/%?]+)")
+	if not host_port or host_port == "" then return false end
+	local host = string_match(host_port, "^([^:]+)") or host_port
+	if host == "" then return false end
+
+	if host == "localhost" or host == "127.0.0.1" or host == "0.0.0.0" or host == "::1" or host == "[::1]" then
+		return true
+	end
+	if string_match(host, "^10%.") then return true end
+	if string_match(host, "^192%.168%.") then return true end
+	if string_match(host, "^172%.1[6-9]%.") or string_match(host, "^172%.2%d%.") or string_match(host, "^172%.3[0-1]%.") then
+		return true
+	end
+
+	return false
 end
 
 local function ulid_encode_time(ms)
@@ -764,10 +787,18 @@ end
 local function poll_server_actions()
 	if not c_enable:GetBool() then return end
 	if not c_actions_enable:GetBool() then return end
+	if actions_poll_blocked_local then return end
 
 	local actions_url = c_actions_url:GetString()
 	local key = c_server_key:GetString()
 	if actions_url == "" or key == "" then return end
+	if is_local_resource_url(actions_url) then
+		if RealTime() >= actions_poll_warn_next then
+			actions_poll_warn_next = RealTime() + 60
+			print("[BSB-INGEST] actions poll skipped: bsb_actions_url points to local/LAN resource blocked by GMod HTTP. Use public HTTPS URL or set bsb_actions_enable 0.")
+		end
+		return
+	end
 
 	HTTP({
 		url = actions_url,
@@ -799,6 +830,12 @@ local function poll_server_actions()
 			end
 		end,
 		failed = function(err)
+			local err_text = string_lower(tostring(err or ""))
+			if string_match(err_text, "local resources are not allowed") then
+				actions_poll_blocked_local = true
+				print("[BSB-INGEST] actions poll disabled: requests to local resources are blocked by GMod HTTP. Configure bsb_actions_url with public URL.")
+				return
+			end
 			debug_log("actions poll failed: " .. tostring(err))
 		end
 	})
