@@ -33,6 +33,7 @@ local c_heartbeat_seconds = CreateConVar("bsb_heartbeat_seconds", "30", FCVAR_AR
 local c_max_payload_bytes = CreateConVar("bsb_max_payload_bytes", "524288", FCVAR_ARCHIVE, "Max JSON body bytes per ingest request.")
 local c_max_retry_attempts = CreateConVar("bsb_max_retry_attempts", "0", FCVAR_ARCHIVE, "Max retry attempts for ingest batches (0 = infinite).")
 local c_queue_warn_size = CreateConVar("bsb_queue_warn_size", "1000", FCVAR_ARCHIVE, "Warn when ingest queue backlog reaches this size.")
+local c_prop_spawn_enable = CreateConVar("bsb_prop_spawn_enable", "1", FCVAR_ARCHIVE, "Enable PROP_SPAWN ingest events.")
 local c_debug = CreateConVar("bsb_ingest_debug", "0", FCVAR_ARCHIVE, "Enable debug logs for ingest addon.")
 
 local ULID_ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
@@ -765,6 +766,82 @@ local function is_sam_chat_command(text)
 	return sam.command.get_command(cmd_name) ~= nil
 end
 
+local function get_entity_class(ent)
+	if ent == nil then return nil end
+	if not isentity or not isentity(ent) then return nil end
+	if not IsValid(ent) then return nil end
+	if not ent.GetClass then return nil end
+	local class_name = tostring(ent:GetClass() or "")
+	if class_name == "" then return nil end
+	return class_name
+end
+
+local function get_entity_model(ent)
+	if ent == nil then return nil end
+	if not isentity or not isentity(ent) then return nil end
+	if not IsValid(ent) then return nil end
+	if not ent.GetModel then return nil end
+	local model = tostring(ent:GetModel() or "")
+	if model == "" then return nil end
+	return model
+end
+
+local function get_entity_index(ent)
+	if ent == nil then return nil end
+	if not isentity or not isentity(ent) then return nil end
+	if not IsValid(ent) then return nil end
+	if not ent.EntIndex then return nil end
+	local idx = tonumber(ent:EntIndex() or "")
+	if not idx then return nil end
+	return idx
+end
+
+local function get_entity_position(ent)
+	if ent == nil then return nil end
+	if not isentity or not isentity(ent) then return nil end
+	if not IsValid(ent) then return nil end
+	if not ent.GetPos then return nil end
+	local pos = ent:GetPos()
+	if not pos then return nil end
+	return {
+		x = tonumber(pos.x or 0) or 0,
+		y = tonumber(pos.y or 0) or 0,
+		z = tonumber(pos.z or 0) or 0,
+	}
+end
+
+local function add_spawn_event(ply, spawn_kind, ent, explicit_model)
+	if not c_enable:GetBool() then return end
+	if not c_prop_spawn_enable:GetBool() then return end
+	if not is_valid_player(ply) then return end
+	if is_bot_player(ply) then return end
+
+	local class_name = get_entity_class(ent) or "unknown"
+	local model_name = tostring(explicit_model or get_entity_model(ent) or "unknown")
+	local ent_index = get_entity_index(ent)
+	local position = get_entity_position(ent)
+
+	local event = build_base_event("PROP_SPAWN", "SPAWN", "player")
+	apply_player_actor(event, ply)
+	event.metadata.spawnKind = tostring(spawn_kind or "UNKNOWN")
+	event.metadata.entityClass = class_name
+	event.metadata.propModel = model_name
+	event.metadata.entIndex = ent_index
+	event.metadata.position = position
+	if model_name ~= "unknown" then
+		event.metadata.model = model_name
+	end
+	event.rawText = string_format(
+		"%s spawned %s %s[%s] model=%s",
+		event.playerName or "Unknown",
+		tostring(spawn_kind or "UNKNOWN"),
+		class_name,
+		tostring(ent_index or "?"),
+		model_name
+	)
+	push_event(event)
+end
+
 local function add_chat_event(ply, text, team_chat, is_dead)
 	local event = build_base_event("CHAT", "CHAT", "player")
 	apply_player_actor(event, ply)
@@ -797,6 +874,22 @@ hook.Add("PlayerSay", "bsb_ingest_chat", function(ply, text, team_chat, is_dead)
 	end
 
 	add_chat_event(ply, text, team_chat, is_dead)
+end)
+
+hook.Add("PlayerSpawnedProp", "bsb_ingest_prop_spawn_prop", function(ply, model, ent)
+	add_spawn_event(ply, "PROP", ent, model)
+end)
+
+hook.Add("PlayerSpawnedSENT", "bsb_ingest_prop_spawn_sent", function(ply, ent)
+	add_spawn_event(ply, "SENT", ent, nil)
+end)
+
+hook.Add("PlayerSpawnedNPC", "bsb_ingest_prop_spawn_npc", function(ply, ent)
+	add_spawn_event(ply, "NPC", ent, nil)
+end)
+
+hook.Add("PlayerSpawnedVehicle", "bsb_ingest_prop_spawn_vehicle", function(ply, ent)
+	add_spawn_event(ply, "VEHICLE", ent, nil)
 end)
 
 hook.Add("PlayerInitialSpawn", "bsb_ingest_connect", function(ply)
