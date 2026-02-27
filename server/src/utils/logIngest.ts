@@ -309,6 +309,36 @@ export const storeLogsAndUpdateProfiles = async (cleanEvents: NormalizedLogEvent
     const isConnect = ev.type === 'CONNECT';
     const ip = isConnect ? normalizeIPv4((ev.metadata as any)?.ip) : undefined;
     const geo = isConnect ? (ev.metadata as any)?.geo || undefined : undefined;
+    const existingProfile = await prisma.playerProfile.findUnique({
+      where: { steamId },
+      select: { serverStats: true },
+    });
+
+    const existingServerStats =
+      existingProfile &&
+      existingProfile.serverStats &&
+      typeof existingProfile.serverStats === 'object' &&
+      !Array.isArray(existingProfile.serverStats)
+        ? (existingProfile.serverStats as Record<string, any>)
+        : {};
+
+    const currentServerStats =
+      ev.serverId &&
+      existingServerStats[ev.serverId] &&
+      typeof existingServerStats[ev.serverId] === 'object'
+        ? (existingServerStats[ev.serverId] as Record<string, any>)
+        : { playTimeHours: 0, connections: 0 };
+
+    const nextServerStats = ev.serverId
+      ? ({
+          ...existingServerStats,
+          [ev.serverId]: {
+            playTimeHours: Number(currentServerStats.playTimeHours) || 0,
+            connections:
+              (Number(currentServerStats.connections) || 0) + (ev.type === 'CONNECT' ? 1 : 0),
+          },
+        } as Record<string, any>)
+      : existingServerStats;
 
     await prisma.playerProfile.upsert({
       where: { steamId },
@@ -325,14 +355,7 @@ export const storeLogsAndUpdateProfiles = async (cleanEvents: NormalizedLogEvent
         isVip: false,
         ip: ip || null,
         geo,
-        serverStats: ev.serverId
-          ? {
-              [ev.serverId]: {
-                playTimeHours: 0,
-                connections: ev.type === 'CONNECT' ? 1 : 0,
-              },
-            }
-          : {},
+        serverStats: nextServerStats,
       },
       update: {
         name: ev.playerName || undefined,
@@ -342,18 +365,7 @@ export const storeLogsAndUpdateProfiles = async (cleanEvents: NormalizedLogEvent
         },
         ip: isConnect ? ip || undefined : undefined,
         geo: isConnect ? geo : undefined,
-        serverStats: ev.serverId
-          ? ({
-              ...(ev.serverId
-                ? {
-                    [ev.serverId]: {
-                      playTimeHours: 0,
-                      connections: ev.type === 'CONNECT' ? 1 : 0,
-                    },
-                  }
-                : {}),
-            } as any)
-          : undefined,
+        serverStats: ev.serverId ? (nextServerStats as any) : undefined,
       } as any,
     });
   }
