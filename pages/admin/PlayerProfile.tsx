@@ -374,6 +374,39 @@ const PlayerProfile: React.FC = () => {
         </div>
       )}
 
+      {player.riskAssessment && (
+        <div className={`rounded border p-4 ${
+          player.riskAssessment.level === 'HIGH'
+            ? 'bg-red-900/20 border-red-900/40'
+            : player.riskAssessment.level === 'MEDIUM'
+            ? 'bg-yellow-900/20 border-yellow-900/40'
+            : 'bg-green-900/20 border-green-900/40'
+        }`}>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div>
+              <p className="text-xs text-zinc-400 uppercase font-bold">Risco Comportamental</p>
+              <p className="text-lg font-bold text-white">
+                {player.riskAssessment.level === 'HIGH'
+                  ? 'Alto'
+                  : player.riskAssessment.level === 'MEDIUM'
+                  ? 'Medio'
+                  : 'Baixo'}
+              </p>
+            </div>
+            <div className="text-xs text-zinc-300">
+              24h: {player.riskAssessment.signals.recentConnections24h} conexoes, {player.riskAssessment.signals.shortSessions24h} sessoes curtas
+            </div>
+          </div>
+          {player.riskAssessment.reasons.length > 0 && (
+            <ul className="mt-3 text-sm text-zinc-200 list-disc list-inside space-y-1">
+              {player.riskAssessment.reasons.map((reason, idx) => (
+                <li key={`${reason}-${idx}`}>{reason}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
       {/* GAME MODE SPECIFIC STATS */}
       {player.gameModeStats && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -499,6 +499,47 @@ const buildActivityHistory = (
   });
 };
 
+const countShortSessions = (
+  logs: { type: string; timestamp: Date; metadata: unknown }[],
+  maxSessionMs: number,
+) => {
+  const sessionsById: Record<string, number> = {};
+  let fallbackStart: number | undefined;
+  let shortCount = 0;
+
+  logs.forEach((log) => {
+    const ts = log.timestamp.getTime();
+    const meta: any = log.metadata || {};
+    const sessionId = typeof meta.sessionId === 'string' && meta.sessionId ? meta.sessionId : undefined;
+
+    if (log.type === 'CONNECT') {
+      if (sessionId) {
+        sessionsById[sessionId] = ts;
+      } else {
+        fallbackStart = ts;
+      }
+      return;
+    }
+
+    if (log.type === 'DISCONNECT') {
+      if (sessionId && sessionsById[sessionId] !== undefined) {
+        const duration = Math.max(0, ts - sessionsById[sessionId]);
+        if (duration <= maxSessionMs) shortCount += 1;
+        delete sessionsById[sessionId];
+        return;
+      }
+
+      if (fallbackStart !== undefined) {
+        const duration = Math.max(0, ts - fallbackStart);
+        if (duration <= maxSessionMs) shortCount += 1;
+        fallbackStart = undefined;
+      }
+    }
+  });
+
+  return shortCount;
+};
+
 const computePlaytimeHours = (logs: { type: string; timestamp: Date; metadata: unknown }[]): number => {
   if (!logs.length) return 0;
 
@@ -857,6 +898,34 @@ router.get('/:steamId', async (req, res) => {
     }),
   ]);
 
+  const churnWindowMs = 24 * 60 * 60 * 1000;
+  const churnSinceMs = Date.now() - churnWindowMs;
+  const activityLogs24h = activityLogs.filter((log) => log.timestamp.getTime() >= churnSinceMs);
+  const recentConnections24h = activityLogs24h.filter((log) => log.type === 'CONNECT').length;
+  const shortSessions24h = countShortSessions(activityLogs24h as any, 2 * 60 * 1000);
+
+  let riskScore = 0;
+  const riskReasons: string[] = [];
+
+  if (punishCount >= 3) {
+    riskScore += 2;
+    riskReasons.push(`Recebeu ${punishCount} punicoes nos ultimos ${moderationWindowDays} dias.`);
+  }
+  if (propBurstCount >= 2) {
+    riskScore += 2;
+    riskReasons.push(`Teve ${propBurstCount} eventos de burst de props nos ultimos ${moderationWindowDays} dias.`);
+  }
+  if (chatCount >= 80 || commandCount >= 40) {
+    riskScore += 1;
+    riskReasons.push('Volume elevado de chat/comandos no periodo recente.');
+  }
+  if (recentConnections24h >= 20 || shortSessions24h >= 8) {
+    riskScore += 1;
+    riskReasons.push('Padrao de conexao/desconexao curto e repetitivo nas ultimas 24h.');
+  }
+
+  const riskLevel = riskScore >= 4 ? 'HIGH' : riskScore >= 2 ? 'MEDIUM' : 'LOW';
+
   return res.json({
     ...toPlayer(player),
     playTimeHours: sessionMetrics.playTimeHours || playTimeHours,
@@ -887,6 +956,18 @@ router.get('/:steamId', async (req, res) => {
       punishCount,
       propBurstCount,
       lastPunishAt: lastPunishLog?.timestamp ? lastPunishLog.timestamp.toISOString() : undefined,
+    },
+    riskAssessment: {
+      level: riskLevel,
+      reasons: riskReasons,
+      signals: {
+        recentConnections24h,
+        shortSessions24h,
+        punishCount30d: punishCount,
+        propBurstCount30d: propBurstCount,
+        chatCount30d: chatCount,
+        commandCount30d: commandCount,
+      },
     },
   });
 });

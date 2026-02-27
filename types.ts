@@ -102,6 +102,19 @@ export interface ModerationSummary {
   lastPunishAt?: string;
 }
 
+export interface RiskAssessment {
+  level: 'LOW' | 'MEDIUM' | 'HIGH';
+  reasons: string[];
+  signals: {
+    recentConnections24h: number;
+    shortSessions24h: number;
+    punishCount30d: number;
+    propBurstCount30d: number;
+    chatCount30d: number;
+    commandCount30d: number;
+  };
+}
+
 export interface Player {
   steamId: string;
   name: string;
@@ -131,6 +144,7 @@ export interface Player {
   gameModeStats?: GameModeStats;
   activityHistory?: ActivityHistoryItem[];
   moderationSummary?: ModerationSummary;
+  riskAssessment?: RiskAssessment;
 }
 
 // --- LOGS & EVENTS SYSTEM ---
