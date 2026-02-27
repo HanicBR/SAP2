@@ -130,6 +130,7 @@ export enum LogType {
   DISCONNECT = 'DISCONNECT',
   CHAT = 'CHAT',
   COMMAND = 'COMMAND', // !menu, !rtv
+  PUNISH = 'PUNISH', // SAM punishments
   ULX = 'ULX', // Admin commands
   KILL = 'KILL',
   DAMAGE = 'DAMAGE',
@@ -146,6 +147,18 @@ export interface LogMetadata {
   message?: string;
   command?: string;
   args?: string[];
+  eventId?: string;
+  source?: string;
+  sourceTag?: string;
+  actorType?: 'player' | 'console' | 'system';
+  actorGroup?: string;
+  punishmentType?: 'BAN' | 'KICK' | 'WARN' | 'MUTE' | 'GAG';
+  action?: string;
+  targetSteamId?: string;
+  reason?: string;
+  durationText?: string;
+  durationMinutes?: number | null;
+  ipHash?: string;
   
   // Combat
   attackerName?: string;

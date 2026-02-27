@@ -70,6 +70,7 @@ const getEventIcon = (type: LogType) => {
     case LogType.CHAT: return <Icons.MessageSquare className="w-4 h-4 text-blue-400" />;
     case LogType.CONNECT: return <Icons.Link2 className="w-4 h-4 text-green-500" />;
     case LogType.DISCONNECT: return <Icons.LogOut className="w-4 h-4 text-zinc-500" />;
+    case LogType.PUNISH: return <Icons.Gavel className="w-4 h-4 text-red-500" />;
     case LogType.PROP_SPAWN: return <Icons.Box className="w-4 h-4 text-yellow-500" />;
     case LogType.ULX:
     case LogType.COMMAND: return <Icons.Terminal className="w-4 h-4 text-purple-500" />;
@@ -813,7 +814,7 @@ const Logs: React.FC = () => {
            </div>
            <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0">
                <Icons.Filter className="w-4 h-4 text-zinc-500 mr-2 flex-shrink-0" />
-               {['ALL', LogType.CHAT, LogType.KILL, LogType.DAMAGE, LogType.COMMAND, LogType.CONNECT].map(type => (
+               {['ALL', LogType.CHAT, LogType.COMMAND, LogType.PUNISH, LogType.CONNECT, LogType.DISCONNECT].map(type => (
                   <button
                      key={type}
                      onClick={() => setLogTypeFilter(type)}

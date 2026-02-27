@@ -30,3 +30,4 @@ server/dist
 *.sw?
 
 bs_ttt_ingest.lua
+sandbox

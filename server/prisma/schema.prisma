@@ -150,6 +150,7 @@ enum LogType {
   DISCONNECT
   CHAT
   COMMAND
+  PUNISH
   ULX
   KILL
   DAMAGE
@@ -163,6 +164,7 @@ enum LogType {
 model Log {
   id         String   @id @default(cuid())
   serverId   String
+  eventId    String?
   gameMode   GameMode
   type       LogType
   timestamp  DateTime
@@ -172,6 +174,8 @@ model Log {
   metadata   Json
 
   server GameServer @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  @@unique([serverId, eventId])
 }
 
 model PlayerSnapshot {
