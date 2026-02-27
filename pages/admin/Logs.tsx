@@ -982,7 +982,7 @@ const Logs: React.FC = () => {
               <input 
                  type="text" 
                  className="w-full bg-zinc-950 border border-zinc-700 rounded pl-10 pr-4 py-2 text-sm text-white placeholder-zinc-500 focus:border-red-500 focus:outline-none"
-                 placeholder="Pesquisar por Nick, SteamID, comando, motivo ou conteúdo..."
+                 placeholder="Pesquisar por Nick, SteamID ou texto do log..."
                  value={search}
                  onChange={(e) => setSearch(e.target.value)}
               />
