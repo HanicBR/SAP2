@@ -16,7 +16,19 @@ jobs:
         with:
           node-version: 20
 
-      # Aqui você poderia rodar testes, lint etc.
+      - name: Install frontend deps
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Install backend deps
+        run: npm ci
+        working-directory: server
+
+      - name: Build backend
+        run: npm run build
+        working-directory: server
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.2.0
