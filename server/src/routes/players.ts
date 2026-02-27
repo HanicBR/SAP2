@@ -5,6 +5,66 @@ import { UserRole } from '../domain';
 
 const router = Router();
 
+const toDomainMode = (mode: string): string =>
+  mode === 'SANDBOX' ? 'Sandbox' : mode === 'MURDER' ? 'Murder' : 'TTT';
+
+const parsePositiveInt = (value: unknown, fallback: number, max: number): number => {
+  const parsed = Number.parseInt(String(value ?? ''), 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
+  return Math.min(parsed, max);
+};
+
+const mapLog = (log: any) => ({
+  id: log.id,
+  serverId: log.serverId,
+  gameMode: toDomainMode(String(log.gameMode || 'TTT')),
+  type: log.type,
+  timestamp: log.timestamp.toISOString(),
+  steamId: log.steamId || undefined,
+  playerName: log.playerName || undefined,
+  rawText: log.rawText,
+  metadata: log.metadata,
+});
+
+const parsePlayerLogScope = (value: unknown): 'actor' | 'target' | 'all' => {
+  const raw = String(value || '')
+    .trim()
+    .toLowerCase();
+  if (raw === 'actor' || raw === 'target' || raw === 'all') return raw;
+  return 'all';
+};
+
+const buildPlayerLogsWhere = (steamId: string, scope: 'actor' | 'target' | 'all') => {
+  const actorClauses: any[] = [
+    { steamId },
+    {
+      metadata: {
+        path: ['attackerSteamId'],
+        equals: steamId,
+      } as any,
+    },
+  ];
+
+  const targetClauses: any[] = [
+    {
+      metadata: {
+        path: ['targetSteamId'],
+        equals: steamId,
+      } as any,
+    },
+    {
+      metadata: {
+        path: ['victimSteamId'],
+        equals: steamId,
+      } as any,
+    },
+  ];
+
+  if (scope === 'actor') return { OR: actorClauses };
+  if (scope === 'target') return { OR: targetClauses };
+  return { OR: [...actorClauses, ...targetClauses] };
+};
+
 const toPlayer = (p: any) => ({
   steamId: p.steamId,
   name: p.name,
@@ -441,6 +501,38 @@ router.get('/:steamId', async (req, res) => {
       duration: p.duration || undefined,
       active: Boolean(p.active),
     })),
+  });
+});
+
+router.get('/:steamId/logs', async (req, res) => {
+  const { steamId } = req.params as { steamId: string };
+  const scope = parsePlayerLogScope(req.query.scope);
+  const limit = parsePositiveInt(req.query.limit, 50, 200);
+  const page = parsePositiveInt(req.query.page, 1, 100000);
+
+  const where = buildPlayerLogsWhere(steamId, scope);
+  const total = await prisma.log.count({ where });
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const safePage = Math.min(page, totalPages);
+  const skip = (safePage - 1) * limit;
+
+  const logs = await prisma.log.findMany({
+    where,
+    orderBy: [{ timestamp: 'desc' }, { id: 'desc' }],
+    skip,
+    take: limit,
+  });
+
+  return res.json({
+    mode: 'page',
+    scope,
+    page: safePage,
+    limit,
+    total,
+    totalPages,
+    hasMore: safePage < totalPages,
+    nextCursor: logs[logs.length - 1]?.id ?? null,
+    items: logs.map(mapLog),
   });
 });
 
