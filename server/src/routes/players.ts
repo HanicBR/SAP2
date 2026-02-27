@@ -448,6 +448,92 @@ const computePlaytimeHours = (logs: { type: string; timestamp: Date; metadata: u
   return Math.round(totalMs / (1000 * 60 * 60));
 };
 
+const computeSessionMetricsByServer = (
+  logs: { id?: string; serverId: string; type: string; timestamp: Date; metadata: unknown }[],
+) => {
+  const sessionsById: Record<string, { start?: number; serverId?: string }> = {};
+  const fallbackByServer: Record<string, number | undefined> = {};
+  const totalsMsByServer: Record<string, number> = {};
+  const connectionsByServer: Record<string, number> = {};
+
+  const ensureServer = (serverId: string) => {
+    if (!totalsMsByServer[serverId]) totalsMsByServer[serverId] = 0;
+    if (!connectionsByServer[serverId]) connectionsByServer[serverId] = 0;
+  };
+
+  logs.forEach((log) => {
+    const serverId = String(log.serverId || '');
+    if (!serverId) return;
+    ensureServer(serverId);
+
+    const ts = log.timestamp.getTime();
+    const meta: any = log.metadata || {};
+    const sessionId = typeof meta.sessionId === 'string' && meta.sessionId ? meta.sessionId : undefined;
+
+    if (log.type === 'CONNECT') {
+      connectionsByServer[serverId] = (connectionsByServer[serverId] || 0) + 1;
+      if (sessionId) {
+        sessionsById[sessionId] = { start: ts, serverId };
+      } else {
+        fallbackByServer[serverId] = ts;
+      }
+      return;
+    }
+
+    if (log.type === 'DISCONNECT') {
+      if (sessionId && sessionsById[sessionId]?.start !== undefined) {
+        const sess = sessionsById[sessionId];
+        if (sess.serverId) {
+          ensureServer(sess.serverId);
+          totalsMsByServer[sess.serverId] =
+            (totalsMsByServer[sess.serverId] || 0) + Math.max(0, ts - (sess.start as number));
+        }
+        delete sessionsById[sessionId];
+        return;
+      }
+
+      const fallbackStart = fallbackByServer[serverId];
+      if (fallbackStart !== undefined) {
+        totalsMsByServer[serverId] = (totalsMsByServer[serverId] || 0) + Math.max(0, ts - fallbackStart);
+        fallbackByServer[serverId] = undefined;
+      }
+    }
+  });
+
+  const nowMs = Date.now();
+  Object.values(sessionsById).forEach((sess) => {
+    if (sess.start !== undefined && sess.serverId) {
+      ensureServer(sess.serverId);
+      totalsMsByServer[sess.serverId] =
+        (totalsMsByServer[sess.serverId] || 0) + Math.max(0, nowMs - sess.start);
+    }
+  });
+
+  Object.entries(fallbackByServer).forEach(([serverId, start]) => {
+    if (start !== undefined) {
+      ensureServer(serverId);
+      totalsMsByServer[serverId] = (totalsMsByServer[serverId] || 0) + Math.max(0, nowMs - start);
+    }
+  });
+
+  const serverStats: Record<string, { playTimeHours: number; connections: number }> = {};
+  let totalHours = 0;
+  Object.keys(connectionsByServer).forEach((serverId) => {
+    const hours = (totalsMsByServer[serverId] || 0) / (1000 * 60 * 60);
+    const roundedHours = Number(hours.toFixed(2));
+    totalHours += roundedHours;
+    serverStats[serverId] = {
+      playTimeHours: roundedHours,
+      connections: connectionsByServer[serverId] || 0,
+    };
+  });
+
+  return {
+    playTimeHours: Number(totalHours.toFixed(2)),
+    serverStats,
+  };
+};
+
 router.get('/', async (req, res) => {
   const search = (req.query.search as string) || '';
   const serverFilter = (req.query.serverId as string) || '';
@@ -557,6 +643,25 @@ router.get('/:steamId', async (req, res) => {
 
   const playTimeHours = computePlaytimeHours(logsByActor as any);
 
+  const serverStatsWindowDays = 90;
+  const serverStatsSince = new Date(Date.now() - serverStatsWindowDays * 24 * 60 * 60 * 1000);
+  const serverSessionLogs = await prisma.log.findMany({
+    where: {
+      steamId,
+      timestamp: { gte: serverStatsSince },
+      type: { in: ['CONNECT', 'DISCONNECT'] },
+    },
+    select: {
+      id: true,
+      serverId: true,
+      type: true,
+      timestamp: true,
+      metadata: true,
+    },
+    orderBy: [{ timestamp: 'asc' }, { id: 'asc' }],
+  });
+  const sessionMetrics = computeSessionMetricsByServer(serverSessionLogs as any);
+
   // Load punishments via raw query to avoid relying on generated Prisma model
   let punishments: any[] = [];
   try {
@@ -592,7 +697,10 @@ router.get('/:steamId', async (req, res) => {
 
   return res.json({
     ...toPlayer(player),
-    playTimeHours,
+    playTimeHours: sessionMetrics.playTimeHours || playTimeHours,
+    serverStats: Object.keys(sessionMetrics.serverStats).length
+      ? sessionMetrics.serverStats
+      : player.serverStats || undefined,
     notes: player.notes.map((n) => ({
       id: n.id,
       content: n.content,
