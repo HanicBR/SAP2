@@ -12,6 +12,53 @@ interface ConfigContextType {
 
 const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
 
+const toArrayOrFallback = <T,>(value: unknown, fallback: T[]): T[] =>
+  Array.isArray(value) && value.length > 0 ? (value as T[]) : fallback;
+
+const normalizeSiteConfig = (raw?: Partial<SiteConfig>): SiteConfig => {
+  const next = (raw || {}) as Partial<SiteConfig>;
+  const nextVip = (next.vip || {}) as Partial<SiteConfig['vip']>;
+  const defaultVip = DEFAULT_SITE_CONFIG.vip;
+
+  return {
+    ...DEFAULT_SITE_CONFIG,
+    ...next,
+    general: {
+      ...DEFAULT_SITE_CONFIG.general,
+      ...(next.general || {}),
+    },
+    social: {
+      ...DEFAULT_SITE_CONFIG.social,
+      ...(next.social || {}),
+    },
+    home: {
+      ...DEFAULT_SITE_CONFIG.home,
+      ...(next.home || {}),
+      heroSubtitleSegments: toArrayOrFallback(next.home?.heroSubtitleSegments, DEFAULT_SITE_CONFIG.home.heroSubtitleSegments),
+    },
+    vip: {
+      ...defaultVip,
+      ...nextVip,
+      plans: toArrayOrFallback(nextVip.plans, defaultVip.plans),
+      billingOptions: toArrayOrFallback(nextVip.billingOptions, defaultVip.billingOptions),
+      ultimatePlan: {
+        ...defaultVip.ultimatePlan,
+        ...(nextVip.ultimatePlan || {}),
+        benefits: toArrayOrFallback(nextVip.ultimatePlan?.benefits, defaultVip.ultimatePlan.benefits),
+      },
+      payment: {
+        ...defaultVip.payment,
+        ...(nextVip.payment || {}),
+      },
+      faq: toArrayOrFallback(nextVip.faq, defaultVip.faq),
+    },
+    logs: {
+      ...(DEFAULT_SITE_CONFIG.logs || {}),
+      ...(next.logs || {}),
+    },
+  };
+};
+
 // Helper to darken/lighten hex color
 const adjustColor = (color: string, amount: number) => {
     return '#' + color.replace(/^#/, '').replace(/../g, color => ('0'+Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substr(-2));
@@ -23,8 +70,9 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   useEffect(() => {
     ApiService.getSiteConfig().then((data) => {
-      setConfig(data);
-      updateCssVariables(data.general.primaryColor);
+      const normalized = normalizeSiteConfig(data);
+      setConfig(normalized);
+      updateCssVariables(normalized.general.primaryColor);
       setLoading(false);
     });
   }, []);
@@ -43,9 +91,10 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   };
 
   const updateConfig = async (newConfig: SiteConfig) => {
-    await ApiService.updateSiteConfig(newConfig);
-    setConfig(newConfig);
-    updateCssVariables(newConfig.general.primaryColor);
+    const normalized = normalizeSiteConfig(newConfig);
+    await ApiService.updateSiteConfig(normalized);
+    setConfig(normalized);
+    updateCssVariables(normalized.general.primaryColor);
   };
 
   return (

@@ -81,6 +81,44 @@ const makeDefaultSiteConfig = (): SiteConfig => ({
         },
       },
     ],
+    billingOptions: [
+      { id: 'monthly', label: 'Mensal', months: 1, standardDiscount: 0, ultimateDiscount: 0.5 },
+      { id: 'quarterly', label: 'Trimestral', months: 3, standardDiscount: 0.15, ultimateDiscount: 0.65 },
+      { id: 'semiannual', label: 'Semestral', months: 6, standardDiscount: 0.3, ultimateDiscount: 0.75 },
+      { id: 'annual', label: 'Anual', months: 12, standardDiscount: 0.5, ultimateDiscount: 0.85 },
+    ],
+    ultimatePlan: {
+      enabled: true,
+      name: 'VIP Ultimate',
+      basePrice: 60,
+      color: '#a855f7',
+      tagline: 'Acesso total Ã  rede',
+      renewalText: 'Oferta especial por tempo limitado. O valor promocional Ã© garantido na renovaÃ§Ã£o automÃ¡tica.',
+      benefits: [
+        'VIP Ouro em TODOS os servidores (TTT, Sandbox, Murder)',
+        'Acesso antecipado a novidades da rede',
+        'Tag [ULTIMATE] exclusiva e colorida',
+        'Prioridade mÃ¡xima na fila de conexÃ£o',
+        'Canal de voz privado no Discord',
+        'Dobro de XP no passe de batalha global',
+      ],
+    },
+    payment: {
+      instructions: 'Realize o pagamento via PIX:',
+      pixKey: 'pagamentos@backstabber.br',
+      copyHint: 'Copiar',
+    },
+    faq: [
+      {
+        question: 'Posso fazer upgrade depois?',
+        answer: 'Sim! Se vocÃª comprar um plano Mensal e quiser mudar para o Trimestral, pague apenas a diferenÃ§a proporcional.',
+      },
+      {
+        question: 'Posso perder meu VIP?',
+        answer: 'Sim. O VIP concede vantagens e comandos exclusivos. Se vocÃª abusar dessas ferramentas, seu VIP serÃ¡ removido.',
+        highlight: true,
+      },
+    ],
   },
 });
 

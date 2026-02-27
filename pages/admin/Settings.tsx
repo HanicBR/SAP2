@@ -83,6 +83,57 @@ const Settings: React.FC = () => {
     handleChange('vip', 'plans', newPlans);
   };
 
+  const handleVipBillingOptionChange = (index: number, field: string, value: any) => {
+    const newOptions = [...formData.vip.billingOptions];
+    newOptions[index] = { ...newOptions[index], [field]: value };
+    handleChange('vip', 'billingOptions', newOptions);
+  };
+
+  const handleUltimatePlanChange = (field: string, value: any) => {
+    handleChange('vip', 'ultimatePlan', {
+      ...formData.vip.ultimatePlan,
+      [field]: value,
+    });
+  };
+
+  const handleUltimateBenefitsChange = (value: string) => {
+    handleUltimatePlanChange(
+      'benefits',
+      value
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean),
+    );
+  };
+
+  const handleVipPaymentChange = (field: string, value: string) => {
+    handleChange('vip', 'payment', {
+      ...formData.vip.payment,
+      [field]: value,
+    });
+  };
+
+  const handleVipFaqChange = (index: number, field: string, value: any) => {
+    const nextFaq = [...formData.vip.faq];
+    nextFaq[index] = { ...nextFaq[index], [field]: value };
+    handleChange('vip', 'faq', nextFaq);
+  };
+
+  const addVipFaqItem = () => {
+    handleChange('vip', 'faq', [
+      ...formData.vip.faq,
+      { question: 'Nova pergunta', answer: 'Nova resposta', highlight: false },
+    ]);
+  };
+
+  const removeVipFaqItem = (index: number) => {
+    handleChange(
+      'vip',
+      'faq',
+      formData.vip.faq.filter((_, i) => i !== index),
+    );
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
@@ -410,6 +461,239 @@ const Settings: React.FC = () => {
                             placeholder="Digite um benefício por linha..."
                          ></textarea>
                          <p className="text-[10px] text-zinc-500 mt-1">* Separe cada benefício com uma quebra de linha (Enter).</p>
+                      </div>
+                   </div>
+
+                   {/* Billing Options */}
+                   <div className="bg-zinc-950 p-6 rounded border border-zinc-800">
+                      <h4 className="text-sm font-bold text-white uppercase mb-4">Ciclos de cobranca</h4>
+                      <div className="space-y-3">
+                         {formData.vip.billingOptions.map((option, idx) => (
+                            <div key={option.id} className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
+                               <div>
+                                  <label className="block text-[10px] font-bold text-zinc-500 uppercase mb-1">ID</label>
+                                  <input
+                                     type="text"
+                                     value={option.id}
+                                     onChange={(e) => handleVipBillingOptionChange(idx, 'id', e.target.value)}
+                                     className="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-white font-mono text-sm focus:border-brand focus:outline-none"
+                                  />
+                               </div>
+                               <div>
+                                  <label className="block text-[10px] font-bold text-zinc-500 uppercase mb-1">Label</label>
+                                  <input
+                                     type="text"
+                                     value={option.label}
+                                     onChange={(e) => handleVipBillingOptionChange(idx, 'label', e.target.value)}
+                                     className="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-white text-sm focus:border-brand focus:outline-none"
+                                  />
+                               </div>
+                               <div>
+                                  <label className="block text-[10px] font-bold text-zinc-500 uppercase mb-1">Meses</label>
+                                  <input
+                                     type="number"
+                                     min={1}
+                                     value={option.months}
+                                     onChange={(e) => handleVipBillingOptionChange(idx, 'months', parseInt(e.target.value || '1', 10))}
+                                     className="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-white text-sm focus:border-brand focus:outline-none"
+                                  />
+                               </div>
+                               <div>
+                                  <label className="block text-[10px] font-bold text-zinc-500 uppercase mb-1">Desc padrao (0-0.99)</label>
+                                  <input
+                                     type="number"
+                                     step="0.01"
+                                     min={0}
+                                     max={0.99}
+                                     value={option.standardDiscount}
+                                     onChange={(e) => handleVipBillingOptionChange(idx, 'standardDiscount', parseFloat(e.target.value || '0'))}
+                                     className="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-white text-sm focus:border-brand focus:outline-none"
+                                  />
+                               </div>
+                               <div>
+                                  <label className="block text-[10px] font-bold text-zinc-500 uppercase mb-1">Desc ultimate (0-0.99)</label>
+                                  <input
+                                     type="number"
+                                     step="0.01"
+                                     min={0}
+                                     max={0.99}
+                                     value={option.ultimateDiscount}
+                                     onChange={(e) => handleVipBillingOptionChange(idx, 'ultimateDiscount', parseFloat(e.target.value || '0'))}
+                                     className="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-white text-sm focus:border-brand focus:outline-none"
+                                  />
+                               </div>
+                            </div>
+                         ))}
+                      </div>
+                   </div>
+
+                   {/* Ultimate Plan */}
+                   <div className="bg-zinc-950 p-6 rounded border border-zinc-800">
+                      <h4 className="text-sm font-bold text-white uppercase mb-4">Plano Ultimate</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                         <label className="flex items-center gap-2 text-sm text-zinc-300">
+                            <input
+                               type="checkbox"
+                               checked={formData.vip.ultimatePlan.enabled}
+                               onChange={(e) => handleUltimatePlanChange('enabled', e.target.checked)}
+                            />
+                            Exibir plano Ultimate
+                         </label>
+                         <div>
+                            <label className="block text-[10px] font-bold text-zinc-500 uppercase mb-1">Nome</label>
+                            <input
+                               type="text"
+                               value={formData.vip.ultimatePlan.name}
+                               onChange={(e) => handleUltimatePlanChange('name', e.target.value)}
+                               className="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-white text-sm focus:border-brand focus:outline-none"
+                            />
+                         </div>
+                         <div>
+                            <label className="block text-[10px] font-bold text-zinc-500 uppercase mb-1">Preco base mensal</label>
+                            <input
+                               type="number"
+                               step="0.01"
+                               value={formData.vip.ultimatePlan.basePrice}
+                               onChange={(e) => handleUltimatePlanChange('basePrice', parseFloat(e.target.value || '0'))}
+                               className="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-white text-sm focus:border-brand focus:outline-none"
+                            />
+                         </div>
+                         <div>
+                            <label className="block text-[10px] font-bold text-zinc-500 uppercase mb-1">Cor destaque</label>
+                            <div className="flex gap-2">
+                               <input
+                                  type="color"
+                                  value={formData.vip.ultimatePlan.color}
+                                  onChange={(e) => handleUltimatePlanChange('color', e.target.value)}
+                                  className="h-10 w-12 bg-zinc-900 border border-zinc-700 rounded cursor-pointer"
+                               />
+                               <input
+                                  type="text"
+                                  value={formData.vip.ultimatePlan.color}
+                                  onChange={(e) => handleUltimatePlanChange('color', e.target.value)}
+                                  className="flex-1 bg-zinc-900 border border-zinc-700 rounded p-2 text-white font-mono text-sm focus:border-brand focus:outline-none"
+                               />
+                            </div>
+                         </div>
+                         <div>
+                            <label className="block text-[10px] font-bold text-zinc-500 uppercase mb-1">Subtitulo</label>
+                            <input
+                               type="text"
+                               value={formData.vip.ultimatePlan.tagline}
+                               onChange={(e) => handleUltimatePlanChange('tagline', e.target.value)}
+                               className="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-white text-sm focus:border-brand focus:outline-none"
+                            />
+                         </div>
+                         <div>
+                            <label className="block text-[10px] font-bold text-zinc-500 uppercase mb-1">Texto de oferta</label>
+                            <input
+                               type="text"
+                               value={formData.vip.ultimatePlan.renewalText}
+                               onChange={(e) => handleUltimatePlanChange('renewalText', e.target.value)}
+                               className="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-white text-sm focus:border-brand focus:outline-none"
+                            />
+                         </div>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-zinc-500 uppercase mb-1">Beneficios (1 por linha)</label>
+                        <textarea
+                           rows={6}
+                           className="w-full bg-zinc-900 border border-zinc-700 rounded p-3 text-sm text-white focus:border-brand focus:outline-none font-mono leading-relaxed"
+                           value={formData.vip.ultimatePlan.benefits.join('\n')}
+                           onChange={(e) => handleUltimateBenefitsChange(e.target.value)}
+                        ></textarea>
+                      </div>
+                   </div>
+
+                   {/* Payment */}
+                   <div className="bg-zinc-950 p-6 rounded border border-zinc-800">
+                      <h4 className="text-sm font-bold text-white uppercase mb-4">Pagamento</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-[10px] font-bold text-zinc-500 uppercase mb-1">Instrucao</label>
+                          <input
+                            type="text"
+                            value={formData.vip.payment.instructions}
+                            onChange={(e) => handleVipPaymentChange('instructions', e.target.value)}
+                            className="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-white text-sm focus:border-brand focus:outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-zinc-500 uppercase mb-1">Chave PIX</label>
+                          <input
+                            type="text"
+                            value={formData.vip.payment.pixKey}
+                            onChange={(e) => handleVipPaymentChange('pixKey', e.target.value)}
+                            className="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-white text-sm focus:border-brand focus:outline-none font-mono"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-zinc-500 uppercase mb-1">Texto botao</label>
+                          <input
+                            type="text"
+                            value={formData.vip.payment.copyHint}
+                            onChange={(e) => handleVipPaymentChange('copyHint', e.target.value)}
+                            className="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-white text-sm focus:border-brand focus:outline-none"
+                          />
+                        </div>
+                      </div>
+                   </div>
+
+                   {/* FAQ */}
+                   <div className="bg-zinc-950 p-6 rounded border border-zinc-800">
+                      <div className="flex justify-between items-center mb-4">
+                        <h4 className="text-sm font-bold text-white uppercase">FAQ VIP</h4>
+                        <button
+                          type="button"
+                          onClick={addVipFaqItem}
+                          className="text-xs bg-zinc-800 hover:bg-zinc-700 px-2 py-1 rounded text-white flex items-center"
+                        >
+                          <Icons.Plus className="w-3 h-3 mr-1" /> Add
+                        </button>
+                      </div>
+                      <div className="space-y-3">
+                        {formData.vip.faq.map((item, idx) => (
+                          <div key={`${idx}-${item.question}`} className="grid grid-cols-1 md:grid-cols-12 gap-3 items-start bg-zinc-900 p-3 rounded border border-zinc-800">
+                            <div className="md:col-span-4">
+                              <label className="block text-[10px] font-bold text-zinc-500 uppercase mb-1">Pergunta</label>
+                              <input
+                                type="text"
+                                value={item.question}
+                                onChange={(e) => handleVipFaqChange(idx, 'question', e.target.value)}
+                                className="w-full bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm focus:border-brand focus:outline-none"
+                              />
+                            </div>
+                            <div className="md:col-span-6">
+                              <label className="block text-[10px] font-bold text-zinc-500 uppercase mb-1">Resposta</label>
+                              <input
+                                type="text"
+                                value={item.answer}
+                                onChange={(e) => handleVipFaqChange(idx, 'answer', e.target.value)}
+                                className="w-full bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm focus:border-brand focus:outline-none"
+                              />
+                            </div>
+                            <div className="md:col-span-1 flex items-center pt-6">
+                              <label className="flex items-center gap-2 text-xs text-zinc-400">
+                                <input
+                                  type="checkbox"
+                                  checked={!!item.highlight}
+                                  onChange={(e) => handleVipFaqChange(idx, 'highlight', e.target.checked)}
+                                />
+                                Highlight
+                              </label>
+                            </div>
+                            <div className="md:col-span-1 pt-6 flex justify-end">
+                              <button
+                                type="button"
+                                onClick={() => removeVipFaqItem(idx)}
+                                className="text-red-500 hover:text-red-400"
+                                title="Remover item"
+                              >
+                                <Icons.Trash className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                    </div>
                 </div>

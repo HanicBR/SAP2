@@ -109,6 +109,36 @@ export interface VipPlanConfig {
   benefits: Record<string, string[]>;
 }
 
+export interface VipBillingOptionConfig {
+  id: string;
+  label: string;
+  months: number;
+  standardDiscount: number;
+  ultimateDiscount: number;
+}
+
+export interface VipUltimatePlanConfig {
+  enabled: boolean;
+  name: string;
+  basePrice: number;
+  color: string;
+  tagline: string;
+  renewalText: string;
+  benefits: string[];
+}
+
+export interface VipPaymentConfig {
+  instructions: string;
+  pixKey: string;
+  copyHint: string;
+}
+
+export interface VipFaqItemConfig {
+  question: string;
+  answer: string;
+  highlight?: boolean;
+}
+
 export interface SiteConfig {
   general: {
     siteName: string;
@@ -137,6 +167,10 @@ export interface SiteConfig {
     promoTextHighlight: string;
     promoTextSuffix: string;
     plans: VipPlanConfig[];
+    billingOptions: VipBillingOptionConfig[];
+    ultimatePlan: VipUltimatePlanConfig;
+    payment: VipPaymentConfig;
+    faq: VipFaqItemConfig[];
   };
   logs?: {
     ignoredTools?: string[];
