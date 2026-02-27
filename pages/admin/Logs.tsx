@@ -341,10 +341,18 @@ const SessionCard = React.memo(({ group, onQuickIgnore }: { group: SessionGroup;
 
   const summary = useMemo(() => {
      const events = group.events || [];
-     const first = events[0];
-     const last = events.length > 0 ? events[events.length - 1] : undefined;
-     const startAt = first ? new Date(first.timestamp) : new Date(group.startTime);
-     const endAt = last ? new Date(last.timestamp) : startAt;
+     let startAt = new Date(group.startTime);
+     let endAt = startAt;
+     if (events.length > 0) {
+       const firstTs = new Date(events[0].timestamp);
+       startAt = firstTs;
+       endAt = firstTs;
+       for (const event of events) {
+         const ts = new Date(event.timestamp);
+         if (ts.getTime() < startAt.getTime()) startAt = ts;
+         if (ts.getTime() > endAt.getTime()) endAt = ts;
+       }
+     }
      const durationMs = Math.max(endAt.getTime() - startAt.getTime(), 0);
 
      let commandCount = 0;
@@ -371,18 +379,25 @@ const SessionCard = React.memo(({ group, onQuickIgnore }: { group: SessionGroup;
   const groupedEvents = useMemo(() => {
      const result: (LogEntry | LogEntry[])[] = [];
      let currentSpam: LogEntry[] = [];
+     const orderedEvents = [...group.events].sort(
+       (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+     );
 
-     group.events.forEach((log, index) => {
-        // Detect spam (consecutive prop spawns)
-        if (log.type === LogType.PROP_SPAWN) {
-           const prev = group.events[index - 1];
-           // Simple check: same type and close time (less than 2s apart)
-           if (prev && prev.type === LogType.PROP_SPAWN && (new Date(log.timestamp).getTime() - new Date(prev.timestamp).getTime() < 2000)) {
-               currentSpam.push(log);
-           } else {
-               if (currentSpam.length > 0) {
-                   result.push(currentSpam);
-                   currentSpam = [];
+     orderedEvents.forEach((log, index) => {
+         // Detect spam (consecutive prop spawns)
+         if (log.type === LogType.PROP_SPAWN) {
+            const prev = orderedEvents[index - 1];
+            // Simple check: same type and close time (less than 2s apart)
+            if (
+              prev &&
+              prev.type === LogType.PROP_SPAWN &&
+              Math.abs(new Date(log.timestamp).getTime() - new Date(prev.timestamp).getTime()) < 2000
+            ) {
+                currentSpam.push(log);
+            } else {
+                if (currentSpam.length > 0) {
+                    result.push(currentSpam);
+                    currentSpam = [];
                }
                currentSpam.push(log);
            }
@@ -580,7 +595,7 @@ const Logs: React.FC = () => {
   const [cursorNext, setCursorNext] = useState<string | null>(null);
   const [cursorTrail, setCursorTrail] = useState<Array<string | null>>([]);
   const [cursorPage, setCursorPage] = useState(1);
-  const itemsPerPage = 20;
+  const itemsPerPage = selectedMode === GameMode.SANDBOX ? 100 : 20;
 
   useEffect(() => {
     ApiService.getSiteConfig().then((cfg) => {
