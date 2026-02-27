@@ -32,6 +32,11 @@ type VipAutomationEnvConfig = {
   revokeTemplate: string | undefined;
 };
 
+type VipAutomationBuildOptions = {
+  allowRawTokens: boolean;
+  enforceSingleLineCommand: boolean;
+};
+
 const metrics = {
   vip_command_build_failures: 0,
   byReason: {} as Record<string, number>,
@@ -83,6 +88,15 @@ const parseExpiry = (raw: Date | string | null | undefined): Date | null => {
   if (raw instanceof Date) return Number.isNaN(raw.getTime()) ? null : raw;
   const parsed = new Date(String(raw));
   return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const extractTemplateTokens = (template: string): string[] => {
+  const tokens: string[] = [];
+  String(template).replace(/\{\{\s*([A-Za-z0-9_]+)\s*\}\}/g, (_match, token) => {
+    tokens.push(String(token));
+    return '';
+  });
+  return tokens;
 };
 
 const renderTemplate = (
@@ -178,8 +192,9 @@ export const getVipAutomationMetrics = () => ({
   lastFailureReason: metrics.lastFailureReason || undefined,
 });
 
-export const previewVipAutomationBuild = async (
+const buildVipAutomation = async (
   input: VipAutomationBuildInput,
+  options: VipAutomationBuildOptions,
 ): Promise<VipAutomationBuildResult> => {
   const config = getEnvConfig();
   if (!config.enabled) {
@@ -204,12 +219,33 @@ export const previewVipAutomationBuild = async (
     };
   }
 
+  if (!options.allowRawTokens) {
+    const hasRawToken = extractTemplateTokens(template).some((token) => /raw$/i.test(token));
+    if (hasRawToken) {
+      bumpCommandBuildFailure('raw_tokens_not_allowed_in_dispatch');
+      return {
+        ok: false,
+        skipped: false,
+        reason: 'raw_tokens_not_allowed_in_dispatch',
+      };
+    }
+  }
+
   const renderResult = renderTemplate(template, input);
   if (!renderResult.ok) {
     return {
       ok: false,
       skipped: false,
       reason: renderResult.reason,
+    };
+  }
+
+  if (options.enforceSingleLineCommand && /[\r\n]/.test(renderResult.command)) {
+    bumpCommandBuildFailure('command_contains_newline');
+    return {
+      ok: false,
+      skipped: false,
+      reason: 'command_contains_newline',
     };
   }
 
@@ -236,10 +272,21 @@ export const previewVipAutomationBuild = async (
   };
 };
 
+export const previewVipAutomationBuild = async (
+  input: VipAutomationBuildInput,
+): Promise<VipAutomationBuildResult> =>
+  buildVipAutomation(input, {
+    allowRawTokens: true,
+    enforceSingleLineCommand: false,
+  });
+
 export const dispatchVipAutomationAction = async (
   input: VipAutomationBuildInput,
 ): Promise<VipAutomationDispatchResult> => {
-  const preview = await previewVipAutomationBuild(input);
+  const preview = await buildVipAutomation(input, {
+    allowRawTokens: false,
+    enforceSingleLineCommand: true,
+  });
   if (!preview.ok || preview.skipped || !preview.serverId || !preview.command) {
     return {
       ...preview,
