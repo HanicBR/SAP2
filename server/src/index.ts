@@ -1,4 +1,5 @@
 import express from 'express';
+import http from 'http';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -17,6 +18,7 @@ import legacyLogsRoutes from './routes/legacyLogs';
 import vipsRoutes from './routes/vips';
 import { bootstrap } from './bootstrap';
 import { startVipExpiryReconcilerJob } from './services/vipExpiryReconciler';
+import { initializeServerWebSocket } from './services/serverWs';
 
 dotenv.config();
 
@@ -74,7 +76,10 @@ const start = async () => {
   process.once('SIGTERM', () => stopVipExpiryReconciler());
   process.once('SIGINT', () => stopVipExpiryReconciler());
 
-  app.listen(port, () => {
+  const httpServer = http.createServer(app);
+  initializeServerWebSocket(httpServer);
+
+  httpServer.listen(port, () => {
     console.log(`API server listening on port ${port}`);
   });
 };

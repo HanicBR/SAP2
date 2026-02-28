@@ -2,10 +2,12 @@ import { Request, Router } from 'express';
 import { prisma } from '../db/client';
 import { GameMode, ServerStatus, UserRole } from '../domain';
 import { authMiddleware, requireRole } from '../middleware/auth';
-import { hashApiKey, compareApiKey } from '../utils/apiKey';
+import { hashApiKey } from '../utils/apiKey';
 import { drainServerActions } from '../services/serverActions';
 import { getVipAutomationMetrics, previewVipAutomationBuild, VipAutomationActionType } from '../services/vipAutomation';
 import { normalizeIp } from '../utils/normalizeIp';
+import { findServerByApiKey } from '../services/serverAuth';
+import { getServerWsHealthSnapshot } from '../services/serverWs';
 import {
   getPlayerPulseSettings,
   sanitizePlayerPulsePayload,
@@ -193,14 +195,6 @@ type TopPlayerItem = {
   hours: number;
 };
 
-const findServerByApiKey = async (apiKey?: string) => {
-  if (!apiKey) return null;
-  const allServers = await prisma.gameServer.findMany({
-    select: { id: true, apiKeyHash: true, ip: true },
-  });
-  return allServers.find((s) => s.apiKeyHash && compareApiKey(apiKey, s.apiKeyHash)) || null;
-};
-
 const toDomainServer = (s: any) => {
   const mode =
     s.mode === 'SANDBOX' ? GameMode.SANDBOX : s.mode === 'MURDER' ? GameMode.MURDER : GameMode.TTT;
@@ -370,6 +364,11 @@ router.post('/actions/vip/preview', authMiddleware, requireRole(UserRole.ADMIN),
 // VIP automation metrics (build failures)
 router.get('/actions/vip/metrics', authMiddleware, requireRole(UserRole.ADMIN), async (_req, res) => {
   return res.json(getVipAutomationMetrics());
+});
+
+// WebSocket server connectivity health (PR-01 transport bootstrap)
+router.get('/ws/health', authMiddleware, requireRole(UserRole.ADMIN), async (_req, res) => {
+  return res.json(getServerWsHealthSnapshot());
 });
 
 // Playtime pulse settings (contract bootstrap)
