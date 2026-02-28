@@ -214,10 +214,10 @@ const ServerDetails: React.FC = () => {
   const displayMap = currentState?.currentMap || server?.currentMap || 'Desconhecido';
   const displayStatus = currentState?.status ?? server?.status ?? ServerStatus.OFFLINE;
   const displayLastHeartbeat = currentState?.lastHeartbeat || server?.lastHeartbeat;
-  const playtimeDiagnostics = analytics.playtimeDiagnostics;
-  const playtimeSource = playtimeSourceLabel(analytics.playtimeSource);
+  const playtimeDiagnostics = analytics?.playtimeDiagnostics;
+  const playtimeSource = playtimeSourceLabel(analytics?.playtimeSource);
   const playtimeDecision = playtimeDecisionLabel(playtimeDiagnostics?.decisionReason);
-  const pulseCoveragePct = Number(analytics.pulseCoveragePct || 0);
+  const pulseCoveragePct = Number(analytics?.pulseCoveragePct || 0);
   const pulseVsLegacyHours = Number(playtimeDiagnostics?.diffHours || 0);
   const pulseVsLegacyPct = Number(playtimeDiagnostics?.diffPct || 0);
 
