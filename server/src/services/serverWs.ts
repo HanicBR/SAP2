@@ -7,6 +7,23 @@ import { ingestPlayerPulse, PlayerPulseIngestError } from './playerPulseIngest';
 import { getPlayerPulseSettings } from './playtimePulse';
 
 const WS_SERVERS_PATH = '/ws/servers';
+const MAX_PLAYER_STATE_PLAYERS = 256;
+const MAX_PLAYER_STATE_PLAYER_NAME = 80;
+const MAX_PLAYER_STATE_MAP_LENGTH = 96;
+
+type LiveStatePlayer = {
+  steamId: string;
+  name?: string;
+};
+
+type LiveServerPlayerState = {
+  serverId: string;
+  receivedAt: string;
+  sentAt?: string;
+  map?: string;
+  playerCount: number;
+  players: LiveStatePlayer[];
+};
 
 type ConnectedServerSocket = {
   serverId: string;
@@ -15,9 +32,12 @@ type ConnectedServerSocket = {
   messagesReceived: number;
   invalidMessages: number;
   playerPulseMessages: number;
+  playerStateMessages: number;
   playerPulseInserted: number;
   playerPulseDeduplicated: number;
   lastPulseAt?: string;
+  lastStateAt?: string;
+  lastStatePlayers?: number;
   lastErrorAt?: string;
   lastErrorReason?: string;
   remoteAddress?: string;
@@ -31,6 +51,7 @@ type UpgradeError = {
 };
 
 const connectedByServerId = new Map<string, ConnectedServerSocket>();
+const liveStateByServerId = new Map<string, LiveServerPlayerState>();
 
 let initialized = false;
 let wsServer: WebSocketServer | null = null;
@@ -98,6 +119,65 @@ const parseJsonMessage = (raw: RawData): any | null => {
   }
 };
 
+const parsePositiveInt = (value: unknown): number | undefined => {
+  const parsed = Number.parseInt(String(value ?? '').trim(), 10);
+  if (!Number.isFinite(parsed)) return undefined;
+  if (parsed < 0) return undefined;
+  return parsed;
+};
+
+const isTrackableSteamId = (value: unknown): value is string => {
+  const raw = String(value || '').trim();
+  if (!raw) return false;
+  const upper = raw.toUpperCase();
+  if (upper === 'BOT' || upper === 'CONSOLE' || upper === 'UNKNOWN' || upper === 'NULL') {
+    return false;
+  }
+  return /^STEAM_[0-5]:[01]:\d+$/.test(raw);
+};
+
+const parseOptionalIsoDate = (value: unknown): string | undefined => {
+  const raw = toOptionalString(value);
+  if (!raw) return undefined;
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) return undefined;
+  return parsed.toISOString();
+};
+
+const sanitizePlayerStatePayload = (input: unknown): Omit<LiveServerPlayerState, 'serverId' | 'receivedAt'> => {
+  const body = (input && typeof input === 'object' ? input : {}) as any;
+  const playersRaw = Array.isArray(body.players) ? body.players : [];
+
+  const seenSteamId = new Set<string>();
+  const players: LiveStatePlayer[] = [];
+  playersRaw.forEach((raw: any) => {
+    if (players.length >= MAX_PLAYER_STATE_PLAYERS) return;
+    const steamId = String(raw?.steamId || '').trim();
+    if (!isTrackableSteamId(steamId)) return;
+    if (seenSteamId.has(steamId)) return;
+    seenSteamId.add(steamId);
+
+    const parsedName = toOptionalString(raw?.name);
+    players.push({
+      steamId,
+      ...(parsedName ? { name: parsedName.slice(0, MAX_PLAYER_STATE_PLAYER_NAME) } : {}),
+    });
+  });
+
+  const mapRaw = toOptionalString(body.map);
+  const map = mapRaw ? mapRaw.slice(0, MAX_PLAYER_STATE_MAP_LENGTH) : undefined;
+  const sentAt = parseOptionalIsoDate(body.sentAt);
+  const parsedPlayerCount = parsePositiveInt(body.playerCount);
+  const playerCount = Math.max(0, Math.min(1000, parsedPlayerCount ?? players.length));
+
+  return {
+    ...(sentAt ? { sentAt } : {}),
+    ...(map ? { map } : {}),
+    playerCount,
+    players,
+  };
+};
+
 const trySend = (socket: WebSocket, payload: Record<string, unknown>) => {
   if (socket.readyState !== 1) return;
   socket.send(JSON.stringify(payload));
@@ -135,6 +215,7 @@ const attachServerSocket = (
     messagesReceived: 0,
     invalidMessages: 0,
     playerPulseMessages: 0,
+    playerStateMessages: 0,
     playerPulseInserted: 0,
     playerPulseDeduplicated: 0,
     socket,
@@ -206,6 +287,31 @@ const attachServerSocket = (
           });
         }
       })();
+      return;
+    }
+
+    if (type === 'player_state') {
+      state.playerStateMessages += 1;
+      const payload = (parsed as any).payload ?? (parsed as any).data ?? parsed;
+      const sanitizedState = sanitizePlayerStatePayload(payload);
+      const receivedAt = nowIso();
+      const snapshot: LiveServerPlayerState = {
+        serverId,
+        receivedAt,
+        ...sanitizedState,
+      };
+      liveStateByServerId.set(serverId, snapshot);
+      state.lastStateAt = receivedAt;
+      state.lastStatePlayers = snapshot.playerCount;
+
+      trySend(socket, {
+        type: 'player_state_ack',
+        ok: true,
+        serverId,
+        receivedAt,
+        playerCount: snapshot.playerCount,
+        playersReceived: snapshot.players.length,
+      });
       return;
     }
 
@@ -309,9 +415,12 @@ export const getServerWsHealthSnapshot = () => {
         messagesReceived: entry.messagesReceived,
         invalidMessages: entry.invalidMessages,
         playerPulseMessages: entry.playerPulseMessages,
+        playerStateMessages: entry.playerStateMessages,
         playerPulseInserted: entry.playerPulseInserted,
         playerPulseDeduplicated: entry.playerPulseDeduplicated,
         ...(entry.lastPulseAt ? { lastPulseAt: entry.lastPulseAt } : {}),
+        ...(entry.lastStateAt ? { lastStateAt: entry.lastStateAt } : {}),
+        ...(entry.lastStatePlayers !== undefined ? { lastStatePlayers: entry.lastStatePlayers } : {}),
         ...(entry.lastErrorAt ? { lastErrorAt: entry.lastErrorAt } : {}),
         ...(entry.lastErrorReason ? { lastErrorReason: entry.lastErrorReason } : {}),
         ...(entry.remoteAddress ? { remoteAddress: entry.remoteAddress } : {}),
@@ -323,7 +432,33 @@ export const getServerWsHealthSnapshot = () => {
   return {
     path: WS_SERVERS_PATH,
     connectedServers: servers.length,
+    serversWithLiveState: liveStateByServerId.size,
     now: nowIso(),
     servers,
+  };
+};
+
+export const getServerWsLiveState = (serverId: string) => {
+  const liveState = liveStateByServerId.get(serverId);
+  if (!liveState) return null;
+
+  const nowMs = Date.now();
+  const receivedMs = new Date(liveState.receivedAt).getTime();
+  const ageSeconds = Number.isFinite(receivedMs)
+    ? Math.max(0, Math.floor((nowMs - receivedMs) / 1000))
+    : undefined;
+  const activeConnection = connectedByServerId.get(serverId);
+
+  return {
+    serverId,
+    transport: 'websocket' as const,
+    connected: Boolean(activeConnection),
+    ...(activeConnection ? { wsConnectedAt: activeConnection.connectedAt } : {}),
+    receivedAt: liveState.receivedAt,
+    ...(ageSeconds !== undefined ? { ageSeconds } : {}),
+    ...(liveState.sentAt ? { sentAt: liveState.sentAt } : {}),
+    ...(liveState.map ? { map: liveState.map } : {}),
+    playerCount: liveState.playerCount,
+    players: liveState.players,
   };
 };

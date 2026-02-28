@@ -7,7 +7,7 @@ import { drainServerActions } from '../services/serverActions';
 import { getVipAutomationMetrics, previewVipAutomationBuild, VipAutomationActionType } from '../services/vipAutomation';
 import { normalizeIp } from '../utils/normalizeIp';
 import { findServerByApiKey } from '../services/serverAuth';
-import { getServerWsHealthSnapshot } from '../services/serverWs';
+import { getServerWsHealthSnapshot, getServerWsLiveState } from '../services/serverWs';
 import { getPlayerPulseSettings } from '../services/playtimePulse';
 import { ingestPlayerPulse, PlayerPulseIngestError } from '../services/playerPulseIngest';
 
@@ -366,6 +366,54 @@ router.get('/actions/vip/metrics', authMiddleware, requireRole(UserRole.ADMIN), 
 // WebSocket server connectivity health (PR-01 transport bootstrap)
 router.get('/ws/health', authMiddleware, requireRole(UserRole.ADMIN), async (_req, res) => {
   return res.json(getServerWsHealthSnapshot());
+});
+
+// Live state from WebSocket snapshots (PR-03 near-real-time players/activity)
+router.get('/:id/live-state', authMiddleware, requireRole(UserRole.ADMIN), async (req, res) => {
+  const { id } = req.params as { id: string };
+
+  const server = await prisma.gameServer.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      status: true,
+      currentPlayers: true,
+      maxPlayers: true,
+      currentMap: true,
+      lastHeartbeat: true,
+    },
+  });
+  if (!server) {
+    return res.status(404).json({ error: 'Server not found' });
+  }
+
+  const liveState = getServerWsLiveState(id);
+  if (!liveState) {
+    return res.json({
+      serverId: id,
+      available: false,
+      transport: 'websocket',
+      fallback: {
+        status: server.status,
+        currentPlayers: server.currentPlayers,
+        maxPlayers: server.maxPlayers,
+        ...(server.currentMap ? { currentMap: server.currentMap } : {}),
+        ...(server.lastHeartbeat ? { lastHeartbeat: server.lastHeartbeat.toISOString() } : {}),
+      },
+    });
+  }
+
+  return res.json({
+    available: true,
+    ...liveState,
+    fallback: {
+      status: server.status,
+      currentPlayers: server.currentPlayers,
+      maxPlayers: server.maxPlayers,
+      ...(server.currentMap ? { currentMap: server.currentMap } : {}),
+      ...(server.lastHeartbeat ? { lastHeartbeat: server.lastHeartbeat.toISOString() } : {}),
+    },
+  });
 });
 
 // Playtime pulse settings (contract bootstrap)

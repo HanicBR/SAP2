@@ -29,7 +29,9 @@ local c_heartbeat_url = CreateConVar("bsb_heartbeat_url", "http://127.0.0.1:4000
 local c_pulse_enable = CreateConVar("bsb_pulse_enable", "1", FCVAR_ARCHIVE, "Enable player pulse playtime endpoint calls.")
 local c_pulse_url = CreateConVar("bsb_pulse_url", "", FCVAR_ARCHIVE, "Backstabber player pulse endpoint. Leave empty to auto-resolve from bsb_ingest_url.")
 local c_pulse_seconds = CreateConVar("bsb_pulse_seconds", "60", FCVAR_ARCHIVE, "Player pulse interval in seconds.")
-local c_ws_enable = CreateConVar("bsb_ws_enable", "0", FCVAR_ARCHIVE, "Enable Backstabber WebSocket transport for pulse updates.")
+local c_state_enable = CreateConVar("bsb_state_enable", "1", FCVAR_ARCHIVE, "Enable websocket player live-state snapshots.")
+local c_state_seconds = CreateConVar("bsb_state_seconds", "10", FCVAR_ARCHIVE, "Player live-state snapshot interval in seconds.")
+local c_ws_enable = CreateConVar("bsb_ws_enable", "0", FCVAR_ARCHIVE, "Enable Backstabber WebSocket transport for pulse/live-state updates.")
 local c_ws_url = CreateConVar("bsb_ws_url", "", FCVAR_ARCHIVE, "Backstabber server WebSocket endpoint. Leave empty to auto-resolve from bsb_ingest_url.")
 local c_ws_verify_tls = CreateConVar("bsb_ws_verify_tls", "1", FCVAR_ARCHIVE, "Verify TLS certificate when connecting to WSS endpoint.")
 local c_ws_reconnect_seconds = CreateConVar("bsb_ws_reconnect_seconds", "5", FCVAR_ARCHIVE, "Base reconnect delay in seconds for Backstabber WebSocket.")
@@ -362,6 +364,14 @@ local function connect_ws_socket()
 			return
 		end
 
+		if msg_type == "player_state_ack" then
+			ws_last_ack_at = RealTime()
+			if parsed.ok == false then
+				debug_log("ws state ack error: " .. tostring(parsed.error or "unknown"))
+			end
+			return
+		end
+
 		if msg_type == "error" then
 			ws_last_error = tostring(parsed.reason or "ws_error")
 			debug_log("ws server error: " .. ws_last_error)
@@ -406,12 +416,12 @@ local function ensure_ws_connected()
 	return ws_connected and ws_socket ~= nil
 end
 
-local function send_player_pulse_ws(payload)
+local function send_ws_message(message_type, payload)
 	if not ensure_ws_connected() then return false end
 	if not ws_socket or not ws_connected then return false end
 
 	local body = util.TableToJSON({
-		type = "player_pulse",
+		type = tostring(message_type or ""),
 		payload = payload,
 	}, false, true)
 	if not body then return false end
@@ -430,13 +440,21 @@ local function send_player_pulse_ws(payload)
 	return true
 end
 
+local function send_player_pulse_ws(payload)
+	return send_ws_message("player_pulse", payload)
+end
+
+local function send_player_state_ws(payload)
+	return send_ws_message("player_state", payload)
+end
+
 local function ws_keepalive_tick()
 	if not c_enable:GetBool() then
 		close_ws_socket(true)
 		return
 	end
 
-	if not c_ws_enable:GetBool() or not c_pulse_enable:GetBool() then
+	if not c_ws_enable:GetBool() or (not c_pulse_enable:GetBool() and not c_state_enable:GetBool()) then
 		close_ws_socket(true)
 		return
 	end
@@ -1205,6 +1223,21 @@ local function collect_online_players()
 	return players
 end
 
+local function send_player_live_state()
+	if not is_configured() then return end
+	if not c_state_enable:GetBool() then return end
+	if not c_ws_enable:GetBool() then return end
+
+	local payload = {
+		sentAt = now_iso_utc(),
+		map = game.GetMap(),
+		playerCount = get_player_count(),
+		players = collect_online_players(),
+	}
+
+	send_player_state_ws(payload)
+end
+
 local function send_player_pulse()
 	if not is_configured() then return end
 	if not c_pulse_enable:GetBool() then return end
@@ -1868,6 +1901,10 @@ end)
 
 timer.Create("bsb_ingest_player_pulse", math_max(10, c_pulse_seconds:GetFloat()), 0, function()
 	send_player_pulse()
+end)
+
+timer.Create("bsb_ingest_player_state", math_max(5, c_state_seconds:GetFloat()), 0, function()
+	send_player_live_state()
 end)
 
 timer.Create("bsb_ingest_ws_maintain", 5, 0, function()
