@@ -122,6 +122,7 @@ const parseMaxPlayers = (value: unknown): number | undefined => {
 
 const MAX_ANALYTICS_LOGS = 120000;
 const MAX_ANALYTICS_SNAPSHOTS = 20000;
+const MAX_ORPHAN_SESSION_MS = 6 * 60 * 60 * 1000;
 
 const isTrackableSteamId = (value: unknown): value is string => {
   const raw = String(value || '').trim();
@@ -527,6 +528,7 @@ router.get('/:id/analytics', async (req, res) => {
   const intervals: SessionInterval[] = [];
   const openBySessionId = new Map<string, { steamId: string; startMs: number }>();
   const openBySteamId = new Map<string, number>();
+  const openSessionIdsBySteam = new Map<string, Set<string>>();
   const playtimeByPlayerMs = new Map<string, number>();
   const sessionDurationsMs: number[] = [];
   const closeSession = (steamId: string, startMs: number, endMs: number) => {
@@ -538,6 +540,42 @@ router.get('/:id/analytics', async (req, res) => {
     intervals.push({ steamId, startMs: clampedStart, endMs: clampedEnd });
     playtimeByPlayerMs.set(steamId, (playtimeByPlayerMs.get(steamId) || 0) + duration);
     sessionDurationsMs.push(duration);
+  };
+
+  const rememberSessionOpen = (steamId: string, sessionId: string) => {
+    const current = openSessionIdsBySteam.get(steamId) || new Set<string>();
+    current.add(sessionId);
+    openSessionIdsBySteam.set(steamId, current);
+  };
+
+  const forgetSessionOpen = (steamId: string, sessionId: string) => {
+    const current = openSessionIdsBySteam.get(steamId);
+    if (!current) return;
+    current.delete(sessionId);
+    if (current.size === 0) {
+      openSessionIdsBySteam.delete(steamId);
+    }
+  };
+
+  const closeOpenSessionsForSteam = (steamId: string, endMs: number, excludeSessionId?: string) => {
+    const current = openSessionIdsBySteam.get(steamId);
+    if (!current || current.size === 0) return;
+
+    Array.from(current).forEach((sid) => {
+      if (excludeSessionId && sid === excludeSessionId) return;
+      const opened = openBySessionId.get(sid);
+      if (opened) {
+        closeSession(steamId, opened.startMs, endMs);
+      }
+      openBySessionId.delete(sid);
+      current.delete(sid);
+    });
+
+    if (current.size === 0) {
+      openSessionIdsBySteam.delete(steamId);
+    } else {
+      openSessionIdsBySteam.set(steamId, current);
+    }
   };
   logs.forEach((log) => {
     const type = String(log.type || '').toUpperCase();
@@ -558,8 +596,29 @@ router.get('/:id/analytics', async (req, res) => {
     if (type === 'CONNECT') {
       connectedPlayers.add(steamId);
       if (sessionId) {
-        openBySessionId.set(sessionId, { steamId, startMs: ts });
+        // Repeated CONNECT for same account means previous unresolved session should close here.
+        closeOpenSessionsForSteam(steamId, ts, sessionId);
+
+        const openedFallback = openBySteamId.get(steamId);
+        if (openedFallback !== undefined) {
+          closeSession(steamId, openedFallback, ts);
+          openBySteamId.delete(steamId);
+        }
+
+        const existing = openBySessionId.get(sessionId);
+        if (existing && existing.steamId === steamId) {
+          existing.startMs = Math.min(existing.startMs, ts);
+        } else {
+          openBySessionId.set(sessionId, { steamId, startMs: ts });
+          rememberSessionOpen(steamId, sessionId);
+        }
       } else {
+        closeOpenSessionsForSteam(steamId, ts);
+
+        const openedFallback = openBySteamId.get(steamId);
+        if (openedFallback !== undefined) {
+          closeSession(steamId, openedFallback, ts);
+        }
         openBySteamId.set(steamId, ts);
       }
       return;
@@ -570,7 +629,7 @@ router.get('/:id/analytics', async (req, res) => {
       if (opened && opened.steamId === steamId) {
         closeSession(steamId, opened.startMs, ts);
         openBySessionId.delete(sessionId);
-        return;
+        forgetSessionOpen(steamId, sessionId);
       }
     }
     const startFallback = openBySteamId.get(steamId);
@@ -578,12 +637,17 @@ router.get('/:id/analytics', async (req, res) => {
       closeSession(steamId, startFallback, ts);
       openBySteamId.delete(steamId);
     }
+    closeOpenSessionsForSteam(steamId, ts);
   });
-  openBySessionId.forEach((opened) => {
-    closeSession(opened.steamId, opened.startMs, nowMs);
+  openBySessionId.forEach((opened, sid) => {
+    // Prevent runaway totals when old sessions never emitted DISCONNECT.
+    const safeEnd = Math.min(nowMs, opened.startMs + MAX_ORPHAN_SESSION_MS);
+    closeSession(opened.steamId, opened.startMs, safeEnd);
+    forgetSessionOpen(opened.steamId, sid);
   });
   openBySteamId.forEach((startMs, steamId) => {
-    closeSession(steamId, startMs, nowMs);
+    const safeEnd = Math.min(nowMs, startMs + MAX_ORPHAN_SESSION_MS);
+    closeSession(steamId, startMs, safeEnd);
   });
   const totalPlayTimeMs = Array.from(playtimeByPlayerMs.values()).reduce((acc, ms) => acc + ms, 0);
   const totalPlayTimeHours = round1(totalPlayTimeMs / (1000 * 60 * 60));
