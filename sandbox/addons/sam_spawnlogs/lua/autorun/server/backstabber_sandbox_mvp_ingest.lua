@@ -26,6 +26,9 @@ local INGEST_SCHEMA_VERSION = 1
 local c_enable = CreateConVar("bsb_ingest_enable", "0", FCVAR_ARCHIVE, "Enable Backstabber Sandbox MVP ingest.")
 local c_ingest_url = CreateConVar("bsb_ingest_url", "http://127.0.0.1:4000/api/ingest/logs", FCVAR_ARCHIVE, "Backstabber ingest endpoint.")
 local c_heartbeat_url = CreateConVar("bsb_heartbeat_url", "http://127.0.0.1:4000/api/servers/heartbeat", FCVAR_ARCHIVE, "Backstabber heartbeat endpoint.")
+local c_pulse_enable = CreateConVar("bsb_pulse_enable", "1", FCVAR_ARCHIVE, "Enable player pulse playtime endpoint calls.")
+local c_pulse_url = CreateConVar("bsb_pulse_url", "http://127.0.0.1:4000/api/servers/pulse", FCVAR_ARCHIVE, "Backstabber player pulse endpoint.")
+local c_pulse_seconds = CreateConVar("bsb_pulse_seconds", "60", FCVAR_ARCHIVE, "Player pulse interval in seconds.")
 local c_actions_url = CreateConVar("bsb_actions_url", "", FCVAR_ARCHIVE, "Backstabber server actions pull endpoint.")
 local c_server_key = CreateConVar("bsb_server_key", "", FCVAR_ARCHIVE, "Backstabber server API key.")
 local c_batch_size = CreateConVar("bsb_batch_size", "100", FCVAR_ARCHIVE, "Max events per ingest request.")
@@ -862,6 +865,63 @@ local function send_heartbeat()
 	})
 end
 
+local function collect_online_players()
+	local players = {}
+	local all_players = player.GetAll and player.GetAll() or {}
+	for i = 1, #all_players do
+		local ply = all_players[i]
+		if is_valid_player(ply) and not ply:IsBot() then
+			local steamid = normalize_steamid(ply:SteamID())
+			if steamid then
+				players[#players + 1] = {
+					steamId = steamid,
+					name = tostring(ply:Nick() or ""),
+				}
+			end
+		end
+	end
+	return players
+end
+
+local function send_player_pulse()
+	if not is_configured() then return end
+	if not c_pulse_enable:GetBool() then return end
+
+	local pulse_url = c_pulse_url:GetString()
+	if pulse_url == "" then return end
+
+	local players = collect_online_players()
+	if #players == 0 then return end
+
+	local interval_sec = math_max(10, math_floor(c_pulse_seconds:GetFloat()))
+	local body = util.TableToJSON({
+		sentAt = now_iso_utc(),
+		intervalSec = interval_sec,
+		map = game.GetMap(),
+		playerCount = get_player_count(),
+		players = players,
+	}, false, true)
+
+	if not body then return end
+
+	HTTP({
+		url = pulse_url,
+		method = "POST",
+		headers = {
+			["Content-Type"] = "application/json",
+			["X-Server-Key"] = c_server_key:GetString(),
+		},
+		body = body,
+		success = function(code, response_body)
+			if code >= 200 and code < 300 then return end
+			debug_log(string_format("pulse http error=%d body=%s", code, tostring(response_body or "")))
+		end,
+		failed = function(err)
+			debug_log("pulse failed: " .. tostring(err))
+		end
+	})
+end
+
 local function poll_server_actions()
 	if not c_enable:GetBool() then return end
 	if not c_actions_enable:GetBool() then return end
@@ -1469,6 +1529,10 @@ end)
 
 timer.Create("bsb_ingest_heartbeat", math_max(5, c_heartbeat_seconds:GetFloat()), 0, function()
 	send_heartbeat()
+end)
+
+timer.Create("bsb_ingest_player_pulse", math_max(10, c_pulse_seconds:GetFloat()), 0, function()
+	send_player_pulse()
 end)
 
 timer.Create("bsb_ingest_actions_poll", math_max(2, c_actions_seconds:GetFloat()), 0, function()
