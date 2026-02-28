@@ -169,9 +169,9 @@ const mapVipPlanToServerGroup = (vipPlan: string): string => {
   const plan = String(vipPlan || '').trim();
   const normalized = plan.toLowerCase();
 
-  if (normalized === 'vip bronze') return 'VIP';
-  if (normalized === 'vip prata') return 'VIP+';
-  if (normalized === 'vip ouro') return 'VIP++';
+  if (normalized === 'vip bronze' || normalized === 'bronze' || normalized === 'vip') return 'VIP';
+  if (normalized === 'vip prata' || normalized === 'prata' || normalized === 'vip+') return 'VIP+';
+  if (normalized === 'vip ouro' || normalized === 'ouro' || normalized === 'vip++') return 'VIP++';
 
   return plan;
 };

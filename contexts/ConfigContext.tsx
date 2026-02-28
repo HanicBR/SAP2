@@ -15,11 +15,58 @@ const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
 const toArrayOrFallback = <T,>(value: unknown, fallback: T[]): T[] =>
   Array.isArray(value) && value.length > 0 ? (value as T[]) : fallback;
 
+const normalizeVipPlanName = (value: unknown): string => {
+  const plan = String(value || '').trim();
+  if (!plan) return plan;
+  const normalized = plan.toLowerCase();
+  if (normalized === 'vip bronze' || normalized === 'bronze') return 'VIP';
+  if (normalized === 'vip prata' || normalized === 'prata') return 'VIP+';
+  if (normalized === 'vip ouro' || normalized === 'ouro') return 'VIP++';
+  return plan;
+};
+
+const normalizeVipPlanId = (value: unknown): string => {
+  const id = String(value || '').trim();
+  if (!id) return id;
+  if (id === 'vip_bronze') return 'vip';
+  if (id === 'vip_silver') return 'vip_plus';
+  if (id === 'vip_gold') return 'vip_plus_plus';
+  return id;
+};
+
+const normalizeVipText = (value: unknown): string =>
+  String(value || '')
+    .replace(/Tudo do Bronze/gi, 'Tudo do VIP')
+    .replace(/Tudo do Prata/gi, 'Tudo do VIP+')
+    .replace(/VIP Ouro em TODOS os servidores/gi, 'VIP++ em TODOS os servidores');
+
+const normalizeVipPlans = (plans: SiteConfig['vip']['plans']): SiteConfig['vip']['plans'] =>
+  plans.map((plan) => {
+    const mappedBenefits = Object.fromEntries(
+      Object.entries(plan.benefits || {}).map(([mode, values]) => [
+        mode,
+        Array.isArray(values) ? values.map((item) => normalizeVipText(item)) : [],
+      ]),
+    ) as SiteConfig['vip']['plans'][number]['benefits'];
+
+    return {
+      ...plan,
+      id: normalizeVipPlanId(plan.id),
+      name: normalizeVipPlanName(plan.name),
+      benefits: mappedBenefits,
+    };
+  });
+
 const normalizeSiteConfig = (raw?: Partial<SiteConfig>): SiteConfig => {
   const next = (raw || {}) as Partial<SiteConfig>;
   const nextVip = (next.vip || {}) as Partial<SiteConfig['vip']>;
   const nextVipAutomation = next.vipAutomation;
   const defaultVip = DEFAULT_SITE_CONFIG.vip;
+  const normalizedPlans = normalizeVipPlans(toArrayOrFallback(nextVip.plans, defaultVip.plans));
+  const normalizedUltimateBenefits = toArrayOrFallback(
+    nextVip.ultimatePlan?.benefits,
+    defaultVip.ultimatePlan.benefits,
+  ).map((item) => normalizeVipText(item));
 
   return {
     ...DEFAULT_SITE_CONFIG,
@@ -40,12 +87,12 @@ const normalizeSiteConfig = (raw?: Partial<SiteConfig>): SiteConfig => {
     vip: {
       ...defaultVip,
       ...nextVip,
-      plans: toArrayOrFallback(nextVip.plans, defaultVip.plans),
+      plans: normalizedPlans,
       billingOptions: toArrayOrFallback(nextVip.billingOptions, defaultVip.billingOptions),
       ultimatePlan: {
         ...defaultVip.ultimatePlan,
         ...(nextVip.ultimatePlan || {}),
-        benefits: toArrayOrFallback(nextVip.ultimatePlan?.benefits, defaultVip.ultimatePlan.benefits),
+        benefits: normalizedUltimateBenefits,
       },
       payment: {
         ...defaultVip.payment,

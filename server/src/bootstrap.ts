@@ -51,8 +51,8 @@ const defaultSiteConfig = {
     promoTextSuffix: 'menos!',
     plans: [
       {
-        id: 'vip_bronze',
-        name: 'VIP Bronze',
+        id: 'vip',
+        name: 'VIP',
         price: 10,
         color: '#ea580c',
         benefits: {
@@ -62,25 +62,25 @@ const defaultSiteConfig = {
         },
       },
       {
-        id: 'vip_silver',
-        name: 'VIP Prata',
+        id: 'vip_plus',
+        name: 'VIP+',
         price: 15,
         color: '#94a3b8',
         benefits: {
-          TTT: ['Tudo do Bronze', '2x Points', 'Comando !votemap', 'Destaque no Scoreboard'],
-          Sandbox: ['Tudo do Bronze', 'Limite de props +50%', 'Ferramentas extras', 'Trails visuais'],
-          Murder: ['Tudo do Bronze', 'Trails personalizados', 'Comando !votemap', 'Bônus de XP'],
+          TTT: ['Tudo do VIP', '2x Points', 'Comando !votemap', 'Destaque no Scoreboard'],
+          Sandbox: ['Tudo do VIP', 'Limite de props +50%', 'Ferramentas extras', 'Trails visuais'],
+          Murder: ['Tudo do VIP', 'Trails personalizados', 'Comando !votemap', 'Bônus de XP'],
         },
       },
       {
-        id: 'vip_gold',
-        name: 'VIP Ouro',
+        id: 'vip_plus_plus',
+        name: 'VIP++',
         price: 20,
         color: '#eab308',
         benefits: {
-          TTT: ['Tudo do Prata', 'Imunidade a VoteKick', 'Skins Raras', 'Trail personalizado', 'Join Message'],
-          Sandbox: ['Tudo do Prata', 'Limite máximo seguro', 'Ferramentas avançadas', 'Destaque total'],
-          Murder: ['Tudo do Prata', 'Skins Murderer/Bystander', 'Emotes (/dance)', 'Destaque visual'],
+          TTT: ['Tudo do VIP+', 'Imunidade a VoteKick', 'Skins Raras', 'Trail personalizado', 'Join Message'],
+          Sandbox: ['Tudo do VIP+', 'Limite máximo seguro', 'Ferramentas avançadas', 'Destaque total'],
+          Murder: ['Tudo do VIP+', 'Skins Murderer/Bystander', 'Emotes (/dance)', 'Destaque visual'],
         },
       },
     ],
@@ -98,7 +98,7 @@ const defaultSiteConfig = {
       tagline: 'Acesso total Ã  rede',
       renewalText: 'Oferta especial por tempo limitado. O valor promocional Ã© garantido na renovaÃ§Ã£o automÃ¡tica.',
       benefits: [
-        'VIP Ouro em TODOS os servidores (TTT, Sandbox, Murder)',
+        'VIP++ em TODOS os servidores (TTT, Sandbox, Murder)',
         'Acesso antecipado a novidades da rede',
         'Tag [ULTIMATE] exclusiva e colorida',
         'Prioridade mÃ¡xima na fila de conexÃ£o',
@@ -176,7 +176,7 @@ const defaultPlayers = [
     totalConnections: 42,
     playTimeHours: 120,
     isVip: true,
-    vipPlan: 'VIP Ouro',
+    vipPlan: 'VIP++',
     vipExpiry: new Date(Date.now() + 1000 * 60 * 60 * 24 * 15),
     serverStats: {
       srv_ttt_01: { playTimeHours: 80, connections: 30 },

@@ -399,7 +399,7 @@ const Financial: React.FC = () => {
                         required
                         type="text"
                         className="w-full bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm focus:border-cyan-500 focus:outline-none"
-                        placeholder={txType === TransactionType.INCOME ? 'Venda VIP Ouro - Discord' : 'Pagamento Host'}
+                        placeholder={txType === TransactionType.INCOME ? 'Venda VIP++ - Discord' : 'Pagamento Host'}
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                       />

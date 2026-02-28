@@ -232,8 +232,9 @@ const Players: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                        {player.isVip ? (
                           <span className={`px-2 inline-flex text-xs leading-5 font-bold rounded-full border bg-opacity-20 ${
-                             player.vipPlan?.includes('Ouro') ? 'bg-yellow-500 text-yellow-500 border-yellow-500' :
-                             player.vipPlan?.includes('Prata') ? 'bg-zinc-400 text-zinc-300 border-zinc-400' :
+                             player.vipPlan?.includes('VIP++') ? 'bg-yellow-500 text-yellow-500 border-yellow-500' :
+                             player.vipPlan?.includes('VIP+') ? 'bg-zinc-400 text-zinc-300 border-zinc-400' :
+                             player.vipPlan?.includes('Ultimate') ? 'bg-purple-700 text-purple-300 border-purple-500' :
                              'bg-orange-600 text-orange-400 border-orange-600'
                           }`}>
                             {player.vipPlan}

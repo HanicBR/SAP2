@@ -435,8 +435,10 @@ const PlayerProfile: React.FC = () => {
                  <h1 className="text-4xl font-black text-white tracking-tight">{player.name}</h1>
                  {player.isVip && (
                     <span className={`px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wider border ${
-                       player.vipPlan?.includes('Ouro') ? 'bg-yellow-900/20 text-yellow-500 border-yellow-600' : 
-                       'bg-zinc-800 text-zinc-400 border-zinc-600'
+                       player.vipPlan?.includes('VIP++') ? 'bg-yellow-900/20 text-yellow-500 border-yellow-600' :
+                       player.vipPlan?.includes('VIP+') ? 'bg-zinc-800 text-zinc-300 border-zinc-500' :
+                       player.vipPlan?.includes('Ultimate') ? 'bg-purple-900/20 text-purple-400 border-purple-600' :
+                       'bg-orange-900/20 text-orange-400 border-orange-600'
                     }`}>
                        VIP {player.vipPlan}
                     </span>

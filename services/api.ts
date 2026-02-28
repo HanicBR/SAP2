@@ -377,7 +377,7 @@ export const ApiService = {
 
     // Mock Live Feed
     const liveActivity: LiveActivityItem[] = [
-      { id: '1', message: 'Player "DarkKiller" comprou VIP Ouro (Mensal)', type: 'SUCCESS', timestamp: new Date().toISOString(), serverName: 'Web Store' },
+      { id: '1', message: 'Player "DarkKiller" comprou VIP++ (Mensal)', type: 'SUCCESS', timestamp: new Date().toISOString(), serverName: 'Web Store' },
       { id: '2', message: 'Servidor TTT #1 reiniciado automaticamente', type: 'INFO', timestamp: new Date(Date.now() - 1000 * 60 * 5).toISOString(), serverName: 'TTT #1' },
       { id: '3', message: 'Admin "Mod_Joao" baniu "Troll123" (Mass RDM)', type: 'WARNING', timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString(), serverName: 'TTT #1' },
       { id: '4', message: 'Novo recorde de players: 32/32', type: 'INFO', timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(), serverName: 'Murder #1' },

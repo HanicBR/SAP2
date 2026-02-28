@@ -40,8 +40,8 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
     promoTextSuffix: "menos!",
     plans: [
         {
-            id: 'vip_bronze',
-            name: 'VIP Bronze',
+            id: 'vip',
+            name: 'VIP',
             price: 10.00,
             color: '#ea580c', // Orange
             benefits: {
@@ -51,25 +51,25 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
             }
         },
         {
-            id: 'vip_silver',
-            name: 'VIP Prata',
+            id: 'vip_plus',
+            name: 'VIP+',
             price: 15.00,
             color: '#94a3b8', // Zinc/Silver
             benefits: {
-                [GameMode.TTT]: ['Tudo do Bronze', '2x Points', 'Comando !votemap', 'Destaque no Scoreboard'],
-                [GameMode.SANDBOX]: ['Tudo do Bronze', 'Limite de props +50%', 'Ferramentas extras', 'Trails visuais'],
-                [GameMode.MURDER]: ['Tudo do Bronze', 'Trails personalizados', 'Comando !votemap', 'Bônus de XP']
+                [GameMode.TTT]: ['Tudo do VIP', '2x Points', 'Comando !votemap', 'Destaque no Scoreboard'],
+                [GameMode.SANDBOX]: ['Tudo do VIP', 'Limite de props +50%', 'Ferramentas extras', 'Trails visuais'],
+                [GameMode.MURDER]: ['Tudo do VIP', 'Trails personalizados', 'Comando !votemap', 'Bônus de XP']
             }
         },
         {
-            id: 'vip_gold',
-            name: 'VIP Ouro',
+            id: 'vip_plus_plus',
+            name: 'VIP++',
             price: 20.00,
             color: '#eab308', // Yellow/Gold
             benefits: {
-                [GameMode.TTT]: ['Tudo do Prata', 'Imunidade a VoteKick', 'Skins Raras', 'Trail personalizado', 'Join Message'],
-                [GameMode.SANDBOX]: ['Tudo do Prata', 'Limite máximo seguro', 'Ferramentas avançadas', 'Destaque total'],
-                [GameMode.MURDER]: ['Tudo do Prata', 'Skins Murderer/Bystander', 'Emotes (/dance)', 'Destaque visual']
+                [GameMode.TTT]: ['Tudo do VIP+', 'Imunidade a VoteKick', 'Skins Raras', 'Trail personalizado', 'Join Message'],
+                [GameMode.SANDBOX]: ['Tudo do VIP+', 'Limite máximo seguro', 'Ferramentas avançadas', 'Destaque total'],
+                [GameMode.MURDER]: ['Tudo do VIP+', 'Skins Murderer/Bystander', 'Emotes (/dance)', 'Destaque visual']
             }
         }
     ],
@@ -87,7 +87,7 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
       tagline: 'Acesso total Ã  rede',
       renewalText: 'Oferta especial por tempo limitado. O valor promocional Ã© garantido na renovaÃ§Ã£o automÃ¡tica.',
       benefits: [
-        'VIP Ouro em TODOS os servidores (TTT, Sandbox, Murder)',
+        'VIP++ em TODOS os servidores (TTT, Sandbox, Murder)',
         'Acesso antecipado a novidades da rede',
         'Tag [ULTIMATE] exclusiva e colorida',
         'Prioridade mÃ¡xima na fila de conexÃ£o',
@@ -216,10 +216,10 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
     amount: 20.00,
     type: TransactionType.INCOME,
     category: TransactionCategory.VIP_SALE,
-    description: 'Venda VIP Ouro - Mensal',
+    description: 'Venda VIP++ - Mensal',
     relatedSteamId: 'STEAM_0:1:55443322',
     relatedPlayerName: 'TrollMaster69',
-    vipPlan: 'VIP Ouro',
+    vipPlan: 'VIP++',
     vipDurationDays: 30,
     proofUrl: 'https://fakeimg.pl/300x400/202020/eae0d0/?text=Comprovante+PIX',
     createdBy: 'u_admin'
@@ -393,7 +393,7 @@ export const MOCK_PLAYERS: Player[] = Array.from({ length: 20 }).map((_, i) => {
     totalConnections: Math.floor(Math.random() * 200) + 1,
     playTimeHours: Math.floor(Math.random() * 500),
     isVip: i % 4 === 0,
-    vipPlan: i % 4 === 0 ? (i % 3 === 0 ? 'Ouro' : i % 2 === 0 ? 'Prata' : 'Bronze') : undefined,
+    vipPlan: i % 4 === 0 ? (i % 3 === 0 ? 'VIP++' : i % 2 === 0 ? 'VIP+' : 'VIP') : undefined,
     vipExpiry: i % 4 === 0 ? new Date(Date.now() + Math.random() * 86400000 * 30).toISOString() : undefined,
     ip: i < 2 ? '189.23.102.45' : `192.168.1.${i + 50}`, // Match duplicate mock for first 2
     geo: { country: 'BR', city: i < 2 ? 'São Paulo' : 'Rio de Janeiro', state: i < 2 ? 'SP' : 'RJ' },
