@@ -72,6 +72,7 @@ model GameServer {
 
   logs            Log[]
   playerSnapshots PlayerSnapshot[]
+  playtimePulses  PlayerPlaytimePulse[]
 }
 
 model PlayerProfile {
@@ -260,4 +261,25 @@ model PlayerSnapshot {
   count     Int
 
   server GameServer @relation(fields: [serverId], references: [id], onDelete: Cascade)
+}
+
+model PlayerPlaytimePulse {
+  id             String   @id @default(cuid())
+  serverId       String
+  steamId        String
+  bucketStart    DateTime
+  grantedSeconds Int
+  playerName     String?
+  map            String?
+  playerCount    Int?
+  sentAt         DateTime?
+  receivedAt     DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  server GameServer @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  @@unique([serverId, steamId, bucketStart], name: "serverId_steamId_bucketStart")
+  @@index([serverId, bucketStart])
+  @@index([steamId, bucketStart])
 }

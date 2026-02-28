@@ -17,6 +17,7 @@ export interface PlayerPulseSettings {
   enabled: boolean;
   source: PlaytimeSource;
   defaultIntervalSec: number;
+  bucketSec: number;
 }
 
 const parseBoolEnv = (value: string | undefined, fallback = false): boolean => {
@@ -46,6 +47,7 @@ export const getPlayerPulseSettings = (): PlayerPulseSettings => ({
   enabled: parseBoolEnv(process.env.PLAYER_PULSE_ENABLED, false),
   source: parsePlaytimeSourceEnv(process.env.PLAYTIME_SOURCE),
   defaultIntervalSec: parsePositiveIntEnv(process.env.PLAYER_PULSE_INTERVAL_SEC, 60, 300),
+  bucketSec: parsePositiveIntEnv(process.env.PLAYER_PULSE_BUCKET_SEC, 60, 300),
 });
 
 const isTrackableSteamId = (value: unknown): value is string => {
@@ -98,5 +100,33 @@ export const sanitizePlayerPulsePayload = (input: unknown): PlayerPulsePayload =
     players,
     ...(map ? { map } : {}),
     ...(playerCount !== undefined ? { playerCount } : {}),
+  };
+};
+
+export const resolvePulseTiming = (
+  payload: PlayerPulsePayload,
+  settings: PlayerPulseSettings,
+): {
+  sentAt: Date;
+  intervalSec: number;
+  bucketStart: Date;
+  grantedSeconds: number;
+} => {
+  const sentAt = payload.sentAt ? new Date(payload.sentAt) : new Date();
+  const sentAtMs = Number.isNaN(sentAt.getTime()) ? Date.now() : sentAt.getTime();
+
+  const intervalSec = Math.max(
+    1,
+    Math.min(payload.intervalSec || settings.defaultIntervalSec, settings.bucketSec),
+  );
+
+  const bucketMs = settings.bucketSec * 1000;
+  const bucketStartMs = Math.floor(sentAtMs / bucketMs) * bucketMs;
+
+  return {
+    sentAt: new Date(sentAtMs),
+    intervalSec,
+    bucketStart: new Date(bucketStartMs),
+    grantedSeconds: intervalSec,
   };
 };

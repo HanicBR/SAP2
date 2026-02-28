@@ -6,7 +6,11 @@ import { hashApiKey, compareApiKey } from '../utils/apiKey';
 import { drainServerActions } from '../services/serverActions';
 import { getVipAutomationMetrics, previewVipAutomationBuild, VipAutomationActionType } from '../services/vipAutomation';
 import { normalizeIp } from '../utils/normalizeIp';
-import { getPlayerPulseSettings, sanitizePlayerPulsePayload } from '../services/playtimePulse';
+import {
+  getPlayerPulseSettings,
+  sanitizePlayerPulsePayload,
+  resolvePulseTiming,
+} from '../services/playtimePulse';
 
 const router = Router();
 
@@ -357,7 +361,7 @@ router.get('/playtime/config', authMiddleware, requireRole(UserRole.ADMIN), asyn
   return res.json(getPlayerPulseSettings());
 });
 
-// Playtime pulse ingestion (PR-01 contract only; persistence is added in PR-02)
+// Playtime pulse ingestion (PR-02 persistence with per-minute idempotency)
 router.post('/pulse', async (req, res) => {
   try {
     const apiKey = (req.header('x-server-key') || req.header('X-Server-Key')) as string | undefined;
@@ -383,14 +387,49 @@ router.post('/pulse', async (req, res) => {
       return res.status(400).json({ error: 'players_required' });
     }
 
+    const pulseClient = (prisma as any).playerPlaytimePulse as
+      | {
+          createMany: (args: any) => Promise<{ count: number }>;
+        }
+      | undefined;
+
+    if (!pulseClient) {
+      return res.status(503).json({ error: 'player_pulse_storage_unavailable' });
+    }
+
+    const timing = resolvePulseTiming(payload, settings);
+    const rows = payload.players.map((player) => ({
+      serverId: server.id,
+      steamId: player.steamId,
+      bucketStart: timing.bucketStart,
+      grantedSeconds: timing.grantedSeconds,
+      playerName: player.name || null,
+      map: payload.map || null,
+      playerCount: payload.playerCount ?? null,
+      sentAt: timing.sentAt,
+      receivedAt: new Date(),
+    }));
+
+    const result = await pulseClient.createMany({
+      data: rows,
+      skipDuplicates: true,
+    });
+
+    const inserted = result?.count ?? 0;
+    const deduplicated = Math.max(0, rows.length - inserted);
+
     return res.json({
       ok: true,
       serverId: server.id,
       source: settings.source,
-      acceptedPlayers: payload.players.length,
-      intervalSec: payload.intervalSec || settings.defaultIntervalSec,
-      persisted: false,
-      reason: 'contract_only_pr01',
+      acceptedPlayers: rows.length,
+      intervalSec: timing.intervalSec,
+      bucketSec: settings.bucketSec,
+      bucketStart: timing.bucketStart.toISOString(),
+      grantedSeconds: timing.grantedSeconds,
+      persisted: true,
+      inserted,
+      deduplicated,
     });
   } catch (err: any) {
     console.error('Pulse ingest error', err);
