@@ -8,11 +8,8 @@ import { getVipAutomationMetrics, previewVipAutomationBuild, VipAutomationAction
 import { normalizeIp } from '../utils/normalizeIp';
 import { findServerByApiKey } from '../services/serverAuth';
 import { getServerWsHealthSnapshot } from '../services/serverWs';
-import {
-  getPlayerPulseSettings,
-  sanitizePlayerPulsePayload,
-  resolvePulseTiming,
-} from '../services/playtimePulse';
+import { getPlayerPulseSettings } from '../services/playtimePulse';
+import { ingestPlayerPulse, PlayerPulseIngestError } from '../services/playerPulseIngest';
 
 const router = Router();
 
@@ -389,64 +386,19 @@ router.post('/pulse', async (req, res) => {
       return res.status(403).json({ error: 'Invalid server key' });
     }
 
-    const settings = getPlayerPulseSettings();
-    if (!settings.enabled) {
-      return res.status(503).json({
-        error: 'player_pulse_disabled',
-        source: settings.source,
-      });
-    }
-
-    const payload = sanitizePlayerPulsePayload((req as any).body);
-    if (!payload.players.length) {
-      return res.status(400).json({ error: 'players_required' });
-    }
-
-    const pulseClient = (prisma as any).playerPlaytimePulse as
-      | {
-          createMany: (args: any) => Promise<{ count: number }>;
-        }
-      | undefined;
-
-    if (!pulseClient) {
-      return res.status(503).json({ error: 'player_pulse_storage_unavailable' });
-    }
-
-    const timing = resolvePulseTiming(payload, settings);
-    const rows = payload.players.map((player) => ({
-      serverId: server.id,
-      steamId: player.steamId,
-      bucketStart: timing.bucketStart,
-      grantedSeconds: timing.grantedSeconds,
-      playerName: player.name || null,
-      map: payload.map || null,
-      playerCount: payload.playerCount ?? null,
-      sentAt: timing.sentAt,
-      receivedAt: new Date(),
-    }));
-
-    const result = await pulseClient.createMany({
-      data: rows,
-      skipDuplicates: true,
-    });
-
-    const inserted = result?.count ?? 0;
-    const deduplicated = Math.max(0, rows.length - inserted);
-
-    return res.json({
-      ok: true,
-      serverId: server.id,
-      source: settings.source,
-      acceptedPlayers: rows.length,
-      intervalSec: timing.intervalSec,
-      bucketSec: settings.bucketSec,
-      bucketStart: timing.bucketStart.toISOString(),
-      grantedSeconds: timing.grantedSeconds,
-      persisted: true,
-      inserted,
-      deduplicated,
-    });
+    const result = await ingestPlayerPulse(server.id, (req as any).body);
+    return res.json(result);
   } catch (err: any) {
+    if (err instanceof PlayerPulseIngestError) {
+      if (err.code === 'player_pulse_disabled') {
+        const settings = getPlayerPulseSettings();
+        return res.status(err.statusCode).json({
+          error: err.code,
+          source: settings.source,
+        });
+      }
+      return res.status(err.statusCode).json({ error: err.code });
+    }
     console.error('Pulse ingest error', err);
     return res.status(500).json({ error: 'Pulse ingest failed', detail: err?.message });
   }

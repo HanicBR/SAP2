@@ -3,6 +3,8 @@ import type { Server as HttpServer } from 'http';
 import type { Duplex } from 'stream';
 import { WebSocketServer, type RawData, type WebSocket } from 'ws';
 import { findServerByApiKey } from './serverAuth';
+import { ingestPlayerPulse, PlayerPulseIngestError } from './playerPulseIngest';
+import { getPlayerPulseSettings } from './playtimePulse';
 
 const WS_SERVERS_PATH = '/ws/servers';
 
@@ -10,6 +12,14 @@ type ConnectedServerSocket = {
   serverId: string;
   connectedAt: string;
   lastMessageAt: string;
+  messagesReceived: number;
+  invalidMessages: number;
+  playerPulseMessages: number;
+  playerPulseInserted: number;
+  playerPulseDeduplicated: number;
+  lastPulseAt?: string;
+  lastErrorAt?: string;
+  lastErrorReason?: string;
   remoteAddress?: string;
   userAgent?: string;
   socket: WebSocket;
@@ -99,6 +109,12 @@ const detachSocketIfCurrent = (serverId: string, socket: WebSocket) => {
   connectedByServerId.delete(serverId);
 };
 
+const markSocketError = (state: ConnectedServerSocket, reason: string) => {
+  state.invalidMessages += 1;
+  state.lastErrorAt = nowIso();
+  state.lastErrorReason = reason;
+};
+
 const attachServerSocket = (
   socket: WebSocket,
   request: IncomingMessage,
@@ -116,6 +132,11 @@ const attachServerSocket = (
     serverId,
     connectedAt,
     lastMessageAt: connectedAt,
+    messagesReceived: 0,
+    invalidMessages: 0,
+    playerPulseMessages: 0,
+    playerPulseInserted: 0,
+    playerPulseDeduplicated: 0,
     socket,
     ...(remoteAddress ? { remoteAddress } : {}),
     ...(userAgent ? { userAgent } : {}),
@@ -124,14 +145,17 @@ const attachServerSocket = (
 
   socket.on('message', (buffer: RawData, isBinary: boolean) => {
     state.lastMessageAt = nowIso();
+    state.messagesReceived += 1;
 
     if (isBinary) {
+      markSocketError(state, 'binary_not_supported');
       trySend(socket, { type: 'error', reason: 'binary_not_supported' });
       return;
     }
 
     const parsed = parseJsonMessage(buffer);
     if (!parsed || typeof parsed !== 'object') {
+      markSocketError(state, 'invalid_json');
       trySend(socket, { type: 'error', reason: 'invalid_json' });
       return;
     }
@@ -141,6 +165,52 @@ const attachServerSocket = (
       trySend(socket, { type: 'pong', now: nowIso() });
       return;
     }
+
+    if (type === 'player_pulse') {
+      state.playerPulseMessages += 1;
+      const payload = (parsed as any).payload ?? (parsed as any).data ?? parsed;
+
+      void (async () => {
+        try {
+          const result = await ingestPlayerPulse(serverId, payload);
+          state.lastPulseAt = nowIso();
+          state.playerPulseInserted += result.inserted;
+          state.playerPulseDeduplicated += result.deduplicated;
+          trySend(socket, {
+            type: 'player_pulse_ack',
+            ...result,
+          });
+        } catch (err: any) {
+          if (err instanceof PlayerPulseIngestError) {
+            markSocketError(state, err.code);
+            const disabledSource =
+              err.code === 'player_pulse_disabled' ? getPlayerPulseSettings().source : undefined;
+            trySend(socket, {
+              type: 'player_pulse_ack',
+              ok: false,
+              error: err.code,
+              ...(disabledSource ? { source: disabledSource } : {}),
+            });
+            return;
+          }
+          const message = toOptionalString(err?.message) || 'player_pulse_ingest_failed';
+          markSocketError(state, message);
+          console.error('Server WS player_pulse ingest error', {
+            serverId,
+            error: message,
+          });
+          trySend(socket, {
+            type: 'player_pulse_ack',
+            ok: false,
+            error: 'player_pulse_ingest_failed',
+          });
+        }
+      })();
+      return;
+    }
+
+    markSocketError(state, 'unknown_message_type');
+    trySend(socket, { type: 'error', reason: 'unknown_message_type' });
   });
 
   socket.on('pong', () => {
@@ -152,6 +222,7 @@ const attachServerSocket = (
   });
 
   socket.on('error', (err: Error) => {
+    markSocketError(state, toOptionalString(err?.message) || 'socket_error');
     console.error('Server WS socket error', {
       serverId,
       error: err?.message || String(err),
@@ -235,6 +306,14 @@ export const getServerWsHealthSnapshot = () => {
         connectedAt: entry.connectedAt,
         lastMessageAt: entry.lastMessageAt,
         idleSeconds,
+        messagesReceived: entry.messagesReceived,
+        invalidMessages: entry.invalidMessages,
+        playerPulseMessages: entry.playerPulseMessages,
+        playerPulseInserted: entry.playerPulseInserted,
+        playerPulseDeduplicated: entry.playerPulseDeduplicated,
+        ...(entry.lastPulseAt ? { lastPulseAt: entry.lastPulseAt } : {}),
+        ...(entry.lastErrorAt ? { lastErrorAt: entry.lastErrorAt } : {}),
+        ...(entry.lastErrorReason ? { lastErrorReason: entry.lastErrorReason } : {}),
         ...(entry.remoteAddress ? { remoteAddress: entry.remoteAddress } : {}),
         ...(entry.userAgent ? { userAgent: entry.userAgent } : {}),
       };

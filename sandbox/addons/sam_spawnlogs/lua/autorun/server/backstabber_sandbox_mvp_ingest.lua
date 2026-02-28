@@ -29,6 +29,10 @@ local c_heartbeat_url = CreateConVar("bsb_heartbeat_url", "http://127.0.0.1:4000
 local c_pulse_enable = CreateConVar("bsb_pulse_enable", "1", FCVAR_ARCHIVE, "Enable player pulse playtime endpoint calls.")
 local c_pulse_url = CreateConVar("bsb_pulse_url", "", FCVAR_ARCHIVE, "Backstabber player pulse endpoint. Leave empty to auto-resolve from bsb_ingest_url.")
 local c_pulse_seconds = CreateConVar("bsb_pulse_seconds", "60", FCVAR_ARCHIVE, "Player pulse interval in seconds.")
+local c_ws_enable = CreateConVar("bsb_ws_enable", "0", FCVAR_ARCHIVE, "Enable Backstabber WebSocket transport for pulse updates.")
+local c_ws_url = CreateConVar("bsb_ws_url", "", FCVAR_ARCHIVE, "Backstabber server WebSocket endpoint. Leave empty to auto-resolve from bsb_ingest_url.")
+local c_ws_verify_tls = CreateConVar("bsb_ws_verify_tls", "1", FCVAR_ARCHIVE, "Verify TLS certificate when connecting to WSS endpoint.")
+local c_ws_reconnect_seconds = CreateConVar("bsb_ws_reconnect_seconds", "5", FCVAR_ARCHIVE, "Base reconnect delay in seconds for Backstabber WebSocket.")
 local c_actions_url = CreateConVar("bsb_actions_url", "", FCVAR_ARCHIVE, "Backstabber server actions pull endpoint.")
 local c_server_key = CreateConVar("bsb_server_key", "", FCVAR_ARCHIVE, "Backstabber server API key.")
 local c_batch_size = CreateConVar("bsb_batch_size", "100", FCVAR_ARCHIVE, "Max events per ingest request.")
@@ -60,6 +64,17 @@ local prop_spawn_window_by_steamid = {}
 local actions_poll_blocked_local = false
 local actions_poll_warn_next = 0
 local pulse_warn_next = 0
+local ws_warn_next = 0
+local ws_socket = nil
+local ws_connected = false
+local ws_connecting = false
+local ws_next_connect_at = 0
+local ws_backoff_seconds = 0
+local ws_last_error = nil
+local ws_last_ack_at = 0
+local ws_last_connected_at = 0
+local ws_module_loaded = false
+local ws_module_checked = false
 
 local sessions_by_steamid = {}
 local pending_disconnect_reason_by_steamid = {}
@@ -181,6 +196,263 @@ local function resolve_pulse_url()
 	end
 
 	return ""
+end
+
+local function derive_ws_url_from_ingest()
+	local ingest_url = trim_string(c_ingest_url:GetString())
+	if ingest_url == "" then return nil end
+
+	local scheme, host_port = string_match(ingest_url, "^(https?)://([^/%?]+)")
+	if not scheme or not host_port or host_port == "" then
+		return nil
+	end
+
+	local ws_scheme = scheme == "https" and "wss" or "ws"
+	return ws_scheme .. "://" .. host_port .. "/ws/servers"
+end
+
+local function resolve_ws_url()
+	local configured = trim_string(c_ws_url:GetString())
+	if configured ~= "" then
+		return configured
+	end
+
+	local fallback = derive_ws_url_from_ingest()
+	if fallback and fallback ~= "" then
+		return fallback
+	end
+
+	return ""
+end
+
+local function get_ws_base_backoff()
+	return math_max(1, math_floor(c_ws_reconnect_seconds:GetFloat()))
+end
+
+local function ensure_ws_module()
+	if ws_module_checked then return ws_module_loaded end
+	ws_module_checked = true
+
+	local ok = pcall(require, "gwsockets")
+	ws_module_loaded = ok and istable(GWSockets) and isfunction(GWSockets.createWebSocket)
+	if not ws_module_loaded then
+		print("[BSB-INGEST] GWSockets module not available; ws transport disabled (fallback HTTP active).")
+	end
+	return ws_module_loaded
+end
+
+local function schedule_ws_reconnect(min_delay)
+	local base = get_ws_base_backoff()
+	local next_delay = ws_backoff_seconds > 0 and ws_backoff_seconds or base
+	if min_delay and min_delay > next_delay then
+		next_delay = min_delay
+	end
+	next_delay = math_min(120, math_max(base, next_delay))
+
+	local jitter = math_random() * math_min(2, next_delay * 0.2)
+	ws_next_connect_at = RealTime() + next_delay + jitter
+	ws_backoff_seconds = math_min(120, next_delay * 2)
+end
+
+local function close_ws_socket(force_now)
+	local socket = ws_socket
+	ws_socket = nil
+	ws_connected = false
+	ws_connecting = false
+
+	if not socket then return end
+	if force_now then
+		pcall(function() socket:closeNow() end)
+	else
+		pcall(function() socket:close() end)
+	end
+end
+
+local function on_ws_connect_failed(reason)
+	ws_last_error = tostring(reason or "connect_failed")
+	ws_connected = false
+	ws_connecting = false
+	close_ws_socket(true)
+	schedule_ws_reconnect()
+
+	if RealTime() >= ws_warn_next then
+		ws_warn_next = RealTime() + 30
+		print("[BSB-INGEST] ws connect failed: " .. tostring(ws_last_error))
+	end
+end
+
+local function connect_ws_socket()
+	if not c_enable:GetBool() then return false end
+	if not c_ws_enable:GetBool() then return false end
+	if not c_pulse_enable:GetBool() then return false end
+	if not is_configured() then return false end
+	if ws_connected and ws_socket then return true end
+	if ws_connecting then return false end
+	if RealTime() < ws_next_connect_at then return false end
+	if not ensure_ws_module() then return false end
+
+	local ws_url = resolve_ws_url()
+	if ws_url == "" then
+		on_ws_connect_failed("empty_ws_url")
+		return false
+	end
+
+	local server_key = trim_string(c_server_key:GetString())
+	if server_key == "" then
+		on_ws_connect_failed("empty_server_key")
+		return false
+	end
+
+	local verify_tls = c_ws_verify_tls:GetBool()
+	local socket = nil
+	local ok_create, create_err = pcall(function()
+		socket = GWSockets.createWebSocket(ws_url, verify_tls)
+	end)
+	if not ok_create or not socket then
+		on_ws_connect_failed(create_err or "socket_create_failed")
+		return false
+	end
+	ws_socket = socket
+
+	local ok_header = pcall(function()
+		socket:setHeader("X-Server-Key", server_key)
+		socket:setHeader("User-Agent", "backstabber-gmod-addon/gwsockets")
+	end)
+	if not ok_header then
+		on_ws_connect_failed("set_header_failed")
+		return false
+	end
+
+	function socket:onConnected()
+		ws_connected = true
+		ws_connecting = false
+		ws_next_connect_at = 0
+		ws_backoff_seconds = get_ws_base_backoff()
+		ws_last_connected_at = RealTime()
+		ws_last_error = nil
+		debug_log("ws connected: " .. tostring(ws_url))
+	end
+
+	function socket:onError(err_text)
+		ws_last_error = tostring(err_text or "ws_error")
+		debug_log("ws error: " .. tostring(ws_last_error))
+	end
+
+	function socket:onDisconnected(reason)
+		ws_last_error = tostring(reason or "ws_disconnected")
+		debug_log("ws disconnected: " .. tostring(ws_last_error))
+		ws_connected = false
+		ws_connecting = false
+		ws_socket = nil
+		if c_ws_enable:GetBool() and c_enable:GetBool() and c_pulse_enable:GetBool() then
+			schedule_ws_reconnect()
+		end
+	end
+
+	function socket:onMessage(raw)
+		local parsed = util.JSONToTable(tostring(raw or ""))
+		if not parsed or not istable(parsed) then return end
+
+		local msg_type = string_lower(tostring(parsed.type or ""))
+		if msg_type == "player_pulse_ack" then
+			ws_last_ack_at = RealTime()
+			if parsed.ok == false then
+				debug_log("ws pulse ack error: " .. tostring(parsed.error or "unknown"))
+			end
+			return
+		end
+
+		if msg_type == "error" then
+			ws_last_error = tostring(parsed.reason or "ws_error")
+			debug_log("ws server error: " .. ws_last_error)
+		end
+	end
+
+	ws_connecting = true
+	ws_connected = false
+
+	local ok_open, open_err = pcall(function()
+		socket:open(true)
+	end)
+	if not ok_open then
+		on_ws_connect_failed(open_err or "socket_open_failed")
+		return false
+	end
+
+	return false
+end
+
+local function ensure_ws_connected()
+	if not c_enable:GetBool() then
+		close_ws_socket(true)
+		return false
+	end
+
+	if not is_configured() then
+		close_ws_socket(true)
+		return false
+	end
+
+	if not c_ws_enable:GetBool() then
+		close_ws_socket(true)
+		return false
+	end
+
+	if ws_connected and ws_socket then
+		return true
+	end
+
+	connect_ws_socket()
+	return ws_connected and ws_socket ~= nil
+end
+
+local function send_player_pulse_ws(payload)
+	if not ensure_ws_connected() then return false end
+	if not ws_socket or not ws_connected then return false end
+
+	local body = util.TableToJSON({
+		type = "player_pulse",
+		payload = payload,
+	}, false, true)
+	if not body then return false end
+
+	local ok_write, err_write = pcall(function()
+		ws_socket:write(body, false)
+	end)
+	if not ok_write then
+		ws_last_error = tostring(err_write or "ws_write_failed")
+		debug_log("ws pulse write failed: " .. ws_last_error)
+		close_ws_socket(true)
+		schedule_ws_reconnect()
+		return false
+	end
+
+	return true
+end
+
+local function ws_keepalive_tick()
+	if not c_enable:GetBool() then
+		close_ws_socket(true)
+		return
+	end
+
+	if not c_ws_enable:GetBool() or not c_pulse_enable:GetBool() then
+		close_ws_socket(true)
+		return
+	end
+
+	local connected = ensure_ws_connected()
+	if not connected or not ws_socket then return end
+
+	local ok_ping, err_ping = pcall(function()
+		ws_socket:write("{\"type\":\"ping\"}", false)
+	end)
+	if not ok_ping then
+		ws_last_error = tostring(err_ping or "ws_ping_failed")
+		debug_log("ws ping failed: " .. ws_last_error)
+		close_ws_socket(true)
+		schedule_ws_reconnect()
+	end
 end
 
 local function ulid_encode_time(ms)
@@ -937,6 +1209,22 @@ local function send_player_pulse()
 	if not is_configured() then return end
 	if not c_pulse_enable:GetBool() then return end
 
+	local players = collect_online_players()
+	if #players == 0 then return end
+
+	local interval_sec = math_max(10, math_floor(c_pulse_seconds:GetFloat()))
+	local payload = {
+		sentAt = now_iso_utc(),
+		intervalSec = interval_sec,
+		map = game.GetMap(),
+		playerCount = get_player_count(),
+		players = players,
+	}
+
+	if c_ws_enable:GetBool() and send_player_pulse_ws(payload) then
+		return
+	end
+
 	local pulse_url = resolve_pulse_url()
 	if pulse_url == "" then return end
 	if is_local_resource_url(pulse_url) then
@@ -947,17 +1235,7 @@ local function send_player_pulse()
 		return
 	end
 
-	local players = collect_online_players()
-	if #players == 0 then return end
-
-	local interval_sec = math_max(10, math_floor(c_pulse_seconds:GetFloat()))
-	local body = util.TableToJSON({
-		sentAt = now_iso_utc(),
-		intervalSec = interval_sec,
-		map = game.GetMap(),
-		playerCount = get_player_count(),
-		players = players,
-	}, false, true)
+	local body = util.TableToJSON(payload, false, true)
 
 	if not body then return end
 
@@ -1592,11 +1870,16 @@ timer.Create("bsb_ingest_player_pulse", math_max(10, c_pulse_seconds:GetFloat())
 	send_player_pulse()
 end)
 
+timer.Create("bsb_ingest_ws_maintain", 5, 0, function()
+	ws_keepalive_tick()
+end)
+
 timer.Create("bsb_ingest_actions_poll", math_max(2, c_actions_seconds:GetFloat()), 0, function()
 	poll_server_actions()
 end)
 
 hook.Add("ShutDown", "bsb_ingest_shutdown_flush", function()
+	close_ws_socket(true)
 	flush_if_needed(true)
 	-- TODO: disk spool could be added later if guaranteed delivery is needed.
 end)
