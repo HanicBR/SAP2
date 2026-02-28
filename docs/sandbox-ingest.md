@@ -301,3 +301,32 @@ Se o logger capturar comandos de admin, envie como `ULX` ou `COMMAND`:
 
 Com esse contrato, basta o servidor Sandbox disparar os eventos na hora certa (hooks do Lua) montando esse JSON e chamando o endpoint; o backend já armazena tudo, o painel de Logs/Detecção/Analytics passa a usar dados reais, e você não precisa mais ler `.txt` manualmente.
 
+
+## Pulse playtime (PR-01 contract)
+
+Novo endpoint para migracao de playtime baseado em pulso:
+
+- URL: `POST /api/servers/pulse`
+- Auth: `X-Server-Key: <apiKey>`
+- Estado no PR-01: valida contrato, sem persistencia (`persisted=false`)
+
+Payload:
+
+```json
+{
+  "sentAt": "2026-02-28T16:30:00Z",
+  "intervalSec": 60,
+  "map": "gm_construct",
+  "playerCount": 3,
+  "players": [
+    { "steamId": "STEAM_0:1:76057833", "name": "Hanic" },
+    { "steamId": "STEAM_0:1:12345678", "name": "Player2" }
+  ]
+}
+```
+
+Feature flags:
+
+- `PLAYER_PULSE_ENABLED=1` para aceitar pulsos.
+- `PLAYTIME_SOURCE=legacy|hybrid|pulse` para controlar fonte de playtime.
+- `PLAYER_PULSE_INTERVAL_SEC=60` intervalo padrao esperado.

@@ -6,6 +6,7 @@ import { hashApiKey, compareApiKey } from '../utils/apiKey';
 import { drainServerActions } from '../services/serverActions';
 import { getVipAutomationMetrics, previewVipAutomationBuild, VipAutomationActionType } from '../services/vipAutomation';
 import { normalizeIp } from '../utils/normalizeIp';
+import { getPlayerPulseSettings, sanitizePlayerPulsePayload } from '../services/playtimePulse';
 
 const router = Router();
 
@@ -349,6 +350,52 @@ router.post('/actions/vip/preview', authMiddleware, requireRole(UserRole.ADMIN),
 // VIP automation metrics (build failures)
 router.get('/actions/vip/metrics', authMiddleware, requireRole(UserRole.ADMIN), async (_req, res) => {
   return res.json(getVipAutomationMetrics());
+});
+
+// Playtime pulse settings (contract bootstrap)
+router.get('/playtime/config', authMiddleware, requireRole(UserRole.ADMIN), async (_req, res) => {
+  return res.json(getPlayerPulseSettings());
+});
+
+// Playtime pulse ingestion (PR-01 contract only; persistence is added in PR-02)
+router.post('/pulse', async (req, res) => {
+  try {
+    const apiKey = (req.header('x-server-key') || req.header('X-Server-Key')) as string | undefined;
+    if (!apiKey) {
+      return res.status(401).json({ error: 'Missing server API key' });
+    }
+
+    const server = await findServerByApiKey(apiKey);
+    if (!server) {
+      return res.status(403).json({ error: 'Invalid server key' });
+    }
+
+    const settings = getPlayerPulseSettings();
+    if (!settings.enabled) {
+      return res.status(503).json({
+        error: 'player_pulse_disabled',
+        source: settings.source,
+      });
+    }
+
+    const payload = sanitizePlayerPulsePayload((req as any).body);
+    if (!payload.players.length) {
+      return res.status(400).json({ error: 'players_required' });
+    }
+
+    return res.json({
+      ok: true,
+      serverId: server.id,
+      source: settings.source,
+      acceptedPlayers: payload.players.length,
+      intervalSec: payload.intervalSec || settings.defaultIntervalSec,
+      persisted: false,
+      reason: 'contract_only_pr01',
+    });
+  } catch (err: any) {
+    console.error('Pulse ingest error', err);
+    return res.status(500).json({ error: 'Pulse ingest failed', detail: err?.message });
+  }
 });
 
 // Heartbeat endpoint for game servers (auth via X-Server-Key)
