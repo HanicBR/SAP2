@@ -1,48 +1,138 @@
 
-import React, { useEffect, useState, useCallback, memo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, memo } from 'react';
 import { ApiService } from '../../services/api';
-import { GameServer, GameMode, ServerStatus, User, UserRole } from '../../types';
+import { GameServer, GameMode, ServerStatus, ServerWsLiveStateItem, User, UserRole } from '../../types';
 import { Icons } from '../../components/Icon';
 import { Link } from 'react-router-dom';
 
+const LIVE_STATE_MAX_AGE_SECONDS = 30;
+
+type ServerLivePresentation = {
+  status: ServerStatus;
+  players: number;
+  maxPlayers: number;
+  map?: string;
+  lastSignal?: string;
+  sourceLabel: 'LIVE (WS)' | 'WS stale' | 'Fallback';
+  sourceClass: string;
+  sourceDescription: string;
+};
+
+const getStatusBadgeClass = (status: ServerStatus) => {
+  if (status === ServerStatus.ONLINE) return 'bg-green-900/20 text-green-400 border-green-900/30';
+  if (status === ServerStatus.MAINTENANCE) return 'bg-yellow-900/20 text-yellow-300 border-yellow-900/30';
+  return 'bg-red-900/20 text-red-400 border-red-900/30';
+};
+
+const getStatusLabel = (status: ServerStatus) => {
+  if (status === ServerStatus.ONLINE) return 'online';
+  if (status === ServerStatus.MAINTENANCE) return 'maintenance';
+  return 'offline';
+};
+
+const getServerLivePresentation = (
+  server: GameServer,
+  snapshot?: ServerWsLiveStateItem,
+): ServerLivePresentation => {
+  const ageSeconds = Number(snapshot?.ageSeconds ?? Number.POSITIVE_INFINITY);
+  const hasFreshWs = Boolean(
+    snapshot &&
+      snapshot.connected &&
+      Number.isFinite(ageSeconds) &&
+      ageSeconds <= LIVE_STATE_MAX_AGE_SECONDS,
+  );
+
+  if (hasFreshWs && snapshot) {
+    return {
+      status: ServerStatus.ONLINE,
+      players: Number(snapshot.playerCount || 0),
+      maxPlayers: server.maxPlayers,
+      ...(snapshot.map ? { map: snapshot.map } : {}),
+      lastSignal: snapshot.receivedAt,
+      sourceLabel: 'LIVE (WS)',
+      sourceClass: 'bg-emerald-900/20 text-emerald-300 border-emerald-700',
+      sourceDescription: `Snapshot WS ${Math.max(0, Math.floor(ageSeconds))}s`,
+    };
+  }
+
+  if (snapshot) {
+    return {
+      status: server.status,
+      players: server.currentPlayers,
+      maxPlayers: server.maxPlayers,
+      ...(server.currentMap ? { map: server.currentMap } : {}),
+      lastSignal: server.lastHeartbeat || snapshot.receivedAt,
+      sourceLabel: 'WS stale',
+      sourceClass: 'bg-yellow-900/20 text-yellow-300 border-yellow-700',
+      sourceDescription: `Snapshot WS antigo (${Math.max(0, Math.floor(ageSeconds))}s), fallback heartbeat/pulse`,
+    };
+  }
+
+  return {
+    status: server.status,
+    players: server.currentPlayers,
+    maxPlayers: server.maxPlayers,
+    ...(server.currentMap ? { map: server.currentMap } : {}),
+    ...(server.lastHeartbeat ? { lastSignal: server.lastHeartbeat } : {}),
+    sourceLabel: 'Fallback',
+    sourceClass: 'bg-zinc-800 text-zinc-400 border-zinc-700',
+    sourceDescription: 'Sem snapshot WS, usando heartbeat/pulse',
+  };
+};
+
 // --- SUB-COMPONENT: SERVER CARD (Memoized) ---
-const ServerCard = memo(({ server, isSuperAdmin, plainKey, onRegenerateKey, onEditIp }: { server: GameServer, isSuperAdmin: boolean, plainKey?: string, onRegenerateKey: (id: string) => void, onEditIp: (server: GameServer) => void }) => {
+const ServerCard = memo(({
+  server,
+  liveState,
+  isSuperAdmin,
+  plainKey,
+  onRegenerateKey,
+  onEditIp,
+}: {
+  server: GameServer;
+  liveState?: ServerWsLiveStateItem;
+  isSuperAdmin: boolean;
+  plainKey?: string;
+  onRegenerateKey: (id: string) => void;
+  onEditIp: (server: GameServer) => void;
+}) => {
+  const display = getServerLivePresentation(server, liveState);
   return (
     <div className="bg-zinc-900 rounded border border-zinc-800 p-6 shadow-sm hover:border-zinc-700 transition-colors">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           
           <div className="flex-1">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
                 <h3 className="text-xl font-bold text-white">{server.name}</h3>
-                <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider border ${
-                  server.status === ServerStatus.ONLINE 
-                  ? 'bg-green-900/20 text-green-400 border-green-900/30' 
-                  : 'bg-red-900/20 text-red-400 border-red-900/30'
-                }`}>
-                  {server.status}
+                <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider border ${getStatusBadgeClass(display.status)}`}>
+                  {getStatusLabel(display.status)}
+                </span>
+                <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider border ${display.sourceClass}`}>
+                  {display.sourceLabel}
                 </span>
             </div>
             <div className="mt-2 flex flex-wrap gap-4 text-sm text-zinc-400">
                 <span className="bg-zinc-950 px-2 py-1 rounded border border-zinc-800 font-mono text-xs">ID: {server.id}</span>
                 <span className="flex items-center"><Icons.Activity className="w-3 h-3 mr-1 text-zinc-600" /> {server.ip}:{server.port}</span>
                 <span className="flex items-center"><Icons.Crown className="w-3 h-3 mr-1 text-zinc-600" /> {server.mode}</span>
+                <span className="flex items-center"><Icons.Activity className="w-3 h-3 mr-1 text-zinc-600" /> {display.sourceDescription}</span>
             </div>
             <div className="mt-2 flex flex-wrap gap-4 text-xs text-zinc-500">
                 <span className="flex items-center">
                   <Icons.Users className="w-3 h-3 mr-1 text-zinc-600" />
-                  Jogadores: <span className="ml-1 font-mono text-zinc-200">{server.currentPlayers}/{server.maxPlayers}</span>
+                  Jogadores: <span className="ml-1 font-mono text-zinc-200">{display.players}/{display.maxPlayers}</span>
                 </span>
-                {server.currentMap && (
+                {display.map && (
                   <span className="flex items-center">
                     <Icons.Map className="w-3 h-3 mr-1 text-zinc-600" />
-                    Mapa: <span className="ml-1 text-zinc-200">{server.currentMap}</span>
+                    Mapa: <span className="ml-1 text-zinc-200">{display.map}</span>
                   </span>
                 )}
-                {server.lastHeartbeat && (
+                {display.lastSignal && (
                   <span className="flex items-center">
                     <Icons.Clock className="w-3 h-3 mr-1 text-zinc-600" />
                     Último sinal: <span className="ml-1 text-zinc-300">
-                      {new Date(server.lastHeartbeat).toLocaleTimeString()}
+                      {new Date(display.lastSignal).toLocaleTimeString('pt-BR')}
                     </span>
                   </span>
                 )}
@@ -236,12 +326,7 @@ const Servers: React.FC = () => {
     }
   });
 
-  useEffect(() => {
-    const userStr = localStorage.getItem('backstabber_user');
-    if (userStr) setCurrentUser(JSON.parse(userStr));
-
-    loadServers();
-  }, []);
+  const [liveStateByServerId, setLiveStateByServerId] = useState<Record<string, ServerWsLiveStateItem>>({});
 
   // Persiste as chaves em localStorage para que continuem visíveis após recarregar
   useEffect(() => {
@@ -252,12 +337,49 @@ const Servers: React.FC = () => {
     }
   }, [plainKeys]);
 
-  const loadServers = useCallback(() => {
-    ApiService.getServers().then(data => {
+  const loadServers = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
+    try {
+      const data = await ApiService.getServers();
       setServers(data);
-      setLoading(false);
-    });
+    } finally {
+      if (!silent) setLoading(false);
+    }
   }, []);
+
+  const loadLiveState = useCallback(async () => {
+    try {
+      const response = await ApiService.getServersLiveState();
+      const mapped: Record<string, ServerWsLiveStateItem> = {};
+      (response.items || []).forEach((item) => {
+        if (!item?.serverId) return;
+        mapped[item.serverId] = item;
+      });
+      setLiveStateByServerId(mapped);
+    } catch {
+      setLiveStateByServerId({});
+    }
+  }, []);
+
+  useEffect(() => {
+    const userStr = localStorage.getItem('backstabber_user');
+    if (userStr) setCurrentUser(JSON.parse(userStr));
+
+    void loadServers(false);
+    void loadLiveState();
+
+    const serversInterval = window.setInterval(() => {
+      void loadServers(true);
+    }, 20000);
+    const liveStateInterval = window.setInterval(() => {
+      void loadLiveState();
+    }, 10000);
+
+    return () => {
+      window.clearInterval(serversInterval);
+      window.clearInterval(liveStateInterval);
+    };
+  }, [loadServers, loadLiveState]);
 
   const handleRegenerateKey = useCallback(async (serverId: string) => {
     if(!window.confirm("ATENÇÃO: Gerar uma nova chave API fará com que o servidor perca a conexão. Continuar?")) return;
@@ -265,7 +387,7 @@ const Servers: React.FC = () => {
     try {
       const newKey = await ApiService.regenerateApiKey(serverId);
       setPlainKeys(prev => ({ ...prev, [serverId]: newKey }));
-      loadServers();
+      void loadServers(true);
       alert(`Nova chave gerada:\n${newKey}`);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Falha ao regenerar chave';
@@ -281,7 +403,7 @@ const Servers: React.FC = () => {
       if (created?.id && created.apiKey) {
         setPlainKeys(prev => ({ ...prev, [created.id]: created.apiKey! }));
       }
-      loadServers();
+      void loadServers(true);
   }, [loadServers]);
 
   const handleEditServerIp = useCallback(async (server: GameServer) => {
@@ -295,7 +417,7 @@ const Servers: React.FC = () => {
 
     try {
       await ApiService.updateServerIp(server.id, trimmed);
-      loadServers();
+      void loadServers(true);
       alert('IP do servidor atualizado.');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Falha ao atualizar IP do servidor';
@@ -304,6 +426,31 @@ const Servers: React.FC = () => {
   }, [loadServers]);
 
   const isSuperAdmin = currentUser?.role === UserRole.SUPERADMIN;
+  const liveStateSummary = useMemo(() => {
+    let live = 0;
+    let stale = 0;
+    let fallback = 0;
+
+    servers.forEach((server) => {
+      const display = getServerLivePresentation(server, liveStateByServerId[server.id]);
+      if (display.sourceLabel === 'LIVE (WS)') {
+        live += 1;
+        return;
+      }
+      if (display.sourceLabel === 'WS stale') {
+        stale += 1;
+        return;
+      }
+      fallback += 1;
+    });
+
+    return {
+      total: servers.length,
+      live,
+      stale,
+      fallback,
+    };
+  }, [servers, liveStateByServerId]);
 
   return (
     <div className="space-y-6 animate-fade-in relative">
@@ -320,14 +467,36 @@ const Servers: React.FC = () => {
          )}
        </div>
 
+       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div className="bg-zinc-900 border border-zinc-800 rounded p-3">
+            <p className="text-[11px] uppercase font-bold text-zinc-500">Total</p>
+            <p className="text-lg font-black text-zinc-100">{liveStateSummary.total}</p>
+          </div>
+          <div className="bg-zinc-900 border border-zinc-800 rounded p-3">
+            <p className="text-[11px] uppercase font-bold text-zinc-500">LIVE (WS)</p>
+            <p className="text-lg font-black text-emerald-300">{liveStateSummary.live}</p>
+          </div>
+          <div className="bg-zinc-900 border border-zinc-800 rounded p-3">
+            <p className="text-[11px] uppercase font-bold text-zinc-500">WS stale</p>
+            <p className="text-lg font-black text-yellow-300">{liveStateSummary.stale}</p>
+          </div>
+          <div className="bg-zinc-900 border border-zinc-800 rounded p-3">
+            <p className="text-[11px] uppercase font-bold text-zinc-500">Fallback</p>
+            <p className="text-lg font-black text-zinc-300">{liveStateSummary.fallback}</p>
+          </div>
+       </div>
+
        <div className="grid gap-6">
           {loading ? (
              <p className="text-zinc-500">Carregando servidores...</p>
+          ) : servers.length === 0 ? (
+             <p className="text-zinc-500">Nenhum servidor cadastrado.</p>
           ) : (
             servers.map(server => (
               <ServerCard 
                   key={server.id} 
                   server={server} 
+                  liveState={liveStateByServerId[server.id]}
                   isSuperAdmin={isSuperAdmin} 
                   onRegenerateKey={handleRegenerateKey}
                   onEditIp={handleEditServerIp}
