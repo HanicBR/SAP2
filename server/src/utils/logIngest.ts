@@ -176,26 +176,8 @@ export const normalizeEventsForServer = (
   return cleanEvents;
 };
 
-const enrichConnectMetadata = async (events: NormalizedLogEvent[]): Promise<NormalizedLogEvent[]> => {
-  const connectIps = new Set<string>();
-
-  events.forEach((event) => {
-    if (event.type !== 'CONNECT') return;
-    const ip = normalizeIp((event.metadata as any)?.ip);
-    if (ip) connectIps.add(ip);
-  });
-
-  const geoByIp = new Map<string, any>();
-  await Promise.all(
-    Array.from(connectIps).map(async (ip) => {
-      const geo = await lookupGeoIp(ip);
-      if (geo) {
-        geoByIp.set(ip, geo);
-      }
-    }),
-  );
-
-  return events.map((event) => {
+const prepareConnectMetadata = (events: NormalizedLogEvent[]): NormalizedLogEvent[] =>
+  events.map((event) => {
     const metadata = (event.metadata || {}) as any;
     if (event.type !== 'CONNECT') {
       delete metadata.ip;
@@ -222,18 +204,46 @@ const enrichConnectMetadata = async (events: NormalizedLogEvent[]): Promise<Norm
 
     metadata.ip = ip;
     metadata.ipHash = hashIp(ip);
-
-    const geo = geoByIp.get(ip);
-    if (geo) {
-      metadata.geo = geo;
-    } else {
-      delete metadata.geo;
-    }
+    delete metadata.geo;
 
     return {
       ...event,
       metadata,
     };
+  });
+
+const enrichPlayerGeoInBackground = (events: NormalizedLogEvent[]) => {
+  const targets = new Map<string, { steamId: string; ip: string }>();
+
+  events.forEach((event) => {
+    if (event.type !== 'CONNECT' || !event.steamId) return;
+    const ip = normalizeIp((event.metadata as any)?.ip);
+    if (!ip) return;
+    targets.set(`${event.steamId}::${ip}`, { steamId: event.steamId, ip });
+  });
+
+  if (!targets.size) return;
+
+  void Promise.all(
+    Array.from(targets.values()).map(async ({ steamId, ip }) => {
+      try {
+        const geo = await lookupGeoIp(ip);
+        if (!geo) return;
+        // Guard to avoid writing stale geo when player already switched to another IP.
+        await prisma.playerProfile.updateMany({
+          where: { steamId, ip },
+          data: { geo: geo as any },
+        });
+      } catch (err: any) {
+        console.error('Geo background enrichment failed', {
+          steamId,
+          ip,
+          error: err?.message || String(err),
+        });
+      }
+    }),
+  ).catch((err: any) => {
+    console.error('Geo background enrichment batch failed', err?.message || String(err));
   });
 };
 
@@ -242,11 +252,11 @@ export const storeLogsAndUpdateProfiles = async (cleanEvents: NormalizedLogEvent
     return { ingested: 0, snapshotsInserted: 0, playersTouched: 0 };
   }
 
-  const enriched = await enrichConnectMetadata(cleanEvents);
+  const preparedEvents = prepareConnectMetadata(cleanEvents);
 
   // Deduplicação no próprio lote por (serverId, eventId)
   const seenInBatch = new Set<string>();
-  const dedupedBatch = enriched.filter((event) => {
+  const dedupedBatch = preparedEvents.filter((event) => {
     if (!event.eventId) return true;
     const key = `${event.serverId}::${event.eventId}`;
     if (seenInBatch.has(key)) return false;
@@ -322,7 +332,6 @@ export const storeLogsAndUpdateProfiles = async (cleanEvents: NormalizedLogEvent
     seenPlayers.add(steamId);
     const isConnect = ev.type === 'CONNECT';
     const ip = isConnect ? normalizeIp((ev.metadata as any)?.ip) || undefined : undefined;
-    const geo = isConnect ? (ev.metadata as any)?.geo || undefined : undefined;
     const existingProfile = await prisma.playerProfile.findUnique({
       where: { steamId },
       select: { serverStats: true },
@@ -368,7 +377,6 @@ export const storeLogsAndUpdateProfiles = async (cleanEvents: NormalizedLogEvent
         playTimeHours: 0,
         isVip: false,
         ip: ip || null,
-        geo,
         serverStats: nextServerStats,
       },
       update: {
@@ -378,11 +386,12 @@ export const storeLogsAndUpdateProfiles = async (cleanEvents: NormalizedLogEvent
           increment: ev.type === 'CONNECT' ? 1 : 0,
         },
         ip: isConnect ? ip || undefined : undefined,
-        geo: isConnect ? geo : undefined,
         serverStats: ev.serverId ? (nextServerStats as any) : undefined,
       } as any,
     });
   }
+
+  enrichPlayerGeoInBackground(eventsToInsert);
 
   return {
     ingested: insertResult.count,
