@@ -196,6 +196,19 @@ const mapPunishmentRecord = (p: any, deactivation?: PunishmentDeactivation) => {
   };
 };
 
+const buildPunishmentDeactivationEntryFromLog = (log: {
+  timestamp?: Date | null;
+  playerName?: string | null;
+  metadata?: unknown;
+}): PunishmentDeactivation => {
+  const meta: any = log.metadata || {};
+  const entry: PunishmentDeactivation = {};
+  if (meta.reason) entry.reason = String(meta.reason);
+  if (log.timestamp) entry.at = log.timestamp.toISOString();
+  if (log.playerName) entry.by = String(log.playerName);
+  return entry;
+};
+
 const buildPunishmentLogsTargetWhere = (steamId: string, playerName?: string) => {
   const clauses: any[] = [
     {
@@ -228,7 +241,7 @@ const buildPunishmentLogsTargetWhere = (steamId: string, playerName?: string) =>
   } as any;
 };
 
-const mapPunishmentLogRecord = (log: any) => {
+const mapPunishmentLogRecord = (log: any, deactivation?: PunishmentDeactivation) => {
   const meta: any = log.metadata || {};
   const timestamp = log.timestamp instanceof Date ? log.timestamp : new Date(log.timestamp);
   const action = String(meta.action || '').trim().toUpperCase();
@@ -249,7 +262,10 @@ const mapPunishmentLogRecord = (log: any) => {
   const isRevocationAction =
     action === 'UNBAN' || action === 'UNMUTE' || action === 'UNGAG' || action === 'UNPUNISH' || sourceTag === 'PUNISHMENT_DEACTIVATE';
 
-  if (isRevocationAction) {
+  if (deactivation) {
+    status = 'REVOKED';
+    active = false;
+  } else if (isRevocationAction) {
     status = 'REVOKED';
     active = false;
   } else if (parsedType === 'BAN' || parsedType === 'MUTE' || parsedType === 'GAG') {
@@ -281,9 +297,15 @@ const mapPunishmentLogRecord = (log: any) => {
     duration: durationText,
     active,
     status,
-    deactivationReason: status === 'REVOKED' && meta.reason ? String(meta.reason) : undefined,
-    deactivatedAt: status === 'REVOKED' ? timestamp.toISOString() : undefined,
-    deactivatedBy: status === 'REVOKED' && log.playerName ? String(log.playerName) : undefined,
+    deactivationReason:
+      deactivation?.reason ||
+      (status === 'REVOKED' && meta.reason ? String(meta.reason) : undefined),
+    deactivatedAt:
+      deactivation?.at ||
+      (status === 'REVOKED' ? timestamp.toISOString() : undefined),
+    deactivatedBy:
+      deactivation?.by ||
+      (status === 'REVOKED' && log.playerName ? String(log.playerName) : undefined),
   };
 };
 
@@ -293,7 +315,7 @@ const normalizePunishmentReason = (value: unknown): string =>
     .toLowerCase()
     .replace(/\s+/g, ' ');
 
-const PANEL_COMMAND_ECHO_WINDOW_MS = 6 * 60 * 60 * 1000;
+const PANEL_COMMAND_ECHO_WINDOW_MS = 45 * 1000;
 
 const punishmentReasonsLikelySame = (left: string, right: string): boolean => {
   if (!left || !right) return false;
@@ -1261,12 +1283,30 @@ const fetchPaginatedPunishments = async (
     },
   });
 
+  const logIdSet = new Set(logRows.map((row) => String(row.id)));
+  const logDeactivationMap = new Map<string, PunishmentDeactivation>();
+  logRows.forEach((log) => {
+    const meta: any = log.metadata || {};
+    const sourceTag = String(meta.sourceTag || '').trim().toUpperCase();
+    if (sourceTag !== 'PUNISHMENT_DEACTIVATE') return;
+    const punishmentLogId = String(meta.punishmentLogId || '').trim();
+    if (!punishmentLogId || logDeactivationMap.has(punishmentLogId)) return;
+    logDeactivationMap.set(
+      punishmentLogId,
+      buildPunishmentDeactivationEntryFromLog(log),
+    );
+  });
+
   const logItems = logRows
     .filter((log) => {
       const meta: any = log.metadata || {};
       const sourceTag = String(meta.sourceTag || '').trim().toUpperCase();
       const punishmentId = String(meta.punishmentId || '').trim();
+      const punishmentLogId = String(meta.punishmentLogId || '').trim();
       if (sourceTag === 'PUNISHMENT_DEACTIVATE' && punishmentId && dbIdSet.has(punishmentId)) {
+        return false;
+      }
+      if (sourceTag === 'PUNISHMENT_DEACTIVATE' && punishmentLogId && logIdSet.has(punishmentLogId)) {
         return false;
       }
       if (shouldDropPanelCommandEchoPunishmentLog(log, dbEchoCandidates)) {
@@ -1274,7 +1314,12 @@ const fetchPaginatedPunishments = async (
       }
       return true;
     })
-    .map((log) => mapPunishmentLogRecord(log));
+    .map((log) =>
+      mapPunishmentLogRecord(
+        log,
+        logDeactivationMap.get(String(log.id)),
+      ),
+    );
 
   const combined = [...dbItems, ...logItems].sort((a, b) => {
     const diff = new Date(b.date).getTime() - new Date(a.date).getTime();
@@ -1992,6 +2037,121 @@ router.patch(
     const { steamId, punishmentId } = req.params as { steamId: string; punishmentId: string };
     const { reason } = req.body as { reason?: string };
     const parsedReason = String(reason || '').trim();
+    const actorName = String(req.user?.username || 'Console');
+    const resolveRevokeActionLabel = (punishmentType: string): 'UNBAN' | 'UNMUTE' | 'UNGAG' | 'UNPUNISH' => {
+      const parsedType = String(punishmentType || '').trim().toUpperCase();
+      if (parsedType === 'BAN') return 'UNBAN';
+      if (parsedType === 'MUTE') return 'UNMUTE';
+      if (parsedType === 'GAG') return 'UNGAG';
+      return 'UNPUNISH';
+    };
+
+    if (String(punishmentId || '').startsWith('log_')) {
+      const logId = String(punishmentId || '').slice(4).trim();
+      if (!logId) {
+        return res.status(404).json({ error: 'Punishment not found' });
+      }
+
+      const sourceLog = await prisma.log.findUnique({
+        where: { id: logId },
+        select: {
+          id: true,
+          serverId: true,
+          gameMode: true,
+          type: true,
+          timestamp: true,
+          playerName: true,
+          metadata: true,
+        },
+      });
+      if (!sourceLog || sourceLog.type !== 'PUNISH') {
+        return res.status(404).json({ error: 'Punishment not found' });
+      }
+
+      const sourceMeta: any = sourceLog.metadata || {};
+      const targetSteamId = String(sourceMeta.targetSteamId || '').trim();
+      if (targetSteamId && targetSteamId !== steamId) {
+        return res.status(404).json({ error: 'Punishment not found' });
+      }
+
+      const sourceAction = String(sourceMeta.action || '').trim().toUpperCase();
+      let sourceType = String(sourceMeta.punishmentType || '').trim().toUpperCase();
+      if (!sourceType) {
+        if (sourceAction === 'UNBAN') sourceType = 'BAN';
+        else if (sourceAction === 'UNMUTE') sourceType = 'MUTE';
+        else if (sourceAction === 'UNGAG') sourceType = 'GAG';
+        else sourceType = sourceAction;
+      }
+
+      if (!['BAN', 'MUTE', 'GAG'].includes(sourceType)) {
+        return res.status(400).json({ error: 'Punishment cannot be deactivated' });
+      }
+
+      const command = buildSamPunishmentDeactivateCommand(sourceType, steamId);
+      let dispatch: { queued: boolean; serverId?: string; actionId?: string } = { queued: false };
+      if (sourceLog.serverId && command) {
+        const action = enqueueServerAction(sourceLog.serverId, command, {
+          steamId,
+          punishmentType: sourceType,
+          reason: parsedReason || undefined,
+          sourceLogId: sourceLog.id,
+        });
+        if (action) {
+          dispatch = {
+            queued: true,
+            serverId: sourceLog.serverId,
+            actionId: action.id,
+          };
+        }
+      }
+
+      const actionLabel = resolveRevokeActionLabel(sourceType);
+      try {
+        await prisma.log.create({
+          data: {
+            serverId: sourceLog.serverId,
+            gameMode: sourceLog.gameMode as any,
+            type: 'PUNISH',
+            timestamp: new Date(),
+            playerName: actorName,
+            rawText: `${actorName} removeu ${actionLabel} de ${steamId}${parsedReason ? ` motivo=${parsedReason}` : ''}`,
+            metadata: {
+              source: 'admin_panel',
+              sourceTag: 'PUNISHMENT_DEACTIVATE',
+              action: actionLabel,
+              targetSteamId: steamId,
+              reason: parsedReason || undefined,
+              punishmentLogId: sourceLog.id,
+            } as any,
+          } as any,
+        });
+      } catch {
+        // best effort audit event
+      }
+
+      const sourceReason =
+        sourceMeta.reason && String(sourceMeta.reason).trim()
+          ? String(sourceMeta.reason)
+          : sourceMeta.command && String(sourceMeta.command).trim()
+          ? String(sourceMeta.command)
+          : 'Sem motivo';
+      const sourceDuration = sourceMeta.durationText ? String(sourceMeta.durationText) : undefined;
+
+      return res.json({
+        id: `log_${sourceLog.id}`,
+        type: sourceType,
+        reason: sourceReason,
+        staffName: String(sourceLog.playerName || 'Console'),
+        date: sourceLog.timestamp.toISOString(),
+        duration: sourceDuration,
+        active: false,
+        status: 'REVOKED',
+        deactivationReason: parsedReason || undefined,
+        deactivatedAt: new Date().toISOString(),
+        deactivatedBy: actorName,
+        dispatch,
+      });
+    }
 
     const punishment = await prisma.punishment.findUnique({ where: { id: punishmentId } });
     if (!punishment || punishment.steamId !== steamId) {
@@ -2034,9 +2194,7 @@ router.patch(
           select: { serverId: true, gameMode: true },
         }));
       if (serverContext?.serverId && serverContext?.gameMode) {
-        const actionLabel =
-          updated.type === 'BAN' ? 'UNBAN' : updated.type === 'MUTE' ? 'UNMUTE' : updated.type === 'GAG' ? 'UNGAG' : 'UNPUNISH';
-        const actorName = String(req.user?.username || 'Console');
+        const actionLabel = resolveRevokeActionLabel(updated.type);
         await prisma.log.create({
           data: {
             serverId: serverContext.serverId,
@@ -2071,7 +2229,7 @@ router.patch(
       status: 'REVOKED',
       deactivationReason: parsedReason || undefined,
       deactivatedAt: new Date().toISOString(),
-      deactivatedBy: String(req.user?.username || 'Console'),
+      deactivatedBy: actorName,
       dispatch,
     });
   },
