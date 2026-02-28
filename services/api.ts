@@ -1,7 +1,7 @@
 
 
 import { MOCK_SERVERS, MOCK_EVENTS, MOCK_STATS, VIP_PLANS, MOCK_SUSPICIOUS_GROUPS, MOCK_PLAYERS, MOCK_USERS, MOCK_TRANSACTIONS, generateServerAnalytics, DEFAULT_SITE_CONFIG } from '../constants';
-import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig } from '../types';
+import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel } from '../types';
 
 // Utility to simulate network delay (used as fallback)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -106,6 +106,35 @@ let siteConfigDb: SiteConfig = (() => {
     return { ...DEFAULT_SITE_CONFIG };
   }
 })();
+
+const toConfidenceFromLegacy = (level?: string): DuplicateConfidence =>
+  String(level || '').toUpperCase() === 'HIGH' ? 'HIGH' : 'MEDIUM';
+
+const toSuspiciousGroupV2FromLegacy = (group: SuspiciousGroup): SuspiciousGroupV2 => {
+  const normalizedLevel = String(group.level || '').toUpperCase();
+  const isHigh = normalizedLevel === 'HIGH';
+  const reasonCode = isHigh ? 'SAME_IP' : 'SAME_SUBNET';
+  return {
+    id: group.id,
+    level: isHigh ? 'HIGH' : 'MODERATE',
+    confidence: isHigh ? 'HIGH' : 'MEDIUM',
+    reasonCode,
+    reasonLabel: isHigh ? 'Mesmo IP exato' : 'Mesma sub-rede /24',
+    commonIpOrSubnet: group.commonIpOrSubnet,
+    location: group.location,
+    lastActivity: group.lastActivity,
+    players: group.players,
+  };
+};
+
+const toLegacyGroupFromV2 = (group: SuspiciousGroupV2): SuspiciousGroup => ({
+  id: group.id,
+  level: group.level === 'HIGH' ? SuspicionLevel.HIGH : SuspicionLevel.MODERATE,
+  commonIpOrSubnet: group.commonIpOrSubnet,
+  location: group.location,
+  lastActivity: group.lastActivity,
+  players: group.players,
+});
 
 export const ApiService = {
   // Public Data
@@ -1061,6 +1090,34 @@ export const ApiService = {
     return [...MOCK_SUSPICIOUS_GROUPS];
   },
 
+  getSuspiciousAccountsV2: async (query?: {
+    limit?: number;
+    maxRows?: number;
+  }): Promise<SuspiciousGroupV2[]> => {
+    const normalized = query || {};
+
+    if (hasApi) {
+      try {
+        const params = new URLSearchParams();
+        if (typeof normalized.limit === 'number' && normalized.limit > 0) {
+          params.set('limit', String(Math.floor(normalized.limit)));
+        }
+        if (typeof normalized.maxRows === 'number' && normalized.maxRows > 0) {
+          params.set('maxRows', String(Math.floor(normalized.maxRows)));
+        }
+        const suffix = params.toString() ? `?${params.toString()}` : '';
+        return await apiFetch<SuspiciousGroupV2[]>(`/suspicious/v2${suffix}`);
+      } catch (error) {
+        console.error('API getSuspiciousAccountsV2 failed, fallback to legacy suspicious:', error);
+        const legacy = await ApiService.getSuspiciousAccounts();
+        return legacy.map(toSuspiciousGroupV2FromLegacy);
+      }
+    }
+
+    await delay(700);
+    return [...MOCK_SUSPICIOUS_GROUPS].map(toSuspiciousGroupV2FromLegacy);
+  },
+
   getPlayerRelatedAccounts: async (steamId: string): Promise<SuspiciousGroup | null> => {
     if (hasApi) {
       return await apiFetch<SuspiciousGroup | null>(`/players/${steamId}/related-accounts`);
@@ -1069,6 +1126,75 @@ export const ApiService = {
     const groups = await ApiService.getSuspiciousAccounts();
     const match = groups.find((g) => g.players.some((p) => p.steamId === steamId));
     return match || null;
+  },
+
+  getPlayerIpHistoryV2: async (
+    steamId: string,
+    options?: { limit?: number },
+  ): Promise<PlayerIpHistoryResponseV2> => {
+    if (hasApi) {
+      try {
+        const params = new URLSearchParams();
+        if (typeof options?.limit === 'number' && options.limit > 0) {
+          params.set('limit', String(Math.floor(options.limit)));
+        }
+        const suffix = params.toString() ? `?${params.toString()}` : '';
+        return await apiFetch<PlayerIpHistoryResponseV2>(`/players/${steamId}/ip-history-v2${suffix}`);
+      } catch (error) {
+        console.error('API getPlayerIpHistoryV2 failed, returning empty history:', error);
+      }
+    }
+
+    await delay(120);
+    return {
+      steamId,
+      total: 0,
+      items: [],
+    };
+  },
+
+  getPlayerRelatedAccountsV2: async (
+    steamId: string,
+    options?: { limit?: number },
+  ): Promise<RelatedAccountsResponseV2 | null> => {
+    if (hasApi) {
+      try {
+        const params = new URLSearchParams();
+        if (typeof options?.limit === 'number' && options.limit > 0) {
+          params.set('limit', String(Math.floor(options.limit)));
+        }
+        const suffix = params.toString() ? `?${params.toString()}` : '';
+        return await apiFetch<RelatedAccountsResponseV2 | null>(
+          `/players/${steamId}/related-accounts-v2${suffix}`,
+        );
+      } catch (error) {
+        console.error('API getPlayerRelatedAccountsV2 failed, fallback to legacy related:', error);
+      }
+    }
+
+    const legacy = await ApiService.getPlayerRelatedAccounts(steamId);
+    if (!legacy) return null;
+    const relatedPlayers = legacy.players.filter((player) => player.steamId !== steamId);
+    return {
+      steamId,
+      analyzedAt: new Date().toISOString(),
+      total: relatedPlayers.length,
+      items: relatedPlayers.map((player) => ({
+        player,
+        confidence: toConfidenceFromLegacy(legacy.level),
+        reasons: [
+          {
+            code: String(legacy.level || '').toUpperCase() === 'HIGH' ? 'SAME_IP' : 'SAME_SUBNET',
+            confidence: toConfidenceFromLegacy(legacy.level),
+            label:
+              String(legacy.level || '').toUpperCase() === 'HIGH'
+                ? 'Mesmo IP exato'
+                : 'Mesma sub-rede /24',
+            evidence: [legacy.commonIpOrSubnet],
+          },
+        ],
+      })),
+    };
   },
 
   regenerateApiKey: async (serverId: string): Promise<string> => {

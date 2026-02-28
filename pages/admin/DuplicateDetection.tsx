@@ -1,13 +1,13 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { ApiService } from '../../services/api';
-import { SuspiciousGroup, SuspicionLevel, Player } from '../../types';
+import { DuplicateConfidence, SuspiciousGroupV2 } from '../../types';
 import { Icons } from '../../components/Icon';
 import { MapContainer, TileLayer, Circle, CircleMarker, Popup } from 'react-leaflet';
 import { Pagination } from '../../components/Pagination';
 
 const DuplicateDetection: React.FC = () => {
-  const [groups, setGroups] = useState<SuspiciousGroup[]>([]);
+  const [groups, setGroups] = useState<SuspiciousGroupV2[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
   const mapRefs = useRef<Record<string, any>>({});
@@ -21,12 +21,14 @@ const DuplicateDetection: React.FC = () => {
     loadData();
   }, []);
 
-  const loadData = () => {
+  const loadData = async () => {
     setLoading(true);
-    ApiService.getSuspiciousAccounts().then(data => {
+    try {
+      const data = await ApiService.getSuspiciousAccountsV2({ limit: 150, maxRows: 8000 });
       setGroups(data);
+    } finally {
       setLoading(false);
-    });
+    }
   };
 
   const toggleExpand = (id: string) => {
@@ -49,19 +51,27 @@ const DuplicateDetection: React.FC = () => {
     }
   }, [expandedGroup]);
 
-  const getLevelBadge = (level: SuspicionLevel) => {
-    if (level === SuspicionLevel.HIGH) {
+  const getLevelBadge = (confidence: DuplicateConfidence, reasonLabel: string) => {
+    if (confidence === 'HIGH') {
       return (
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-900/30 text-red-500 border border-red-900/50 uppercase tracking-wide">
           <Icons.Shield className="w-3 h-3 mr-1" />
-          Forte (Mesmo IP)
+          Alta ({reasonLabel})
+        </span>
+      );
+    }
+    if (confidence === 'MEDIUM') {
+      return (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-yellow-900/30 text-yellow-500 border border-yellow-900/50 uppercase tracking-wide">
+          <Icons.Activity className="w-3 h-3 mr-1" />
+          Media ({reasonLabel})
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-yellow-900/30 text-yellow-500 border border-yellow-900/50 uppercase tracking-wide">
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-zinc-800 text-zinc-300 border border-zinc-700 uppercase tracking-wide">
         <Icons.Activity className="w-3 h-3 mr-1" />
-        Moderada (Subnet/Cidade)
+        Baixa ({reasonLabel})
       </span>
     );
   };
@@ -89,7 +99,15 @@ const DuplicateDetection: React.FC = () => {
              <span className="text-xs text-red-400 font-bold uppercase">Área Sensível: Acesso restrito à Staff</span>
           </div>
           <button
-            onClick={() => { setRefreshing(true); loadData(); setTimeout(() => setRefreshing(false), 400); setExpandedGroup(null); }}
+            onClick={async () => {
+              setRefreshing(true);
+              setExpandedGroup(null);
+              try {
+                await loadData();
+              } finally {
+                setRefreshing(false);
+              }
+            }}
             className="bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-2 rounded text-xs font-bold uppercase tracking-wider flex items-center border border-zinc-700"
             disabled={loading || refreshing}
           >
@@ -114,12 +132,20 @@ const DuplicateDetection: React.FC = () => {
                     onClick={() => toggleExpand(group.id)}
                   >
                     <div className="flex items-start sm:items-center gap-4">
-                      <div className={`p-3 rounded-full ${group.level === SuspicionLevel.HIGH ? 'bg-red-500/10 text-red-500' : 'bg-yellow-500/10 text-yellow-500'}`}>
+                      <div
+                        className={`p-3 rounded-full ${
+                          group.confidence === 'HIGH'
+                            ? 'bg-red-500/10 text-red-500'
+                            : group.confidence === 'MEDIUM'
+                            ? 'bg-yellow-500/10 text-yellow-500'
+                            : 'bg-zinc-700/20 text-zinc-400'
+                        }`}
+                      >
                           <Icons.Fingerprint className="w-6 h-6" />
                       </div>
                       <div>
                           <div className="flex items-center gap-3 mb-1">
-                            {getLevelBadge(group.level)}
+                            {getLevelBadge(group.confidence, group.reasonLabel)}
                             <span className="text-zinc-500 text-xs font-mono bg-black/50 px-2 py-0.5 rounded border border-zinc-800">
                               {group.commonIpOrSubnet}
                             </span>
@@ -202,7 +228,7 @@ const DuplicateDetection: React.FC = () => {
                                   />
                                   {group.players.map((player) => {
                                       if (!player.geo?.lat || !player.geo?.lng) return null;
-                                      const isHighRisk = group.level === SuspicionLevel.HIGH;
+                                      const isHighRisk = group.confidence === 'HIGH';
                                       return (
                                         <React.Fragment key={`map-${player.steamId}`}>
                                             <CircleMarker 

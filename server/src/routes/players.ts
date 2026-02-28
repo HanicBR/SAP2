@@ -3,6 +3,11 @@ import { prisma } from '../db/client';
 import { authMiddleware, requireRole } from '../middleware/auth';
 import { UserRole } from '../domain';
 import { enqueueServerAction } from '../services/serverActions';
+import {
+  getPlayerIpHistoryV2,
+  getRelatedAccountsV2,
+  isDuplicateAnalysisV2Enabled,
+} from '../services/duplicateAnalysis';
 
 const router = Router();
 const VALID_PUNISHMENT_TYPES = new Set(['BAN', 'MUTE', 'GAG', 'KICK']);
@@ -1458,6 +1463,39 @@ router.get('/:steamId/logs', async (req, res) => {
     nextCursor: logs[logs.length - 1]?.id ?? null,
     items: logs.map(mapLog),
   });
+});
+
+router.get('/:steamId/ip-history-v2', async (req, res) => {
+  if (!isDuplicateAnalysisV2Enabled()) {
+    return res.status(404).json({ error: 'duplicate_analysis_v2_disabled' });
+  }
+
+  const { steamId } = req.params as { steamId: string };
+  const player = await prisma.playerProfile.findUnique({
+    where: { steamId },
+    select: { steamId: true },
+  });
+  if (!player) {
+    return res.status(404).json({ error: 'Player not found' });
+  }
+
+  const limit = parsePositiveInt(req.query.limit, 100, 500);
+  const history = await getPlayerIpHistoryV2(steamId, limit);
+  return res.json(history);
+});
+
+router.get('/:steamId/related-accounts-v2', async (req, res) => {
+  if (!isDuplicateAnalysisV2Enabled()) {
+    return res.status(404).json({ error: 'duplicate_analysis_v2_disabled' });
+  }
+
+  const { steamId } = req.params as { steamId: string };
+  const limit = parsePositiveInt(req.query.limit, 50, 200);
+  const analysis = await getRelatedAccountsV2(steamId, limit);
+  if (!analysis) {
+    return res.status(404).json({ error: 'Player not found' });
+  }
+  return res.json(analysis);
 });
 
 router.get('/:steamId/related-accounts', async (req, res) => {

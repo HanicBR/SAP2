@@ -1,9 +1,19 @@
 import { Router } from 'express';
 import { prisma } from '../db/client';
+import {
+  isDuplicateAnalysisV2Enabled,
+  listSuspiciousGroupsV2,
+} from '../services/duplicateAnalysis';
 
 type SuspicionLevel = 'HIGH' | 'MEDIUM';
 
 const router = Router();
+
+const parsePositiveInt = (value: unknown, fallback: number, max: number): number => {
+  const parsed = Number.parseInt(String(value ?? ''), 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
+  return Math.min(parsed, max);
+};
 
 const toPlayer = (p: any) => ({
   steamId: p.steamId,
@@ -37,6 +47,17 @@ const validIp = (ip?: string | null) => {
     return !isNaN(n) && n >= 0 && n <= 255;
   });
 };
+
+router.get('/v2', async (req, res) => {
+  if (!isDuplicateAnalysisV2Enabled()) {
+    return res.status(404).json({ error: 'duplicate_analysis_v2_disabled' });
+  }
+
+  const limit = parsePositiveInt(req.query.limit, 100, 500);
+  const maxRows = parsePositiveInt(req.query.maxRows, 5000, 20000);
+  const groups = await listSuspiciousGroupsV2(limit, maxRows);
+  return res.json(groups);
+});
 
 router.get('/', async (_req, res) => {
   const players = await prisma.playerProfile.findMany({

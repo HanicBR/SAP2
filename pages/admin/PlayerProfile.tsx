@@ -4,7 +4,16 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ApiService } from '../../services/api';
-import { Player, ServerEvent, GameServer, SuspiciousGroup, Punishment } from '../../types';
+import {
+  Player,
+  ServerEvent,
+  GameServer,
+  SuspiciousGroup,
+  Punishment,
+  PlayerIpHistoryResponseV2,
+  RelatedAccountsResponseV2,
+  RelatedAccountItemV2,
+} from '../../types';
 import { Icons } from '../../components/Icon';
 import { formatLogMessage } from '../../components/logMessage';
 import { Pagination } from '../../components/Pagination';
@@ -27,6 +36,8 @@ const PlayerProfile: React.FC = () => {
   const [servers, setServers] = useState<GameServer[]>([]);
   const [loading, setLoading] = useState(true);
   const [suspiciousGroup, setSuspiciousGroup] = useState<SuspiciousGroup | null>(null);
+  const [relatedAccountsV2, setRelatedAccountsV2] = useState<RelatedAccountsResponseV2 | null>(null);
+  const [ipHistoryV2, setIpHistoryV2] = useState<PlayerIpHistoryResponseV2 | null>(null);
   
   // Note state
   const [newNote, setNewNote] = useState('');
@@ -60,10 +71,25 @@ const PlayerProfile: React.FC = () => {
         setServers(allServers);
 
         if (playerData) {
-          const relatedAccounts = await ApiService.getPlayerRelatedAccounts(playerData.steamId).catch(
-            () => null,
-          );
-          setSuspiciousGroup(relatedAccounts);
+          const [relatedAccountsV2Data, ipHistoryData] = await Promise.all([
+            ApiService.getPlayerRelatedAccountsV2(playerData.steamId, { limit: 50 }).catch(
+              () => null,
+            ),
+            ApiService.getPlayerIpHistoryV2(playerData.steamId, { limit: 100 }).catch(() => ({
+              steamId: playerData.steamId,
+              total: 0,
+              items: [],
+            })),
+          ]);
+
+          const relatedAccountsLegacy =
+            relatedAccountsV2Data && relatedAccountsV2Data.items.length > 0
+              ? null
+              : await ApiService.getPlayerRelatedAccounts(playerData.steamId).catch(() => null);
+
+          setRelatedAccountsV2(relatedAccountsV2Data);
+          setIpHistoryV2(ipHistoryData);
+          setSuspiciousGroup(relatedAccountsLegacy);
           setLogsPage(1);
           setPunishmentsPage(1);
         } else {
@@ -71,6 +97,8 @@ const PlayerProfile: React.FC = () => {
           setLogsTotal(0);
           setPunishments([]);
           setPunishmentsTotal(0);
+          setRelatedAccountsV2(null);
+          setIpHistoryV2(null);
         }
       } finally {
         setLoading(false);
@@ -399,7 +427,10 @@ const PlayerProfile: React.FC = () => {
       series.serverId === 'unknown' ? 'Servidor desconhecido' : getServerName(series.serverId);
   });
 
-  const suspicious = !!suspiciousGroup;
+  const relatedAccountsItems: RelatedAccountItemV2[] = relatedAccountsV2?.items || [];
+  const ipHistoryItems = ipHistoryV2?.items || [];
+  const hasRelatedAccounts = relatedAccountsItems.length > 0 || !!suspiciousGroup;
+  const suspicious = hasRelatedAccounts;
 
   return (
     <div className="space-y-6 animate-fade-in pb-10">
@@ -795,36 +826,132 @@ const PlayerProfile: React.FC = () => {
         <div className="space-y-6">
           
           {/* Linked Accounts */}
-          {suspiciousGroup ? (
+          {relatedAccountsItems.length > 0 ? (
             <div className="bg-red-900/10 border border-red-900/30 rounded overflow-hidden">
-               <div className="p-4 bg-red-900/20 border-b border-red-900/30 flex justify-between items-center">
-                  <h3 className="text-sm font-bold text-red-400 uppercase flex items-center">
-                     <Icons.Fingerprint className="w-4 h-4 mr-2" /> Contas Relacionadas
-                  </h3>
-                  <Link to="/admin/duplicates" className="text-xs text-red-500 hover:text-red-300 font-bold uppercase">Ver Rede</Link>
-               </div>
-               <div className="p-4">
-                  <p className="text-xs text-zinc-400 mb-3">
-                     Este jogador compartilha {suspiciousGroup.level === 'HIGH' ? 'o mesmo IP' : 'a mesma rede/local'} com:
-                  </p>
-                  <div className="space-y-2">
-                     {suspiciousGroup.players.filter(p => p.steamId !== player.steamId).map(p => (
-                        <Link key={p.steamId} to={`/admin/players/${p.steamId}`} className="block bg-zinc-900/50 p-2 rounded border border-red-900/20 hover:bg-red-900/20 transition-colors flex items-center justify-between">
-                           <div className="flex items-center">
-                              <img src={p.avatarUrl} className="w-6 h-6 rounded-full mr-2" alt="" />
-                              <span className="text-sm text-zinc-200 font-bold">{p.name}</span>
-                           </div>
-                           <span className="text-[10px] font-mono text-zinc-500">{p.steamId}</span>
-                        </Link>
-                     ))}
-                  </div>
-               </div>
+              <div className="p-4 bg-red-900/20 border-b border-red-900/30 flex justify-between items-center">
+                <h3 className="text-sm font-bold text-red-400 uppercase flex items-center">
+                  <Icons.Fingerprint className="w-4 h-4 mr-2" /> Contas Relacionadas
+                </h3>
+                <Link
+                  to="/admin/duplicates"
+                  className="text-xs text-red-500 hover:text-red-300 font-bold uppercase"
+                >
+                  Ver Rede
+                </Link>
+              </div>
+              <div className="p-4 space-y-2">
+                {relatedAccountsItems.map((item) => (
+                  <Link
+                    key={item.player.steamId}
+                    to={`/admin/players/${item.player.steamId}`}
+                    className="block bg-zinc-900/60 p-3 rounded border border-red-900/20 hover:bg-red-900/20 transition-colors"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center">
+                        <img
+                          src={item.player.avatarUrl}
+                          className="w-7 h-7 rounded-full mr-2"
+                          alt=""
+                        />
+                        <span className="text-sm text-zinc-100 font-bold">{item.player.name}</span>
+                      </div>
+                      <span className="text-[10px] font-mono text-zinc-500">{item.player.steamId}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {item.reasons.map((reason) => (
+                        <span
+                          key={`${item.player.steamId}_${reason.code}`}
+                          className={`text-[10px] uppercase font-bold px-2 py-1 rounded border ${
+                            reason.confidence === 'HIGH'
+                              ? 'bg-red-900/30 text-red-400 border-red-900/50'
+                              : reason.confidence === 'MEDIUM'
+                              ? 'bg-yellow-900/30 text-yellow-400 border-yellow-900/50'
+                              : 'bg-zinc-800 text-zinc-300 border-zinc-700'
+                          }`}
+                        >
+                          {reason.label}
+                        </span>
+                      ))}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ) : suspiciousGroup ? (
+            <div className="bg-red-900/10 border border-red-900/30 rounded overflow-hidden">
+              <div className="p-4 bg-red-900/20 border-b border-red-900/30 flex justify-between items-center">
+                <h3 className="text-sm font-bold text-red-400 uppercase flex items-center">
+                  <Icons.Fingerprint className="w-4 h-4 mr-2" /> Contas Relacionadas
+                </h3>
+                <Link
+                  to="/admin/duplicates"
+                  className="text-xs text-red-500 hover:text-red-300 font-bold uppercase"
+                >
+                  Ver Rede
+                </Link>
+              </div>
+              <div className="p-4">
+                <p className="text-xs text-zinc-400 mb-3">
+                  Este jogador compartilha{' '}
+                  {suspiciousGroup.level === 'HIGH' ? 'o mesmo IP' : 'a mesma rede/local'} com:
+                </p>
+                <div className="space-y-2">
+                  {suspiciousGroup.players
+                    .filter((p) => p.steamId !== player.steamId)
+                    .map((p) => (
+                      <Link
+                        key={p.steamId}
+                        to={`/admin/players/${p.steamId}`}
+                        className="block bg-zinc-900/50 p-2 rounded border border-red-900/20 hover:bg-red-900/20 transition-colors flex items-center justify-between"
+                      >
+                        <div className="flex items-center">
+                          <img src={p.avatarUrl} className="w-6 h-6 rounded-full mr-2" alt="" />
+                          <span className="text-sm text-zinc-200 font-bold">{p.name}</span>
+                        </div>
+                        <span className="text-[10px] font-mono text-zinc-500">{p.steamId}</span>
+                      </Link>
+                    ))}
+                </div>
+              </div>
             </div>
           ) : (
-             <div className="bg-zinc-900 border border-zinc-800 rounded p-4 flex items-center justify-center text-zinc-500 text-sm">
-                <Icons.Check className="w-4 h-4 mr-2" /> Nenhuma conta duplicada detectada.
-             </div>
+            <div className="bg-zinc-900 border border-zinc-800 rounded p-4 flex items-center justify-center text-zinc-500 text-sm">
+              <Icons.Check className="w-4 h-4 mr-2" /> Nenhuma conta duplicada detectada.
+            </div>
           )}
+
+          {/* IP History */}
+          <div className="bg-zinc-900 border border-zinc-800 rounded overflow-hidden">
+            <div className="p-4 border-b border-zinc-800 bg-zinc-950/30 flex items-center justify-between">
+              <h3 className="text-sm font-bold text-zinc-300 uppercase flex items-center">
+                <Icons.Activity className="w-4 h-4 mr-2" /> Historico de IP e Localizacao
+              </h3>
+              <span className="text-xs text-zinc-500">{ipHistoryItems.length} registros</span>
+            </div>
+            <div className="max-h-60 overflow-y-auto">
+              {ipHistoryItems.length === 0 ? (
+                <div className="p-4 text-sm text-zinc-500">Sem historico de IP registrado.</div>
+              ) : (
+                <div className="divide-y divide-zinc-800">
+                  {ipHistoryItems.map((entry) => (
+                    <div key={`${entry.ip}_${entry.lastSeen}`} className="p-3 text-xs">
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <span className="font-mono text-cyan-400">{entry.ip}</span>
+                        <span className="text-zinc-500">{entry.connections} conexoes</span>
+                      </div>
+                      <div className="text-zinc-400">{entry.location || 'Localizacao desconhecida'}</div>
+                      <div className="text-zinc-600 mt-1">
+                        Primeiro: {new Date(entry.firstSeen).toLocaleString()}
+                      </div>
+                      <div className="text-zinc-600">
+                        Ultimo: {new Date(entry.lastSeen).toLocaleString()}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* Staff Notes */}
           <div className="bg-zinc-900 border border-zinc-800 rounded overflow-hidden flex flex-col h-[400px]">

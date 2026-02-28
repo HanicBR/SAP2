@@ -41,6 +41,16 @@ const ALLOWED_TYPES = new Set([
 const normalizeType = (raw: unknown): string => String(raw || 'UNKNOWN').toUpperCase();
 const RAW_TEXT_IP_RE = /(?:^|\s)ip=([0-9]{1,3}(?:\.[0-9]{1,3}){3}(?::\d{1,5})?)(?:\s|$)/i;
 
+const parseBoolEnv = (value: string | undefined, fallback: boolean): boolean => {
+  const normalized = String(value || '')
+    .trim()
+    .toLowerCase();
+  if (!normalized) return fallback;
+  return ['1', 'true', 'yes', 'on'].includes(normalized);
+};
+
+const PLAYER_IP_HISTORY_ENABLED = parseBoolEnv(process.env.PLAYER_IP_HISTORY_ENABLED, true);
+
 const extractIpFromRawText = (rawText: unknown): string | null => {
   const raw = String(rawText || '');
   if (!raw) return null;
@@ -213,6 +223,120 @@ const prepareConnectMetadata = (events: NormalizedLogEvent[]): NormalizedLogEven
     };
   });
 
+type PlayerIpHistoryAggregate = {
+  steamId: string;
+  ip: string;
+  firstSeen: Date;
+  lastSeen: Date;
+  connections: number;
+  lastServerId?: string;
+};
+
+const getPlayerIpHistoryClient = () => (prisma as any).playerIpHistory;
+
+const collectPlayerIpHistoryAggregates = (
+  events: NormalizedLogEvent[],
+): Map<string, PlayerIpHistoryAggregate> => {
+  const map = new Map<string, PlayerIpHistoryAggregate>();
+
+  events.forEach((event) => {
+    if (event.type !== 'CONNECT') return;
+    if (!event.steamId) return;
+    const ip = normalizeIp((event.metadata as any)?.ip);
+    if (!ip) return;
+
+    const key = `${event.steamId}::${ip}`;
+    const current = map.get(key);
+    if (!current) {
+      map.set(key, {
+        steamId: event.steamId,
+        ip,
+        firstSeen: event.timestamp,
+        lastSeen: event.timestamp,
+        connections: 1,
+        ...(event.serverId ? { lastServerId: event.serverId } : {}),
+      });
+      return;
+    }
+
+    if (event.timestamp.getTime() < current.firstSeen.getTime()) {
+      current.firstSeen = event.timestamp;
+    }
+    if (event.timestamp.getTime() > current.lastSeen.getTime()) {
+      current.lastSeen = event.timestamp;
+      current.lastServerId = event.serverId;
+    }
+    current.connections += 1;
+  });
+
+  return map;
+};
+
+const persistPlayerIpHistory = async (aggregates: Map<string, PlayerIpHistoryAggregate>) => {
+  if (!PLAYER_IP_HISTORY_ENABLED) return;
+  const client = getPlayerIpHistoryClient();
+  if (!client || !aggregates.size) return;
+
+  for (const aggregate of aggregates.values()) {
+    try {
+      const existing = await client.findUnique({
+        where: {
+          steamId_ip: {
+            steamId: aggregate.steamId,
+            ip: aggregate.ip,
+          },
+        },
+        select: {
+          firstSeen: true,
+          lastSeen: true,
+          connections: true,
+        },
+      });
+
+      if (!existing) {
+        await client.create({
+          data: {
+            steamId: aggregate.steamId,
+            ip: aggregate.ip,
+            firstSeen: aggregate.firstSeen,
+            lastSeen: aggregate.lastSeen,
+            connections: aggregate.connections,
+            lastServerId: aggregate.lastServerId || null,
+          },
+        });
+        continue;
+      }
+
+      await client.update({
+        where: {
+          steamId_ip: {
+            steamId: aggregate.steamId,
+            ip: aggregate.ip,
+          },
+        },
+        data: {
+          firstSeen:
+            aggregate.firstSeen.getTime() < existing.firstSeen.getTime()
+              ? aggregate.firstSeen
+              : existing.firstSeen,
+          lastSeen:
+            aggregate.lastSeen.getTime() > existing.lastSeen.getTime()
+              ? aggregate.lastSeen
+              : existing.lastSeen,
+          connections: existing.connections + aggregate.connections,
+          lastServerId: aggregate.lastServerId || null,
+        },
+      });
+    } catch (err: any) {
+      console.error('PlayerIpHistory persist failed', {
+        steamId: aggregate.steamId,
+        ip: aggregate.ip,
+        error: err?.message || String(err),
+      });
+    }
+  }
+};
+
 const enrichPlayerGeoInBackground = (events: NormalizedLogEvent[]) => {
   const targets = new Map<string, { steamId: string; ip: string }>();
 
@@ -235,6 +359,24 @@ const enrichPlayerGeoInBackground = (events: NormalizedLogEvent[]) => {
           where: { steamId, ip },
           data: { geo: geo as any },
         });
+        if (PLAYER_IP_HISTORY_ENABLED) {
+          const historyClient = getPlayerIpHistoryClient();
+          if (historyClient) {
+            await historyClient.updateMany({
+              where: { steamId, ip },
+              data: {
+                geoSnapshot: {
+                  ...(geo.country ? { country: geo.country } : {}),
+                  ...(geo.state ? { state: geo.state } : {}),
+                  ...(geo.city ? { city: geo.city } : {}),
+                  ...(typeof geo.lat === 'number' ? { lat: geo.lat } : {}),
+                  ...(typeof geo.lng === 'number' ? { lng: geo.lng } : {}),
+                  source: geo.source || 'ipwhois',
+                },
+              },
+            });
+          }
+        }
       } catch (err: any) {
         console.error('Geo background enrichment failed', {
           steamId,
@@ -300,6 +442,8 @@ export const storeLogsAndUpdateProfiles = async (cleanEvents: NormalizedLogEvent
   if (!eventsToInsert.length) {
     return { ingested: 0, snapshotsInserted: 0, playersTouched: 0 };
   }
+
+  const playerIpHistoryAggregates = collectPlayerIpHistoryAggregates(eventsToInsert);
 
   const insertResult = await prisma.log.createMany({
     data: eventsToInsert as any,
@@ -392,6 +536,7 @@ export const storeLogsAndUpdateProfiles = async (cleanEvents: NormalizedLogEvent
     });
   }
 
+  await persistPlayerIpHistory(playerIpHistoryAggregates);
   enrichPlayerGeoInBackground(eventsToInsert);
 
   return {

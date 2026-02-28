@@ -467,6 +467,65 @@ export interface SuspiciousGroup {
   players: Player[];
 }
 
+export type DuplicateReasonCode = 'SAME_IP' | 'SAME_SUBNET' | 'SAME_LOCATION';
+export type DuplicateConfidence = 'HIGH' | 'MEDIUM' | 'LOW';
+
+export interface PlayerIpHistoryItemV2 {
+  ip: string;
+  firstSeen: string;
+  lastSeen: string;
+  connections: number;
+  lastServerId?: string;
+  geo?: {
+    country?: string;
+    state?: string;
+    city?: string;
+    lat?: number;
+    lng?: number;
+    source?: string;
+    [key: string]: unknown;
+  };
+  location: string;
+}
+
+export interface PlayerIpHistoryResponseV2 {
+  steamId: string;
+  total: number;
+  items: PlayerIpHistoryItemV2[];
+}
+
+export interface RelatedAccountReasonV2 {
+  code: DuplicateReasonCode;
+  confidence: DuplicateConfidence;
+  label: string;
+  evidence: string[];
+}
+
+export interface RelatedAccountItemV2 {
+  player: Player;
+  confidence: DuplicateConfidence;
+  reasons: RelatedAccountReasonV2[];
+}
+
+export interface RelatedAccountsResponseV2 {
+  steamId: string;
+  analyzedAt: string;
+  total: number;
+  items: RelatedAccountItemV2[];
+}
+
+export interface SuspiciousGroupV2 {
+  id: string;
+  level: 'HIGH' | 'MODERATE';
+  confidence: DuplicateConfidence;
+  reasonCode: DuplicateReasonCode;
+  reasonLabel: string;
+  commonIpOrSubnet: string;
+  location: string;
+  lastActivity: string;
+  players: Player[];
+}
+
 // --- SERVER ANALYTICS (NEW) ---
 export interface ServerAnalytics {
   totalPlayTimeHours: number; // Sum of all players in period

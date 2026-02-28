@@ -92,6 +92,7 @@ model PlayerProfile {
   updatedAt        DateTime     @updatedAt
   notes            PlayerNote[]
   punishments      Punishment[]
+  ipHistory        PlayerIpHistory[]
 }
 
 model VipAutomationAction {
@@ -137,6 +138,24 @@ model GeoIpCache {
   @@index([expiresAt])
   @@index([nextRetryAt])
   @@index([updatedAt])
+}
+
+model PlayerIpHistory {
+  steamId      String
+  ip           String
+  firstSeen    DateTime
+  lastSeen     DateTime
+  connections  Int      @default(0)
+  lastServerId String?
+  geoSnapshot  Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  player PlayerProfile @relation(fields: [steamId], references: [steamId], onDelete: Cascade)
+
+  @@id([steamId, ip])
+  @@index([steamId, lastSeen])
+  @@index([ip, lastSeen])
 }
 
 model PlayerNote {
