@@ -8,7 +8,6 @@ import {
   getRelatedAccountsV2,
   isDuplicateAnalysisV2Enabled,
 } from '../services/duplicateAnalysis';
-import { getPlayerPulseSettings } from '../services/playtimePulse';
 
 const router = Router();
 const VALID_PUNISHMENT_TYPES = new Set(['BAN', 'MUTE', 'GAG', 'KICK']);
@@ -1428,7 +1427,6 @@ router.get('/:steamId', async (req, res) => {
     orderBy: [{ timestamp: 'asc' }, { id: 'asc' }],
   });
 
-  const pulseSettings = getPlayerPulseSettings();
   const pulseClient = (prisma as any).playerPlaytimePulse as
     | {
         findMany: (args: any) => Promise<any[]>;
@@ -1439,7 +1437,7 @@ router.get('/:steamId', async (req, res) => {
   const openSessionTailSecondsByServer = new Map<string, number>();
   const pulseActivityTailRows: { bucketStart: Date; serverId: string; grantedSeconds: number }[] = [];
 
-  if (pulseClient && pulseSettings.source !== 'legacy') {
+  if (pulseClient) {
     const openSessionSinceMs = findEarliestOpenSessionStartMs(serverSessionLogs as any);
     if (openSessionSinceMs !== undefined) {
       const openSessionSince = new Date(openSessionSinceMs);
