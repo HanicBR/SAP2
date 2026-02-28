@@ -8,6 +8,7 @@ import {
   getRelatedAccountsV2,
   isDuplicateAnalysisV2Enabled,
 } from '../services/duplicateAnalysis';
+import { getPlayerPulseSettings } from '../services/playtimePulse';
 
 const router = Router();
 const VALID_PUNISHMENT_TYPES = new Set(['BAN', 'MUTE', 'GAG', 'KICK']);
@@ -360,6 +361,29 @@ const formatLocation = (geo: any) => {
   const country = typeof geo.country === 'string' ? geo.country : '';
   const text = [city, state, country].filter(Boolean).join(', ');
   return text || 'Localizacao desconhecida';
+};
+
+const round2 = (value: number): number => Number(value.toFixed(2));
+
+const parseSessionIdFromMeta = (metadata: unknown): string | undefined => {
+  const meta: any = metadata || {};
+  const value = String(meta.sessionId || meta.serverSessionId || '').trim();
+  return value || undefined;
+};
+
+const normalizeServerStats = (value: unknown): Record<string, { playTimeHours: number; connections: number }> => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  const raw = value as Record<string, any>;
+  const normalized: Record<string, { playTimeHours: number; connections: number }> = {};
+  Object.keys(raw).forEach((serverId) => {
+    const item = raw[serverId];
+    if (!item || typeof item !== 'object') return;
+    normalized[serverId] = {
+      playTimeHours: Number(item.playTimeHours) || 0,
+      connections: Number(item.connections) || 0,
+    };
+  });
+  return normalized;
 };
 
 const toPlayer = (p: any) => ({
@@ -816,6 +840,7 @@ const buildGameModeStats = (steamId: string, logs: any[], roundEndLogs?: any[]) 
 const buildActivityHistory = (
   logs: { id?: string; serverId?: string; type: string; timestamp: Date; metadata: unknown }[],
   days: number,
+  pulseRows?: { bucketStart: Date; serverId: string; grantedSeconds: number }[],
 ) => {
   const now = new Date();
   const buckets: Record<
@@ -905,6 +930,18 @@ const buildActivityHistory = (
         fallbackByServer[serverId] = {};
       }
     }
+  });
+
+  (pulseRows || []).forEach((row) => {
+    const ts = row.bucketStart instanceof Date ? row.bucketStart : new Date(row.bucketStart);
+    if (Number.isNaN(ts.getTime())) return;
+    const dayKey = ts.toISOString().slice(0, 10);
+    if (!buckets[dayKey]) return;
+    const serverId = String(row.serverId || '').trim() || 'unknown';
+    const hours = Math.max(0, Number(row.grantedSeconds) || 0) / (60 * 60);
+    if (hours <= 0) return;
+    buckets[dayKey].hoursPlayed += hours;
+    buckets[dayKey].serverHours[serverId] = (buckets[dayKey].serverHours[serverId] || 0) + hours;
   });
 
   return orderedKeys.map((key) => {
@@ -1018,6 +1055,42 @@ const computePlaytimeHours = (logs: { type: string; timestamp: Date; metadata: u
   });
 
   return Number((totalMs / (1000 * 60 * 60)).toFixed(2));
+};
+
+const findEarliestOpenSessionStartMs = (
+  logs: { serverId: string; type: string; timestamp: Date; metadata: unknown }[],
+): number | undefined => {
+  const sessionsById = new Map<string, number>();
+  const fallbackByServer = new Map<string, number>();
+
+  logs.forEach((log) => {
+    const ts = log.timestamp.getTime();
+    const sessionId = parseSessionIdFromMeta(log.metadata);
+    const serverId = String(log.serverId || '').trim() || 'unknown';
+    const type = String(log.type || '').toUpperCase();
+
+    if (type === 'CONNECT') {
+      if (sessionId) {
+        sessionsById.set(sessionId, ts);
+      } else {
+        fallbackByServer.set(serverId, ts);
+      }
+      return;
+    }
+
+    if (type !== 'DISCONNECT') return;
+    if (sessionId) {
+      sessionsById.delete(sessionId);
+      return;
+    }
+    fallbackByServer.delete(serverId);
+  });
+
+  const starts = [...sessionsById.values(), ...fallbackByServer.values()].filter((n) =>
+    Number.isFinite(n),
+  );
+  if (!starts.length) return undefined;
+  return Math.min(...starts);
 };
 
 const computeSessionMetricsByServer = (
@@ -1210,8 +1283,42 @@ router.get('/', async (req, res) => {
     where,
     orderBy: { lastSeen: 'desc' },
   });
+  const pulseClient = (prisma as any).playerPlaytimePulse as
+    | {
+        groupBy: (args: any) => Promise<any[]>;
+      }
+    | undefined;
 
-  return res.json(players.map(toPlayer));
+  const pulseHoursBySteamId = new Map<string, number>();
+  if (pulseClient && players.length) {
+    const steamIds = players.map((player) => String(player.steamId || '').trim()).filter(Boolean);
+    if (steamIds.length) {
+      const rows = await pulseClient.groupBy({
+        by: ['steamId'],
+        where: {
+          steamId: { in: steamIds },
+        },
+        _sum: { grantedSeconds: true },
+      });
+      rows.forEach((row) => {
+        const steamId = String(row?.steamId || '').trim();
+        if (!steamId) return;
+        const hours = (Math.max(0, Number(row?._sum?.grantedSeconds) || 0) || 0) / (60 * 60);
+        pulseHoursBySteamId.set(steamId, round2(hours));
+      });
+    }
+  }
+
+  return res.json(
+    players.map((player) => {
+      const base = toPlayer(player);
+      const pulseHours = pulseHoursBySteamId.get(player.steamId) || 0;
+      return {
+        ...base,
+        playTimeHours: round2(Math.max(Number(base.playTimeHours) || 0, pulseHours)),
+      };
+    }),
+  );
 });
 
 router.get('/:steamId', async (req, res) => {
@@ -1320,7 +1427,72 @@ router.get('/:steamId', async (req, res) => {
     },
     orderBy: [{ timestamp: 'asc' }, { id: 'asc' }],
   });
-  const activityHistory = buildActivityHistory(activityLogs as any, activityWindowDays);
+
+  const pulseSettings = getPlayerPulseSettings();
+  const pulseClient = (prisma as any).playerPlaytimePulse as
+    | {
+        findMany: (args: any) => Promise<any[]>;
+      }
+    | undefined;
+  const legacyPlayTimeHours = sessionMetrics.playTimeHours || playTimeHours;
+  let openSessionTailSeconds = 0;
+  const openSessionTailSecondsByServer = new Map<string, number>();
+  const pulseActivityTailRows: { bucketStart: Date; serverId: string; grantedSeconds: number }[] = [];
+
+  if (pulseClient && pulseSettings.source !== 'legacy') {
+    const openSessionSinceMs = findEarliestOpenSessionStartMs(serverSessionLogs as any);
+    if (openSessionSinceMs !== undefined) {
+      const openSessionSince = new Date(openSessionSinceMs);
+      const tailRows = await pulseClient.findMany({
+        where: {
+          steamId,
+          bucketStart: { gte: openSessionSince },
+        },
+        orderBy: [{ bucketStart: 'asc' }],
+        select: {
+          bucketStart: true,
+          serverId: true,
+          grantedSeconds: true,
+        },
+      });
+
+      tailRows.forEach((row) => {
+        const grantedSeconds = Math.max(0, Number(row?.grantedSeconds) || 0);
+        if (grantedSeconds <= 0) return;
+        const serverId = String(row?.serverId || '').trim() || 'unknown';
+        const bucketStart = row?.bucketStart instanceof Date ? row.bucketStart : new Date(row?.bucketStart);
+        if (Number.isNaN(bucketStart.getTime())) return;
+
+        openSessionTailSeconds += grantedSeconds;
+        openSessionTailSecondsByServer.set(
+          serverId,
+          (openSessionTailSecondsByServer.get(serverId) || 0) + grantedSeconds,
+        );
+
+        if (bucketStart.getTime() >= activitySince.getTime()) {
+          pulseActivityTailRows.push({
+            bucketStart,
+            serverId,
+            grantedSeconds,
+          });
+        }
+      });
+    }
+  }
+
+  const openSessionTailHours = round2(openSessionTailSeconds / (60 * 60));
+  const mergedPlayTimeHours = round2(legacyPlayTimeHours + openSessionTailHours);
+  const activityHistory = buildActivityHistory(activityLogs as any, activityWindowDays, pulseActivityTailRows);
+  const mergedServerStats = normalizeServerStats(
+    Object.keys(sessionMetrics.serverStats).length ? sessionMetrics.serverStats : player.serverStats,
+  );
+  openSessionTailSecondsByServer.forEach((seconds, serverId) => {
+    const current = mergedServerStats[serverId] || { playTimeHours: 0, connections: 0 };
+    mergedServerStats[serverId] = {
+      ...current,
+      playTimeHours: round2((Number(current.playTimeHours) || 0) + seconds / (60 * 60)),
+    };
+  });
 
   const moderationWindowDays = 30;
   const moderationSince = new Date(Date.now() - moderationWindowDays * 24 * 60 * 60 * 1000);
@@ -1397,10 +1569,8 @@ router.get('/:steamId', async (req, res) => {
 
   return res.json({
     ...toPlayer(player),
-    playTimeHours: sessionMetrics.playTimeHours || playTimeHours,
-    serverStats: Object.keys(sessionMetrics.serverStats).length
-      ? sessionMetrics.serverStats
-      : player.serverStats || undefined,
+    playTimeHours: mergedPlayTimeHours,
+    serverStats: Object.keys(mergedServerStats).length ? mergedServerStats : undefined,
     notes: player.notes.map((n) => ({
       id: n.id,
       content: n.content,
