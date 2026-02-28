@@ -338,3 +338,11 @@ Observabilidade no analytics (`GET /api/servers/:id/analytics`):
 - `playtimeSource`: `legacy` ou `pulse` (fonte efetiva usada no retorno).
 - `pulseCoveragePct`: cobertura de pulso no periodo em relacao aos buckets com atividade legada.
 - `playtimeDiagnostics`: comparativo entre horas `legacy` vs `pulse`, motivo da decisao e threshold do modo `hybrid`.
+
+Auditoria operacional (CLI, PR-07):
+
+- Script: `npm run audit:playtime-pulse -- --hours=24`
+- Exemplo por servidor: `npm run audit:playtime-pulse -- --hours=24 --server-id=srv_sandbox_01`
+- JSON para automacao: `npm run audit:playtime-pulse -- --hours=24 --json`
+
+Saida inclui comparativo `legacyHours` x `pulseHours`, `diffPct`, cobertura e recomendacao (`READY`, `PARTIAL`, `NO_PULSE`).

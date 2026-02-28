@@ -10,7 +10,8 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "backfill:player-ip-history": "ts-node src/scripts/backfillPlayerIpHistory.ts"
+    "backfill:player-ip-history": "ts-node src/scripts/backfillPlayerIpHistory.ts",
+    "audit:playtime-pulse": "ts-node src/scripts/auditPlaytimePulse.ts"
   },
   "keywords": [],
   "author": "",
