@@ -1,16 +1,130 @@
-import { Router } from 'express';
+import { Request, Router } from 'express';
 import { prisma } from '../db/client';
 import { GameMode, ServerStatus, UserRole } from '../domain';
 import { authMiddleware, requireRole } from '../middleware/auth';
 import { hashApiKey, compareApiKey } from '../utils/apiKey';
 import { drainServerActions } from '../services/serverActions';
 import { getVipAutomationMetrics, previewVipAutomationBuild, VipAutomationActionType } from '../services/vipAutomation';
+import { normalizeIp } from '../utils/normalizeIp';
 
 const router = Router();
 
+const IPV4_IN_TEXT_RE = /(\d{1,3}(?:\.\d{1,3}){3})/;
+const HOSTNAME_RE = /^[a-z0-9.-]+$/i;
+
+const parseInteger = (value: unknown): number | undefined => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return Math.floor(value);
+  }
+  const parsed = Number.parseInt(String(value ?? '').trim(), 10);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
+const extractIpv4 = (value: unknown): string | undefined => {
+  const raw = String(value ?? '').trim();
+  if (!raw) return undefined;
+  const direct = normalizeIp(raw);
+  if (direct) return direct;
+
+  const firstPart = raw.split(',')[0]?.trim() || '';
+  const firstDirect = normalizeIp(firstPart);
+  if (firstDirect) return firstDirect;
+
+  const match = IPV4_IN_TEXT_RE.exec(firstPart) || IPV4_IN_TEXT_RE.exec(raw);
+  if (!match || !match[1]) return undefined;
+  const normalized = normalizeIp(match[1]);
+  return normalized || undefined;
+};
+
+const isPrivateIpv4 = (ip: string): boolean => {
+  const [aRaw = '', bRaw = ''] = ip.split('.');
+  const a = Number.parseInt(aRaw, 10);
+  const b = Number.parseInt(bRaw, 10);
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return false;
+  if (a === 10) return true;
+  if (a === 127) return true;
+  if (a === 192 && b === 168) return true;
+  if (a === 172 && b >= 16 && b <= 31) return true;
+  if (a === 169 && b === 254) return true;
+  return false;
+};
+
+const isPlaceholderHost = (value: unknown): boolean => {
+  const raw = String(value ?? '')
+    .trim()
+    .toLowerCase();
+  if (!raw) return true;
+  if (raw === 'localhost' || raw === '0.0.0.0') return true;
+  const ipv4 = extractIpv4(raw);
+  if (!ipv4) return false;
+  return isPrivateIpv4(ipv4);
+};
+
+const sanitizeHost = (value: unknown): string | undefined => {
+  const raw = String(value ?? '').trim();
+  if (!raw) return undefined;
+
+  const noScheme = raw.replace(/^https?:\/\//i, '');
+  const firstPath = noScheme.split('/')[0]?.trim() || '';
+  if (!firstPath) return undefined;
+
+  const ipv4 = extractIpv4(firstPath);
+  if (ipv4) return ipv4;
+
+  const hostOnly = firstPath.split(':')[0]?.trim().toLowerCase() || '';
+  if (!hostOnly || !HOSTNAME_RE.test(hostOnly)) return undefined;
+  return hostOnly;
+};
+
+const detectClientIpv4 = (req: Request): string | undefined => {
+  const forwarded = extractIpv4(req.header('x-forwarded-for'));
+  if (forwarded) return forwarded;
+  const realIp = extractIpv4(req.header('x-real-ip'));
+  if (realIp) return realIp;
+  const reqIp = extractIpv4(req.ip);
+  if (reqIp) return reqIp;
+  const socketIp = extractIpv4(req.socket?.remoteAddress);
+  if (socketIp) return socketIp;
+  return undefined;
+};
+
+const sanitizeShortText = (value: unknown, maxLength: number): string | undefined => {
+  const raw = String(value ?? '').trim();
+  if (!raw) return undefined;
+  if (raw.length <= maxLength) return raw;
+  return raw.slice(0, maxLength);
+};
+
+const parseMode = (value: unknown): 'TTT' | 'SANDBOX' | 'MURDER' | undefined => {
+  const raw = String(value ?? '')
+    .trim()
+    .toUpperCase();
+  if (!raw) return undefined;
+  if (raw === 'SANDBOX') return 'SANDBOX';
+  if (raw === 'MURDER') return 'MURDER';
+  if (raw === 'TTT') return 'TTT';
+  return undefined;
+};
+
+const parsePort = (value: unknown): number | undefined => {
+  const parsed = parseInteger(value);
+  if (parsed === undefined) return undefined;
+  if (parsed < 1 || parsed > 65535) return undefined;
+  return parsed;
+};
+
+const parseMaxPlayers = (value: unknown): number | undefined => {
+  const parsed = parseInteger(value);
+  if (parsed === undefined) return undefined;
+  if (parsed < 1 || parsed > 512) return undefined;
+  return parsed;
+};
+
 const findServerByApiKey = async (apiKey?: string) => {
   if (!apiKey) return null;
-  const allServers = await prisma.gameServer.findMany({ select: { id: true, apiKeyHash: true } });
+  const allServers = await prisma.gameServer.findMany({
+    select: { id: true, apiKeyHash: true, ip: true },
+  });
   return allServers.find((s) => s.apiKeyHash && compareApiKey(apiKey, s.apiKeyHash)) || null;
 };
 
@@ -188,11 +302,34 @@ router.post('/heartbeat', async (req, res) => {
       }
     }
 
-    const map = (body && (body.map || body.Map || body.mapName)) || (req.query as any)?.map;
+    const mapRaw = (body && (body.map || body.Map || body.mapName)) || (req.query as any)?.map;
+    const map = sanitizeShortText(mapRaw, 128);
+
     const playerCountRaw =
       (body && (body.playerCount ?? body.PlayerCount ?? body.count)) || (req.query as any)?.playerCount;
-    const playerCount =
-      typeof playerCountRaw === 'string' ? parseInt(playerCountRaw, 10) : (playerCountRaw as number | undefined);
+    const playerCount = parseInteger(playerCountRaw);
+
+    const serverNameRaw =
+      (body && (body.serverName || body.ServerName || body.hostname || body.name)) ||
+      (req.query as any)?.serverName;
+    const serverName = sanitizeShortText(serverNameRaw, 120);
+
+    const maxPlayersRaw =
+      (body && (body.maxPlayers ?? body.MaxPlayers ?? body.max_slots ?? body.slots)) ||
+      (req.query as any)?.maxPlayers;
+    const maxPlayers = parseMaxPlayers(maxPlayersRaw);
+
+    const modeRaw =
+      (body && (body.mode || body.gameMode || body.serverMode)) || (req.query as any)?.mode;
+    const mode = parseMode(modeRaw);
+
+    const ipRaw = (body && (body.ip || body.serverIp || body.host)) || (req.query as any)?.ip;
+    const reportedHost = sanitizeHost(ipRaw);
+
+    const portRaw = (body && (body.port || body.serverPort)) || (req.query as any)?.port;
+    const port = parsePort(portRaw);
+    const detectedClientIp = detectClientIpv4(req);
+    const shouldAutofillIp = isPlaceholderHost(server.ip);
 
     const now = new Date();
 
@@ -205,6 +342,23 @@ router.post('/heartbeat', async (req, res) => {
     }
     if (map) {
       updateData.currentMap = map;
+    }
+    if (serverName) {
+      updateData.name = serverName;
+    }
+    if (maxPlayers !== undefined) {
+      updateData.maxPlayers = maxPlayers;
+    }
+    if (mode) {
+      updateData.mode = mode;
+    }
+    if (port !== undefined) {
+      updateData.port = port;
+    }
+    if (reportedHost) {
+      updateData.ip = reportedHost;
+    } else if (shouldAutofillIp && detectedClientIp && !isPrivateIpv4(detectedClientIp)) {
+      updateData.ip = detectedClientIp;
     }
 
     await prisma.gameServer.update({

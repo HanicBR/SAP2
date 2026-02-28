@@ -759,9 +759,28 @@ local function send_heartbeat()
 	local heartbeat_url = c_heartbeat_url:GetString()
 	if heartbeat_url == "" then return end
 
+	local host_port = nil
+	local host_port_cvar = GetConVar and GetConVar("hostport")
+	if host_port_cvar then
+		host_port = tonumber(host_port_cvar:GetString() or "") or host_port_cvar:GetInt()
+	end
+
+	local host_ip = nil
+	if GetConVarString then
+		local raw_ip = tostring(GetConVarString("ip") or ""):gsub("^%s+", ""):gsub("%s+$", "")
+		if raw_ip ~= "" and raw_ip ~= "0.0.0.0" then
+			host_ip = raw_ip
+		end
+	end
+
 	local body = util.TableToJSON({
 		map = game.GetMap(),
 		playerCount = (player.GetCount and player.GetCount()) or #player.GetAll(),
+		maxPlayers = game.MaxPlayers and game.MaxPlayers() or nil,
+		serverName = (GetHostName and GetHostName()) or nil,
+		mode = INGEST_MODE,
+		port = host_port,
+		ip = host_ip,
 	}, false, true)
 
 	if not body then return end
