@@ -379,6 +379,18 @@ const normalizeServerStats = (value: unknown): Record<string, { playTimeHours: n
   return normalized;
 };
 
+const resetServerStatsPlaytime = (value: Record<string, { playTimeHours: number; connections: number }>) => {
+  const next: Record<string, { playTimeHours: number; connections: number }> = {};
+  Object.keys(value).forEach((serverId) => {
+    const row = value[serverId];
+    next[serverId] = {
+      playTimeHours: 0,
+      connections: Number(row?.connections) || 0,
+    };
+  });
+  return next;
+};
+
 const toPlayer = (p: any) => ({
   steamId: p.steamId,
   name: p.name,
@@ -1272,7 +1284,7 @@ router.get('/', async (req, res) => {
       const pulseHours = pulseHoursBySteamId.get(player.steamId) || 0;
       return {
         ...base,
-        playTimeHours: round2(Math.max(Number(base.playTimeHours) || 0, pulseHours)),
+        playTimeHours: pulseClient ? round2(pulseHours) : round2(Number(base.playTimeHours) || 0),
       };
     }),
   );
@@ -1393,7 +1405,6 @@ router.get('/:steamId', async (req, res) => {
     | undefined;
   const legacyPlayTimeHours = sessionMetrics.playTimeHours || playTimeHours;
   let pulseTotalHours = 0;
-  let pulseAvailable = false;
   const pulseServerHours = new Map<string, number>();
   const pulseActivityRows: { bucketStart: Date; serverId: string; grantedSeconds: number }[] = [];
 
@@ -1428,7 +1439,6 @@ router.get('/:steamId', async (req, res) => {
       Number(pulseTotalRows?.[0]?._sum?.grantedSeconds) || 0,
     );
     pulseTotalHours = round2(pulseTotalSeconds / (60 * 60));
-    pulseAvailable = pulseTotalHours > 0;
 
     pulseByServerRows.forEach((row) => {
       const serverId = String(row?.serverId || '').trim() || 'unknown';
@@ -1447,11 +1457,16 @@ router.get('/:steamId', async (req, res) => {
     });
   }
 
-  const resolvedPlayTimeHours = pulseAvailable ? pulseTotalHours : legacyPlayTimeHours;
-  const activityHistory = buildActivityHistory(activityLogs as any, activityWindowDays, pulseActivityRows);
-  const mergedServerStats = normalizeServerStats(
+  const resolvedPlayTimeHours = pulseClient ? pulseTotalHours : legacyPlayTimeHours;
+  const activityHistory = pulseClient
+    ? buildActivityHistory([], activityWindowDays, pulseActivityRows)
+    : buildActivityHistory(activityLogs as any, activityWindowDays);
+  const mergedServerStatsBase = normalizeServerStats(
     Object.keys(sessionMetrics.serverStats).length ? sessionMetrics.serverStats : player.serverStats,
   );
+  const mergedServerStats = pulseClient
+    ? resetServerStatsPlaytime(mergedServerStatsBase)
+    : mergedServerStatsBase;
   pulseServerHours.forEach((hours, serverId) => {
     const current = mergedServerStats[serverId] || { playTimeHours: 0, connections: 0 };
     mergedServerStats[serverId] = {

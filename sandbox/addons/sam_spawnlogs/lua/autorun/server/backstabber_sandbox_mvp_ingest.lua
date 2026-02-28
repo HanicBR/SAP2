@@ -27,7 +27,7 @@ local c_enable = CreateConVar("bsb_ingest_enable", "0", FCVAR_ARCHIVE, "Enable B
 local c_ingest_url = CreateConVar("bsb_ingest_url", "http://127.0.0.1:4000/api/ingest/logs", FCVAR_ARCHIVE, "Backstabber ingest endpoint.")
 local c_heartbeat_url = CreateConVar("bsb_heartbeat_url", "http://127.0.0.1:4000/api/servers/heartbeat", FCVAR_ARCHIVE, "Backstabber heartbeat endpoint.")
 local c_pulse_enable = CreateConVar("bsb_pulse_enable", "1", FCVAR_ARCHIVE, "Enable player pulse playtime endpoint calls.")
-local c_pulse_url = CreateConVar("bsb_pulse_url", "http://127.0.0.1:4000/api/servers/pulse", FCVAR_ARCHIVE, "Backstabber player pulse endpoint.")
+local c_pulse_url = CreateConVar("bsb_pulse_url", "", FCVAR_ARCHIVE, "Backstabber player pulse endpoint. Leave empty to auto-resolve from bsb_ingest_url.")
 local c_pulse_seconds = CreateConVar("bsb_pulse_seconds", "60", FCVAR_ARCHIVE, "Player pulse interval in seconds.")
 local c_actions_url = CreateConVar("bsb_actions_url", "", FCVAR_ARCHIVE, "Backstabber server actions pull endpoint.")
 local c_server_key = CreateConVar("bsb_server_key", "", FCVAR_ARCHIVE, "Backstabber server API key.")
@@ -59,6 +59,7 @@ local queue_warn_next = 0
 local prop_spawn_window_by_steamid = {}
 local actions_poll_blocked_local = false
 local actions_poll_warn_next = 0
+local pulse_warn_next = 0
 
 local sessions_by_steamid = {}
 local pending_disconnect_reason_by_steamid = {}
@@ -131,6 +132,55 @@ local function is_local_resource_url(raw_url)
 	end
 
 	return false
+end
+
+local function trim_string(value)
+	local raw = tostring(value or "")
+	return raw:gsub("^%s+", ""):gsub("%s+$", "")
+end
+
+local function derive_pulse_url_from_ingest()
+	local ingest_url = trim_string(c_ingest_url:GetString())
+	if ingest_url == "" then return nil end
+
+	local replaced = string.gsub(ingest_url, "/api/ingest/logs.*$", "/api/servers/pulse")
+	if replaced ~= ingest_url then
+		return replaced
+	end
+
+	local base = string_match(ingest_url, "^(https?://[^/%?]+)")
+	if base and base ~= "" then
+		return base .. "/api/servers/pulse"
+	end
+
+	return nil
+end
+
+local function resolve_pulse_url()
+	local configured = trim_string(c_pulse_url:GetString())
+	local fallback = derive_pulse_url_from_ingest()
+
+	if configured ~= "" then
+		if not is_local_resource_url(configured) then
+			return configured
+		end
+
+		if fallback and not is_local_resource_url(fallback) then
+			if RealTime() >= pulse_warn_next then
+				pulse_warn_next = RealTime() + 60
+				print("[BSB-INGEST] pulse url local/LAN detectada; usando fallback derivado de bsb_ingest_url: " .. fallback)
+			end
+			return fallback
+		end
+
+		return configured
+	end
+
+	if fallback and fallback ~= "" then
+		return fallback
+	end
+
+	return ""
 end
 
 local function ulid_encode_time(ms)
@@ -887,8 +937,15 @@ local function send_player_pulse()
 	if not is_configured() then return end
 	if not c_pulse_enable:GetBool() then return end
 
-	local pulse_url = c_pulse_url:GetString()
+	local pulse_url = resolve_pulse_url()
 	if pulse_url == "" then return end
+	if is_local_resource_url(pulse_url) then
+		if RealTime() >= pulse_warn_next then
+			pulse_warn_next = RealTime() + 60
+			print("[BSB-INGEST] pulse skipped: bsb_pulse_url aponta para recurso local/LAN bloqueado pelo HTTP do GMod. Use URL publica HTTPS.")
+		end
+		return
+	end
 
 	local players = collect_online_players()
 	if #players == 0 then return end
