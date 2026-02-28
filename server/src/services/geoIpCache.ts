@@ -25,13 +25,23 @@ type GeoIpCacheRow = {
 
 const getGeoIpCacheClient = () => (prisma as any).geoIpCache;
 
+const parseGeoSource = (value: unknown): GeoIpData['source'] => {
+  const raw = String(value || '')
+    .trim()
+    .toLowerCase();
+  if (raw === 'ipapiis') return 'ipapiis';
+  if (raw === 'ipinfo') return 'ipinfo';
+  if (raw === 'consensus') return 'consensus';
+  return 'ipwhois';
+};
+
 const toGeo = (row: GeoIpCacheRow | null | undefined): GeoIpData | undefined => {
   if (!row) return undefined;
   const hasAnyField =
     !!row.country || !!row.state || !!row.city || typeof row.lat === 'number' || typeof row.lng === 'number';
   if (!hasAnyField) return undefined;
   return {
-    source: row.source === 'ipapiis' ? 'ipapiis' : 'ipwhois',
+    source: parseGeoSource(row.source),
     ...(row.country ? { country: row.country } : {}),
     ...(row.state ? { state: row.state } : {}),
     ...(row.city ? { city: row.city } : {}),
@@ -149,6 +159,7 @@ const saveFailure = async (
 
 export const resolveGeoIpWithPersistentCache = async (
   ipInput: unknown,
+  options?: { bypassRetryBlock?: boolean },
 ): Promise<GeoIpData | undefined> => {
   const ip = normalizeIp(ipInput);
   if (!ip) return undefined;
@@ -161,7 +172,8 @@ export const resolveGeoIpWithPersistentCache = async (
     return cachedGeo;
   }
 
-  if (cached && retryBlocked(cached, now)) {
+  const bypassRetryBlock = options?.bypassRetryBlock === true;
+  if (cached && retryBlocked(cached, now) && !bypassRetryBlock) {
     return cachedGeo;
   }
 

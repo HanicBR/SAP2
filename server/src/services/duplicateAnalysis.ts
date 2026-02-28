@@ -403,7 +403,7 @@ const enrichPlayerHistoryRowsGeo = async (
   await Promise.all(
     ipsToResolve.map(async (ip) => {
       try {
-        const geo = await resolveGeoIpWithPersistentCache(ip);
+        const geo = await resolveGeoIpWithPersistentCache(ip, { bypassRetryBlock: true });
         if (!geo) return;
         const snapshot = toGeoSnapshotPayload(geo);
         resolvedByIp.set(ip, snapshot);
