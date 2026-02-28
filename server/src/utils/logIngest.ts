@@ -1,6 +1,7 @@
 import { prisma } from '../db/client';
 import { GameMode } from '../domain';
-import { hashIp, lookupGeoIp, normalizeIPv4 } from './geoIp';
+import { hashIp, lookupGeoIp } from './geoIp';
+import { normalizeIp } from './normalizeIp';
 
 export interface IngestServerInfo {
   id: string;
@@ -37,6 +38,15 @@ const ALLOWED_TYPES = new Set([
 ]);
 
 const normalizeType = (raw: unknown): string => String(raw || 'UNKNOWN').toUpperCase();
+const RAW_TEXT_IP_RE = /(?:^|\s)ip=([0-9]{1,3}(?:\.[0-9]{1,3}){3}(?::\d{1,5})?)(?:\s|$)/i;
+
+const extractIpFromRawText = (rawText: unknown): string | null => {
+  const raw = String(rawText || '');
+  if (!raw) return null;
+  const match = RAW_TEXT_IP_RE.exec(raw);
+  if (!match || !match[1]) return null;
+  return normalizeIp(match[1]);
+};
 
 const pickEventId = (event: any): string | undefined => {
   const raw =
@@ -123,7 +133,11 @@ export const normalizeEventsForServer = (
       };
 
       if (type === 'CONNECT') {
-        const eventIp = normalizeIPv4(e.ip || (meta as any).ip);
+        const metadataIpRaw = (meta as any).ip ?? e.ip;
+        const hasMetadataIp = String(metadataIpRaw ?? '').trim().length > 0;
+        const eventIp = hasMetadataIp
+          ? normalizeIp(metadataIpRaw)
+          : extractIpFromRawText(rawText);
         if (eventIp) {
           (meta as any).ip = eventIp;
         } else {
@@ -167,7 +181,7 @@ const enrichConnectMetadata = async (events: NormalizedLogEvent[]): Promise<Norm
 
   events.forEach((event) => {
     if (event.type !== 'CONNECT') return;
-    const ip = normalizeIPv4((event.metadata as any)?.ip);
+    const ip = normalizeIp((event.metadata as any)?.ip);
     if (ip) connectIps.add(ip);
   });
 
@@ -194,7 +208,7 @@ const enrichConnectMetadata = async (events: NormalizedLogEvent[]): Promise<Norm
       };
     }
 
-    const ip = normalizeIPv4(metadata.ip);
+    const ip = normalizeIp(metadata.ip);
     if (!ip) {
       delete metadata.ip;
       delete metadata.port;
@@ -307,7 +321,7 @@ export const storeLogsAndUpdateProfiles = async (cleanEvents: NormalizedLogEvent
     const steamId = ev.steamId!;
     seenPlayers.add(steamId);
     const isConnect = ev.type === 'CONNECT';
-    const ip = isConnect ? normalizeIPv4((ev.metadata as any)?.ip) : undefined;
+    const ip = isConnect ? normalizeIp((ev.metadata as any)?.ip) || undefined : undefined;
     const geo = isConnect ? (ev.metadata as any)?.geo || undefined : undefined;
     const existingProfile = await prisma.playerProfile.findUnique({
       where: { steamId },
