@@ -31,3 +31,5 @@ server/dist
 
 bs_ttt_ingest.lua
 sandbox
+
+GWSockets
