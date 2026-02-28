@@ -86,6 +86,9 @@ export interface ServerAnalytics {
   totalSessions: number;
   newPlayers: number;
   peakPlayers: number;
+  uniquePlayers?: number;
+  avgSessionMinutes?: number;
+  medianSessionMinutes?: number;
   playTimeTrend: { date: string; hours: number }[];
   playerCountTrend: { date: string; count: number }[];
   topPlayers: {
@@ -94,6 +97,15 @@ export interface ServerAnalytics {
     avatarUrl: string;
     hours: number;
   }[];
+  topMaps?: { name: string; count: number; percentage: number }[];
+  eventBreakdown?: { type: string; count: number }[];
+  currentState?: {
+    status: ServerStatus;
+    currentPlayers: number;
+    maxPlayers: number;
+    currentMap?: string;
+    lastHeartbeat?: string;
+  };
 }
 
 export interface HeroSegment {

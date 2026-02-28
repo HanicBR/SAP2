@@ -495,6 +495,9 @@ export const generateServerAnalytics = (days: number): ServerAnalytics => {
     totalSessions: Math.floor(Math.random() * 1000),
     newPlayers: Math.floor(Math.random() * 200),
     peakPlayers: Math.floor(Math.random() * 32) + 10,
+    uniquePlayers: Math.floor(Math.random() * 400) + 20,
+    avgSessionMinutes: Math.floor(Math.random() * 120) + 10,
+    medianSessionMinutes: Math.floor(Math.random() * 90) + 8,
     
     playTimeTrend: dates.map(date => ({
       date,
@@ -511,6 +514,25 @@ export const generateServerAnalytics = (days: number): ServerAnalytics => {
       name: p.name,
       avatarUrl: p.avatarUrl || '',
       hours: Math.floor(Math.random() * 500)
-    })).sort((a,b) => b.hours - a.hours)
+    })).sort((a,b) => b.hours - a.hours),
+    topMaps: [
+      { name: 'gm_construct', count: 14, percentage: 46.7 },
+      { name: 'gm_flatgrass', count: 11, percentage: 36.7 },
+      { name: 'gm_bigcity', count: 5, percentage: 16.6 },
+    ],
+    eventBreakdown: [
+      { type: 'CONNECT', count: 120 },
+      { type: 'DISCONNECT', count: 118 },
+      { type: 'CHAT', count: 620 },
+      { type: 'COMMAND', count: 75 },
+      { type: 'PROP_SPAWN', count: 980 },
+    ],
+    currentState: {
+      status: ServerStatus.ONLINE,
+      currentPlayers: Math.floor(Math.random() * 24),
+      maxPlayers: 32,
+      currentMap: 'gm_construct',
+      lastHeartbeat: new Date().toISOString(),
+    },
   };
 };

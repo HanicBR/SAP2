@@ -120,6 +120,57 @@ const parseMaxPlayers = (value: unknown): number | undefined => {
   return parsed;
 };
 
+const MAX_ANALYTICS_LOGS = 120000;
+const MAX_ANALYTICS_SNAPSHOTS = 20000;
+
+const isTrackableSteamId = (value: unknown): value is string => {
+  const raw = String(value || '').trim();
+  if (!raw) return false;
+  const upper = raw.toUpperCase();
+  if (upper === 'BOT' || upper === 'CONSOLE' || upper === 'UNKNOWN' || upper === 'NULL') {
+    return false;
+  }
+  return /^STEAM_[0-5]:[01]:\d+$/.test(raw);
+};
+
+const parseSessionId = (metadata: any): string | undefined => {
+  const raw = String(metadata?.sessionId || metadata?.serverSessionId || '').trim();
+  return raw || undefined;
+};
+
+const normalizeMapName = (value: unknown): string | undefined => {
+  const raw = String(value || '').trim();
+  if (!raw) return undefined;
+  return raw.length <= 96 ? raw : raw.slice(0, 96);
+};
+
+type AnalyticsBucket = {
+  startMs: number;
+  endMs: number;
+  label: string;
+};
+
+const buildAnalyticsBuckets = (range: '24h' | '7d' | '30d', since: Date, now: Date): AnalyticsBucket[] => {
+  const bucketCount = range === '24h' ? 24 : range === '7d' ? 7 : 30;
+  const sinceMs = since.getTime();
+  const nowMs = now.getTime();
+  const total = Math.max(1, nowMs - sinceMs);
+  const bucketMs = total / bucketCount;
+
+  return Array.from({ length: bucketCount }).map((_, idx) => {
+    const startMs = Math.floor(sinceMs + idx * bucketMs);
+    const endMs = idx === bucketCount - 1 ? nowMs : Math.floor(sinceMs + (idx + 1) * bucketMs);
+    const labelDate = new Date(startMs);
+    const label =
+      range === '24h'
+        ? labelDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+        : labelDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+    return { startMs, endMs, label };
+  });
+};
+
+const round1 = (value: number): number => Math.round(value * 10) / 10;
+
 const findServerByApiKey = async (apiKey?: string) => {
   if (!apiKey) return null;
   const allServers = await prisma.gameServer.findMany({
@@ -166,7 +217,7 @@ const toDomainServer = (s: any) => {
     maxPlayers: s.maxPlayers,
     currentMap: s.currentMap || undefined,
     lastHeartbeat: lastHeartbeat ? lastHeartbeat.toISOString() : undefined,
-    apiKey: undefined, // nunca exponha a chave; apenas em respostas específicas de criação/regeneração
+    apiKey: undefined, // never expose API key outside create/regenerate responses
   };
 };
 
@@ -443,211 +494,229 @@ router.get('/:id/analytics', async (req, res) => {
   const { id } = req.params as { id: string };
   const rangeParam = (req.query.range as string) || '7d';
   const range = (['24h', '7d', '30d'].includes(rangeParam) ? rangeParam : '7d') as '24h' | '7d' | '30d';
-
   const server = await prisma.gameServer.findUnique({ where: { id } });
   if (!server) {
     return res.status(404).json({ error: 'Server not found' });
   }
-
-  // Range window
+  const now = new Date();
+  const nowMs = now.getTime();
   const hours = range === '24h' ? 24 : range === '7d' ? 24 * 7 : 24 * 30;
-  const since = new Date(Date.now() - hours * 60 * 60 * 1000);
-
-  // Logs in range
+  const since = new Date(nowMs - hours * 60 * 60 * 1000);
+  const sinceMs = since.getTime();
+  const buckets = buildAnalyticsBuckets(range, since, now);
+  const bucketCount = buckets.length;
+  const bucketMs = Math.max(1, (nowMs - sinceMs) / bucketCount);
   const logs = await prisma.log.findMany({
     where: { serverId: id, timestamp: { gte: since } },
     orderBy: { timestamp: 'asc' },
+    select: {
+      type: true,
+      timestamp: true,
+      steamId: true,
+      playerName: true,
+      metadata: true,
+    },
+    take: MAX_ANALYTICS_LOGS,
   });
-
-  // Total sessions = CONNECT logs
-  const totalSessions = logs.filter((l) => l.type === 'CONNECT').length;
-
-  // New players = first CONNECT within window
-  const connectsByPlayer: Record<string, Date> = {};
-  logs.forEach((l) => {
-    if (l.type === 'CONNECT' && l.steamId) {
-      if (!connectsByPlayer[l.steamId]) connectsByPlayer[l.steamId] = l.timestamp;
+  const lastKnownNameBySteam = new Map<string, string>();
+  const eventBreakdownMap = new Map<string, number>();
+  const mapChangeCount = new Map<string, number>();
+  const connectedPlayers = new Set<string>();
+  let lastMapSeen: string | undefined;
+  type SessionInterval = { steamId: string; startMs: number; endMs: number };
+  const intervals: SessionInterval[] = [];
+  const openBySessionId = new Map<string, { steamId: string; startMs: number }>();
+  const openBySteamId = new Map<string, number>();
+  const playtimeByPlayerMs = new Map<string, number>();
+  const sessionDurationsMs: number[] = [];
+  const closeSession = (steamId: string, startMs: number, endMs: number) => {
+    if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) return;
+    const clampedStart = Math.max(startMs, sinceMs);
+    const clampedEnd = Math.min(endMs, nowMs);
+    if (clampedEnd <= clampedStart) return;
+    const duration = clampedEnd - clampedStart;
+    intervals.push({ steamId, startMs: clampedStart, endMs: clampedEnd });
+    playtimeByPlayerMs.set(steamId, (playtimeByPlayerMs.get(steamId) || 0) + duration);
+    sessionDurationsMs.push(duration);
+  };
+  logs.forEach((log) => {
+    const type = String(log.type || '').toUpperCase();
+    const ts = log.timestamp.getTime();
+    const metadata = (log.metadata || {}) as any;
+    const sessionId = parseSessionId(metadata);
+    const mapFromEvent = normalizeMapName(metadata?.map || metadata?.mapName || metadata?.Map || metadata?.level);
+    eventBreakdownMap.set(type, (eventBreakdownMap.get(type) || 0) + 1);
+    if (mapFromEvent && mapFromEvent !== lastMapSeen) {
+      mapChangeCount.set(mapFromEvent, (mapChangeCount.get(mapFromEvent) || 0) + 1);
+      lastMapSeen = mapFromEvent;
     }
-  });
-  const newPlayers = Object.values(connectsByPlayer).filter((d) => d >= since).length;
-
-  // Playtime real: preferir sessionId, senão parear CONNECT/DISCONNECT por steamId
-  const playtimeByPlayer: Record<string, number> = {}; // ms
-  const sessionsById: Record<string, { steamId: string | null; start?: number; end?: number }> = {};
-  const lastConnectByPlayer: Record<string, number> = {};
-
-  logs.forEach((l) => {
-    const ts = l.timestamp.getTime();
-    const sessionId = (l.metadata as any)?.sessionId;
-    const steamId = l.steamId || undefined;
-
+    if (!isTrackableSteamId(log.steamId)) return;
+    const steamId = log.steamId;
+    if (log.playerName) {
+      lastKnownNameBySteam.set(steamId, log.playerName);
+    }
+    if (type === 'CONNECT') {
+      connectedPlayers.add(steamId);
+      if (sessionId) {
+        openBySessionId.set(sessionId, { steamId, startMs: ts });
+      } else {
+        openBySteamId.set(steamId, ts);
+      }
+      return;
+    }
+    if (type !== 'DISCONNECT') return;
     if (sessionId) {
-      if (!sessionsById[sessionId]) sessionsById[sessionId] = { steamId: null };
-      const sess = sessionsById[sessionId];
-      if (l.type === 'CONNECT') {
-        sess.start = ts;
-        sess.steamId = steamId || sess.steamId;
-      } else if (l.type === 'DISCONNECT') {
-        sess.end = ts;
-        sess.steamId = steamId || sess.steamId;
+      const opened = openBySessionId.get(sessionId);
+      if (opened && opened.steamId === steamId) {
+        closeSession(steamId, opened.startMs, ts);
+        openBySessionId.delete(sessionId);
+        return;
       }
-    } else if (steamId) {
-      // fallback por steamId
-      if (l.type === 'CONNECT') {
-        lastConnectByPlayer[steamId] = ts;
-      } else if (l.type === 'DISCONNECT') {
-        const start = lastConnectByPlayer[steamId];
-        if (start !== undefined) {
-          const duration = ts - start;
-          playtimeByPlayer[steamId] = (playtimeByPlayer[steamId] || 0) + Math.max(duration, 0);
-          delete lastConnectByPlayer[steamId];
-        }
+    }
+    const startFallback = openBySteamId.get(steamId);
+    if (startFallback !== undefined) {
+      closeSession(steamId, startFallback, ts);
+      openBySteamId.delete(steamId);
+    }
+  });
+  openBySessionId.forEach((opened) => {
+    closeSession(opened.steamId, opened.startMs, nowMs);
+  });
+  openBySteamId.forEach((startMs, steamId) => {
+    closeSession(steamId, startMs, nowMs);
+  });
+  const totalPlayTimeMs = Array.from(playtimeByPlayerMs.values()).reduce((acc, ms) => acc + ms, 0);
+  const totalPlayTimeHours = round1(totalPlayTimeMs / (1000 * 60 * 60));
+  const totalSessions = sessionDurationsMs.length;
+  const uniquePlayers = new Set([...connectedPlayers, ...Array.from(playtimeByPlayerMs.keys())]).size;
+  const avgSessionMinutes = totalSessions
+    ? round1(
+        sessionDurationsMs.reduce((acc, ms) => acc + ms, 0) / (sessionDurationsMs.length * 1000 * 60),
+      )
+    : 0;
+  const sortedDurations = [...sessionDurationsMs].sort((a, b) => a - b);
+  const medianSessionMinutes =
+    sortedDurations.length === 0
+      ? 0
+      : round1(
+          ((sortedDurations[Math.floor((sortedDurations.length - 1) / 2)] || 0) +
+            (sortedDurations[Math.ceil((sortedDurations.length - 1) / 2)] || 0)) /
+            2 /
+            (1000 * 60),
+        );
+  const playerConnectFirstSeen = await prisma.log.groupBy({
+    by: ['steamId'],
+    where: { serverId: id, type: 'CONNECT', steamId: { not: null } },
+    _min: { timestamp: true },
+  });
+  const newPlayers = playerConnectFirstSeen.reduce((acc, row) => {
+    if (!isTrackableSteamId(row.steamId)) return acc;
+    const firstSeen = row._min.timestamp;
+    if (!firstSeen) return acc;
+    return firstSeen.getTime() >= sinceMs ? acc + 1 : acc;
+  }, 0);
+  const playtimeByBucketMs = Array.from({ length: bucketCount }).map(() => 0);
+  intervals.forEach((interval) => {
+    for (let idx = 0; idx < bucketCount; idx++) {
+      const bucket = buckets[idx];
+      if (!bucket) continue;
+      const overlapStart = Math.max(interval.startMs, bucket.startMs);
+      const overlapEnd = Math.min(interval.endMs, bucket.endMs);
+      if (overlapEnd > overlapStart) {
+        playtimeByBucketMs[idx] = (playtimeByBucketMs[idx] || 0) + (overlapEnd - overlapStart);
       }
     }
   });
-
-  // Consolidar sessões com sessionId
-  const rangeEnd = Date.now();
-  Object.values(sessionsById).forEach((s) => {
-    const sid: string = s.steamId ?? 'unknown';
-    const start = s.start;
-    const end = s.end ?? rangeEnd;
-    if (start !== undefined) {
-      const duration = end - start;
-      playtimeByPlayer[sid] = (playtimeByPlayer[sid] || 0) + Math.max(duration, 0);
-    }
-  });
-
-  // Fechar sessões abertas (fallback) na borda final do range
-  Object.entries(lastConnectByPlayer).forEach(([steamId, start]) => {
-    const duration = rangeEnd - start;
-    playtimeByPlayer[steamId] = (playtimeByPlayer[steamId] || 0) + Math.max(duration, 0);
-  });
-
-  const totalPlayTimeHours = Math.round(
-    Object.values(playtimeByPlayer).reduce((acc, ms) => acc + ms, 0) / (1000 * 60 * 60),
-  );
-
-  // Peak players: prefer snapshots (playerCount), fallback para CONNECT window
-  let peakPlayers = 0;
+  const playTimeTrend = buckets.map((bucket, idx) => ({
+    date: bucket.label,
+    hours: round1((playtimeByBucketMs[idx] || 0) / (1000 * 60 * 60)),
+  }));
   const snapshotClient = (prisma as any).playerSnapshot as
     | { findMany: (args: any) => Promise<any[]> }
     | undefined;
+  const bucketPlayerTotal = Array.from({ length: bucketCount }).map(() => 0);
+  const bucketPlayerSamples = Array.from({ length: bucketCount }).map(() => 0);
+  let snapshots: { timestamp: Date; count: number }[] = [];
   if (snapshotClient) {
-    const snapshots = await snapshotClient.findMany({
+    snapshots = await snapshotClient.findMany({
       where: { serverId: id, timestamp: { gte: since } },
-      orderBy: { timestamp: 'desc' },
-      take: 5000,
+      orderBy: { timestamp: 'asc' },
+      take: MAX_ANALYTICS_SNAPSHOTS,
+      select: { timestamp: true, count: true },
     });
-    if (snapshots.length) {
-      peakPlayers = Math.max(...snapshots.map((s: any) => s.count));
-    }
-  } else if (logs.length) {
-    const timestamps = logs
-      .filter((l) => l.type === 'CONNECT')
-      .map((l) => l.timestamp.getTime())
-      .sort((a, b) => a - b);
-    let left = 0;
-    for (let right = 0; right < timestamps.length; right++) {
-      const current = timestamps[right];
-      if (current === undefined) continue;
-      while (left < timestamps.length) {
-        const leftVal = timestamps[left];
-        if (leftVal === undefined) break;
-        if (current - leftVal > 5 * 60 * 1000) {
-          left++;
-          continue;
-        }
-        break;
-      }
-      peakPlayers = Math.max(peakPlayers, right - left + 1);
-    }
   }
-
-  // Trends (daily buckets)
-  const bucketCount = range === '24h' ? 24 : range === '7d' ? 7 : 30;
-  const playTimeTrend = Array.from({ length: bucketCount }).map((_, idx) => {
-    const bucketStart = new Date(since.getTime() + (idx * hours * 60 * 60 * 1000) / bucketCount);
-    const bucketEnd = new Date(since.getTime() + ((idx + 1) * hours * 60 * 60 * 1000) / bucketCount);
-
-    const bucketLogs = logs.filter((l) => l.timestamp >= bucketStart && l.timestamp < bucketEnd);
-    const localSessions: Record<string, { steamId: string | null; start?: number; end?: number }> = {};
-    const localLastByPlayer: Record<string, number> = {};
-    const localPlaytime: Record<string, number> = {};
-
-    bucketLogs.forEach((l) => {
-      const ts = l.timestamp.getTime();
-      const sessionId = (l.metadata as any)?.sessionId;
-      const steamId = l.steamId || undefined;
-      if (sessionId) {
-        if (!localSessions[sessionId]) localSessions[sessionId] = { steamId: null };
-        const sess = localSessions[sessionId];
-        if (l.type === 'CONNECT') {
-          sess.start = ts;
-          sess.steamId = steamId || sess.steamId;
-        } else if (l.type === 'DISCONNECT') {
-          sess.end = ts;
-          sess.steamId = steamId || sess.steamId;
-        }
-      } else if (steamId) {
-        if (l.type === 'CONNECT') {
-          localLastByPlayer[steamId] = ts;
-        } else if (l.type === 'DISCONNECT') {
-          const start = localLastByPlayer[steamId];
-          if (start !== undefined) {
-            const duration = ts - start;
-            localPlaytime[steamId] = (localPlaytime[steamId] || 0) + Math.max(duration, 0);
-            delete localLastByPlayer[steamId];
-          }
+  if (snapshots.length) {
+    snapshots.forEach((snap) => {
+      const ts = snap.timestamp.getTime();
+      const idx = Math.min(bucketCount - 1, Math.max(0, Math.floor((ts - sinceMs) / bucketMs)));
+      bucketPlayerTotal[idx] = (bucketPlayerTotal[idx] || 0) + Math.max(0, Number(snap.count) || 0);
+      bucketPlayerSamples[idx] = (bucketPlayerSamples[idx] || 0) + 1;
+    });
+  } else {
+    intervals.forEach((interval) => {
+      for (let idx = 0; idx < bucketCount; idx++) {
+        const bucket = buckets[idx];
+        if (!bucket) continue;
+        const overlapStart = Math.max(interval.startMs, bucket.startMs);
+        const overlapEnd = Math.min(interval.endMs, bucket.endMs);
+        if (overlapEnd > overlapStart) {
+          bucketPlayerTotal[idx] =
+            (bucketPlayerTotal[idx] || 0) + (overlapEnd - overlapStart) / (bucket.endMs - bucket.startMs);
         }
       }
     });
-
-    Object.values(localSessions).forEach((s) => {
-      const sid: string = s.steamId ?? 'unknown';
-      const start = s.start;
-      const end = s.end ?? bucketEnd.getTime();
-      if (start !== undefined) {
-        const duration = end - start;
-        localPlaytime[sid] = (localPlaytime[sid] || 0) + Math.max(duration, 0);
-      }
+    bucketPlayerSamples.forEach((_, idx) => {
+      bucketPlayerSamples[idx] = 1;
     });
-
-    Object.entries(localLastByPlayer).forEach(([steamId, start]) => {
-      const duration = bucketEnd.getTime() - start;
-      localPlaytime[steamId] = (localPlaytime[steamId] || 0) + Math.max(duration, 0);
-    });
-
-    const bucketHours = Math.round(
-      Object.values(localPlaytime).reduce((acc, ms) => acc + ms, 0) / (1000 * 60 * 60),
-    );
-
-    return { date: `P${idx + 1}`, hours: bucketHours };
-  });
-
-  const playerCountTrend = playTimeTrend.map((p) => ({
-    date: p.date,
-    count: p.hours > 0 ? Math.max(1, Math.round(p.hours / (20 / 60))) : 0,
+  }
+  const playerCountTrend = buckets.map((bucket, idx) => ({
+    date: bucket.label,
+    count:
+      (bucketPlayerSamples[idx] || 0) > 0
+        ? round1((bucketPlayerTotal[idx] || 0) / (bucketPlayerSamples[idx] || 1))
+        : 0,
   }));
-
-  // Top players by number of events in range
-  const playerEventCount: Record<string, { name: string; count: number }> = {};
-  logs.forEach((l) => {
-    if (!l.steamId) return;
-    const key = l.steamId;
-    if (!playerEventCount[key]) playerEventCount[key] = { name: l.playerName || key, count: 0 };
-    playerEventCount[key].count += 1;
-  });
-  const topPlayers = Object.entries(playerEventCount)
-    .sort((a, b) => b[1].count - a[1].count)
+  const peakPlayersFromTrend = playerCountTrend.reduce((acc, item) => Math.max(acc, item.count), 0);
+  const peakPlayersFromSnapshots = snapshots.length
+    ? Math.max(...snapshots.map((snap) => Math.max(0, Number(snap.count) || 0)))
+    : 0;
+  const peakPlayers = Math.max(peakPlayersFromTrend, peakPlayersFromSnapshots);
+  const topPlayerIds = Array.from(playtimeByPlayerMs.entries())
+    .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
-    .map(([steamId, info]) => ({
+    .map(([steamId]) => steamId);
+  const profiles = topPlayerIds.length
+    ? await prisma.playerProfile.findMany({
+        where: { steamId: { in: topPlayerIds } },
+        select: { steamId: true, name: true, avatarUrl: true },
+      })
+    : [];
+  const profileBySteam = new Map(profiles.map((profile) => [profile.steamId, profile]));
+  const topPlayers = topPlayerIds.map((steamId) => {
+    const profile = profileBySteam.get(steamId);
+    const ms = playtimeByPlayerMs.get(steamId) || 0;
+    return {
       steamId,
-      name: info.name,
-      avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(steamId)}`,
-      hours: Math.max(1, Math.round((info.count * 20) / 60)),
+      name: profile?.name || lastKnownNameBySteam.get(steamId) || steamId,
+      avatarUrl:
+        profile?.avatarUrl ||
+        `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(steamId)}`,
+      hours: round1(ms / (1000 * 60 * 60)),
+    };
+  });
+  const totalMapCycles = Array.from(mapChangeCount.values()).reduce((acc, count) => acc + count, 0);
+  const topMaps = Array.from(mapChangeCount.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([name, count]) => ({
+      name,
+      count,
+      percentage: totalMapCycles > 0 ? round1((count * 100) / totalMapCycles) : 0,
     }));
-
+  const eventBreakdown = Array.from(eventBreakdownMap.entries())
+    .sort((a, b) => b[1] - a[1])
+    .map(([type, count]) => ({ type, count }));
+  const domainServer = toDomainServer(server as any);
   return res.json({
     totalPlayTimeHours,
     totalSessions,
@@ -656,7 +725,20 @@ router.get('/:id/analytics', async (req, res) => {
     playTimeTrend,
     playerCountTrend,
     topPlayers,
+    uniquePlayers,
+    avgSessionMinutes,
+    medianSessionMinutes,
+    topMaps,
+    eventBreakdown,
+    currentState: {
+      status: domainServer.status,
+      currentPlayers: domainServer.currentPlayers,
+      maxPlayers: domainServer.maxPlayers,
+      currentMap: domainServer.currentMap,
+      lastHeartbeat: domainServer.lastHeartbeat,
+    },
   });
 });
-
 export default router;
+
+
