@@ -287,6 +287,84 @@ const mapPunishmentLogRecord = (log: any) => {
   };
 };
 
+const normalizePunishmentReason = (value: unknown): string =>
+  String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, ' ');
+
+const PANEL_COMMAND_ECHO_WINDOW_MS = 6 * 60 * 60 * 1000;
+
+const punishmentReasonsLikelySame = (left: string, right: string): boolean => {
+  if (!left || !right) return false;
+  if (left === right) return true;
+  const shorter = left.length <= right.length ? left : right;
+  const longer = shorter === left ? right : left;
+  return shorter.length >= 12 && longer.includes(shorter);
+};
+
+type DbPunishmentEchoCandidate = {
+  type: string;
+  reason: string;
+  durationMinutes: number;
+  dateMs: number;
+};
+
+const buildDbPunishmentEchoCandidates = (dbRows: any[]): DbPunishmentEchoCandidate[] =>
+  dbRows.map((row) => ({
+    type: String(row.type || '').trim().toUpperCase(),
+    reason: normalizePunishmentReason(row.reason),
+    durationMinutes: toDurationMinutes(row.duration || undefined),
+    dateMs: row.date instanceof Date ? row.date.getTime() : new Date(row.date).getTime(),
+  }));
+
+const shouldDropPanelCommandEchoPunishmentLog = (
+  log: { timestamp: Date; playerName?: string | null; metadata: unknown },
+  dbCandidates: DbPunishmentEchoCandidate[],
+): boolean => {
+  if (!dbCandidates.length) return false;
+
+  const meta: any = log.metadata || {};
+  const sourceTag = String(meta.sourceTag || '')
+    .trim()
+    .toUpperCase();
+  if (sourceTag !== 'COMMAND') return false;
+
+  const actorType = String(meta.actorType || '')
+    .trim()
+    .toLowerCase();
+  const actorName = String(log.playerName || '')
+    .trim()
+    .toLowerCase();
+  if (actorType && actorType !== 'console') return false;
+  if (!actorType && actorName && actorName !== 'console') return false;
+
+  const action = String(meta.action || '')
+    .trim()
+    .toUpperCase();
+  if (action === 'UNBAN' || action === 'UNMUTE' || action === 'UNGAG' || action === 'UNPUNISH') {
+    return false;
+  }
+
+  const punishmentType = String(meta.punishmentType || '')
+    .trim()
+    .toUpperCase();
+  if (!punishmentType) return false;
+
+  const reason = normalizePunishmentReason(meta.reason);
+  if (!reason) return false;
+
+  const logDateMs = log.timestamp instanceof Date ? log.timestamp.getTime() : new Date(log.timestamp).getTime();
+  const durationMinutes = toDurationMinutes(meta.durationText ? String(meta.durationText) : undefined);
+
+  return dbCandidates.some((candidate) => {
+    if (candidate.type !== punishmentType) return false;
+    if (candidate.durationMinutes !== durationMinutes) return false;
+    if (!punishmentReasonsLikelySame(candidate.reason, reason)) return false;
+    return Math.abs(candidate.dateMs - logDateMs) <= PANEL_COMMAND_ECHO_WINDOW_MS;
+  });
+};
+
 const mapLog = (log: any) => ({
   id: log.id,
   serverId: log.serverId,
@@ -1164,6 +1242,7 @@ const fetchPaginatedPunishments = async (
   const deactivationMap = await loadPunishmentDeactivations(dbRows.map((p) => p.id));
   const dbItems = dbRows.map((p) => mapPunishmentRecord(p, deactivationMap.get(p.id)));
   const dbIdSet = new Set(dbRows.map((p) => p.id));
+  const dbEchoCandidates = buildDbPunishmentEchoCandidates(dbRows);
 
   const logWhere = buildPunishmentLogsTargetWhere(steamId, playerName);
   const logTotalRaw = await prisma.log.count({
@@ -1188,6 +1267,9 @@ const fetchPaginatedPunishments = async (
       const sourceTag = String(meta.sourceTag || '').trim().toUpperCase();
       const punishmentId = String(meta.punishmentId || '').trim();
       if (sourceTag === 'PUNISHMENT_DEACTIVATE' && punishmentId && dbIdSet.has(punishmentId)) {
+        return false;
+      }
+      if (shouldDropPanelCommandEchoPunishmentLog(log, dbEchoCandidates)) {
         return false;
       }
       return true;
