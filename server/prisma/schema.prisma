@@ -118,6 +118,27 @@ model VipAutomationAction {
   @@index([retryOfActionId])
 }
 
+model GeoIpCache {
+  ip           String   @id
+  country      String?
+  state        String?
+  city         String?
+  lat          Float?
+  lng          Float?
+  source       String?
+  lastLookupAt DateTime?
+  expiresAt    DateTime?
+  failedCount  Int      @default(0)
+  lastError    String?
+  nextRetryAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([expiresAt])
+  @@index([nextRetryAt])
+  @@index([updatedAt])
+}
+
 model PlayerNote {
   id        String   @id @default(cuid())
   steamId   String

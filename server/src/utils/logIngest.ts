@@ -1,7 +1,8 @@
 import { prisma } from '../db/client';
 import { GameMode } from '../domain';
-import { hashIp, lookupGeoIp } from './geoIp';
+import { hashIp } from './geoIp';
 import { normalizeIp } from './normalizeIp';
+import { resolveGeoIpWithPersistentCache } from '../services/geoIpCache';
 
 export interface IngestServerInfo {
   id: string;
@@ -227,7 +228,7 @@ const enrichPlayerGeoInBackground = (events: NormalizedLogEvent[]) => {
   void Promise.all(
     Array.from(targets.values()).map(async ({ steamId, ip }) => {
       try {
-        const geo = await lookupGeoIp(ip);
+        const geo = await resolveGeoIpWithPersistentCache(ip);
         if (!geo) return;
         // Guard to avoid writing stale geo when player already switched to another IP.
         await prisma.playerProfile.updateMany({
