@@ -5,11 +5,21 @@ import { WebSocketServer, type RawData, type WebSocket } from 'ws';
 import { findServerByApiKey } from './serverAuth';
 import { ingestPlayerPulse, PlayerPulseIngestError } from './playerPulseIngest';
 import { getPlayerPulseSettings } from './playtimePulse';
+import {
+  ackServerAction,
+  claimServerActionsForWsDispatch,
+  getServerActionHealthSummary,
+  getServerActionRuntimeSnapshot,
+  setServerActionEnqueueListener,
+  type ServerAction,
+} from './serverActions';
 
 const WS_SERVERS_PATH = '/ws/servers';
 const MAX_PLAYER_STATE_PLAYERS = 256;
 const MAX_PLAYER_STATE_PLAYER_NAME = 80;
 const MAX_PLAYER_STATE_MAP_LENGTH = 96;
+const MAX_SERVER_ACTIONS_PER_DISPATCH = 20;
+const SERVER_ACTION_DISPATCH_TICK_MS = 2_000;
 
 type LiveStatePlayer = {
   steamId: string;
@@ -33,11 +43,20 @@ type ConnectedServerSocket = {
   invalidMessages: number;
   playerPulseMessages: number;
   playerStateMessages: number;
+  serverActionMessages: number;
+  serverActionAckMessages: number;
+  serverActionAckOk: number;
+  serverActionAckFailed: number;
   playerPulseInserted: number;
   playerPulseDeduplicated: number;
   lastPulseAt?: string;
   lastStateAt?: string;
   lastStatePlayers?: number;
+  lastActionSentAt?: string;
+  lastActionId?: string;
+  lastActionAckAt?: string;
+  lastActionAckId?: string;
+  lastActionAckError?: string;
   lastErrorAt?: string;
   lastErrorReason?: string;
   remoteAddress?: string;
@@ -55,6 +74,7 @@ const liveStateByServerId = new Map<string, LiveServerPlayerState>();
 
 let initialized = false;
 let wsServer: WebSocketServer | null = null;
+let actionDispatchTimer: NodeJS.Timeout | null = null;
 
 const nowIso = () => new Date().toISOString();
 
@@ -195,6 +215,36 @@ const markSocketError = (state: ConnectedServerSocket, reason: string) => {
   state.lastErrorReason = reason;
 };
 
+const mapServerActionPayload = (action: ServerAction) => ({
+  id: action.id,
+  actionId: action.id,
+  command: action.command,
+  createdAt: action.createdAt,
+  ...(action.metadata ? { metadata: action.metadata } : {}),
+});
+
+const dispatchPendingServerActions = (serverId: string, limit = MAX_SERVER_ACTIONS_PER_DISPATCH) => {
+  const active = connectedByServerId.get(serverId);
+  if (!active || active.socket.readyState !== 1) return 0;
+
+  const pending = claimServerActionsForWsDispatch(serverId, limit);
+  if (!pending.length) return 0;
+
+  const sentAt = nowIso();
+  pending.forEach((action) => {
+    trySend(active.socket, {
+      type: 'server_action',
+      serverId,
+      payload: mapServerActionPayload(action),
+    });
+    active.serverActionMessages += 1;
+    active.lastActionSentAt = sentAt;
+    active.lastActionId = action.id;
+  });
+
+  return pending.length;
+};
+
 const attachServerSocket = (
   socket: WebSocket,
   request: IncomingMessage,
@@ -216,6 +266,10 @@ const attachServerSocket = (
     invalidMessages: 0,
     playerPulseMessages: 0,
     playerStateMessages: 0,
+    serverActionMessages: 0,
+    serverActionAckMessages: 0,
+    serverActionAckOk: 0,
+    serverActionAckFailed: 0,
     playerPulseInserted: 0,
     playerPulseDeduplicated: 0,
     socket,
@@ -315,12 +369,42 @@ const attachServerSocket = (
       return;
     }
 
+    if (type === 'server_action_ack') {
+      state.serverActionAckMessages += 1;
+      const payload = (parsed as any).payload ?? (parsed as any).data ?? parsed;
+      const actionId = toOptionalString(payload?.actionId || payload?.id);
+      if (!actionId) {
+        markSocketError(state, 'server_action_ack_missing_id');
+        trySend(socket, { type: 'error', reason: 'server_action_ack_missing_id' });
+        return;
+      }
+
+      const ackOk = payload?.ok !== false;
+      const ackAt = nowIso();
+      state.lastActionAckAt = ackAt;
+      state.lastActionAckId = actionId;
+
+      if (!ackOk) {
+        const reason = toOptionalString(payload?.error || payload?.reason) || 'server_action_failed';
+        state.serverActionAckFailed += 1;
+        state.lastActionAckError = reason;
+        ackServerAction(serverId, actionId, false, reason);
+      } else {
+        state.serverActionAckOk += 1;
+        ackServerAction(serverId, actionId, true);
+      }
+
+      dispatchPendingServerActions(serverId);
+      return;
+    }
+
     markSocketError(state, 'unknown_message_type');
     trySend(socket, { type: 'error', reason: 'unknown_message_type' });
   });
 
   socket.on('pong', () => {
     state.lastMessageAt = nowIso();
+    dispatchPendingServerActions(serverId);
   });
 
   socket.on('close', () => {
@@ -342,6 +426,7 @@ const attachServerSocket = (
     transport: 'websocket',
     fallback: 'http',
   });
+  dispatchPendingServerActions(serverId);
 }
 
 const authenticateUpgrade = async (request: IncomingMessage) => {
@@ -362,6 +447,16 @@ export const initializeServerWebSocket = (httpServer: HttpServer) => {
   if (initialized) return;
   initialized = true;
   wsServer = new WebSocketServer({ noServer: true });
+  setServerActionEnqueueListener((serverId) => {
+    dispatchPendingServerActions(serverId);
+  });
+
+  actionDispatchTimer = setInterval(() => {
+    connectedByServerId.forEach((_state, serverId) => {
+      dispatchPendingServerActions(serverId);
+    });
+  }, SERVER_ACTION_DISPATCH_TICK_MS);
+  actionDispatchTimer.unref?.();
 
   httpServer.on('upgrade', (request, socket, head) => {
     const pathname = parsePathName(request);
@@ -401,12 +496,14 @@ export const initializeServerWebSocket = (httpServer: HttpServer) => {
 
 export const getServerWsHealthSnapshot = () => {
   const nowMs = Date.now();
+  const actionSummary = getServerActionHealthSummary();
   const servers = Array.from(connectedByServerId.values())
     .map((entry) => {
       const idleSeconds = Math.max(
         0,
         Math.floor((nowMs - new Date(entry.lastMessageAt).getTime()) / 1000),
       );
+      const actionRuntime = getServerActionRuntimeSnapshot(entry.serverId);
       return {
         serverId: entry.serverId,
         connectedAt: entry.connectedAt,
@@ -416,11 +513,29 @@ export const getServerWsHealthSnapshot = () => {
         invalidMessages: entry.invalidMessages,
         playerPulseMessages: entry.playerPulseMessages,
         playerStateMessages: entry.playerStateMessages,
+        serverActionMessages: entry.serverActionMessages,
+        serverActionAckMessages: entry.serverActionAckMessages,
+        serverActionAckOk: entry.serverActionAckOk,
+        serverActionAckFailed: entry.serverActionAckFailed,
         playerPulseInserted: entry.playerPulseInserted,
         playerPulseDeduplicated: entry.playerPulseDeduplicated,
+        actionQueue: actionRuntime.queueSize,
+        actionPendingWsAck: actionRuntime.pendingWsAck,
+        actionHttpEligible: actionRuntime.httpEligible,
+        actionQueuedTotal: actionRuntime.queuedTotal,
+        actionWsSentTotal: actionRuntime.wsSentTotal,
+        actionWsAckedTotal: actionRuntime.wsAckedTotal,
+        actionWsAckErrorTotal: actionRuntime.wsAckErrorTotal,
+        actionWsRetryTotal: actionRuntime.wsRetryTotal,
+        actionHttpPulledTotal: actionRuntime.httpPulledTotal,
         ...(entry.lastPulseAt ? { lastPulseAt: entry.lastPulseAt } : {}),
         ...(entry.lastStateAt ? { lastStateAt: entry.lastStateAt } : {}),
         ...(entry.lastStatePlayers !== undefined ? { lastStatePlayers: entry.lastStatePlayers } : {}),
+        ...(entry.lastActionSentAt ? { lastActionSentAt: entry.lastActionSentAt } : {}),
+        ...(entry.lastActionId ? { lastActionId: entry.lastActionId } : {}),
+        ...(entry.lastActionAckAt ? { lastActionAckAt: entry.lastActionAckAt } : {}),
+        ...(entry.lastActionAckId ? { lastActionAckId: entry.lastActionAckId } : {}),
+        ...(entry.lastActionAckError ? { lastActionAckError: entry.lastActionAckError } : {}),
         ...(entry.lastErrorAt ? { lastErrorAt: entry.lastErrorAt } : {}),
         ...(entry.lastErrorReason ? { lastErrorReason: entry.lastErrorReason } : {}),
         ...(entry.remoteAddress ? { remoteAddress: entry.remoteAddress } : {}),
@@ -433,6 +548,7 @@ export const getServerWsHealthSnapshot = () => {
     path: WS_SERVERS_PATH,
     connectedServers: servers.length,
     serversWithLiveState: liveStateByServerId.size,
+    serverActions: actionSummary,
     now: nowIso(),
     servers,
   };

@@ -231,6 +231,14 @@ local function get_ws_base_backoff()
 	return math_max(1, math_floor(c_ws_reconnect_seconds:GetFloat()))
 end
 
+local function is_ws_transport_needed()
+	if not c_ws_enable:GetBool() then return false end
+	if c_pulse_enable:GetBool() then return true end
+	if c_state_enable:GetBool() then return true end
+	if c_actions_enable:GetBool() then return true end
+	return false
+end
+
 local function ensure_ws_module()
 	if ws_module_checked then return ws_module_loaded end
 	ws_module_checked = true
@@ -283,10 +291,70 @@ local function on_ws_connect_failed(reason)
 	end
 end
 
+local function send_server_action_ack_ws(socket, action_id, ok, err_text)
+	if not socket then return false end
+	if not action_id or action_id == "" then return false end
+
+	local payload = {
+		type = "server_action_ack",
+		payload = {
+			actionId = tostring(action_id),
+			ok = ok and true or false,
+			receivedAt = now_iso_utc(),
+		},
+	}
+	if not ok and err_text and tostring(err_text) ~= "" then
+		payload.payload.error = tostring(err_text)
+	end
+
+	local body = util.TableToJSON(payload, false, true)
+	if not body then return false end
+
+	local ok_write = pcall(function()
+		socket:write(body, false)
+	end)
+	return ok_write
+end
+
+local function handle_server_action_ws(socket, parsed)
+	local payload = parsed.payload
+	if not istable(payload) then
+		payload = parsed.data
+	end
+	if not istable(payload) then
+		payload = parsed
+	end
+
+	local action_id = trim_string(payload.actionId or payload.id or parsed.actionId or parsed.id)
+	if action_id == "" then
+		debug_log("ws server_action ignored: missing action id")
+		return
+	end
+
+	local command = trim_string(payload.command or parsed.command)
+	if command == "" then
+		debug_log("ws server_action invalid command id=" .. tostring(action_id))
+		send_server_action_ack_ws(socket, action_id, false, "invalid_action_command")
+		return
+	end
+
+	local ok_exec, exec_err = pcall(function()
+		game.ConsoleCommand(command .. "\n")
+	end)
+
+	if not ok_exec then
+		debug_log("ws server_action failed id=" .. tostring(action_id) .. " err=" .. tostring(exec_err))
+		send_server_action_ack_ws(socket, action_id, false, tostring(exec_err or "command_execution_failed"))
+		return
+	end
+
+	debug_log("ws action executed id=" .. tostring(action_id) .. " cmd=" .. tostring(command))
+	send_server_action_ack_ws(socket, action_id, true)
+end
+
 local function connect_ws_socket()
 	if not c_enable:GetBool() then return false end
-	if not c_ws_enable:GetBool() then return false end
-	if not c_pulse_enable:GetBool() then return false end
+	if not is_ws_transport_needed() then return false end
 	if not is_configured() then return false end
 	if ws_connected and ws_socket then return true end
 	if ws_connecting then return false end
@@ -346,7 +414,7 @@ local function connect_ws_socket()
 		ws_connected = false
 		ws_connecting = false
 		ws_socket = nil
-		if c_ws_enable:GetBool() and c_enable:GetBool() and c_pulse_enable:GetBool() then
+		if c_enable:GetBool() and is_ws_transport_needed() then
 			schedule_ws_reconnect()
 		end
 	end
@@ -369,6 +437,11 @@ local function connect_ws_socket()
 			if parsed.ok == false then
 				debug_log("ws state ack error: " .. tostring(parsed.error or "unknown"))
 			end
+			return
+		end
+
+		if msg_type == "server_action" then
+			handle_server_action_ws(socket, parsed)
 			return
 		end
 
@@ -403,7 +476,7 @@ local function ensure_ws_connected()
 		return false
 	end
 
-	if not c_ws_enable:GetBool() then
+	if not is_ws_transport_needed() then
 		close_ws_socket(true)
 		return false
 	end
@@ -454,7 +527,7 @@ local function ws_keepalive_tick()
 		return
 	end
 
-	if not c_ws_enable:GetBool() or (not c_pulse_enable:GetBool() and not c_state_enable:GetBool()) then
+	if not is_ws_transport_needed() then
 		close_ws_socket(true)
 		return
 	end
