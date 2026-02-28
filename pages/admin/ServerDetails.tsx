@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState, memo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ApiService } from '../../services/api';
-import { GameServer, ServerAnalytics, ServerStatus } from '../../types';
+import { GameServer, ServerAnalytics, ServerLiveStateResponse, ServerStatus } from '../../types';
 import { Icons } from '../../components/Icon';
 import {
   LineChart,
@@ -17,6 +17,7 @@ import {
 } from 'recharts';
 
 type RangeKey = '24h' | '7d' | '30d';
+const LIVE_STATE_MAX_AGE_SECONDS = 30;
 
 const KPICard = memo(
   ({
@@ -175,6 +176,7 @@ const ServerDetails: React.FC = () => {
   const { serverId } = useParams<{ serverId: string }>();
   const [server, setServer] = useState<GameServer | null>(null);
   const [analytics, setAnalytics] = useState<ServerAnalytics | null>(null);
+  const [liveState, setLiveState] = useState<ServerLiveStateResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [range, setRange] = useState<RangeKey>('7d');
@@ -186,12 +188,14 @@ const ServerDetails: React.FC = () => {
       else setLoading(true);
 
       try {
-        const [serverData, analyticsData] = await Promise.all([
+        const [serverData, analyticsData, liveStateData] = await Promise.all([
           ApiService.getServerById(serverId),
           ApiService.getServerAnalytics(serverId, range),
+          ApiService.getServerLiveState(serverId),
         ]);
         if (serverData) setServer(serverData);
         setAnalytics(analyticsData);
+        setLiveState(liveStateData);
       } finally {
         if (silent) setRefreshing(false);
         else setLoading(false);
@@ -209,11 +213,31 @@ const ServerDetails: React.FC = () => {
   }, [loadData]);
 
   const currentState = useMemo(() => analytics?.currentState, [analytics]);
-  const displayPlayers = currentState?.currentPlayers ?? server?.currentPlayers ?? 0;
+  const liveStateAgeSeconds = Number(liveState?.ageSeconds ?? Number.POSITIVE_INFINITY);
+  const hasFreshLiveState = Boolean(
+    liveState?.available &&
+      liveState?.connected &&
+      Number.isFinite(liveStateAgeSeconds) &&
+      liveStateAgeSeconds <= LIVE_STATE_MAX_AGE_SECONDS,
+  );
+  const liveStatePlayers = hasFreshLiveState ? liveState?.players || [] : [];
+  const liveStateSourceLabel = hasFreshLiveState
+    ? 'LIVE (WS)'
+    : liveState?.available
+    ? 'WS stale'
+    : 'Fallback';
+  const liveStateSourceClass = hasFreshLiveState
+    ? 'bg-emerald-900/20 text-emerald-300 border-emerald-700'
+    : liveState?.available
+    ? 'bg-yellow-900/20 text-yellow-300 border-yellow-700'
+    : 'bg-zinc-800 text-zinc-400 border-zinc-700';
+  const displayPlayers = hasFreshLiveState
+    ? Number(liveState?.playerCount || 0)
+    : currentState?.currentPlayers ?? server?.currentPlayers ?? 0;
   const displayMaxPlayers = currentState?.maxPlayers ?? server?.maxPlayers ?? 0;
-  const displayMap = currentState?.currentMap || server?.currentMap || 'Desconhecido';
-  const displayStatus = currentState?.status ?? server?.status ?? ServerStatus.OFFLINE;
-  const displayLastHeartbeat = currentState?.lastHeartbeat || server?.lastHeartbeat;
+  const displayMap = (hasFreshLiveState ? liveState?.map : undefined) || currentState?.currentMap || server?.currentMap || 'Desconhecido';
+  const displayStatus = hasFreshLiveState ? ServerStatus.ONLINE : currentState?.status ?? server?.status ?? ServerStatus.OFFLINE;
+  const displayLastSignal = hasFreshLiveState ? liveState?.receivedAt : currentState?.lastHeartbeat || server?.lastHeartbeat;
   const playtimeDiagnostics = analytics?.playtimeDiagnostics;
   const playtimeSource = playtimeSourceLabel(analytics?.playtimeSource);
   const playtimeDecision = playtimeDecisionLabel(playtimeDiagnostics?.decisionReason);
@@ -238,6 +262,9 @@ const ServerDetails: React.FC = () => {
             <span className={`px-2 py-0.5 rounded border text-xs font-bold uppercase ${statusClass(displayStatus)}`}>
               {statusText(displayStatus)}
             </span>
+            <span className={`px-2 py-0.5 rounded border text-xs font-bold uppercase ${liveStateSourceClass}`}>
+              {liveStateSourceLabel}
+            </span>
             {refreshing && <span className="text-zinc-500 text-xs">Atualizando...</span>}
           </div>
         </div>
@@ -258,7 +285,7 @@ const ServerDetails: React.FC = () => {
       </div>
 
       <div className="bg-zinc-900 rounded border border-zinc-800 p-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 text-sm">
           <div>
             <p className="text-zinc-500 uppercase text-xs font-bold">Mapa Atual</p>
             <p className="text-white font-semibold">{displayMap}</p>
@@ -274,9 +301,68 @@ const ServerDetails: React.FC = () => {
           <div>
             <p className="text-zinc-500 uppercase text-xs font-bold">Último Sinal</p>
             <p className="text-white font-semibold">
-              {displayLastHeartbeat ? new Date(displayLastHeartbeat).toLocaleString('pt-BR') : 'Sem heartbeat'}
+              {displayLastSignal ? new Date(displayLastSignal).toLocaleString('pt-BR') : 'Sem heartbeat'}
             </p>
           </div>
+          <div>
+            <p className="text-zinc-500 uppercase text-xs font-bold">Fonte de Presenca</p>
+            <p className="text-white font-semibold">
+              {hasFreshLiveState
+                ? `WebSocket (${Math.max(0, Math.floor(liveStateAgeSeconds))}s)`
+                : liveState?.available
+                ? 'WebSocket stale, usando fallback'
+                : 'Heartbeat/Pulse fallback'}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-zinc-900 rounded border border-zinc-800">
+        <div className="p-4 border-b border-zinc-800 bg-zinc-950/30 flex items-center justify-between">
+          <h3 className="text-sm font-bold text-zinc-300 uppercase flex items-center">
+            <Icons.Users className="w-4 h-4 mr-2 text-zinc-500" /> Players Ao Vivo
+          </h3>
+          <span className={`px-2 py-0.5 rounded border text-xs font-bold uppercase ${liveStateSourceClass}`}>
+            {liveStateSourceLabel}
+          </span>
+        </div>
+        <div className="p-3 space-y-2">
+          {hasFreshLiveState && liveStatePlayers.length === 0 && (
+            <p className="text-zinc-500 text-sm">Snapshot WS ativo, sem players no momento.</p>
+          )}
+
+          {hasFreshLiveState && liveStatePlayers.length > 0 && (
+            <>
+              <p className="text-zinc-400 text-xs uppercase font-bold px-1">
+                {displayPlayers.toLocaleString('pt-BR')} online
+              </p>
+              {liveStatePlayers.map((entry) => (
+                <div
+                  key={entry.steamId}
+                  className="flex items-center justify-between bg-zinc-950/40 border border-zinc-800 rounded px-3 py-2"
+                >
+                  <div className="min-w-0">
+                    <p className="text-white text-sm font-semibold truncate">{entry.name || 'Sem nome'}</p>
+                    <p className="text-zinc-500 text-xs font-mono truncate">{entry.steamId}</p>
+                  </div>
+                  <Link
+                    to={`/admin/players/${entry.steamId}`}
+                    className="text-xs text-cyan-300 hover:text-cyan-200 font-bold uppercase"
+                  >
+                    Perfil
+                  </Link>
+                </div>
+              ))}
+            </>
+          )}
+
+          {!hasFreshLiveState && (
+            <p className="text-zinc-500 text-sm">
+              {liveState?.available
+                ? `WS conectado, mas snapshot antigo (${Math.max(0, Math.floor(liveStateAgeSeconds))}s). Exibindo fallback.`
+                : 'Live-state WS indisponivel. Exibindo fallback por heartbeat/pulse.'}
+            </p>
+          )}
         </div>
       </div>
 
