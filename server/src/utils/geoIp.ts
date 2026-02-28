@@ -6,10 +6,12 @@ export interface GeoIpData {
   city?: string;
   lat?: number;
   lng?: number;
-  source: 'ipwhois';
+  source: 'ipwhois' | 'ipapiis';
 }
 
 const GEO_TTL_MS = 6 * 60 * 60 * 1000;
+const GEO_FAILURE_TTL_MS = 5 * 60 * 1000;
+const GEO_LOOKUP_TIMEOUT_MS = 3200;
 const geoCache = new Map<string, { expiresAt: number; value: GeoIpData | undefined }>();
 
 const isValidIpv4 = (ip: string): boolean => {
@@ -51,6 +53,73 @@ export const hashIp = (ip: string): string => {
   return createHash('sha256').update(`${salt}|${ip}`).digest('hex');
 };
 
+const parseFiniteNumber = (value: unknown): number | undefined => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
+const fetchJson = async (
+  url: string,
+  timeoutMs = GEO_LOOKUP_TIMEOUT_MS,
+): Promise<any | undefined> => {
+  let timer: NodeJS.Timeout | undefined;
+  const controller = new AbortController();
+  try {
+    timer = setTimeout(() => controller.abort(), timeoutMs);
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        Accept: 'application/json',
+      },
+    });
+    if (!response.ok) return undefined;
+    return await response.json();
+  } catch {
+    return undefined;
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+};
+
+const lookupViaIpWhoIs = async (ip: string): Promise<GeoIpData | undefined> => {
+  const payload = await fetchJson(`https://ipwho.is/${encodeURIComponent(ip)}`);
+  if (!payload || payload.success === false) return undefined;
+  const lat = parseFiniteNumber(payload.latitude ?? payload.lat);
+  const lng = parseFiniteNumber(payload.longitude ?? payload.lng);
+  const value: GeoIpData = {
+    source: 'ipwhois',
+    ...(payload.country ? { country: payload.country } : {}),
+    ...(payload.region || payload.region_name ? { state: payload.region || payload.region_name } : {}),
+    ...(payload.city ? { city: payload.city } : {}),
+    ...(typeof lat === 'number' ? { lat } : {}),
+    ...(typeof lng === 'number' ? { lng } : {}),
+  };
+  if (!value.country && !value.state && !value.city && value.lat === undefined && value.lng === undefined) {
+    return undefined;
+  }
+  return value;
+};
+
+const lookupViaIpApiIs = async (ip: string): Promise<GeoIpData | undefined> => {
+  const payload = await fetchJson(`https://api.ipapi.is?q=${encodeURIComponent(ip)}`);
+  if (!payload || payload.error) return undefined;
+  const location = payload.location && typeof payload.location === 'object' ? payload.location : {};
+  const lat = parseFiniteNumber(location.latitude ?? payload.latitude ?? payload.lat);
+  const lng = parseFiniteNumber(location.longitude ?? payload.longitude ?? payload.lng);
+  const value: GeoIpData = {
+    source: 'ipapiis',
+    ...(location.country || payload.country ? { country: location.country || payload.country } : {}),
+    ...(location.state || payload.region ? { state: location.state || payload.region } : {}),
+    ...(location.city || payload.city ? { city: location.city || payload.city } : {}),
+    ...(typeof lat === 'number' ? { lat } : {}),
+    ...(typeof lng === 'number' ? { lng } : {}),
+  };
+  if (!value.country && !value.state && !value.city && value.lat === undefined && value.lng === undefined) {
+    return undefined;
+  }
+  return value;
+};
+
 export const lookupGeoIp = async (ip: string): Promise<GeoIpData | undefined> => {
   const normalized = normalizeIPv4(ip);
   if (!normalized || isPrivateIpv4(normalized)) {
@@ -63,39 +132,23 @@ export const lookupGeoIp = async (ip: string): Promise<GeoIpData | undefined> =>
     return cached.value;
   }
 
-  let timer: NodeJS.Timeout | undefined;
-  const controller = new AbortController();
   try {
-    timer = setTimeout(() => controller.abort(), 1500);
-    const response = await fetch(`https://ipwho.is/${encodeURIComponent(normalized)}`, {
-      signal: controller.signal,
-    });
-    if (!response.ok) {
-      geoCache.set(normalized, { expiresAt: now + GEO_TTL_MS, value: undefined });
-      return undefined;
+    const primary = await lookupViaIpWhoIs(normalized);
+    if (primary) {
+      geoCache.set(normalized, { expiresAt: now + GEO_TTL_MS, value: primary });
+      return primary;
     }
 
-    const payload: any = await response.json();
-    if (!payload || payload.success === false) {
-      geoCache.set(normalized, { expiresAt: now + GEO_TTL_MS, value: undefined });
-      return undefined;
+    const fallback = await lookupViaIpApiIs(normalized);
+    if (fallback) {
+      geoCache.set(normalized, { expiresAt: now + GEO_TTL_MS, value: fallback });
+      return fallback;
     }
 
-    const value: GeoIpData = {
-      source: 'ipwhois',
-      country: payload.country || undefined,
-      state: payload.region || payload.region_name || undefined,
-      city: payload.city || undefined,
-      lat: typeof payload.latitude === 'number' ? payload.latitude : undefined,
-      lng: typeof payload.longitude === 'number' ? payload.longitude : undefined,
-    };
-
-    geoCache.set(normalized, { expiresAt: now + GEO_TTL_MS, value });
-    return value;
-  } catch {
-    geoCache.set(normalized, { expiresAt: now + 60 * 1000, value: undefined });
+    geoCache.set(normalized, { expiresAt: now + GEO_FAILURE_TTL_MS, value: undefined });
     return undefined;
-  } finally {
-    if (timer) clearTimeout(timer);
+  } catch {
+    geoCache.set(normalized, { expiresAt: now + GEO_FAILURE_TTL_MS, value: undefined });
+    return undefined;
   }
 };

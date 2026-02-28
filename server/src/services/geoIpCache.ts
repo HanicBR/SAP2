@@ -31,7 +31,7 @@ const toGeo = (row: GeoIpCacheRow | null | undefined): GeoIpData | undefined => 
     !!row.country || !!row.state || !!row.city || typeof row.lat === 'number' || typeof row.lng === 'number';
   if (!hasAnyField) return undefined;
   return {
-    source: row.source === 'ipwhois' ? 'ipwhois' : 'ipwhois',
+    source: row.source === 'ipapiis' ? 'ipapiis' : 'ipwhois',
     ...(row.country ? { country: row.country } : {}),
     ...(row.state ? { state: row.state } : {}),
     ...(row.city ? { city: row.city } : {}),

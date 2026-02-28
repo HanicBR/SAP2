@@ -1,4 +1,5 @@
 import { prisma } from '../db/client';
+import { resolveGeoIpWithPersistentCache } from './geoIpCache';
 import { normalizeIp } from '../utils/normalizeIp';
 
 type Confidence = 'HIGH' | 'MEDIUM' | 'LOW';
@@ -87,6 +88,7 @@ const DUPLICATE_ANALYSIS_V2_ENABLED = parseBoolEnv(
 );
 
 const getPlayerIpHistoryClient = () => (prisma as any).playerIpHistory;
+const MAX_HISTORY_GEO_ENRICH_PER_REQUEST = 5;
 
 const isValidIpv4 = (ip?: string | null): ip is string => {
   if (!ip) return false;
@@ -352,6 +354,78 @@ const listHistoryRowsByLocations = async (
   });
 };
 
+const hasUsefulGeo = (geoRaw: unknown): boolean => {
+  const geo = parseGeoRecord(geoRaw);
+  if (!geo) return false;
+  const hasCountry = typeof geo.country === 'string' && geo.country.trim() !== '';
+  const hasState = typeof geo.state === 'string' && geo.state.trim() !== '';
+  const hasCity = typeof geo.city === 'string' && geo.city.trim() !== '';
+  const hasLat = typeof geo.lat === 'number' && Number.isFinite(geo.lat);
+  const hasLng = typeof geo.lng === 'number' && Number.isFinite(geo.lng);
+  return hasCountry || hasState || hasCity || hasLat || hasLng;
+};
+
+const toGeoSnapshotPayload = (geo: {
+  country?: string;
+  state?: string;
+  city?: string;
+  lat?: number;
+  lng?: number;
+  source?: string;
+}) => ({
+  ...(geo.country ? { country: geo.country } : {}),
+  ...(geo.state ? { state: geo.state } : {}),
+  ...(geo.city ? { city: geo.city } : {}),
+  ...(typeof geo.lat === 'number' ? { lat: geo.lat } : {}),
+  ...(typeof geo.lng === 'number' ? { lng: geo.lng } : {}),
+  source: geo.source || 'ipwhois',
+});
+
+const enrichPlayerHistoryRowsGeo = async (
+  steamId: string,
+  rows: any[],
+): Promise<Map<string, Record<string, unknown>>> => {
+  const client = getPlayerIpHistoryClient();
+  const resolvedByIp = new Map<string, Record<string, unknown>>();
+  if (!client || !rows.length) return resolvedByIp;
+
+  const ipsToResolve = Array.from(
+    new Set(
+      rows
+        .filter((row) => !hasUsefulGeo(row.geoSnapshot))
+        .map((row) => normalizeIp(row.ip))
+        .filter((ip): ip is string => Boolean(ip)),
+    ),
+  ).slice(0, MAX_HISTORY_GEO_ENRICH_PER_REQUEST);
+
+  if (!ipsToResolve.length) return resolvedByIp;
+
+  await Promise.all(
+    ipsToResolve.map(async (ip) => {
+      try {
+        const geo = await resolveGeoIpWithPersistentCache(ip);
+        if (!geo) return;
+        const snapshot = toGeoSnapshotPayload(geo);
+        resolvedByIp.set(ip, snapshot);
+        await client.updateMany({
+          where: { steamId, ip },
+          data: {
+            geoSnapshot: snapshot,
+          },
+        });
+      } catch (err: any) {
+        console.error('PlayerIpHistory geo enrich failed', {
+          steamId,
+          ip,
+          error: err?.message || String(err),
+        });
+      }
+    }),
+  );
+
+  return resolvedByIp;
+};
+
 export const isDuplicateAnalysisV2Enabled = () => DUPLICATE_ANALYSIS_V2_ENABLED;
 
 export const getPlayerIpHistoryV2 = async (
@@ -359,8 +433,12 @@ export const getPlayerIpHistoryV2 = async (
   limit: number,
 ): Promise<PlayerIpHistoryResponseV2> => {
   const rows = await listPlayerHistoryRows(steamId, limit);
+  const enrichedGeoByIp = await enrichPlayerHistoryRowsGeo(steamId, rows);
   const items: PlayerIpHistoryItemV2[] = rows.map((row: any) => {
-    const geo = parseGeoRecord(row.geoSnapshot);
+    const normalizedIp = normalizeIp(row.ip) || row.ip;
+    const geo =
+      parseGeoRecord(row.geoSnapshot) ||
+      (normalizedIp ? parseGeoRecord(enrichedGeoByIp.get(normalizedIp)) : undefined);
     const parts = toLocationParts(geo);
     return {
       ip: row.ip,

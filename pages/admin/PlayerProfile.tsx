@@ -17,6 +17,7 @@ import {
 import { Icons } from '../../components/Icon';
 import { formatLogMessage } from '../../components/logMessage';
 import { Pagination } from '../../components/Pagination';
+import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend
 } from 'recharts';
@@ -38,6 +39,8 @@ const PlayerProfile: React.FC = () => {
   const [suspiciousGroup, setSuspiciousGroup] = useState<SuspiciousGroup | null>(null);
   const [relatedAccountsV2, setRelatedAccountsV2] = useState<RelatedAccountsResponseV2 | null>(null);
   const [ipHistoryV2, setIpHistoryV2] = useState<PlayerIpHistoryResponseV2 | null>(null);
+  const [selectedIpHistoryMap, setSelectedIpHistoryMap] =
+    useState<PlayerIpHistoryResponseV2['items'][number] | null>(null);
   
   // Note state
   const [newNote, setNewNote] = useState('');
@@ -60,6 +63,7 @@ const PlayerProfile: React.FC = () => {
     const fetchData = async () => {
       if (!steamId) return;
       setLoading(true);
+      setSelectedIpHistoryMap(null);
       
       try {
         const [playerData, allServers] = await Promise.all([
@@ -99,6 +103,7 @@ const PlayerProfile: React.FC = () => {
           setPunishmentsTotal(0);
           setRelatedAccountsV2(null);
           setIpHistoryV2(null);
+          setSelectedIpHistoryMap(null);
         }
       } finally {
         setLoading(false);
@@ -431,6 +436,12 @@ const PlayerProfile: React.FC = () => {
   const ipHistoryItems = ipHistoryV2?.items || [];
   const hasRelatedAccounts = relatedAccountsItems.length > 0 || !!suspiciousGroup;
   const suspicious = hasRelatedAccounts;
+  const selectedIpMapLat =
+    typeof selectedIpHistoryMap?.geo?.lat === 'number' ? selectedIpHistoryMap.geo.lat : undefined;
+  const selectedIpMapLng =
+    typeof selectedIpHistoryMap?.geo?.lng === 'number' ? selectedIpHistoryMap.geo.lng : undefined;
+  const selectedIpHasCoordinates =
+    typeof selectedIpMapLat === 'number' && typeof selectedIpMapLng === 'number';
 
   return (
     <div className="space-y-6 animate-fade-in pb-10">
@@ -934,13 +945,33 @@ const PlayerProfile: React.FC = () => {
               ) : (
                 <div className="divide-y divide-zinc-800">
                   {ipHistoryItems.map((entry) => (
-                    <div key={`${entry.ip}_${entry.lastSeen}`} className="p-3 text-xs">
-                      <div className="flex items-center justify-between gap-2 mb-1">
-                        <span className="font-mono text-cyan-400">{entry.ip}</span>
-                        <span className="text-zinc-500">{entry.connections} conexoes</span>
+                    <div key={`${entry.ip}_${entry.lastSeen}`} className="p-3 text-xs space-y-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <span className="font-mono text-cyan-400">{entry.ip}</span>
+                          <div className="text-zinc-500">{entry.connections} conexoes</div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedIpHistoryMap(entry)}
+                          disabled={
+                            typeof entry.geo?.lat !== 'number' || typeof entry.geo?.lng !== 'number'
+                          }
+                          className="inline-flex items-center gap-1 rounded border border-zinc-700 px-2 py-1 text-[10px] font-bold uppercase text-zinc-300 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-40"
+                          title={
+                            typeof entry.geo?.lat === 'number' && typeof entry.geo?.lng === 'number'
+                              ? 'Abrir mapa desta conexao'
+                              : 'Sem coordenadas para este registro'
+                          }
+                        >
+                          <Icons.Map className="h-3 w-3" />
+                          Mapa
+                        </button>
                       </div>
-                      <div className="text-zinc-400">{entry.location || 'Localizacao desconhecida'}</div>
-                      <div className="text-zinc-600 mt-1">
+                      <div className="text-zinc-400">
+                        {entry.location || 'Localizacao desconhecida'}
+                      </div>
+                      <div className="text-zinc-600">
                         Primeiro: {new Date(entry.firstSeen).toLocaleString()}
                       </div>
                       <div className="text-zinc-600">
@@ -1214,6 +1245,75 @@ const PlayerProfile: React.FC = () => {
             onPageChange={setLogsPage}
          />
       </div>
+
+      {selectedIpHistoryMap && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            onClick={() => setSelectedIpHistoryMap(null)}
+          />
+          <div className="relative w-full max-w-2xl rounded-xl border border-zinc-700 bg-zinc-900 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-zinc-800 px-5 py-4">
+              <h3 className="text-sm font-bold uppercase text-zinc-200">
+                Mapa da Conexao
+              </h3>
+              <button
+                type="button"
+                onClick={() => setSelectedIpHistoryMap(null)}
+                className="rounded border border-zinc-700 p-1 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+                aria-label="Fechar modal"
+              >
+                <Icons.X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="space-y-3 p-5">
+              <div className="rounded border border-zinc-800 bg-zinc-950 p-3 text-xs text-zinc-300 space-y-1">
+                <div>
+                  <span className="text-zinc-500 mr-2">IP:</span>
+                  <span className="font-mono text-cyan-400">{selectedIpHistoryMap.ip}</span>
+                </div>
+                <div>
+                  <span className="text-zinc-500 mr-2">Local:</span>
+                  <span>{selectedIpHistoryMap.location || 'Localizacao desconhecida'}</span>
+                </div>
+                <div>
+                  <span className="text-zinc-500 mr-2">Entrada:</span>
+                  <span>{new Date(selectedIpHistoryMap.lastSeen).toLocaleString()}</span>
+                </div>
+              </div>
+              {selectedIpHasCoordinates ? (
+                <div className="h-80 overflow-hidden rounded border border-zinc-800">
+                  <MapContainer
+                    key={`${selectedIpHistoryMap.ip}_${selectedIpHistoryMap.lastSeen}`}
+                    center={[selectedIpMapLat as number, selectedIpMapLng as number]}
+                    zoom={12}
+                    style={{ height: '100%', width: '100%' }}
+                  >
+                    <TileLayer
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                      url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                    />
+                    <CircleMarker
+                      center={[selectedIpMapLat as number, selectedIpMapLng as number]}
+                      radius={9}
+                      pathOptions={{ color: '#ef4444', fillColor: '#ef4444', fillOpacity: 0.7 }}
+                    >
+                      <Popup>
+                        <div className="text-sm font-bold">{player.name}</div>
+                        <div className="text-xs">{selectedIpHistoryMap.ip}</div>
+                      </Popup>
+                    </CircleMarker>
+                  </MapContainer>
+                </div>
+              ) : (
+                <div className="rounded border border-zinc-800 bg-zinc-950 p-4 text-sm text-zinc-500">
+                  Este registro ainda nao possui coordenadas para renderizar o mapa.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {showPunishmentForm && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
