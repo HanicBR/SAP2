@@ -364,12 +364,6 @@ const formatLocation = (geo: any) => {
 
 const round2 = (value: number): number => Number(value.toFixed(2));
 
-const parseSessionIdFromMeta = (metadata: unknown): string | undefined => {
-  const meta: any = metadata || {};
-  const value = String(meta.sessionId || meta.serverSessionId || '').trim();
-  return value || undefined;
-};
-
 const normalizeServerStats = (value: unknown): Record<string, { playTimeHours: number; connections: number }> => {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
   const raw = value as Record<string, any>;
@@ -1056,42 +1050,6 @@ const computePlaytimeHours = (logs: { type: string; timestamp: Date; metadata: u
   return Number((totalMs / (1000 * 60 * 60)).toFixed(2));
 };
 
-const findEarliestOpenSessionStartMs = (
-  logs: { serverId: string; type: string; timestamp: Date; metadata: unknown }[],
-): number | undefined => {
-  const sessionsById = new Map<string, number>();
-  const fallbackByServer = new Map<string, number>();
-
-  logs.forEach((log) => {
-    const ts = log.timestamp.getTime();
-    const sessionId = parseSessionIdFromMeta(log.metadata);
-    const serverId = String(log.serverId || '').trim() || 'unknown';
-    const type = String(log.type || '').toUpperCase();
-
-    if (type === 'CONNECT') {
-      if (sessionId) {
-        sessionsById.set(sessionId, ts);
-      } else {
-        fallbackByServer.set(serverId, ts);
-      }
-      return;
-    }
-
-    if (type !== 'DISCONNECT') return;
-    if (sessionId) {
-      sessionsById.delete(sessionId);
-      return;
-    }
-    fallbackByServer.delete(serverId);
-  });
-
-  const starts = [...sessionsById.values(), ...fallbackByServer.values()].filter((n) =>
-    Number.isFinite(n),
-  );
-  if (!starts.length) return undefined;
-  return Math.min(...starts);
-};
-
 const computeSessionMetricsByServer = (
   logs: { id?: string; serverId: string; type: string; timestamp: Date; metadata: unknown }[],
 ) => {
@@ -1430,21 +1388,31 @@ router.get('/:steamId', async (req, res) => {
   const pulseClient = (prisma as any).playerPlaytimePulse as
     | {
         findMany: (args: any) => Promise<any[]>;
+        groupBy: (args: any) => Promise<any[]>;
       }
     | undefined;
   const legacyPlayTimeHours = sessionMetrics.playTimeHours || playTimeHours;
-  let openSessionTailSeconds = 0;
-  const openSessionTailSecondsByServer = new Map<string, number>();
-  const pulseActivityTailRows: { bucketStart: Date; serverId: string; grantedSeconds: number }[] = [];
+  let pulseTotalHours = 0;
+  let pulseAvailable = false;
+  const pulseServerHours = new Map<string, number>();
+  const pulseActivityRows: { bucketStart: Date; serverId: string; grantedSeconds: number }[] = [];
 
   if (pulseClient) {
-    const openSessionSinceMs = findEarliestOpenSessionStartMs(serverSessionLogs as any);
-    if (openSessionSinceMs !== undefined) {
-      const openSessionSince = new Date(openSessionSinceMs);
-      const tailRows = await pulseClient.findMany({
+    const [pulseTotalRows, pulseByServerRows, pulseRecentRows] = await Promise.all([
+      pulseClient.groupBy({
+        by: ['steamId'],
+        where: { steamId },
+        _sum: { grantedSeconds: true },
+      }),
+      pulseClient.groupBy({
+        by: ['serverId'],
+        where: { steamId },
+        _sum: { grantedSeconds: true },
+      }),
+      pulseClient.findMany({
         where: {
           steamId,
-          bucketStart: { gte: openSessionSince },
+          bucketStart: { gte: activitySince },
         },
         orderBy: [{ bucketStart: 'asc' }],
         select: {
@@ -1452,43 +1420,43 @@ router.get('/:steamId', async (req, res) => {
           serverId: true,
           grantedSeconds: true,
         },
-      });
+      }),
+    ]);
 
-      tailRows.forEach((row) => {
-        const grantedSeconds = Math.max(0, Number(row?.grantedSeconds) || 0);
-        if (grantedSeconds <= 0) return;
-        const serverId = String(row?.serverId || '').trim() || 'unknown';
-        const bucketStart = row?.bucketStart instanceof Date ? row.bucketStart : new Date(row?.bucketStart);
-        if (Number.isNaN(bucketStart.getTime())) return;
+    const pulseTotalSeconds = Math.max(
+      0,
+      Number(pulseTotalRows?.[0]?._sum?.grantedSeconds) || 0,
+    );
+    pulseTotalHours = round2(pulseTotalSeconds / (60 * 60));
+    pulseAvailable = pulseTotalHours > 0;
 
-        openSessionTailSeconds += grantedSeconds;
-        openSessionTailSecondsByServer.set(
-          serverId,
-          (openSessionTailSecondsByServer.get(serverId) || 0) + grantedSeconds,
-        );
+    pulseByServerRows.forEach((row) => {
+      const serverId = String(row?.serverId || '').trim() || 'unknown';
+      const seconds = Math.max(0, Number(row?._sum?.grantedSeconds) || 0);
+      if (seconds <= 0) return;
+      pulseServerHours.set(serverId, round2(seconds / (60 * 60)));
+    });
 
-        if (bucketStart.getTime() >= activitySince.getTime()) {
-          pulseActivityTailRows.push({
-            bucketStart,
-            serverId,
-            grantedSeconds,
-          });
-        }
-      });
-    }
+    pulseRecentRows.forEach((row) => {
+      const bucketStart = row?.bucketStart instanceof Date ? row.bucketStart : new Date(row?.bucketStart);
+      if (Number.isNaN(bucketStart.getTime())) return;
+      const serverId = String(row?.serverId || '').trim() || 'unknown';
+      const grantedSeconds = Math.max(0, Number(row?.grantedSeconds) || 0);
+      if (grantedSeconds <= 0) return;
+      pulseActivityRows.push({ bucketStart, serverId, grantedSeconds });
+    });
   }
 
-  const openSessionTailHours = round2(openSessionTailSeconds / (60 * 60));
-  const mergedPlayTimeHours = round2(legacyPlayTimeHours + openSessionTailHours);
-  const activityHistory = buildActivityHistory(activityLogs as any, activityWindowDays, pulseActivityTailRows);
+  const resolvedPlayTimeHours = pulseAvailable ? pulseTotalHours : legacyPlayTimeHours;
+  const activityHistory = buildActivityHistory(activityLogs as any, activityWindowDays, pulseActivityRows);
   const mergedServerStats = normalizeServerStats(
     Object.keys(sessionMetrics.serverStats).length ? sessionMetrics.serverStats : player.serverStats,
   );
-  openSessionTailSecondsByServer.forEach((seconds, serverId) => {
+  pulseServerHours.forEach((hours, serverId) => {
     const current = mergedServerStats[serverId] || { playTimeHours: 0, connections: 0 };
     mergedServerStats[serverId] = {
       ...current,
-      playTimeHours: round2((Number(current.playTimeHours) || 0) + seconds / (60 * 60)),
+      playTimeHours: hours,
     };
   });
 
@@ -1567,7 +1535,7 @@ router.get('/:steamId', async (req, res) => {
 
   return res.json({
     ...toPlayer(player),
-    playTimeHours: mergedPlayTimeHours,
+    playTimeHours: resolvedPlayTimeHours,
     serverStats: Object.keys(mergedServerStats).length ? mergedServerStats : undefined,
     notes: player.notes.map((n) => ({
       id: n.id,

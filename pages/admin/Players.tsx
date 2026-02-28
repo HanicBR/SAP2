@@ -26,6 +26,18 @@ const Players: React.FC = () => {
     ApiService.getServers().then(setServers);
   }, []);
 
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      ApiService.getPlayers(search, serverFilter, vipFilter)
+        .then((data) => setPlayers(data))
+        .catch(() => {
+          // retry on next tick
+        });
+    }, 20000);
+
+    return () => window.clearInterval(intervalId);
+  }, [search, serverFilter, vipFilter]);
+
   const loadData = () => {
     setLoading(true);
     ApiService.getPlayers(search, serverFilter, vipFilter).then(data => {

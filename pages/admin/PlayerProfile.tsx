@@ -114,6 +114,22 @@ const PlayerProfile: React.FC = () => {
   }, [steamId, activityWindowDays]);
 
   useEffect(() => {
+    if (!steamId) return;
+
+    const intervalId = window.setInterval(() => {
+      ApiService.getPlayerBySteamId(steamId, { activityWindowDays })
+        .then((updatedPlayer) => {
+          if (updatedPlayer) setPlayer(updatedPlayer);
+        })
+        .catch(() => {
+          // silent retry on next tick
+        });
+    }, 20000);
+
+    return () => window.clearInterval(intervalId);
+  }, [steamId, activityWindowDays]);
+
+  useEffect(() => {
     const fetchPlayerLogs = async () => {
       if (!player?.steamId) return;
       setLogsLoading(true);
