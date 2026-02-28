@@ -532,6 +532,19 @@ export interface ServerAnalytics {
   totalSessions: number;
   newPlayers: number; // First join in period
   peakPlayers: number;
+  playtimeSource?: 'legacy' | 'pulse';
+  pulseCoveragePct?: number;
+  playtimeDiagnostics?: {
+    configuredSource: 'legacy' | 'hybrid' | 'pulse';
+    decisionReason: string;
+    hybridMinCoveragePct: number;
+    legacyHours: number;
+    pulseHours?: number;
+    diffHours?: number;
+    diffPct?: number;
+    legacyUniquePlayers: number;
+    pulseUniquePlayers?: number;
+  };
   uniquePlayers?: number;
   avgSessionMinutes?: number;
   medianSessionMinutes?: number;

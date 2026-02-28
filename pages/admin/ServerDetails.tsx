@@ -154,6 +154,23 @@ const statusClass = (status: ServerStatus): string => {
   return 'bg-red-900/30 text-red-300 border-red-800';
 };
 
+const playtimeSourceLabel = (source?: 'legacy' | 'pulse') => {
+  if (source === 'pulse') return 'Pulso';
+  return 'Legado';
+};
+
+const playtimeDecisionLabel = (reason?: string) => {
+  const normalized = String(reason || '').trim().toLowerCase();
+  if (normalized === 'pulse_forced') return 'Modo pulse ativo';
+  if (normalized === 'hybrid_coverage_ok') return 'Hibrido com cobertura suficiente';
+  if (normalized === 'hybrid_coverage_below_threshold') return 'Hibrido com cobertura abaixo do minimo';
+  if (normalized === 'hybrid_no_pulse_data') return 'Hibrido sem dados de pulso';
+  if (normalized === 'pulse_no_data_fallback') return 'Pulse sem dados, usando legado';
+  if (normalized === 'pulse_query_error_fallback') return 'Erro ao ler pulso, fallback legado';
+  if (normalized === 'legacy_forced') return 'Modo legado ativo';
+  return normalized ? normalized : 'Nao informado';
+};
+
 const ServerDetails: React.FC = () => {
   const { serverId } = useParams<{ serverId: string }>();
   const [server, setServer] = useState<GameServer | null>(null);
@@ -197,6 +214,12 @@ const ServerDetails: React.FC = () => {
   const displayMap = currentState?.currentMap || server?.currentMap || 'Desconhecido';
   const displayStatus = currentState?.status ?? server?.status ?? ServerStatus.OFFLINE;
   const displayLastHeartbeat = currentState?.lastHeartbeat || server?.lastHeartbeat;
+  const playtimeDiagnostics = analytics.playtimeDiagnostics;
+  const playtimeSource = playtimeSourceLabel(analytics.playtimeSource);
+  const playtimeDecision = playtimeDecisionLabel(playtimeDiagnostics?.decisionReason);
+  const pulseCoveragePct = Number(analytics.pulseCoveragePct || 0);
+  const pulseVsLegacyHours = Number(playtimeDiagnostics?.diffHours || 0);
+  const pulseVsLegacyPct = Number(playtimeDiagnostics?.diffPct || 0);
 
   if (loading) return <div className="p-8 text-zinc-500">Carregando detalhes do servidor...</div>;
   if (!server || !analytics) return <div className="p-8 text-zinc-500">Servidor não encontrado.</div>;
@@ -253,6 +276,31 @@ const ServerDetails: React.FC = () => {
             <p className="text-white font-semibold">
               {displayLastHeartbeat ? new Date(displayLastHeartbeat).toLocaleString('pt-BR') : 'Sem heartbeat'}
             </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-zinc-900 rounded border border-zinc-800 p-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+          <div>
+            <p className="text-zinc-500 uppercase text-xs font-bold">Fonte do Playtime</p>
+            <p className="text-white font-semibold">{playtimeSource}</p>
+          </div>
+          <div>
+            <p className="text-zinc-500 uppercase text-xs font-bold">Cobertura Pulse</p>
+            <p className="text-white font-semibold">{pulseCoveragePct.toLocaleString('pt-BR')}%</p>
+          </div>
+          <div>
+            <p className="text-zinc-500 uppercase text-xs font-bold">Comparativo Pulse x Legado</p>
+            <p className="text-white font-semibold">
+              {playtimeDiagnostics?.pulseHours === undefined
+                ? 'Sem dados de pulse'
+                : `${pulseVsLegacyHours.toLocaleString('pt-BR')}h (${pulseVsLegacyPct.toLocaleString('pt-BR')}%)`}
+            </p>
+          </div>
+          <div>
+            <p className="text-zinc-500 uppercase text-xs font-bold">Decisao da Fonte</p>
+            <p className="text-white font-semibold">{playtimeDecision}</p>
           </div>
         </div>
       </div>
