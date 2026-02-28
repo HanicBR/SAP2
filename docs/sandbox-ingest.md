@@ -330,3 +330,10 @@ Feature flags:
 - `PLAYER_PULSE_ENABLED=1` para aceitar pulsos.
 - `PLAYTIME_SOURCE=legacy|hybrid|pulse` para controlar fonte de playtime.
 - `PLAYER_PULSE_INTERVAL_SEC=60` intervalo padrao esperado.
+- `PLAYER_PULSE_BUCKET_SEC=60` bucket de idempotencia/agrupamento dos pulsos.
+- `PLAYTIME_PULSE_MIN_COVERAGE_PCT=60` minimo de cobertura para `PLAYTIME_SOURCE=hybrid`.
+
+Observabilidade no analytics (`GET /api/servers/:id/analytics`):
+
+- `playtimeSource`: `legacy` ou `pulse` (fonte efetiva usada no retorno).
+- `pulseCoveragePct`: cobertura de pulso no periodo em relacao aos buckets com atividade legada.

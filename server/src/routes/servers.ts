@@ -25,6 +25,12 @@ const parseInteger = (value: unknown): number | undefined => {
   return Number.isFinite(parsed) ? parsed : undefined;
 };
 
+const parsePercentEnv = (value: string | undefined, fallback: number): number => {
+  const parsed = Number.parseFloat(String(value || '').trim());
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.max(0, Math.min(parsed, 100));
+};
+
 const extractIpv4 = (value: unknown): string | undefined => {
   const raw = String(value ?? '').trim();
   if (!raw) return undefined;
@@ -128,6 +134,7 @@ const parseMaxPlayers = (value: unknown): number | undefined => {
 const MAX_ANALYTICS_LOGS = 120000;
 const MAX_ANALYTICS_SNAPSHOTS = 20000;
 const MAX_ORPHAN_SESSION_MS = 6 * 60 * 60 * 1000;
+const PULSE_MIN_COVERAGE_PCT = parsePercentEnv(process.env.PLAYTIME_PULSE_MIN_COVERAGE_PCT, 60);
 
 const isTrackableSteamId = (value: unknown): value is string => {
   const raw = String(value || '').trim();
@@ -176,6 +183,15 @@ const buildAnalyticsBuckets = (range: '24h' | '7d' | '30d', since: Date, now: Da
 };
 
 const round1 = (value: number): number => Math.round(value * 10) / 10;
+
+type PlaytimeTrendItem = { date: string; hours: number };
+
+type TopPlayerItem = {
+  steamId: string;
+  name: string;
+  avatarUrl: string;
+  hours: number;
+};
 
 const findServerByApiKey = async (apiKey?: string) => {
   if (!apiKey) return null;
@@ -777,10 +793,14 @@ router.get('/:id/analytics', async (req, res) => {
       }
     }
   });
-  const playTimeTrend = buckets.map((bucket, idx) => ({
+  const playTimeTrend: PlaytimeTrendItem[] = buckets.map((bucket, idx) => ({
     date: bucket.label,
     hours: round1((playtimeByBucketMs[idx] || 0) / (1000 * 60 * 60)),
   }));
+  const legacyActiveBucketIndexes = new Set<number>();
+  playtimeByBucketMs.forEach((ms, idx) => {
+    if ((ms || 0) > 0) legacyActiveBucketIndexes.add(idx);
+  });
   const snapshotClient = (prisma as any).playerSnapshot as
     | { findMany: (args: any) => Promise<any[]> }
     | undefined;
@@ -842,7 +862,7 @@ router.get('/:id/analytics', async (req, res) => {
       })
     : [];
   const profileBySteam = new Map(profiles.map((profile) => [profile.steamId, profile]));
-  const topPlayers = topPlayerIds.map((steamId) => {
+  const topPlayers: TopPlayerItem[] = topPlayerIds.map((steamId) => {
     const profile = profileBySteam.get(steamId);
     const ms = playtimeByPlayerMs.get(steamId) || 0;
     return {
@@ -854,6 +874,151 @@ router.get('/:id/analytics', async (req, res) => {
       hours: round1(ms / (1000 * 60 * 60)),
     };
   });
+  const pulseSettings = getPlayerPulseSettings();
+  const pulseClient = (prisma as any).playerPlaytimePulse as
+    | {
+        groupBy: (args: any) => Promise<any[]>;
+        findMany: (args: any) => Promise<any[]>;
+      }
+    | undefined;
+
+  let pulseCoveragePct = 0;
+  let playtimeSource: 'legacy' | 'pulse' = 'legacy';
+  let selectedTotalPlayTimeHours = totalPlayTimeHours;
+  let selectedPlayTimeTrend = playTimeTrend;
+  let selectedTopPlayers = topPlayers;
+  let selectedUniquePlayers = uniquePlayers;
+
+  if (pulseClient && pulseSettings.source !== 'legacy') {
+    try {
+      const pulseWhere = {
+        serverId: id,
+        bucketStart: { gte: since, lte: now },
+      };
+
+      const [pulseByBucket, pulseBySteam] = await Promise.all([
+        pulseClient.groupBy({
+          by: ['bucketStart'],
+          where: pulseWhere,
+          _sum: { grantedSeconds: true },
+          orderBy: { bucketStart: 'asc' },
+        }),
+        pulseClient.groupBy({
+          by: ['steamId'],
+          where: pulseWhere,
+          _sum: { grantedSeconds: true },
+        }),
+      ]);
+
+      const pulseByBucketSeconds = Array.from({ length: bucketCount }).map(() => 0);
+      pulseByBucket.forEach((row) => {
+        const tsRaw = row?.bucketStart;
+        if (!tsRaw) return;
+        const ts = new Date(tsRaw).getTime();
+        if (!Number.isFinite(ts)) return;
+        const idx = Math.min(bucketCount - 1, Math.max(0, Math.floor((ts - sinceMs) / bucketMs)));
+        const granted = Math.max(0, Number(row?._sum?.grantedSeconds) || 0);
+        pulseByBucketSeconds[idx] = (pulseByBucketSeconds[idx] || 0) + granted;
+      });
+
+      const pulseTotalSeconds = pulseByBucketSeconds.reduce((acc, secs) => acc + secs, 0);
+      const hasPulseData = pulseTotalSeconds > 0;
+
+      const pulseActiveBucketIndexes = new Set<number>();
+      pulseByBucketSeconds.forEach((secs, idx) => {
+        if ((secs || 0) > 0) pulseActiveBucketIndexes.add(idx);
+      });
+
+      if (legacyActiveBucketIndexes.size > 0) {
+        let overlap = 0;
+        legacyActiveBucketIndexes.forEach((idx) => {
+          if (pulseActiveBucketIndexes.has(idx)) overlap += 1;
+        });
+        pulseCoveragePct = round1((overlap * 100) / legacyActiveBucketIndexes.size);
+      } else if (hasPulseData) {
+        pulseCoveragePct = 100;
+      }
+
+      const pulseTotalPlayTimeHours = round1(pulseTotalSeconds / (60 * 60));
+      const pulsePlayTimeTrend: PlaytimeTrendItem[] = buckets.map((bucket, idx) => {
+        const hours = round1((pulseByBucketSeconds[idx] || 0) / (60 * 60));
+        return {
+          date: bucket.label,
+          hours,
+        };
+      });
+
+      const pulseUniquePlayers = pulseBySteam.filter((row) => isTrackableSteamId(row?.steamId)).length;
+      const sortedPulseBySteam = pulseBySteam
+        .filter((row) => isTrackableSteamId(row?.steamId))
+        .map((row) => ({
+          steamId: String(row.steamId),
+          grantedSeconds: Math.max(0, Number(row?._sum?.grantedSeconds) || 0),
+        }))
+        .sort((a, b) => b.grantedSeconds - a.grantedSeconds);
+      const pulseTopIds = sortedPulseBySteam.slice(0, 5).map((row) => row.steamId);
+
+      const [pulseProfiles, latestPulseNames] = await Promise.all([
+        pulseTopIds.length
+          ? prisma.playerProfile.findMany({
+              where: { steamId: { in: pulseTopIds } },
+              select: { steamId: true, name: true, avatarUrl: true },
+            })
+          : Promise.resolve([] as any[]),
+        pulseTopIds.length
+          ? pulseClient.findMany({
+              where: {
+                serverId: id,
+                steamId: { in: pulseTopIds },
+                playerName: { not: null },
+              },
+              orderBy: [{ bucketStart: 'desc' }, { updatedAt: 'desc' }],
+              take: pulseTopIds.length * 10,
+              select: { steamId: true, playerName: true, bucketStart: true },
+            })
+          : Promise.resolve([] as any[]),
+      ]);
+
+      const pulseProfileBySteam = new Map<string, { name?: string | null; avatarUrl?: string | null }>(
+        pulseProfiles.map((profile) => [profile.steamId, profile]),
+      );
+      const pulseNameBySteam = new Map<string, string>();
+      latestPulseNames.forEach((entry) => {
+        const steamId = String(entry?.steamId || '').trim();
+        const playerName = String(entry?.playerName || '').trim();
+        if (!steamId || !playerName || pulseNameBySteam.has(steamId)) return;
+        pulseNameBySteam.set(steamId, playerName);
+      });
+
+      const pulseTopPlayers: TopPlayerItem[] = sortedPulseBySteam.slice(0, 5).map((entry) => {
+        const profile = pulseProfileBySteam.get(entry.steamId);
+        return {
+          steamId: entry.steamId,
+          name: profile?.name || pulseNameBySteam.get(entry.steamId) || lastKnownNameBySteam.get(entry.steamId) || entry.steamId,
+          avatarUrl:
+            profile?.avatarUrl ||
+            `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(entry.steamId)}`,
+          hours: round1(entry.grantedSeconds / (60 * 60)),
+        };
+      });
+
+      const canUsePulse = hasPulseData;
+      const shouldUsePulse =
+        pulseSettings.source === 'pulse'
+          ? canUsePulse
+          : canUsePulse && pulseCoveragePct >= PULSE_MIN_COVERAGE_PCT;
+
+      if (shouldUsePulse) {
+        playtimeSource = 'pulse';
+        selectedTotalPlayTimeHours = pulseTotalPlayTimeHours;
+        selectedPlayTimeTrend = pulsePlayTimeTrend;
+        selectedTopPlayers = pulseTopPlayers;
+        selectedUniquePlayers = pulseUniquePlayers;
+      }
+    } catch (err: any) {
+      console.error('Pulse analytics fallback to legacy', err?.message || err);
+    }
+  }
   const totalMapCycles = Array.from(mapChangeCount.values()).reduce((acc, count) => acc + count, 0);
   const topMaps = Array.from(mapChangeCount.entries())
     .sort((a, b) => b[1] - a[1])
@@ -868,16 +1033,18 @@ router.get('/:id/analytics', async (req, res) => {
     .map(([type, count]) => ({ type, count }));
   const domainServer = toDomainServer(server as any);
   return res.json({
-    totalPlayTimeHours,
+    totalPlayTimeHours: selectedTotalPlayTimeHours,
     totalSessions,
     newPlayers,
     peakPlayers,
-    playTimeTrend,
+    playTimeTrend: selectedPlayTimeTrend,
     playerCountTrend,
-    topPlayers,
-    uniquePlayers,
+    topPlayers: selectedTopPlayers,
+    uniquePlayers: selectedUniquePlayers,
     avgSessionMinutes,
     medianSessionMinutes,
+    playtimeSource,
+    pulseCoveragePct,
     topMaps,
     eventBreakdown,
     currentState: {
