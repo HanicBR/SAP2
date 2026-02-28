@@ -337,3 +337,4 @@ Observabilidade no analytics (`GET /api/servers/:id/analytics`):
 
 - `playtimeSource`: `legacy` ou `pulse` (fonte efetiva usada no retorno).
 - `pulseCoveragePct`: cobertura de pulso no periodo em relacao aos buckets com atividade legada.
+- `playtimeDiagnostics`: comparativo entre horas `legacy` vs `pulse`, motivo da decisao e threshold do modo `hybrid`.

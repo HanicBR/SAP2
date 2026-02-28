@@ -888,6 +888,9 @@ router.get('/:id/analytics', async (req, res) => {
   let selectedPlayTimeTrend = playTimeTrend;
   let selectedTopPlayers = topPlayers;
   let selectedUniquePlayers = uniquePlayers;
+  let pulseTotalPlayTimeHours: number | undefined;
+  let pulseUniquePlayers: number | undefined;
+  let playtimeDecisionReason = pulseSettings.source === 'legacy' ? 'legacy_forced' : 'pulse_no_data_fallback';
 
   if (pulseClient && pulseSettings.source !== 'legacy') {
     try {
@@ -939,7 +942,7 @@ router.get('/:id/analytics', async (req, res) => {
         pulseCoveragePct = 100;
       }
 
-      const pulseTotalPlayTimeHours = round1(pulseTotalSeconds / (60 * 60));
+      pulseTotalPlayTimeHours = round1(pulseTotalSeconds / (60 * 60));
       const pulsePlayTimeTrend: PlaytimeTrendItem[] = buckets.map((bucket, idx) => {
         const hours = round1((pulseByBucketSeconds[idx] || 0) / (60 * 60));
         return {
@@ -948,7 +951,7 @@ router.get('/:id/analytics', async (req, res) => {
         };
       });
 
-      const pulseUniquePlayers = pulseBySteam.filter((row) => isTrackableSteamId(row?.steamId)).length;
+      pulseUniquePlayers = pulseBySteam.filter((row) => isTrackableSteamId(row?.steamId)).length;
       const sortedPulseBySteam = pulseBySteam
         .filter((row) => isTrackableSteamId(row?.steamId))
         .map((row) => ({
@@ -1008,17 +1011,38 @@ router.get('/:id/analytics', async (req, res) => {
           ? canUsePulse
           : canUsePulse && pulseCoveragePct >= PULSE_MIN_COVERAGE_PCT;
 
+      if (pulseSettings.source === 'hybrid' && canUsePulse && !shouldUsePulse) {
+        playtimeDecisionReason = 'hybrid_coverage_below_threshold';
+      } else if (pulseSettings.source === 'hybrid' && !canUsePulse) {
+        playtimeDecisionReason = 'hybrid_no_pulse_data';
+      } else if (pulseSettings.source === 'pulse' && !canUsePulse) {
+        playtimeDecisionReason = 'pulse_no_data_fallback';
+      }
+
       if (shouldUsePulse) {
         playtimeSource = 'pulse';
         selectedTotalPlayTimeHours = pulseTotalPlayTimeHours;
         selectedPlayTimeTrend = pulsePlayTimeTrend;
         selectedTopPlayers = pulseTopPlayers;
         selectedUniquePlayers = pulseUniquePlayers;
+        playtimeDecisionReason = pulseSettings.source === 'hybrid' ? 'hybrid_coverage_ok' : 'pulse_forced';
       }
     } catch (err: any) {
       console.error('Pulse analytics fallback to legacy', err?.message || err);
+      playtimeDecisionReason = 'pulse_query_error_fallback';
     }
   }
+  if (playtimeSource === 'legacy' && pulseSettings.source === 'legacy') {
+    playtimeDecisionReason = 'legacy_forced';
+  }
+  const playtimeDiffHours =
+    pulseTotalPlayTimeHours !== undefined
+      ? round1(pulseTotalPlayTimeHours - totalPlayTimeHours)
+      : undefined;
+  const playtimeDiffPct =
+    pulseTotalPlayTimeHours !== undefined && totalPlayTimeHours > 0
+      ? round1((playtimeDiffHours! * 100) / totalPlayTimeHours)
+      : undefined;
   const totalMapCycles = Array.from(mapChangeCount.values()).reduce((acc, count) => acc + count, 0);
   const topMaps = Array.from(mapChangeCount.entries())
     .sort((a, b) => b[1] - a[1])
@@ -1045,6 +1069,17 @@ router.get('/:id/analytics', async (req, res) => {
     medianSessionMinutes,
     playtimeSource,
     pulseCoveragePct,
+    playtimeDiagnostics: {
+      configuredSource: pulseSettings.source,
+      decisionReason: playtimeDecisionReason,
+      hybridMinCoveragePct: PULSE_MIN_COVERAGE_PCT,
+      legacyHours: totalPlayTimeHours,
+      pulseHours: pulseTotalPlayTimeHours,
+      diffHours: playtimeDiffHours,
+      diffPct: playtimeDiffPct,
+      legacyUniquePlayers: uniquePlayers,
+      pulseUniquePlayers,
+    },
     topMaps,
     eventBreakdown,
     currentState: {
