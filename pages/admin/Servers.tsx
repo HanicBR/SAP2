@@ -6,7 +6,7 @@ import { Icons } from '../../components/Icon';
 import { Link } from 'react-router-dom';
 
 // --- SUB-COMPONENT: SERVER CARD (Memoized) ---
-const ServerCard = memo(({ server, isSuperAdmin, plainKey, onRegenerateKey }: { server: GameServer, isSuperAdmin: boolean, plainKey?: string, onRegenerateKey: (id: string) => void }) => {
+const ServerCard = memo(({ server, isSuperAdmin, plainKey, onRegenerateKey, onEditIp }: { server: GameServer, isSuperAdmin: boolean, plainKey?: string, onRegenerateKey: (id: string) => void, onEditIp: (server: GameServer) => void }) => {
   return (
     <div className="bg-zinc-900 rounded border border-zinc-800 p-6 shadow-sm hover:border-zinc-700 transition-colors">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -59,26 +59,36 @@ const ServerCard = memo(({ server, isSuperAdmin, plainKey, onRegenerateKey }: { 
             </Link>
 
             {isSuperAdmin && (
-                  <div className="bg-zinc-950 p-3 rounded border border-zinc-800 flex items-center gap-2">
-                    <code className="bg-black px-2 py-1 rounded text-xs font-mono text-zinc-300 border border-zinc-800 break-all">
-                        {plainKey || 'Gere para visualizar'}
-                    </code>
-                    <div className="flex items-center gap-1">
-                      <button 
-                          onClick={() => onRegenerateKey(server.id)}
-                          className="p-1.5 bg-zinc-800 hover:bg-red-900/20 hover:text-red-400 border border-zinc-700 rounded text-xs text-zinc-300 transition-colors"
-                          title="Gerar nova chave"
-                      >
-                          <Icons.Key className="w-3 h-3" />
-                      </button>
-                      <button
-                          onClick={() => plainKey && navigator.clipboard.writeText(plainKey)}
-                          disabled={!plainKey}
-                          className="p-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded text-xs text-zinc-300 transition-colors disabled:opacity-40"
-                          title={plainKey ? 'Copiar chave' : 'Gere para visualizar'}
-                      >
-                          <Icons.Copy className="w-3 h-3" />
-                      </button>
+                  <div className="flex flex-col gap-2">
+                    <button
+                      onClick={() => onEditIp(server)}
+                      className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded text-xs text-zinc-200 transition-colors uppercase tracking-wider font-bold flex items-center justify-center"
+                      title="Editar IP/host do servidor"
+                    >
+                      <Icons.Edit className="w-3 h-3 mr-1.5" />
+                      Editar IP
+                    </button>
+                    <div className="bg-zinc-950 p-3 rounded border border-zinc-800 flex items-center gap-2">
+                      <code className="bg-black px-2 py-1 rounded text-xs font-mono text-zinc-300 border border-zinc-800 break-all">
+                          {plainKey || 'Gere para visualizar'}
+                      </code>
+                      <div className="flex items-center gap-1">
+                        <button 
+                            onClick={() => onRegenerateKey(server.id)}
+                            className="p-1.5 bg-zinc-800 hover:bg-red-900/20 hover:text-red-400 border border-zinc-700 rounded text-xs text-zinc-300 transition-colors"
+                            title="Gerar nova chave"
+                        >
+                            <Icons.Key className="w-3 h-3" />
+                        </button>
+                        <button
+                            onClick={() => plainKey && navigator.clipboard.writeText(plainKey)}
+                            disabled={!plainKey}
+                            className="p-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded text-xs text-zinc-300 transition-colors disabled:opacity-40"
+                            title={plainKey ? 'Copiar chave' : 'Gere para visualizar'}
+                        >
+                            <Icons.Copy className="w-3 h-3" />
+                        </button>
+                      </div>
                     </div>
                 </div>
             )}
@@ -274,6 +284,25 @@ const Servers: React.FC = () => {
       loadServers();
   }, [loadServers]);
 
+  const handleEditServerIp = useCallback(async (server: GameServer) => {
+    const nextValue = window.prompt(`Novo IP/hostname para ${server.name}:`, server.ip);
+    if (nextValue === null) return;
+    const trimmed = nextValue.trim();
+    if (!trimmed) {
+      alert('IP/hostname invÃ¡lido.');
+      return;
+    }
+
+    try {
+      await ApiService.updateServerIp(server.id, trimmed);
+      loadServers();
+      alert('IP do servidor atualizado.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Falha ao atualizar IP do servidor';
+      alert(`Erro: ${message}`);
+    }
+  }, [loadServers]);
+
   const isSuperAdmin = currentUser?.role === UserRole.SUPERADMIN;
 
   return (
@@ -301,6 +330,7 @@ const Servers: React.FC = () => {
                   server={server} 
                   isSuperAdmin={isSuperAdmin} 
                   onRegenerateKey={handleRegenerateKey}
+                  onEditIp={handleEditServerIp}
                   plainKey={plainKeys[server.id]}
                />
             ))

@@ -237,6 +237,26 @@ router.post('/:id/regenerate-key', authMiddleware, requireRole(UserRole.SUPERADM
   return res.json({ apiKey });
 });
 
+router.patch('/:id', authMiddleware, requireRole(UserRole.SUPERADMIN), async (req, res) => {
+  const { id } = req.params as { id: string };
+  const { ip } = (req as any).body || {};
+
+  const normalizedIp = sanitizeHost(ip);
+  if (!normalizedIp) {
+    return res.status(400).json({ error: 'Invalid server host/ip' });
+  }
+
+  try {
+    const updated = await prisma.gameServer.update({
+      where: { id },
+      data: { ip: normalizedIp },
+    });
+    return res.json(toDomainServer(updated));
+  } catch {
+    return res.status(404).json({ error: 'Server not found' });
+  }
+});
+
 // Preview VIP automation command (does not enqueue actions)
 router.post('/actions/vip/preview', authMiddleware, requireRole(UserRole.ADMIN), async (req, res) => {
   try {
@@ -339,6 +359,9 @@ router.post('/heartbeat', async (req, res) => {
     };
     if (typeof playerCount === 'number' && playerCount >= 0) {
       updateData.currentPlayers = Math.floor(playerCount);
+    } else {
+      // Avoid stale count when heartbeat arrives without a valid payload.
+      updateData.currentPlayers = 0;
     }
     if (map) {
       updateData.currentMap = map;

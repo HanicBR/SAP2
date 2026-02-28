@@ -754,10 +754,59 @@ flush_if_needed = function(force)
 	dispatch_batch(batch, 0)
 end
 
+local function get_player_count()
+	if player.GetHumans then
+		return #player.GetHumans()
+	end
+	return (player.GetCount and player.GetCount()) or #player.GetAll()
+end
+
+local function get_max_players()
+	if game.MaxPlayers then
+		local by_game = tonumber(game.MaxPlayers())
+		if by_game and by_game > 0 then
+			return math_floor(by_game)
+		end
+	end
+	local maxplayers_cvar = GetConVar and GetConVar("maxplayers")
+	if maxplayers_cvar then
+		local by_cvar = tonumber(maxplayers_cvar:GetString() or "") or maxplayers_cvar:GetInt()
+		if by_cvar and by_cvar > 0 then
+			return math_floor(by_cvar)
+		end
+	end
+	return nil
+end
+
+local function url_encode(raw)
+	local str = tostring(raw or "")
+	return (str:gsub("([^%w%-_%.~])", function(char)
+		return string_format("%%%02X", string.byte(char))
+	end))
+end
+
+local function append_query_params(base_url, params)
+	local parts = {}
+	for key, value in pairs(params or {}) do
+		if value ~= nil then
+			parts[#parts + 1] = url_encode(key) .. "=" .. url_encode(value)
+		end
+	end
+
+	if #parts == 0 then return base_url end
+	local sep = string_match(base_url, "%?") and "&" or "?"
+	return base_url .. sep .. table_concat(parts, "&")
+end
+
 local function send_heartbeat()
 	if not is_configured() then return end
 	local heartbeat_url = c_heartbeat_url:GetString()
 	if heartbeat_url == "" then return end
+
+	local current_map = game.GetMap()
+	local current_players = get_player_count()
+	local max_players = get_max_players()
+	local server_name = (GetHostName and GetHostName()) or nil
 
 	local host_port = nil
 	local host_port_cvar = GetConVar and GetConVar("hostport")
@@ -774,10 +823,10 @@ local function send_heartbeat()
 	end
 
 	local body = util.TableToJSON({
-		map = game.GetMap(),
-		playerCount = (player.GetCount and player.GetCount()) or #player.GetAll(),
-		maxPlayers = game.MaxPlayers and game.MaxPlayers() or nil,
-		serverName = (GetHostName and GetHostName()) or nil,
+		map = current_map,
+		playerCount = current_players,
+		maxPlayers = max_players,
+		serverName = server_name,
 		mode = INGEST_MODE,
 		port = host_port,
 		ip = host_ip,
@@ -785,8 +834,18 @@ local function send_heartbeat()
 
 	if not body then return end
 
+	local url_with_query = append_query_params(heartbeat_url, {
+		map = current_map,
+		playerCount = current_players,
+		maxPlayers = max_players,
+		serverName = server_name,
+		mode = INGEST_MODE,
+		port = host_port,
+		ip = host_ip,
+	})
+
 	HTTP({
-		url = heartbeat_url,
+		url = url_with_query,
 		method = "POST",
 		headers = {
 			["Content-Type"] = "application/json",

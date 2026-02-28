@@ -176,6 +176,23 @@ export const ApiService = {
     });
   },
 
+  updateServerIp: async (serverId: string, ip: string): Promise<GameServer> => {
+    if (!hasApi) {
+      await delay(200);
+      const idx = serversDb.findIndex((s) => s.id === serverId);
+      if (idx === -1) {
+        throw new Error('Servidor nÃ£o encontrado');
+      }
+      serversDb[idx] = { ...serversDb[idx], ip };
+      return serversDb[idx];
+    }
+
+    return apiFetch<GameServer>(`/servers/${serverId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ ip }),
+    });
+  },
+
   getServerAnalytics: async (serverId: string, range: '24h' | '7d' | '30d'): Promise<ServerAnalytics> => {
     if (hasApi) {
       try {
