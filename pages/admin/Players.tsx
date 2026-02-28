@@ -1,11 +1,43 @@
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ApiService } from '../../services/api';
-import { Player, GameServer } from '../../types';
+import { Player, GameServer, ServerWsLiveStateItem } from '../../types';
 import { MOCK_SUSPICIOUS_GROUPS } from '../../constants';
 import { Icons } from '../../components/Icon';
 import { Pagination } from '../../components/Pagination';
+
+const LIVE_STATE_MAX_AGE_SECONDS = 30;
+
+type PlayerLivePresence = {
+  serverId: string;
+  map?: string;
+  ageSeconds: number;
+  playerCount: number;
+};
+
+const mapLiveStateToPlayers = (items: ServerWsLiveStateItem[]): Record<string, PlayerLivePresence> => {
+  const mapped: Record<string, PlayerLivePresence> = {};
+
+  items.forEach((snapshot) => {
+    const ageSeconds = Number(snapshot.ageSeconds ?? 0);
+    if (!snapshot.connected) return;
+    if (!Number.isFinite(ageSeconds) || ageSeconds > LIVE_STATE_MAX_AGE_SECONDS) return;
+
+    (snapshot.players || []).forEach((entry) => {
+      const steamId = String(entry?.steamId || '').trim();
+      if (!steamId) return;
+      mapped[steamId] = {
+        serverId: snapshot.serverId,
+        ageSeconds,
+        playerCount: Number(snapshot.playerCount || 0),
+        ...(snapshot.map ? { map: snapshot.map } : {}),
+      };
+    });
+  });
+
+  return mapped;
+};
 
 const Players: React.FC = () => {
   const [players, setPlayers] = useState<Player[]>([]);
@@ -14,6 +46,7 @@ const Players: React.FC = () => {
   const [vipFilter, setVipFilter] = useState<boolean | undefined>(undefined);
   const [serverFilter, setServerFilter] = useState('');
   const [servers, setServers] = useState<GameServer[]>([]);
+  const [livePresenceBySteamId, setLivePresenceBySteamId] = useState<Record<string, PlayerLivePresence>>({});
   const [sortBy, setSortBy] = useState<null | 'name' | 'reputation' | 'playtime' | 'lastSeen' | 'status'>(null);
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   
@@ -24,6 +57,16 @@ const Players: React.FC = () => {
   useEffect(() => {
     loadData();
     ApiService.getServers().then(setServers);
+    void loadLiveState();
+  }, []);
+
+  const loadLiveState = useCallback(async () => {
+    try {
+      const liveState = await ApiService.getServersLiveState();
+      setLivePresenceBySteamId(mapLiveStateToPlayers(liveState.items || []));
+    } catch {
+      setLivePresenceBySteamId({});
+    }
   }, []);
 
   useEffect(() => {
@@ -37,6 +80,13 @@ const Players: React.FC = () => {
 
     return () => window.clearInterval(intervalId);
   }, [search, serverFilter, vipFilter]);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      void loadLiveState();
+    }, 10000);
+    return () => window.clearInterval(intervalId);
+  }, [loadLiveState]);
 
   const loadData = () => {
     setLoading(true);
@@ -137,6 +187,12 @@ const Players: React.FC = () => {
     } catch {
       // ignore clipboard errors in non-secure contexts
     }
+  };
+
+  const getServerShortName = (serverId: string) => {
+    const server = servers.find((item) => item.id === serverId);
+    if (!server) return serverId;
+    return server.name.split('[')[0]?.trim() || server.name;
   };
 
   return (
@@ -242,18 +298,40 @@ const Players: React.FC = () => {
                       {new Date(player.lastSeen).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                       {player.isVip ? (
-                          <span className={`px-2 inline-flex text-xs leading-5 font-bold rounded-full border bg-opacity-20 ${
-                             player.vipPlan?.includes('VIP++') ? 'bg-yellow-500 text-yellow-500 border-yellow-500' :
-                             player.vipPlan?.includes('VIP+') ? 'bg-zinc-400 text-zinc-300 border-zinc-400' :
-                             player.vipPlan?.includes('Ultimate') ? 'bg-purple-700 text-purple-300 border-purple-500' :
-                             'bg-orange-600 text-orange-400 border-orange-600'
-                          }`}>
-                            {player.vipPlan}
-                          </span>
-                       ) : (
-                          <span className="px-2 inline-flex text-xs leading-5 font-bold rounded-full bg-zinc-800 text-zinc-500 border border-zinc-700">Free</span>
-                       )}
+                      {(() => {
+                        const livePresence = livePresenceBySteamId[player.steamId];
+                        return (
+                          <div className="space-y-2">
+                            {player.isVip ? (
+                              <span className={`px-2 inline-flex text-xs leading-5 font-bold rounded-full border bg-opacity-20 ${
+                                 player.vipPlan?.includes('VIP++') ? 'bg-yellow-500 text-yellow-500 border-yellow-500' :
+                                 player.vipPlan?.includes('VIP+') ? 'bg-zinc-400 text-zinc-300 border-zinc-400' :
+                                 player.vipPlan?.includes('Ultimate') ? 'bg-purple-700 text-purple-300 border-purple-500' :
+                                 'bg-orange-600 text-orange-400 border-orange-600'
+                              }`}>
+                                {player.vipPlan}
+                              </span>
+                           ) : (
+                              <span className="px-2 inline-flex text-xs leading-5 font-bold rounded-full bg-zinc-800 text-zinc-500 border border-zinc-700">Free</span>
+                           )}
+
+                            {livePresence ? (
+                              <div>
+                                <span className="px-2 inline-flex text-xs leading-5 font-bold rounded-full border bg-emerald-900/20 text-emerald-300 border-emerald-700">
+                                  LIVE (WS)
+                                </span>
+                                <div className="text-[11px] text-emerald-300 mt-1">
+                                  {getServerShortName(livePresence.serverId)} • {livePresence.playerCount} online
+                                </div>
+                              </div>
+                            ) : (
+                              <span className="px-2 inline-flex text-xs leading-5 font-bold rounded-full bg-zinc-800 text-zinc-500 border border-zinc-700">
+                                Fallback
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end gap-2">

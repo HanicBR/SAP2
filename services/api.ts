@@ -1,7 +1,7 @@
 
 
 import { MOCK_SERVERS, MOCK_EVENTS, MOCK_STATS, VIP_PLANS, MOCK_SUSPICIOUS_GROUPS, MOCK_PLAYERS, MOCK_USERS, MOCK_TRANSACTIONS, generateServerAnalytics, DEFAULT_SITE_CONFIG } from '../constants';
-import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel } from '../types';
+import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel, ServerLiveStateResponse, ServerWsLiveStateListResponse } from '../types';
 
 // Utility to simulate network delay (used as fallback)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -164,6 +164,48 @@ export const ApiService = {
 
      await delay(300);
      return serversDb.find(s => s.id === id);
+  },
+
+  getServersLiveState: async (): Promise<ServerWsLiveStateListResponse> => {
+    if (hasApi) {
+      try {
+        return await apiFetch<ServerWsLiveStateListResponse>('/servers/ws/live-state');
+      } catch (error) {
+        console.error('API getServersLiveState failed, returning empty live-state list:', error);
+      }
+    }
+
+    await delay(100);
+    return {
+      now: new Date().toISOString(),
+      total: 0,
+      items: [],
+    };
+  },
+
+  getServerLiveState: async (serverId: string): Promise<ServerLiveStateResponse> => {
+    if (hasApi) {
+      try {
+        return await apiFetch<ServerLiveStateResponse>(`/servers/${serverId}/live-state`);
+      } catch (error) {
+        console.error('API getServerLiveState failed, returning unavailable live-state fallback:', error);
+      }
+    }
+
+    await delay(100);
+    const mockServer = serversDb.find((item) => item.id === serverId);
+    return {
+      serverId,
+      available: false,
+      transport: 'websocket',
+      fallback: {
+        status: 'UNKNOWN',
+        currentPlayers: mockServer?.currentPlayers || 0,
+        maxPlayers: mockServer?.maxPlayers || 0,
+        ...(mockServer?.currentMap ? { currentMap: mockServer.currentMap } : {}),
+        ...(mockServer?.lastHeartbeat ? { lastHeartbeat: mockServer.lastHeartbeat } : {}),
+      },
+    };
   },
 
   createServer: async (data: { name: string, ip: string, port: number, mode: GameMode, maxPlayers: number }): Promise<GameServer> => {

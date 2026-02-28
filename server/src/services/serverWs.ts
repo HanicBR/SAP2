@@ -462,3 +462,9 @@ export const getServerWsLiveState = (serverId: string) => {
     players: liveState.players,
   };
 };
+
+export const getAllServerWsLiveState = () =>
+  Array.from(liveStateByServerId.keys())
+    .map((serverId) => getServerWsLiveState(serverId))
+    .filter((entry): entry is NonNullable<ReturnType<typeof getServerWsLiveState>> => Boolean(entry))
+    .sort((left, right) => left.serverId.localeCompare(right.serverId));

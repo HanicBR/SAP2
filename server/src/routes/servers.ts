@@ -7,7 +7,7 @@ import { drainServerActions } from '../services/serverActions';
 import { getVipAutomationMetrics, previewVipAutomationBuild, VipAutomationActionType } from '../services/vipAutomation';
 import { normalizeIp } from '../utils/normalizeIp';
 import { findServerByApiKey } from '../services/serverAuth';
-import { getServerWsHealthSnapshot, getServerWsLiveState } from '../services/serverWs';
+import { getAllServerWsLiveState, getServerWsHealthSnapshot, getServerWsLiveState } from '../services/serverWs';
 import { getPlayerPulseSettings } from '../services/playtimePulse';
 import { ingestPlayerPulse, PlayerPulseIngestError } from '../services/playerPulseIngest';
 
@@ -366,6 +366,16 @@ router.get('/actions/vip/metrics', authMiddleware, requireRole(UserRole.ADMIN), 
 // WebSocket server connectivity health (PR-01 transport bootstrap)
 router.get('/ws/health', authMiddleware, requireRole(UserRole.ADMIN), async (_req, res) => {
   return res.json(getServerWsHealthSnapshot());
+});
+
+// Aggregated live player-state snapshots from WebSocket transport (PR-04 admin consumption)
+router.get('/ws/live-state', authMiddleware, requireRole(UserRole.ADMIN), async (_req, res) => {
+  const items = getAllServerWsLiveState();
+  return res.json({
+    now: new Date().toISOString(),
+    total: items.length,
+    items,
+  });
 });
 
 // Live state from WebSocket snapshots (PR-03 near-real-time players/activity)

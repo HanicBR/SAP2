@@ -22,6 +22,17 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend
 } from 'recharts';
 
+const LIVE_STATE_MAX_AGE_SECONDS = 30;
+
+type PlayerLivePresence = {
+  serverId: string;
+  serverName: string;
+  map?: string;
+  ageSeconds: number;
+  playerCount: number;
+  receivedAt: string;
+};
+
 const PlayerProfile: React.FC = () => {
   const { steamId } = useParams<{ steamId: string }>();
   const [player, setPlayer] = useState<Player | null>(null);
@@ -56,6 +67,7 @@ const PlayerProfile: React.FC = () => {
   const [deactivationReasonView, setDeactivationReasonView] = useState<Punishment | null>(null);
   const [showCopyFallback, setShowCopyFallback] = useState(false);
   const [copyToast, setCopyToast] = useState<{ message: string; tone: 'success' | 'error' } | null>(null);
+  const [livePresence, setLivePresence] = useState<PlayerLivePresence | null>(null);
   const logsPerPage = 50;
   const punishmentsPerPage = 20;
 
@@ -128,6 +140,57 @@ const PlayerProfile: React.FC = () => {
 
     return () => window.clearInterval(intervalId);
   }, [steamId, activityWindowDays]);
+
+  useEffect(() => {
+    if (!steamId) {
+      setLivePresence(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadLivePresence = async () => {
+      try {
+        const liveState = await ApiService.getServersLiveState();
+        const match = (liveState.items || []).find((snapshot) => {
+          const ageSeconds = Number(snapshot.ageSeconds ?? 0);
+          if (!snapshot.connected) return false;
+          if (!Number.isFinite(ageSeconds) || ageSeconds > LIVE_STATE_MAX_AGE_SECONDS) return false;
+          return (snapshot.players || []).some((entry) => entry.steamId === steamId);
+        });
+
+        if (cancelled) return;
+        if (!match) {
+          setLivePresence(null);
+          return;
+        }
+
+        const serverName =
+          servers.find((item) => item.id === match.serverId)?.name.split('[')[0]?.trim() || match.serverId;
+
+        setLivePresence({
+          serverId: match.serverId,
+          serverName,
+          ageSeconds: Number(match.ageSeconds ?? 0),
+          playerCount: Number(match.playerCount || 0),
+          receivedAt: match.receivedAt,
+          ...(match.map ? { map: match.map } : {}),
+        });
+      } catch {
+        if (!cancelled) setLivePresence(null);
+      }
+    };
+
+    void loadLivePresence();
+    const intervalId = window.setInterval(() => {
+      void loadLivePresence();
+    }, 10000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+    };
+  }, [steamId, servers]);
 
   useEffect(() => {
     const fetchPlayerLogs = async () => {
@@ -507,6 +570,20 @@ const PlayerProfile: React.FC = () => {
                  <div className="bg-zinc-950 px-3 py-1.5 rounded border border-zinc-800 flex items-center gap-2">
                     <span className="select-all">{player.steamId}</span>
                  </div>
+                 {livePresence ? (
+                    <div className="bg-emerald-900/20 px-3 py-1.5 rounded border border-emerald-700 flex items-center gap-2 text-emerald-200 font-sans">
+                      <span className="text-[11px] font-black uppercase tracking-wider text-emerald-300">LIVE (WS)</span>
+                      <span className="text-xs font-semibold">
+                        {livePresence.serverName}
+                        {livePresence.map ? ` • ${livePresence.map}` : ''}
+                        {` • ${livePresence.playerCount} online`}
+                      </span>
+                    </div>
+                 ) : (
+                    <div className="bg-zinc-950 px-3 py-1.5 rounded border border-zinc-700 text-zinc-500 font-sans">
+                      <span className="text-[11px] font-black uppercase tracking-wider">Fallback (Heartbeat/Pulse)</span>
+                    </div>
+                 )}
                  {suspicious && (
                     <Link to="/admin/duplicates" className="text-red-500 hover:text-red-400 font-bold uppercase flex items-center text-xs">
                        <Icons.Fingerprint className="w-4 h-4 mr-1" /> Ver detalhes de duplicidade

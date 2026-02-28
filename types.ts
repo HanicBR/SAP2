@@ -26,6 +26,45 @@ export interface GameServer {
   apiKey?: string; // Only visible to admins
 }
 
+export interface ServerWsLivePlayer {
+  steamId: string;
+  name?: string;
+}
+
+export interface ServerWsLiveStateItem {
+  serverId: string;
+  transport: 'websocket';
+  connected: boolean;
+  wsConnectedAt?: string;
+  receivedAt: string;
+  ageSeconds?: number;
+  sentAt?: string;
+  map?: string;
+  playerCount: number;
+  players: ServerWsLivePlayer[];
+}
+
+export interface ServerWsLiveStateListResponse {
+  now: string;
+  total: number;
+  items: ServerWsLiveStateItem[];
+}
+
+export interface ServerLiveStateFallback {
+  status: string;
+  currentPlayers: number;
+  maxPlayers: number;
+  currentMap?: string;
+  lastHeartbeat?: string;
+}
+
+export interface ServerLiveStateResponse extends Partial<ServerWsLiveStateItem> {
+  serverId: string;
+  available: boolean;
+  transport: 'websocket';
+  fallback: ServerLiveStateFallback;
+}
+
 export enum PunishmentType {
   BAN = 'BAN',
   MUTE = 'MUTE',
