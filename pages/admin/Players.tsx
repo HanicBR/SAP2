@@ -1,19 +1,31 @@
-
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ApiService } from '../../services/api';
-import { Player, GameServer, ServerWsLiveStateItem } from '../../types';
+import { GameServer, Player, ServerWsLiveStateItem } from '../../types';
 import { MOCK_SUSPICIOUS_GROUPS } from '../../constants';
 import { Icons } from '../../components/Icon';
 import { Pagination } from '../../components/Pagination';
 
 const LIVE_STATE_MAX_AGE_SECONDS = 30;
+const PLAYERS_REFRESH_MS = 30_000;
+const LIVE_STATE_REFRESH_MS = 10_000;
+const ITEMS_PER_PAGE = 12;
+
+type PresenceFilter = 'all' | 'online' | 'offline';
+type SortField = 'name' | 'presence' | 'vip' | 'punishments' | 'playtime' | 'lastSeen';
 
 type PlayerLivePresence = {
   serverId: string;
   map?: string;
   ageSeconds: number;
   playerCount: number;
+};
+
+type PlayerRow = Player & {
+  isOnline: boolean;
+  presence?: PlayerLivePresence;
+  punishmentCount: number;
+  suspicious: boolean;
 };
 
 const mapLiveStateToPlayers = (items: ServerWsLiveStateItem[]): Record<string, PlayerLivePresence> => {
@@ -39,26 +51,140 @@ const mapLiveStateToPlayers = (items: ServerWsLiveStateItem[]): Record<string, P
   return mapped;
 };
 
+const formatDate = (value?: string): string => {
+  if (!value) return '-';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '-';
+  return date.toLocaleDateString('pt-BR');
+};
+
+const formatDateTime = (value?: string): string => {
+  if (!value) return '-';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '-';
+  return date.toLocaleString('pt-BR');
+};
+
+const formatPlaytime = (hours?: number): string => {
+  const safe = Number(hours || 0);
+  return `${safe.toFixed(1)}h`;
+};
+
+const getVipBadge = (player: Player) => {
+  if (!player.isVip) {
+    return (
+      <span className="inline-flex items-center rounded-full border border-zinc-700 bg-zinc-800 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-zinc-400">
+        Free
+      </span>
+    );
+  }
+
+  const plan = String(player.vipPlan || 'VIP');
+  const style =
+    plan.includes('VIP++')
+      ? 'border-yellow-700 bg-yellow-900/20 text-yellow-300'
+      : plan.includes('VIP+')
+      ? 'border-zinc-500 bg-zinc-700/30 text-zinc-200'
+      : plan.toLowerCase().includes('ultimate')
+      ? 'border-fuchsia-700 bg-fuchsia-900/20 text-fuchsia-300'
+      : 'border-orange-700 bg-orange-900/20 text-orange-300';
+
+  return (
+    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide ${style}`}>
+      {plan}
+    </span>
+  );
+};
+
+const getReputationBadge = (punishmentCount: number) => {
+  if (punishmentCount === 0) {
+    return (
+      <span className="inline-flex items-center rounded-full border border-emerald-900/40 bg-emerald-900/10 px-2 py-0.5 text-[11px] font-bold text-emerald-300">
+        Limpo
+      </span>
+    );
+  }
+
+  if (punishmentCount <= 2) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full border border-amber-900/40 bg-amber-900/10 px-2 py-0.5 text-[11px] font-bold text-amber-300">
+        <Icons.AlertTriangle className="h-3 w-3" />
+        Leve ({punishmentCount})
+      </span>
+    );
+  }
+
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full border border-red-900/40 bg-red-900/10 px-2 py-0.5 text-[11px] font-bold text-red-300">
+      <Icons.Gavel className="h-3 w-3" />
+      Alto ({punishmentCount})
+    </span>
+  );
+};
+
 const Players: React.FC = () => {
   const [players, setPlayers] = useState<Player[]>([]);
+  const [servers, setServers] = useState<GameServer[]>([]);
+  const [livePresenceBySteamId, setLivePresenceBySteamId] = useState<Record<string, PlayerLivePresence>>({});
+
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [lastSyncAt, setLastSyncAt] = useState<string | null>(null);
+
+  const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [vipFilter, setVipFilter] = useState<boolean | undefined>(undefined);
   const [serverFilter, setServerFilter] = useState('');
-  const [servers, setServers] = useState<GameServer[]>([]);
-  const [livePresenceBySteamId, setLivePresenceBySteamId] = useState<Record<string, PlayerLivePresence>>({});
-  const [sortBy, setSortBy] = useState<null | 'name' | 'reputation' | 'playtime' | 'lastSeen' | 'status'>(null);
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
-  
-  // Pagination State
+  const [presenceFilter, setPresenceFilter] = useState<PresenceFilter>('all');
+  const [sortBy, setSortBy] = useState<SortField>('lastSeen');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
 
-  useEffect(() => {
-    loadData();
-    ApiService.getServers().then(setServers);
-    void loadLiveState();
+  const suspiciousSteamIds = useMemo(() => {
+    const ids = new Set<string>();
+    MOCK_SUSPICIOUS_GROUPS.forEach((group) => {
+      group.players.forEach((entry) => ids.add(entry.steamId));
+    });
+    return ids;
   }, []);
+
+  const serverNameById = useMemo(() => {
+    const mapped: Record<string, string> = {};
+    servers.forEach((server) => {
+      mapped[server.id] = server.name.split('[')[0]?.trim() || server.name;
+    });
+    return mapped;
+  }, [servers]);
+
+  const loadServers = useCallback(async () => {
+    try {
+      const items = await ApiService.getServers();
+      setServers(items);
+    } catch {
+      setServers([]);
+    }
+  }, []);
+
+  const loadPlayers = useCallback(
+    async (silent = false) => {
+      if (silent) setRefreshing(true);
+      else setLoading(true);
+
+      try {
+        const items = await ApiService.getPlayers(search, serverFilter, vipFilter);
+        setPlayers(items);
+        setError(null);
+        setLastSyncAt(new Date().toISOString());
+      } catch {
+        setError('Nao foi possivel carregar jogadores agora. Tentando novamente no proximo ciclo.');
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [search, serverFilter, vipFilter],
+  );
 
   const loadLiveState = useCallback(async () => {
     try {
@@ -70,305 +196,507 @@ const Players: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      ApiService.getPlayers(search, serverFilter, vipFilter)
-        .then((data) => setPlayers(data))
-        .catch(() => {
-          // retry on next tick
-        });
-    }, 20000);
+    void loadServers();
+  }, [loadServers]);
 
-    return () => window.clearInterval(intervalId);
-  }, [search, serverFilter, vipFilter]);
+  useEffect(() => {
+    void loadPlayers(false);
+  }, [loadPlayers]);
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
+      void loadPlayers(true);
+    }, PLAYERS_REFRESH_MS);
+
+    return () => window.clearInterval(intervalId);
+  }, [loadPlayers]);
+
+  useEffect(() => {
+    void loadLiveState();
+
+    const intervalId = window.setInterval(() => {
       void loadLiveState();
-    }, 10000);
+    }, LIVE_STATE_REFRESH_MS);
+
     return () => window.clearInterval(intervalId);
   }, [loadLiveState]);
 
-  const loadData = () => {
-    setLoading(true);
-    ApiService.getPlayers(search, serverFilter, vipFilter).then(data => {
-      setPlayers(data);
-      setLoading(false);
-      setCurrentPage(1); // Reset to page 1 on new filter/load
-    });
-  };
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    loadData();
-  };
-
-  const isSuspicious = (steamId: string) => {
-    return MOCK_SUSPICIOUS_GROUPS.some(g => g.players.some(p => p.steamId === steamId));
-  };
-
-  const getReputationBadge = (player: Player) => {
-    const count = player.punishments?.length || 0;
-    if (count === 0) {
-      return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-900/20 text-green-400 border border-green-900/30">
-          Sem punições
-        </span>
-      );
-    } else if (count <= 2) {
-      return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-yellow-900/20 text-yellow-500 border border-yellow-900/30">
-          <Icons.AlertTriangle className="w-3 h-3 mr-1" />
-          Histórico leve
-        </span>
-      );
-    } else {
-      return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-900/20 text-red-500 border border-red-900/30">
-          <Icons.Gavel className="w-3 h-3 mr-1" />
-          Histórico pesado
-        </span>
-      );
-    }
-  };
-
-  const toggleSort = (field: typeof sortBy) => {
-    if (sortBy !== field) {
-      setSortBy(field);
-      setSortDir('asc');
-      setCurrentPage(1);
-      return;
-    }
-    if (sortDir === 'asc') {
-      setSortDir('desc');
-    } else {
-      setSortBy(null);
-      setSortDir('asc');
-    }
+  useEffect(() => {
     setCurrentPage(1);
-  };
+  }, [search, serverFilter, vipFilter, presenceFilter, sortBy, sortDir]);
 
-  const sortedPlayers = useMemo(() => {
-    if (!sortBy) return players;
-    const sorted = [...players].sort((a, b) => {
+  const playerRows = useMemo<PlayerRow[]>(() => {
+    return players.map((player) => {
+      const presence = livePresenceBySteamId[player.steamId];
+      return {
+        ...player,
+        isOnline: Boolean(presence),
+        ...(presence ? { presence } : {}),
+        punishmentCount: player.punishments?.length || 0,
+        suspicious: suspiciousSteamIds.has(player.steamId),
+      };
+    });
+  }, [players, livePresenceBySteamId, suspiciousSteamIds]);
+
+  const filteredRows = useMemo(() => {
+    if (presenceFilter === 'all') return playerRows;
+    if (presenceFilter === 'online') return playerRows.filter((item) => item.isOnline);
+    return playerRows.filter((item) => !item.isOnline);
+  }, [playerRows, presenceFilter]);
+
+  const sortedRows = useMemo(() => {
+    const sorted = [...filteredRows].sort((left, right) => {
       switch (sortBy) {
         case 'name':
-          return a.name.localeCompare(b.name);
-        case 'reputation': {
-          const pa = a.punishments?.length || 0;
-          const pb = b.punishments?.length || 0;
-          return pa - pb;
-        }
+          return String(left.name || '').localeCompare(String(right.name || ''));
+        case 'presence':
+          return Number(left.isOnline) - Number(right.isOnline);
+        case 'vip':
+          return Number(left.isVip) - Number(right.isVip);
+        case 'punishments':
+          return left.punishmentCount - right.punishmentCount;
         case 'playtime':
-          return (a.playTimeHours || 0) - (b.playTimeHours || 0);
+          return Number(left.playTimeHours || 0) - Number(right.playTimeHours || 0);
         case 'lastSeen':
-          return new Date(a.lastSeen).getTime() - new Date(b.lastSeen).getTime();
-        case 'status':
-          return Number(a.isVip) - Number(b.isVip);
+          return new Date(left.lastSeen).getTime() - new Date(right.lastSeen).getTime();
         default:
           return 0;
       }
     });
+
     return sortDir === 'asc' ? sorted : sorted.reverse();
-  }, [players, sortBy, sortDir]);
+  }, [filteredRows, sortBy, sortDir]);
 
-  // Pagination Logic
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentPlayers = sortedPlayers.slice(indexOfFirstItem, indexOfLastItem);
+  const paginatedRows = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return sortedRows.slice(start, start + ITEMS_PER_PAGE);
+  }, [sortedRows, currentPage]);
 
-  const sortIndicator = (field: typeof sortBy) => {
-    if (sortBy !== field) return null;
+  const stats = useMemo(() => {
+    const total = filteredRows.length;
+    const online = filteredRows.filter((item) => item.isOnline).length;
+    const vip = filteredRows.filter((item) => item.isVip).length;
+    const punished = filteredRows.filter((item) => item.punishmentCount > 0).length;
+    return { total, online, vip, punished };
+  }, [filteredRows]);
+
+  const sortIndicator = (field: SortField): string => {
+    if (sortBy !== field) return '';
     return sortDir === 'asc' ? '^' : 'v';
+  };
+
+  const toggleSort = (field: SortField) => {
+    if (sortBy !== field) {
+      setSortBy(field);
+      setSortDir(field === 'name' ? 'asc' : 'desc');
+      return;
+    }
+    setSortDir((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+  };
+
+  const applySearch = (event: React.FormEvent) => {
+    event.preventDefault();
+    setSearch(searchInput.trim());
+  };
+
+  const clearFilters = () => {
+    setSearchInput('');
+    setSearch('');
+    setVipFilter(undefined);
+    setServerFilter('');
+    setPresenceFilter('all');
+    setSortBy('lastSeen');
+    setSortDir('desc');
+  };
+
+  const refreshNow = () => {
+    void loadPlayers(true);
+    void loadLiveState();
   };
 
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
     } catch {
-      // ignore clipboard errors in non-secure contexts
+      // clipboard can fail in non-secure contexts
     }
   };
 
-  const getServerShortName = (serverId: string) => {
-    const server = servers.find((item) => item.id === serverId);
-    if (!server) return serverId;
-    return server.name.split('[')[0]?.trim() || server.name;
-  };
-
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <h1 className="text-2xl font-bold text-white flex items-center">
-          <Icons.UserGroup className="w-6 h-6 mr-3 text-red-500" />
-          Gerenciar Jogadores
-        </h1>
-        
-        <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-          {/* Server Filter */}
-          <select 
-            className="bg-zinc-900 border border-zinc-700 text-zinc-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-red-600"
-            value={serverFilter}
-            onChange={(e) => setServerFilter(e.target.value)}
-          >
-            <option value="">Todos os Servidores</option>
-            {servers.map(s => <option key={s.id} value={s.id}>{s.name.split(' ')[1]} ({s.mode})</option>)}
-          </select>
+    <div className="animate-fade-in space-y-5">
+      <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
+        <div>
+          <h1 className="flex items-center text-2xl font-bold text-white">
+            <Icons.UserGroup className="mr-3 h-6 w-6 text-red-500" />
+            Jogadores
+          </h1>
+          <p className="mt-1 text-sm text-zinc-500">
+            Presenca ao vivo via WS (janela de {LIVE_STATE_MAX_AGE_SECONDS}s).
+            {lastSyncAt ? ` Ultima atualizacao: ${formatDateTime(lastSyncAt)}.` : ''}
+          </p>
+        </div>
 
-          {/* VIP Filter */}
-          <select 
-            className="bg-zinc-900 border border-zinc-700 text-zinc-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-red-600"
-            value={vipFilter === undefined ? 'all' : vipFilter.toString()}
-            onChange={(e) => setVipFilter(e.target.value === 'all' ? undefined : e.target.value === 'true')}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={refreshNow}
+            className="inline-flex items-center gap-2 rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-xs font-bold uppercase tracking-wider text-zinc-200 transition-colors hover:bg-zinc-800"
+            disabled={refreshing}
           >
-            <option value="all">Todos (VIP/Non-VIP)</option>
-            <option value="true">Apenas VIPs</option>
-            <option value="false">Apenas Grátis</option>
-          </select>
+            <Icons.RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+            Atualizar
+          </button>
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="rounded border border-zinc-700 px-3 py-2 text-xs font-bold uppercase tracking-wider text-zinc-300 transition-colors hover:border-zinc-500 hover:text-white"
+          >
+            Limpar filtros
+          </button>
+        </div>
+      </div>
 
-          {/* Search Input */}
-          <div className="relative">
-            <input
-              type="text"
-              className="w-full sm:w-64 pl-10 pr-3 py-2 border border-zinc-700 rounded bg-zinc-900 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-red-600 focus:border-red-600 text-sm transition-colors"
-              placeholder="Nick ou SteamID..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-             <button type="submit" className="absolute left-0 top-0 bottom-0 pl-3 flex items-center text-zinc-500 hover:text-white">
-               <Icons.Search className="h-4 w-4" />
-             </button>
+      <div className="rounded border border-zinc-800 bg-zinc-900 p-4">
+        <form onSubmit={applySearch} className="grid gap-3 lg:grid-cols-12">
+          <div className="lg:col-span-5">
+            <label className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+              Buscar jogador
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                value={searchInput}
+                onChange={(event) => setSearchInput(event.target.value)}
+                placeholder="Nome ou SteamID"
+                className="w-full rounded border border-zinc-700 bg-zinc-950 py-2 pl-10 pr-3 text-sm text-zinc-100 placeholder-zinc-500 focus:border-red-600 focus:outline-none focus:ring-1 focus:ring-red-600"
+              />
+              <Icons.Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-zinc-500" />
+            </div>
+          </div>
+
+          <div className="lg:col-span-2">
+            <label className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-zinc-500">Servidor</label>
+            <select
+              value={serverFilter}
+              onChange={(event) => setServerFilter(event.target.value)}
+              className="w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-200 focus:border-red-600 focus:outline-none focus:ring-1 focus:ring-red-600"
+            >
+              <option value="">Todos</option>
+              {servers.map((server) => (
+                <option key={server.id} value={server.id}>
+                  {server.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="lg:col-span-2">
+            <label className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-zinc-500">Plano</label>
+            <select
+              value={vipFilter === undefined ? 'all' : String(vipFilter)}
+              onChange={(event) =>
+                setVipFilter(event.target.value === 'all' ? undefined : event.target.value === 'true')
+              }
+              className="w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-200 focus:border-red-600 focus:outline-none focus:ring-1 focus:ring-red-600"
+            >
+              <option value="all">Todos</option>
+              <option value="true">Apenas VIP</option>
+              <option value="false">Apenas Free</option>
+            </select>
+          </div>
+
+          <div className="lg:col-span-2">
+            <label className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-zinc-500">Presenca</label>
+            <select
+              value={presenceFilter}
+              onChange={(event) => setPresenceFilter(event.target.value as PresenceFilter)}
+              className="w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-200 focus:border-red-600 focus:outline-none focus:ring-1 focus:ring-red-600"
+            >
+              <option value="all">Todos</option>
+              <option value="online">Online</option>
+              <option value="offline">Offline</option>
+            </select>
+          </div>
+
+          <div className="lg:col-span-1 lg:flex lg:items-end">
+            <button
+              type="submit"
+              className="w-full rounded border border-red-800 bg-red-900/20 px-3 py-2 text-xs font-bold uppercase tracking-wider text-red-300 transition-colors hover:bg-red-900/30"
+            >
+              Buscar
+            </button>
           </div>
         </form>
       </div>
 
-      <div className="bg-zinc-900 rounded border border-zinc-800 overflow-hidden shadow-sm flex flex-col">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-zinc-800">
-            <thead className="bg-zinc-950/50">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider cursor-pointer select-none" onClick={() => toggleSort('name')}>
-                  Jogador {sortIndicator('name')}
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider cursor-pointer select-none" onClick={() => toggleSort('reputation')}>
-                  Reputação {sortIndicator('reputation')}
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider cursor-pointer select-none" onClick={() => toggleSort('playtime')}>
-                  Tempo Jogado {sortIndicator('playtime')}
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider cursor-pointer select-none" onClick={() => toggleSort('lastSeen')}>
-                  Último Acesso {sortIndicator('lastSeen')}
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider cursor-pointer select-none" onClick={() => toggleSort('status')}>
-                  Status {sortIndicator('status')}
-                </th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-bold text-zinc-500 uppercase tracking-wider">Ações</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-800 bg-zinc-900">
-              {loading ? (
-                <tr><td colSpan={6} className="px-6 py-4 text-center text-zinc-500">Carregando lista de jogadores...</td></tr>
-              ) : players.length === 0 ? (
-                 <tr><td colSpan={6} className="px-6 py-4 text-center text-zinc-500">Nenhum jogador encontrado.</td></tr>
-              ) : (
-                currentPlayers.map((player) => (
-                  <tr key={player.steamId} className="hover:bg-zinc-800/50 transition-colors group">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10 relative">
-                          <img className="h-10 w-10 rounded-full border border-zinc-700" src={player.avatarUrl} alt="" />
-                          {isSuspicious(player.steamId) && (
-                            <span className="absolute -top-1 -right-1 block h-3 w-3 rounded-full bg-red-500 ring-2 ring-zinc-900" title="Suspeita de conta duplicada"></span>
-                          )}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="rounded border border-zinc-800 bg-zinc-900 p-3">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Jogadores</p>
+          <p className="mt-1 text-2xl font-black text-white">{stats.total}</p>
+        </div>
+        <div className="rounded border border-emerald-900/30 bg-emerald-900/10 p-3">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-300">Online agora</p>
+          <p className="mt-1 text-2xl font-black text-emerald-200">{stats.online}</p>
+        </div>
+        <div className="rounded border border-amber-900/30 bg-amber-900/10 p-3">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-amber-300">VIP</p>
+          <p className="mt-1 text-2xl font-black text-amber-200">{stats.vip}</p>
+        </div>
+        <div className="rounded border border-red-900/30 bg-red-900/10 p-3">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-red-300">Com punicoes</p>
+          <p className="mt-1 text-2xl font-black text-red-200">{stats.punished}</p>
+        </div>
+      </div>
+
+      {error ? (
+        <div className="rounded border border-red-900/40 bg-red-900/10 px-3 py-2 text-sm text-red-300">{error}</div>
+      ) : null}
+
+      <div className="rounded border border-zinc-800 bg-zinc-900 shadow-sm">
+        <div className="border-b border-zinc-800 px-4 py-3 text-xs text-zinc-500">
+          Ordenando por <span className="font-bold text-zinc-300">{sortBy}</span> ({sortDir}).
+        </div>
+
+        {loading ? (
+          <div className="px-4 py-10 text-center text-zinc-500">Carregando jogadores...</div>
+        ) : sortedRows.length === 0 ? (
+          <div className="px-4 py-10 text-center text-zinc-500">Nenhum jogador encontrado com os filtros atuais.</div>
+        ) : (
+          <>
+            <div className="space-y-3 p-3 lg:hidden">
+              {paginatedRows.map((player) => {
+                const avatarUrl =
+                  player.avatarUrl ||
+                  `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(player.steamId)}`;
+                const serverName = player.presence ? serverNameById[player.presence.serverId] || player.presence.serverId : '';
+
+                return (
+                  <div key={player.steamId} className="rounded border border-zinc-800 bg-zinc-950/40 p-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <div className="relative h-10 w-10 shrink-0">
+                          <img src={avatarUrl} alt={player.name} className="h-10 w-10 rounded-full border border-zinc-700 object-cover" />
+                          {player.suspicious ? (
+                            <span
+                              className="absolute -right-1 -top-1 block h-3 w-3 rounded-full bg-red-500 ring-2 ring-zinc-900"
+                              title="Suspeita de conta duplicada"
+                            />
+                          ) : null}
                         </div>
-                        <div className="ml-4">
-                          <Link to={`/admin/players/${player.steamId}`} className="text-sm font-bold text-white group-hover:text-red-500 transition-colors block">
+                        <div className="min-w-0">
+                          <Link to={`/admin/players/${player.steamId}`} className="block truncate text-sm font-bold text-white">
                             {player.name}
                           </Link>
-                          <div className="text-xs text-zinc-500 font-mono">{player.steamId}</div>
+                          <button
+                            type="button"
+                            onClick={() => copyToClipboard(player.steamId)}
+                            className="truncate font-mono text-[11px] text-zinc-500 hover:text-zinc-300"
+                            title="Copiar SteamID"
+                          >
+                            {player.steamId}
+                          </button>
                         </div>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {getReputationBadge(player)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-300">
-                      {player.playTimeHours}h
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-400">
-                      {new Date(player.lastSeen).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {(() => {
-                        const livePresence = livePresenceBySteamId[player.steamId];
-                        return (
-                          <div className="space-y-2">
-                            {player.isVip ? (
-                              <span className={`px-2 inline-flex text-xs leading-5 font-bold rounded-full border bg-opacity-20 ${
-                                 player.vipPlan?.includes('VIP++') ? 'bg-yellow-500 text-yellow-500 border-yellow-500' :
-                                 player.vipPlan?.includes('VIP+') ? 'bg-zinc-400 text-zinc-300 border-zinc-400' :
-                                 player.vipPlan?.includes('Ultimate') ? 'bg-purple-700 text-purple-300 border-purple-500' :
-                                 'bg-orange-600 text-orange-400 border-orange-600'
-                              }`}>
-                                {player.vipPlan}
-                              </span>
-                           ) : (
-                              <span className="px-2 inline-flex text-xs leading-5 font-bold rounded-full bg-zinc-800 text-zinc-500 border border-zinc-700">Free</span>
-                           )}
 
-                            {livePresence ? (
-                              <div>
-                                <span className="px-2 inline-flex text-xs leading-5 font-bold rounded-full border bg-emerald-900/20 text-emerald-300 border-emerald-700">
-                                  LIVE (WS)
-                                </span>
-                                <div className="text-[11px] text-emerald-300 mt-1">
-                                  {getServerShortName(livePresence.serverId)} • {livePresence.playerCount} online
-                                </div>
-                              </div>
+                      <span
+                        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider ${
+                          player.isOnline
+                            ? 'border-emerald-700 bg-emerald-900/20 text-emerald-300'
+                            : 'border-zinc-700 bg-zinc-800 text-zinc-400'
+                        }`}
+                      >
+                        {player.isOnline ? 'Online' : 'Offline'}
+                      </span>
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-zinc-400">
+                      <div>
+                        <p className="text-zinc-500">Tempo</p>
+                        <p className="font-bold text-zinc-200">{formatPlaytime(player.playTimeHours)}</p>
+                      </div>
+                      <div>
+                        <p className="text-zinc-500">Ultimo acesso</p>
+                        <p className="font-bold text-zinc-200">{formatDate(player.lastSeen)}</p>
+                      </div>
+                      <div>
+                        <p className="text-zinc-500">Reputacao</p>
+                        <div className="mt-1">{getReputationBadge(player.punishmentCount)}</div>
+                      </div>
+                      <div>
+                        <p className="text-zinc-500">Plano</p>
+                        <div className="mt-1">{getVipBadge(player)}</div>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 text-[11px] text-zinc-500">
+                      {player.isOnline && player.presence ? (
+                        <span>
+                          WS: {serverName}
+                          {player.presence.map ? ` | ${player.presence.map}` : ''}
+                          {` | ${Math.max(0, Math.floor(player.presence.ageSeconds))}s`}
+                        </span>
+                      ) : (
+                        <span>Fora do snapshot WS ativo.</span>
+                      )}
+                    </div>
+
+                    <div className="mt-3 flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(player.name)}
+                        className="rounded border border-zinc-700 px-2 py-1 text-zinc-300 transition-colors hover:border-zinc-500 hover:text-white"
+                        title="Copiar nome"
+                      >
+                        <Icons.Copy className="h-4 w-4" />
+                      </button>
+                      <Link
+                        to={`/admin/players/${player.steamId}`}
+                        className="inline-flex items-center gap-1 rounded border border-cyan-900/50 bg-cyan-900/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-cyan-300 transition-colors hover:border-cyan-700 hover:text-cyan-200"
+                      >
+                        <Icons.Eye className="h-3.5 w-3.5" />
+                        Perfil
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="hidden overflow-x-auto lg:block">
+              <table className="min-w-full divide-y divide-zinc-800">
+                <thead className="bg-zinc-950/50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                      <button type="button" onClick={() => toggleSort('name')} className="inline-flex items-center gap-1 hover:text-zinc-300">
+                        Jogador {sortIndicator('name')}
+                      </button>
+                    </th>
+                    <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                      <button type="button" onClick={() => toggleSort('presence')} className="inline-flex items-center gap-1 hover:text-zinc-300">
+                        Online/offline {sortIndicator('presence')}
+                      </button>
+                    </th>
+                    <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                      <button type="button" onClick={() => toggleSort('vip')} className="inline-flex items-center gap-1 hover:text-zinc-300">
+                        VIP {sortIndicator('vip')}
+                      </button>
+                    </th>
+                    <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                      <button
+                        type="button"
+                        onClick={() => toggleSort('punishments')}
+                        className="inline-flex items-center gap-1 hover:text-zinc-300"
+                      >
+                        Reputacao {sortIndicator('punishments')}
+                      </button>
+                    </th>
+                    <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                      <button type="button" onClick={() => toggleSort('playtime')} className="inline-flex items-center gap-1 hover:text-zinc-300">
+                        Playtime {sortIndicator('playtime')}
+                      </button>
+                    </th>
+                    <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                      <button type="button" onClick={() => toggleSort('lastSeen')} className="inline-flex items-center gap-1 hover:text-zinc-300">
+                        Ultimo acesso {sortIndicator('lastSeen')}
+                      </button>
+                    </th>
+                    <th className="px-4 py-3 text-right text-[11px] font-bold uppercase tracking-wider text-zinc-500">Acoes</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-800">
+                  {paginatedRows.map((player) => {
+                    const avatarUrl =
+                      player.avatarUrl ||
+                      `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(player.steamId)}`;
+                    const serverName = player.presence ? serverNameById[player.presence.serverId] || player.presence.serverId : '-';
+
+                    return (
+                      <tr key={player.steamId} className="transition-colors hover:bg-zinc-800/40">
+                        <td className="whitespace-nowrap px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            <div className="relative h-10 w-10 shrink-0">
+                              <img src={avatarUrl} alt={player.name} className="h-10 w-10 rounded-full border border-zinc-700 object-cover" />
+                              {player.suspicious ? (
+                                <span
+                                  className="absolute -right-1 -top-1 block h-3 w-3 rounded-full bg-red-500 ring-2 ring-zinc-900"
+                                  title="Suspeita de conta duplicada"
+                                />
+                              ) : null}
+                            </div>
+                            <div>
+                              <Link to={`/admin/players/${player.steamId}`} className="text-sm font-bold text-white hover:text-red-400">
+                                {player.name}
+                              </Link>
+                              <button
+                                type="button"
+                                onClick={() => copyToClipboard(player.steamId)}
+                                className="block font-mono text-[11px] text-zinc-500 hover:text-zinc-300"
+                                title="Copiar SteamID"
+                              >
+                                {player.steamId}
+                              </button>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="whitespace-nowrap px-4 py-3">
+                          <span
+                            className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide ${
+                              player.isOnline
+                                ? 'border-emerald-700 bg-emerald-900/20 text-emerald-300'
+                                : 'border-zinc-700 bg-zinc-800 text-zinc-400'
+                            }`}
+                          >
+                            {player.isOnline ? 'Online' : 'Offline'}
+                          </span>
+                          <div className="mt-1 text-[11px] text-zinc-500">
+                            {player.isOnline && player.presence ? (
+                              <>
+                                {serverName}
+                                {player.presence.map ? ` | ${player.presence.map}` : ''}
+                              </>
                             ) : (
-                              <span className="px-2 inline-flex text-xs leading-5 font-bold rounded-full bg-zinc-800 text-zinc-500 border border-zinc-700">
-                                Fallback
-                              </span>
+                              'Sem snapshot WS ativo'
                             )}
                           </div>
-                        );
-                      })()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex justify-end gap-2">
-                        <button
-                          onClick={() => copyToClipboard(player.name)}
-                          className="px-2 py-1 border border-zinc-700 rounded text-zinc-300 hover:text-white hover:border-zinc-500"
-                          title="Copiar nome"
-                        >
-                          <Icons.Copy className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => copyToClipboard(player.steamId)}
-                          className="px-2 py-1 border border-zinc-700 rounded text-zinc-300 hover:text-white hover:border-zinc-500"
-                          title="Copiar SteamID"
-                        >
-                          <Icons.Key className="w-4 h-4" />
-                        </button>
-                        <Link 
-                           to={`/admin/players/${player.steamId}`}
-                           className="text-cyan-400 hover:text-cyan-300 font-bold uppercase text-xs border border-cyan-900/50 bg-cyan-900/10 px-3 py-1 rounded transition-colors"
-                        >
-                           Ver Perfil
-                        </Link>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-        
-        {/* Pagination Component */}
-        <Pagination 
+                        </td>
+                        <td className="whitespace-nowrap px-4 py-3">{getVipBadge(player)}</td>
+                        <td className="whitespace-nowrap px-4 py-3">{getReputationBadge(player.punishmentCount)}</td>
+                        <td className="whitespace-nowrap px-4 py-3 text-sm text-zinc-200">
+                          {formatPlaytime(player.playTimeHours)}
+                        </td>
+                        <td className="whitespace-nowrap px-4 py-3 text-sm text-zinc-400">{formatDate(player.lastSeen)}</td>
+                        <td className="whitespace-nowrap px-4 py-3 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              type="button"
+                              onClick={() => copyToClipboard(player.name)}
+                              className="rounded border border-zinc-700 px-2 py-1 text-zinc-300 transition-colors hover:border-zinc-500 hover:text-white"
+                              title="Copiar nome"
+                            >
+                              <Icons.Copy className="h-4 w-4" />
+                            </button>
+                            <Link
+                              to={`/admin/players/${player.steamId}`}
+                              className="inline-flex items-center gap-1 rounded border border-cyan-900/50 bg-cyan-900/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-cyan-300 transition-colors hover:border-cyan-700 hover:text-cyan-200"
+                            >
+                              <Icons.Eye className="h-3.5 w-3.5" />
+                              Perfil
+                            </Link>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+
+        <Pagination
           currentPage={currentPage}
-          totalItems={players.length}
-          itemsPerPage={itemsPerPage}
+          totalItems={sortedRows.length}
+          itemsPerPage={ITEMS_PER_PAGE}
           onPageChange={setCurrentPage}
         />
       </div>
