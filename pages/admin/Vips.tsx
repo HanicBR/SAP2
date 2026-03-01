@@ -229,15 +229,6 @@ const Vips: React.FC = () => {
   }, [grantPlan, extendPlan, planOptions]);
 
   useEffect(() => {
-    if (!durationOptions.some((d) => d.value === grantDurationDays)) {
-      setGrantDurationDays(durationOptions[0]?.value || '30');
-    }
-    if (!durationOptions.some((d) => d.value === extendDurationDays)) {
-      setExtendDurationDays(durationOptions[0]?.value || '30');
-    }
-  }, [grantDurationDays, extendDurationDays, durationOptions]);
-
-  useEffect(() => {
     loadData();
   }, [status]);
 
@@ -266,8 +257,15 @@ const Vips: React.FC = () => {
     });
   };
 
+  const sanitizeDaysInput = (value: string) => value.replace(/[^0-9]/g, '');
+
   const handleGrant = async (e: React.FormEvent) => {
     e.preventDefault();
+    const parsedDurationDays = Number.parseInt(grantDurationDays, 10);
+    if (!Number.isFinite(parsedDurationDays) || parsedDurationDays <= 0) {
+      setFeedback('Informe um numero de dias valido para conceder VIP.');
+      return;
+    }
     setBusy(true);
     setFeedback('');
     try {
@@ -275,7 +273,7 @@ const Vips: React.FC = () => {
         steamId: grantSteamId.trim(),
         name: grantName.trim() || undefined,
         vipPlan: grantPlan,
-        vipDurationDays: Number.parseInt(grantDurationDays, 10),
+        vipDurationDays: parsedDurationDays,
         vipServerIds: normalizeIdList(grantServerIds),
       });
       setFeedback(
@@ -298,13 +296,18 @@ const Vips: React.FC = () => {
 
   const handleExtend = async (e: React.FormEvent) => {
     e.preventDefault();
+    const parsedDurationDays = Number.parseInt(extendDurationDays, 10);
+    if (!Number.isFinite(parsedDurationDays) || parsedDurationDays <= 0) {
+      setFeedback('Informe um numero de dias valido para estender VIP.');
+      return;
+    }
     setBusy(true);
     setFeedback('');
     try {
       const result = await ApiService.extendVip({
         steamId: extendSteamId.trim(),
         vipPlan: extendPlan || undefined,
-        vipDurationDays: Number.parseInt(extendDurationDays, 10),
+        vipDurationDays: parsedDurationDays,
         vipServerIds: normalizeIdList(extendServerIds),
       });
       setFeedback(
@@ -679,6 +682,13 @@ const Vips: React.FC = () => {
 
       {activeTab === 'operations' ? (
         <>
+          <datalist id="vip-duration-suggestions">
+            {durationOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </datalist>
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             <form onSubmit={handleGrant} className="bg-zinc-900 border border-zinc-800 rounded p-4 space-y-3">
               <h2 className="text-sm uppercase font-bold text-zinc-300">Conceder VIP</h2>
@@ -707,18 +717,18 @@ const Vips: React.FC = () => {
                     </option>
                   ))}
                 </select>
-                <select
+                <input
+                  required
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  list="vip-duration-suggestions"
                   value={grantDurationDays}
-                  onChange={(e) => setGrantDurationDays(e.target.value)}
+                  onChange={(e) => setGrantDurationDays(sanitizeDaysInput(e.target.value))}
                   className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm"
-                >
-                  {durationOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                  placeholder="Dias (ex: 30)"
+                />
               </div>
+              <p className="text-[11px] text-zinc-500">Dias do VIP (manual). Use qualquer valor inteiro positivo.</p>
               <div className="rounded border border-zinc-800 bg-zinc-950/60 p-3">
                 <p className="text-[11px] uppercase font-bold text-zinc-500">Escopo de servidores VIP</p>
                 <p className="mt-1 text-xs text-zinc-400">
@@ -783,18 +793,18 @@ const Vips: React.FC = () => {
                     </option>
                   ))}
                 </select>
-                <select
+                <input
+                  required
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  list="vip-duration-suggestions"
                   value={extendDurationDays}
-                  onChange={(e) => setExtendDurationDays(e.target.value)}
+                  onChange={(e) => setExtendDurationDays(sanitizeDaysInput(e.target.value))}
                   className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm"
-                >
-                  {durationOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                  placeholder="Dias (ex: 30)"
+                />
               </div>
+              <p className="text-[11px] text-zinc-500">Dias para estender (manual). Use qualquer valor inteiro positivo.</p>
               <div className="rounded border border-zinc-800 bg-zinc-950/60 p-3">
                 <p className="text-[11px] uppercase font-bold text-zinc-500">Atualizar escopo de servidores</p>
                 <p className="mt-1 text-xs text-zinc-400">
