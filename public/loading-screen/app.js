@@ -159,9 +159,20 @@
           name: name,
           steamId: String(item.steamId || '').trim(),
           avatarUrl: String(item.avatarUrl || '').trim(),
+          vipPlan: normalizeVipPlan(item.vipPlan),
         };
       })
       .filter(Boolean);
+  }
+
+  function normalizeVipPlan(value) {
+    var raw = String(value || '').trim();
+    if (!raw) return 'VIP';
+    var upper = raw.toUpperCase();
+    if (upper.indexOf('++') !== -1) return 'VIP++';
+    if (upper.indexOf('+') !== -1) return 'VIP+';
+    if (upper.indexOf('VIP') !== -1) return 'VIP';
+    return raw.slice(0, 24);
   }
 
   function normalizeProfile(raw, fallback) {
@@ -248,6 +259,7 @@
         ('https://api.dicebear.com/7.x/bottts/svg?seed=' + encodeURIComponent(player.name || 'vip'));
 
       var info = document.createElement('div');
+      info.style.minWidth = '0';
       var name = document.createElement('div');
       name.className = 'vip-name';
       name.textContent = player.name || 'Jogador';
@@ -259,8 +271,16 @@
       info.appendChild(name);
       info.appendChild(steam);
 
+      var tier = document.createElement('span');
+      var plan = normalizeVipPlan(player.vipPlan);
+      tier.className = 'vip-tier';
+      if (plan === 'VIP+') tier.className += ' vip-tier-plus';
+      if (plan === 'VIP++') tier.className += ' vip-tier-plusplus';
+      tier.textContent = plan;
+
       wrap.appendChild(avatar);
       wrap.appendChild(info);
+      wrap.appendChild(tier);
       dom.vipList.appendChild(wrap);
     });
   }

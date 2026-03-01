@@ -763,6 +763,7 @@ export interface LoadingScreenVipEntry {
   name: string;
   steamId?: string;
   avatarUrl?: string;
+  vipPlan?: string;
 }
 
 export interface LoadingScreenHero {

@@ -51,6 +51,7 @@ const makeVip = (): LoadingScreenVipEntry => ({
   name: 'Novo destaque',
   steamId: '',
   avatarUrl: '',
+  vipPlan: 'VIP',
 });
 
 const makeDraft = (base?: LoadingScreenProfile): LoadingScreenProfile => {
@@ -988,7 +989,19 @@ const LoadingScreens: React.FC = () => {
                       className={`${INPUT_CLASS} font-mono`}
                     />
                   </div>
-                  <div className="md:col-span-4">
+                  <div className="md:col-span-2">
+                    <label className={LABEL_CLASS}>Plano VIP</label>
+                    <select
+                      value={vip.vipPlan || 'VIP'}
+                      onChange={(event) => updateVip(index, { vipPlan: event.target.value })}
+                      className={INPUT_CLASS}
+                    >
+                      <option value="VIP">VIP</option>
+                      <option value="VIP+">VIP+</option>
+                      <option value="VIP++">VIP++</option>
+                    </select>
+                  </div>
+                  <div className="md:col-span-2">
                     <label className={LABEL_CLASS}>Avatar URL</label>
                     <input
                       type="text"

@@ -16,6 +16,7 @@ type LoadingScreenVipEntry = {
   name: string;
   steamId?: string;
   avatarUrl?: string;
+  vipPlan?: string;
 };
 
 type LoadingScreenHero = {
@@ -64,6 +65,7 @@ const MAX_TRACKS = 24;
 const MAX_VIPS = 40;
 const MAX_RULES = 12;
 const MAX_PUBLIC_VIPS = 80;
+const STEAM_ID64_BASE = BigInt('76561197960265728');
 const maxLoadingMediaUploadMb = Math.max(1, Number(process.env.LOADING_MEDIA_UPLOAD_MAX_MB || 25));
 const loadingMediaUploadDir =
   process.env.LOADING_MEDIA_UPLOAD_DIR || path.resolve(process.cwd(), 'uploads', 'loading-media');
@@ -159,6 +161,114 @@ const parseBool = (value: unknown, fallback: boolean): boolean => {
   return ['1', 'true', 'yes', 'on'].includes(normalized);
 };
 
+const normalizeVipPlanForTier = (value: unknown): string => {
+  const raw = String(value || '').trim();
+  if (!raw) return 'VIP';
+  const upper = raw.toUpperCase();
+  if (upper.includes('++')) return 'VIP++';
+  if (upper.includes('+')) return 'VIP+';
+  if (upper.includes('VIP')) return 'VIP';
+  return raw.slice(0, 32);
+};
+
+const vipPlanTierWeight = (value: unknown): number => {
+  const normalized = normalizeVipPlanForTier(value).toUpperCase();
+  if (normalized === 'VIP++') return 3;
+  if (normalized === 'VIP+') return 2;
+  if (normalized === 'VIP') return 1;
+  return 0;
+};
+
+const steam2To64 = (steamId: string): string | null => {
+  const match = String(steamId || '')
+    .trim()
+    .match(/^STEAM_[0-5]:([01]):(\d+)$/i);
+  if (!match) return null;
+  const yRaw = match[1];
+  const zRaw = match[2];
+  if (!yRaw || !zRaw) return null;
+  const y = BigInt(yRaw);
+  const z = BigInt(zRaw);
+  return (STEAM_ID64_BASE + z * BigInt(2) + y).toString();
+};
+
+type SteamSummary = {
+  personaName?: string;
+  avatarUrl?: string;
+};
+
+const steamSummaryCache = new Map<string, { expiresAt: number; summary: SteamSummary }>();
+const STEAM_SUMMARY_CACHE_TTL_MS = 10 * 60 * 1000;
+
+const withTimeout = async (url: string, timeoutMs: number): Promise<Response> => {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, {
+      method: 'GET',
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'backstabber-api/loading-screens',
+      },
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
+const fetchSteamSummariesById64 = async (steamIds64: string[]): Promise<Map<string, SteamSummary>> => {
+  const result = new Map<string, SteamSummary>();
+  const apiKey = String(process.env.STEAM_WEB_API_KEY || '').trim();
+  if (!apiKey || steamIds64.length === 0) return result;
+
+  const now = Date.now();
+  const uniqueIds = uniqueStrings(steamIds64).filter((entry) => /^\d{17}$/.test(entry));
+  const pendingIds: string[] = [];
+
+  uniqueIds.forEach((steamId64) => {
+    const cached = steamSummaryCache.get(steamId64);
+    if (cached && cached.expiresAt > now) {
+      result.set(steamId64, cached.summary);
+      return;
+    }
+    pendingIds.push(steamId64);
+  });
+
+  const chunkSize = 100;
+  for (let i = 0; i < pendingIds.length; i += chunkSize) {
+    const chunk = pendingIds.slice(i, i + chunkSize);
+    if (chunk.length === 0) continue;
+    const endpoint =
+      `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${encodeURIComponent(apiKey)}` +
+      `&steamids=${encodeURIComponent(chunk.join(','))}`;
+    try {
+      const response = await withTimeout(endpoint, 2500);
+      if (!response.ok) continue;
+      const json = await response.json().catch(() => null);
+      const players = Array.isArray(json?.response?.players) ? json.response.players : [];
+      players.forEach((player: any) => {
+        const steamId64 = String(player?.steamid || '').trim();
+        if (!/^\d{17}$/.test(steamId64)) return;
+        const personaName = String(player?.personaname || '').trim();
+        const avatarUrl = String(player?.avatarfull || '').trim();
+        const summary: SteamSummary = {
+          ...(personaName ? { personaName } : {}),
+          ...(avatarUrl ? { avatarUrl } : {}),
+        };
+        result.set(steamId64, summary);
+        steamSummaryCache.set(steamId64, {
+          expiresAt: now + STEAM_SUMMARY_CACHE_TTL_MS,
+          summary,
+        });
+      });
+    } catch {
+      // ignore Steam fetch failures and keep DB fallback
+    }
+  }
+
+  return result;
+};
+
 const uniqueStrings = (values: string[]): string[] => {
   const seen = new Set<string>();
   const next: string[] = [];
@@ -185,11 +295,13 @@ const sanitizeVipPlayers = (value: unknown, fallback: LoadingScreenVipEntry[]): 
 
     const steamId = trimTo(entry.steamId, 80, '');
     const avatarUrl = sanitizeUrl(entry.avatarUrl);
+    const vipPlan = trimTo(entry.vipPlan, 32, '');
 
     const normalized: LoadingScreenVipEntry = {
       name,
       ...(steamId ? { steamId } : {}),
       ...(avatarUrl ? { avatarUrl } : {}),
+      ...(vipPlan ? { vipPlan: normalizeVipPlanForTier(vipPlan) } : {}),
     };
 
     next.push(normalized);
@@ -211,6 +323,7 @@ const mergeAndDedupeVipEntries = (
     if (!name) return;
     const steamId = trimTo(entry.steamId, 80, '');
     const avatarUrl = sanitizeUrl(entry.avatarUrl);
+    const vipPlan = trimTo(entry.vipPlan, 32, '');
     const key = steamId ? `steam:${steamId.toUpperCase()}` : `name:${name.toLowerCase()}`;
     if (seen.has(key)) return;
     seen.add(key);
@@ -218,6 +331,7 @@ const mergeAndDedupeVipEntries = (
       name,
       ...(steamId ? { steamId } : {}),
       ...(avatarUrl ? { avatarUrl } : {}),
+      ...(vipPlan ? { vipPlan: normalizeVipPlanForTier(vipPlan) } : {}),
     });
   };
 
@@ -274,11 +388,13 @@ const buildDefaultProfiles = (): LoadingScreenProfile[] => {
       vipPlayers: [
         {
           name: 'Mr.B-O-M-B-A-S-T-I-C',
+          vipPlan: 'VIP++',
           avatarUrl:
             'https://shared.akamai.steamstatic.com/community_assets/images/items/2181720/097978e42477d98190ed9e14e971c2b9976fc8d1.gif',
         },
         {
           name: 'Gatogames435',
+          vipPlan: 'VIP+',
           avatarUrl:
             'https://shared.akamai.steamstatic.com/community_assets/images/items/2459330/11bbadea5154c316c883df0f3f1944395b3715b8.gif',
         },
@@ -321,10 +437,12 @@ const buildDefaultProfiles = (): LoadingScreenProfile[] => {
       vipPlayers: [
         {
           name: 'Sheva',
+          vipPlan: 'VIP++',
           avatarUrl: 'https://avatars.steamstatic.com/0650a97d7708b948a87e28c4b7c07ca9f268b073_full.jpg',
         },
         {
           name: 'chico tekito',
+          vipPlan: 'VIP+',
           avatarUrl: 'https://avatars.fastly.steamstatic.com/75bb2a0541d607eaed4e09c8d1e68413a2cbb58a_full.jpg',
         },
       ],
@@ -532,20 +650,47 @@ const buildSyncedVipPlayers = async (profile: LoadingScreenProfile): Promise<Loa
 
   const activeRows = await prisma.playerProfile.findMany({
     where,
-    orderBy: [{ lastSeen: 'desc' }, { updatedAt: 'desc' }],
+    orderBy: [{ firstSeen: 'asc' }, { lastSeen: 'desc' }],
     select: {
       steamId: true,
       name: true,
       avatarUrl: true,
+      vipPlan: true,
+      firstSeen: true,
     },
     take: MAX_PUBLIC_VIPS,
   });
 
-  const synced = activeRows.map((row) => ({
-    name: trimTo(row.name, 80, row.steamId),
-    steamId: row.steamId,
-    ...(row.avatarUrl ? { avatarUrl: row.avatarUrl } : {}),
-  }));
+  const sortedRows = [...activeRows].sort((a, b) => {
+    const tierDiff = vipPlanTierWeight(b.vipPlan) - vipPlanTierWeight(a.vipPlan);
+    if (tierDiff !== 0) return tierDiff;
+    const aFirst = a.firstSeen?.getTime?.() || 0;
+    const bFirst = b.firstSeen?.getTime?.() || 0;
+    if (aFirst !== bFirst) return aFirst - bFirst;
+    return String(a.steamId).localeCompare(String(b.steamId));
+  });
+
+  const steamId64BySteam2 = new Map<string, string>();
+  const steamIds64: string[] = [];
+  sortedRows.forEach((row) => {
+    const steamId64 = steam2To64(row.steamId);
+    if (!steamId64) return;
+    steamId64BySteam2.set(row.steamId, steamId64);
+    steamIds64.push(steamId64);
+  });
+  const steamSummariesBy64 = await fetchSteamSummariesById64(steamIds64);
+
+  const synced = sortedRows.map((row) => {
+    const steamId64 = steamId64BySteam2.get(row.steamId);
+    const steamSummary = steamId64 ? steamSummariesBy64.get(steamId64) : undefined;
+    const candidateAvatar = sanitizeUrl(steamSummary?.avatarUrl || row.avatarUrl);
+    return {
+      name: trimTo(steamSummary?.personaName || row.name, 80, row.steamId),
+      steamId: row.steamId,
+      ...(candidateAvatar ? { avatarUrl: candidateAvatar } : {}),
+      vipPlan: normalizeVipPlanForTier(row.vipPlan),
+    };
+  });
 
   const manualFallback = sanitizeVipPlayers(profile.vipPlayers, []);
   return mergeAndDedupeVipEntries(synced, manualFallback);

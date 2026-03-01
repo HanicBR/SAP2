@@ -56,9 +56,20 @@
           name: name,
           steamId: String(item.steamId || '').trim(),
           avatarUrl: String(item.avatarUrl || '').trim(),
+          vipPlan: normalizeVipPlan(item.vipPlan),
         };
       })
       .filter(Boolean);
+  }
+
+  function normalizeVipPlan(value) {
+    var raw = String(value || '').trim();
+    if (!raw) return 'VIP';
+    var upper = raw.toUpperCase();
+    if (upper.indexOf('++') !== -1) return 'VIP++';
+    if (upper.indexOf('+') !== -1) return 'VIP+';
+    if (upper.indexOf('VIP') !== -1) return 'VIP';
+    return raw.slice(0, 24);
   }
 
   function setText(selector, text) {
@@ -223,6 +234,7 @@
         'https://api.dicebear.com/7.x/bottts/svg?seed=' + encodeURIComponent(player.name || 'vip');
 
       var textWrap = document.createElement('div');
+      textWrap.style.minWidth = '0';
       var name = document.createElement('div');
       name.className = 'vip-name rainbow-text';
       name.textContent = player.name;
@@ -234,9 +246,61 @@
       textWrap.appendChild(name);
       textWrap.appendChild(steam);
 
+      var tier = document.createElement('span');
+      tier.className = 'bsb-vip-tier';
+      var plan = normalizeVipPlan(player.vipPlan);
+      if (plan === 'VIP+') tier.className += ' bsb-vip-tier--plus';
+      if (plan === 'VIP++') tier.className += ' bsb-vip-tier--plusplus';
+      tier.textContent = plan;
+
       row.appendChild(avatar);
       row.appendChild(textWrap);
+      row.appendChild(tier);
       list.appendChild(row);
+    });
+  }
+
+  function ensureVipTierStyles() {
+    if (document.getElementById('bsb-vip-tier-style')) return;
+    var style = document.createElement('style');
+    style.id = 'bsb-vip-tier-style';
+    style.textContent =
+      '.bsb-vip-tier{margin-left:8px;display:inline-flex;align-items:center;justify-content:center;min-width:56px;padding:3px 8px;border-radius:999px;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;border:1px solid rgba(15,23,42,.18);background:rgba(15,23,42,.06);color:#0f172a;white-space:nowrap}' +
+      '.bsb-vip-tier--plus{background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.35);color:#1e3a8a}' +
+      '.bsb-vip-tier--plusplus{background:rgba(234,179,8,.16);border-color:rgba(234,179,8,.4);color:#854d0e}';
+    document.head.appendChild(style);
+  }
+
+  function decorateVipCardsFromList(mappedPlayers) {
+    ensureVipTierStyles();
+    var list = document.querySelector('.vip-list');
+    if (!list) return;
+    var cards = list.querySelectorAll('.vip-card');
+    if (!cards || !cards.length) return;
+
+    Array.prototype.forEach.call(cards, function (card, index) {
+      var player = mappedPlayers[index];
+      if (!player) return;
+
+      card.style.display = 'flex';
+      card.style.alignItems = 'center';
+      card.style.justifyContent = 'space-between';
+
+      var infoWrap = card.children && card.children[1];
+      if (infoWrap && infoWrap.style) {
+        infoWrap.style.minWidth = '0';
+      }
+
+      var existing = card.querySelector('.bsb-vip-tier');
+      if (existing) existing.remove();
+
+      var tier = normalizeVipPlan(player.vipPlan);
+      var badge = document.createElement('span');
+      badge.className = 'bsb-vip-tier';
+      if (tier === 'VIP+') badge.className += ' bsb-vip-tier--plus';
+      if (tier === 'VIP++') badge.className += ' bsb-vip-tier--plusplus';
+      badge.textContent = tier;
+      card.appendChild(badge);
     });
   }
 
@@ -248,6 +312,7 @@
         steamId: entry.steamId || '',
         name: entry.name,
         avatar: entry.avatarUrl || '',
+        vipPlan: normalizeVipPlan(entry.vipPlan),
       };
     });
 
@@ -262,6 +327,7 @@
 
     if (typeof window.renderVips === 'function') {
       window.renderVips();
+      decorateVipCardsFromList(mapped);
       return;
     }
 
