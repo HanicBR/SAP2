@@ -69,6 +69,32 @@
     return urls.length > 0 ? urls : safeArray(fallback);
   }
 
+  function extractEnabledMusicUrls(items, fallback) {
+    if (!Array.isArray(items) || items.length === 0) return safeArray(fallback);
+    var urls = [];
+    var seen = Object.create(null);
+    items.forEach(function (entry) {
+      if (!entry || typeof entry !== 'object') return;
+      if (entry.enabled === false) return;
+      var url = String(entry.url || '').trim();
+      if (!url) return;
+      if (seen[url]) return;
+      seen[url] = true;
+      urls.push(url);
+    });
+    return urls.length > 0 ? urls : safeArray(fallback);
+  }
+
+  function pickRandomIndex(length, avoidIndex) {
+    var safeLength = Number(length) || 0;
+    if (safeLength <= 1) return 0;
+    var candidate = Math.floor(Math.random() * safeLength);
+    if (candidate === avoidIndex) {
+      candidate = (candidate + 1 + Math.floor(Math.random() * (safeLength - 1))) % safeLength;
+    }
+    return candidate;
+  }
+
   function safePlayers(value) {
     if (!Array.isArray(value)) return [];
     return value
@@ -416,7 +442,7 @@
       audio.appendChild(source);
     });
 
-    var trackIndex = 0;
+    var trackIndex = tracks.length > 1 ? pickRandomIndex(tracks.length, -1) : 0;
     var safeVolumePct = clampNumber(volumePct, 25, 0, 300);
     var gainValue = safeVolumePct / 100;
     var audioContext = null;
@@ -443,7 +469,7 @@
 
     audio.onended = function () {
       if (!tracks.length) return;
-      trackIndex = (trackIndex + 1) % tracks.length;
+      trackIndex = pickRandomIndex(tracks.length, trackIndex);
       audio.src = tracks[trackIndex];
       var p = audio.play();
       if (p && typeof p.catch === 'function') p.catch(function () {});
@@ -486,7 +512,7 @@
       accentColor: String(source.accentColor || ''),
       backgroundImages: extractEnabledBackgroundUrls(source.backgroundImageItems, fallbackBackgrounds),
       backgroundRotationSec: Math.round(clampNumber(source.backgroundRotationSec, 12, 3, 120)),
-      musicTracks: safeArray(source.musicTracks),
+      musicTracks: extractEnabledMusicUrls(source.musicTrackItems, source.musicTracks),
       musicVolumePct: Math.round(clampNumber(source.musicVolumePct, 25, 0, 300)),
       hero: source.hero && typeof source.hero === 'object' ? source.hero : {},
       notice: source.notice && typeof source.notice === 'object' ? source.notice : {},

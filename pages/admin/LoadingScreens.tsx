@@ -3,6 +3,7 @@ import { Icons } from '../../components/Icon';
 import { ApiService } from '../../services/api';
 import {
   LoadingScreenBackgroundItem,
+  LoadingScreenMusicTrackItem,
   LoadingScreenMode,
   LoadingScreenProfile,
   LoadingScreenVipEntry,
@@ -89,10 +90,34 @@ const toBackgroundItems = (
 const activeBackgroundUrls = (items: LoadingScreenBackgroundItem[]): string[] =>
   items.filter((entry) => entry.enabled !== false).map((entry) => entry.url);
 
-const mergeLineInput = (current: string, nextValues: string[]): string => {
-  const merged = parseLineInput(`${current}\n${nextValues.join('\n')}`);
-  return merged.join('\n');
+const toMusicTrackItems = (
+  items: LoadingScreenMusicTrackItem[] | undefined,
+  fallbackUrls: string[] | undefined,
+): LoadingScreenMusicTrackItem[] => {
+  const source = Array.isArray(items) && items.length > 0
+    ? items
+    : (fallbackUrls || []).map((url) => ({
+        id: createBackgroundItemId(),
+        url,
+        enabled: true,
+      }));
+  const next: LoadingScreenMusicTrackItem[] = [];
+  const seen = new Set<string>();
+  source.forEach((entry) => {
+    const url = String(entry?.url || '').trim();
+    if (!url || seen.has(url)) return;
+    seen.add(url);
+    next.push({
+      id: String(entry?.id || '').trim() || createBackgroundItemId(),
+      url,
+      enabled: entry?.enabled !== false,
+    });
+  });
+  return next;
 };
+
+const activeMusicUrls = (items: LoadingScreenMusicTrackItem[]): string[] =>
+  items.filter((entry) => entry.enabled !== false).map((entry) => entry.url);
 
 const makeVip = (): LoadingScreenVipEntry => ({
   name: 'Novo destaque',
@@ -108,6 +133,11 @@ const makeDraft = (base?: LoadingScreenProfile): LoadingScreenProfile => {
     base?.backgroundImages?.length ? base.backgroundImages : ['https://i.imgur.com/HnZfcKR.jpeg'],
   );
   const backgroundImages = activeBackgroundUrls(backgroundImageItems);
+  const musicTrackItems = toMusicTrackItems(
+    base?.musicTrackItems,
+    base?.musicTracks?.length ? base.musicTracks : [],
+  );
+  const musicTracks = activeMusicUrls(musicTrackItems);
   return {
     slug,
     name: base?.name || 'Nova loading screen',
@@ -118,7 +148,8 @@ const makeDraft = (base?: LoadingScreenProfile): LoadingScreenProfile => {
     backgroundImages: backgroundImages.length > 0 ? backgroundImages : ['https://i.imgur.com/HnZfcKR.jpeg'],
     backgroundImageItems,
     backgroundRotationSec: Math.round(clampNumber(Number(base?.backgroundRotationSec ?? 12), 12, 3, 120)),
-    musicTracks: base?.musicTracks?.length ? [...base.musicTracks] : [],
+    musicTracks,
+    musicTrackItems,
     musicVolumePct: Math.round(clampNumber(Number(base?.musicVolumePct ?? 25), 25, 0, 300)),
     hero: {
       badge: base?.hero.badge || 'BACKSTABBER',
@@ -199,7 +230,7 @@ const LoadingScreens: React.FC = () => {
 
   const [backgroundLinkInput, setBackgroundLinkInput] = useState('');
   const [compressImagesOnUpload, setCompressImagesOnUpload] = useState(true);
-  const [musicInput, setMusicInput] = useState('');
+  const [musicLinkInput, setMusicLinkInput] = useState('');
   const [heroDescInput, setHeroDescInput] = useState('');
   const [noticeLinesInput, setNoticeLinesInput] = useState('');
   const [rulesInput, setRulesInput] = useState('');
@@ -217,7 +248,7 @@ const LoadingScreens: React.FC = () => {
 
   const hydrateDraftInputs = (profile: LoadingScreenProfile) => {
     setBackgroundLinkInput('');
-    setMusicInput(toLineInput(profile.musicTracks));
+    setMusicLinkInput('');
     setHeroDescInput(toLineInput(profile.hero.descriptionLines));
     setNoticeLinesInput(toLineInput(profile.notice.lines));
     setRulesInput(toLineInput(profile.rules));
@@ -367,14 +398,6 @@ const LoadingScreens: React.FC = () => {
     });
   };
 
-  const setBackgroundItems = (items: LoadingScreenBackgroundItem[]) => {
-    const normalized = toBackgroundItems(items, []);
-    updateDraft({
-      backgroundImageItems: normalized,
-      backgroundImages: activeBackgroundUrls(normalized),
-    });
-  };
-
   const addBackgroundUrl = (urlRaw: string) => {
     const url = String(urlRaw || '').trim();
     if (!url) return;
@@ -418,10 +441,53 @@ const LoadingScreens: React.FC = () => {
     });
   };
 
+  const addMusicTrackUrl = (urlRaw: string) => {
+    const url = String(urlRaw || '').trim();
+    if (!url) return;
+    setDraft((prev) => {
+      if (!prev) return prev;
+      const nextItems = toMusicTrackItems(
+        [...(prev.musicTrackItems || []), { id: createBackgroundItemId(), url, enabled: true }],
+        prev.musicTracks,
+      );
+      return {
+        ...prev,
+        musicTrackItems: nextItems,
+        musicTracks: activeMusicUrls(nextItems),
+      };
+    });
+  };
+
+  const toggleMusicTrackItem = (id: string, enabled: boolean) => {
+    setDraft((prev) => {
+      if (!prev) return prev;
+      const nextItems = (prev.musicTrackItems || []).map((item) =>
+        item.id === id ? { ...item, enabled } : item,
+      );
+      return {
+        ...prev,
+        musicTrackItems: nextItems,
+        musicTracks: activeMusicUrls(nextItems),
+      };
+    });
+  };
+
+  const removeMusicTrackItem = (id: string) => {
+    setDraft((prev) => {
+      if (!prev) return prev;
+      const nextItems = (prev.musicTrackItems || []).filter((item) => item.id !== id);
+      return {
+        ...prev,
+        musicTrackItems: nextItems,
+        musicTracks: activeMusicUrls(nextItems),
+      };
+    });
+  };
+
   const syncArrayInputsToDraft = () => {
     if (!draft) return draft;
     const nextBackgroundItems = toBackgroundItems(draft.backgroundImageItems, draft.backgroundImages);
-    const nextMusicTracks = parseLineInput(musicInput);
+    const nextMusicTrackItems = toMusicTrackItems(draft.musicTrackItems, draft.musicTracks);
     return {
       ...draft,
       backgroundImageItems: nextBackgroundItems,
@@ -429,7 +495,8 @@ const LoadingScreens: React.FC = () => {
       backgroundRotationSec: Math.round(
         clampNumber(Number(draft.backgroundRotationSec ?? 12), 12, 3, 120),
       ),
-      musicTracks: nextMusicTracks,
+      musicTrackItems: nextMusicTrackItems,
+      musicTracks: activeMusicUrls(nextMusicTrackItems),
       musicVolumePct: Math.round(clampNumber(Number(draft.musicVolumePct ?? 25), 25, 0, 300)),
       hero: {
         ...draft.hero,
@@ -742,11 +809,7 @@ const LoadingScreens: React.FC = () => {
         const result = await ApiService.uploadLoadingMedia(file);
         uploadedUrls.push(result.url);
       }
-      setMusicInput((prev) => {
-        const nextInput = mergeLineInput(prev, uploadedUrls);
-        updateDraft({ musicTracks: parseLineInput(nextInput) });
-        return nextInput;
-      });
+      uploadedUrls.forEach((url) => addMusicTrackUrl(url));
       setNotice({
         tone: 'success',
         message: `${uploadedUrls.length} faixa(s) enviada(s) com sucesso.`,
@@ -1240,7 +1303,7 @@ const LoadingScreens: React.FC = () => {
                     (draft.backgroundImageItems || []).map((item) => (
                       <div
                         key={item.id}
-                        className="grid items-center gap-2 rounded border border-zinc-800 bg-zinc-950 p-2 sm:grid-cols-[56px_1fr_auto_auto]"
+                        className="grid items-center gap-2 rounded border border-zinc-800 bg-zinc-950 p-2 sm:grid-cols-[56px_1fr_auto_auto_auto]"
                       >
                         <img
                           src={item.url}
@@ -1262,6 +1325,15 @@ const LoadingScreens: React.FC = () => {
                           />
                           Ativa
                         </label>
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          download
+                          className="rounded border border-cyan-900/60 bg-cyan-900/20 px-2 py-1 text-[11px] font-bold uppercase text-cyan-200"
+                        >
+                          Download
+                        </a>
                         <button
                           type="button"
                           onClick={() => removeBackgroundItem(item.id)}
@@ -1292,15 +1364,25 @@ const LoadingScreens: React.FC = () => {
                     {mediaUploading === 'music' ? 'Enviando...' : 'Fazer upload de audio'}
                   </label>
                 </div>
-                <textarea
-                  rows={5}
-                  value={musicInput}
-                  onChange={(event) => {
-                    setMusicInput(event.target.value);
-                    updateDraft({ musicTracks: parseLineInput(event.target.value) });
-                  }}
-                  className={TEXTAREA_CLASS}
-                />
+                <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
+                  <input
+                    type="text"
+                    value={musicLinkInput}
+                    onChange={(event) => setMusicLinkInput(event.target.value)}
+                    className={INPUT_CLASS}
+                    placeholder="https://... (adicionar musica por link)"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      addMusicTrackUrl(musicLinkInput);
+                      setMusicLinkInput('');
+                    }}
+                    className="rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-xs font-bold uppercase text-zinc-200"
+                  >
+                    Adicionar
+                  </button>
+                </div>
                 <div className="mt-2">
                   <label className={LABEL_CLASS}>Volume da playlist (%)</label>
                   <input
@@ -1320,6 +1402,54 @@ const LoadingScreens: React.FC = () => {
                   <p className="mt-1 text-[11px] text-zinc-500">
                     100 = volume normal. Pode aumentar acima de 100 em navegadores compatíveis com ganho.
                   </p>
+                </div>
+                <p className="mt-2 text-[11px] text-zinc-500">
+                  Toca uma faixa aleatoria ao carregar e escolhe outra aleatoria quando acabar.
+                </p>
+                <div className="mt-3 space-y-2">
+                  {(draft.musicTrackItems || []).length === 0 ? (
+                    <div className="rounded border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs text-zinc-500">
+                      Nenhuma musica cadastrada.
+                    </div>
+                  ) : (
+                    (draft.musicTrackItems || []).map((item) => (
+                      <div
+                        key={item.id}
+                        className="grid items-center gap-2 rounded border border-zinc-800 bg-zinc-950 p-2 sm:grid-cols-[1fr_auto_auto_auto]"
+                      >
+                        <div className="min-w-0">
+                          <div className="truncate text-xs text-zinc-300">{item.url}</div>
+                          <div className="mt-1 text-[10px] uppercase tracking-wide text-zinc-500">
+                            {item.enabled ? 'Ativa' : 'Desativada'}
+                          </div>
+                        </div>
+                        <label className="inline-flex items-center gap-1 rounded border border-zinc-700 bg-zinc-900 px-2 py-1 text-[11px] text-zinc-300">
+                          <input
+                            type="checkbox"
+                            checked={item.enabled !== false}
+                            onChange={(event) => toggleMusicTrackItem(item.id, event.target.checked)}
+                          />
+                          Ativa
+                        </label>
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          download
+                          className="rounded border border-cyan-900/60 bg-cyan-900/20 px-2 py-1 text-[11px] font-bold uppercase text-cyan-200"
+                        >
+                          Download
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() => removeMusicTrackItem(item.id)}
+                          className="rounded border border-red-900/60 bg-red-900/20 px-2 py-1 text-[11px] font-bold uppercase text-red-300"
+                        >
+                          Remover
+                        </button>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>

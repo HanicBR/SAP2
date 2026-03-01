@@ -457,6 +457,23 @@
     return safeLines(fallback, []);
   }
 
+  function safeMusicUrls(source, fallback) {
+    var items = Array.isArray(source) ? source : [];
+    var urls = [];
+    var seen = Object.create(null);
+    items.forEach(function (entry) {
+      if (!entry || typeof entry !== 'object') return;
+      if (entry.enabled === false) return;
+      var url = String(entry.url || '').trim();
+      if (!url) return;
+      if (seen[url]) return;
+      seen[url] = true;
+      urls.push(url);
+    });
+    if (urls.length > 0) return urls;
+    return safeLines(fallback, []);
+  }
+
   function normalizeVipPlan(value) {
     var raw = String(value || '').trim();
     if (!raw) return 'VIP';
@@ -488,7 +505,7 @@
       backgroundRotationSec: Math.round(
         clampNumber(source.backgroundRotationSec, Number(base.backgroundRotationSec || 12), 3, 120),
       ),
-      musicTracks: safeLines(source.musicTracks, base.musicTracks),
+      musicTracks: safeMusicUrls(source.musicTrackItems, source.musicTracks || base.musicTracks),
       musicVolumePct: Math.round(
         clampNumber(source.musicVolumePct, Number(base.musicVolumePct || 25), 0, 300),
       ),
@@ -702,10 +719,20 @@
     }
   }
 
+  function pickRandomTrackIndex(length, avoidIndex) {
+    var safeLength = Number(length) || 0;
+    if (safeLength <= 1) return 0;
+    var candidate = Math.floor(Math.random() * safeLength);
+    if (candidate === avoidIndex) {
+      candidate = (candidate + 1 + Math.floor(Math.random() * (safeLength - 1))) % safeLength;
+    }
+    return candidate;
+  }
+
   function initMusic(tracks, volumePct) {
     var safeTracks = (tracks || []).filter(Boolean);
     state.tracks = safeTracks;
-    state.trackIndex = 0;
+    state.trackIndex = safeTracks.length > 1 ? pickRandomTrackIndex(safeTracks.length, -1) : 0;
 
     if (!safeTracks.length) {
       if (state.audio) {
@@ -720,7 +747,7 @@
       state.audio.volume = 0.25;
       state.audio.addEventListener('ended', function () {
         if (!state.tracks.length) return;
-        state.trackIndex = (state.trackIndex + 1) % state.tracks.length;
+        state.trackIndex = pickRandomTrackIndex(state.tracks.length, state.trackIndex);
         loadAndPlayTrack();
       });
     }

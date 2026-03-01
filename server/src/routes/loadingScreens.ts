@@ -24,6 +24,12 @@ type LoadingScreenBackgroundItem = {
   enabled: boolean;
 };
 
+type LoadingScreenMusicTrackItem = {
+  id: string;
+  url: string;
+  enabled: boolean;
+};
+
 type LoadingScreenVipEntry = {
   name: string;
   steamId?: string;
@@ -57,6 +63,7 @@ type LoadingScreenProfile = {
   backgroundImageItems: LoadingScreenBackgroundItem[];
   backgroundRotationSec: number;
   musicTracks: string[];
+  musicTrackItems: LoadingScreenMusicTrackItem[];
   musicVolumePct: number;
   hero: LoadingScreenHero;
   notice: LoadingScreenNotice;
@@ -184,6 +191,15 @@ const createBackgroundItemId = (seed?: string): string => {
   return `bg_${Date.now().toString(36)}_${crypto.randomBytes(4).toString('hex')}`;
 };
 
+const createMusicTrackItemId = (seed?: string): string => {
+  const normalizedSeed = String(seed || '').trim();
+  if (normalizedSeed) {
+    const hash = crypto.createHash('sha1').update(normalizedSeed).digest('hex').slice(0, 16);
+    return `trk_${hash}`;
+  }
+  return `trk_${Date.now().toString(36)}_${crypto.randomBytes(4).toString('hex')}`;
+};
+
 const parseBoolLoose = (value: unknown, fallback: boolean): boolean => {
   if (typeof value === 'boolean') return value;
   const normalized = String(value ?? '')
@@ -229,6 +245,45 @@ const sanitizeBackgroundImageItems = (
 
   if (next.length > 0) return next;
   if (fallback.length > 0) return fallback.slice(0, MAX_BG_IMAGES);
+  return [];
+};
+
+const sanitizeMusicTrackItems = (
+  value: unknown,
+  fallback: LoadingScreenMusicTrackItem[],
+): LoadingScreenMusicTrackItem[] => {
+  const source = Array.isArray(value) ? value : [];
+  const seen = new Set<string>();
+  const next: LoadingScreenMusicTrackItem[] = [];
+
+  source.forEach((entry) => {
+    if (next.length >= MAX_TRACKS) return;
+
+    let idRaw = '';
+    let urlRaw: unknown;
+    let enabledRaw: unknown = true;
+    if (isRecord(entry)) {
+      idRaw = trimTo(entry.id, 80, '');
+      urlRaw = entry.url;
+      enabledRaw = entry.enabled;
+    } else {
+      urlRaw = entry;
+      enabledRaw = true;
+    }
+
+    const url = sanitizeUrl(urlRaw);
+    if (!url) return;
+    if (seen.has(url)) return;
+    seen.add(url);
+    next.push({
+      id: idRaw || createMusicTrackItemId(url),
+      url,
+      enabled: parseBoolLoose(enabledRaw, true),
+    });
+  });
+
+  if (next.length > 0) return next;
+  if (fallback.length > 0) return fallback.slice(0, MAX_TRACKS);
   return [];
 };
 
@@ -617,6 +672,13 @@ const buildDefaultProfiles = (): LoadingScreenProfile[] => {
       ],
       backgroundRotationSec: 12,
       musicTracks: ['https://raw.githubusercontent.com/HanicBR/backtttloading/main/assets/music/gtavicecity.ogg'],
+      musicTrackItems: [
+        {
+          id: 'ttt-track-1',
+          url: 'https://raw.githubusercontent.com/HanicBR/backtttloading/main/assets/music/gtavicecity.ogg',
+          enabled: true,
+        },
+      ],
       musicVolumePct: 25,
       hero: {
         badge: 'TTT',
@@ -678,6 +740,13 @@ const buildDefaultProfiles = (): LoadingScreenProfile[] => {
       ],
       backgroundRotationSec: 12,
       musicTracks: ['https://raw.githubusercontent.com/HanicBR/backtttloading/main/assets/music/gtavicecity.ogg'],
+      musicTrackItems: [
+        {
+          id: 'sandbox-track-1',
+          url: 'https://raw.githubusercontent.com/HanicBR/backtttloading/main/assets/music/gtavicecity.ogg',
+          enabled: true,
+        },
+      ],
       musicVolumePct: 25,
       hero: {
         badge: 'SANDBOX',
@@ -752,9 +821,20 @@ const normalizeProfile = (input: unknown, fallback?: LoadingScreenProfile): Load
     MAX_BG_ROTATION_SEC,
   );
 
-  const musicTracks = toLines(record.musicTracks, MAX_TRACKS, base.musicTracks)
-    .map((entry) => sanitizeUrl(entry))
-    .filter((entry): entry is string => Boolean(entry));
+  const fallbackMusicTrackItems = Array.isArray(base.musicTrackItems)
+    ? base.musicTrackItems
+    : base.musicTracks.map((url, idx) => ({
+        id: `trk_fallback_${idx + 1}`,
+        url,
+        enabled: true,
+      }));
+  const musicTrackItems = sanitizeMusicTrackItems(
+    record.musicTrackItems || record.musicTracks,
+    fallbackMusicTrackItems,
+  );
+  const activeMusicTracks = musicTrackItems
+    .filter((entry) => entry.enabled)
+    .map((entry) => entry.url);
   const musicVolumePct = clampInt(
     record.musicVolumePct,
     base.musicVolumePct || 25,
@@ -796,7 +876,8 @@ const normalizeProfile = (input: unknown, fallback?: LoadingScreenProfile): Load
     backgroundImages: activeBackgroundImages,
     backgroundImageItems,
     backgroundRotationSec,
-    musicTracks: musicTracks.length > 0 ? musicTracks : base.musicTracks,
+    musicTracks: activeMusicTracks,
+    musicTrackItems,
     musicVolumePct,
     hero,
     notice,

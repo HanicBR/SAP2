@@ -765,6 +765,12 @@ export interface LoadingScreenBackgroundItem {
   enabled: boolean;
 }
 
+export interface LoadingScreenMusicTrackItem {
+  id: string;
+  url: string;
+  enabled: boolean;
+}
+
 export interface LoadingScreenVipEntry {
   name: string;
   steamId?: string;
@@ -798,6 +804,7 @@ export interface LoadingScreenProfile {
   backgroundImageItems?: LoadingScreenBackgroundItem[];
   backgroundRotationSec?: number;
   musicTracks: string[];
+  musicTrackItems?: LoadingScreenMusicTrackItem[];
   musicVolumePct?: number;
   hero: LoadingScreenHero;
   notice: LoadingScreenNotice;
