@@ -1711,6 +1711,52 @@ router.get('/:steamId', async (req, res) => {
   });
 });
 
+router.get('/:steamId/aliases', async (req, res) => {
+  const { steamId } = req.params as { steamId: string };
+  const limit = parsePositiveInt((req.query as any)?.limit, 50, 500);
+
+  const profile = await prisma.playerProfile.findUnique({
+    where: { steamId },
+    select: { steamId: true },
+  });
+  if (!profile) {
+    return res.status(404).json({ error: 'Player not found' });
+  }
+
+  const aliasClient = (prisma as any).playerAliasHistory;
+  if (!aliasClient) {
+    return res.json({ steamId, total: 0, items: [] });
+  }
+
+  const [items, total] = await Promise.all([
+    aliasClient.findMany({
+      where: { steamId },
+      orderBy: [{ lastSeen: 'desc' }, { seenCount: 'desc' }],
+      take: limit,
+      select: {
+        name: true,
+        firstSeen: true,
+        lastSeen: true,
+        seenCount: true,
+      },
+    }),
+    aliasClient.count({
+      where: { steamId },
+    }),
+  ]);
+
+  return res.json({
+    steamId,
+    total,
+    items: items.map((item: any) => ({
+      name: String(item.name || ''),
+      firstSeen: item.firstSeen instanceof Date ? item.firstSeen.toISOString() : undefined,
+      lastSeen: item.lastSeen instanceof Date ? item.lastSeen.toISOString() : undefined,
+      seenCount: Number(item.seenCount || 0),
+    })),
+  });
+});
+
 router.get('/:steamId/logs', async (req, res) => {
   const { steamId } = req.params as { steamId: string };
   const scope = parsePlayerLogScope(req.query.scope);

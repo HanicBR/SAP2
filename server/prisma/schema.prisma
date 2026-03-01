@@ -43,6 +43,12 @@ model User {
   passwordHash String
   role         UserRole
   avatarUrl    String?
+  steamId64    String?  @unique
+  steamProfileUrl String?
+  steamAvatarUrl String?
+  steamPersonaName String?
+  steamLinkedAt DateTime?
+  steamLastSyncAt DateTime?
   mustChangePassword Boolean @default(false)
   createdAt    DateTime @default(now())
 
@@ -94,6 +100,24 @@ model PlayerProfile {
   notes            PlayerNote[]
   punishments      Punishment[]
   ipHistory        PlayerIpHistory[]
+  aliases          PlayerAliasHistory[]
+}
+
+model PlayerAliasHistory {
+  id        String   @id @default(cuid())
+  steamId   String
+  name      String
+  firstSeen DateTime @default(now())
+  lastSeen  DateTime @default(now())
+  seenCount Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  player PlayerProfile @relation(fields: [steamId], references: [steamId], onDelete: Cascade)
+
+  @@unique([steamId, name], name: "steamId_name")
+  @@index([steamId, lastSeen])
+  @@index([name, lastSeen])
 }
 
 model VipAutomationAction {

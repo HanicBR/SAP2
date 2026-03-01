@@ -233,6 +233,7 @@ type PlayerIpHistoryAggregate = {
 };
 
 const getPlayerIpHistoryClient = () => (prisma as any).playerIpHistory;
+const getPlayerAliasHistoryClient = () => (prisma as any).playerAliasHistory;
 
 const collectPlayerIpHistoryAggregates = (
   events: NormalizedLogEvent[],
@@ -334,6 +335,103 @@ const persistPlayerIpHistory = async (aggregates: Map<string, PlayerIpHistoryAgg
         error: err?.message || String(err),
       });
     }
+  }
+};
+
+type PlayerAliasAggregate = {
+  steamId: string;
+  name: string;
+  firstSeen: Date;
+  lastSeen: Date;
+  seenCount: number;
+};
+
+const collectPlayerAliasAggregates = (
+  events: NormalizedLogEvent[],
+): Map<string, PlayerAliasAggregate> => {
+  const aliases = new Map<string, PlayerAliasAggregate>();
+
+  events.forEach((event) => {
+    const steamId = String(event.steamId || '').trim();
+    const name = String(event.playerName || '').trim();
+    if (!steamId || !name) return;
+
+    const key = `${steamId}::${name.toLowerCase()}`;
+    const existing = aliases.get(key);
+    if (!existing) {
+      aliases.set(key, {
+        steamId,
+        name,
+        firstSeen: event.timestamp,
+        lastSeen: event.timestamp,
+        seenCount: 1,
+      });
+      return;
+    }
+
+    if (event.timestamp.getTime() < existing.firstSeen.getTime()) {
+      existing.firstSeen = event.timestamp;
+    }
+    if (event.timestamp.getTime() > existing.lastSeen.getTime()) {
+      existing.lastSeen = event.timestamp;
+    }
+    existing.seenCount += 1;
+  });
+
+  return aliases;
+};
+
+const persistPlayerAliasHistory = async (aggregates: Map<string, PlayerAliasAggregate>) => {
+  const client = getPlayerAliasHistoryClient();
+  if (!client || !aggregates.size) return;
+
+  for (const aggregate of aggregates.values()) {
+    const existing = await client.findUnique({
+      where: {
+        steamId_name: {
+          steamId: aggregate.steamId,
+          name: aggregate.name,
+        },
+      },
+      select: {
+        firstSeen: true,
+        lastSeen: true,
+        seenCount: true,
+      },
+    });
+
+    if (!existing) {
+      await client.create({
+        data: {
+          steamId: aggregate.steamId,
+          name: aggregate.name,
+          firstSeen: aggregate.firstSeen,
+          lastSeen: aggregate.lastSeen,
+          seenCount: aggregate.seenCount,
+        },
+      });
+      continue;
+    }
+
+    await client.update({
+      where: {
+        steamId_name: {
+          steamId: aggregate.steamId,
+          name: aggregate.name,
+        },
+      },
+      data: {
+        firstSeen:
+          aggregate.firstSeen.getTime() < existing.firstSeen.getTime()
+            ? aggregate.firstSeen
+            : existing.firstSeen,
+        lastSeen:
+          aggregate.lastSeen.getTime() > existing.lastSeen.getTime()
+            ? aggregate.lastSeen
+            : existing.lastSeen,
+        seenCount: Number(existing.seenCount || 0) + aggregate.seenCount,
+      },
+    });
   }
 };
 
@@ -444,6 +542,7 @@ export const storeLogsAndUpdateProfiles = async (cleanEvents: NormalizedLogEvent
   }
 
   const playerIpHistoryAggregates = collectPlayerIpHistoryAggregates(eventsToInsert);
+  const playerAliasAggregates = collectPlayerAliasAggregates(eventsToInsert);
 
   const insertResult = await prisma.log.createMany({
     data: eventsToInsert as any,
@@ -537,6 +636,7 @@ export const storeLogsAndUpdateProfiles = async (cleanEvents: NormalizedLogEvent
   }
 
   await persistPlayerIpHistory(playerIpHistoryAggregates);
+  await persistPlayerAliasHistory(playerAliasAggregates);
   enrichPlayerGeoInBackground(eventsToInsert);
 
   return {

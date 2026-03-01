@@ -12,6 +12,12 @@ export interface User {
   mustChangePassword?: boolean;
   createdAt: string;
   avatarUrl?: string;
+  steamId64?: string;
+  steamProfileUrl?: string;
+  steamAvatarUrl?: string;
+  steamPersonaName?: string;
+  steamLinkedAt?: string;
+  steamLastSyncAt?: string;
 }
 
 export enum GameMode {

@@ -1,7 +1,7 @@
 
 
 import { MOCK_SERVERS, MOCK_EVENTS, MOCK_STATS, VIP_PLANS, MOCK_SUSPICIOUS_GROUPS, MOCK_PLAYERS, MOCK_USERS, MOCK_TRANSACTIONS, generateServerAnalytics, DEFAULT_SITE_CONFIG } from '../constants';
-import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionProofUploadResult, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel, ServerLiveStateResponse, ServerWsLiveStateListResponse } from '../types';
+import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionProofUploadResult, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel, ServerLiveStateResponse, ServerWsLiveStateListResponse, PlayerAliasHistoryResponse } from '../types';
 
 // Utility to simulate network delay (used as fallback)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -378,6 +378,29 @@ export const ApiService = {
   deleteUser: async (userId: string): Promise<void> => {
     if (!hasApi) throw new Error('API base URL not configured');
     await apiFetch<void>(`/users/${userId}`, { method: 'DELETE' });
+  },
+
+  linkUserSteam: async (userId: string, steam: string): Promise<User> => {
+    if (!hasApi) throw new Error('API base URL not configured');
+    return apiFetch<User>(`/users/${userId}/steam-link`, {
+      method: 'POST',
+      body: JSON.stringify({ steam }),
+    });
+  },
+
+  syncUserSteam: async (userId: string): Promise<User> => {
+    if (!hasApi) throw new Error('API base URL not configured');
+    return apiFetch<User>(`/users/${userId}/steam-sync`, {
+      method: 'POST',
+      body: JSON.stringify({}),
+    });
+  },
+
+  unlinkUserSteam: async (userId: string): Promise<User> => {
+    if (!hasApi) throw new Error('API base URL not configured');
+    return apiFetch<User>(`/users/${userId}/steam-link`, {
+      method: 'DELETE',
+    });
   },
 
   changePassword: async (currentPassword: string, newPassword: string): Promise<User> => {
@@ -1138,6 +1161,22 @@ export const ApiService = {
     await delay(400);
     const player = playersDb.find(p => p.steamId === steamId);
     return player || null;
+  },
+
+  getPlayerAliases: async (steamId: string, limit = 50): Promise<PlayerAliasHistoryResponse> => {
+    if (hasApi) {
+      const params = new URLSearchParams();
+      if (Number.isFinite(limit) && limit > 0) params.set('limit', String(Math.floor(limit)));
+      const suffix = params.toString() ? `?${params.toString()}` : '';
+      return apiFetch<PlayerAliasHistoryResponse>(`/players/${steamId}/aliases${suffix}`);
+    }
+
+    await delay(100);
+    return {
+      steamId,
+      total: 0,
+      items: [],
+    };
   },
 
   getPlayerPunishments: async (

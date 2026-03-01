@@ -458,6 +458,25 @@ export interface User {
   mustChangePassword?: boolean;
   createdAt: string;
   avatarUrl?: string;
+  steamId64?: string;
+  steamProfileUrl?: string;
+  steamAvatarUrl?: string;
+  steamPersonaName?: string;
+  steamLinkedAt?: string;
+  steamLastSyncAt?: string;
+}
+
+export interface PlayerAliasHistoryItem {
+  name: string;
+  firstSeen?: string;
+  lastSeen?: string;
+  seenCount: number;
+}
+
+export interface PlayerAliasHistoryResponse {
+  steamId: string;
+  total: number;
+  items: PlayerAliasHistoryItem[];
 }
 
 // Chart Data Types

@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { prisma } from '../db/client';
 import { User, UserRole } from '../domain';
 import { authMiddleware, requireRole } from '../middleware/auth';
+import { resolveSteamProfile, syncSteamProfileBySteamId64 } from '../services/steamProfile';
 
 const router = Router();
 
@@ -114,6 +115,107 @@ router.patch('/:id/role', requireRole(UserRole.SUPERADMIN), async (req, res) => 
   } catch (err) {
     return res.status(404).json({ error: 'User not found' });
   }
+});
+
+router.post('/:id/steam-link', requireRole(UserRole.SUPERADMIN), async (req, res) => {
+  const { id } = req.params as { id: string };
+  const rawSteam = String((req.body as { steam?: string })?.steam || '').trim();
+  if (!rawSteam) {
+    return res.status(400).json({ error: 'steam is required' });
+  }
+
+  const existingUser = await prisma.user.findUnique({ where: { id } });
+  if (!existingUser) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  try {
+    const profile = await resolveSteamProfile(rawSteam);
+    const conflict = await prisma.user.findFirst({
+      where: {
+        id: { not: id },
+        steamId64: profile.steamId64,
+      },
+      select: { id: true },
+    });
+    if (conflict) {
+      return res.status(409).json({ error: 'Steam account already linked to another user' });
+    }
+
+    const now = new Date();
+    const updated = await prisma.user.update({
+      where: { id },
+      data: {
+        steamId64: profile.steamId64,
+        steamProfileUrl: profile.profileUrl,
+        steamAvatarUrl: profile.avatarUrl || null,
+        steamPersonaName: profile.personaName || null,
+        avatarUrl: profile.avatarUrl || existingUser.avatarUrl || null,
+        steamLinkedAt: existingUser.steamLinkedAt || now,
+        steamLastSyncAt: now,
+      },
+    });
+
+    return res.json(toPublicUser(updated));
+  } catch (err: any) {
+    return res.status(400).json({ error: err?.message || 'Could not link Steam account' });
+  }
+});
+
+router.post('/:id/steam-sync', requireRole(UserRole.SUPERADMIN), async (req, res) => {
+  const { id } = req.params as { id: string };
+  const user = await prisma.user.findUnique({ where: { id } });
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  if (!user.steamId64) {
+    return res.status(400).json({ error: 'User does not have linked steamId64' });
+  }
+
+  try {
+    const profile = await syncSteamProfileBySteamId64(user.steamId64);
+    const updated = await prisma.user.update({
+      where: { id },
+      data: {
+        steamProfileUrl: profile.profileUrl,
+        steamAvatarUrl: profile.avatarUrl || null,
+        steamPersonaName: profile.personaName || null,
+        avatarUrl: profile.avatarUrl || user.avatarUrl || null,
+        steamLastSyncAt: new Date(),
+      },
+    });
+
+    return res.json(toPublicUser(updated));
+  } catch (err: any) {
+    return res.status(400).json({ error: err?.message || 'Could not sync Steam profile' });
+  }
+});
+
+router.delete('/:id/steam-link', requireRole(UserRole.SUPERADMIN), async (req, res) => {
+  const { id } = req.params as { id: string };
+  const user = await prisma.user.findUnique({ where: { id } });
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  const fallbackAvatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(
+    user.username,
+  )}`;
+  const updated = await prisma.user.update({
+    where: { id },
+    data: {
+      steamId64: null,
+      steamProfileUrl: null,
+      steamAvatarUrl: null,
+      steamPersonaName: null,
+      steamLinkedAt: null,
+      steamLastSyncAt: null,
+      avatarUrl: fallbackAvatar,
+    },
+  });
+
+  return res.json(toPublicUser(updated));
 });
 
 // Update user (username, email, role, password) - SUPERADMIN only
