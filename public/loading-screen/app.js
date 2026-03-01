@@ -160,6 +160,16 @@
     return Math.round(parsed);
   }
 
+  function isConnectedStatus(text) {
+    var normalized = String(text || '').trim().toLowerCase();
+    return (
+      normalized === 'lua started!' ||
+      normalized === 'lua started' ||
+      normalized === 'fully connected!' ||
+      normalized === 'fully connected'
+    );
+  }
+
   function createTelemetrySessionKey(slug) {
     var rand = Math.random().toString(36).slice(2, 10);
     return 'ls_' + String(slug || 'loading') + '_' + Date.now().toString(36) + '_' + rand;
@@ -745,6 +755,9 @@
       setProgress(100);
       scheduleStartingLuaFinalize();
     }
+    if (isConnectedStatus(text)) {
+      finalizeTelemetry('connected_status');
+    }
 
     if (text && text !== telemetry.lastStatus) {
       telemetry.lastStatus = text;
@@ -759,6 +772,10 @@
       text === 'Mounting Addons' ||
       text === 'Client info sent!' ||
       text === 'Client info sent' ||
+      text === 'Lua Started!' ||
+      text === 'Lua Started' ||
+      text === 'Fully connected!' ||
+      text === 'Fully connected' ||
       text === 'Starting Lua...' ||
       text === 'Starting Lua'
     ) {

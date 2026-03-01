@@ -513,6 +513,16 @@
       return Math.round(parsed);
     }
 
+    function isConnectedStatus(text) {
+      var normalized = String(text || '').trim().toLowerCase();
+      return (
+        normalized === 'lua started!' ||
+        normalized === 'lua started' ||
+        normalized === 'fully connected!' ||
+        normalized === 'fully connected'
+      );
+    }
+
     function readProgressFromDom() {
       var percentEl = document.getElementById('progress-percent');
       if (!percentEl) return undefined;
@@ -737,6 +747,10 @@
             text === 'Mounting Addons' ||
             text === 'Client info sent!' ||
             text === 'Client info sent' ||
+            text === 'Lua Started!' ||
+            text === 'Lua Started' ||
+            text === 'Fully connected!' ||
+            text === 'Fully connected' ||
             text === 'Starting Lua...' ||
             text === 'Starting Lua'
           ) {
@@ -748,6 +762,9 @@
 
           if (text === 'Starting Lua...' || text === 'Starting Lua') {
             scheduleStartingLuaFinalize();
+          }
+          if (isConnectedStatus(text)) {
+            finalize('connected_status');
           }
           return result;
         };

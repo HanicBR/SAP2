@@ -112,7 +112,7 @@ type BatchSummary = {
   firstEventAt?: Date;
   lastEventAt?: Date;
   endedAt?: Date;
-  sawStartingLua: boolean;
+  sawCompletionSignal: boolean;
   lastStatus?: string;
   lastFile?: string;
   maxProgress?: number;
@@ -249,13 +249,28 @@ const isStartingLuaStatus = (value: unknown): boolean => {
   return text === 'starting lua...' || text === 'starting lua';
 };
 
+const isConnectedStatus = (value: unknown): boolean => {
+  const text = String(value || '')
+    .trim()
+    .toLowerCase();
+  return (
+    text === 'lua started!' ||
+    text === 'lua started' ||
+    text === 'fully connected!' ||
+    text === 'fully connected'
+  );
+};
+
+const isCompletionStatus = (value: unknown): boolean =>
+  isStartingLuaStatus(value) || isConnectedStatus(value);
+
 const summarizeBatch = (events: SanitizedEvent[]): BatchSummary => {
-  if (!events.length) return { sawStartingLua: false };
+  if (!events.length) return { sawCompletionSignal: false };
 
   let firstEventAt: Date | undefined;
   let lastEventAt: Date | undefined;
   let endedAt: Date | undefined;
-  let sawStartingLua = false;
+  let sawCompletionSignal = false;
   let lastStatus: string | undefined;
   let lastFile: string | undefined;
   let maxProgress: number | undefined;
@@ -271,9 +286,9 @@ const summarizeBatch = (events: SanitizedEvent[]): BatchSummary => {
     if (
       event.statusText &&
       (event.type === 'STATUS_CHANGE' || event.type === 'STAGE_MARK') &&
-      isStartingLuaStatus(event.statusText)
+      isCompletionStatus(event.statusText)
     ) {
-      sawStartingLua = true;
+      sawCompletionSignal = true;
     }
 
     if (event.statusText) lastStatus = event.statusText;
@@ -287,7 +302,7 @@ const summarizeBatch = (events: SanitizedEvent[]): BatchSummary => {
     ...(firstEventAt ? { firstEventAt } : {}),
     ...(lastEventAt ? { lastEventAt } : {}),
     ...(endedAt ? { endedAt } : {}),
-    sawStartingLua,
+    sawCompletionSignal,
     ...(lastStatus ? { lastStatus } : {}),
     ...(lastFile ? { lastFile } : {}),
     ...(typeof maxProgress === 'number' ? { maxProgress } : {}),
@@ -654,15 +669,24 @@ router.post('/ingest', ingestLimiter, async (req, res) => {
     const mergedStartedAt = minDate(session.startedAt, startedAt, batch.firstEventAt) || startedAt;
     const mergedFirstEventAt = minDate(session.firstEventAt, batch.firstEventAt);
     const mergedLastEventAt = maxDate(session.lastEventAt, batch.lastEventAt);
-    const existingSawStartingLua = isStartingLuaStatus(session.lastStatus);
-    const mergedSawStartingLua =
-      existingSawStartingLua || batch.sawStartingLua || isStartingLuaStatus(batch.lastStatus);
-    const mergedCompletedAt =
-      session.completedAt || (mergedSawStartingLua && batch.endedAt ? batch.endedAt : undefined);
-    const mergedCompleted = Boolean(session.completed || mergedCompletedAt);
     const mergedStatus = batch.lastStatus || session.lastStatus || null;
     const mergedFile = batch.lastFile || session.lastFile || null;
     const mergedMaxProgress = Math.max(session.maxProgress || 0, batch.maxProgress || 0);
+    const existingCompletionSignal =
+      Boolean(session.completed) ||
+      isCompletionStatus(session.lastStatus) ||
+      (session.maxProgress || 0) >= 99;
+    const mergedCompletionSignal =
+      existingCompletionSignal ||
+      batch.sawCompletionSignal ||
+      isCompletionStatus(batch.lastStatus) ||
+      mergedMaxProgress >= 99;
+    const mergedCompletedAt =
+      session.completedAt ||
+      (mergedCompletionSignal
+        ? batch.endedAt || batch.lastEventAt || session.lastEventAt || undefined
+        : undefined);
+    const mergedCompleted = Boolean(session.completed || (mergedCompletionSignal && mergedCompletedAt));
     const mergedUserAgent = session.userAgent || userAgent || null;
     const mergedSource = session.source || source || null;
     const mergedIpHash = session.ipHash || ipHash || null;
