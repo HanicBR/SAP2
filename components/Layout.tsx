@@ -158,6 +158,7 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
     { name: 'Servidores', path: '/admin/servers', icon: Icons.Server },
     { name: 'Detecção de Duplicatas', path: '/admin/duplicates', icon: Icons.Fingerprint },
     { name: 'Configurações Site', path: '/admin/settings', icon: Icons.Settings },
+    { name: 'Telas de Loading', path: '/admin/loading-screens', icon: Icons.Image },
   ];
 
   if (user?.role === UserRole.SUPERADMIN) {

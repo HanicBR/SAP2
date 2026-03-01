@@ -9,6 +9,7 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/auth';
 import usersRoutes from './routes/users';
 import siteConfigRoutes from './routes/siteConfig';
+import loadingScreensRoutes from './routes/loadingScreens';
 import serversRoutes from './routes/servers';
 import dashboardRoutes from './routes/dashboard';
 import playersRoutes from './routes/players';
@@ -93,6 +94,7 @@ app.use(
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/site-config', siteConfigRoutes);
+app.use('/api/loading-screens', loadingScreensRoutes);
 app.use('/api/servers', serversRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/players', playersRoutes);

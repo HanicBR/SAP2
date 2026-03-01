@@ -754,3 +754,48 @@ export interface SiteConfig {
     revokeTemplate: string;
   };
 }
+
+export type LoadingScreenMode = 'TTT' | 'SANDBOX' | 'MURDER' | 'CUSTOM';
+
+export interface LoadingScreenVipEntry {
+  name: string;
+  steamId?: string;
+  avatarUrl?: string;
+}
+
+export interface LoadingScreenHero {
+  badge: string;
+  title: string;
+  subtitle: string;
+  descriptionLines: string[];
+}
+
+export interface LoadingScreenNotice {
+  title: string;
+  lines: string[];
+  ctaLabel?: string;
+  ctaUrl?: string;
+  qrImageUrl?: string;
+}
+
+export interface LoadingScreenProfile {
+  slug: string;
+  name: string;
+  mode: LoadingScreenMode;
+  enabled: boolean;
+  routePath: string;
+  accentColor: string;
+  backgroundImages: string[];
+  musicTracks: string[];
+  hero: LoadingScreenHero;
+  notice: LoadingScreenNotice;
+  rules: string[];
+  vipTitle: string;
+  vipPlayers: LoadingScreenVipEntry[];
+  updatedAt: string;
+}
+
+export interface LoadingScreensResponse {
+  updatedAt: string;
+  profiles: LoadingScreenProfile[];
+}

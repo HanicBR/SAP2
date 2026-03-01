@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Backstabber - Loading</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Teko:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../loading-screen/style.css" />
+  </head>
+  <body>
+    <div id="bg-layer" aria-hidden="true"></div>
+
+    <main id="root">
+      <section class="top-grid">
+        <article class="card">
+          <div class="card-title-row">
+            <span id="hero-badge" class="badge">BACK</span>
+            <h1 id="hero-title" class="title">Loading Screen</h1>
+          </div>
+          <p id="hero-subtitle" class="subtitle">Conectando ao servidor</p>
+          <div class="scroll-area">
+            <div id="hero-list" class="list"></div>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2 id="notice-title" class="notice-title">Avisos importantes</h2>
+          <div id="notice-lines" class="notice-lines"></div>
+          <a id="notice-cta" class="notice-cta" target="_blank" rel="noreferrer">Abrir link</a>
+          <div id="notice-qr-wrap" class="notice-qr-wrap">
+            <img id="notice-qr" class="notice-qr" alt="QR" />
+          </div>
+        </article>
+
+        <article class="card">
+          <h2 class="notice-title">Regras e dicas</h2>
+          <div class="scroll-area">
+            <ol id="rules-list" class="rules-list"></ol>
+          </div>
+        </article>
+      </section>
+
+      <section class="vip-card">
+        <h3 id="vip-title" class="vip-title">Destaques</h3>
+        <div id="vip-list" class="vip-list"></div>
+      </section>
+
+      <footer class="footer-card">
+        <div class="footer-top">
+          <div>
+            <p id="server-name" class="server-name">BACKSTABBER BRASIL</p>
+            <p id="server-sub" class="server-sub">Conectando ao servidor...</p>
+          </div>
+          <div id="progress-percent" class="progress-percent">0%</div>
+        </div>
+
+        <div class="progress-track">
+          <div id="progress-bar" class="progress-fill"></div>
+        </div>
+
+        <div class="footer-bottom">
+          <div class="status-wrap">
+            <div id="status-text" class="status">Aguardando resposta do jogo...</div>
+            <div id="file-text" class="file"></div>
+          </div>
+          <div class="mini">
+            <div id="info-map">mapa: -</div>
+            <div id="info-mode">modo: -</div>
+          </div>
+        </div>
+      </footer>
+    </main>
+
+    <script src="../loading-screen/app.js"></script>
+  </body>
+</html>

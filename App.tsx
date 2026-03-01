@@ -25,6 +25,7 @@ const Financial = lazy(() => import('./pages/admin/Financial'));
 const Vips = lazy(() => import('./pages/admin/Vips'));
 const Settings = lazy(() => import('./pages/admin/Settings'));
 const ImportLogs = lazy(() => import('./pages/admin/ImportLogs'));
+const LoadingScreens = lazy(() => import('./pages/admin/LoadingScreens'));
 
 const PageLoader = () => (
   <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center text-zinc-500">
@@ -154,6 +155,7 @@ const App: React.FC = () => {
           <Route path="/admin/duplicates" element={<AdminRoute><DuplicateDetection /></AdminRoute>} />
           <Route path="/admin/users" element={<SuperAdminRoute><Users /></SuperAdminRoute>} />
           <Route path="/admin/settings" element={<AdminRoute><Settings /></AdminRoute>} />
+          <Route path="/admin/loading-screens" element={<AdminRoute><LoadingScreens /></AdminRoute>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

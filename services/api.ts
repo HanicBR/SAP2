@@ -1,7 +1,7 @@
 
 
 import { MOCK_SERVERS, MOCK_EVENTS, MOCK_STATS, VIP_PLANS, MOCK_SUSPICIOUS_GROUPS, MOCK_PLAYERS, MOCK_USERS, MOCK_TRANSACTIONS, generateServerAnalytics, DEFAULT_SITE_CONFIG } from '../constants';
-import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionProofUploadResult, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel, ServerLiveStateResponse, ServerWsLiveStateListResponse, PlayerAliasHistoryResponse } from '../types';
+import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionProofUploadResult, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel, ServerLiveStateResponse, ServerWsLiveStateListResponse, PlayerAliasHistoryResponse, LoadingScreenProfile, LoadingScreensResponse } from '../types';
 
 // Utility to simulate network delay (used as fallback)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -115,6 +115,117 @@ let siteConfigDb: SiteConfig = (() => {
   }
 })();
 
+const DEFAULT_LOADING_PROFILES: LoadingScreenProfile[] = [
+  {
+    slug: 'tttloading',
+    name: 'TTT Loading',
+    mode: 'TTT',
+    enabled: true,
+    routePath: '/tttloading',
+    accentColor: '#be1b3c',
+    backgroundImages: ['https://i.imgur.com/HnZfcKR.jpeg'],
+    musicTracks: ['https://raw.githubusercontent.com/HanicBR/backtttloading/main/assets/music/gtavicecity.ogg'],
+    hero: {
+      badge: 'TTT',
+      title: 'Trouble in Terrorist Town',
+      subtitle: 'Quem e o assassino?',
+      descriptionLines: [
+        'Em TTT, paranoia e informacao decidem a rodada.',
+        'Traidores: eliminem todos sem serem descobertos.',
+        'Inocentes e detetive: identifiquem os traidores.',
+      ],
+    },
+    notice: {
+      title: 'Crash ao entrar?',
+      lines: [
+        'Se travar na entrada, faltam mapas da colecao.',
+        'Abra o link, inscreva-se na colecao e tente novamente.',
+      ],
+      ctaLabel: 'Abrir colecao de mapas',
+      ctaUrl: 'https://bit.ly/mapasback',
+      qrImageUrl: 'https://i.imgur.com/5873D1j.jpeg',
+    },
+    rules: [
+      'Nao mate sem motivo.',
+      'Nao ofenda outros jogadores.',
+      'Nao abuse de props para atrapalhar a rodada.',
+      'Use !discord para entrar no Discord da rede.',
+    ],
+    vipTitle: 'Destaques da comunidade',
+    vipPlayers: [
+      {
+        name: 'Mr.B-O-M-B-A-S-T-I-C',
+        avatarUrl:
+          'https://shared.akamai.steamstatic.com/community_assets/images/items/2181720/097978e42477d98190ed9e14e971c2b9976fc8d1.gif',
+      },
+      {
+        name: 'Gatogames435',
+        avatarUrl:
+          'https://shared.akamai.steamstatic.com/community_assets/images/items/2459330/11bbadea5154c316c883df0f3f1944395b3715b8.gif',
+      },
+    ],
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    slug: 'sandboxloading',
+    name: 'Sandbox Loading',
+    mode: 'SANDBOX',
+    enabled: true,
+    routePath: '/sandboxloading',
+    accentColor: '#be1b3c',
+    backgroundImages: ['https://i.imgur.com/HnZfcKR.jpeg'],
+    musicTracks: ['https://raw.githubusercontent.com/HanicBR/backtttloading/main/assets/music/gtavicecity.ogg'],
+    hero: {
+      badge: 'SANDBOX',
+      title: 'Backstabber Sandbox',
+      subtitle: 'Construa, teste e jogue com liberdade',
+      descriptionLines: [
+        'Use Toolgun e Physgun para criar sem limites.',
+        'Teste addons, armas, NPCs e sistemas do servidor.',
+        'Respeite outras construcoes e evite grief.',
+      ],
+    },
+    notice: {
+      title: 'Erro ao entrar?',
+      lines: [
+        'Reinicie o jogo e tente novamente.',
+        'Se persistir, limpe garrysmod/cache/lua e reabra o jogo.',
+      ],
+    },
+    rules: [
+      'Nao destrua construcoes de outros jogadores.',
+      'Nao ofenda outros jogadores.',
+      'Nao abuse de entidades para causar lag.',
+      'Use !steam para entrar no grupo Steam.',
+    ],
+    vipTitle: 'Jogadores em destaque',
+    vipPlayers: [
+      {
+        name: 'Sheva',
+        avatarUrl: 'https://avatars.steamstatic.com/0650a97d7708b948a87e28c4b7c07ca9f268b073_full.jpg',
+      },
+      {
+        name: 'chico tekito',
+        avatarUrl: 'https://avatars.fastly.steamstatic.com/75bb2a0541d607eaed4e09c8d1e68413a2cbb58a_full.jpg',
+      },
+    ],
+    updatedAt: new Date().toISOString(),
+  },
+];
+
+let loadingScreensDb: LoadingScreenProfile[] = (() => {
+  try {
+    const raw = localStorage.getItem('backstabber_loading_screens');
+    if (!raw) return [...DEFAULT_LOADING_PROFILES];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [...DEFAULT_LOADING_PROFILES];
+    const items = parsed.filter((entry) => entry && typeof entry === 'object');
+    return items.length > 0 ? (items as LoadingScreenProfile[]) : [...DEFAULT_LOADING_PROFILES];
+  } catch {
+    return [...DEFAULT_LOADING_PROFILES];
+  }
+})();
+
 const toConfidenceFromLegacy = (level?: string): DuplicateConfidence =>
   String(level || '').toUpperCase() === 'HIGH' ? 'HIGH' : 'MEDIUM';
 
@@ -143,6 +254,23 @@ const toLegacyGroupFromV2 = (group: SuspiciousGroupV2): SuspiciousGroup => ({
   lastActivity: group.lastActivity,
   players: group.players,
 });
+
+const normalizeLoadingSlug = (value: string): string =>
+  String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, '-')
+    .replace(/-{2,}/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 64);
+
+const persistLoadingScreensDb = (): void => {
+  try {
+    localStorage.setItem('backstabber_loading_screens', JSON.stringify(loadingScreensDb));
+  } catch {
+    // ignore storage errors
+  }
+};
 
 export const ApiService = {
   // Public Data
@@ -460,6 +588,134 @@ export const ApiService = {
       // ignore storage errors
     }
     return config;
+  },
+
+  getLoadingScreens: async (): Promise<LoadingScreensResponse> => {
+    if (hasApi) {
+      try {
+        return await apiFetch<LoadingScreensResponse>('/loading-screens');
+      } catch (error) {
+        console.error('API getLoadingScreens failed, falling back to local store:', error);
+      }
+    }
+
+    await delay(120);
+    return {
+      updatedAt: new Date().toISOString(),
+      profiles: [...loadingScreensDb],
+    };
+  },
+
+  createLoadingScreen: async (profile: LoadingScreenProfile): Promise<LoadingScreensResponse> => {
+    const safeSlug = normalizeLoadingSlug(profile.slug);
+    if (!safeSlug) {
+      throw new Error('Slug invalido');
+    }
+
+    const payload: LoadingScreenProfile = {
+      ...profile,
+      slug: safeSlug,
+      routePath: `/${safeSlug}`,
+      updatedAt: new Date().toISOString(),
+    };
+
+    if (hasApi) {
+      try {
+        const result = await apiFetch<LoadingScreensResponse>(`/loading-screens`, {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
+        return result;
+      } catch (error) {
+        console.error('API createLoadingScreen failed, falling back to local store:', error);
+      }
+    }
+
+    await delay(150);
+    if (loadingScreensDb.some((entry) => entry.slug === safeSlug)) {
+      throw new Error('Slug ja existe');
+    }
+    loadingScreensDb = [...loadingScreensDb, payload];
+    persistLoadingScreensDb();
+    return {
+      updatedAt: new Date().toISOString(),
+      profiles: [...loadingScreensDb],
+    };
+  },
+
+  updateLoadingScreen: async (
+    slug: string,
+    profile: LoadingScreenProfile,
+  ): Promise<LoadingScreensResponse> => {
+    const safeSlug = normalizeLoadingSlug(slug || profile.slug);
+    if (!safeSlug) {
+      throw new Error('Slug invalido');
+    }
+
+    const payload: LoadingScreenProfile = {
+      ...profile,
+      slug: safeSlug,
+      routePath: `/${safeSlug}`,
+      updatedAt: new Date().toISOString(),
+    };
+
+    if (hasApi) {
+      try {
+        return await apiFetch<LoadingScreensResponse>(`/loading-screens/${safeSlug}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload),
+        });
+      } catch (error) {
+        console.error('API updateLoadingScreen failed, falling back to local store:', error);
+      }
+    }
+
+    await delay(150);
+    const idx = loadingScreensDb.findIndex((entry) => entry.slug === safeSlug);
+    if (idx === -1) {
+      loadingScreensDb = [...loadingScreensDb, payload];
+    } else {
+      const next = [...loadingScreensDb];
+      next[idx] = payload;
+      loadingScreensDb = next;
+    }
+    persistLoadingScreensDb();
+    return {
+      updatedAt: new Date().toISOString(),
+      profiles: [...loadingScreensDb],
+    };
+  },
+
+  deleteLoadingScreen: async (slug: string): Promise<LoadingScreensResponse> => {
+    const safeSlug = normalizeLoadingSlug(slug);
+    if (!safeSlug) {
+      throw new Error('Slug invalido');
+    }
+
+    if (hasApi) {
+      try {
+        return await apiFetch<LoadingScreensResponse>(`/loading-screens/${safeSlug}`, {
+          method: 'DELETE',
+        });
+      } catch (error) {
+        console.error('API deleteLoadingScreen failed, falling back to local store:', error);
+      }
+    }
+
+    await delay(150);
+    const next = loadingScreensDb.filter((entry) => entry.slug !== safeSlug);
+    if (next.length === loadingScreensDb.length) {
+      throw new Error('Loading screen nao encontrada');
+    }
+    if (next.length === 0) {
+      throw new Error('Mantenha ao menos 1 loading screen');
+    }
+    loadingScreensDb = next;
+    persistLoadingScreensDb();
+    return {
+      updatedAt: new Date().toISOString(),
+      profiles: [...loadingScreensDb],
+    };
   },
 
   getIngestStats: async (): Promise<{ tools: Record<string, number>; commands: Record<string, number>; rawText: Record<string, number> }> => {
