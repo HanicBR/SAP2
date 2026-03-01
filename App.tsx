@@ -1,5 +1,5 @@
 import React, { Suspense, lazy, useEffect, useState } from 'react';
-import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { PublicLayout, AdminLayout } from './components/Layout';
 import { User } from './types';
 import { Icons } from './components/Icon';
@@ -132,8 +132,15 @@ const RoleRoute: React.FC<{ children: React.ReactNode; page: AdminPageKey }> = (
 };
 
 const App: React.FC = () => {
+  useEffect(() => {
+    const hash = window.location.hash || '';
+    if (!hash.startsWith('#/')) return;
+    const target = hash.slice(1);
+    window.history.replaceState(null, '', target);
+  }, []);
+
   return (
-    <HashRouter>
+    <BrowserRouter>
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
@@ -163,7 +170,7 @@ const App: React.FC = () => {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
-    </HashRouter>
+    </BrowserRouter>
   );
 };
 

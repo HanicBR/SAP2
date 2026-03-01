@@ -125,7 +125,6 @@ export const buildFrontendAppUrl = (path: string, query?: Record<string, string>
   const base = trimEnv(process.env.APP_PUBLIC_URL || process.env.FRONTEND_PUBLIC_URL || 'https://backstabberbrasil.com')
     .replace(/\/+$/, '');
   const safePath = `/${String(path || '').replace(/^\/+/, '')}`;
-  const useHashRouter = parseBoolEnv(process.env.APP_FRONTEND_HASH_ROUTER, true);
 
   const searchParams = new URLSearchParams();
   Object.entries(query || {}).forEach(([key, value]) => {
@@ -134,10 +133,6 @@ export const buildFrontendAppUrl = (path: string, query?: Record<string, string>
     searchParams.set(key, String(value));
   });
   const search = searchParams.toString();
-
-  if (useHashRouter) {
-    return `${base}/#${safePath}${search ? `?${search}` : ''}`;
-  }
 
   return `${base}${safePath}${search ? `?${search}` : ''}`;
 };
