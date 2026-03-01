@@ -42,12 +42,14 @@ local c_flush_seconds = CreateConVar("bsb_flush_seconds", "2", FCVAR_ARCHIVE, "B
 local c_heartbeat_seconds = CreateConVar("bsb_heartbeat_seconds", "30", FCVAR_ARCHIVE, "Heartbeat interval in seconds.")
 local c_actions_enable = CreateConVar("bsb_actions_enable", "1", FCVAR_ARCHIVE, "Enable server-side action pull (punishments from panel).")
 local c_actions_seconds = CreateConVar("bsb_actions_seconds", "3", FCVAR_ARCHIVE, "Actions poll interval in seconds.")
+local c_actions_http_fallback_seconds = CreateConVar("bsb_actions_http_fallback_seconds", "30", FCVAR_ARCHIVE, "HTTP actions poll fallback interval while WS is healthy (0 = pause HTTP poll).")
 local c_max_payload_bytes = CreateConVar("bsb_max_payload_bytes", "524288", FCVAR_ARCHIVE, "Max JSON body bytes per ingest request.")
 local c_max_retry_attempts = CreateConVar("bsb_max_retry_attempts", "0", FCVAR_ARCHIVE, "Max retry attempts for ingest batches (0 = infinite).")
 local c_queue_warn_size = CreateConVar("bsb_queue_warn_size", "1000", FCVAR_ARCHIVE, "Warn when ingest queue backlog reaches this size.")
 local c_prop_spawn_enable = CreateConVar("bsb_prop_spawn_enable", "1", FCVAR_ARCHIVE, "Enable PROP_SPAWN ingest events.")
 local c_prop_spawn_max_per_window = CreateConVar("bsb_prop_spawn_max_per_window", "0", FCVAR_ARCHIVE, "Max PROP_SPAWN events per player per window (0 = unlimited).")
 local c_prop_spawn_window_seconds = CreateConVar("bsb_prop_spawn_window_seconds", "10", FCVAR_ARCHIVE, "PROP_SPAWN rate-limit window in seconds.")
+local c_heartbeat_ws_fallback_seconds = CreateConVar("bsb_heartbeat_ws_fallback_seconds", "120", FCVAR_ARCHIVE, "Heartbeat HTTP fallback interval while WS is healthy (0 = pause HTTP heartbeat).")
 local c_debug = CreateConVar("bsb_ingest_debug", "0", FCVAR_ARCHIVE, "Enable debug logs for ingest addon.")
 
 local ULID_ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
@@ -74,9 +76,12 @@ local ws_next_connect_at = 0
 local ws_backoff_seconds = 0
 local ws_last_error = nil
 local ws_last_ack_at = 0
+local ws_last_message_at = 0
 local ws_last_connected_at = 0
 local ws_module_loaded = false
 local ws_module_checked = false
+local actions_last_http_poll_at = 0
+local heartbeat_last_http_sent_at = 0
 
 local sessions_by_steamid = {}
 local pending_disconnect_reason_by_steamid = {}
@@ -229,6 +234,29 @@ end
 
 local function get_ws_base_backoff()
 	return math_max(1, math_floor(c_ws_reconnect_seconds:GetFloat()))
+end
+
+local function get_ws_last_activity_realtime()
+	local last = tonumber(ws_last_connected_at) or 0
+	local message_at = tonumber(ws_last_message_at) or 0
+	local ack_at = tonumber(ws_last_ack_at) or 0
+	if message_at > last then
+		last = message_at
+	end
+	if ack_at > last then
+		last = ack_at
+	end
+	return last
+end
+
+local function is_ws_link_fresh(max_idle_seconds)
+	if not c_ws_enable:GetBool() then return false end
+	if not ws_connected or not ws_socket then return false end
+
+	local max_idle = math_max(5, tonumber(max_idle_seconds) or 20)
+	local last_activity = get_ws_last_activity_realtime()
+	if last_activity <= 0 then return false end
+	return (RealTime() - last_activity) <= max_idle
 end
 
 local function is_ws_transport_needed()
@@ -399,6 +427,7 @@ local function connect_ws_socket()
 		ws_next_connect_at = 0
 		ws_backoff_seconds = get_ws_base_backoff()
 		ws_last_connected_at = RealTime()
+		ws_last_message_at = ws_last_connected_at
 		ws_last_error = nil
 		debug_log("ws connected: " .. tostring(ws_url))
 	end
@@ -422,6 +451,7 @@ local function connect_ws_socket()
 	function socket:onMessage(raw)
 		local parsed = util.JSONToTable(tostring(raw or ""))
 		if not parsed or not istable(parsed) then return end
+		ws_last_message_at = RealTime()
 
 		local msg_type = string_lower(tostring(parsed.type or ""))
 		if msg_type == "player_pulse_ack" then
@@ -1219,6 +1249,16 @@ local function send_heartbeat()
 	local heartbeat_url = c_heartbeat_url:GetString()
 	if heartbeat_url == "" then return end
 
+	if is_ws_link_fresh(20) then
+		local fallback_seconds = math_max(0, c_heartbeat_ws_fallback_seconds:GetFloat())
+		if fallback_seconds <= 0 then
+			return
+		end
+		if heartbeat_last_http_sent_at > 0 and (RealTime() - heartbeat_last_http_sent_at) < fallback_seconds then
+			return
+		end
+	end
+
 	local current_map = game.GetMap()
 	local current_players = get_player_count()
 	local max_players = get_max_players()
@@ -1249,6 +1289,7 @@ local function send_heartbeat()
 	}, false, true)
 
 	if not body then return end
+	heartbeat_last_http_sent_at = RealTime()
 
 	local url_with_query = append_query_params(heartbeat_url, {
 		map = current_map,
@@ -1368,6 +1409,16 @@ local function poll_server_actions()
 	if not c_actions_enable:GetBool() then return end
 	if actions_poll_blocked_local then return end
 
+	if is_ws_link_fresh(20) then
+		local fallback_seconds = math_max(0, c_actions_http_fallback_seconds:GetFloat())
+		if fallback_seconds <= 0 then
+			return
+		end
+		if actions_last_http_poll_at > 0 and (RealTime() - actions_last_http_poll_at) < fallback_seconds then
+			return
+		end
+	end
+
 	local actions_url = c_actions_url:GetString()
 	local key = c_server_key:GetString()
 	if actions_url == "" or key == "" then return end
@@ -1379,6 +1430,7 @@ local function poll_server_actions()
 		return
 	end
 
+	actions_last_http_poll_at = RealTime()
 	HTTP({
 		url = actions_url,
 		method = "POST",

@@ -2,6 +2,7 @@ import type { IncomingMessage } from 'http';
 import type { Server as HttpServer } from 'http';
 import type { Duplex } from 'stream';
 import { WebSocketServer, type RawData, type WebSocket } from 'ws';
+import { prisma } from '../db/client';
 import { findServerByApiKey } from './serverAuth';
 import { ingestPlayerPulse, PlayerPulseIngestError } from './playerPulseIngest';
 import { getPlayerPulseSettings } from './playtimePulse';
@@ -20,6 +21,14 @@ const MAX_PLAYER_STATE_PLAYER_NAME = 80;
 const MAX_PLAYER_STATE_MAP_LENGTH = 96;
 const MAX_SERVER_ACTIONS_PER_DISPATCH = 20;
 const SERVER_ACTION_DISPATCH_TICK_MS = 2_000;
+const WS_PRESENCE_TOUCH_MIN_MS = 10_000;
+const WS_PRESENCE_TOUCH_FORCE_MS = 30_000;
+
+type WsPresenceRecord = {
+  lastTouchMs: number;
+  playerCount?: number;
+  map?: string;
+};
 
 type LiveStatePlayer = {
   steamId: string;
@@ -71,6 +80,7 @@ type UpgradeError = {
 
 const connectedByServerId = new Map<string, ConnectedServerSocket>();
 const liveStateByServerId = new Map<string, LiveServerPlayerState>();
+const wsPresenceByServerId = new Map<string, WsPresenceRecord>();
 
 let initialized = false;
 let wsServer: WebSocketServer | null = null;
@@ -144,6 +154,75 @@ const parsePositiveInt = (value: unknown): number | undefined => {
   if (!Number.isFinite(parsed)) return undefined;
   if (parsed < 0) return undefined;
   return parsed;
+};
+
+const sanitizeWsMap = (value: unknown): string | undefined => {
+  const parsed = toOptionalString(value);
+  if (!parsed) return undefined;
+  return parsed.slice(0, MAX_PLAYER_STATE_MAP_LENGTH);
+};
+
+const touchServerPresenceFromWs = (
+  serverId: string,
+  update?: {
+    playerCount?: number;
+    map?: string;
+  },
+) => {
+  const nowMs = Date.now();
+  const current = wsPresenceByServerId.get(serverId);
+  const nextPlayerCount =
+    typeof update?.playerCount === 'number' && Number.isFinite(update.playerCount)
+      ? Math.max(0, Math.min(1000, Math.floor(update.playerCount)))
+      : undefined;
+  const nextMap = sanitizeWsMap(update?.map);
+
+  const playerCountChanged =
+    nextPlayerCount !== undefined && nextPlayerCount !== current?.playerCount;
+  const mapChanged = nextMap !== undefined && nextMap !== current?.map;
+  const idleTooLong = !current || nowMs - current.lastTouchMs >= WS_PRESENCE_TOUCH_FORCE_MS;
+  const touchedRecently = Boolean(current && nowMs - current.lastTouchMs < WS_PRESENCE_TOUCH_MIN_MS);
+
+  if (!idleTooLong && !playerCountChanged && !mapChanged && touchedRecently) {
+    return;
+  }
+
+  const data: any = {
+    lastHeartbeat: new Date(nowMs),
+    status: 'ONLINE',
+  };
+  if (nextPlayerCount !== undefined) {
+    data.currentPlayers = nextPlayerCount;
+  }
+  if (nextMap) {
+    data.currentMap = nextMap;
+  }
+
+  const nextRecord: WsPresenceRecord = {
+    lastTouchMs: nowMs,
+  };
+  const mergedPlayerCount =
+    nextPlayerCount !== undefined ? nextPlayerCount : current?.playerCount;
+  const mergedMap = nextMap !== undefined ? nextMap : current?.map;
+  if (mergedPlayerCount !== undefined) {
+    nextRecord.playerCount = mergedPlayerCount;
+  }
+  if (mergedMap !== undefined) {
+    nextRecord.map = mergedMap;
+  }
+  wsPresenceByServerId.set(serverId, nextRecord);
+
+  void prisma.gameServer
+    .update({
+      where: { id: serverId },
+      data,
+    })
+    .catch((err: any) => {
+      console.error('Server WS presence touch error', {
+        serverId,
+        error: err?.message || String(err),
+      });
+    });
 };
 
 const isTrackableSteamId = (value: unknown): value is string => {
@@ -277,6 +356,7 @@ const attachServerSocket = (
     ...(userAgent ? { userAgent } : {}),
   };
   connectedByServerId.set(serverId, state);
+  touchServerPresenceFromWs(serverId);
 
   socket.on('message', (buffer: RawData, isBinary: boolean) => {
     state.lastMessageAt = nowIso();
@@ -297,6 +377,7 @@ const attachServerSocket = (
 
     const type = toOptionalString((parsed as any).type)?.toLowerCase();
     if (type === 'ping') {
+      touchServerPresenceFromWs(serverId);
       trySend(socket, { type: 'pong', now: nowIso() });
       return;
     }
@@ -304,6 +385,12 @@ const attachServerSocket = (
     if (type === 'player_pulse') {
       state.playerPulseMessages += 1;
       const payload = (parsed as any).payload ?? (parsed as any).data ?? parsed;
+      const pulsePlayerCount = parsePositiveInt(payload?.playerCount);
+      const pulseMap = sanitizeWsMap(payload?.map);
+      touchServerPresenceFromWs(serverId, {
+        ...(pulsePlayerCount !== undefined ? { playerCount: pulsePlayerCount } : {}),
+        ...(pulseMap !== undefined ? { map: pulseMap } : {}),
+      });
 
       void (async () => {
         try {
@@ -357,6 +444,10 @@ const attachServerSocket = (
       liveStateByServerId.set(serverId, snapshot);
       state.lastStateAt = receivedAt;
       state.lastStatePlayers = snapshot.playerCount;
+      touchServerPresenceFromWs(serverId, {
+        playerCount: snapshot.playerCount,
+        ...(snapshot.map !== undefined ? { map: snapshot.map } : {}),
+      });
 
       trySend(socket, {
         type: 'player_state_ack',
@@ -404,6 +495,7 @@ const attachServerSocket = (
 
   socket.on('pong', () => {
     state.lastMessageAt = nowIso();
+    touchServerPresenceFromWs(serverId);
     dispatchPendingServerActions(serverId);
   });
 
