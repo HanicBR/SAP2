@@ -435,6 +435,13 @@ export interface Transaction {
   createdByName?: string;
 }
 
+export interface TransactionProofUploadResult {
+  url: string;
+  filename: string;
+  size: number;
+  mime: string;
+}
+
 // --- AUTH SYSTEM ---
 
 export enum UserRole {

@@ -1,5 +1,7 @@
 import express from 'express';
 import http from 'http';
+import fs from 'fs';
+import path from 'path';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -32,6 +34,10 @@ app.use(cors({ origin: '*', credentials: true }));
 app.use(express.json());
 app.use(helmet());
 
+const proofUploadsDir =
+  process.env.PROOF_UPLOAD_DIR || path.resolve(process.cwd(), 'uploads', 'proofs');
+fs.mkdirSync(proofUploadsDir, { recursive: true });
+
 const apiLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 min
   max: 2000, // 15x mais: 1800 req/min por IP nas rotas gerais
@@ -51,6 +57,14 @@ app.get('/health', (_req, res) => {
 });
 
 app.use('/api', apiLimiter);
+app.use(
+  '/api/uploads/proofs',
+  express.static(proofUploadsDir, {
+    index: false,
+    maxAge: '7d',
+    dotfiles: 'deny',
+  }),
+);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/site-config', siteConfigRoutes);

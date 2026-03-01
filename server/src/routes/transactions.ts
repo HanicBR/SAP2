@@ -1,4 +1,8 @@
 import { Router } from 'express';
+import path from 'path';
+import crypto from 'crypto';
+import fs from 'fs';
+import multer from 'multer';
 import { prisma } from '../db/client';
 import { authMiddleware, requireRole } from '../middleware/auth';
 import { UserRole } from '../domain';
@@ -6,6 +10,50 @@ import { TransactionType, TransactionCategory } from '@prisma/client';
 import { dispatchVipAutomationAction } from '../services/vipAutomation';
 
 const router = Router();
+const proofUploadDir =
+  process.env.PROOF_UPLOAD_DIR || path.resolve(process.cwd(), 'uploads', 'proofs');
+const maxProofUploadMb = Math.max(1, Number(process.env.PROOF_UPLOAD_MAX_MB || 5));
+const allowedProofMimeTypes = new Set([
+  'image/png',
+  'image/jpeg',
+  'image/jpg',
+  'image/webp',
+  'image/gif',
+]);
+
+fs.mkdirSync(proofUploadDir, { recursive: true });
+
+const storage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, proofUploadDir),
+  filename: (_req, file, cb) => {
+    const safeOriginal = path.basename(file.originalname || '').toLowerCase();
+    const originalExt = path.extname(safeOriginal).replace(/[^a-z0-9.]/g, '');
+    const fallbackExt = file.mimetype === 'image/png'
+      ? '.png'
+      : file.mimetype === 'image/webp'
+      ? '.webp'
+      : file.mimetype === 'image/gif'
+      ? '.gif'
+      : '.jpg';
+    const extension = originalExt || fallbackExt;
+    const random = crypto.randomBytes(8).toString('hex');
+    cb(null, `${Date.now()}_${random}${extension}`);
+  },
+});
+
+const uploadProof = multer({
+  storage,
+  limits: {
+    fileSize: maxProofUploadMb * 1024 * 1024,
+    files: 1,
+  },
+  fileFilter: (_req, file, cb) => {
+    if (!allowedProofMimeTypes.has(String(file.mimetype || '').toLowerCase())) {
+      return cb(new Error('INVALID_FILE_TYPE'));
+    }
+    return cb(null, true);
+  },
+});
 
 const serializeTransaction = (t: any) => {
   const { user, ...rest } = t;
@@ -19,6 +67,36 @@ const serializeTransaction = (t: any) => {
 
 router.use(authMiddleware);
 router.use(requireRole(UserRole.ADMIN));
+
+router.post('/proof-upload', (req, res) => {
+  uploadProof.single('file')(req as any, res as any, (err: any) => {
+    if (err) {
+      if (err?.code === 'LIMIT_FILE_SIZE') {
+        return res
+          .status(413)
+          .json({ error: `Proof image exceeds ${maxProofUploadMb}MB limit` });
+      }
+      if (err?.message === 'INVALID_FILE_TYPE') {
+        return res
+          .status(400)
+          .json({ error: 'Unsupported file type. Use PNG, JPG, WEBP or GIF' });
+      }
+      return res.status(400).json({ error: 'Failed to upload proof image' });
+    }
+
+    const file = (req as any).file as Express.Multer.File | undefined;
+    if (!file) {
+      return res.status(400).json({ error: 'Missing file' });
+    }
+
+    return res.status(201).json({
+      url: `/api/uploads/proofs/${encodeURIComponent(file.filename)}`,
+      filename: file.filename,
+      size: file.size,
+      mime: file.mimetype,
+    });
+  });
+});
 
 router.get('/', async (_req, res) => {
   const transactions = await prisma.transaction.findMany({

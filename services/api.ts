@@ -1,7 +1,7 @@
 
 
 import { MOCK_SERVERS, MOCK_EVENTS, MOCK_STATS, VIP_PLANS, MOCK_SUSPICIOUS_GROUPS, MOCK_PLAYERS, MOCK_USERS, MOCK_TRANSACTIONS, generateServerAnalytics, DEFAULT_SITE_CONFIG } from '../constants';
-import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel, ServerLiveStateResponse, ServerWsLiveStateListResponse } from '../types';
+import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionProofUploadResult, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel, ServerLiveStateResponse, ServerWsLiveStateListResponse } from '../types';
 
 // Utility to simulate network delay (used as fallback)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -91,6 +91,14 @@ const apiFetch = async <T>(path: string, options: RequestInit = {}): Promise<T> 
     return text as unknown as T;
   }
 };
+
+const fileToDataUrl = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(new Error('Falha ao ler arquivo local'));
+    reader.readAsDataURL(file);
+  });
 
 // Mock Databases in Memory (fallback when backend is not available)
 let usersDb = [...MOCK_USERS];
@@ -1425,6 +1433,48 @@ export const ApiService = {
 
     await delay(500);
     return [...transactionsDb].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  },
+
+  uploadTransactionProof: async (file: File): Promise<TransactionProofUploadResult> => {
+    if (hasApi && API_BASE_URL) {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const headers: HeadersInit = {};
+      const token = getAuthToken();
+      if (token) {
+        (headers as any).Authorization = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/transactions/proof-upload`, {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+
+      if (!response.ok) {
+        let message = `HTTP ${response.status}`;
+        try {
+          const body = await response.json();
+          if (body && typeof body.error === 'string') {
+            message = body.error;
+          }
+        } catch {
+          // ignore parse error
+        }
+        throw new Error(message);
+      }
+
+      return (await response.json()) as TransactionProofUploadResult;
+    }
+
+    const dataUrl = await fileToDataUrl(file);
+    return {
+      url: dataUrl,
+      filename: file.name,
+      size: file.size,
+      mime: file.type || 'image/*',
+    };
   },
 
   createTransaction: async (

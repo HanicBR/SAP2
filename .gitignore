@@ -17,6 +17,7 @@ server/.env
 server/.env.*
 server/node_modules
 server/dist
+server/uploads
 
 # Editor directories and files
 .vscode/*

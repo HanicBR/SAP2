@@ -74,6 +74,14 @@ const getOperatorName = (tx: Transaction, usersById: Record<string, string>): st
   return usersById[tx.createdBy] || tx.createdBy || 'Unknown';
 };
 
+const isAllowedProofUrl = (url: string): boolean =>
+  /^https?:\/\//i.test(url) || url.startsWith('/api/uploads/') || url.startsWith('data:image/');
+
+const isImageLikeUrl = (url: string): boolean =>
+  url.startsWith('data:image/') ||
+  /\.(png|jpe?g|gif|webp|bmp|svg)(\?.*)?$/i.test(url) ||
+  url.startsWith('/api/uploads/');
+
 const Financial: React.FC = () => {
   const { config } = useConfig();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -92,6 +100,7 @@ const Financial: React.FC = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploadingProof, setIsUploadingProof] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ tone: 'success' | 'error'; text: string } | null>(null);
   const [editingTx, setEditingTx] = useState<Transaction | null>(null);
@@ -150,6 +159,7 @@ const Financial: React.FC = () => {
     setVipDuration(vipDurationOptions[0]?.value || '30');
     setTxType(isSuperAdmin ? TransactionType.EXPENSE : TransactionType.INCOME);
     setCategory(TransactionCategory.OTHER);
+    setIsUploadingProof(false);
     setEditingTx(null);
     setFormError(null);
   }, [isSuperAdmin, vipDurationOptions, vipPlanOptions]);
@@ -365,6 +375,24 @@ const Financial: React.FC = () => {
     }
   };
 
+  const handleProofFileSelected = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.currentTarget.value = '';
+    if (!file) return;
+
+    setIsUploadingProof(true);
+    setFormError(null);
+    try {
+      const result = await ApiService.uploadTransactionProof(file);
+      setProofUrl(result.url);
+      setFeedback({ tone: 'success', text: 'Comprovante enviado com sucesso.' });
+    } catch (error: any) {
+      setFormError(error?.message || 'Falha ao enviar comprovante.');
+    } finally {
+      setIsUploadingProof(false);
+    }
+  };
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsSubmitting(true);
@@ -393,8 +421,8 @@ const Financial: React.FC = () => {
         setFormError('SteamID e obrigatorio para venda VIP.');
         return;
       }
-      if (normalizedProofUrl && !/^https?:\/\//i.test(normalizedProofUrl)) {
-        setFormError('URL do comprovante deve iniciar com http:// ou https://');
+      if (normalizedProofUrl && !isAllowedProofUrl(normalizedProofUrl)) {
+        setFormError('URL do comprovante deve ser http(s) ou arquivo enviado pelo sistema.');
         return;
       }
 
@@ -904,6 +932,37 @@ const Financial: React.FC = () => {
                           onChange={(event) => setProofUrl(event.target.value)}
                         />
                       </div>
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <label className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider px-2.5 py-1.5 rounded border border-zinc-700 text-zinc-300 hover:text-white hover:border-zinc-500 cursor-pointer">
+                          <Icons.Upload className="w-3.5 h-3.5" />
+                          {isUploadingProof ? 'Enviando...' : 'Fazer upload de imagem'}
+                          <input
+                            type="file"
+                            accept="image/png,image/jpeg,image/webp,image/gif"
+                            className="hidden"
+                            onChange={handleProofFileSelected}
+                            disabled={isUploadingProof}
+                          />
+                        </label>
+                        <span className="text-[11px] text-zinc-500">
+                          PNG/JPG/WEBP/GIF ate 5MB
+                        </span>
+                      </div>
+                      {proofUrl && isImageLikeUrl(proofUrl) ? (
+                        <a
+                          href={proofUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-2 block"
+                          title="Abrir comprovante"
+                        >
+                          <img
+                            src={proofUrl}
+                            alt="Comprovante"
+                            className="max-h-40 rounded border border-zinc-700 object-contain bg-zinc-950"
+                          />
+                        </a>
+                      ) : null}
                     </div>
 
                     {formError ? (
@@ -927,12 +986,18 @@ const Financial: React.FC = () => {
                   </button>
                   <button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isUploadingProof}
                     className={`w-full sm:w-auto inline-flex justify-center rounded border border-transparent px-4 py-2 text-sm font-bold text-white uppercase tracking-wider disabled:opacity-50 ${
                       txType === TransactionType.INCOME ? 'bg-emerald-700 hover:bg-emerald-600' : 'bg-red-700 hover:bg-red-600'
                     }`}
                   >
-                    {isSubmitting ? 'Salvando...' : editingTx ? 'Salvar Alteracoes' : 'Criar Transacao'}
+                    {isUploadingProof
+                      ? 'Aguardando upload...'
+                      : isSubmitting
+                      ? 'Salvando...'
+                      : editingTx
+                      ? 'Salvar Alteracoes'
+                      : 'Criar Transacao'}
                   </button>
                 </div>
               </form>
