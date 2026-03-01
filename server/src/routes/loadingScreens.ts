@@ -67,6 +67,27 @@ const MAX_VIPS = 40;
 const MAX_RULES = 12;
 const MAX_PUBLIC_VIPS = 80;
 const STEAM_ID64_BASE = BigInt('76561197960265728');
+
+const parsePositiveIntEnv = (value: string | undefined, fallback: number): number => {
+  const parsed = Number.parseInt(String(value || '').trim(), 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
+  return parsed;
+};
+
+const LOADING_PUBLIC_CACHE_TTL_MS = parsePositiveIntEnv(
+  process.env.LOADING_PUBLIC_CACHE_TTL_MS,
+  30_000,
+);
+const LOADING_PUBLIC_MAX_AGE_SEC = Math.max(5, Math.floor(LOADING_PUBLIC_CACHE_TTL_MS / 1000));
+const STEAM_REFRESH_CONCURRENCY = Math.min(
+  8,
+  parsePositiveIntEnv(process.env.LOADING_STEAM_REFRESH_CONCURRENCY, 2),
+);
+const STEAM_REFRESH_TIMEOUT_MS = parsePositiveIntEnv(
+  process.env.LOADING_STEAM_REFRESH_TIMEOUT_MS,
+  2_500,
+);
+
 const maxLoadingMediaUploadMb = Math.max(1, Number(process.env.LOADING_MEDIA_UPLOAD_MAX_MB || 25));
 const loadingMediaUploadDir =
   process.env.LOADING_MEDIA_UPLOAD_DIR || path.resolve(process.cwd(), 'uploads', 'loading-media');
@@ -198,105 +219,108 @@ type SteamSummary = {
   avatarUrl?: string;
 };
 
-const steamSummaryCache = new Map<string, { expiresAt: number; summary: SteamSummary }>();
-const STEAM_SUMMARY_CACHE_TTL_MS = 10 * 60 * 1000;
-
-const withTimeout = async (url: string, timeoutMs: number): Promise<Response> => {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    return await fetch(url, {
-      method: 'GET',
-      signal: controller.signal,
-      headers: {
-        'User-Agent': 'backstabber-api/loading-screens',
-      },
-    });
-  } finally {
-    clearTimeout(timer);
-  }
+type PublicLoadingProfileCacheEntry = {
+  expiresAt: number;
+  payload: LoadingScreenProfile;
 };
 
-const fetchSteamSummariesById64 = async (steamIds64: string[]): Promise<Map<string, SteamSummary>> => {
+const steamSummaryCache = new Map<string, { expiresAt: number; summary: SteamSummary }>();
+const STEAM_SUMMARY_CACHE_TTL_MS = 10 * 60 * 1000;
+const publicLoadingProfileCache = new Map<string, PublicLoadingProfileCacheEntry>();
+const steamSummaryRefreshQueue: string[] = [];
+const steamSummaryRefreshQueued = new Set<string>();
+const steamSummaryRefreshInFlight = new Set<string>();
+let steamSummaryRefreshWorkers = 0;
+
+const getCachedSteamSummariesById64 = (steamIds64: string[]): Map<string, SteamSummary> => {
   const result = new Map<string, SteamSummary>();
-  const apiKey = String(process.env.STEAM_WEB_API_KEY || '').trim();
   if (steamIds64.length === 0) return result;
 
   const now = Date.now();
   const uniqueIds = uniqueStrings(steamIds64).filter((entry) => /^\d{17}$/.test(entry));
-  const pendingIds: string[] = [];
-
   uniqueIds.forEach((steamId64) => {
     const cached = steamSummaryCache.get(steamId64);
     if (cached && cached.expiresAt > now) {
       result.set(steamId64, cached.summary);
       return;
     }
-    pendingIds.push(steamId64);
+    steamSummaryCache.delete(steamId64);
   });
 
-  if (apiKey) {
-    const chunkSize = 100;
-    for (let i = 0; i < pendingIds.length; i += chunkSize) {
-      const chunk = pendingIds.slice(i, i + chunkSize);
-      if (chunk.length === 0) continue;
-      const endpoint =
-        `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${encodeURIComponent(apiKey)}` +
-        `&steamids=${encodeURIComponent(chunk.join(','))}`;
-      try {
-        const response = await withTimeout(endpoint, 2500);
-        if (!response.ok) continue;
-        const json = await response.json().catch(() => null);
-        const players = Array.isArray(json?.response?.players) ? json.response.players : [];
-        players.forEach((player: any) => {
-          const steamId64 = String(player?.steamid || '').trim();
-          if (!/^\d{17}$/.test(steamId64)) return;
-          const personaName = String(player?.personaname || '').trim();
-          const avatarUrl = String(player?.avatarfull || '').trim();
-          const summary: SteamSummary = {
-            ...(personaName ? { personaName } : {}),
-            ...(avatarUrl ? { avatarUrl } : {}),
-          };
-          result.set(steamId64, summary);
-          steamSummaryCache.set(steamId64, {
-            expiresAt: now + STEAM_SUMMARY_CACHE_TTL_MS,
-            summary,
-          });
-        });
-      } catch {
-        // ignore Steam fetch failures and keep DB fallback
-      }
-    }
-  }
-
-  const missing = pendingIds.filter((steamId64) => !result.has(steamId64));
-  if (missing.length > 0) {
-    // Same behavior used in Users screen: resolve profile by steamId64 with XML fallback.
-    await Promise.allSettled(
-      missing.map(async (steamId64) => {
-        try {
-          const profile = await syncSteamProfileBySteamId64(steamId64);
-          const personaName = String(profile.personaName || '').trim();
-          const avatarUrl = String(profile.avatarUrl || '').trim();
-          const summary: SteamSummary = {
-            ...(personaName ? { personaName } : {}),
-            ...(avatarUrl ? { avatarUrl } : {}),
-          };
-          if (summary.personaName || summary.avatarUrl) {
-            result.set(steamId64, summary);
-            steamSummaryCache.set(steamId64, {
-              expiresAt: now + STEAM_SUMMARY_CACHE_TTL_MS,
-              summary,
-            });
-          }
-        } catch {
-          // keep DB fallback
-        }
-      }),
-    );
-  }
-
   return result;
+};
+
+const toLighterAvatarUrl = (value: string | undefined): string | undefined => {
+  const sanitized = sanitizeUrl(value);
+  if (!sanitized) return undefined;
+  return sanitized.replace(/_full(\.(?:jpg|jpeg|png|webp))$/i, '_medium$1');
+};
+
+const runSteamSummaryRefreshWorkers = () => {
+  while (
+    steamSummaryRefreshWorkers < STEAM_REFRESH_CONCURRENCY &&
+    steamSummaryRefreshQueue.length > 0
+  ) {
+    const steamId64 = steamSummaryRefreshQueue.shift();
+    if (!steamId64) continue;
+    steamSummaryRefreshQueued.delete(steamId64);
+    steamSummaryRefreshWorkers += 1;
+    steamSummaryRefreshInFlight.add(steamId64);
+
+    void (async () => {
+      try {
+        const now = Date.now();
+        const cached = steamSummaryCache.get(steamId64);
+        if (cached && cached.expiresAt > now) return;
+
+        const profile = (await Promise.race([
+          syncSteamProfileBySteamId64(steamId64),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), STEAM_REFRESH_TIMEOUT_MS)),
+        ])) as
+          | {
+              personaName?: string;
+              avatarUrl?: string;
+            }
+          | null;
+        if (!profile) return;
+
+        const personaName = String(profile.personaName || '').trim();
+        const avatarUrl = toLighterAvatarUrl(String(profile.avatarUrl || '').trim());
+        if (!personaName && !avatarUrl) return;
+
+        const summary: SteamSummary = {
+          ...(personaName ? { personaName } : {}),
+          ...(avatarUrl ? { avatarUrl } : {}),
+        };
+        steamSummaryCache.set(steamId64, {
+          expiresAt: Date.now() + STEAM_SUMMARY_CACHE_TTL_MS,
+          summary,
+        });
+        invalidatePublicLoadingProfileCache();
+      } catch {
+        // keep fallback data only
+      } finally {
+        steamSummaryRefreshInFlight.delete(steamId64);
+        steamSummaryRefreshWorkers = Math.max(0, steamSummaryRefreshWorkers - 1);
+        runSteamSummaryRefreshWorkers();
+      }
+    })();
+  }
+};
+
+const enqueueSteamSummaryRefresh = (steamIds64: string[]) => {
+  const ids = uniqueStrings(steamIds64).filter((entry) => /^\d{17}$/.test(entry));
+  if (ids.length === 0) return;
+  const now = Date.now();
+  ids.forEach((steamId64) => {
+    const cached = steamSummaryCache.get(steamId64);
+    if (cached && cached.expiresAt > now) return;
+    if (steamSummaryRefreshInFlight.has(steamId64)) return;
+    if (steamSummaryRefreshQueued.has(steamId64)) return;
+    steamSummaryRefreshQueued.add(steamId64);
+    steamSummaryRefreshQueue.push(steamId64);
+  });
+  runSteamSummaryRefreshWorkers();
 };
 
 const uniqueStrings = (values: string[]): string[] => {
@@ -708,12 +732,16 @@ const buildSyncedVipPlayers = async (profile: LoadingScreenProfile): Promise<Loa
     steamId64BySteam2.set(row.steamId, steamId64);
     steamIds64.push(steamId64);
   });
-  const steamSummariesBy64 = await fetchSteamSummariesById64(steamIds64);
+  const steamSummariesBy64 = getCachedSteamSummariesById64(steamIds64);
+  const missingSteamIds64 = steamIds64.filter((steamId64) => !steamSummariesBy64.has(steamId64));
+  if (missingSteamIds64.length > 0) {
+    enqueueSteamSummaryRefresh(missingSteamIds64);
+  }
 
   const synced = sortedRows.map((row) => {
     const steamId64 = steamId64BySteam2.get(row.steamId);
     const steamSummary = steamId64 ? steamSummariesBy64.get(steamId64) : undefined;
-    const candidateAvatar = sanitizeUrl(steamSummary?.avatarUrl || row.avatarUrl);
+    const candidateAvatar = toLighterAvatarUrl(steamSummary?.avatarUrl || row.avatarUrl || undefined);
     return {
       name: trimTo(steamSummary?.personaName || row.name, 80, row.steamId),
       steamId: row.steamId,
@@ -731,6 +759,33 @@ const respondStore = (res: any, store: LoadingScreensStore, updatedAt: Date) => 
     updatedAt: updatedAt.toISOString(),
     profiles: store.profiles,
   });
+};
+
+const setPublicLoadingResponseHeaders = (res: any) => {
+  res.setHeader(
+    'Cache-Control',
+    `public, max-age=${LOADING_PUBLIC_MAX_AGE_SEC}, stale-while-revalidate=${Math.max(
+      LOADING_PUBLIC_MAX_AGE_SEC,
+      30,
+    )}`,
+  );
+};
+
+const pruneExpiredPublicLoadingProfileCache = () => {
+  const now = Date.now();
+  publicLoadingProfileCache.forEach((entry, key) => {
+    if (entry.expiresAt <= now) {
+      publicLoadingProfileCache.delete(key);
+    }
+  });
+};
+
+const invalidatePublicLoadingProfileCache = (slug?: string) => {
+  if (!slug) {
+    publicLoadingProfileCache.clear();
+    return;
+  }
+  publicLoadingProfileCache.delete(slug);
 };
 
 router.post('/media-upload', authMiddleware, requireRole(UserRole.ADMIN), (req, res) => {
@@ -775,6 +830,13 @@ router.get('/public/:slug', async (req, res) => {
     return res.status(400).json({ error: 'Invalid slug' });
   }
 
+  pruneExpiredPublicLoadingProfileCache();
+  const cached = publicLoadingProfileCache.get(slug);
+  if (cached && cached.expiresAt > Date.now()) {
+    setPublicLoadingResponseHeaders(res);
+    return res.json(cached.payload);
+  }
+
   const siteConfig = await ensureSiteConfig();
   const store = loadStoreFromSiteConfig(siteConfig.data);
   const profile = store.profiles.find((entry) => entry.slug === slug);
@@ -784,10 +846,16 @@ router.get('/public/:slug', async (req, res) => {
   }
 
   const syncedVipPlayers = await buildSyncedVipPlayers(profile);
-  return res.json({
+  const payload: LoadingScreenProfile = {
     ...profile,
     vipPlayers: syncedVipPlayers,
+  };
+  publicLoadingProfileCache.set(slug, {
+    expiresAt: Date.now() + LOADING_PUBLIC_CACHE_TTL_MS,
+    payload,
   });
+  setPublicLoadingResponseHeaders(res);
+  return res.json(payload);
 });
 
 router.post('/', authMiddleware, requireRole(UserRole.ADMIN), async (req, res) => {
@@ -825,6 +893,7 @@ router.post('/', authMiddleware, requireRole(UserRole.ADMIN), async (req, res) =
       data: mergedData as any,
     },
   });
+  invalidatePublicLoadingProfileCache(nextProfile.slug);
 
   return res.status(201).json({
     updatedAt: updated.updatedAt.toISOString(),
@@ -878,6 +947,8 @@ router.put('/:slug', authMiddleware, requireRole(UserRole.ADMIN), async (req, re
       data: mergedData as any,
     },
   });
+  invalidatePublicLoadingProfileCache(slug);
+  invalidatePublicLoadingProfileCache(nextProfile.slug);
 
   return res.json({
     updatedAt: updated.updatedAt.toISOString(),
@@ -915,6 +986,7 @@ router.delete('/:slug', authMiddleware, requireRole(UserRole.ADMIN), async (req,
       data: mergedData as any,
     },
   });
+  invalidatePublicLoadingProfileCache(slug);
 
   return respondStore(res, nextStore, updated.updatedAt);
 });

@@ -220,6 +220,7 @@
   function renderLines(target, lines, ordered) {
     if (!target) return;
     target.innerHTML = '';
+    var fragment = document.createDocumentFragment();
 
     (lines || []).forEach(function (line, index) {
       var item = document.createElement(ordered ? 'li' : 'div');
@@ -236,8 +237,9 @@
       } else {
         item.textContent = String(line);
       }
-      target.appendChild(item);
+      fragment.appendChild(item);
     });
+    target.appendChild(fragment);
   }
 
   function renderVips(title, players) {
@@ -245,6 +247,7 @@
     if (!dom.vipList) return;
 
     dom.vipList.innerHTML = '';
+    var fragment = document.createDocumentFragment();
 
     (players || []).forEach(function (player) {
       var wrap = document.createElement('div');
@@ -281,8 +284,9 @@
       wrap.appendChild(avatar);
       wrap.appendChild(info);
       wrap.appendChild(tier);
-      dom.vipList.appendChild(wrap);
+      fragment.appendChild(wrap);
     });
+    dom.vipList.appendChild(fragment);
   }
 
   function applyProfile(profile) {
@@ -518,7 +522,6 @@
         headers: {
           'Content-Type': 'application/json',
         },
-        cache: 'no-store',
       });
 
       if (!response.ok) {

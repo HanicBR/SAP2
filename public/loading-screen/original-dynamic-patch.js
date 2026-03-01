@@ -222,6 +222,7 @@
     if (!list) return;
 
     list.innerHTML = '';
+    var fragment = document.createDocumentFragment();
     players.forEach(function (player) {
       var row = document.createElement('div');
       row.className = 'vip-card';
@@ -256,8 +257,9 @@
       row.appendChild(avatar);
       row.appendChild(textWrap);
       row.appendChild(tier);
-      list.appendChild(row);
+      fragment.appendChild(row);
     });
+    list.appendChild(fragment);
   }
 
   function ensureVipTierStyles() {
@@ -461,7 +463,6 @@
         headers: {
           'Content-Type': 'application/json',
         },
-        cache: 'no-store',
       });
 
       if (!response.ok) return;
