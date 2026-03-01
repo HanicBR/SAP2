@@ -1,288 +1,434 @@
-import React, { useEffect, useState, memo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { ApiService } from '../../services/api';
-import { DailyStats, GameServer, ServerStatus, LiveActivityItem, FinancialStats, DashboardData } from '../../types';
-import { 
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend
+import { DashboardData, GameServer, ServerStatus } from '../../types';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
 } from 'recharts';
 import { Icons } from '../../components/Icon';
 
-const COLORS = ['#b91c1c', '#ea580c', '#eab308', '#0284c7', '#4b5563'];
+const MAP_COLORS = ['#ef4444', '#f97316', '#eab308', '#06b6d4', '#3b82f6', '#6b7280'];
+const REFRESH_INTERVAL_MS = 20_000;
 
-// --- OPTIMIZED SUB-COMPONENTS ---
+type FeedTone = 'INFO' | 'WARNING' | 'SUCCESS' | 'ERROR';
 
-// 1. Tooltip moved outside to prevent recreation on render
-const CustomTooltip = ({ active, payload }: any) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    return (
-      <div className="bg-zinc-950 border border-zinc-800 p-3 rounded shadow-xl">
-        <p className="font-bold text-white mb-1">{data.name}</p>
-        <p className="text-sm text-zinc-400">
-           {data.playCount} partidas 
-           <span className="ml-1 text-xs font-bold text-zinc-600">({data.percentage}%)</span>
-        </p>
-      </div>
-    );
-  }
-  return null;
+const toneClass = (tone: FeedTone) => {
+  if (tone === 'SUCCESS') return 'text-green-400 border-green-900/40 bg-green-900/10';
+  if (tone === 'WARNING') return 'text-amber-300 border-amber-900/40 bg-amber-900/10';
+  if (tone === 'ERROR') return 'text-red-400 border-red-900/40 bg-red-900/10';
+  return 'text-cyan-300 border-cyan-900/40 bg-cyan-900/10';
 };
 
-// 2. Memoized Stat Cards to prevent re-render when charts update
-const StatCard = memo(({ title, value, icon: Icon, colorClass, subValue, subLabel }: { title: string, value: string | number, icon: any, colorClass: string, subValue?: string, subLabel?: React.ReactNode }) => (
-  <div className="bg-zinc-900 p-6 rounded border border-zinc-800 shadow-sm relative overflow-hidden group">
-    <div className="flex items-center justify-between relative z-10">
-      <div>
-        <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider">{title}</p>
-        <p className="text-3xl font-black text-white mt-1">{value}</p>
-        {subLabel && <p className="text-xs mt-1">{subLabel}</p>}
-      </div>
-      <div className={`p-3 rounded-full border bg-opacity-10 ${colorClass.replace('text-', 'bg-').replace('text-', 'border-')} ${colorClass}`}>
-         <Icon />
-      </div>
-    </div>
-  </div>
-));
+const statusClass = (status: ServerStatus) => {
+  if (status === ServerStatus.ONLINE) return 'bg-green-900/20 text-green-400 border-green-900/30';
+  if (status === ServerStatus.MAINTENANCE) return 'bg-yellow-900/20 text-yellow-300 border-yellow-900/30';
+  return 'bg-red-900/20 text-red-400 border-red-900/30';
+};
 
-// 3. Memoized Revenue Card
-const RevenueCard = memo(({ revenueMonth, revenueToday }: { revenueMonth: number, revenueToday: number }) => (
-  <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 rounded border border-zinc-800 shadow-sm relative overflow-hidden group hover:border-green-900/50 transition-colors">
-    <div className="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-       <Icons.Activity className="w-16 h-16 text-green-500" />
-    </div>
-    <div className="flex items-center justify-between relative z-10">
-      <div>
-        <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Faturamento (Mês)</p>
-        <p className="text-3xl font-black text-white mt-1 flex items-baseline gap-1">
-           <span className="text-lg text-zinc-500">R$</span>
-           {revenueMonth.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-        </p>
-        <p className="text-xs text-green-500 font-bold mt-1">
-           + R$ {revenueToday.toFixed(2)} hoje
-        </p>
-      </div>
-      <div className="p-3 bg-green-500/10 rounded-full text-green-500 border border-green-500/20">
-         <span className="text-xl font-bold">$</span>
-      </div>
-    </div>
-  </div>
-));
+const statusLabel = (status: ServerStatus) => {
+  if (status === ServerStatus.ONLINE) return 'online';
+  if (status === ServerStatus.MAINTENANCE) return 'maintenance';
+  return 'offline';
+};
 
-// 4. Memoized Charts Section
-const ChartsSection = memo(({ chartData, mapStats, selectedMapMode, onMapModeChange }: { chartData: DailyStats[], mapStats: any, selectedMapMode: string, onMapModeChange: (mode: string) => void }) => (
-  <div className="lg:col-span-2 space-y-6">
-    {/* Player Activity Chart */}
-    <div className="bg-zinc-900 p-6 rounded border border-zinc-800">
-      <h3 className="text-lg font-bold text-white mb-6 flex items-center">
-        <Icons.BarChart className="w-5 h-5 mr-2 text-zinc-500" /> Atividade de Jogadores (7 dias)
-      </h3>
-      <div className="h-80 w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
-            <XAxis dataKey="date" stroke="#71717a" tick={{fontSize: 12}} />
-            <YAxis stroke="#71717a" tick={{fontSize: 12}} />
-            <Tooltip 
-              contentStyle={{ backgroundColor: '#09090b', border: '1px solid #3f3f46', color: '#f4f4f5' }}
-              itemStyle={{ color: '#e4e4e7' }}
-            />
-            <Line type="monotone" dataKey="players" stroke="#b91c1c" strokeWidth={3} dot={{r: 4, fill: '#b91c1c'}} activeDot={{r: 6, stroke: '#fff'}} />
-          </LineChart>
-        </ResponsiveContainer>
+const StatCard = memo(
+  ({
+    title,
+    value,
+    icon: Icon,
+    className,
+    subtitle,
+  }: {
+    title: string;
+    value: string | number;
+    icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+    className: string;
+    subtitle?: string;
+  }) => (
+    <div className="bg-zinc-900 border border-zinc-800 rounded p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-[11px] uppercase tracking-wider text-zinc-500 font-bold">{title}</p>
+          <p className="text-2xl font-black text-white mt-1">{value}</p>
+          {subtitle ? <p className="text-xs text-zinc-500 mt-1">{subtitle}</p> : null}
+        </div>
+        <div className={`p-2 rounded border ${className}`}>
+          <Icon className="w-4 h-4" />
+        </div>
       </div>
     </div>
+  ),
+);
 
-    {/* Map Distribution Chart */}
-    <div className="bg-zinc-900 p-6 rounded border border-zinc-800">
-       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-         <h3 className="text-lg font-bold text-white flex items-center">
-           <Icons.Box className="w-5 h-5 mr-2 text-zinc-500" /> Mapas Mais Jogados
-         </h3>
-         
-         {/* Mode Selector Tabs */}
-         <div className="flex bg-zinc-950 p-1 rounded border border-zinc-800">
-           {Object.keys(mapStats).map(mode => (
-             <button
-               key={mode}
-               onClick={() => onMapModeChange(mode)}
-               className={`px-3 py-1 text-xs font-bold uppercase rounded transition-colors ${
-                 selectedMapMode === mode 
-                   ? 'bg-zinc-800 text-white shadow-sm' 
-                   : 'text-zinc-500 hover:text-zinc-300'
-               }`}
-             >
-               {mode}
-             </button>
-           ))}
-         </div>
-       </div>
-
-       <div className="h-64 w-full flex flex-col sm:flex-row items-center justify-center">
-          <ResponsiveContainer width="100%" height="100%">
-             <PieChart>
-                <Pie
-                  data={mapStats[selectedMapMode] || []}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="playCount"
-                >
-                  {(mapStats[selectedMapMode] || []).map((entry: any, index: number) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="rgba(0,0,0,0)" />
-                  ))}
-                </Pie>
-                <Tooltip content={<CustomTooltip />} />
-                <Legend 
-                   verticalAlign="middle" 
-                   align="right"
-                   layout="vertical" 
-                   iconSize={10}
-                   wrapperStyle={{ fontSize: '12px', color: '#a1a1aa' }}
-                />
-             </PieChart>
-          </ResponsiveContainer>
-       </div>
-    </div>
-  </div>
-));
-
-// 5. Memoized Server List
 const ServerList = memo(({ servers }: { servers: GameServer[] }) => (
-  <div className="bg-zinc-900 p-6 rounded border border-zinc-800">
-    <h3 className="text-lg font-bold text-white mb-6 flex items-center">
-      <Icons.Server className="w-5 h-5 mr-2 text-zinc-500" /> Status dos Servidores
+  <div className="bg-zinc-900 p-4 rounded border border-zinc-800">
+    <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-300 mb-4 flex items-center gap-2">
+      <Icons.Server className="w-4 h-4 text-zinc-500" />
+      Servidores
     </h3>
-    <div className="space-y-4">
-      {servers.map(server => (
-        <div key={server.id} className="p-4 bg-zinc-950/50 rounded border border-zinc-800 hover:border-zinc-700 transition-colors">
-            <div className="flex justify-between items-start mb-2">
-              <span className="font-bold text-zinc-200 truncate pr-2 text-sm" title={server.name}>{server.name}</span>
-              <span className={`inline-block w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${server.status === ServerStatus.ONLINE ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-red-500'}`}></span>
-            </div>
-            <div className="flex justify-between items-end">
-              <span className="text-xs text-zinc-500 uppercase font-bold tracking-wider">{server.mode}</span>
-              <div className="text-right">
-                <span className="text-xl font-bold text-white">{server.currentPlayers}</span>
-                <span className="text-xs text-zinc-600">/{server.maxPlayers}</span>
-              </div>
-            </div>
-            <div className="mt-2 w-full bg-zinc-800 h-1 rounded-full overflow-hidden">
-              <div 
-                  className={`h-full rounded-full transition-all duration-1000 ${server.currentPlayers > 0 ? 'bg-red-600' : 'bg-zinc-700'}`} 
-                  style={{ width: `${(server.currentPlayers / server.maxPlayers) * 100}%` }}
-              ></div>
-            </div>
+    <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1">
+      {servers.map((server) => (
+        <div key={server.id} className="bg-zinc-950/70 border border-zinc-800 rounded p-3">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm font-bold text-zinc-200 truncate" title={server.name}>
+              {server.name}
+            </span>
+            <span className={`px-2 py-0.5 rounded text-[10px] uppercase border font-bold ${statusClass(server.status)}`}>
+              {statusLabel(server.status)}
+            </span>
+          </div>
+          <div className="mt-2 flex items-center justify-between text-xs text-zinc-500">
+            <span>{server.mode}</span>
+            <span className="font-mono text-zinc-300">
+              {server.currentPlayers}/{server.maxPlayers}
+            </span>
+          </div>
+          <div className="mt-1 h-1.5 bg-zinc-800 rounded overflow-hidden">
+            <div
+              className="h-full bg-red-600"
+              style={{ width: `${Math.min(100, (server.currentPlayers / Math.max(1, server.maxPlayers)) * 100)}%` }}
+            />
+          </div>
+          {server.currentMap ? (
+            <p className="mt-2 text-[11px] text-zinc-500 truncate">Mapa: {server.currentMap}</p>
+          ) : null}
         </div>
       ))}
+      {servers.length === 0 ? (
+        <div className="text-xs text-zinc-500 italic">Nenhum servidor cadastrado.</div>
+      ) : null}
     </div>
   </div>
 ));
 
-// 6. Memoized Activity Feed
-const ActivityFeed = memo(({ activity }: { activity: LiveActivityItem[] }) => (
-  <div className="bg-zinc-900 p-6 rounded border border-zinc-800 h-96 flex flex-col">
-     <h3 className="text-lg font-bold text-white mb-4 flex items-center">
-        <Icons.Activity className="w-5 h-5 mr-2 text-red-500 animate-pulse" /> Live Feed
-     </h3>
-     <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
-        {activity.map((item) => (
-           <div key={item.id} className="p-3 rounded bg-zinc-950/50 border border-zinc-800/50 text-sm hover:bg-zinc-950 transition-colors">
-              <div className="flex justify-between items-center mb-1">
-                 <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border uppercase ${
-                    item.type === 'SUCCESS' ? 'bg-green-900/20 text-green-500 border-green-900/30' :
-                    item.type === 'WARNING' ? 'bg-red-900/20 text-red-500 border-red-900/30' :
-                    item.type === 'ERROR' ? 'bg-orange-900/20 text-orange-500 border-orange-900/30' :
-                    'bg-blue-900/20 text-blue-500 border-blue-900/30'
-                 }`}>
-                    {item.serverName}
-                 </span>
-                 <span className="text-[10px] text-zinc-600 font-mono">
-                    {new Date(item.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                 </span>
-              </div>
-              <p className="text-zinc-300 leading-snug">{item.message}</p>
-           </div>
-        ))}
-     </div>
+const ActivityFeed = memo(({ items }: { items: DashboardData['liveActivity'] }) => (
+  <div className="bg-zinc-900 p-4 rounded border border-zinc-800">
+    <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-300 mb-4 flex items-center gap-2">
+      <Icons.Activity className="w-4 h-4 text-red-500" />
+      Feed Ao Vivo
+    </h3>
+    <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1">
+      {items.map((item) => (
+        <div key={item.id} className={`border rounded p-3 ${toneClass(item.type)}`}>
+          <div className="flex items-center justify-between gap-2 mb-1">
+            <span className="text-[10px] uppercase tracking-wider font-bold">{item.serverName || 'Sistema'}</span>
+            <span className="text-[10px] text-zinc-500 font-mono">
+              {new Date(item.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          </div>
+          <p className="text-xs text-zinc-300 leading-snug">{item.message}</p>
+        </div>
+      ))}
+      {items.length === 0 ? (
+        <div className="text-xs text-zinc-500 italic">Sem atividade recente.</div>
+      ) : null}
+    </div>
   </div>
 ));
-
-// --- MAIN COMPONENT ---
 
 const Dashboard: React.FC = () => {
   const [data, setData] = useState<DashboardData | null>(null);
   const [servers, setServers] = useState<GameServer[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  // State for Map Stats Tabs
+  const [refreshing, setRefreshing] = useState(false);
   const [selectedMapMode, setSelectedMapMode] = useState('TTT');
 
-  useEffect(() => {
-    Promise.all([
-      ApiService.getDashboardStats(),
-      ApiService.getServers()
-    ]).then(([statsData, serversData]) => {
-      setData(statsData);
-      setServers(serversData);
+  const loadDashboard = useCallback(async (silent = false) => {
+    if (!silent) setRefreshing(true);
+    try {
+      const [dashboard, serverList] = await Promise.all([
+        ApiService.getDashboardStats(),
+        ApiService.getServers(),
+      ]);
+      setData(dashboard);
+      setServers(serverList);
+
+      if (!dashboard.mapStats[selectedMapMode]) {
+        const firstMode = Object.keys(dashboard.mapStats || {})[0];
+        if (firstMode) setSelectedMapMode(firstMode);
+      }
+    } finally {
       setLoading(false);
+      setRefreshing(false);
+    }
+  }, [selectedMapMode]);
+
+  useEffect(() => {
+    void loadDashboard();
+    const interval = window.setInterval(() => {
+      void loadDashboard(true);
+    }, REFRESH_INTERVAL_MS);
+    return () => window.clearInterval(interval);
+  }, [loadDashboard]);
+
+  const sortedServers = useMemo(() => {
+    return [...servers].sort((left, right) => {
+      const leftOnline = left.status === ServerStatus.ONLINE ? 1 : 0;
+      const rightOnline = right.status === ServerStatus.ONLINE ? 1 : 0;
+      if (leftOnline !== rightOnline) return rightOnline - leftOnline;
+      return String(left.name || '').localeCompare(String(right.name || ''));
     });
-  }, []);
+  }, [servers]);
 
   if (loading || !data) {
-    return <div className="text-zinc-400 p-8">Carregando dashboard...</div>;
+    return <div className="text-zinc-400 p-6">Carregando dashboard...</div>;
   }
+
+  const mapModes = Object.keys(data.mapStats || {});
+  const selectedMapData = data.mapStats[selectedMapMode] || [];
+  const occupancyPct =
+    data.opsHealth.maxPlayers > 0
+      ? Math.round((data.opsHealth.currentPlayers / data.opsHealth.maxPlayers) * 100)
+      : 0;
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-white">Visão Geral</h1>
-        <div className="text-sm text-zinc-400 bg-zinc-900 border border-zinc-800 px-3 py-1 rounded">
-           Última atualização: <span className="text-white font-mono">{new Date().toLocaleTimeString()}</span>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+          <p className="text-sm text-zinc-500">
+            Atualizado em {new Date(data.generatedAt).toLocaleString('pt-BR')}
+          </p>
         </div>
+        <button
+          onClick={() => void loadDashboard()}
+          className="inline-flex items-center gap-2 px-3 py-2 rounded border border-zinc-700 bg-zinc-900 text-zinc-200 hover:bg-zinc-800 text-xs font-bold uppercase tracking-wider"
+          disabled={refreshing}
+        >
+          <Icons.RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+          Atualizar
+        </button>
       </div>
-      
-      {/* KPI Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <RevenueCard 
-          revenueMonth={data.financialStats.revenueMonth} 
-          revenueToday={data.financialStats.revenueToday} 
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        <StatCard
+          title="Servidores Online"
+          value={`${data.opsHealth.onlineServers}/${data.opsHealth.totalServers}`}
+          icon={Icons.Server}
+          className="text-emerald-400 border-emerald-900/40 bg-emerald-900/10"
+          subtitle={`${data.opsHealth.maintenanceServers} em manutenção`}
         />
-        <StatCard 
-          title="Jogadores (24h)" 
-          value={data.uniquePlayers24h} 
-          icon={Icons.Users} 
-          colorClass="text-cyan-500" 
+        <StatCard
+          title="Slots Ocupados"
+          value={`${data.opsHealth.currentPlayers}/${data.opsHealth.maxPlayers}`}
+          icon={Icons.Users}
+          className="text-cyan-400 border-cyan-900/40 bg-cyan-900/10"
+          subtitle={`${occupancyPct}% de ocupação`}
         />
-        <StatCard 
-          title="Total Conexões" 
-          value={data.totalConnections} 
-          icon={Icons.Activity} 
-          colorClass="text-blue-500" 
+        <StatCard
+          title="WS Conectados"
+          value={data.opsHealth.wsConnectedServers}
+          icon={Icons.Activity}
+          className="text-blue-400 border-blue-900/40 bg-blue-900/10"
+          subtitle={`${data.opsHealth.wsLiveStateServers} com live-state`}
         />
-        <StatCard 
-          title="Bans Ativos" 
-          value={data.activeBans} 
-          icon={Icons.Shield} 
-          colorClass="text-red-500" 
+        <StatCard
+          title="Jogadores Únicos (24h)"
+          value={data.uniquePlayers24h}
+          icon={Icons.UserGroup}
+          className="text-fuchsia-400 border-fuchsia-900/40 bg-fuchsia-900/10"
+          subtitle={`${data.highlights.logs24h} logs nas últimas 24h`}
+        />
+        <StatCard
+          title="Conexões (30d)"
+          value={data.totalConnections}
+          icon={Icons.Link2}
+          className="text-amber-300 border-amber-900/40 bg-amber-900/10"
+          subtitle={`${data.roundsPlayed} rounds encerradas`}
+        />
+        <StatCard
+          title="Fila de Ações"
+          value={data.opsHealth.actionQueueSize}
+          icon={Icons.Terminal}
+          className="text-zinc-300 border-zinc-700 bg-zinc-800/40"
+          subtitle={`ACK errors WS: ${data.opsHealth.wsAckErrors}`}
         />
       </div>
 
-      {/* Main Content Split */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Left Column: Charts */}
-        <ChartsSection 
-          chartData={data.chartData} 
-          mapStats={data.mapStats} 
-          selectedMapMode={selectedMapMode} 
-          onMapModeChange={setSelectedMapMode}
-        />
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="xl:col-span-2 space-y-6">
+          <div className="bg-zinc-900 p-4 rounded border border-zinc-800">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-300 mb-4 flex items-center gap-2">
+              <Icons.BarChart className="w-4 h-4 text-zinc-500" />
+              Tendência (7 dias)
+            </h3>
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={data.chartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                  <XAxis dataKey="date" stroke="#71717a" tick={{ fontSize: 12 }} />
+                  <YAxis stroke="#71717a" tick={{ fontSize: 12 }} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#09090b', border: '1px solid #3f3f46' }}
+                    labelStyle={{ color: '#d4d4d8' }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="players"
+                    name="Jogadores únicos"
+                    stroke="#06b6d4"
+                    strokeWidth={2.5}
+                    dot={{ r: 3 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="rounds"
+                    name="Rounds"
+                    stroke="#ef4444"
+                    strokeWidth={2.2}
+                    dot={{ r: 2 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
 
-        {/* Right Column: Server Status & Live Feed */}
+          <div className="bg-zinc-900 p-4 rounded border border-zinc-800">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-300 flex items-center gap-2">
+                <Icons.Map className="w-4 h-4 text-zinc-500" />
+                Mapas Mais Jogados (30d)
+              </h3>
+              <div className="flex bg-zinc-950 border border-zinc-800 rounded p-1">
+                {mapModes.map((mode) => (
+                  <button
+                    key={mode}
+                    onClick={() => setSelectedMapMode(mode)}
+                    className={`px-2.5 py-1 text-[11px] font-bold uppercase rounded ${
+                      selectedMapMode === mode
+                        ? 'bg-zinc-800 text-zinc-100'
+                        : 'text-zinc-500 hover:text-zinc-300'
+                    }`}
+                  >
+                    {mode}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="h-64">
+              {selectedMapData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={selectedMapData}
+                      dataKey="playCount"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={58}
+                      outerRadius={86}
+                      paddingAngle={3}
+                    >
+                      {selectedMapData.map((_entry, idx) => (
+                        <Cell key={`map-${idx}`} fill={MAP_COLORS[idx % MAP_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      formatter={(value: any, _name: any, payload: any) => [
+                        `${value} ciclos`,
+                        payload?.payload?.name || 'Mapa',
+                      ]}
+                      contentStyle={{ backgroundColor: '#09090b', border: '1px solid #3f3f46' }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-full flex items-center justify-center text-sm text-zinc-500 italic">
+                  Sem dados de mapa para este modo.
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-zinc-900 p-4 rounded border border-zinc-800">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-300 mb-3">
+                Moderação (24h)
+              </h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between text-zinc-400">
+                  <span>Punições aplicadas</span>
+                  <span className="text-zinc-100 font-bold">{data.highlights.punishments24h}</span>
+                </div>
+                <div className="flex justify-between text-zinc-400">
+                  <span>Punições desativadas</span>
+                  <span className="text-zinc-100 font-bold">{data.highlights.deactivations24h}</span>
+                </div>
+                <div className="flex justify-between text-zinc-400">
+                  <span>Bans ativas</span>
+                  <span className="text-red-300 font-bold">{data.activeBans}</span>
+                </div>
+                <div className="flex justify-between text-zinc-400">
+                  <span>Mutes ativas</span>
+                  <span className="text-amber-200 font-bold">{data.highlights.activeMutes}</span>
+                </div>
+                <div className="flex justify-between text-zinc-400">
+                  <span>Gags ativas</span>
+                  <span className="text-amber-200 font-bold">{data.highlights.activeGags}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-zinc-900 p-4 rounded border border-zinc-800">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-300 mb-3">
+                Top Eventos (24h)
+              </h3>
+              <div className="space-y-2">
+                {data.highlights.topEventTypes24h.map((item) => (
+                  <div key={item.type} className="flex items-center justify-between text-sm">
+                    <span className="text-zinc-400">{item.type}</span>
+                    <span className="text-zinc-100 font-bold">{item.count}</span>
+                  </div>
+                ))}
+                {data.highlights.topEventTypes24h.length === 0 ? (
+                  <div className="text-xs text-zinc-500 italic">Sem eventos no período.</div>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="space-y-6">
-          <ServerList servers={servers} />
-          <ActivityFeed activity={data.liveActivity} />
+          <div className="bg-zinc-900 p-4 rounded border border-zinc-800">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-300 mb-3 flex items-center gap-2">
+              <Icons.DollarSign className="w-4 h-4 text-emerald-400" />
+              Financeiro
+            </h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between text-zinc-400">
+                <span>Receita líquida hoje</span>
+                <span className="text-zinc-100 font-bold">
+                  R$ {data.financialStats.revenueToday.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </span>
+              </div>
+              <div className="flex justify-between text-zinc-400">
+                <span>Receita líquida mês</span>
+                <span className="text-zinc-100 font-bold">
+                  R$ {data.financialStats.revenueMonth.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </span>
+              </div>
+              <div className="flex justify-between text-zinc-400">
+                <span>Transações hoje</span>
+                <span className="text-zinc-100 font-bold">{data.financialStats.transactionsToday}</span>
+              </div>
+              <div className="flex justify-between text-zinc-400">
+                <span>Mensagens WS inválidas</span>
+                <span className="text-zinc-100 font-bold">{data.opsHealth.wsInvalidMessages}</span>
+              </div>
+            </div>
+          </div>
+
+          <ServerList servers={sortedServers} />
+          <ActivityFeed items={data.liveActivity} />
         </div>
       </div>
     </div>

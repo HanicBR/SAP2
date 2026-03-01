@@ -480,7 +480,31 @@ export interface FinancialStats {
   transactionsToday: number;
 }
 
+export interface DashboardOpsHealth {
+  totalServers: number;
+  onlineServers: number;
+  offlineServers: number;
+  maintenanceServers: number;
+  currentPlayers: number;
+  maxPlayers: number;
+  wsConnectedServers: number;
+  wsLiveStateServers: number;
+  wsInvalidMessages: number;
+  wsAckErrors: number;
+  actionQueueSize: number;
+}
+
+export interface DashboardHighlights {
+  logs24h: number;
+  punishments24h: number;
+  deactivations24h: number;
+  activeMutes: number;
+  activeGags: number;
+  topEventTypes24h: { type: string; count: number }[];
+}
+
 export interface DashboardData {
+  generatedAt: string;
   uniquePlayers24h: number;
   totalConnections: number;
   roundsPlayed: number;
@@ -489,6 +513,8 @@ export interface DashboardData {
   mapStats: Record<string, MapStats[]>; // Changed to support grouping by mode
   liveActivity: LiveActivityItem[];
   financialStats: FinancialStats;
+  opsHealth: DashboardOpsHealth;
+  highlights: DashboardHighlights;
 }
 
 // Duplicate Detection Types

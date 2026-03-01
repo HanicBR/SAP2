@@ -11,6 +11,7 @@ const baseChartData = (): DashboardData['chartData'] => ([
 ]);
 
 export const dashboardData: DashboardData = {
+  generatedAt: new Date().toISOString(),
   uniquePlayers24h: 1420,
   totalConnections: 3500,
   roundsPlayed: 450,
@@ -45,6 +46,31 @@ export const dashboardData: DashboardData = {
     revenueMonth: 3250.0,
     transactionsToday: 4,
   },
+  opsHealth: {
+    totalServers: 3,
+    onlineServers: 2,
+    offlineServers: 1,
+    maintenanceServers: 0,
+    currentPlayers: 18,
+    maxPlayers: 96,
+    wsConnectedServers: 1,
+    wsLiveStateServers: 1,
+    wsInvalidMessages: 0,
+    wsAckErrors: 0,
+    actionQueueSize: 0,
+  },
+  highlights: {
+    logs24h: 4200,
+    punishments24h: 8,
+    deactivations24h: 3,
+    activeMutes: 4,
+    activeGags: 2,
+    topEventTypes24h: [
+      { type: 'CHAT', count: 1200 },
+      { type: 'PROP_SPAWN', count: 980 },
+      { type: 'CONNECT', count: 140 },
+    ],
+  },
 };
 
 const randomBetween = (min: number, max: number) => Math.round(Math.random() * (max - min) + min);
@@ -78,4 +104,3 @@ export const generateServerAnalytics = (range: AnalyticsRange): ServerAnalytics 
     ],
   };
 };
-

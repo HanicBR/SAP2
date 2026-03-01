@@ -480,6 +480,7 @@ export const ApiService = {
     };
 
     return {
+      generatedAt: new Date().toISOString(),
       uniquePlayers24h: 1420,
       totalConnections: 3500,
       roundsPlayed: 450,
@@ -487,7 +488,28 @@ export const ApiService = {
       chartData: MOCK_STATS,
       mapStats,
       liveActivity,
-      financialStats
+      financialStats,
+      opsHealth: {
+        totalServers: serversDb.length,
+        onlineServers: serversDb.filter((server) => server.status === ServerStatus.ONLINE).length,
+        offlineServers: serversDb.filter((server) => server.status === ServerStatus.OFFLINE).length,
+        maintenanceServers: serversDb.filter((server) => server.status === ServerStatus.MAINTENANCE).length,
+        currentPlayers: serversDb.reduce((acc, server) => acc + Number(server.currentPlayers || 0), 0),
+        maxPlayers: serversDb.reduce((acc, server) => acc + Number(server.maxPlayers || 0), 0),
+        wsConnectedServers: 0,
+        wsLiveStateServers: 0,
+        wsInvalidMessages: 0,
+        wsAckErrors: 0,
+        actionQueueSize: 0,
+      },
+      highlights: {
+        logs24h: 0,
+        punishments24h: 0,
+        deactivations24h: 0,
+        activeMutes: 0,
+        activeGags: 0,
+        topEventTypes24h: [],
+      },
     };
   },
 
