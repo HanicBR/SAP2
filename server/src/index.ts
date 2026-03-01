@@ -30,7 +30,32 @@ const port = process.env.PORT || 4000;
 // Trust only the first proxy hop (Nginx) so rate limiting sees correct client IPs
 app.set('trust proxy', 1);
 
-app.use(cors({ origin: '*', credentials: true }));
+const parseBoolEnv = (value: string | undefined, fallback: boolean): boolean => {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (!normalized) return fallback;
+  return ['1', 'true', 'yes', 'on'].includes(normalized);
+};
+
+const parseCsvEnv = (value: string | undefined): string[] =>
+  String(value || '')
+    .split(',')
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0);
+
+const allowedOrigins = parseCsvEnv(process.env.CORS_ALLOWED_ORIGINS || process.env.CORS_ORIGINS);
+const allowAnyOrigin = parseBoolEnv(process.env.CORS_ALLOW_ANY_ORIGIN, allowedOrigins.length === 0);
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (allowAnyOrigin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(null, false);
+    },
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(helmet());
 

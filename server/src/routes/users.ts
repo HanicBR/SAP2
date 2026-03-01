@@ -12,6 +12,21 @@ const toPublicUser = (record: any): User => {
   return rest as User;
 };
 
+const getUserRole = async (userId: string): Promise<UserRole | null> => {
+  const record = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true },
+  });
+  return (record?.role as UserRole | undefined) || null;
+};
+
+const isLastSuperAdmin = async (userId: string): Promise<boolean> => {
+  const role = await getUserRole(userId);
+  if (role !== UserRole.SUPERADMIN) return false;
+  const count = await prisma.user.count({ where: { role: UserRole.SUPERADMIN } });
+  return count <= 1;
+};
+
 router.use(authMiddleware);
 router.use(requireRole(UserRole.ADMIN));
 
@@ -74,6 +89,22 @@ router.patch('/:id/role', requireRole(UserRole.SUPERADMIN), async (req, res) => 
     return res.status(400).json({ error: 'Invalid role' });
   }
 
+  if (req.user?.id === id && role !== UserRole.SUPERADMIN) {
+    return res.status(400).json({ error: 'Cannot change your own role' });
+  }
+
+  const targetRole = await getUserRole(id);
+  if (!targetRole) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  if (targetRole === UserRole.SUPERADMIN && role !== UserRole.SUPERADMIN) {
+    const last = await isLastSuperAdmin(id);
+    if (last) {
+      return res.status(400).json({ error: 'Cannot downgrade the last SUPERADMIN' });
+    }
+  }
+
   try {
     const updated = await prisma.user.update({
       where: { id },
@@ -100,12 +131,23 @@ router.patch('/:id', requireRole(UserRole.SUPERADMIN), async (req, res) => {
     return res.status(400).json({ error: 'Cannot change your own role' });
   }
 
+  const currentRole = await getUserRole(id);
+  if (!currentRole) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
   const data: any = {};
   if (username) data.username = username;
   if (email) data.email = email;
   if (role) {
     if (!Object.values(UserRole).includes(role)) {
       return res.status(400).json({ error: 'Invalid role' });
+    }
+    if (currentRole === UserRole.SUPERADMIN && role !== UserRole.SUPERADMIN) {
+      const last = await isLastSuperAdmin(id);
+      if (last) {
+        return res.status(400).json({ error: 'Cannot downgrade the last SUPERADMIN' });
+      }
     }
     data.role = role;
   }
@@ -153,6 +195,17 @@ router.delete('/:id', requireRole(UserRole.SUPERADMIN), async (req, res) => {
 
   if (req.user?.id === id) {
     return res.status(400).json({ error: 'Cannot delete yourself' });
+  }
+
+  const role = await getUserRole(id);
+  if (!role) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+  if (role === UserRole.SUPERADMIN) {
+    const last = await isLastSuperAdmin(id);
+    if (last) {
+      return res.status(400).json({ error: 'Cannot delete the last SUPERADMIN' });
+    }
   }
 
   try {

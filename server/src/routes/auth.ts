@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import rateLimit from 'express-rate-limit';
 import { prisma } from '../db/client';
 import { User, UserRole } from '../domain';
 import { authMiddleware } from '../middleware/auth';
@@ -9,6 +10,28 @@ const router = Router();
 
 const getJwtSecret = () => process.env.JWT_SECRET || 'dev-secret-change-me';
 const getJwtExpiresIn = () => process.env.JWT_EXPIRES_IN || '7d';
+const parseIntEnv = (value: string | undefined, fallback: number): number => {
+  const parsed = Number.parseInt(String(value || ''), 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
+  return parsed;
+};
+const parseBoolEnv = (value: string | undefined, fallback: boolean): boolean => {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (!normalized) return fallback;
+  return ['1', 'true', 'yes', 'on'].includes(normalized);
+};
+const isPublicRegisterEnabled = (): boolean => {
+  const fallback = process.env.NODE_ENV !== 'production';
+  return parseBoolEnv(process.env.AUTH_REGISTER_ENABLED, fallback);
+};
+
+const loginLimiter = rateLimit({
+  windowMs: parseIntEnv(process.env.AUTH_LOGIN_RATE_WINDOW_MS, 60_000),
+  max: parseIntEnv(process.env.AUTH_LOGIN_RATE_MAX, 20),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many login attempts. Please wait and try again.' },
+});
 
 const signToken = (payload: object): string => {
   // Cast options to any to avoid friction with overloaded typings
@@ -23,7 +46,7 @@ const toPublicUser = (record: any): User => {
   return rest as User;
 };
 
-router.post('/login', async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => {
   const { emailOrUser, password } = req.body as {
     emailOrUser?: string;
     password?: string;
@@ -63,6 +86,10 @@ router.post('/login', async (req, res) => {
 });
 
 router.post('/register', async (req, res) => {
+  if (!isPublicRegisterEnabled()) {
+    return res.status(403).json({ error: 'Public registration is disabled' });
+  }
+
   const { username, email, password } = req.body as {
     username?: string;
     email?: string;
