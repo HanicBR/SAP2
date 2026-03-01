@@ -418,6 +418,7 @@ export enum TransactionCategory {
 export interface Transaction {
   id: string;
   date: string; // ISO
+  createdAt?: string; // ISO
   amount: number;
   type: TransactionType;
   category: TransactionCategory;
@@ -431,6 +432,7 @@ export interface Transaction {
   vipDurationDays?: number;
   
   createdBy: string; // Admin User ID
+  createdByName?: string;
 }
 
 // --- AUTH SYSTEM ---

@@ -7,21 +7,32 @@ import { dispatchVipAutomationAction } from '../services/vipAutomation';
 
 const router = Router();
 
+const serializeTransaction = (t: any) => {
+  const { user, ...rest } = t;
+  return {
+    ...rest,
+    date: t.date.toISOString(),
+    createdAt: t.createdAt.toISOString(),
+    createdByName: user?.username,
+  };
+};
+
 router.use(authMiddleware);
 router.use(requireRole(UserRole.ADMIN));
 
 router.get('/', async (_req, res) => {
   const transactions = await prisma.transaction.findMany({
     orderBy: { date: 'desc' },
+    include: {
+      user: {
+        select: {
+          username: true,
+        },
+      },
+    },
   });
 
-  return res.json(
-    transactions.map((t) => ({
-      ...t,
-      date: t.date.toISOString(),
-      createdAt: t.createdAt.toISOString(),
-    })),
-  );
+  return res.json(transactions.map(serializeTransaction));
 });
 
 router.post('/', async (req, res) => {
@@ -96,6 +107,13 @@ router.post('/', async (req, res) => {
       vipDurationDays: vipDurationDays || null,
       createdBy,
     },
+    include: {
+      user: {
+        select: {
+          username: true,
+        },
+      },
+    },
   });
 
   let vipDispatch:
@@ -168,9 +186,7 @@ router.post('/', async (req, res) => {
   }
 
   return res.status(201).json({
-    ...tx,
-    date: tx.date.toISOString(),
-    createdAt: tx.createdAt.toISOString(),
+    ...serializeTransaction(tx),
     ...(vipDispatch ? { dispatch: vipDispatch } : {}),
   });
 });
@@ -217,13 +233,16 @@ router.patch('/:id', async (req, res) => {
     const updated = await prisma.transaction.update({
       where: { id },
       data,
+      include: {
+        user: {
+          select: {
+            username: true,
+          },
+        },
+      },
     });
 
-    return res.json({
-      ...updated,
-      date: updated.date.toISOString(),
-      createdAt: updated.createdAt.toISOString(),
-    });
+    return res.json(serializeTransaction(updated));
   } catch {
     return res.status(404).json({ error: 'Transaction not found' });
   }

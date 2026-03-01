@@ -1427,7 +1427,11 @@ export const ApiService = {
     return [...transactionsDb].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   },
 
-  createTransaction: async (data: Omit<Transaction, 'id'>): Promise<Transaction> => {
+  createTransaction: async (
+    data: Omit<Transaction, 'id' | 'createdBy' | 'createdAt' | 'createdByName'> & {
+      createdBy?: string;
+    },
+  ): Promise<Transaction> => {
     if (hasApi) {
       try {
         const created = await apiFetch<Transaction>('/transactions', {
@@ -1443,7 +1447,10 @@ export const ApiService = {
     await delay(600);
     const newTx: Transaction = {
       ...data,
-      id: `tx_${Date.now()}`
+      id: `tx_${Date.now()}`,
+      createdBy: data.createdBy || getStoredUsername() || 'system',
+      createdByName: getStoredUsername() || undefined,
+      createdAt: new Date().toISOString(),
     };
     transactionsDb.unshift(newTx);
 
