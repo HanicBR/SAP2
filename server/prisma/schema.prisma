@@ -36,6 +36,15 @@ enum VipAutomationActionStatus {
   SKIPPED
 }
 
+enum LoadingTelemetryEventType {
+  SESSION_START
+  HEARTBEAT
+  STATUS_CHANGE
+  FILE_DOWNLOAD
+  STAGE_MARK
+  SESSION_END
+}
+
 model User {
   id           String   @id @default(cuid())
   username     String   @unique
@@ -307,4 +316,48 @@ model PlayerPlaytimePulse {
   @@unique([serverId, steamId, bucketStart], name: "serverId_steamId_bucketStart")
   @@index([serverId, bucketStart])
   @@index([steamId, bucketStart])
+}
+
+model LoadingTelemetrySession {
+  id              String                 @id @default(cuid())
+  sessionKey      String                 @unique
+  slug            String
+  source          String?
+  startedAt       DateTime
+  firstEventAt    DateTime?
+  lastEventAt     DateTime?
+  completedAt     DateTime?
+  completed       Boolean                @default(false)
+  totalDurationMs Int?
+  lastStatus      String?
+  lastFile        String?
+  maxProgress     Int?
+  userAgent       String?
+  ipHash          String?
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+  events          LoadingTelemetryEvent[]
+
+  @@index([slug, startedAt])
+  @@index([slug, createdAt])
+  @@index([completed, startedAt])
+}
+
+model LoadingTelemetryEvent {
+  id          String                   @id @default(cuid())
+  sessionId   String
+  seq         Int
+  type        LoadingTelemetryEventType
+  eventAt     DateTime
+  statusText  String?
+  fileName    String?
+  progressPct Int?
+  payload     Json?
+  createdAt   DateTime                 @default(now())
+
+  session LoadingTelemetrySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, seq], name: "sessionId_seq")
+  @@index([sessionId, eventAt])
+  @@index([type, eventAt])
 }
