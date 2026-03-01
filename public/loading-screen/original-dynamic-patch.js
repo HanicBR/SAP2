@@ -282,13 +282,15 @@
       var player = mappedPlayers[index];
       if (!player) return;
 
-      card.style.display = 'flex';
+      card.style.display = 'grid';
+      card.style.gridTemplateColumns = '40px minmax(0,1fr) auto';
       card.style.alignItems = 'center';
-      card.style.justifyContent = 'space-between';
+      card.style.columnGap = '10px';
 
       var infoWrap = card.children && card.children[1];
       if (infoWrap && infoWrap.style) {
         infoWrap.style.minWidth = '0';
+        infoWrap.style.textAlign = 'left';
       }
 
       var existing = card.querySelector('.bsb-vip-tier');

@@ -7,6 +7,7 @@ import { prisma } from '../db/client';
 import { UserRole } from '../domain';
 import { authMiddleware, requireRole } from '../middleware/auth';
 import { bootstrap } from '../bootstrap';
+import { syncSteamProfileBySteamId64 } from '../services/steamProfile';
 
 const router = Router();
 
@@ -219,7 +220,7 @@ const withTimeout = async (url: string, timeoutMs: number): Promise<Response> =>
 const fetchSteamSummariesById64 = async (steamIds64: string[]): Promise<Map<string, SteamSummary>> => {
   const result = new Map<string, SteamSummary>();
   const apiKey = String(process.env.STEAM_WEB_API_KEY || '').trim();
-  if (!apiKey || steamIds64.length === 0) return result;
+  if (steamIds64.length === 0) return result;
 
   const now = Date.now();
   const uniqueIds = uniqueStrings(steamIds64).filter((entry) => /^\d{17}$/.test(entry));
@@ -234,36 +235,65 @@ const fetchSteamSummariesById64 = async (steamIds64: string[]): Promise<Map<stri
     pendingIds.push(steamId64);
   });
 
-  const chunkSize = 100;
-  for (let i = 0; i < pendingIds.length; i += chunkSize) {
-    const chunk = pendingIds.slice(i, i + chunkSize);
-    if (chunk.length === 0) continue;
-    const endpoint =
-      `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${encodeURIComponent(apiKey)}` +
-      `&steamids=${encodeURIComponent(chunk.join(','))}`;
-    try {
-      const response = await withTimeout(endpoint, 2500);
-      if (!response.ok) continue;
-      const json = await response.json().catch(() => null);
-      const players = Array.isArray(json?.response?.players) ? json.response.players : [];
-      players.forEach((player: any) => {
-        const steamId64 = String(player?.steamid || '').trim();
-        if (!/^\d{17}$/.test(steamId64)) return;
-        const personaName = String(player?.personaname || '').trim();
-        const avatarUrl = String(player?.avatarfull || '').trim();
-        const summary: SteamSummary = {
-          ...(personaName ? { personaName } : {}),
-          ...(avatarUrl ? { avatarUrl } : {}),
-        };
-        result.set(steamId64, summary);
-        steamSummaryCache.set(steamId64, {
-          expiresAt: now + STEAM_SUMMARY_CACHE_TTL_MS,
-          summary,
+  if (apiKey) {
+    const chunkSize = 100;
+    for (let i = 0; i < pendingIds.length; i += chunkSize) {
+      const chunk = pendingIds.slice(i, i + chunkSize);
+      if (chunk.length === 0) continue;
+      const endpoint =
+        `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${encodeURIComponent(apiKey)}` +
+        `&steamids=${encodeURIComponent(chunk.join(','))}`;
+      try {
+        const response = await withTimeout(endpoint, 2500);
+        if (!response.ok) continue;
+        const json = await response.json().catch(() => null);
+        const players = Array.isArray(json?.response?.players) ? json.response.players : [];
+        players.forEach((player: any) => {
+          const steamId64 = String(player?.steamid || '').trim();
+          if (!/^\d{17}$/.test(steamId64)) return;
+          const personaName = String(player?.personaname || '').trim();
+          const avatarUrl = String(player?.avatarfull || '').trim();
+          const summary: SteamSummary = {
+            ...(personaName ? { personaName } : {}),
+            ...(avatarUrl ? { avatarUrl } : {}),
+          };
+          result.set(steamId64, summary);
+          steamSummaryCache.set(steamId64, {
+            expiresAt: now + STEAM_SUMMARY_CACHE_TTL_MS,
+            summary,
+          });
         });
-      });
-    } catch {
-      // ignore Steam fetch failures and keep DB fallback
+      } catch {
+        // ignore Steam fetch failures and keep DB fallback
+      }
     }
+  }
+
+  const missing = pendingIds.filter((steamId64) => !result.has(steamId64));
+  if (missing.length > 0) {
+    // Same behavior used in Users screen: resolve profile by steamId64 with XML fallback.
+    await Promise.allSettled(
+      missing.map(async (steamId64) => {
+        try {
+          const profile = await syncSteamProfileBySteamId64(steamId64);
+          const personaName = String(profile.personaName || '').trim();
+          const avatarUrl = String(profile.avatarUrl || '').trim();
+          const summary: SteamSummary = {
+            ...(personaName ? { personaName } : {}),
+            ...(avatarUrl ? { avatarUrl } : {}),
+          };
+          if (summary.personaName || summary.avatarUrl) {
+            result.set(steamId64, summary);
+            steamSummaryCache.set(steamId64, {
+              expiresAt: now + STEAM_SUMMARY_CACHE_TTL_MS,
+              summary,
+            });
+          }
+        } catch {
+          // keep DB fallback
+        }
+      }),
+    );
   }
 
   return result;
