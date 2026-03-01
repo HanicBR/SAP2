@@ -105,9 +105,7 @@ const Vips: React.FC = () => {
   const [extendDurationDays, setExtendDurationDays] = useState('');
   const [extendServerIds, setExtendServerIds] = useState<string[]>([]);
   const [revokeReason, setRevokeReason] = useState('');
-  const [operationApplyMode, setOperationApplyMode] = useState<'SERVER_AND_SITE' | 'SITE_ONLY'>(
-    'SERVER_AND_SITE',
-  );
+  const [applyVipOnServer, setApplyVipOnServer] = useState(true);
 
   const planOptions = useMemo(() => {
     const options = config.vip.plans.map((plan) => String(plan.name || '').trim()).filter(Boolean);
@@ -261,7 +259,7 @@ const Vips: React.FC = () => {
   };
 
   const sanitizeDaysInput = (value: string) => value.replace(/[^0-9]/g, '');
-  const operationEnqueue = operationApplyMode === 'SERVER_AND_SITE';
+  const operationEnqueue = applyVipOnServer;
 
   const handleGrant = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -697,38 +695,6 @@ const Vips: React.FC = () => {
               </option>
             ))}
           </datalist>
-          <div className="bg-zinc-900 border border-zinc-800 rounded p-4">
-            <p className="text-[11px] uppercase font-bold text-zinc-500">Aplicacao da operacao VIP</p>
-            <div className="mt-2 inline-flex rounded border border-zinc-700 bg-zinc-950 p-1">
-              <button
-                type="button"
-                onClick={() => setOperationApplyMode('SERVER_AND_SITE')}
-                className={`px-3 py-1.5 text-xs font-bold uppercase rounded ${
-                  operationApplyMode === 'SERVER_AND_SITE'
-                    ? 'bg-emerald-700 text-white'
-                    : 'text-zinc-300 hover:bg-zinc-800'
-                }`}
-              >
-                Site + Servidor
-              </button>
-              <button
-                type="button"
-                onClick={() => setOperationApplyMode('SITE_ONLY')}
-                className={`px-3 py-1.5 text-xs font-bold uppercase rounded ${
-                  operationApplyMode === 'SITE_ONLY'
-                    ? 'bg-amber-700 text-white'
-                    : 'text-zinc-300 hover:bg-zinc-800'
-                }`}
-              >
-                Somente Site
-              </button>
-            </div>
-            <p className="mt-2 text-xs text-zinc-400">
-              {operationApplyMode === 'SERVER_AND_SITE'
-                ? 'As operacoes abaixo atualizam o painel e tambem enviam automacao para o servidor.'
-                : 'As operacoes abaixo atualizam apenas o painel (sem enviar comando para o servidor).'}
-            </p>
-          </div>
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             <form onSubmit={handleGrant} className="bg-zinc-900 border border-zinc-800 rounded p-4 space-y-3">
               <h2 className="text-sm uppercase font-bold text-zinc-300">Conceder VIP</h2>
@@ -797,6 +763,26 @@ const Vips: React.FC = () => {
                   })}
                 </div>
               </div>
+              <label className="flex items-center justify-between rounded border border-zinc-700 bg-zinc-950/70 px-3 py-2">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wide text-zinc-200">
+                    Aplicar VIP no servidor
+                  </p>
+                  <p className="text-[11px] text-zinc-500">
+                    Desmarcado: so registra no site; remocao no servidor ocorre pela rotina de expiracao.
+                  </p>
+                </div>
+                <span className="relative inline-flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={applyVipOnServer}
+                    onChange={(e) => setApplyVipOnServer(e.target.checked)}
+                    className="peer sr-only"
+                  />
+                  <span className="h-6 w-11 rounded-full bg-zinc-700 transition peer-checked:bg-emerald-600" />
+                  <span className="pointer-events-none absolute left-1 top-1 h-4 w-4 rounded-full bg-white transition peer-checked:translate-x-5" />
+                </span>
+              </label>
               <button
                 type="submit"
                 disabled={busy}
@@ -873,6 +859,26 @@ const Vips: React.FC = () => {
                   })}
                 </div>
               </div>
+              <label className="flex items-center justify-between rounded border border-zinc-700 bg-zinc-950/70 px-3 py-2">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wide text-zinc-200">
+                    Aplicar VIP no servidor
+                  </p>
+                  <p className="text-[11px] text-zinc-500">
+                    Desmarcado: so atualiza cadastro no site para esta operacao.
+                  </p>
+                </div>
+                <span className="relative inline-flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={applyVipOnServer}
+                    onChange={(e) => setApplyVipOnServer(e.target.checked)}
+                    className="peer sr-only"
+                  />
+                  <span className="h-6 w-11 rounded-full bg-zinc-700 transition peer-checked:bg-emerald-600" />
+                  <span className="pointer-events-none absolute left-1 top-1 h-4 w-4 rounded-full bg-white transition peer-checked:translate-x-5" />
+                </span>
+              </label>
               <div className="flex gap-2">
                 <button
                   type="submit"
