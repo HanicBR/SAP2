@@ -8,7 +8,9 @@
       routePath: '/tttloading',
       accentColor: '#be1b3c',
       backgroundImages: ['https://i.imgur.com/HnZfcKR.jpeg'],
+      backgroundRotationSec: 12,
       musicTracks: ['https://raw.githubusercontent.com/HanicBR/backtttloading/main/assets/music/gtavicecity.ogg'],
+      musicVolumePct: 25,
       hero: {
         badge: 'TTT',
         title: 'Trouble in Terrorist Town',
@@ -52,7 +54,9 @@
       routePath: '/sandboxloading',
       accentColor: '#be1b3c',
       backgroundImages: ['https://i.imgur.com/HnZfcKR.jpeg'],
+      backgroundRotationSec: 12,
       musicTracks: ['https://raw.githubusercontent.com/HanicBR/backtttloading/main/assets/music/gtavicecity.ogg'],
+      musicVolumePct: 25,
       hero: {
         badge: 'SANDBOX',
         title: 'Backstabber Sandbox',
@@ -93,6 +97,9 @@
     bgIndex: 0,
     bgTimer: null,
     audio: null,
+    audioContext: null,
+    audioGainNode: null,
+    audioSourceNode: null,
     tracks: [],
     trackIndex: 0,
   };
@@ -425,6 +432,31 @@
       .filter(Boolean);
   }
 
+  function clampNumber(value, fallback, min, max) {
+    var parsed = Number(value);
+    if (!Number.isFinite(parsed)) return fallback;
+    if (parsed < min) return min;
+    if (parsed > max) return max;
+    return parsed;
+  }
+
+  function safeBackgroundUrls(source, fallback) {
+    var items = Array.isArray(source) ? source : [];
+    var urls = [];
+    var seen = Object.create(null);
+    items.forEach(function (entry) {
+      if (!entry || typeof entry !== 'object') return;
+      if (entry.enabled === false) return;
+      var url = String(entry.url || '').trim();
+      if (!url) return;
+      if (seen[url]) return;
+      seen[url] = true;
+      urls.push(url);
+    });
+    if (urls.length > 0) return urls;
+    return safeLines(fallback, []);
+  }
+
   function normalizeVipPlan(value) {
     var raw = String(value || '').trim();
     if (!raw) return 'VIP';
@@ -452,8 +484,14 @@
       enabled: source.enabled !== false,
       routePath: String(source.routePath || '/' + slug),
       accentColor: sanitizeColor(source.accentColor || base.accentColor),
-      backgroundImages: safeLines(source.backgroundImages, base.backgroundImages),
+      backgroundImages: safeBackgroundUrls(source.backgroundImageItems, source.backgroundImages || base.backgroundImages),
+      backgroundRotationSec: Math.round(
+        clampNumber(source.backgroundRotationSec, Number(base.backgroundRotationSec || 12), 3, 120),
+      ),
       musicTracks: safeLines(source.musicTracks, base.musicTracks),
+      musicVolumePct: Math.round(
+        clampNumber(source.musicVolumePct, Number(base.musicVolumePct || 25), 0, 300),
+      ),
       hero: {
         badge: String(hero.badge || base.hero.badge || 'BACKSTABBER').trim(),
         title: String(hero.title || base.hero.title || 'Loading Screen').trim(),
@@ -598,8 +636,8 @@
     renderLines(dom.rulesList, profile.rules, true);
     renderVips(profile.vipTitle, profile.vipPlayers);
 
-    startBackgroundRotation(profile.backgroundImages || []);
-    initMusic(profile.musicTracks || []);
+    startBackgroundRotation(profile.backgroundImages || [], profile.backgroundRotationSec || 12);
+    initMusic(profile.musicTracks || [], profile.musicVolumePct || 25);
 
     if (dom.serverName) dom.serverName.textContent = profile.name || 'Backstabber Brasil';
     if (dom.serverSub) dom.serverSub.textContent = 'Conectando ao servidor...';
@@ -607,7 +645,7 @@
     if (dom.infoMode) dom.infoMode.textContent = 'modo: ' + (profile.mode || '-');
   }
 
-  function startBackgroundRotation(images) {
+  function startBackgroundRotation(images, intervalSec) {
     if (state.bgTimer) {
       window.clearInterval(state.bgTimer);
       state.bgTimer = null;
@@ -631,11 +669,40 @@
     apply();
 
     if (list.length > 1) {
-      state.bgTimer = window.setInterval(apply, 12000);
+      var intervalMs = Math.round(clampNumber(intervalSec, 12, 3, 120) * 1000);
+      state.bgTimer = window.setInterval(apply, intervalMs);
     }
   }
 
-  function initMusic(tracks) {
+  function applyMusicVolume(volumePct) {
+    var safePct = clampNumber(volumePct, 25, 0, 300);
+    var gainValue = safePct / 100;
+    if (!state.audio) return;
+
+    try {
+      var AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) throw new Error('audio_context_unavailable');
+      if (!state.audioContext) {
+        state.audioContext = new AudioCtx();
+        state.audioSourceNode = state.audioContext.createMediaElementSource(state.audio);
+        state.audioGainNode = state.audioContext.createGain();
+        state.audioSourceNode.connect(state.audioGainNode);
+        state.audioGainNode.connect(state.audioContext.destination);
+      }
+      if (state.audioGainNode && state.audioGainNode.gain) {
+        state.audioGainNode.gain.value = gainValue;
+      }
+      if (state.audioContext && state.audioContext.state === 'suspended') {
+        state.audioContext.resume().catch(function () {});
+      }
+      state.audio.volume = 1;
+    } catch (_err) {
+      // Fallback para navegadores sem WebAudio ou com bloqueio
+      state.audio.volume = Math.max(0, Math.min(1, safePct / 100));
+    }
+  }
+
+  function initMusic(tracks, volumePct) {
     var safeTracks = (tracks || []).filter(Boolean);
     state.tracks = safeTracks;
     state.trackIndex = 0;
@@ -657,6 +724,7 @@
         loadAndPlayTrack();
       });
     }
+    applyMusicVolume(volumePct);
 
     function loadAndPlayTrack() {
       if (!state.audio || !state.tracks.length) return;

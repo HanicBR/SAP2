@@ -18,6 +18,12 @@ const router = Router();
 
 type LoadingScreenMode = 'TTT' | 'SANDBOX' | 'MURDER' | 'CUSTOM';
 
+type LoadingScreenBackgroundItem = {
+  id: string;
+  url: string;
+  enabled: boolean;
+};
+
 type LoadingScreenVipEntry = {
   name: string;
   steamId?: string;
@@ -48,7 +54,10 @@ type LoadingScreenProfile = {
   routePath: string;
   accentColor: string;
   backgroundImages: string[];
+  backgroundImageItems: LoadingScreenBackgroundItem[];
+  backgroundRotationSec: number;
   musicTracks: string[];
+  musicVolumePct: number;
   hero: LoadingScreenHero;
   notice: LoadingScreenNotice;
   rules: string[];
@@ -79,6 +88,10 @@ const MAX_VIPS = 40;
 const MAX_RULES = 12;
 const MAX_PUBLIC_VIPS = 80;
 const STEAM_ID64_BASE = BigInt('76561197960265728');
+const MIN_BG_ROTATION_SEC = 3;
+const MAX_BG_ROTATION_SEC = 120;
+const MIN_MUSIC_VOLUME_PCT = 0;
+const MAX_MUSIC_VOLUME_PCT = 300;
 
 const parsePositiveIntEnv = (value: string | undefined, fallback: number): number => {
   const parsed = Number.parseInt(String(value || '').trim(), 10);
@@ -142,6 +155,14 @@ const trimTo = (value: unknown, maxLength: number, fallback: string): string => 
   return text.length <= maxLength ? text : text.slice(0, maxLength);
 };
 
+const clampInt = (value: unknown, fallback: number, min: number, max: number): number => {
+  const parsed = Number.parseInt(String(value ?? '').trim(), 10);
+  if (!Number.isFinite(parsed)) return fallback;
+  if (parsed < min) return min;
+  if (parsed > max) return max;
+  return parsed;
+};
+
 const sanitizeColor = (value: unknown, fallback: string): string => {
   const raw = String(value ?? '').trim();
   return /^#[0-9a-fA-F]{6}$/.test(raw) ? raw : fallback;
@@ -152,6 +173,63 @@ const sanitizeUrl = (value: unknown): string | undefined => {
   if (!raw) return undefined;
   if (raw.length > MAX_URL_LENGTH) return raw.slice(0, MAX_URL_LENGTH);
   return raw;
+};
+
+const createBackgroundItemId = (seed?: string): string => {
+  const normalizedSeed = String(seed || '').trim();
+  if (normalizedSeed) {
+    const hash = crypto.createHash('sha1').update(normalizedSeed).digest('hex').slice(0, 16);
+    return `bg_${hash}`;
+  }
+  return `bg_${Date.now().toString(36)}_${crypto.randomBytes(4).toString('hex')}`;
+};
+
+const parseBoolLoose = (value: unknown, fallback: boolean): boolean => {
+  if (typeof value === 'boolean') return value;
+  const normalized = String(value ?? '')
+    .trim()
+    .toLowerCase();
+  if (!normalized) return fallback;
+  return ['1', 'true', 'yes', 'on'].includes(normalized);
+};
+
+const sanitizeBackgroundImageItems = (
+  value: unknown,
+  fallback: LoadingScreenBackgroundItem[],
+): LoadingScreenBackgroundItem[] => {
+  const source = Array.isArray(value) ? value : [];
+  const seen = new Set<string>();
+  const next: LoadingScreenBackgroundItem[] = [];
+
+  source.forEach((entry) => {
+    if (next.length >= MAX_BG_IMAGES) return;
+
+    let idRaw = '';
+    let urlRaw: unknown;
+    let enabledRaw: unknown = true;
+    if (isRecord(entry)) {
+      idRaw = trimTo(entry.id, 80, '');
+      urlRaw = entry.url;
+      enabledRaw = entry.enabled;
+    } else {
+      urlRaw = entry;
+      enabledRaw = true;
+    }
+
+    const url = sanitizeUrl(urlRaw);
+    if (!url) return;
+    if (seen.has(url)) return;
+    seen.add(url);
+    next.push({
+      id: idRaw || createBackgroundItemId(url),
+      url,
+      enabled: parseBoolLoose(enabledRaw, true),
+    });
+  });
+
+  if (next.length > 0) return next;
+  if (fallback.length > 0) return fallback.slice(0, MAX_BG_IMAGES);
+  return [];
 };
 
 const toLines = (value: unknown, maxItems: number, fallback: string[]): string[] => {
@@ -530,7 +608,16 @@ const buildDefaultProfiles = (): LoadingScreenProfile[] => {
       routePath: '/tttloading',
       accentColor: '#be1b3c',
       backgroundImages: ['https://i.imgur.com/HnZfcKR.jpeg'],
+      backgroundImageItems: [
+        {
+          id: 'ttt-bg-1',
+          url: 'https://i.imgur.com/HnZfcKR.jpeg',
+          enabled: true,
+        },
+      ],
+      backgroundRotationSec: 12,
       musicTracks: ['https://raw.githubusercontent.com/HanicBR/backtttloading/main/assets/music/gtavicecity.ogg'],
+      musicVolumePct: 25,
       hero: {
         badge: 'TTT',
         title: 'Trouble in Terrorist Town',
@@ -582,7 +669,16 @@ const buildDefaultProfiles = (): LoadingScreenProfile[] => {
       routePath: '/sandboxloading',
       accentColor: '#be1b3c',
       backgroundImages: ['https://i.imgur.com/HnZfcKR.jpeg'],
+      backgroundImageItems: [
+        {
+          id: 'sandbox-bg-1',
+          url: 'https://i.imgur.com/HnZfcKR.jpeg',
+          enabled: true,
+        },
+      ],
+      backgroundRotationSec: 12,
       musicTracks: ['https://raw.githubusercontent.com/HanicBR/backtttloading/main/assets/music/gtavicecity.ogg'],
+      musicVolumePct: 25,
       hero: {
         badge: 'SANDBOX',
         title: 'Backstabber Sandbox',
@@ -635,13 +731,36 @@ const normalizeProfile = (input: unknown, fallback?: LoadingScreenProfile): Load
   const inferredName = trimTo(record.name, 80, base.name);
   const slug = sanitizeSlug(record.slug) || sanitizeSlug(base.slug) || sanitizeSlugFromName(inferredName);
 
-  const backgroundImages = toLines(record.backgroundImages, MAX_BG_IMAGES, base.backgroundImages)
-    .map((entry) => sanitizeUrl(entry))
-    .filter((entry): entry is string => Boolean(entry));
+  const fallbackBackgroundItems = Array.isArray(base.backgroundImageItems)
+    ? base.backgroundImageItems
+    : base.backgroundImages.map((url, idx) => ({
+        id: `bg_fallback_${idx + 1}`,
+        url,
+        enabled: true,
+      }));
+  const backgroundImageItems = sanitizeBackgroundImageItems(
+    record.backgroundImageItems || record.backgroundImages,
+    fallbackBackgroundItems,
+  );
+  const activeBackgroundImages = backgroundImageItems
+    .filter((entry) => entry.enabled)
+    .map((entry) => entry.url);
+  const backgroundRotationSec = clampInt(
+    record.backgroundRotationSec,
+    base.backgroundRotationSec || 12,
+    MIN_BG_ROTATION_SEC,
+    MAX_BG_ROTATION_SEC,
+  );
 
   const musicTracks = toLines(record.musicTracks, MAX_TRACKS, base.musicTracks)
     .map((entry) => sanitizeUrl(entry))
     .filter((entry): entry is string => Boolean(entry));
+  const musicVolumePct = clampInt(
+    record.musicVolumePct,
+    base.musicVolumePct || 25,
+    MIN_MUSIC_VOLUME_PCT,
+    MAX_MUSIC_VOLUME_PCT,
+  );
 
   const heroRecord = isRecord(record.hero) ? record.hero : {};
   const noticeRecord = isRecord(record.notice) ? record.notice : {};
@@ -674,8 +793,11 @@ const normalizeProfile = (input: unknown, fallback?: LoadingScreenProfile): Load
     enabled: parseBool(record.enabled, base.enabled),
     routePath: `/${slug}`,
     accentColor: sanitizeColor(record.accentColor, base.accentColor),
-    backgroundImages: backgroundImages.length > 0 ? backgroundImages : base.backgroundImages,
+    backgroundImages: activeBackgroundImages,
+    backgroundImageItems,
+    backgroundRotationSec,
     musicTracks: musicTracks.length > 0 ? musicTracks : base.musicTracks,
+    musicVolumePct,
     hero,
     notice,
     rules: toLines(record.rules, MAX_RULES, base.rules).map((item) => item.slice(0, MAX_LINE_LENGTH)),

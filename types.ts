@@ -759,6 +759,12 @@ export interface SiteConfig {
 
 export type LoadingScreenMode = 'TTT' | 'SANDBOX' | 'MURDER' | 'CUSTOM';
 
+export interface LoadingScreenBackgroundItem {
+  id: string;
+  url: string;
+  enabled: boolean;
+}
+
 export interface LoadingScreenVipEntry {
   name: string;
   steamId?: string;
@@ -789,7 +795,10 @@ export interface LoadingScreenProfile {
   routePath: string;
   accentColor: string;
   backgroundImages: string[];
+  backgroundImageItems?: LoadingScreenBackgroundItem[];
+  backgroundRotationSec?: number;
   musicTracks: string[];
+  musicVolumePct?: number;
   hero: LoadingScreenHero;
   notice: LoadingScreenNotice;
   rules: string[];

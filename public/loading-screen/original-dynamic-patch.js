@@ -45,6 +45,30 @@
       .filter(Boolean);
   }
 
+  function clampNumber(value, fallback, min, max) {
+    var parsed = Number(value);
+    if (!Number.isFinite(parsed)) return fallback;
+    if (parsed < min) return min;
+    if (parsed > max) return max;
+    return parsed;
+  }
+
+  function extractEnabledBackgroundUrls(items, fallback) {
+    if (!Array.isArray(items) || items.length === 0) return safeArray(fallback);
+    var urls = [];
+    var seen = Object.create(null);
+    items.forEach(function (entry) {
+      if (!entry || typeof entry !== 'object') return;
+      if (entry.enabled === false) return;
+      var url = String(entry.url || '').trim();
+      if (!url) return;
+      if (seen[url]) return;
+      seen[url] = true;
+      urls.push(url);
+    });
+    return urls.length > 0 ? urls : safeArray(fallback);
+  }
+
   function safePlayers(value) {
     if (!Array.isArray(value)) return [];
     return value
@@ -338,7 +362,7 @@
     renderVipFallback(players);
   }
 
-  function applyBackground(backgroundImages) {
+  function applyBackground(backgroundImages, rotationSec) {
     var images = safeArray(backgroundImages);
     if (!images.length) return;
 
@@ -363,6 +387,7 @@
 
     if (images.length > 1) {
       var idx = 0;
+      var intervalMs = Math.round(clampNumber(rotationSec, 12, 3, 120) * 1000);
       window.__bsbBgRotateTimer = setInterval(function () {
         idx = (idx + 1) % images.length;
         if (layer) {
@@ -371,11 +396,11 @@
         if (bgImg) {
           bgImg.setAttribute('src', images[idx]);
         }
-      }, 12000);
+      }, intervalMs);
     }
   }
 
-  function applyMusic(musicTracks) {
+  function applyMusic(musicTracks, volumePct) {
     var tracks = safeArray(musicTracks);
     if (!tracks.length) return;
 
@@ -392,6 +417,28 @@
     });
 
     var trackIndex = 0;
+    var safeVolumePct = clampNumber(volumePct, 25, 0, 300);
+    var gainValue = safeVolumePct / 100;
+    var audioContext = null;
+    var gainNode = null;
+    var sourceNode = null;
+
+    try {
+      var AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) {
+        audioContext = new AudioCtx();
+        sourceNode = audioContext.createMediaElementSource(audio);
+        gainNode = audioContext.createGain();
+        sourceNode.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        gainNode.gain.value = gainValue;
+        audio.volume = 1;
+      } else {
+        audio.volume = Math.max(0, Math.min(1, safeVolumePct / 100));
+      }
+    } catch (_err) {
+      audio.volume = Math.max(0, Math.min(1, safeVolumePct / 100));
+    }
     audio.load();
 
     audio.onended = function () {
@@ -404,6 +451,9 @@
 
     var play = function () {
       if (!tracks.length) return;
+      if (audioContext && audioContext.state === 'suspended') {
+        audioContext.resume().catch(function () {});
+      }
       audio.src = tracks[trackIndex];
       var promise = audio.play();
       if (promise && typeof promise.catch === 'function') {
@@ -431,10 +481,13 @@
 
   function normalizeProfile(raw) {
     var source = raw && typeof raw === 'object' ? raw : {};
+    var fallbackBackgrounds = safeArray(source.backgroundImages);
     return {
       accentColor: String(source.accentColor || ''),
-      backgroundImages: safeArray(source.backgroundImages),
+      backgroundImages: extractEnabledBackgroundUrls(source.backgroundImageItems, fallbackBackgrounds),
+      backgroundRotationSec: Math.round(clampNumber(source.backgroundRotationSec, 12, 3, 120)),
       musicTracks: safeArray(source.musicTracks),
+      musicVolumePct: Math.round(clampNumber(source.musicVolumePct, 25, 0, 300)),
       hero: source.hero && typeof source.hero === 'object' ? source.hero : {},
       notice: source.notice && typeof source.notice === 'object' ? source.notice : {},
       rules: safeArray(source.rules),
@@ -459,8 +512,8 @@
     applyNotice(profile.notice);
     applyRules(profile.rules);
     applyVip(profile.vipTitle, profile.vipPlayers);
-    applyBackground(profile.backgroundImages);
-    applyMusic(profile.musicTracks);
+    applyBackground(profile.backgroundImages, profile.backgroundRotationSec);
+    applyMusic(profile.musicTracks, profile.musicVolumePct);
   }
 
   function initLoadingTelemetry(telemetryMeta) {

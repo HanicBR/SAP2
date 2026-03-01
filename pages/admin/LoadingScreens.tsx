@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Icons } from '../../components/Icon';
 import { ApiService } from '../../services/api';
 import {
+  LoadingScreenBackgroundItem,
   LoadingScreenMode,
   LoadingScreenProfile,
   LoadingScreenVipEntry,
@@ -49,6 +50,45 @@ const parseLineInput = (value: string): string[] =>
     ),
   );
 
+const createBackgroundItemId = (): string =>
+  `bg_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+
+const clampNumber = (value: number, fallback: number, min: number, max: number): number => {
+  if (!Number.isFinite(value)) return fallback;
+  if (value < min) return min;
+  if (value > max) return max;
+  return value;
+};
+
+const toBackgroundItems = (
+  items: LoadingScreenBackgroundItem[] | undefined,
+  fallbackUrls: string[] | undefined,
+): LoadingScreenBackgroundItem[] => {
+  const source = Array.isArray(items) && items.length > 0
+    ? items
+    : (fallbackUrls || []).map((url) => ({
+        id: createBackgroundItemId(),
+        url,
+        enabled: true,
+      }));
+  const next: LoadingScreenBackgroundItem[] = [];
+  const seen = new Set<string>();
+  source.forEach((entry) => {
+    const url = String(entry?.url || '').trim();
+    if (!url || seen.has(url)) return;
+    seen.add(url);
+    next.push({
+      id: String(entry?.id || '').trim() || createBackgroundItemId(),
+      url,
+      enabled: entry?.enabled !== false,
+    });
+  });
+  return next;
+};
+
+const activeBackgroundUrls = (items: LoadingScreenBackgroundItem[]): string[] =>
+  items.filter((entry) => entry.enabled !== false).map((entry) => entry.url);
+
 const mergeLineInput = (current: string, nextValues: string[]): string => {
   const merged = parseLineInput(`${current}\n${nextValues.join('\n')}`);
   return merged.join('\n');
@@ -63,6 +103,11 @@ const makeVip = (): LoadingScreenVipEntry => ({
 
 const makeDraft = (base?: LoadingScreenProfile): LoadingScreenProfile => {
   const slug = base?.slug || `loading-${Date.now()}`;
+  const backgroundImageItems = toBackgroundItems(
+    base?.backgroundImageItems,
+    base?.backgroundImages?.length ? base.backgroundImages : ['https://i.imgur.com/HnZfcKR.jpeg'],
+  );
+  const backgroundImages = activeBackgroundUrls(backgroundImageItems);
   return {
     slug,
     name: base?.name || 'Nova loading screen',
@@ -70,10 +115,11 @@ const makeDraft = (base?: LoadingScreenProfile): LoadingScreenProfile => {
     enabled: base?.enabled ?? true,
     routePath: `/${slug}`,
     accentColor: base?.accentColor || '#be1b3c',
-    backgroundImages: base?.backgroundImages?.length
-      ? [...base.backgroundImages]
-      : ['https://i.imgur.com/HnZfcKR.jpeg'],
+    backgroundImages: backgroundImages.length > 0 ? backgroundImages : ['https://i.imgur.com/HnZfcKR.jpeg'],
+    backgroundImageItems,
+    backgroundRotationSec: Math.round(clampNumber(Number(base?.backgroundRotationSec ?? 12), 12, 3, 120)),
     musicTracks: base?.musicTracks?.length ? [...base.musicTracks] : [],
+    musicVolumePct: Math.round(clampNumber(Number(base?.musicVolumePct ?? 25), 25, 0, 300)),
     hero: {
       badge: base?.hero.badge || 'BACKSTABBER',
       title: base?.hero.title || 'Loading Screen',
@@ -151,7 +197,8 @@ const LoadingScreens: React.FC = () => {
   const [isNewDraft, setIsNewDraft] = useState(false);
   const [savedSignature, setSavedSignature] = useState('');
 
-  const [bgInput, setBgInput] = useState('');
+  const [backgroundLinkInput, setBackgroundLinkInput] = useState('');
+  const [compressImagesOnUpload, setCompressImagesOnUpload] = useState(true);
   const [musicInput, setMusicInput] = useState('');
   const [heroDescInput, setHeroDescInput] = useState('');
   const [noticeLinesInput, setNoticeLinesInput] = useState('');
@@ -169,7 +216,7 @@ const LoadingScreens: React.FC = () => {
   const [telemetrySummary, setTelemetrySummary] = useState<LoadingTelemetrySummaryResponse | null>(null);
 
   const hydrateDraftInputs = (profile: LoadingScreenProfile) => {
-    setBgInput(toLineInput(profile.backgroundImages));
+    setBackgroundLinkInput('');
     setMusicInput(toLineInput(profile.musicTracks));
     setHeroDescInput(toLineInput(profile.hero.descriptionLines));
     setNoticeLinesInput(toLineInput(profile.notice.lines));
@@ -320,12 +367,70 @@ const LoadingScreens: React.FC = () => {
     });
   };
 
+  const setBackgroundItems = (items: LoadingScreenBackgroundItem[]) => {
+    const normalized = toBackgroundItems(items, []);
+    updateDraft({
+      backgroundImageItems: normalized,
+      backgroundImages: activeBackgroundUrls(normalized),
+    });
+  };
+
+  const addBackgroundUrl = (urlRaw: string) => {
+    const url = String(urlRaw || '').trim();
+    if (!url) return;
+    setDraft((prev) => {
+      if (!prev) return prev;
+      const nextItems = toBackgroundItems(
+        [...(prev.backgroundImageItems || []), { id: createBackgroundItemId(), url, enabled: true }],
+        prev.backgroundImages,
+      );
+      return {
+        ...prev,
+        backgroundImageItems: nextItems,
+        backgroundImages: activeBackgroundUrls(nextItems),
+      };
+    });
+  };
+
+  const toggleBackgroundItem = (id: string, enabled: boolean) => {
+    setDraft((prev) => {
+      if (!prev) return prev;
+      const nextItems = (prev.backgroundImageItems || []).map((item) =>
+        item.id === id ? { ...item, enabled } : item,
+      );
+      return {
+        ...prev,
+        backgroundImageItems: nextItems,
+        backgroundImages: activeBackgroundUrls(nextItems),
+      };
+    });
+  };
+
+  const removeBackgroundItem = (id: string) => {
+    setDraft((prev) => {
+      if (!prev) return prev;
+      const nextItems = (prev.backgroundImageItems || []).filter((item) => item.id !== id);
+      return {
+        ...prev,
+        backgroundImageItems: nextItems,
+        backgroundImages: activeBackgroundUrls(nextItems),
+      };
+    });
+  };
+
   const syncArrayInputsToDraft = () => {
     if (!draft) return draft;
+    const nextBackgroundItems = toBackgroundItems(draft.backgroundImageItems, draft.backgroundImages);
+    const nextMusicTracks = parseLineInput(musicInput);
     return {
       ...draft,
-      backgroundImages: parseLineInput(bgInput),
-      musicTracks: parseLineInput(musicInput),
+      backgroundImageItems: nextBackgroundItems,
+      backgroundImages: activeBackgroundUrls(nextBackgroundItems),
+      backgroundRotationSec: Math.round(
+        clampNumber(Number(draft.backgroundRotationSec ?? 12), 12, 3, 120),
+      ),
+      musicTracks: nextMusicTracks,
+      musicVolumePct: Math.round(clampNumber(Number(draft.musicVolumePct ?? 25), 25, 0, 300)),
       hero: {
         ...draft.hero,
         descriptionLines: parseLineInput(heroDescInput),
@@ -552,6 +657,53 @@ const LoadingScreens: React.FC = () => {
     }
   };
 
+  const compressImageFileToJpeg = async (file: File): Promise<File> => {
+    if (!file.type.startsWith('image/')) return file;
+    const lowerType = file.type.toLowerCase();
+    if (lowerType.includes('svg') || lowerType.includes('gif')) {
+      return file;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    try {
+      try {
+        const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+          const element = new Image();
+          element.onload = () => resolve(element);
+          element.onerror = () => reject(new Error('Falha ao ler imagem para compressao'));
+          element.src = objectUrl;
+        });
+
+        const maxDimension = 2560;
+        const scale = Math.min(1, maxDimension / Math.max(img.width, img.height));
+        const targetWidth = Math.max(1, Math.round(img.width * scale));
+        const targetHeight = Math.max(1, Math.round(img.height * scale));
+
+        const canvas = document.createElement('canvas');
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+        const context = canvas.getContext('2d');
+        if (!context) return file;
+        context.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+        const blob = await new Promise<Blob | null>((resolve) =>
+          canvas.toBlob(resolve, 'image/jpeg', 0.82),
+        );
+        if (!blob) return file;
+
+        const baseName = file.name.replace(/\.[a-z0-9]+$/i, '');
+        return new File([blob], `${baseName || 'background'}.jpg`, {
+          type: 'image/jpeg',
+          lastModified: Date.now(),
+        });
+      } catch {
+        return file;
+      }
+    } finally {
+      URL.revokeObjectURL(objectUrl);
+    }
+  };
+
   const uploadBackgroundFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     setMediaUploading('background');
@@ -559,17 +711,16 @@ const LoadingScreens: React.FC = () => {
     try {
       const uploadedUrls: string[] = [];
       for (const file of Array.from(files)) {
-        const result = await ApiService.uploadLoadingMedia(file);
+        const fileToUpload = compressImagesOnUpload ? await compressImageFileToJpeg(file) : file;
+        const result = await ApiService.uploadLoadingMedia(fileToUpload);
         uploadedUrls.push(result.url);
       }
-      setBgInput((prev) => {
-        const nextInput = mergeLineInput(prev, uploadedUrls);
-        updateDraft({ backgroundImages: parseLineInput(nextInput) });
-        return nextInput;
-      });
+      uploadedUrls.forEach((url) => addBackgroundUrl(url));
       setNotice({
         tone: 'success',
-        message: `${uploadedUrls.length} arquivo(s) de background enviado(s) com sucesso.`,
+        message: `${uploadedUrls.length} arquivo(s) de background enviado(s) com sucesso${
+          compressImagesOnUpload ? ' (JPG comprimido)' : ''
+        }.`,
       });
     } catch (error: any) {
       setNotice({
@@ -1035,16 +1186,93 @@ const LoadingScreens: React.FC = () => {
                     />
                     {mediaUploading === 'background' ? 'Enviando...' : 'Fazer upload de imagem'}
                   </label>
+                  <label className="mt-2 flex items-center gap-2 rounded border border-zinc-700 bg-zinc-950/70 px-2 py-1.5 text-xs text-zinc-300">
+                    <input
+                      type="checkbox"
+                      checked={compressImagesOnUpload}
+                      onChange={(event) => setCompressImagesOnUpload(event.target.checked)}
+                    />
+                    Comprimir upload (JPG qualidade 82%)
+                  </label>
                 </div>
-                <textarea
-                  rows={5}
-                  value={bgInput}
-                  onChange={(event) => {
-                    setBgInput(event.target.value);
-                    updateDraft({ backgroundImages: parseLineInput(event.target.value) });
-                  }}
-                  className={TEXTAREA_CLASS}
-                />
+                <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
+                  <input
+                    type="text"
+                    value={backgroundLinkInput}
+                    onChange={(event) => setBackgroundLinkInput(event.target.value)}
+                    className={INPUT_CLASS}
+                    placeholder="https://... (adicionar imagem por link)"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      addBackgroundUrl(backgroundLinkInput);
+                      setBackgroundLinkInput('');
+                    }}
+                    className="rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-xs font-bold uppercase text-zinc-200"
+                  >
+                    Adicionar
+                  </button>
+                </div>
+                <div className="mt-2">
+                  <label className={LABEL_CLASS}>Troca de fundo (segundos)</label>
+                  <input
+                    type="number"
+                    min={3}
+                    max={120}
+                    value={Number(draft.backgroundRotationSec ?? 12)}
+                    onChange={(event) =>
+                      updateDraft({
+                        backgroundRotationSec: Math.round(
+                          clampNumber(Number(event.target.value), 12, 3, 120),
+                        ),
+                      })
+                    }
+                    className={INPUT_CLASS}
+                  />
+                </div>
+                <div className="mt-3 space-y-2">
+                  {(draft.backgroundImageItems || []).length === 0 ? (
+                    <div className="rounded border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs text-zinc-500">
+                      Nenhuma imagem cadastrada.
+                    </div>
+                  ) : (
+                    (draft.backgroundImageItems || []).map((item) => (
+                      <div
+                        key={item.id}
+                        className="grid items-center gap-2 rounded border border-zinc-800 bg-zinc-950 p-2 sm:grid-cols-[56px_1fr_auto_auto]"
+                      >
+                        <img
+                          src={item.url}
+                          alt="preview"
+                          className="h-14 w-14 rounded border border-zinc-800 object-cover"
+                          loading="lazy"
+                        />
+                        <div className="min-w-0">
+                          <div className="truncate text-xs text-zinc-300">{item.url}</div>
+                          <div className="mt-1 text-[10px] uppercase tracking-wide text-zinc-500">
+                            {item.enabled ? 'Ativa' : 'Desativada'}
+                          </div>
+                        </div>
+                        <label className="inline-flex items-center gap-1 rounded border border-zinc-700 bg-zinc-900 px-2 py-1 text-[11px] text-zinc-300">
+                          <input
+                            type="checkbox"
+                            checked={item.enabled !== false}
+                            onChange={(event) => toggleBackgroundItem(item.id, event.target.checked)}
+                          />
+                          Ativa
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => removeBackgroundItem(item.id)}
+                          className="rounded border border-red-900/60 bg-red-900/20 px-2 py-1 text-[11px] font-bold uppercase text-red-300"
+                        >
+                          Remover
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
               <div>
                 <label className={LABEL_CLASS}>Playlist (upload recomendado)</label>
@@ -1073,6 +1301,26 @@ const LoadingScreens: React.FC = () => {
                   }}
                   className={TEXTAREA_CLASS}
                 />
+                <div className="mt-2">
+                  <label className={LABEL_CLASS}>Volume da playlist (%)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={300}
+                    value={Number(draft.musicVolumePct ?? 25)}
+                    onChange={(event) =>
+                      updateDraft({
+                        musicVolumePct: Math.round(
+                          clampNumber(Number(event.target.value), 25, 0, 300),
+                        ),
+                      })
+                    }
+                    className={INPUT_CLASS}
+                  />
+                  <p className="mt-1 text-[11px] text-zinc-500">
+                    100 = volume normal. Pode aumentar acima de 100 em navegadores compatíveis com ganho.
+                  </p>
+                </div>
               </div>
             </div>
             </div>
