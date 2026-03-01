@@ -1,4 +1,4 @@
-﻿-- Add steam identity fields to User
+-- Add steam identity fields to User
 ALTER TABLE "User"
 ADD COLUMN "steamId64" TEXT,
 ADD COLUMN "steamProfileUrl" TEXT,
