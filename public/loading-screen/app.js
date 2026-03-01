@@ -129,6 +129,8 @@
     source: isGmod ? 'gmod-cef-appjs' : 'web-preview-appjs',
     sessionKey: '',
     slug: '',
+    token: '',
+    tokenRequired: false,
     startedAt: '',
     seq: 0,
     queue: [],
@@ -172,17 +174,27 @@
   }
 
   function buildTelemetryPayload(events) {
-    return {
+    var payload = {
       sessionKey: telemetry.sessionKey,
       slug: telemetry.slug,
       startedAt: telemetry.startedAt,
       source: telemetry.source,
       events: events,
     };
+    if (telemetry.token) {
+      payload.token = telemetry.token;
+    }
+    return payload;
   }
 
   function sendTelemetryPayload(payload, preferBeacon) {
     var body = JSON.stringify(payload);
+    var headers = {
+      'Content-Type': 'application/json',
+    };
+    if (telemetry.token) {
+      headers['X-Loading-Token'] = telemetry.token;
+    }
     if (preferBeacon && typeof navigator.sendBeacon === 'function') {
       try {
         var blob = new Blob([body], { type: 'application/json' });
@@ -193,9 +205,7 @@
 
     return fetch(telemetry.endpoint, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: headers,
       body: body,
       keepalive: !!preferBeacon,
     })
@@ -310,10 +320,14 @@
     flushTelemetry(true);
   }
 
-  function startTelemetry(slug) {
+  function startTelemetry(slug, telemetryMeta) {
     if (!enableTelemetry) return;
     var normalizedSlug = String(slug || '').trim().toLowerCase();
     if (!normalizedSlug) return;
+    if (telemetryMeta && typeof telemetryMeta === 'object') {
+      telemetry.token = String(telemetryMeta.token || '').trim();
+      telemetry.tokenRequired = telemetryMeta.required === true;
+    }
 
     telemetry.slug = normalizedSlug;
     telemetry.sessionKey = createTelemetrySessionKey(normalizedSlug);
@@ -431,6 +445,16 @@
       rules: safeLines(source.rules, base.rules),
       vipTitle: String(source.vipTitle || base.vipTitle || 'Destaques').trim(),
       vipPlayers: safePlayers(source.vipPlayers || base.vipPlayers),
+    };
+  }
+
+  function normalizeTelemetryMeta(raw) {
+    if (!raw || typeof raw !== 'object') {
+      return { required: false, token: '' };
+    }
+    return {
+      required: raw.required === true,
+      token: String(raw.token || '').trim(),
     };
   }
 
@@ -799,18 +823,24 @@
       }
 
       var body = await response.json();
-      return normalizeProfile(body, fallback);
+      return {
+        profile: normalizeProfile(body, fallback),
+        telemetry: normalizeTelemetryMeta(body && body.telemetry),
+      };
     } catch (_err) {
-      return normalizeProfile(fallback, FALLBACKS.tttloading);
+      return {
+        profile: normalizeProfile(fallback, FALLBACKS.tttloading),
+        telemetry: { required: false, token: '' },
+      };
     }
   }
 
   async function init() {
     state.slug = getSlug();
-    startTelemetry(state.slug);
-
-    var profile = await fetchProfile(state.slug);
+    var fetched = await fetchProfile(state.slug);
+    var profile = fetched.profile;
     applyProfile(profile);
+    startTelemetry(state.slug, fetched.telemetry);
 
     if (dom.statusText) {
       dom.statusText.textContent = 'Aguardando resposta do jogo...';

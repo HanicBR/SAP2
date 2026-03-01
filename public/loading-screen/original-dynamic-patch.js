@@ -443,6 +443,16 @@
     };
   }
 
+  function normalizeTelemetryMeta(raw) {
+    if (!raw || typeof raw !== 'object') {
+      return { required: false, token: '' };
+    }
+    return {
+      required: raw.required === true,
+      token: String(raw.token || '').trim(),
+    };
+  }
+
   function applyProfile(profile) {
     applyAccent(profile.accentColor);
     applyHero(profile.hero);
@@ -453,7 +463,7 @@
     applyMusic(profile.musicTracks);
   }
 
-  function initLoadingTelemetry() {
+  function initLoadingTelemetry(telemetryMeta) {
     var isGmod = /GMod/i.test(navigator.userAgent || '');
     var telemetryEnabled = isGmod || /[?&]bsb_telemetry=1(?:&|$)/i.test(window.location.search || '');
     if (!telemetryEnabled) return;
@@ -465,6 +475,8 @@
       endpoint: '/api/loading-telemetry/ingest',
       source: isGmod ? 'gmod-cef-template' : 'web-preview-template',
       slug: slug,
+      token: telemetryMeta && telemetryMeta.token ? String(telemetryMeta.token) : '',
+      tokenRequired: telemetryMeta && telemetryMeta.required === true,
       startedAt: new Date().toISOString(),
       sessionKey:
         'ls_' +
@@ -510,17 +522,27 @@
     }
 
     function buildPayload(events) {
-      return {
+      var payload = {
         sessionKey: telemetry.sessionKey,
         slug: telemetry.slug,
         startedAt: telemetry.startedAt,
         source: telemetry.source,
         events: events,
       };
+      if (telemetry.token) {
+        payload.token = telemetry.token;
+      }
+      return payload;
     }
 
     function sendPayload(payload, preferBeacon) {
       var body = JSON.stringify(payload);
+      var headers = {
+        'Content-Type': 'application/json',
+      };
+      if (telemetry.token) {
+        headers['X-Loading-Token'] = telemetry.token;
+      }
       if (preferBeacon && typeof navigator.sendBeacon === 'function') {
         try {
           var blob = new Blob([body], { type: 'application/json' });
@@ -532,9 +554,7 @@
 
       return fetch(telemetry.endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: headers,
         body: body,
         keepalive: !!preferBeacon,
       })
@@ -768,7 +788,7 @@
 
   async function fetchAndApply() {
     var slug = sanitizeSlug(getSlug());
-    if (!slug) return;
+    if (!slug) return { required: false, token: '' };
 
     try {
       var response = await fetch('/api/loading-screens/public/' + encodeURIComponent(slug), {
@@ -778,15 +798,21 @@
         },
       });
 
-      if (!response.ok) return;
+      if (!response.ok) return { required: false, token: '' };
       var json = await response.json();
       var profile = normalizeProfile(json);
       applyProfile(profile);
+      return normalizeTelemetryMeta(json && json.telemetry);
     } catch (_err) {
       // keep template defaults when API is not reachable
+      return { required: false, token: '' };
     }
   }
 
-  fetchAndApply();
-  initLoadingTelemetry();
+  async function boot() {
+    var telemetryMeta = await fetchAndApply();
+    initLoadingTelemetry(telemetryMeta);
+  }
+
+  boot();
 })();

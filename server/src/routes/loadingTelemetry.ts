@@ -4,6 +4,12 @@ import rateLimit from 'express-rate-limit';
 import { prisma } from '../db/client';
 import { authMiddleware, requireRole } from '../middleware/auth';
 import { UserRole } from '../domain';
+import {
+  getLoadingTelemetryTokenTtlSec,
+  isLoadingTelemetryTokenConfigured,
+  isLoadingTelemetryTokenRequired,
+  verifyLoadingTelemetryToken,
+} from '../services/loadingTelemetryAuth';
 
 const router = Router();
 
@@ -13,6 +19,14 @@ const MAX_FILE_NAME_LENGTH = 600;
 const MAX_SOURCE_LENGTH = 48;
 const MAX_SESSION_KEY_LENGTH = 128;
 const MAX_PAYLOAD_JSON_LENGTH = 3_500;
+
+const parseBoolEnv = (value: string | undefined, fallback: boolean): boolean => {
+  const normalized = String(value || '')
+    .trim()
+    .toLowerCase();
+  if (!normalized) return fallback;
+  return ['1', 'true', 'yes', 'on'].includes(normalized);
+};
 
 const parsePositiveIntEnv = (value: string | undefined, fallback: number): number => {
   const parsed = Number.parseInt(String(value || '').trim(), 10);
@@ -41,6 +55,16 @@ const ingestRateLimitMax = parsePositiveIntEnv(
   process.env.LOADING_TELEMETRY_INGEST_MAX_PER_MIN,
   360,
 );
+const MAX_EVENTS_PER_SESSION = parsePositiveIntEnv(
+  process.env.LOADING_TELEMETRY_MAX_EVENTS_PER_SESSION,
+  4_000,
+);
+const RETENTION_DAYS = parsePositiveIntEnv(process.env.LOADING_TELEMETRY_RETENTION_DAYS, 30);
+const CLEANUP_INTERVAL_MIN = parsePositiveIntEnv(
+  process.env.LOADING_TELEMETRY_CLEANUP_INTERVAL_MIN,
+  60,
+);
+const CLEANUP_ENABLED = parseBoolEnv(process.env.LOADING_TELEMETRY_CLEANUP_ENABLED, true);
 
 const ingestLimiter = rateLimit({
   windowMs: 60 * 1000,
@@ -270,6 +294,16 @@ const safeJsonBody = (value: unknown): Record<string, unknown> | null => {
   }
 };
 
+const readRequestToken = (req: any, body: Record<string, unknown>): string | undefined => {
+  const fromBody = trimTo(body.token, 4096);
+  if (fromBody) return fromBody;
+  const fromHeader = trimTo(
+    req?.header?.('x-loading-token') || req?.header?.('x-loading-telemetry-token'),
+    4096,
+  );
+  return fromHeader || undefined;
+};
+
 const getIpHash = (req: { headers: Record<string, unknown>; socket?: { remoteAddress?: string } }): string | undefined => {
   const forwardedRaw = String(req.headers['x-forwarded-for'] || '').trim();
   const forwarded = forwardedRaw ? forwardedRaw.split(',')[0]?.trim() : '';
@@ -283,6 +317,71 @@ const getIpHash = (req: { headers: Record<string, unknown>; socket?: { remoteAdd
 
 const getLoadingTelemetrySessionClient = () => (prisma as any).loadingTelemetrySession;
 const getLoadingTelemetryEventClient = () => (prisma as any).loadingTelemetryEvent;
+
+type CleanupState = {
+  enabled: boolean;
+  retentionDays: number;
+  intervalMin: number;
+  running: boolean;
+  totalRuns: number;
+  totalDeletedSessions: number;
+  lastRunAt?: Date;
+  lastDeletedSessions: number;
+  lastError: string | null;
+};
+
+const cleanupState: CleanupState = {
+  enabled: CLEANUP_ENABLED,
+  retentionDays: RETENTION_DAYS,
+  intervalMin: CLEANUP_INTERVAL_MIN,
+  running: false,
+  totalRuns: 0,
+  totalDeletedSessions: 0,
+  lastDeletedSessions: 0,
+  lastError: null,
+};
+
+const runRetentionCleanup = async () => {
+  if (!cleanupState.enabled) return;
+  if (cleanupState.running) return;
+  cleanupState.running = true;
+  try {
+    const now = new Date();
+    const cutoff = new Date(now.getTime() - cleanupState.retentionDays * 24 * 60 * 60 * 1000);
+    const loadingTelemetrySessionClient = getLoadingTelemetrySessionClient();
+    const deleted = await loadingTelemetrySessionClient.deleteMany({
+      where: {
+        startedAt: {
+          lt: cutoff,
+        },
+      },
+    });
+    cleanupState.lastRunAt = now;
+    cleanupState.lastDeletedSessions = deleted.count;
+    cleanupState.totalDeletedSessions += deleted.count;
+    cleanupState.totalRuns += 1;
+    cleanupState.lastError = null;
+  } catch (error) {
+    cleanupState.lastRunAt = new Date();
+    cleanupState.lastDeletedSessions = 0;
+    cleanupState.totalRuns += 1;
+    cleanupState.lastError = error instanceof Error ? error.message : 'cleanup_failed';
+    console.error('loading telemetry retention cleanup failed', error);
+  } finally {
+    cleanupState.running = false;
+  }
+};
+
+if (cleanupState.enabled) {
+  const cleanupIntervalMs = Math.max(60_000, cleanupState.intervalMin * 60 * 1000);
+  const cleanupTimer = setInterval(() => {
+    void runRetentionCleanup();
+  }, cleanupIntervalMs);
+  if (typeof (cleanupTimer as any).unref === 'function') {
+    (cleanupTimer as any).unref();
+  }
+  void runRetentionCleanup();
+}
 
 type TelemetryRange = '24h' | '7d' | '30d';
 
@@ -457,9 +556,29 @@ router.post('/ingest', ingestLimiter, async (req, res) => {
     return res.status(400).json({ error: 'invalid_events' });
   }
 
+  const tokenRequired = isLoadingTelemetryTokenRequired();
+  const token = readRequestToken(req as any, body);
+  if (tokenRequired && !isLoadingTelemetryTokenConfigured()) {
+    return res.status(503).json({ error: 'token_not_configured' });
+  }
+
+  let tokenValidated = false;
+  let tokenReason: string | undefined;
+  if (token) {
+    const tokenResult = verifyLoadingTelemetryToken(token, slug);
+    tokenValidated = tokenResult.ok;
+    if (!tokenResult.ok) tokenReason = tokenResult.reason || 'invalid_token';
+  } else if (tokenRequired) {
+    tokenReason = 'missing_token';
+  }
+
+  if (tokenRequired && !tokenValidated) {
+    return res.status(401).json({ error: tokenReason || 'invalid_token' });
+  }
+
   const startedAtFromBody = toDate(body.startedAt);
-  const batch = summarizeBatch(events);
-  const startedAt = startedAtFromBody || batch.firstEventAt || new Date();
+  const initialBatch = summarizeBatch(events);
+  const startedAt = startedAtFromBody || events[0]?.eventAt || new Date();
   const userAgent = trimTo(req.header('user-agent'), 350);
   const ipHash = getIpHash(req as any);
 
@@ -478,15 +597,21 @@ router.post('/ingest', ingestLimiter, async (req, res) => {
           slug,
           ...(source ? { source } : {}),
           startedAt,
-          ...(batch.firstEventAt ? { firstEventAt: batch.firstEventAt } : {}),
-          ...(batch.lastEventAt ? { lastEventAt: batch.lastEventAt } : {}),
-          ...(batch.completedAt ? { completedAt: batch.completedAt, completed: true } : {}),
-          ...(batch.lastStatus ? { lastStatus: batch.lastStatus } : {}),
-          ...(batch.lastFile ? { lastFile: batch.lastFile } : {}),
-          ...(typeof batch.maxProgress === 'number' ? { maxProgress: batch.maxProgress } : {}),
+          ...(initialBatch.firstEventAt ? { firstEventAt: initialBatch.firstEventAt } : {}),
+          ...(initialBatch.lastEventAt ? { lastEventAt: initialBatch.lastEventAt } : {}),
+          ...(initialBatch.completedAt
+            ? { completedAt: initialBatch.completedAt, completed: true }
+            : {}),
+          ...(initialBatch.lastStatus ? { lastStatus: initialBatch.lastStatus } : {}),
+          ...(initialBatch.lastFile ? { lastFile: initialBatch.lastFile } : {}),
+          ...(typeof initialBatch.maxProgress === 'number'
+            ? { maxProgress: initialBatch.maxProgress }
+            : {}),
           ...(userAgent ? { userAgent } : {}),
           ...(ipHash ? { ipHash } : {}),
-          ...(batch.completedAt ? { totalDurationMs: msDiff(startedAt, batch.completedAt) } : {}),
+          ...(initialBatch.completedAt
+            ? { totalDurationMs: msDiff(startedAt, initialBatch.completedAt) }
+            : {}),
         },
       });
     } else if (session.slug !== slug) {
@@ -496,8 +621,27 @@ router.post('/ingest', ingestLimiter, async (req, res) => {
       });
     }
 
+    const existingEventsCount = await loadingTelemetryEventClient.count({
+      where: { sessionId: session.id },
+    });
+    const remainingCapacity = Math.max(0, MAX_EVENTS_PER_SESSION - existingEventsCount);
+    if (remainingCapacity <= 0) {
+      return res.status(429).json({
+        error: 'session_event_cap_reached',
+        sessionKey,
+        slug,
+        maxEventsPerSession: MAX_EVENTS_PER_SESSION,
+        existingEvents: existingEventsCount,
+        droppedByCap: events.length,
+      });
+    }
+    const acceptedEvents =
+      remainingCapacity >= events.length ? events : events.slice(0, remainingCapacity);
+    const droppedByCap = Math.max(0, events.length - acceptedEvents.length);
+    const batch = summarizeBatch(acceptedEvents);
+
     const insertResult = await loadingTelemetryEventClient.createMany({
-      data: events.map((event) => ({
+      data: acceptedEvents.map((event) => ({
         sessionId: session.id,
         seq: event.seq,
         type: event.type,
@@ -547,13 +691,141 @@ router.post('/ingest', ingestLimiter, async (req, res) => {
       sessionKey,
       slug,
       received: events.length,
+      accepted: acceptedEvents.length,
       inserted: insertResult.count,
-      deduplicated: Math.max(0, events.length - insertResult.count),
+      deduplicated: Math.max(0, acceptedEvents.length - insertResult.count),
+      droppedByCap,
       completed: mergedCompleted,
+      tokenValidated,
+      ...(tokenReason ? { tokenReason } : {}),
     });
   } catch (error) {
     console.error('loading telemetry ingest failed', error);
     return res.status(500).json({ error: 'ingest_failed' });
+  }
+});
+
+router.get('/admin/health', authMiddleware, requireRole(UserRole.ADMIN), async (_req, res) => {
+  try {
+    const loadingTelemetrySessionClient = getLoadingTelemetrySessionClient();
+    const loadingTelemetryEventClient = getLoadingTelemetryEventClient();
+
+    const now = new Date();
+    const since24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const recentLiveSince = new Date(now.getTime() - 2 * 60 * 1000);
+    const retentionCutoff = new Date(now.getTime() - RETENTION_DAYS * 24 * 60 * 60 * 1000);
+
+    const [
+      totalSessions,
+      totalEvents,
+      sessionsLast24h,
+      eventsLast24h,
+      recentActiveSessions,
+      pendingRetentionSessions,
+      oldestSession,
+      newestSession,
+    ] = await Promise.all([
+      loadingTelemetrySessionClient.count(),
+      loadingTelemetryEventClient.count(),
+      loadingTelemetrySessionClient.count({
+        where: {
+          startedAt: {
+            gte: since24h,
+          },
+        },
+      }),
+      loadingTelemetryEventClient.count({
+        where: {
+          eventAt: {
+            gte: since24h,
+          },
+        },
+      }),
+      loadingTelemetrySessionClient.count({
+        where: {
+          lastEventAt: {
+            gte: recentLiveSince,
+          },
+        },
+      }),
+      loadingTelemetrySessionClient.count({
+        where: {
+          startedAt: {
+            lt: retentionCutoff,
+          },
+        },
+      }),
+      loadingTelemetrySessionClient.findFirst({
+        select: { startedAt: true, slug: true },
+        orderBy: {
+          startedAt: 'asc',
+        },
+      }),
+      loadingTelemetrySessionClient.findFirst({
+        select: { startedAt: true, lastEventAt: true, slug: true },
+        orderBy: {
+          startedAt: 'desc',
+        },
+      }),
+    ]);
+
+    return res.json({
+      generatedAt: now.toISOString(),
+      ingest: {
+        rateLimitPerMin: ingestRateLimitMax,
+        maxEventsPerBatch: MAX_EVENTS_PER_BATCH,
+        maxEventsPerSession: MAX_EVENTS_PER_SESSION,
+      },
+      token: {
+        required: isLoadingTelemetryTokenRequired(),
+        configured: isLoadingTelemetryTokenConfigured(),
+        ttlSec: getLoadingTelemetryTokenTtlSec(),
+      },
+      retention: {
+        enabled: CLEANUP_ENABLED,
+        retentionDays: RETENTION_DAYS,
+        cleanupIntervalMin: CLEANUP_INTERVAL_MIN,
+        cutoff: retentionCutoff.toISOString(),
+        pendingSessions: pendingRetentionSessions,
+        cleanup: {
+          running: cleanupState.running,
+          totalRuns: cleanupState.totalRuns,
+          totalDeletedSessions: cleanupState.totalDeletedSessions,
+          lastRunAt: cleanupState.lastRunAt ? cleanupState.lastRunAt.toISOString() : null,
+          lastDeletedSessions: cleanupState.lastDeletedSessions,
+          lastError: cleanupState.lastError,
+        },
+      },
+      limits: {
+        maxAdminSessions: MAX_ADMIN_SESSIONS,
+        maxAdminEvents: MAX_ADMIN_EVENTS,
+        maxTrackedFiles: MAX_TRACKED_FILES,
+        maxStepDurationMs: MAX_EVENT_STEP_DURATION_MS,
+      },
+      totals: {
+        sessions: totalSessions,
+        events: totalEvents,
+        sessionsLast24h,
+        eventsLast24h,
+        recentActiveSessions,
+      },
+      oldestSession: oldestSession
+        ? {
+            slug: oldestSession.slug,
+            startedAt: oldestSession.startedAt.toISOString(),
+          }
+        : null,
+      newestSession: newestSession
+        ? {
+            slug: newestSession.slug,
+            startedAt: newestSession.startedAt.toISOString(),
+            lastEventAt: newestSession.lastEventAt ? newestSession.lastEventAt.toISOString() : null,
+          }
+        : null,
+    });
+  } catch (error) {
+    console.error('loading telemetry health failed', error);
+    return res.status(500).json({ error: 'telemetry_health_failed' });
   }
 });
 

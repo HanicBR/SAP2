@@ -8,6 +8,11 @@ import { UserRole } from '../domain';
 import { authMiddleware, requireRole } from '../middleware/auth';
 import { bootstrap } from '../bootstrap';
 import { syncSteamProfileBySteamId64 } from '../services/steamProfile';
+import {
+  getLoadingTelemetryTokenTtlSec,
+  isLoadingTelemetryTokenRequired,
+  issueLoadingTelemetryToken,
+} from '../services/loadingTelemetryAuth';
 
 const router = Router();
 
@@ -57,6 +62,13 @@ type LoadingScreensStore = {
 };
 
 type SiteConfigJson = Record<string, unknown>;
+type PublicLoadingProfileResponse = LoadingScreenProfile & {
+  telemetry?: {
+    required: boolean;
+    tokenTtlSec?: number;
+    token?: string;
+  };
+};
 
 const MAX_LINE_LENGTH = 240;
 const MAX_LONG_TEXT_LENGTH = 600;
@@ -229,7 +241,7 @@ type SteamSummary = {
 
 type PublicLoadingProfileCacheEntry = {
   expiresAt: number;
-  payload: LoadingScreenProfile;
+  payload: PublicLoadingProfileResponse;
 };
 
 const steamSummaryCache = new Map<string, { expiresAt: number; summary: SteamSummary }>();
@@ -959,9 +971,18 @@ router.get('/public/:slug', async (req, res) => {
   }
 
   const syncedVipPlayers = await buildSyncedVipPlayers(profile);
-  const payload: LoadingScreenProfile = {
+  const telemetryToken = issueLoadingTelemetryToken(profile.slug);
+  const telemetryRequired = isLoadingTelemetryTokenRequired();
+  const telemetryTtlSec = getLoadingTelemetryTokenTtlSec();
+
+  const payload: PublicLoadingProfileResponse = {
     ...profile,
     vipPlayers: syncedVipPlayers,
+    telemetry: {
+      required: telemetryRequired,
+      tokenTtlSec: telemetryTtlSec,
+      ...(telemetryToken ? { token: telemetryToken } : {}),
+    },
   };
   publicLoadingProfileCache.set(slug, {
     expiresAt: Date.now() + LOADING_PUBLIC_CACHE_TTL_MS,
