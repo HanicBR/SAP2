@@ -105,6 +105,9 @@ const Vips: React.FC = () => {
   const [extendDurationDays, setExtendDurationDays] = useState('');
   const [extendServerIds, setExtendServerIds] = useState<string[]>([]);
   const [revokeReason, setRevokeReason] = useState('');
+  const [operationApplyMode, setOperationApplyMode] = useState<'SERVER_AND_SITE' | 'SITE_ONLY'>(
+    'SERVER_AND_SITE',
+  );
 
   const planOptions = useMemo(() => {
     const options = config.vip.plans.map((plan) => String(plan.name || '').trim()).filter(Boolean);
@@ -258,6 +261,7 @@ const Vips: React.FC = () => {
   };
 
   const sanitizeDaysInput = (value: string) => value.replace(/[^0-9]/g, '');
+  const operationEnqueue = operationApplyMode === 'SERVER_AND_SITE';
 
   const handleGrant = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -274,14 +278,15 @@ const Vips: React.FC = () => {
         name: grantName.trim() || undefined,
         vipPlan: grantPlan,
         vipDurationDays: parsedDurationDays,
+        enqueue: operationEnqueue,
         vipServerIds: normalizeIdList(grantServerIds),
       });
       setFeedback(
-        result.dispatch
+        operationEnqueue && result.dispatch
           ? `VIP concedido. Automacao ${dispatchResultLabel(result.dispatch)}${
               result.dispatch.reason ? ` (${automationReasonLabel(result.dispatch.reason)})` : ''
             }.`
-          : 'VIP concedido.',
+          : 'VIP concedido e registrado apenas no site (sem envio ao servidor).',
       );
       setGrantSteamId('');
       setGrantName('');
@@ -308,14 +313,15 @@ const Vips: React.FC = () => {
         steamId: extendSteamId.trim(),
         vipPlan: extendPlan || undefined,
         vipDurationDays: parsedDurationDays,
+        enqueue: operationEnqueue,
         vipServerIds: normalizeIdList(extendServerIds),
       });
       setFeedback(
-        result.dispatch
+        operationEnqueue && result.dispatch
           ? `VIP estendido. Automacao ${dispatchResultLabel(result.dispatch)}${
               result.dispatch.reason ? ` (${automationReasonLabel(result.dispatch.reason)})` : ''
             }.`
-          : 'VIP estendido.',
+          : 'VIP estendido e registrado apenas no site (sem envio ao servidor).',
       );
       await refreshAll();
     } catch (err: any) {
@@ -325,22 +331,24 @@ const Vips: React.FC = () => {
     }
   };
 
-  const handleRevoke = async (steamId: string) => {
+  const handleRevoke = async (steamId: string, options?: { enqueue?: boolean }) => {
     const confirmed = window.confirm(`Revogar VIP de ${steamId}?`);
     if (!confirmed) return;
+    const enqueue = options?.enqueue ?? true;
     setBusy(true);
     setFeedback('');
     try {
       const result = await ApiService.revokeVip({
         steamId,
+        enqueue,
         reason: revokeReason.trim() || undefined,
       });
       setFeedback(
-        result.dispatch
+        enqueue && result.dispatch
           ? `VIP revogado. Automacao ${dispatchResultLabel(result.dispatch)}${
               result.dispatch.reason ? ` (${automationReasonLabel(result.dispatch.reason)})` : ''
             }.`
-          : 'VIP revogado.',
+          : 'VIP revogado apenas no site (sem envio ao servidor).',
       );
       await refreshAll();
     } catch (err: any) {
@@ -689,6 +697,38 @@ const Vips: React.FC = () => {
               </option>
             ))}
           </datalist>
+          <div className="bg-zinc-900 border border-zinc-800 rounded p-4">
+            <p className="text-[11px] uppercase font-bold text-zinc-500">Aplicacao da operacao VIP</p>
+            <div className="mt-2 inline-flex rounded border border-zinc-700 bg-zinc-950 p-1">
+              <button
+                type="button"
+                onClick={() => setOperationApplyMode('SERVER_AND_SITE')}
+                className={`px-3 py-1.5 text-xs font-bold uppercase rounded ${
+                  operationApplyMode === 'SERVER_AND_SITE'
+                    ? 'bg-emerald-700 text-white'
+                    : 'text-zinc-300 hover:bg-zinc-800'
+                }`}
+              >
+                Site + Servidor
+              </button>
+              <button
+                type="button"
+                onClick={() => setOperationApplyMode('SITE_ONLY')}
+                className={`px-3 py-1.5 text-xs font-bold uppercase rounded ${
+                  operationApplyMode === 'SITE_ONLY'
+                    ? 'bg-amber-700 text-white'
+                    : 'text-zinc-300 hover:bg-zinc-800'
+                }`}
+              >
+                Somente Site
+              </button>
+            </div>
+            <p className="mt-2 text-xs text-zinc-400">
+              {operationApplyMode === 'SERVER_AND_SITE'
+                ? 'As operacoes abaixo atualizam o painel e tambem enviam automacao para o servidor.'
+                : 'As operacoes abaixo atualizam apenas o painel (sem enviar comando para o servidor).'}
+            </p>
+          </div>
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             <form onSubmit={handleGrant} className="bg-zinc-900 border border-zinc-800 rounded p-4 space-y-3">
               <h2 className="text-sm uppercase font-bold text-zinc-300">Conceder VIP</h2>
@@ -843,7 +883,7 @@ const Vips: React.FC = () => {
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleRevoke(extendSteamId.trim())}
+                  onClick={() => handleRevoke(extendSteamId.trim(), { enqueue: operationEnqueue })}
                   disabled={busy || !extendSteamId.trim()}
                   className="bg-red-700 hover:bg-red-600 text-white px-4 py-2 rounded text-sm font-bold uppercase disabled:opacity-60"
                 >
