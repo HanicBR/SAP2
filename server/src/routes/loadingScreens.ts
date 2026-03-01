@@ -87,6 +87,14 @@ const STEAM_REFRESH_TIMEOUT_MS = parsePositiveIntEnv(
   process.env.LOADING_STEAM_REFRESH_TIMEOUT_MS,
   2_500,
 );
+const STEAM_SYNC_LOOKUP_MAX = Math.min(
+  MAX_PUBLIC_VIPS,
+  parsePositiveIntEnv(process.env.LOADING_STEAM_SYNC_LOOKUP_MAX, 12),
+);
+const STEAM_SYNC_XML_FALLBACK_MAX = Math.min(
+  STEAM_SYNC_LOOKUP_MAX,
+  parsePositiveIntEnv(process.env.LOADING_STEAM_SYNC_XML_FALLBACK_MAX, 4),
+);
 
 const maxLoadingMediaUploadMb = Math.max(1, Number(process.env.LOADING_MEDIA_UPLOAD_MAX_MB || 25));
 const loadingMediaUploadDir =
@@ -232,6 +240,22 @@ const steamSummaryRefreshQueued = new Set<string>();
 const steamSummaryRefreshInFlight = new Set<string>();
 let steamSummaryRefreshWorkers = 0;
 
+const withTimeout = async (url: string, timeoutMs: number): Promise<Response> => {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, {
+      method: 'GET',
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'backstabber-api/loading-screens',
+      },
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
 const getCachedSteamSummariesById64 = (steamIds64: string[]): Map<string, SteamSummary> => {
   const result = new Map<string, SteamSummary>();
   if (steamIds64.length === 0) return result;
@@ -246,6 +270,89 @@ const getCachedSteamSummariesById64 = (steamIds64: string[]): Map<string, SteamS
     }
     steamSummaryCache.delete(steamId64);
   });
+
+  return result;
+};
+
+const fetchSteamSummariesSyncLimited = async (steamIds64: string[]): Promise<Map<string, SteamSummary>> => {
+  const result = new Map<string, SteamSummary>();
+  const ids = uniqueStrings(steamIds64).filter((entry) => /^\d{17}$/.test(entry));
+  if (ids.length === 0) return result;
+
+  const syncTargets = ids.slice(0, STEAM_SYNC_LOOKUP_MAX);
+  if (syncTargets.length === 0) return result;
+
+  const unresolved = new Set(syncTargets);
+  const apiKey = String(process.env.STEAM_WEB_API_KEY || '').trim();
+
+  if (apiKey) {
+    try {
+      const endpoint =
+        `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${encodeURIComponent(apiKey)}` +
+        `&steamids=${encodeURIComponent(syncTargets.join(','))}`;
+      const response = await withTimeout(endpoint, STEAM_REFRESH_TIMEOUT_MS);
+      if (response.ok) {
+        const json = await response.json().catch(() => null);
+        const players = Array.isArray(json?.response?.players) ? json.response.players : [];
+
+        players.forEach((player: Record<string, unknown>) => {
+          const steamId64 = String(player.steamid || '').trim();
+          if (!/^\d{17}$/.test(steamId64)) return;
+          const personaName = String(player.personaname || '').trim();
+          const avatarUrl = toLighterAvatarUrl(String(player.avatarfull || '').trim());
+          if (!personaName && !avatarUrl) return;
+
+          const summary: SteamSummary = {
+            ...(personaName ? { personaName } : {}),
+            ...(avatarUrl ? { avatarUrl } : {}),
+          };
+          steamSummaryCache.set(steamId64, {
+            expiresAt: Date.now() + STEAM_SUMMARY_CACHE_TTL_MS,
+            summary,
+          });
+          result.set(steamId64, summary);
+          unresolved.delete(steamId64);
+        });
+      }
+    } catch {
+      // keep fallback data only
+    }
+  }
+
+  if (unresolved.size > 0) {
+    const xmlFallbackTargets = [...unresolved].slice(0, STEAM_SYNC_XML_FALLBACK_MAX);
+    for (const steamId64 of xmlFallbackTargets) {
+      try {
+        const profile = (await Promise.race([
+          syncSteamProfileBySteamId64(steamId64),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), STEAM_REFRESH_TIMEOUT_MS)),
+        ])) as
+          | {
+              personaName?: string;
+              avatarUrl?: string;
+            }
+          | null;
+        if (!profile) continue;
+
+        const personaName = String(profile.personaName || '').trim();
+        const avatarUrl = toLighterAvatarUrl(String(profile.avatarUrl || '').trim());
+        if (!personaName && !avatarUrl) continue;
+
+        const summary: SteamSummary = {
+          ...(personaName ? { personaName } : {}),
+          ...(avatarUrl ? { avatarUrl } : {}),
+        };
+        steamSummaryCache.set(steamId64, {
+          expiresAt: Date.now() + STEAM_SUMMARY_CACHE_TTL_MS,
+          summary,
+        });
+        result.set(steamId64, summary);
+        unresolved.delete(steamId64);
+      } catch {
+        // keep fallback data only
+      }
+    }
+  }
 
   return result;
 };
@@ -733,9 +840,15 @@ const buildSyncedVipPlayers = async (profile: LoadingScreenProfile): Promise<Loa
     steamIds64.push(steamId64);
   });
   const steamSummariesBy64 = getCachedSteamSummariesById64(steamIds64);
-  const missingSteamIds64 = steamIds64.filter((steamId64) => !steamSummariesBy64.has(steamId64));
-  if (missingSteamIds64.length > 0) {
-    enqueueSteamSummaryRefresh(missingSteamIds64);
+  const initialMissingSteamIds64 = steamIds64.filter((steamId64) => !steamSummariesBy64.has(steamId64));
+  if (initialMissingSteamIds64.length > 0) {
+    const syncedSummaries = await fetchSteamSummariesSyncLimited(initialMissingSteamIds64);
+    syncedSummaries.forEach((summary, steamId64) => steamSummariesBy64.set(steamId64, summary));
+  }
+
+  const remainingMissingSteamIds64 = steamIds64.filter((steamId64) => !steamSummariesBy64.has(steamId64));
+  if (remainingMissingSteamIds64.length > 0) {
+    enqueueSteamSummaryRefresh(remainingMissingSteamIds64);
   }
 
   const synced = sortedRows.map((row) => {
