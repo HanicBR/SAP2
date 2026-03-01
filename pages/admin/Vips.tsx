@@ -97,12 +97,12 @@ const Vips: React.FC = () => {
   const [grantSteamId, setGrantSteamId] = useState('');
   const [grantName, setGrantName] = useState('');
   const [grantPlan, setGrantPlan] = useState('');
-  const [grantDurationDays, setGrantDurationDays] = useState('30');
+  const [grantDurationDays, setGrantDurationDays] = useState('');
   const [grantServerIds, setGrantServerIds] = useState<string[]>([]);
 
   const [extendSteamId, setExtendSteamId] = useState('');
   const [extendPlan, setExtendPlan] = useState('');
-  const [extendDurationDays, setExtendDurationDays] = useState('30');
+  const [extendDurationDays, setExtendDurationDays] = useState('');
   const [extendServerIds, setExtendServerIds] = useState<string[]>([]);
   const [revokeReason, setRevokeReason] = useState('');
 
