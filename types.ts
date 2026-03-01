@@ -209,6 +209,8 @@ export interface VipAdminItem {
   vipExpiry?: string;
   lastSeen?: string;
   vipStatus?: 'ACTIVE' | 'EXPIRED' | 'INACTIVE';
+  vipServerIds?: string[];
+  vipServerNames?: string[];
 }
 
 export interface VipAdminListResponse {
@@ -798,4 +800,11 @@ export interface LoadingScreenProfile {
 export interface LoadingScreensResponse {
   updatedAt: string;
   profiles: LoadingScreenProfile[];
+}
+
+export interface LoadingMediaUploadResult {
+  url: string;
+  filename: string;
+  size: number;
+  mime: string;
 }

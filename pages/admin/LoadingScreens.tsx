@@ -42,6 +42,11 @@ const parseLineInput = (value: string): string[] =>
     ),
   );
 
+const mergeLineInput = (current: string, nextValues: string[]): string => {
+  const merged = parseLineInput(`${current}\n${nextValues.join('\n')}`);
+  return merged.join('\n');
+};
+
 const makeVip = (): LoadingScreenVipEntry => ({
   name: 'Novo destaque',
   steamId: '',
@@ -122,6 +127,7 @@ const LoadingScreens: React.FC = () => {
   const [activeEditorTab, setActiveEditorTab] = useState<'identity' | 'content' | 'media' | 'vip'>(
     'identity',
   );
+  const [mediaUploading, setMediaUploading] = useState<null | 'background' | 'music'>(null);
 
   const hydrateDraftInputs = (profile: LoadingScreenProfile) => {
     setBgInput(toLineInput(profile.backgroundImages));
@@ -440,6 +446,64 @@ const LoadingScreens: React.FC = () => {
       setNotice({ tone: 'success', message: 'URL copiada para a area de transferencia.' });
     } catch {
       setNotice({ tone: 'error', message: 'Nao foi possivel copiar a URL automaticamente.' });
+    }
+  };
+
+  const uploadBackgroundFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setMediaUploading('background');
+    setNotice(null);
+    try {
+      const uploadedUrls: string[] = [];
+      for (const file of Array.from(files)) {
+        const result = await ApiService.uploadLoadingMedia(file);
+        uploadedUrls.push(result.url);
+      }
+      setBgInput((prev) => {
+        const nextInput = mergeLineInput(prev, uploadedUrls);
+        updateDraft({ backgroundImages: parseLineInput(nextInput) });
+        return nextInput;
+      });
+      setNotice({
+        tone: 'success',
+        message: `${uploadedUrls.length} arquivo(s) de background enviado(s) com sucesso.`,
+      });
+    } catch (error: any) {
+      setNotice({
+        tone: 'error',
+        message: error?.message ? String(error.message) : 'Falha ao enviar background.',
+      });
+    } finally {
+      setMediaUploading(null);
+    }
+  };
+
+  const uploadMusicFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setMediaUploading('music');
+    setNotice(null);
+    try {
+      const uploadedUrls: string[] = [];
+      for (const file of Array.from(files)) {
+        const result = await ApiService.uploadLoadingMedia(file);
+        uploadedUrls.push(result.url);
+      }
+      setMusicInput((prev) => {
+        const nextInput = mergeLineInput(prev, uploadedUrls);
+        updateDraft({ musicTracks: parseLineInput(nextInput) });
+        return nextInput;
+      });
+      setNotice({
+        tone: 'success',
+        message: `${uploadedUrls.length} faixa(s) enviada(s) com sucesso.`,
+      });
+    } catch (error: any) {
+      setNotice({
+        tone: 'error',
+        message: error?.message ? String(error.message) : 'Falha ao enviar audio.',
+      });
+    } finally {
+      setMediaUploading(null);
     }
   };
 
@@ -813,9 +877,28 @@ const LoadingScreens: React.FC = () => {
           {activeEditorTab === 'media' ? (
             <div className={`${CARD_CLASS} border-emerald-900/25 bg-zinc-900/90`}>
             <h3 className="text-sm font-black uppercase tracking-wide text-white">Media</h3>
+            <p className="mt-2 text-xs text-zinc-400">
+              Upload e o fluxo recomendado. Tambem e possivel colar links externos manualmente.
+            </p>
             <div className="mt-4 grid gap-4 xl:grid-cols-2">
               <div>
-                <label className={LABEL_CLASS}>Background images (uma URL por linha)</label>
+                <label className={LABEL_CLASS}>Background images (upload recomendado)</label>
+                <div className="mb-2 rounded-lg border border-emerald-900/40 bg-emerald-900/10 p-2">
+                  <label className="flex cursor-pointer items-center justify-center rounded border border-emerald-800/60 bg-emerald-900/20 px-3 py-2 text-xs font-bold uppercase tracking-wide text-emerald-200 hover:bg-emerald-900/30">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      onChange={(event) => {
+                        void uploadBackgroundFiles(event.target.files);
+                        event.currentTarget.value = '';
+                      }}
+                      disabled={mediaUploading !== null}
+                    />
+                    {mediaUploading === 'background' ? 'Enviando...' : 'Fazer upload de imagem'}
+                  </label>
+                </div>
                 <textarea
                   rows={5}
                   value={bgInput}
@@ -827,7 +910,23 @@ const LoadingScreens: React.FC = () => {
                 />
               </div>
               <div>
-                <label className={LABEL_CLASS}>Playlist (uma URL por linha)</label>
+                <label className={LABEL_CLASS}>Playlist (upload recomendado)</label>
+                <div className="mb-2 rounded-lg border border-cyan-900/40 bg-cyan-900/10 p-2">
+                  <label className="flex cursor-pointer items-center justify-center rounded border border-cyan-800/60 bg-cyan-900/20 px-3 py-2 text-xs font-bold uppercase tracking-wide text-cyan-200 hover:bg-cyan-900/30">
+                    <input
+                      type="file"
+                      accept="audio/*"
+                      multiple
+                      className="hidden"
+                      onChange={(event) => {
+                        void uploadMusicFiles(event.target.files);
+                        event.currentTarget.value = '';
+                      }}
+                      disabled={mediaUploading !== null}
+                    />
+                    {mediaUploading === 'music' ? 'Enviando...' : 'Fazer upload de audio'}
+                  </label>
+                </div>
                 <textarea
                   rows={5}
                   value={musicInput}
@@ -845,7 +944,7 @@ const LoadingScreens: React.FC = () => {
           {activeEditorTab === 'vip' ? (
             <div className={`${CARD_CLASS} border-fuchsia-900/25 bg-zinc-900/90`}>
             <div className="flex items-center justify-between gap-2">
-              <h3 className="text-sm font-black uppercase tracking-wide text-white">Destaques/VIPs exibidos</h3>
+              <h3 className="text-sm font-black uppercase tracking-wide text-white">VIPs sincronizados + fallback manual</h3>
               <button
                 type="button"
                 onClick={addVip}
@@ -854,6 +953,9 @@ const LoadingScreens: React.FC = () => {
                 + VIP
               </button>
             </div>
+            <p className="mt-2 text-xs text-zinc-400">
+              A tela publica usa VIPs ativos da aba VIPs (filtrando por modo/servidor). A lista abaixo entra como fallback/complemento.
+            </p>
 
             <div className="mt-3">
               <label className={LABEL_CLASS}>Titulo da secao</label>

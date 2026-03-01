@@ -1,7 +1,7 @@
 
 
 import { MOCK_SERVERS, MOCK_EVENTS, MOCK_STATS, VIP_PLANS, MOCK_SUSPICIOUS_GROUPS, MOCK_PLAYERS, MOCK_USERS, MOCK_TRANSACTIONS, generateServerAnalytics, DEFAULT_SITE_CONFIG } from '../constants';
-import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionProofUploadResult, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel, ServerLiveStateResponse, ServerWsLiveStateListResponse, PlayerAliasHistoryResponse, LoadingScreenProfile, LoadingScreensResponse } from '../types';
+import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionProofUploadResult, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel, ServerLiveStateResponse, ServerWsLiveStateListResponse, PlayerAliasHistoryResponse, LoadingScreenProfile, LoadingScreensResponse, LoadingMediaUploadResult } from '../types';
 
 // Utility to simulate network delay (used as fallback)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -590,6 +590,48 @@ export const ApiService = {
     return config;
   },
 
+  uploadLoadingMedia: async (file: File): Promise<LoadingMediaUploadResult> => {
+    if (hasApi && API_BASE_URL) {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const headers: HeadersInit = {};
+      const token = getAuthToken();
+      if (token) {
+        (headers as any).Authorization = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/loading-screens/media-upload`, {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+
+      if (!response.ok) {
+        let message = `HTTP ${response.status}`;
+        try {
+          const body = await response.json();
+          if (body && typeof body.error === 'string') {
+            message = body.error;
+          }
+        } catch {
+          // ignore parse error
+        }
+        throw new Error(message);
+      }
+
+      return (await response.json()) as LoadingMediaUploadResult;
+    }
+
+    const dataUrl = await fileToDataUrl(file);
+    return {
+      url: dataUrl,
+      filename: file.name,
+      size: file.size,
+      mime: file.type || 'application/octet-stream',
+    };
+  },
+
   getLoadingScreens: async (): Promise<LoadingScreensResponse> => {
     if (hasApi) {
       try {
@@ -1102,6 +1144,12 @@ export const ApiService = {
       .map((player) => {
         const expiryMs = player.vipExpiry ? new Date(player.vipExpiry).getTime() : 0;
         const expired = !!expiryMs && expiryMs <= now;
+        const vipServerIds = Array.isArray((player as any).vipServerIds)
+          ? ((player as any).vipServerIds as string[]).filter((entry) => String(entry || '').trim().length > 0)
+          : [];
+        const vipServerNames = vipServerIds
+          .map((id) => serversDb.find((server) => server.id === id)?.name)
+          .filter((name): name is string => Boolean(name));
         return {
           steamId: player.steamId,
           name: player.name,
@@ -1111,6 +1159,8 @@ export const ApiService = {
           vipExpiry: player.vipExpiry,
           lastSeen: player.lastSeen,
           vipStatus: player.isVip ? (expired ? 'EXPIRED' : 'ACTIVE') : 'INACTIVE',
+          vipServerIds,
+          vipServerNames,
         };
       })
       .filter((item) => {
@@ -1267,6 +1317,7 @@ export const ApiService = {
     vipExpiry?: string;
     enqueue?: boolean;
     serverId?: string;
+    vipServerIds?: string[];
   }): Promise<VipAdminItem & { dispatch?: VipDispatchInfo }> => {
     if (hasApi) {
       return apiFetch(`/vips/grant`, {
@@ -1280,6 +1331,15 @@ export const ApiService = {
     const plan = String(data.vipPlan || '').trim();
     const name = String(data.name || '').trim();
     const durationDays = Math.max(1, Math.floor(data.vipDurationDays || 30));
+    const parsedVipServerIds = Array.isArray(data.vipServerIds)
+      ? Array.from(
+          new Set(
+            data.vipServerIds
+              .map((entry) => String(entry || '').trim())
+              .filter(Boolean),
+          ),
+        )
+      : [];
     const expiry = data.vipExpiry
       ? new Date(data.vipExpiry)
       : new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000);
@@ -1297,6 +1357,7 @@ export const ApiService = {
         isVip: true,
         vipPlan: plan,
         vipExpiry: expiry.toISOString(),
+        ...(parsedVipServerIds.length > 0 ? { vipServerIds: parsedVipServerIds } : {}),
       });
     } else {
       playersDb[idx] = {
@@ -1305,10 +1366,17 @@ export const ApiService = {
         isVip: true,
         vipPlan: plan,
         vipExpiry: expiry.toISOString(),
+        vipServerIds: parsedVipServerIds,
       };
     }
 
     const player = playersDb.find((p) => p.steamId === steamId)!;
+    const vipServerIds = Array.isArray((player as any).vipServerIds)
+      ? ((player as any).vipServerIds as string[])
+      : [];
+    const vipServerNames = vipServerIds
+      .map((id) => serversDb.find((server) => server.id === id)?.name)
+      .filter((name): name is string => Boolean(name));
     return {
       steamId: player.steamId,
       name: player.name,
@@ -1317,6 +1385,8 @@ export const ApiService = {
       vipPlan: player.vipPlan,
       vipExpiry: player.vipExpiry,
       vipStatus: 'ACTIVE',
+      vipServerIds,
+      vipServerNames,
       dispatch: { queued: false, skipped: true, reason: 'mock_mode' },
     };
   },
@@ -1327,6 +1397,7 @@ export const ApiService = {
     vipDurationDays?: number;
     enqueue?: boolean;
     serverId?: string;
+    vipServerIds?: string[];
   }): Promise<VipAdminItem & { dispatch?: VipDispatchInfo }> => {
     if (hasApi) {
       return apiFetch(`/vips/extend`, {
@@ -1347,10 +1418,29 @@ export const ApiService = {
     const baseMs = currentExpiry > now ? currentExpiry : now;
     const days = Math.max(1, Math.floor(data.vipDurationDays || 30));
     const nextExpiry = new Date(baseMs + days * 24 * 60 * 60 * 1000).toISOString();
+    const parsedVipServerIds = Array.isArray(data.vipServerIds)
+      ? Array.from(
+          new Set(
+            data.vipServerIds
+              .map((entry) => String(entry || '').trim())
+              .filter(Boolean),
+          ),
+        )
+      : undefined;
 
     player.isVip = true;
     player.vipPlan = data.vipPlan || player.vipPlan || 'VIP';
     player.vipExpiry = nextExpiry;
+    if (parsedVipServerIds !== undefined) {
+      (player as any).vipServerIds = parsedVipServerIds;
+    }
+
+    const vipServerIds = Array.isArray((player as any).vipServerIds)
+      ? ((player as any).vipServerIds as string[])
+      : [];
+    const vipServerNames = vipServerIds
+      .map((id) => serversDb.find((server) => server.id === id)?.name)
+      .filter((name): name is string => Boolean(name));
 
     return {
       steamId: player.steamId,
@@ -1360,6 +1450,8 @@ export const ApiService = {
       vipPlan: player.vipPlan,
       vipExpiry: player.vipExpiry,
       vipStatus: 'ACTIVE',
+      vipServerIds,
+      vipServerNames,
       dispatch: { queued: false, skipped: true, reason: 'mock_mode' },
     };
   },
@@ -1396,6 +1488,9 @@ export const ApiService = {
       vipPlan: player.vipPlan,
       vipExpiry: player.vipExpiry,
       vipStatus: 'INACTIVE',
+      vipServerIds: Array.isArray((player as any).vipServerIds)
+        ? ((player as any).vipServerIds as string[])
+        : [],
       dispatch: { queued: false, skipped: true, reason: 'mock_mode' },
     };
   },

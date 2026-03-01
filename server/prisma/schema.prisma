@@ -92,6 +92,7 @@ model PlayerProfile {
   isVip            Boolean      @default(false)
   vipPlan          String?
   vipExpiry        DateTime?
+  vipServerIds     String[]     @default([])
   ip               String?
   geo              Json?
   serverStats      Json?

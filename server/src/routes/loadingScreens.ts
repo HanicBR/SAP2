@@ -1,4 +1,8 @@
 import { Router } from 'express';
+import path from 'path';
+import crypto from 'crypto';
+import fs from 'fs';
+import multer from 'multer';
 import { prisma } from '../db/client';
 import { UserRole } from '../domain';
 import { authMiddleware, requireRole } from '../middleware/auth';
@@ -59,6 +63,29 @@ const MAX_BG_IMAGES = 16;
 const MAX_TRACKS = 24;
 const MAX_VIPS = 40;
 const MAX_RULES = 12;
+const MAX_PUBLIC_VIPS = 80;
+const maxLoadingMediaUploadMb = Math.max(1, Number(process.env.LOADING_MEDIA_UPLOAD_MAX_MB || 25));
+const loadingMediaUploadDir =
+  process.env.LOADING_MEDIA_UPLOAD_DIR || path.resolve(process.cwd(), 'uploads', 'loading-media');
+const allowedLoadingMediaMimeTypes = new Set([
+  'image/png',
+  'image/jpeg',
+  'image/jpg',
+  'image/webp',
+  'image/gif',
+  'image/avif',
+  'image/svg+xml',
+  'audio/mpeg',
+  'audio/mp3',
+  'audio/ogg',
+  'audio/wav',
+  'audio/x-wav',
+  'audio/webm',
+  'audio/aac',
+  'audio/flac',
+]);
+
+fs.mkdirSync(loadingMediaUploadDir, { recursive: true });
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -132,6 +159,19 @@ const parseBool = (value: unknown, fallback: boolean): boolean => {
   return ['1', 'true', 'yes', 'on'].includes(normalized);
 };
 
+const uniqueStrings = (values: string[]): string[] => {
+  const seen = new Set<string>();
+  const next: string[] = [];
+  values.forEach((value) => {
+    const normalized = String(value || '').trim();
+    if (!normalized) return;
+    if (seen.has(normalized)) return;
+    seen.add(normalized);
+    next.push(normalized);
+  });
+  return next;
+};
+
 const sanitizeVipPlayers = (value: unknown, fallback: LoadingScreenVipEntry[]): LoadingScreenVipEntry[] => {
   if (!Array.isArray(value)) return fallback;
 
@@ -156,6 +196,35 @@ const sanitizeVipPlayers = (value: unknown, fallback: LoadingScreenVipEntry[]): 
   });
 
   return next.length > 0 ? next : fallback;
+};
+
+const mergeAndDedupeVipEntries = (
+  primary: LoadingScreenVipEntry[],
+  fallback: LoadingScreenVipEntry[],
+): LoadingScreenVipEntry[] => {
+  const next: LoadingScreenVipEntry[] = [];
+  const seen = new Set<string>();
+
+  const push = (entry: LoadingScreenVipEntry) => {
+    if (next.length >= MAX_PUBLIC_VIPS) return;
+    const name = trimTo(entry.name, 80, '');
+    if (!name) return;
+    const steamId = trimTo(entry.steamId, 80, '');
+    const avatarUrl = sanitizeUrl(entry.avatarUrl);
+    const key = steamId ? `steam:${steamId.toUpperCase()}` : `name:${name.toLowerCase()}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    next.push({
+      name,
+      ...(steamId ? { steamId } : {}),
+      ...(avatarUrl ? { avatarUrl } : {}),
+    });
+  };
+
+  primary.forEach(push);
+  fallback.forEach(push);
+
+  return next.length > 0 ? next : fallback.slice(0, MAX_PUBLIC_VIPS);
 };
 
 const sanitizeSlugFromName = (name: string): string => {
@@ -394,12 +463,130 @@ const ensureSiteConfig = async () => {
   return siteConfig;
 };
 
+const loadingMediaStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, loadingMediaUploadDir),
+  filename: (_req, file, cb) => {
+    const safeOriginal = path.basename(file.originalname || '').toLowerCase();
+    const originalExt = path.extname(safeOriginal).replace(/[^a-z0-9.]/g, '');
+    const normalizedMime = String(file.mimetype || '').toLowerCase();
+    const fallbackExt = normalizedMime.startsWith('audio/')
+      ? '.ogg'
+      : normalizedMime === 'image/png'
+      ? '.png'
+      : normalizedMime === 'image/webp'
+      ? '.webp'
+      : normalizedMime === 'image/gif'
+      ? '.gif'
+      : normalizedMime === 'image/svg+xml'
+      ? '.svg'
+      : '.jpg';
+    const extension = originalExt || fallbackExt;
+    const random = crypto.randomBytes(8).toString('hex');
+    cb(null, `${Date.now()}_${random}${extension}`);
+  },
+});
+
+const uploadLoadingMedia = multer({
+  storage: loadingMediaStorage,
+  limits: {
+    fileSize: maxLoadingMediaUploadMb * 1024 * 1024,
+    files: 1,
+  },
+  fileFilter: (_req, file, cb) => {
+    const mime = String(file.mimetype || '').toLowerCase();
+    if (!allowedLoadingMediaMimeTypes.has(mime)) {
+      return cb(new Error('INVALID_LOADING_MEDIA_TYPE'));
+    }
+    return cb(null, true);
+  },
+});
+
+const buildSyncedVipPlayers = async (profile: LoadingScreenProfile): Promise<LoadingScreenVipEntry[]> => {
+  const now = new Date();
+  const mode = profile.mode;
+  const modeFilterEnabled = mode === 'TTT' || mode === 'SANDBOX' || mode === 'MURDER';
+  let modeServerIds: string[] = [];
+
+  if (modeFilterEnabled) {
+    const modeServers = await prisma.gameServer.findMany({
+      where: { mode: mode as any },
+      select: { id: true },
+    });
+    modeServerIds = uniqueStrings(modeServers.map((entry) => entry.id));
+  }
+
+  const where: any = {
+    isVip: true,
+    AND: [
+      {
+        OR: [{ vipExpiry: null }, { vipExpiry: { gt: now } }],
+      },
+    ],
+  };
+
+  if (modeFilterEnabled && modeServerIds.length > 0) {
+    where.AND.push({
+      OR: [{ vipServerIds: { isEmpty: true } }, { vipServerIds: { hasSome: modeServerIds } }],
+    });
+  }
+
+  const activeRows = await prisma.playerProfile.findMany({
+    where,
+    orderBy: [{ lastSeen: 'desc' }, { updatedAt: 'desc' }],
+    select: {
+      steamId: true,
+      name: true,
+      avatarUrl: true,
+    },
+    take: MAX_PUBLIC_VIPS,
+  });
+
+  const synced = activeRows.map((row) => ({
+    name: trimTo(row.name, 80, row.steamId),
+    steamId: row.steamId,
+    ...(row.avatarUrl ? { avatarUrl: row.avatarUrl } : {}),
+  }));
+
+  const manualFallback = sanitizeVipPlayers(profile.vipPlayers, []);
+  return mergeAndDedupeVipEntries(synced, manualFallback);
+};
+
 const respondStore = (res: any, store: LoadingScreensStore, updatedAt: Date) => {
   return res.json({
     updatedAt: updatedAt.toISOString(),
     profiles: store.profiles,
   });
 };
+
+router.post('/media-upload', authMiddleware, requireRole(UserRole.ADMIN), (req, res) => {
+  uploadLoadingMedia.single('file')(req as any, res as any, (err: any) => {
+    if (err) {
+      if (err?.code === 'LIMIT_FILE_SIZE') {
+        return res
+          .status(413)
+          .json({ error: `Loading media exceeds ${maxLoadingMediaUploadMb}MB limit` });
+      }
+      if (err?.message === 'INVALID_LOADING_MEDIA_TYPE') {
+        return res
+          .status(400)
+          .json({ error: 'Unsupported media type. Use image or audio files' });
+      }
+      return res.status(400).json({ error: 'Failed to upload loading media' });
+    }
+
+    const file = (req as any).file as Express.Multer.File | undefined;
+    if (!file) {
+      return res.status(400).json({ error: 'Missing file' });
+    }
+
+    return res.status(201).json({
+      url: `/api/uploads/loading-media/${encodeURIComponent(file.filename)}`,
+      filename: file.filename,
+      size: file.size,
+      mime: file.mimetype,
+    });
+  });
+});
 
 router.get('/', authMiddleware, requireRole(UserRole.ADMIN), async (_req, res) => {
   const siteConfig = await ensureSiteConfig();
@@ -421,7 +608,11 @@ router.get('/public/:slug', async (req, res) => {
     return res.status(404).json({ error: 'Loading screen not found' });
   }
 
-  return res.json(profile);
+  const syncedVipPlayers = await buildSyncedVipPlayers(profile);
+  return res.json({
+    ...profile,
+    vipPlayers: syncedVipPlayers,
+  });
 });
 
 router.post('/', authMiddleware, requireRole(UserRole.ADMIN), async (req, res) => {

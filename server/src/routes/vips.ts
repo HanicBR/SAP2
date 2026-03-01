@@ -41,6 +41,26 @@ const parseBoolean = (value: unknown, fallback: boolean): boolean => {
   return fallback;
 };
 
+const parseStringArray = (value: unknown, maxItems: number): string[] | undefined => {
+  if (value === undefined) return undefined;
+  const source = Array.isArray(value)
+    ? value
+    : String(value ?? '')
+        .split(',')
+        .map((item) => item.trim());
+  const next: string[] = [];
+  const seen = new Set<string>();
+  source.forEach((entry) => {
+    const normalized = String(entry || '').trim();
+    if (!normalized) return;
+    if (seen.has(normalized)) return;
+    if (next.length >= maxItems) return;
+    seen.add(normalized);
+    next.push(normalized);
+  });
+  return next;
+};
+
 const toDispatchPayload = (dispatch: {
   queued: boolean;
   skipped?: boolean;
@@ -147,8 +167,19 @@ router.get('/', async (req, res) => {
     take: limit,
   });
 
+  const serverCatalog = await prisma.gameServer.findMany({
+    select: { id: true, name: true },
+  });
+  const serverNameById = new Map(serverCatalog.map((server) => [server.id, server.name]));
+
   const items = rows.map((row) => {
     const isExpired = !!row.vipExpiry && row.vipExpiry.getTime() <= Date.now();
+    const vipServerIds = Array.isArray((row as any).vipServerIds)
+      ? ((row as any).vipServerIds as string[]).filter((entry) => String(entry || '').trim().length > 0)
+      : [];
+    const vipServerNames = vipServerIds
+      .map((id) => serverNameById.get(id))
+      .filter((value): value is string => Boolean(value));
     return {
       steamId: row.steamId,
       name: row.name,
@@ -158,6 +189,8 @@ router.get('/', async (req, res) => {
       vipExpiry: toIso(row.vipExpiry),
       lastSeen: row.lastSeen.toISOString(),
       vipStatus: row.isVip ? (isExpired ? 'EXPIRED' : 'ACTIVE') : 'INACTIVE',
+      vipServerIds,
+      vipServerNames,
     };
   });
 
@@ -223,17 +256,31 @@ router.post('/grant', async (req, res) => {
     vipExpiry,
     enqueue,
     serverId,
+    vipServerIds,
   } = (req as any).body || {};
 
   const parsedSteamId = String(steamId || '').trim();
   const parsedName = String(name || '').trim();
   const parsedPlan = String(vipPlan || '').trim();
   const parsedServerId = String(serverId || '').trim();
+  const parsedVipServerIds = parseStringArray(vipServerIds, 64);
   const durationDays = parsePositiveInt(vipDurationDays, 30, 3650);
   const explicitExpiry = parseOptionalDate(vipExpiry);
 
   if (!parsedSteamId || !parsedPlan) {
     return res.status(400).json({ error: 'steamId and vipPlan are required' });
+  }
+
+  if (parsedVipServerIds && parsedVipServerIds.length > 0) {
+    const validServers = await prisma.gameServer.findMany({
+      where: { id: { in: parsedVipServerIds } },
+      select: { id: true },
+    });
+    const validIds = new Set(validServers.map((entry) => entry.id));
+    const invalidIds = parsedVipServerIds.filter((entry) => !validIds.has(entry));
+    if (invalidIds.length > 0) {
+      return res.status(400).json({ error: `Invalid vipServerIds: ${invalidIds.join(', ')}` });
+    }
   }
 
   const expiry = explicitExpiry || new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000);
@@ -251,12 +298,14 @@ router.post('/grant', async (req, res) => {
       isVip: true,
       vipPlan: parsedPlan,
       vipExpiry: expiry,
+      vipServerIds: parsedVipServerIds || [],
     },
     update: {
       ...(parsedName ? { name: parsedName } : {}),
       isVip: true,
       vipPlan: parsedPlan,
       vipExpiry: expiry,
+      ...(parsedVipServerIds !== undefined ? { vipServerIds: parsedVipServerIds } : {}),
     },
   });
 
@@ -293,6 +342,7 @@ router.post('/grant', async (req, res) => {
     isVip: updated.isVip,
     vipPlan: updated.vipPlan || undefined,
     vipExpiry: toIso(updated.vipExpiry),
+    vipServerIds: Array.isArray((updated as any).vipServerIds) ? (updated as any).vipServerIds : [],
     ...(dispatch ? { dispatch } : {}),
   });
 });
@@ -304,15 +354,29 @@ router.post('/extend', async (req, res) => {
     vipDurationDays,
     enqueue,
     serverId,
+    vipServerIds,
   } = (req as any).body || {};
 
   const parsedSteamId = String(steamId || '').trim();
   const parsedPlan = String(vipPlan || '').trim();
   const parsedServerId = String(serverId || '').trim();
+  const parsedVipServerIds = parseStringArray(vipServerIds, 64);
   const durationDays = parsePositiveInt(vipDurationDays, 30, 3650);
 
   if (!parsedSteamId) {
     return res.status(400).json({ error: 'steamId is required' });
+  }
+
+  if (parsedVipServerIds && parsedVipServerIds.length > 0) {
+    const validServers = await prisma.gameServer.findMany({
+      where: { id: { in: parsedVipServerIds } },
+      select: { id: true },
+    });
+    const validIds = new Set(validServers.map((entry) => entry.id));
+    const invalidIds = parsedVipServerIds.filter((entry) => !validIds.has(entry));
+    if (invalidIds.length > 0) {
+      return res.status(400).json({ error: `Invalid vipServerIds: ${invalidIds.join(', ')}` });
+    }
   }
 
   const player = await prisma.playerProfile.findUnique({ where: { steamId: parsedSteamId } });
@@ -331,6 +395,7 @@ router.post('/extend', async (req, res) => {
       isVip: true,
       vipPlan: nextPlan,
       vipExpiry: nextExpiry,
+      ...(parsedVipServerIds !== undefined ? { vipServerIds: parsedVipServerIds } : {}),
     },
   });
 
@@ -367,6 +432,7 @@ router.post('/extend', async (req, res) => {
     isVip: updated.isVip,
     vipPlan: updated.vipPlan || undefined,
     vipExpiry: toIso(updated.vipExpiry),
+    vipServerIds: Array.isArray((updated as any).vipServerIds) ? (updated as any).vipServerIds : [],
     ...(dispatch ? { dispatch } : {}),
   });
 });
@@ -428,6 +494,7 @@ router.post('/revoke', async (req, res) => {
     isVip: updated.isVip,
     vipPlan: updated.vipPlan || undefined,
     vipExpiry: toIso(updated.vipExpiry),
+    vipServerIds: Array.isArray((updated as any).vipServerIds) ? (updated as any).vipServerIds : [],
     ...(dispatch ? { dispatch } : {}),
   });
 });

@@ -63,6 +63,9 @@ app.use(helmet());
 const proofUploadsDir =
   process.env.PROOF_UPLOAD_DIR || path.resolve(process.cwd(), 'uploads', 'proofs');
 fs.mkdirSync(proofUploadsDir, { recursive: true });
+const loadingMediaUploadsDir =
+  process.env.LOADING_MEDIA_UPLOAD_DIR || path.resolve(process.cwd(), 'uploads', 'loading-media');
+fs.mkdirSync(loadingMediaUploadsDir, { recursive: true });
 
 const apiLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 min
@@ -88,6 +91,14 @@ app.use(
   express.static(proofUploadsDir, {
     index: false,
     maxAge: '7d',
+    dotfiles: 'deny',
+  }),
+);
+app.use(
+  '/api/uploads/loading-media',
+  express.static(loadingMediaUploadsDir, {
+    index: false,
+    maxAge: '30d',
     dotfiles: 'deny',
   }),
 );

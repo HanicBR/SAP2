@@ -65,6 +65,9 @@ const dispatchResultLabel = (dispatch?: { queued: boolean; skipped?: boolean; re
   return 'falhou';
 };
 
+const normalizeIdList = (values: string[]): string[] =>
+  Array.from(new Set(values.map((entry) => String(entry || '').trim()).filter(Boolean)));
+
 const Vips: React.FC = () => {
   const { config } = useConfig();
   const [activeTab, setActiveTab] = useState<'overview' | 'operations' | 'automation'>('overview');
@@ -95,10 +98,12 @@ const Vips: React.FC = () => {
   const [grantName, setGrantName] = useState('');
   const [grantPlan, setGrantPlan] = useState('');
   const [grantDurationDays, setGrantDurationDays] = useState('30');
+  const [grantServerIds, setGrantServerIds] = useState<string[]>([]);
 
   const [extendSteamId, setExtendSteamId] = useState('');
   const [extendPlan, setExtendPlan] = useState('');
   const [extendDurationDays, setExtendDurationDays] = useState('30');
+  const [extendServerIds, setExtendServerIds] = useState<string[]>([]);
   const [revokeReason, setRevokeReason] = useState('');
 
   const planOptions = useMemo(() => {
@@ -248,6 +253,19 @@ const Vips: React.FC = () => {
     loadServers();
   }, []);
 
+  const toggleServerSelection = (
+    serverId: string,
+    setState: React.Dispatch<React.SetStateAction<string[]>>,
+  ) => {
+    setState((prev) => {
+      const safeCurrent = normalizeIdList(prev);
+      if (safeCurrent.includes(serverId)) {
+        return safeCurrent.filter((id) => id !== serverId);
+      }
+      return [...safeCurrent, serverId];
+    });
+  };
+
   const handleGrant = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
@@ -258,6 +276,7 @@ const Vips: React.FC = () => {
         name: grantName.trim() || undefined,
         vipPlan: grantPlan,
         vipDurationDays: Number.parseInt(grantDurationDays, 10),
+        vipServerIds: normalizeIdList(grantServerIds),
       });
       setFeedback(
         result.dispatch
@@ -268,6 +287,7 @@ const Vips: React.FC = () => {
       );
       setGrantSteamId('');
       setGrantName('');
+      setGrantServerIds([]);
       await refreshAll();
     } catch (err: any) {
       setFeedback(err?.message || 'Erro ao conceder VIP');
@@ -285,6 +305,7 @@ const Vips: React.FC = () => {
         steamId: extendSteamId.trim(),
         vipPlan: extendPlan || undefined,
         vipDurationDays: Number.parseInt(extendDurationDays, 10),
+        vipServerIds: normalizeIdList(extendServerIds),
       });
       setFeedback(
         result.dispatch
@@ -553,6 +574,7 @@ const Vips: React.FC = () => {
                     <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">SteamID</th>
                     <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Plano</th>
                     <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Expira em</th>
+                    <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Servidores VIP</th>
                     <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Status</th>
                     <th className="px-4 py-3 text-right text-xs uppercase text-zinc-500">Acoes</th>
                   </tr>
@@ -560,13 +582,13 @@ const Vips: React.FC = () => {
                 <tbody className="divide-y divide-zinc-800">
                   {loading ? (
                     <tr>
-                      <td colSpan={6} className="px-4 py-10 text-center text-zinc-500">
+                      <td colSpan={7} className="px-4 py-10 text-center text-zinc-500">
                         Carregando VIPs...
                       </td>
                     </tr>
                   ) : items.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="px-4 py-10 text-center text-zinc-500">
+                      <td colSpan={7} className="px-4 py-10 text-center text-zinc-500">
                         Nenhum VIP encontrado.
                       </td>
                     </tr>
@@ -589,6 +611,27 @@ const Vips: React.FC = () => {
                         <td className="px-4 py-3 text-xs text-zinc-400 font-mono">{item.steamId}</td>
                         <td className="px-4 py-3 text-sm text-zinc-300">{item.vipPlan || '-'}</td>
                         <td className="px-4 py-3 text-sm text-zinc-300">{formatDateTime(item.vipExpiry)}</td>
+                        <td className="px-4 py-3 text-xs text-zinc-300">
+                          {!item.vipServerIds || item.vipServerIds.length === 0 ? (
+                            <span className="inline-flex rounded border border-emerald-800/60 bg-emerald-900/20 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-300">
+                              Todos os servidores
+                            </span>
+                          ) : (
+                            <div className="flex flex-wrap gap-1">
+                              {(item.vipServerNames && item.vipServerNames.length > 0
+                                ? item.vipServerNames
+                                : item.vipServerIds
+                              ).map((name) => (
+                                <span
+                                  key={`${item.steamId}-${name}`}
+                                  className="inline-flex rounded border border-zinc-700 bg-zinc-800 px-2 py-0.5 text-[10px] font-bold uppercase text-zinc-300"
+                                >
+                                  {name}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </td>
                         <td className="px-4 py-3">
                           <span
                             className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
@@ -608,6 +651,7 @@ const Vips: React.FC = () => {
                             onClick={() => {
                               setExtendSteamId(item.steamId);
                               setExtendPlan(item.vipPlan || planOptions[0]);
+                              setExtendServerIds(item.vipServerIds || []);
                               setActiveTab('operations');
                             }}
                             className="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3 py-1 rounded mr-2"
@@ -675,6 +719,34 @@ const Vips: React.FC = () => {
                   ))}
                 </select>
               </div>
+              <div className="rounded border border-zinc-800 bg-zinc-950/60 p-3">
+                <p className="text-[11px] uppercase font-bold text-zinc-500">Escopo de servidores VIP</p>
+                <p className="mt-1 text-xs text-zinc-400">
+                  Se nada for marcado, vale para todos os servidores.
+                </p>
+                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {servers.map((server) => {
+                    const checked = grantServerIds.includes(server.id);
+                    return (
+                      <label
+                        key={`grant-${server.id}`}
+                        className={`flex items-center gap-2 rounded border px-2 py-1.5 text-xs ${
+                          checked
+                            ? 'border-emerald-700/70 bg-emerald-900/20 text-emerald-200'
+                            : 'border-zinc-700 bg-zinc-900/60 text-zinc-300'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleServerSelection(server.id, setGrantServerIds)}
+                        />
+                        <span className="min-w-0 truncate">{server.name}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
               <button
                 type="submit"
                 disabled={busy}
@@ -722,6 +794,34 @@ const Vips: React.FC = () => {
                     </option>
                   ))}
                 </select>
+              </div>
+              <div className="rounded border border-zinc-800 bg-zinc-950/60 p-3">
+                <p className="text-[11px] uppercase font-bold text-zinc-500">Atualizar escopo de servidores</p>
+                <p className="mt-1 text-xs text-zinc-400">
+                  Marque os servidores onde esse VIP vale. Deixe vazio para todos.
+                </p>
+                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {servers.map((server) => {
+                    const checked = extendServerIds.includes(server.id);
+                    return (
+                      <label
+                        key={`extend-${server.id}`}
+                        className={`flex items-center gap-2 rounded border px-2 py-1.5 text-xs ${
+                          checked
+                            ? 'border-cyan-700/70 bg-cyan-900/20 text-cyan-200'
+                            : 'border-zinc-700 bg-zinc-900/60 text-zinc-300'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleServerSelection(server.id, setExtendServerIds)}
+                        />
+                        <span className="min-w-0 truncate">{server.name}</span>
+                      </label>
+                    );
+                  })}
+                </div>
               </div>
               <div className="flex gap-2">
                 <button
