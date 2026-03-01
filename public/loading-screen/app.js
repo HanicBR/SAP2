@@ -137,6 +137,7 @@
     flushTimer: null,
     flushInFlight: false,
     heartbeatTimer: null,
+    startingLuaFinalizeTimer: null,
     finalized: false,
     sentStart: false,
     sentGameDetails: false,
@@ -307,6 +308,10 @@
       window.clearTimeout(telemetry.flushTimer);
       telemetry.flushTimer = null;
     }
+    if (telemetry.startingLuaFinalizeTimer) {
+      window.clearTimeout(telemetry.startingLuaFinalizeTimer);
+      telemetry.startingLuaFinalizeTimer = null;
+    }
 
     pushTelemetryEvent('SESSION_END', {
       statusText: telemetry.lastStatus,
@@ -318,6 +323,16 @@
     });
     telemetry.finalized = true;
     flushTelemetry(true);
+  }
+
+  function scheduleStartingLuaFinalize() {
+    if (!enableTelemetry || !telemetry.sessionKey) return;
+    if (telemetry.finalized) return;
+    if (telemetry.startingLuaFinalizeTimer) return;
+    telemetry.startingLuaFinalizeTimer = window.setTimeout(function () {
+      telemetry.startingLuaFinalizeTimer = null;
+      finalizeTelemetry('starting_lua_timeout');
+    }, 45000);
   }
 
   function startTelemetry(slug, telemetryMeta) {
@@ -726,8 +741,9 @@
     if (text === 'Client info sent!' || text === 'Client info sent') {
       setProgress(92);
     }
-    if (text === 'Starting Lua...') {
+    if (text === 'Starting Lua...' || text === 'Starting Lua') {
       setProgress(100);
+      scheduleStartingLuaFinalize();
     }
 
     if (text && text !== telemetry.lastStatus) {
@@ -752,9 +768,6 @@
       });
     }
 
-    if (text === 'Starting Lua...' || text === 'Starting Lua') {
-      finalizeTelemetry('starting_lua');
-    }
   }
 
   function DownloadingFile(fileName) {

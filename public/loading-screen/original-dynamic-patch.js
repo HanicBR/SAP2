@@ -490,6 +490,7 @@
       flushTimer: null,
       flushInFlight: false,
       heartbeatTimer: null,
+      startingLuaFinalizeTimer: null,
       finalized: false,
       lastStatus: '',
       lastFile: '',
@@ -657,6 +658,10 @@
         clearTimeout(telemetry.flushTimer);
         telemetry.flushTimer = null;
       }
+      if (telemetry.startingLuaFinalizeTimer) {
+        clearTimeout(telemetry.startingLuaFinalizeTimer);
+        telemetry.startingLuaFinalizeTimer = null;
+      }
 
       pushEvent(
         'SESSION_END',
@@ -672,6 +677,15 @@
       );
       telemetry.finalized = true;
       flush(true);
+    }
+
+    function scheduleStartingLuaFinalize() {
+      if (telemetry.finalized) return;
+      if (telemetry.startingLuaFinalizeTimer) return;
+      telemetry.startingLuaFinalizeTimer = setTimeout(function () {
+        telemetry.startingLuaFinalizeTimer = null;
+        finalize('starting_lua_timeout');
+      }, 45000);
     }
 
     function patchHooks() {
@@ -733,7 +747,7 @@
           }
 
           if (text === 'Starting Lua...' || text === 'Starting Lua') {
-            finalize('starting_lua');
+            scheduleStartingLuaFinalize();
           }
           return result;
         };
