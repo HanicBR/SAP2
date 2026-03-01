@@ -68,6 +68,7 @@ const dispatchResultLabel = (dispatch?: { queued: boolean; skipped?: boolean; re
 const Vips: React.FC = () => {
   const { config } = useConfig();
   const [activeTab, setActiveTab] = useState<'overview' | 'operations' | 'automation'>('overview');
+  const [showAutomationConfig, setShowAutomationConfig] = useState(false);
   const [items, setItems] = useState<VipAdminItem[]>([]);
   const [actions, setActions] = useState<VipAutomationActionItem[]>([]);
   const [servers, setServers] = useState<GameServer[]>([]);
@@ -410,39 +411,66 @@ const Vips: React.FC = () => {
           </button>
         </div>
 
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-2">
           <button
             type="button"
             onClick={() => setActiveTab('overview')}
-            className={`px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider border ${
+            className={`group text-left p-3 rounded-lg border transition-all ${
               activeTab === 'overview'
-                ? 'bg-brand/20 border-brand/50 text-white'
-                : 'bg-zinc-950 border-zinc-700 text-zinc-400 hover:text-zinc-200'
+                ? 'bg-gradient-to-r from-brand/30 to-red-900/20 border-brand/60 shadow-lg shadow-brand/10'
+                : 'bg-zinc-950 border-zinc-700 hover:border-zinc-500'
             }`}
           >
-            Visao geral
+            <div className="flex items-center gap-2">
+              <Icons.BarChart className={`w-4 h-4 ${activeTab === 'overview' ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
+              <span className={`text-xs font-bold uppercase tracking-wider ${activeTab === 'overview' ? 'text-white' : 'text-zinc-300'}`}>
+                Visao geral
+              </span>
+            </div>
+            <p className={`mt-1 text-[11px] ${activeTab === 'overview' ? 'text-zinc-200' : 'text-zinc-500'}`}>
+              Lista de VIPs e filtros rapidos
+            </p>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('operations')}
-            className={`px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider border ${
+            className={`group text-left p-3 rounded-lg border transition-all ${
               activeTab === 'operations'
-                ? 'bg-brand/20 border-brand/50 text-white'
-                : 'bg-zinc-950 border-zinc-700 text-zinc-400 hover:text-zinc-200'
+                ? 'bg-gradient-to-r from-blue-900/30 to-cyan-900/20 border-blue-700/70 shadow-lg shadow-blue-900/10'
+                : 'bg-zinc-950 border-zinc-700 hover:border-zinc-500'
             }`}
           >
-            Operacoes
+            <div className="flex items-center gap-2">
+              <Icons.Settings className={`w-4 h-4 ${activeTab === 'operations' ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
+              <span className={`text-xs font-bold uppercase tracking-wider ${activeTab === 'operations' ? 'text-white' : 'text-zinc-300'}`}>
+                Operacoes
+              </span>
+            </div>
+            <p className={`mt-1 text-[11px] ${activeTab === 'operations' ? 'text-zinc-200' : 'text-zinc-500'}`}>
+              Conceder, estender, revogar e reconciliar
+            </p>
           </button>
           <button
             type="button"
-            onClick={() => setActiveTab('automation')}
-            className={`px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider border ${
+            onClick={() => {
+              setShowAutomationConfig(false);
+              setActiveTab('automation');
+            }}
+            className={`group text-left p-3 rounded-lg border transition-all ${
               activeTab === 'automation'
-                ? 'bg-brand/20 border-brand/50 text-white'
-                : 'bg-zinc-950 border-zinc-700 text-zinc-400 hover:text-zinc-200'
+                ? 'bg-gradient-to-r from-emerald-900/30 to-green-900/20 border-emerald-700/70 shadow-lg shadow-emerald-900/10'
+                : 'bg-zinc-950 border-zinc-700 hover:border-zinc-500'
             }`}
           >
-            Automacao
+            <div className="flex items-center gap-2">
+              <Icons.Activity className={`w-4 h-4 ${activeTab === 'automation' ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
+              <span className={`text-xs font-bold uppercase tracking-wider ${activeTab === 'automation' ? 'text-white' : 'text-zinc-300'}`}>
+                Automacao
+              </span>
+            </div>
+            <p className={`mt-1 text-[11px] ${activeTab === 'automation' ? 'text-zinc-200' : 'text-zinc-500'}`}>
+              Configuracao e auditoria de comandos
+            </p>
           </button>
         </div>
       </div>
@@ -746,92 +774,124 @@ const Vips: React.FC = () => {
 
       {activeTab === 'automation' ? (
         <>
-          <form
-            onSubmit={handleSaveAutomationConfig}
-            className="bg-zinc-900 border border-zinc-800 rounded p-4 space-y-4"
-          >
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-              <h2 className="text-sm uppercase font-bold text-zinc-300">Config da automacao VIP</h2>
-              <span className="text-xs text-zinc-500">source={automationConfig.source || 'env'}</span>
-            </div>
-            <label className="flex items-center gap-2 text-sm text-zinc-300">
-              <input
-                type="checkbox"
-                checked={automationConfig.enabled}
-                onChange={(e) =>
-                  setAutomationConfig((prev) => ({
-                    ...prev,
-                    enabled: e.target.checked,
-                  }))
-                }
-              />
-              Ativar envio automatico de comando VIP
-            </label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <select
-                value={automationConfig.sandboxServerId || ''}
-                onChange={(e) =>
-                  setAutomationConfig((prev) => ({
-                    ...prev,
-                    sandboxServerId: e.target.value || undefined,
-                  }))
-                }
-                className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm font-mono"
-                disabled={serversLoading}
-              >
-                <option value="">Automatico (primeiro Sandbox online)</option>
-                {sandboxServers.map((server) => (
-                  <option key={server.id} value={server.id}>
-                    {server.name} - {server.id}
-                  </option>
-                ))}
-                {automationConfig.sandboxServerId && !hasSelectedSandboxServer ? (
-                  <option value={automationConfig.sandboxServerId}>
-                    Atual (nao listado): {automationConfig.sandboxServerId}
-                  </option>
-                ) : null}
-              </select>
-              <div className="text-xs text-zinc-500 flex items-center">
-                {serversLoading
-                  ? 'Carregando servidores...'
-                  : `${sandboxServers.length} servidor(es) Sandbox disponivel(is)`}
-              </div>
-              <textarea
-                value={automationConfig.grantTemplate}
-                onChange={(e) =>
-                  setAutomationConfig((prev) => ({
-                    ...prev,
-                    grantTemplate: e.target.value,
-                  }))
-                }
-                className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm font-mono md:col-span-2"
-                placeholder='Template GRANT. Ex: sam setrank {{steamId}} {{vipPlanServer}}'
-                rows={2}
-              />
-              <textarea
-                value={automationConfig.revokeTemplate}
-                onChange={(e) =>
-                  setAutomationConfig((prev) => ({
-                    ...prev,
-                    revokeTemplate: e.target.value,
-                  }))
-                }
-                className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm font-mono md:col-span-2"
-                placeholder='Template REVOKE. Ex: sam setrank {{steamId}} "user"'
-                rows={2}
-              />
-              <div className="text-xs text-zinc-500 md:col-span-2">
-                Tokens permitidos: {'{{steamId}}'}, {'{{vipPlanServer}}'}, {'{{vipExpiryUnix}}'}
-              </div>
-            </div>
+          <div className="bg-zinc-900 border border-zinc-800 rounded overflow-hidden">
             <button
-              type="submit"
-              disabled={automationSaving}
-              className="bg-brand hover:bg-brand-dark text-white px-4 py-2 rounded text-sm font-bold uppercase disabled:opacity-60"
+              type="button"
+              onClick={() => setShowAutomationConfig((prev) => !prev)}
+              className="w-full p-4 bg-zinc-950/40 border-b border-zinc-800 flex items-center justify-between text-left"
             >
-              Salvar automacao
+              <div>
+                <h2 className="text-sm uppercase font-bold text-zinc-300">Config da automacao VIP</h2>
+                <p className="text-xs text-zinc-500 mt-1">
+                  Painel recolhido por seguranca. Expanda apenas quando for editar.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] text-zinc-500">source={automationConfig.source || 'env'}</span>
+                <span
+                  className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                    automationConfig.enabled
+                      ? 'bg-green-900/30 text-green-400 border border-green-800'
+                      : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                  }`}
+                >
+                  {automationConfig.enabled ? 'ativa' : 'desativada'}
+                </span>
+                <span className="text-zinc-300 text-xs font-bold uppercase">
+                  {showAutomationConfig ? 'ocultar' : 'expandir'}
+                </span>
+              </div>
             </button>
-          </form>
+
+            {showAutomationConfig ? (
+              <form
+                onSubmit={handleSaveAutomationConfig}
+                className="p-4 space-y-4"
+              >
+                <label className="flex items-center gap-2 text-sm text-zinc-300">
+                  <input
+                    type="checkbox"
+                    checked={automationConfig.enabled}
+                    onChange={(e) =>
+                      setAutomationConfig((prev) => ({
+                        ...prev,
+                        enabled: e.target.checked,
+                      }))
+                    }
+                  />
+                  Ativar envio automatico de comando VIP
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <select
+                    value={automationConfig.sandboxServerId || ''}
+                    onChange={(e) =>
+                      setAutomationConfig((prev) => ({
+                        ...prev,
+                        sandboxServerId: e.target.value || undefined,
+                      }))
+                    }
+                    className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm font-mono"
+                    disabled={serversLoading}
+                  >
+                    <option value="">Automatico (primeiro Sandbox online)</option>
+                    {sandboxServers.map((server) => (
+                      <option key={server.id} value={server.id}>
+                        {server.name} - {server.id}
+                      </option>
+                    ))}
+                    {automationConfig.sandboxServerId && !hasSelectedSandboxServer ? (
+                      <option value={automationConfig.sandboxServerId}>
+                        Atual (nao listado): {automationConfig.sandboxServerId}
+                      </option>
+                    ) : null}
+                  </select>
+                  <div className="text-xs text-zinc-500 flex items-center">
+                    {serversLoading
+                      ? 'Carregando servidores...'
+                      : `${sandboxServers.length} servidor(es) Sandbox disponivel(is)`}
+                  </div>
+                  <textarea
+                    value={automationConfig.grantTemplate}
+                    onChange={(e) =>
+                      setAutomationConfig((prev) => ({
+                        ...prev,
+                        grantTemplate: e.target.value,
+                      }))
+                    }
+                    className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm font-mono md:col-span-2"
+                    placeholder='Template GRANT. Ex: sam setrank {{steamId}} {{vipPlanServer}}'
+                    rows={2}
+                  />
+                  <textarea
+                    value={automationConfig.revokeTemplate}
+                    onChange={(e) =>
+                      setAutomationConfig((prev) => ({
+                        ...prev,
+                        revokeTemplate: e.target.value,
+                      }))
+                    }
+                    className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm font-mono md:col-span-2"
+                    placeholder='Template REVOKE. Ex: sam setrank {{steamId}} "user"'
+                    rows={2}
+                  />
+                  <div className="text-xs text-zinc-500 md:col-span-2">
+                    Tokens permitidos: {'{{steamId}}'}, {'{{vipPlanServer}}'}, {'{{vipExpiryUnix}}'}
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  disabled={automationSaving}
+                  className="bg-brand hover:bg-brand-dark text-white px-4 py-2 rounded text-sm font-bold uppercase disabled:opacity-60"
+                >
+                  Salvar automacao
+                </button>
+              </form>
+            ) : (
+              <div className="p-4 text-xs text-zinc-500">
+                Configuracao protegida contra alteracao acidental. Clique em <span className="text-zinc-300 font-bold">expandir</span> para editar.
+              </div>
+            )}
+          </div>
 
           <div className="bg-zinc-900 border border-zinc-800 rounded overflow-hidden">
             <div className="p-4 border-b border-zinc-800 bg-zinc-950/40 flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between">
