@@ -338,6 +338,8 @@ const Dashboard: React.FC = () => {
                         payload?.payload?.name || 'Mapa',
                       ]}
                       contentStyle={{ backgroundColor: '#09090b', border: '1px solid #3f3f46' }}
+                      itemStyle={{ color: '#e4e4e7' }}
+                      labelStyle={{ color: '#d4d4d8' }}
                     />
                   </PieChart>
                 </ResponsiveContainer>
