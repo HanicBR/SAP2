@@ -113,9 +113,18 @@ router.post('/register', async (req, res) => {
   return res.status(201).json({ user: toPublicUser(record), token });
 });
 
-router.get('/me', (req, res) => {
-  // For simplicity this endpoint can be implemented later using authMiddleware
-  return res.status(501).json({ error: 'Not implemented' });
+router.get('/me', authMiddleware, async (req, res) => {
+  const user = req.user;
+  if (!user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const userRecord = await prisma.user.findUnique({ where: { id: user.id } });
+  if (!userRecord) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  return res.json({ user: toPublicUser(userRecord) });
 });
 
 // Change password (autenticado)

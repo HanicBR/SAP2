@@ -273,6 +273,7 @@ export const ApiService = {
       body: JSON.stringify({ emailOrUser, password }),
     });
     localStorage.setItem('backstabber_token', result.token);
+    localStorage.setItem('backstabber_user', JSON.stringify(result.user));
     return result.user;
   },
 
@@ -286,6 +287,17 @@ export const ApiService = {
       body: JSON.stringify({ username, email, password }),
     });
     localStorage.setItem('backstabber_token', result.token);
+    localStorage.setItem('backstabber_user', JSON.stringify(result.user));
+    return result.user;
+  },
+
+  getCurrentUser: async (): Promise<User> => {
+    if (!hasApi) {
+      throw new Error('API base URL not configured');
+    }
+
+    const result = await apiFetch<{ user: User }>('/auth/me');
+    localStorage.setItem('backstabber_user', JSON.stringify(result.user));
     return result.user;
   },
   
