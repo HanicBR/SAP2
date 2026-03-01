@@ -1116,7 +1116,7 @@ const invalidatePublicLoadingProfileCache = (slug?: string) => {
   publicLoadingProfileCache.delete(slug);
 };
 
-router.post('/media-upload', authMiddleware, requireRole(UserRole.ADMIN), (req, res) => {
+router.post('/media-upload', authMiddleware, requireRole(UserRole.SUPERADMIN), (req, res) => {
   uploadLoadingMedia.single('file')(req as any, res as any, (err: any) => {
     if (err) {
       if (err?.code === 'LIMIT_FILE_SIZE') {
@@ -1146,7 +1146,7 @@ router.post('/media-upload', authMiddleware, requireRole(UserRole.ADMIN), (req, 
   });
 });
 
-router.get('/', authMiddleware, requireRole(UserRole.ADMIN), async (_req, res) => {
+router.get('/', authMiddleware, requireRole(UserRole.SUPERADMIN), async (_req, res) => {
   const siteConfig = await ensureSiteConfig();
   const store = loadStoreFromSiteConfig(siteConfig.data);
   return respondStore(res, store, siteConfig.updatedAt);
@@ -1195,7 +1195,7 @@ router.get('/public/:slug', async (req, res) => {
   return res.json(payload);
 });
 
-router.post('/', authMiddleware, requireRole(UserRole.ADMIN), async (req, res) => {
+router.post('/', authMiddleware, requireRole(UserRole.SUPERADMIN), async (req, res) => {
   const body = isRecord(req.body) ? req.body : {};
   const incomingSlug = sanitizeSlug(body.slug);
   if (!incomingSlug) {
@@ -1239,7 +1239,7 @@ router.post('/', authMiddleware, requireRole(UserRole.ADMIN), async (req, res) =
   });
 });
 
-router.put('/:slug', authMiddleware, requireRole(UserRole.ADMIN), async (req, res) => {
+router.put('/:slug', authMiddleware, requireRole(UserRole.SUPERADMIN), async (req, res) => {
   const slug = sanitizeSlug(req.params.slug);
   if (!slug) {
     return res.status(400).json({ error: 'Invalid slug' });
@@ -1294,7 +1294,7 @@ router.put('/:slug', authMiddleware, requireRole(UserRole.ADMIN), async (req, re
   });
 });
 
-router.delete('/:slug', authMiddleware, requireRole(UserRole.ADMIN), async (req, res) => {
+router.delete('/:slug', authMiddleware, requireRole(UserRole.SUPERADMIN), async (req, res) => {
   const slug = sanitizeSlug(req.params.slug);
   if (!slug) {
     return res.status(400).json({ error: 'Invalid slug' });

@@ -1,6 +1,6 @@
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { ApiService } from '../../services/api';
-import { DashboardData, GameServer, ServerStatus } from '../../types';
+import { DashboardData, GameServer, ServerStatus, UserRole } from '../../types';
 import {
   LineChart,
   Line,
@@ -14,6 +14,7 @@ import {
   Cell,
 } from 'recharts';
 import { Icons } from '../../components/Icon';
+import { canViewDashboardFinancial } from '../../utils/adminAccess';
 
 const MAP_COLORS = ['#ef4444', '#f97316', '#eab308', '#06b6d4', '#3b82f6', '#6b7280'];
 const REFRESH_INTERVAL_MS = 20_000;
@@ -140,6 +141,7 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedMapMode, setSelectedMapMode] = useState('TTT');
+  const [currentRole, setCurrentRole] = useState<UserRole | null>(null);
 
   const loadDashboard = useCallback(async (silent = false) => {
     if (!silent) setRefreshing(true);
@@ -160,6 +162,20 @@ const Dashboard: React.FC = () => {
       setRefreshing(false);
     }
   }, [selectedMapMode]);
+
+  useEffect(() => {
+    const rawUser = localStorage.getItem('backstabber_user');
+    if (!rawUser) {
+      setCurrentRole(null);
+      return;
+    }
+    try {
+      const parsed = JSON.parse(rawUser) as { role?: UserRole };
+      setCurrentRole(parsed.role || null);
+    } catch {
+      setCurrentRole(null);
+    }
+  }, []);
 
   useEffect(() => {
     void loadDashboard();
@@ -188,6 +204,7 @@ const Dashboard: React.FC = () => {
     data.opsHealth.maxPlayers > 0
       ? Math.round((data.opsHealth.currentPlayers / data.opsHealth.maxPlayers) * 100)
       : 0;
+  const showFinancial = canViewDashboardFinancial(currentRole);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -400,34 +417,36 @@ const Dashboard: React.FC = () => {
         </div>
 
         <div className="space-y-6">
-          <div className="bg-zinc-900 p-4 rounded border border-zinc-800">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-300 mb-3 flex items-center gap-2">
-              <Icons.DollarSign className="w-4 h-4 text-emerald-400" />
-              Financeiro
-            </h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between text-zinc-400">
-                <span>Receita líquida hoje</span>
-                <span className="text-zinc-100 font-bold">
-                  R$ {data.financialStats.revenueToday.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </span>
-              </div>
-              <div className="flex justify-between text-zinc-400">
-                <span>Receita líquida mês</span>
-                <span className="text-zinc-100 font-bold">
-                  R$ {data.financialStats.revenueMonth.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </span>
-              </div>
-              <div className="flex justify-between text-zinc-400">
-                <span>Transações hoje</span>
-                <span className="text-zinc-100 font-bold">{data.financialStats.transactionsToday}</span>
-              </div>
-              <div className="flex justify-between text-zinc-400">
-                <span>Mensagens WS inválidas</span>
-                <span className="text-zinc-100 font-bold">{data.opsHealth.wsInvalidMessages}</span>
+          {showFinancial ? (
+            <div className="bg-zinc-900 p-4 rounded border border-zinc-800">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-300 mb-3 flex items-center gap-2">
+                <Icons.DollarSign className="w-4 h-4 text-emerald-400" />
+                Financeiro
+              </h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between text-zinc-400">
+                  <span>Receita liquida hoje</span>
+                  <span className="text-zinc-100 font-bold">
+                    R$ {data.financialStats.revenueToday.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+                <div className="flex justify-between text-zinc-400">
+                  <span>Receita liquida mes</span>
+                  <span className="text-zinc-100 font-bold">
+                    R$ {data.financialStats.revenueMonth.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+                <div className="flex justify-between text-zinc-400">
+                  <span>Transacoes hoje</span>
+                  <span className="text-zinc-100 font-bold">{data.financialStats.transactionsToday}</span>
+                </div>
+                <div className="flex justify-between text-zinc-400">
+                  <span>Mensagens WS invalidas</span>
+                  <span className="text-zinc-100 font-bold">{data.opsHealth.wsInvalidMessages}</span>
+                </div>
               </div>
             </div>
-          </div>
+          ) : null}
 
           <ServerList servers={sortedServers} />
           <ActivityFeed items={data.liveActivity} />

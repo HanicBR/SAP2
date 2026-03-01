@@ -55,7 +55,7 @@ export const requireRole =
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const order = [UserRole.USER, UserRole.ADMIN, UserRole.SUPERADMIN];
+    const order = [UserRole.USER, UserRole.MODERATOR, UserRole.ADMIN, UserRole.SUPERADMIN];
     const userIndex = order.indexOf(user.role);
     const minIndex = order.indexOf(minRole);
 

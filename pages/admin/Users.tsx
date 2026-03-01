@@ -17,12 +17,14 @@ type Notice = {
 
 const roleLabel = (role: UserRole): string => {
   if (role === UserRole.SUPERADMIN) return 'Super Admin';
+  if (role === UserRole.MODERATOR) return 'Moderador';
   if (role === UserRole.ADMIN) return 'Admin';
   return 'User';
 };
 
 const roleClass = (role: UserRole): string => {
   if (role === UserRole.SUPERADMIN) return 'border-red-900/50 bg-red-900/20 text-red-300';
+  if (role === UserRole.MODERATOR) return 'border-sky-900/50 bg-sky-900/20 text-sky-300';
   if (role === UserRole.ADMIN) return 'border-yellow-900/50 bg-yellow-900/20 text-yellow-300';
   return 'border-zinc-700 bg-zinc-800 text-zinc-400';
 };
@@ -518,6 +520,7 @@ const Users: React.FC = () => {
             >
               <option value="ALL">Todos os cargos</option>
               <option value={UserRole.SUPERADMIN}>Super Admin</option>
+              <option value={UserRole.MODERATOR}>Moderador</option>
               <option value={UserRole.ADMIN}>Admin</option>
               <option value={UserRole.USER}>User</option>
             </select>
@@ -659,6 +662,7 @@ const Users: React.FC = () => {
                               >
                                 <option value={UserRole.USER}>User</option>
                                 <option value={UserRole.ADMIN}>Admin</option>
+                                <option value={UserRole.MODERATOR}>Moderador</option>
                                 <option value={UserRole.SUPERADMIN}>Super Admin</option>
                               </select>
                             ) : null}
@@ -733,6 +737,7 @@ const Users: React.FC = () => {
             <select value={newRole} onChange={(e) => setNewRole(e.target.value as UserRole)} className="w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-200">
               <option value={UserRole.USER}>User</option>
               <option value={UserRole.ADMIN}>Admin</option>
+              <option value={UserRole.MODERATOR}>Moderador</option>
               <option value={UserRole.SUPERADMIN}>Super Admin</option>
             </select>
             <div className="flex justify-end gap-2">
@@ -753,6 +758,7 @@ const Users: React.FC = () => {
             <select value={editRole} onChange={(e) => setEditRole(e.target.value as UserRole)} disabled={editUser.id === currentUser?.id} className="w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-200 disabled:opacity-40">
               <option value={UserRole.USER}>User</option>
               <option value={UserRole.ADMIN}>Admin</option>
+              <option value={UserRole.MODERATOR}>Moderador</option>
               <option value={UserRole.SUPERADMIN}>Super Admin</option>
             </select>
             <div className="flex justify-end gap-2">

@@ -66,7 +66,7 @@ const serializeTransaction = (t: any) => {
 };
 
 router.use(authMiddleware);
-router.use(requireRole(UserRole.ADMIN));
+router.use(requireRole(UserRole.SUPERADMIN));
 
 router.post('/proof-upload', (req, res) => {
   uploadProof.single('file')(req as any, res as any, (err: any) => {

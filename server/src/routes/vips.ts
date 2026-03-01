@@ -13,7 +13,7 @@ import { reconcileExpiredVips } from '../services/vipExpiryReconciler';
 const router = Router();
 
 router.use(authMiddleware);
-router.use(requireRole(UserRole.ADMIN));
+router.use(requireRole(UserRole.SUPERADMIN));
 
 const toIso = (value: Date | null | undefined) => (value ? value.toISOString() : undefined);
 

@@ -29,7 +29,7 @@ const isLastSuperAdmin = async (userId: string): Promise<boolean> => {
 };
 
 router.use(authMiddleware);
-router.use(requireRole(UserRole.ADMIN));
+router.use(requireRole(UserRole.SUPERADMIN));
 
 router.get('/', async (_req, res) => {
   const users = await prisma.user.findMany({

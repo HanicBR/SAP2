@@ -448,8 +448,9 @@ export interface TransactionProofUploadResult {
 
 export enum UserRole {
   USER = 'USER',
-  ADMIN = 'ADMIN',           // Can view Dashboard, Logs, Players, Servers (Read Only)
-  SUPERADMIN = 'SUPERADMIN'  // Can do everything + Manage Users + Add Servers + View API Keys
+  MODERATOR = 'MODERATOR',
+  ADMIN = 'ADMIN',
+  SUPERADMIN = 'SUPERADMIN',
 }
 
 export interface User {

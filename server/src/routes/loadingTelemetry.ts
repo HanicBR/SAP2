@@ -730,7 +730,7 @@ router.post('/ingest', ingestLimiter, async (req, res) => {
   }
 });
 
-router.get('/admin/health', authMiddleware, requireRole(UserRole.ADMIN), async (_req, res) => {
+router.get('/admin/health', authMiddleware, requireRole(UserRole.SUPERADMIN), async (_req, res) => {
   try {
     const loadingTelemetrySessionClient = getLoadingTelemetrySessionClient();
     const loadingTelemetryEventClient = getLoadingTelemetryEventClient();
@@ -854,7 +854,7 @@ router.get('/admin/health', authMiddleware, requireRole(UserRole.ADMIN), async (
   }
 });
 
-router.get('/admin/slugs', authMiddleware, requireRole(UserRole.ADMIN), async (req, res) => {
+router.get('/admin/slugs', authMiddleware, requireRole(UserRole.SUPERADMIN), async (req, res) => {
   const range = parseRangeQuery(req.query.range);
   const now = new Date();
   const since = new Date(now.getTime() - rangeToWindowMs(range));
@@ -938,7 +938,7 @@ router.get('/admin/slugs', authMiddleware, requireRole(UserRole.ADMIN), async (r
   }
 });
 
-router.get('/admin/summary', authMiddleware, requireRole(UserRole.ADMIN), async (req, res) => {
+router.get('/admin/summary', authMiddleware, requireRole(UserRole.SUPERADMIN), async (req, res) => {
   const range = parseRangeQuery(req.query.range);
   const now = new Date();
   const since = new Date(now.getTime() - rangeToWindowMs(range));

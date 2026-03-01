@@ -1,9 +1,10 @@
 import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { PublicLayout, AdminLayout } from './components/Layout';
-import { User, UserRole } from './types';
+import { User } from './types';
 import { Icons } from './components/Icon';
 import { ApiService } from './services/api';
+import { AdminPageKey, canAccessAdminPage, isAdminRole } from './utils/adminAccess';
 
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -38,6 +39,18 @@ const RouteAuthLoader = () => (
   <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center text-zinc-500">
     <Icons.Activity className="w-6 h-6 text-red-600 animate-spin mb-3" />
     <p className="text-xs font-mono uppercase tracking-wider">Validando sessao...</p>
+  </div>
+);
+
+const AccessDeniedView = () => (
+  <div className="mx-auto max-w-xl rounded border border-red-900/40 bg-zinc-900 p-6">
+    <div className="flex items-center gap-3">
+      <Icons.Shield className="h-5 w-5 text-red-400" />
+      <h2 className="text-lg font-bold text-white">Acesso negado</h2>
+    </div>
+    <p className="mt-3 text-sm text-zinc-300">
+      Acesso negado. Você não tem permissão para acessar esta página.
+    </p>
   </div>
 );
 
@@ -86,7 +99,7 @@ const useServerAuth = () => {
   return { loading, user };
 };
 
-const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const RoleRoute: React.FC<{ children: React.ReactNode; page: AdminPageKey }> = ({ children, page }) => {
   const { loading, user } = useServerAuth();
 
   if (loading) {
@@ -101,33 +114,19 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return <Navigate to="/admin/login" replace />;
   }
 
-  if (user.role === UserRole.USER) {
+  if (!isAdminRole(user.role)) {
     return <Navigate to="/" replace />;
   }
 
-  return <AdminLayout>{children}</AdminLayout>;
-};
-
-const SuperAdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { loading, user } = useServerAuth();
-
-  if (loading) {
-    return <RouteAuthLoader />;
+  if (!canAccessAdminPage(user.role, page)) {
+    return (
+      <AdminLayout userOverride={user}>
+        <AccessDeniedView />
+      </AdminLayout>
+    );
   }
 
-  if (!user) {
-    return <Navigate to="/admin/login" replace />;
-  }
-
-  if (user.mustChangePassword) {
-    return <Navigate to="/admin/login" replace />;
-  }
-
-  if (user.role !== UserRole.SUPERADMIN) {
-    return <Navigate to="/admin/dashboard" replace />;
-  }
-
-  return <AdminLayout>{children}</AdminLayout>;
+  return <AdminLayout userOverride={user}>{children}</AdminLayout>;
 };
 
 const App: React.FC = () => {
@@ -143,19 +142,19 @@ const App: React.FC = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/admin/login" element={<Login />} />
 
-          <Route path="/admin/dashboard" element={<AdminRoute><Dashboard /></AdminRoute>} />
-          <Route path="/admin/financial" element={<AdminRoute><Financial /></AdminRoute>} />
-          <Route path="/admin/vips" element={<AdminRoute><Vips /></AdminRoute>} />
-          <Route path="/admin/players" element={<AdminRoute><Players /></AdminRoute>} />
-          <Route path="/admin/players/:steamId" element={<AdminRoute><PlayerProfile /></AdminRoute>} />
-          <Route path="/admin/logs" element={<AdminRoute><Logs /></AdminRoute>} />
-          <Route path="/admin/import-logs" element={<AdminRoute><ImportLogs /></AdminRoute>} />
-          <Route path="/admin/servers" element={<AdminRoute><Servers /></AdminRoute>} />
-          <Route path="/admin/servers/:serverId" element={<AdminRoute><ServerDetails /></AdminRoute>} />
-          <Route path="/admin/duplicates" element={<AdminRoute><DuplicateDetection /></AdminRoute>} />
-          <Route path="/admin/users" element={<SuperAdminRoute><Users /></SuperAdminRoute>} />
-          <Route path="/admin/settings" element={<AdminRoute><Settings /></AdminRoute>} />
-          <Route path="/admin/loading-screens" element={<AdminRoute><LoadingScreens /></AdminRoute>} />
+          <Route path="/admin/dashboard" element={<RoleRoute page="dashboard"><Dashboard /></RoleRoute>} />
+          <Route path="/admin/financial" element={<RoleRoute page="financial"><Financial /></RoleRoute>} />
+          <Route path="/admin/vips" element={<RoleRoute page="vips"><Vips /></RoleRoute>} />
+          <Route path="/admin/players" element={<RoleRoute page="players"><Players /></RoleRoute>} />
+          <Route path="/admin/players/:steamId" element={<RoleRoute page="playerProfile"><PlayerProfile /></RoleRoute>} />
+          <Route path="/admin/logs" element={<RoleRoute page="logs"><Logs /></RoleRoute>} />
+          <Route path="/admin/import-logs" element={<RoleRoute page="importLogs"><ImportLogs /></RoleRoute>} />
+          <Route path="/admin/servers" element={<RoleRoute page="servers"><Servers /></RoleRoute>} />
+          <Route path="/admin/servers/:serverId" element={<RoleRoute page="serverDetails"><ServerDetails /></RoleRoute>} />
+          <Route path="/admin/duplicates" element={<RoleRoute page="duplicates"><DuplicateDetection /></RoleRoute>} />
+          <Route path="/admin/users" element={<RoleRoute page="users"><Users /></RoleRoute>} />
+          <Route path="/admin/settings" element={<RoleRoute page="settings"><Settings /></RoleRoute>} />
+          <Route path="/admin/loading-screens" element={<RoleRoute page="loadingScreens"><LoadingScreens /></RoleRoute>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
