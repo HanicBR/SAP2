@@ -46,14 +46,14 @@ const automationReasonLabel = (reason?: string) => {
     missing_revoke_template: 'Template de revogacao ausente',
     missing_steam_id: 'SteamID ausente',
     empty_command: 'Comando vazio',
-    raw_tokens_not_allowed_in_dispatch: 'Tokens Raw nao permitidos no envio real',
-    command_contains_newline: 'Comando invalido (contendo quebra de linha)',
+    raw_tokens_not_allowed_in_dispatch: 'Tokens raw nao permitidos no envio real',
+    command_contains_newline: 'Comando invalido com quebra de linha',
     sandbox_server_not_found: 'Servidor Sandbox nao encontrado',
     sandbox_server_invalid_mode: 'Servidor selecionado nao e Sandbox',
     sandbox_server_missing: 'Nenhum servidor Sandbox disponivel',
     enqueue_failed: 'Falha ao enfileirar comando',
     dispatch_error: 'Erro no envio da automacao',
-    mock_mode: 'Modo mock (sem envio real)',
+    mock_mode: 'Modo mock sem envio real',
   };
   return known[code] || code;
 };
@@ -67,6 +67,7 @@ const dispatchResultLabel = (dispatch?: { queued: boolean; skipped?: boolean; re
 
 const Vips: React.FC = () => {
   const { config } = useConfig();
+  const [activeTab, setActiveTab] = useState<'overview' | 'operations' | 'automation'>('overview');
   const [items, setItems] = useState<VipAdminItem[]>([]);
   const [actions, setActions] = useState<VipAutomationActionItem[]>([]);
   const [servers, setServers] = useState<GameServer[]>([]);
@@ -132,6 +133,29 @@ const Vips: React.FC = () => {
       sandboxServers.some((server) => server.id === automationConfig.sandboxServerId),
     [automationConfig.sandboxServerId, sandboxServers],
   );
+
+  const summary = useMemo(() => {
+    const activeCount = items.filter((item) => item.vipStatus === 'ACTIVE').length;
+    const expiredCount = items.filter((item) => item.vipStatus === 'EXPIRED').length;
+    const inactiveCount = items.filter((item) => item.vipStatus !== 'ACTIVE' && item.vipStatus !== 'EXPIRED').length;
+    const queuedCount = actions.filter((action) => action.status === 'QUEUED').length;
+    const failedCount = actions.filter((action) => action.status === 'FAILED').length;
+    const skippedCount = actions.filter((action) => action.status === 'SKIPPED').length;
+
+    return {
+      totalVips: items.length,
+      activeCount,
+      expiredCount,
+      inactiveCount,
+      queuedCount,
+      failedCount,
+      skippedCount,
+      sandboxCount: sandboxServers.length,
+      automationEnabled: automationConfig.enabled,
+    };
+  }, [actions, automationConfig.enabled, items, sandboxServers.length]);
+
+  const isRefreshingAll = loading || actionsLoading || automationLoading || serversLoading;
 
   const loadData = async () => {
     setLoading(true);
@@ -313,7 +337,7 @@ const Vips: React.FC = () => {
       );
       await refreshAll();
     } catch (err: any) {
-      setFeedback(err?.message || 'Erro ao executar retry da ação VIP');
+      setFeedback(err?.message || 'Erro ao executar retry da acao VIP');
     } finally {
       setBusy(false);
     }
@@ -323,15 +347,15 @@ const Vips: React.FC = () => {
     setReconcileBusy(true);
     setFeedback('');
     try {
-      const summary = await ApiService.reconcileExpiredVips({
+      const summaryResult = await ApiService.reconcileExpiredVips({
         dryRun,
         enqueue: true,
         limit: 200,
       });
       setFeedback(
         dryRun
-          ? `Simulação de VIPs expirados: encontrados=${summary.expiredCount}.`
-          : `Processamento de VIPs expirados: encontrados=${summary.expiredCount}, atualizados=${summary.updatedCount}, dispatchQueued=${summary.dispatchQueuedCount}, dispatchNotQueued=${summary.dispatchNotQueuedCount}.`,
+          ? `Simulacao de VIPs expirados: encontrados=${summaryResult.expiredCount}.`
+          : `Processamento de VIPs expirados: encontrados=${summaryResult.expiredCount}, atualizados=${summaryResult.updatedCount}, dispatchQueued=${summaryResult.dispatchQueuedCount}, dispatchNotQueued=${summaryResult.dispatchNotQueuedCount}.`,
       );
       if (!dryRun) {
         await refreshAll();
@@ -365,426 +389,546 @@ const Vips: React.FC = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-2xl font-bold text-white flex items-center">
-          <Icons.Crown className="w-6 h-6 mr-3 text-brand" />
-          VIPs
-        </h1>
-        <button
-          onClick={refreshAll}
-          className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-4 py-2 rounded text-sm font-bold uppercase tracking-wider flex items-center"
-          disabled={loading || actionsLoading || automationLoading || serversLoading}
-        >
-          <Icons.RefreshCw className="w-4 h-4 mr-2" />
-          Atualizar
-        </button>
+      <div className="bg-zinc-900 border border-zinc-800 rounded p-4 sm:p-5">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-white flex items-center">
+              <Icons.Crown className="w-6 h-6 mr-3 text-brand" />
+              VIPs
+            </h1>
+            <p className="text-xs text-zinc-500 mt-1">
+              Painel reorganizado por fluxo: visao geral, operacoes e automacao.
+            </p>
+          </div>
+          <button
+            onClick={refreshAll}
+            className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-4 py-2 rounded text-sm font-bold uppercase tracking-wider flex items-center justify-center"
+            disabled={isRefreshingAll}
+          >
+            <Icons.RefreshCw className={`w-4 h-4 mr-2 ${isRefreshingAll ? 'animate-spin' : ''}`} />
+            Atualizar tudo
+          </button>
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveTab('overview')}
+            className={`px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider border ${
+              activeTab === 'overview'
+                ? 'bg-brand/20 border-brand/50 text-white'
+                : 'bg-zinc-950 border-zinc-700 text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            Visao geral
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('operations')}
+            className={`px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider border ${
+              activeTab === 'operations'
+                ? 'bg-brand/20 border-brand/50 text-white'
+                : 'bg-zinc-950 border-zinc-700 text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            Operacoes
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('automation')}
+            className={`px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider border ${
+              activeTab === 'automation'
+                ? 'bg-brand/20 border-brand/50 text-white'
+                : 'bg-zinc-950 border-zinc-700 text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            Automacao
+          </button>
+        </div>
       </div>
 
       {feedback ? (
         <div className="bg-zinc-900 border border-zinc-700 rounded p-3 text-sm text-zinc-300">{feedback}</div>
       ) : null}
 
-      <form onSubmit={handleSaveAutomationConfig} className="bg-zinc-900 border border-zinc-800 rounded p-4 space-y-3">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-          <h2 className="text-sm uppercase font-bold text-zinc-300">Automacao VIP no servidor</h2>
-          <span className="text-xs text-zinc-500">source={automationConfig.source || 'env'}</span>
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+        <div className="bg-zinc-900 border border-zinc-800 rounded p-3">
+          <p className="text-[11px] uppercase text-zinc-500 font-bold">Total VIPs</p>
+          <p className="text-xl font-black text-white mt-1">{summary.totalVips}</p>
         </div>
-        <label className="flex items-center gap-2 text-sm text-zinc-300">
-          <input
-            type="checkbox"
-            checked={automationConfig.enabled}
-            onChange={(e) =>
-              setAutomationConfig((prev) => ({
-                ...prev,
-                enabled: e.target.checked,
-              }))
-            }
-          />
-          Ativar envio automatico de comando VIP
-        </label>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <select
-            value={automationConfig.sandboxServerId || ''}
-            onChange={(e) =>
-              setAutomationConfig((prev) => ({
-                ...prev,
-                sandboxServerId: e.target.value || undefined,
-              }))
-            }
-            className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm font-mono"
-            disabled={serversLoading}
-          >
-            <option value="">Automatico (primeiro Sandbox online)</option>
-            {sandboxServers.map((server) => (
-              <option key={server.id} value={server.id}>
-                {server.name} - {server.id}
-              </option>
-            ))}
-            {automationConfig.sandboxServerId && !hasSelectedSandboxServer ? (
-              <option value={automationConfig.sandboxServerId}>
-                Atual (nao listado): {automationConfig.sandboxServerId}
-              </option>
-            ) : null}
-          </select>
-          <div className="text-xs text-zinc-500 flex items-center">
-            {serversLoading
-              ? 'Carregando servidores...'
-              : `${sandboxServers.length} servidor(es) Sandbox disponivel(is)`}
-          </div>
-          <div className="text-xs text-zinc-500 flex items-center">
-            Tokens: {'{{steamId}}'}, {'{{vipPlanServer}}'}, {'{{vipExpiryUnix}}'}
-          </div>
-          <input
-            value={automationConfig.grantTemplate}
-            onChange={(e) =>
-              setAutomationConfig((prev) => ({
-                ...prev,
-                grantTemplate: e.target.value,
-              }))
-            }
-            className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm font-mono md:col-span-2"
-            placeholder='Template GRANT. Ex: sam setrank {{steamId}} {{vipPlanServer}}'
-          />
-          <input
-            value={automationConfig.revokeTemplate}
-            onChange={(e) =>
-              setAutomationConfig((prev) => ({
-                ...prev,
-                revokeTemplate: e.target.value,
-              }))
-            }
-            className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm font-mono md:col-span-2"
-            placeholder='Template REVOKE. Ex: sam setrank {{steamId}} "user"'
-          />
+        <div className="bg-zinc-900 border border-zinc-800 rounded p-3">
+          <p className="text-[11px] uppercase text-zinc-500 font-bold">Ativos</p>
+          <p className="text-xl font-black text-green-400 mt-1">{summary.activeCount}</p>
         </div>
-        <button
-          type="submit"
-          disabled={automationSaving}
-          className="bg-brand hover:bg-brand-dark text-white px-4 py-2 rounded text-sm font-bold uppercase disabled:opacity-60"
-        >
-          Salvar automacao
-        </button>
-      </form>
-
-      <div className="bg-zinc-900 border border-zinc-800 rounded p-4 flex flex-wrap gap-2 items-center">
-        <span className="text-xs uppercase font-bold text-zinc-400">VIP expirado</span>
-        <span className="text-xs text-zinc-500">
-          Remove VIP vencido no painel e dispara REVOKE para o servidor.
-        </span>
-        <button
-          type="button"
-          onClick={() => handleReconcileExpired(true)}
-          disabled={reconcileBusy}
-          className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3 py-2 rounded text-xs font-bold uppercase disabled:opacity-60"
-        >
-          Simular expirados
-        </button>
-        <button
-          type="button"
-          onClick={() => handleReconcileExpired(false)}
-          disabled={reconcileBusy}
-          className="bg-yellow-700 hover:bg-yellow-600 text-white px-3 py-2 rounded text-xs font-bold uppercase disabled:opacity-60"
-        >
-          Remover expirados agora
-        </button>
+        <div className="bg-zinc-900 border border-zinc-800 rounded p-3">
+          <p className="text-[11px] uppercase text-zinc-500 font-bold">Expirados</p>
+          <p className="text-xl font-black text-yellow-400 mt-1">{summary.expiredCount}</p>
+        </div>
+        <div className="bg-zinc-900 border border-zinc-800 rounded p-3">
+          <p className="text-[11px] uppercase text-zinc-500 font-bold">Inativos</p>
+          <p className="text-xl font-black text-zinc-400 mt-1">{summary.inactiveCount}</p>
+        </div>
+        <div className="bg-zinc-900 border border-zinc-800 rounded p-3">
+          <p className="text-[11px] uppercase text-zinc-500 font-bold">Fila auto</p>
+          <p className="text-xl font-black text-cyan-400 mt-1">{summary.queuedCount}</p>
+          <p className="text-[10px] text-zinc-500 mt-1">
+            falhou {summary.failedCount} | ignorou {summary.skippedCount}
+          </p>
+        </div>
+        <div className="bg-zinc-900 border border-zinc-800 rounded p-3">
+          <p className="text-[11px] uppercase text-zinc-500 font-bold">Sandbox</p>
+          <p className="text-xl font-black text-white mt-1">{summary.sandboxCount}</p>
+          <p className={`text-[10px] mt-1 ${summary.automationEnabled ? 'text-green-400' : 'text-zinc-500'}`}>
+            auto {summary.automationEnabled ? 'ativa' : 'desativada'}
+          </p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <form onSubmit={handleGrant} className="bg-zinc-900 border border-zinc-800 rounded p-4 space-y-3">
-          <h2 className="text-sm uppercase font-bold text-zinc-300">Conceder VIP</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <input
-              required
-              value={grantSteamId}
-              onChange={(e) => setGrantSteamId(e.target.value)}
-              className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm font-mono"
-              placeholder="SteamID"
-            />
-            <input
-              value={grantName}
-              onChange={(e) => setGrantName(e.target.value)}
-              className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm"
-              placeholder="Nome (opcional)"
-            />
-            <select
-              value={grantPlan}
-              onChange={(e) => setGrantPlan(e.target.value)}
-              className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm"
-            >
-              {planOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-            <select
-              value={grantDurationDays}
-              onChange={(e) => setGrantDurationDays(e.target.value)}
-              className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm"
-            >
-              {durationOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+      {activeTab === 'overview' ? (
+        <>
+          <div className="bg-zinc-900 border border-zinc-800 rounded p-4">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+              <h2 className="text-sm uppercase font-bold text-zinc-300">VIPs registrados</h2>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="bg-zinc-950 border border-zinc-700 rounded px-3 py-2 text-white text-sm"
+                  placeholder="Buscar por SteamID ou nome"
+                />
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value as 'ALL' | 'ACTIVE' | 'EXPIRED')}
+                  className="bg-zinc-950 border border-zinc-700 rounded px-3 py-2 text-white text-sm"
+                >
+                  <option value="ALL">Todos</option>
+                  <option value="ACTIVE">Ativos</option>
+                  <option value="EXPIRED">Expirados</option>
+                </select>
+                <button
+                  type="button"
+                  onClick={loadData}
+                  className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3 py-2 rounded text-sm font-bold uppercase"
+                >
+                  Buscar
+                </button>
+              </div>
+            </div>
           </div>
-          <button
-            type="submit"
-            disabled={busy}
-            className="bg-green-700 hover:bg-green-600 text-white px-4 py-2 rounded text-sm font-bold uppercase disabled:opacity-60"
-          >
-            Conceder
-          </button>
-        </form>
 
-        <form onSubmit={handleExtend} className="bg-zinc-900 border border-zinc-800 rounded p-4 space-y-3">
-          <h2 className="text-sm uppercase font-bold text-zinc-300">Estender VIP</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <input
-              required
-              value={extendSteamId}
-              onChange={(e) => setExtendSteamId(e.target.value)}
-              className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm font-mono"
-              placeholder="SteamID"
-            />
-            <input
-              value={revokeReason}
-              onChange={(e) => setRevokeReason(e.target.value)}
-              className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm"
-              placeholder="Motivo revogação (opcional)"
-            />
-            <select
-              value={extendPlan}
-              onChange={(e) => setExtendPlan(e.target.value)}
-              className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm"
-            >
-              {planOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-            <select
-              value={extendDurationDays}
-              onChange={(e) => setExtendDurationDays(e.target.value)}
-              className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm"
-            >
-              {durationOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+          <div className="bg-zinc-900 border border-zinc-800 rounded overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-zinc-800">
+                <thead className="bg-zinc-950/50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Jogador</th>
+                    <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">SteamID</th>
+                    <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Plano</th>
+                    <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Expira em</th>
+                    <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Status</th>
+                    <th className="px-4 py-3 text-right text-xs uppercase text-zinc-500">Acoes</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-800">
+                  {loading ? (
+                    <tr>
+                      <td colSpan={6} className="px-4 py-10 text-center text-zinc-500">
+                        Carregando VIPs...
+                      </td>
+                    </tr>
+                  ) : items.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-4 py-10 text-center text-zinc-500">
+                        Nenhum VIP encontrado.
+                      </td>
+                    </tr>
+                  ) : (
+                    items.map((item) => (
+                      <tr key={item.steamId} className="hover:bg-zinc-800/40">
+                        <td className="px-4 py-3 text-sm text-white">
+                          <div className="flex items-center gap-3">
+                            {item.avatarUrl ? (
+                              <img src={item.avatarUrl} alt={item.name} className="w-8 h-8 rounded border border-zinc-700" />
+                            ) : (
+                              <div className="w-8 h-8 rounded border border-zinc-700 bg-zinc-800" />
+                            )}
+                            <div className="min-w-0">
+                              <p className="text-white font-semibold truncate">{item.name || item.steamId}</p>
+                              <p className="text-[11px] text-zinc-500">{item.vipStatus || 'INACTIVE'}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-xs text-zinc-400 font-mono">{item.steamId}</td>
+                        <td className="px-4 py-3 text-sm text-zinc-300">{item.vipPlan || '-'}</td>
+                        <td className="px-4 py-3 text-sm text-zinc-300">{formatDateTime(item.vipExpiry)}</td>
+                        <td className="px-4 py-3">
+                          <span
+                            className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                              item.vipStatus === 'ACTIVE'
+                                ? 'bg-green-900/30 text-green-400 border border-green-800'
+                                : item.vipStatus === 'EXPIRED'
+                                ? 'bg-yellow-900/30 text-yellow-400 border border-yellow-800'
+                                : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                            }`}
+                          >
+                            {item.vipStatus || 'INACTIVE'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setExtendSteamId(item.steamId);
+                              setExtendPlan(item.vipPlan || planOptions[0]);
+                              setActiveTab('operations');
+                            }}
+                            className="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3 py-1 rounded mr-2"
+                          >
+                            Operar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleRevoke(item.steamId)}
+                            className="text-xs bg-red-800 hover:bg-red-700 text-white px-3 py-1 rounded"
+                            disabled={busy}
+                          >
+                            Revogar
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-          <div className="flex gap-2">
+        </>
+      ) : null}
+
+      {activeTab === 'operations' ? (
+        <>
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <form onSubmit={handleGrant} className="bg-zinc-900 border border-zinc-800 rounded p-4 space-y-3">
+              <h2 className="text-sm uppercase font-bold text-zinc-300">Conceder VIP</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input
+                  required
+                  value={grantSteamId}
+                  onChange={(e) => setGrantSteamId(e.target.value)}
+                  className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm font-mono"
+                  placeholder="SteamID"
+                />
+                <input
+                  value={grantName}
+                  onChange={(e) => setGrantName(e.target.value)}
+                  className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm"
+                  placeholder="Nome (opcional)"
+                />
+                <select
+                  value={grantPlan}
+                  onChange={(e) => setGrantPlan(e.target.value)}
+                  className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm"
+                >
+                  {planOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={grantDurationDays}
+                  onChange={(e) => setGrantDurationDays(e.target.value)}
+                  className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm"
+                >
+                  {durationOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <button
+                type="submit"
+                disabled={busy}
+                className="bg-green-700 hover:bg-green-600 text-white px-4 py-2 rounded text-sm font-bold uppercase disabled:opacity-60"
+              >
+                Conceder
+              </button>
+            </form>
+
+            <form onSubmit={handleExtend} className="bg-zinc-900 border border-zinc-800 rounded p-4 space-y-3">
+              <h2 className="text-sm uppercase font-bold text-zinc-300">Estender ou revogar</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input
+                  required
+                  value={extendSteamId}
+                  onChange={(e) => setExtendSteamId(e.target.value)}
+                  className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm font-mono"
+                  placeholder="SteamID"
+                />
+                <input
+                  value={revokeReason}
+                  onChange={(e) => setRevokeReason(e.target.value)}
+                  className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm"
+                  placeholder="Motivo de revogacao (opcional)"
+                />
+                <select
+                  value={extendPlan}
+                  onChange={(e) => setExtendPlan(e.target.value)}
+                  className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm"
+                >
+                  {planOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={extendDurationDays}
+                  onChange={(e) => setExtendDurationDays(e.target.value)}
+                  className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm"
+                >
+                  {durationOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  disabled={busy}
+                  className="bg-blue-700 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm font-bold uppercase disabled:opacity-60"
+                >
+                  Estender
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleRevoke(extendSteamId.trim())}
+                  disabled={busy || !extendSteamId.trim()}
+                  className="bg-red-700 hover:bg-red-600 text-white px-4 py-2 rounded text-sm font-bold uppercase disabled:opacity-60"
+                >
+                  Revogar
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div className="bg-zinc-900 border border-zinc-800 rounded p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <h3 className="text-sm uppercase font-bold text-zinc-300">Conciliar expirados</h3>
+              <p className="text-xs text-zinc-500 mt-1">
+                Remove VIP vencido no painel e dispara REVOKE para o servidor.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => handleReconcileExpired(true)}
+                disabled={reconcileBusy}
+                className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3 py-2 rounded text-xs font-bold uppercase disabled:opacity-60"
+              >
+                Simular
+              </button>
+              <button
+                type="button"
+                onClick={() => handleReconcileExpired(false)}
+                disabled={reconcileBusy}
+                className="bg-yellow-700 hover:bg-yellow-600 text-white px-3 py-2 rounded text-xs font-bold uppercase disabled:opacity-60"
+              >
+                Processar agora
+              </button>
+            </div>
+          </div>
+        </>
+      ) : null}
+
+      {activeTab === 'automation' ? (
+        <>
+          <form
+            onSubmit={handleSaveAutomationConfig}
+            className="bg-zinc-900 border border-zinc-800 rounded p-4 space-y-4"
+          >
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+              <h2 className="text-sm uppercase font-bold text-zinc-300">Config da automacao VIP</h2>
+              <span className="text-xs text-zinc-500">source={automationConfig.source || 'env'}</span>
+            </div>
+            <label className="flex items-center gap-2 text-sm text-zinc-300">
+              <input
+                type="checkbox"
+                checked={automationConfig.enabled}
+                onChange={(e) =>
+                  setAutomationConfig((prev) => ({
+                    ...prev,
+                    enabled: e.target.checked,
+                  }))
+                }
+              />
+              Ativar envio automatico de comando VIP
+            </label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <select
+                value={automationConfig.sandboxServerId || ''}
+                onChange={(e) =>
+                  setAutomationConfig((prev) => ({
+                    ...prev,
+                    sandboxServerId: e.target.value || undefined,
+                  }))
+                }
+                className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm font-mono"
+                disabled={serversLoading}
+              >
+                <option value="">Automatico (primeiro Sandbox online)</option>
+                {sandboxServers.map((server) => (
+                  <option key={server.id} value={server.id}>
+                    {server.name} - {server.id}
+                  </option>
+                ))}
+                {automationConfig.sandboxServerId && !hasSelectedSandboxServer ? (
+                  <option value={automationConfig.sandboxServerId}>
+                    Atual (nao listado): {automationConfig.sandboxServerId}
+                  </option>
+                ) : null}
+              </select>
+              <div className="text-xs text-zinc-500 flex items-center">
+                {serversLoading
+                  ? 'Carregando servidores...'
+                  : `${sandboxServers.length} servidor(es) Sandbox disponivel(is)`}
+              </div>
+              <textarea
+                value={automationConfig.grantTemplate}
+                onChange={(e) =>
+                  setAutomationConfig((prev) => ({
+                    ...prev,
+                    grantTemplate: e.target.value,
+                  }))
+                }
+                className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm font-mono md:col-span-2"
+                placeholder='Template GRANT. Ex: sam setrank {{steamId}} {{vipPlanServer}}'
+                rows={2}
+              />
+              <textarea
+                value={automationConfig.revokeTemplate}
+                onChange={(e) =>
+                  setAutomationConfig((prev) => ({
+                    ...prev,
+                    revokeTemplate: e.target.value,
+                  }))
+                }
+                className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm font-mono md:col-span-2"
+                placeholder='Template REVOKE. Ex: sam setrank {{steamId}} "user"'
+                rows={2}
+              />
+              <div className="text-xs text-zinc-500 md:col-span-2">
+                Tokens permitidos: {'{{steamId}}'}, {'{{vipPlanServer}}'}, {'{{vipExpiryUnix}}'}
+              </div>
+            </div>
             <button
               type="submit"
-              disabled={busy}
-              className="bg-blue-700 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm font-bold uppercase disabled:opacity-60"
+              disabled={automationSaving}
+              className="bg-brand hover:bg-brand-dark text-white px-4 py-2 rounded text-sm font-bold uppercase disabled:opacity-60"
             >
-              Estender
+              Salvar automacao
             </button>
-            <button
-              type="button"
-              onClick={() => handleRevoke(extendSteamId.trim())}
-              disabled={busy || !extendSteamId.trim()}
-              className="bg-red-700 hover:bg-red-600 text-white px-4 py-2 rounded text-sm font-bold uppercase disabled:opacity-60"
-            >
-              Revogar
-            </button>
-          </div>
-        </form>
-      </div>
+          </form>
 
-      <div className="bg-zinc-900 border border-zinc-800 rounded overflow-hidden">
-        <div className="p-4 border-b border-zinc-800 bg-zinc-950/40 flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
-          <h2 className="text-sm uppercase font-bold text-zinc-300">VIPs registrados</h2>
-          <div className="flex gap-2">
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm"
-              placeholder="Buscar por SteamID ou nome"
-            />
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value as 'ALL' | 'ACTIVE' | 'EXPIRED')}
-              className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm"
-            >
-              <option value="ALL">Todos</option>
-              <option value="ACTIVE">Ativos</option>
-              <option value="EXPIRED">Expirados</option>
-            </select>
-            <button onClick={loadData} className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3 rounded text-sm">
-              Buscar
-            </button>
-          </div>
-        </div>
+          <div className="bg-zinc-900 border border-zinc-800 rounded overflow-hidden">
+            <div className="p-4 border-b border-zinc-800 bg-zinc-950/40 flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between">
+              <h2 className="text-sm uppercase font-bold text-zinc-300">Auditoria da automacao VIP</h2>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  value={actionSteamId}
+                  onChange={(e) => setActionSteamId(e.target.value)}
+                  className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm"
+                  placeholder="Filtrar SteamID"
+                />
+                <select
+                  value={actionStatus}
+                  onChange={(e) => setActionStatus(e.target.value as 'ALL' | VipAutomationActionStatus)}
+                  className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm"
+                >
+                  <option value="ALL">Todos</option>
+                  <option value="QUEUED">Enfileirado</option>
+                  <option value="FAILED">Falhou</option>
+                  <option value="SKIPPED">Ignorado</option>
+                </select>
+                <button
+                  type="button"
+                  onClick={loadActions}
+                  className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3 rounded text-sm font-bold uppercase"
+                >
+                  Buscar
+                </button>
+              </div>
+            </div>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-zinc-800">
-            <thead className="bg-zinc-950/50">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Jogador</th>
-                <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">SteamID</th>
-                <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Plano</th>
-                <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Expira em</th>
-                <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Status</th>
-                <th className="px-4 py-3 text-right text-xs uppercase text-zinc-500">Ações</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-800">
-              {loading ? (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-zinc-500">
-                    Carregando VIPs...
-                  </td>
-                </tr>
-              ) : items.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-zinc-500">
-                    Nenhum VIP encontrado.
-                  </td>
-                </tr>
-              ) : (
-                items.map((item) => (
-                  <tr key={item.steamId} className="hover:bg-zinc-800/40">
-                    <td className="px-4 py-3 text-sm text-white">{item.name}</td>
-                    <td className="px-4 py-3 text-xs text-zinc-400 font-mono">{item.steamId}</td>
-                    <td className="px-4 py-3 text-sm text-zinc-300">{item.vipPlan || '-'}</td>
-                    <td className="px-4 py-3 text-sm text-zinc-300">{formatDateTime(item.vipExpiry)}</td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                          item.vipStatus === 'ACTIVE'
-                            ? 'bg-green-900/30 text-green-400 border border-green-800'
-                            : item.vipStatus === 'EXPIRED'
-                            ? 'bg-yellow-900/30 text-yellow-400 border border-yellow-800'
-                            : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
-                        }`}
-                      >
-                        {item.vipStatus || 'INACTIVE'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <button
-                        onClick={() => {
-                          setExtendSteamId(item.steamId);
-                          setExtendPlan(item.vipPlan || planOptions[0]);
-                        }}
-                        className="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3 py-1 rounded mr-2"
-                      >
-                        Selecionar
-                      </button>
-                      <button
-                        onClick={() => handleRevoke(item.steamId)}
-                        className="text-xs bg-red-800 hover:bg-red-700 text-white px-3 py-1 rounded"
-                        disabled={busy}
-                      >
-                        Revogar
-                      </button>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-zinc-800">
+                <thead className="bg-zinc-950/50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Quando</th>
+                    <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Acao</th>
+                    <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">SteamID</th>
+                    <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Status</th>
+                    <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Motivo</th>
+                    <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Comando</th>
+                    <th className="px-4 py-3 text-right text-xs uppercase text-zinc-500">Acoes</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div className="bg-zinc-900 border border-zinc-800 rounded overflow-hidden">
-        <div className="p-4 border-b border-zinc-800 bg-zinc-950/40 flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
-          <h2 className="text-sm uppercase font-bold text-zinc-300">Auditoria automação VIP</h2>
-          <div className="flex gap-2">
-            <input
-              value={actionSteamId}
-              onChange={(e) => setActionSteamId(e.target.value)}
-              className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm"
-              placeholder="Filtrar SteamID"
-            />
-            <select
-              value={actionStatus}
-              onChange={(e) => setActionStatus(e.target.value as 'ALL' | VipAutomationActionStatus)}
-              className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm"
-            >
-              <option value="ALL">Todos</option>
-              <option value="QUEUED">Enfileirado</option>
-              <option value="FAILED">Falhou</option>
-              <option value="SKIPPED">Ignorado</option>
-            </select>
-            <button
-              onClick={loadActions}
-              className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3 rounded text-sm"
-            >
-              Buscar
-            </button>
+                </thead>
+                <tbody className="divide-y divide-zinc-800">
+                  {actionsLoading ? (
+                    <tr>
+                      <td colSpan={7} className="px-4 py-10 text-center text-zinc-500">
+                        Carregando auditoria...
+                      </td>
+                    </tr>
+                  ) : actions.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-4 py-10 text-center text-zinc-500">
+                        Nenhuma acao encontrada.
+                      </td>
+                    </tr>
+                  ) : (
+                    actions.map((action) => (
+                      <tr key={action.id} className="hover:bg-zinc-800/40">
+                        <td className="px-4 py-3 text-xs text-zinc-300">{formatDateTime(action.createdAt)}</td>
+                        <td className="px-4 py-3 text-xs text-zinc-300">{automationActionLabel(action.action)}</td>
+                        <td className="px-4 py-3 text-xs text-zinc-400 font-mono">{action.steamId}</td>
+                        <td className="px-4 py-3">
+                          <span
+                            className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                              action.status === 'QUEUED'
+                                ? 'bg-green-900/30 text-green-400 border border-green-800'
+                                : action.status === 'FAILED'
+                                ? 'bg-red-900/30 text-red-400 border border-red-800'
+                                : 'bg-yellow-900/30 text-yellow-400 border border-yellow-800'
+                            }`}
+                          >
+                            {automationStatusLabel(action.status)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-xs text-zinc-400">{automationReasonLabel(action.reason)}</td>
+                        <td className="px-4 py-3 text-xs text-zinc-400 font-mono">{formatCommand(action.command)}</td>
+                        <td className="px-4 py-3 text-right">
+                          <button
+                            type="button"
+                            onClick={() => handleRetryAction(action.id)}
+                            disabled={busy || action.status === 'QUEUED'}
+                            className="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3 py-1 rounded disabled:opacity-60"
+                          >
+                            Tentar novamente
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-zinc-800">
-            <thead className="bg-zinc-950/50">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Quando</th>
-                <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Ação</th>
-                <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">SteamID</th>
-                <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Status</th>
-                <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Motivo</th>
-                <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Comando</th>
-                <th className="px-4 py-3 text-right text-xs uppercase text-zinc-500">Ações</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-800">
-              {actionsLoading ? (
-                <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-zinc-500">
-                    Carregando auditoria...
-                  </td>
-                </tr>
-              ) : actions.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-zinc-500">
-                    Nenhuma ação encontrada.
-                  </td>
-                </tr>
-              ) : (
-                actions.map((action) => (
-                  <tr key={action.id} className="hover:bg-zinc-800/40">
-                    <td className="px-4 py-3 text-xs text-zinc-300">{formatDateTime(action.createdAt)}</td>
-                    <td className="px-4 py-3 text-xs text-zinc-300">{automationActionLabel(action.action)}</td>
-                    <td className="px-4 py-3 text-xs text-zinc-400 font-mono">{action.steamId}</td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                          action.status === 'QUEUED'
-                            ? 'bg-green-900/30 text-green-400 border border-green-800'
-                            : action.status === 'FAILED'
-                            ? 'bg-red-900/30 text-red-400 border border-red-800'
-                            : 'bg-yellow-900/30 text-yellow-400 border border-yellow-800'
-                        }`}
-                      >
-                        {automationStatusLabel(action.status)}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-xs text-zinc-400">{automationReasonLabel(action.reason)}</td>
-                    <td className="px-4 py-3 text-xs text-zinc-400 font-mono">{formatCommand(action.command)}</td>
-                    <td className="px-4 py-3 text-right">
-                      <button
-                        onClick={() => handleRetryAction(action.id)}
-                        disabled={busy || action.status === 'QUEUED'}
-                        className="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3 py-1 rounded disabled:opacity-60"
-                      >
-                        Tentar novamente
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+        </>
+      ) : null}
     </div>
   );
 };
