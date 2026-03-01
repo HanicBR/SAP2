@@ -65,6 +65,35 @@ export interface ConsumeUserEmailTokenInput {
   rawToken: string;
 }
 
+export interface UserEmailTokenValidation {
+  valid: boolean;
+  reason?: 'missing_token' | 'not_found' | 'wrong_type' | 'already_used' | 'expired';
+}
+
+export const validateUserEmailToken = async (
+  type: UserEmailTokenType,
+  rawToken: string,
+): Promise<UserEmailTokenValidation> => {
+  const normalized = String(rawToken || '').trim();
+  if (!normalized) return { valid: false, reason: 'missing_token' };
+
+  const tokenHash = hashToken(normalized);
+  const token = await prisma.userEmailToken.findUnique({
+    where: { tokenHash },
+    select: {
+      type: true,
+      usedAt: true,
+      expiresAt: true,
+    },
+  });
+
+  if (!token) return { valid: false, reason: 'not_found' };
+  if (token.type !== type) return { valid: false, reason: 'wrong_type' };
+  if (token.usedAt) return { valid: false, reason: 'already_used' };
+  if (token.expiresAt.getTime() <= Date.now()) return { valid: false, reason: 'expired' };
+  return { valid: true };
+};
+
 export const consumeUserEmailToken = async (input: ConsumeUserEmailTokenInput) => {
   const rawToken = String(input.rawToken || '').trim();
   if (!rawToken) return null;

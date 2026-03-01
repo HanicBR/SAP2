@@ -158,3 +158,41 @@ export const buildVipPurchaseReceiptTemplate = (params: {
     html: baseHtml('Compra de VIP confirmada', intro, undefined, undefined, footer),
   };
 };
+
+export const buildFirstAccessTemplate = (params: {
+  username: string;
+  role: string;
+  setupUrl: string;
+  expiresMinutes: number;
+}) => {
+  const subject = 'Seu acesso ao painel foi criado - Backstabber Brasil';
+  const expiresText =
+    params.expiresMinutes >= 60 * 24
+      ? `${Math.floor(params.expiresMinutes / (60 * 24))} dia(s)`
+      : `${params.expiresMinutes} minuto(s)`;
+  const intro = `Ola ${params.username}, sua conta no painel Backstabber Brasil foi criada com o cargo ${params.role}. Para o primeiro acesso, defina sua senha no link abaixo. O link expira em ${expiresText}.`;
+  const footer = 'Se voce nao reconhece este convite, contate um SUPERADMIN.';
+  const text = [
+    `Ola ${params.username},`,
+    '',
+    'Seu usuario no painel Backstabber Brasil foi criado com sucesso.',
+    `Cargo: ${params.role}`,
+    'Para fazer o primeiro acesso, defina sua senha neste link:',
+    params.setupUrl,
+    '',
+    `Validade do link: ${expiresText}.`,
+    footer,
+  ].join('\n');
+
+  return {
+    subject,
+    text,
+    html: baseHtml(
+      'Primeiro acesso ao painel',
+      intro,
+      'Definir senha de acesso',
+      params.setupUrl,
+      footer,
+    ),
+  };
+};

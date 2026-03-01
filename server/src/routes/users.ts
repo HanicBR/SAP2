@@ -1,11 +1,24 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
+import { UserEmailTokenType } from '@prisma/client';
 import { prisma } from '../db/client';
 import { User, UserRole } from '../domain';
 import { authMiddleware, requireRole } from '../middleware/auth';
+import { issueUserEmailToken } from '../services/authEmailTokens';
+import { buildFrontendAppUrl, sendTransactionalEmail } from '../services/email';
+import { buildFirstAccessTemplate } from '../services/emailTemplates';
 import { resolveSteamProfile, syncSteamProfileBySteamId64 } from '../services/steamProfile';
 
 const router = Router();
+
+const parseIntEnv = (value: string | undefined, fallback: number): number => {
+  const parsed = Number.parseInt(String(value || ''), 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
+  return parsed;
+};
+
+const getFirstAccessTokenTtlMinutes = (): number =>
+  parseIntEnv(process.env.AUTH_FIRST_ACCESS_TTL_MINUTES, 60 * 24 * 7);
 
 const toPublicUser = (record: any): User => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -82,6 +95,38 @@ router.post('/', requireRole(UserRole.SUPERADMIN), async (req, res) => {
       mustChangePassword: true,
     },
   });
+
+  // First access email is best-effort: user creation must succeed even if SMTP fails.
+  try {
+    const issued = await issueUserEmailToken({
+      userId: created.id,
+      type: UserEmailTokenType.PASSWORD_RESET,
+      ttlMinutes: getFirstAccessTokenTtlMinutes(),
+      invalidatePrevious: true,
+    });
+    const setupUrl = buildFrontendAppUrl('/reset-password', {
+      token: issued.rawToken,
+      firstAccess: '1',
+    });
+    const template = buildFirstAccessTemplate({
+      username: created.username,
+      role: created.role,
+      setupUrl,
+      expiresMinutes: getFirstAccessTokenTtlMinutes(),
+    });
+    await sendTransactionalEmail({
+      to: created.email,
+      subject: template.subject,
+      text: template.text,
+      html: template.html,
+    });
+  } catch (error: any) {
+    console.error('Failed to send first-access email', {
+      userId: created.id,
+      email: created.email,
+      error: error?.message || String(error),
+    });
+  }
 
   return res.status(201).json(toPublicUser(created));
 });

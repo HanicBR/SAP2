@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ApiService } from '../services/api';
 import { Icons } from '../components/Icon';
@@ -9,13 +9,64 @@ const ResetPassword: React.FC = () => {
     const params = new URLSearchParams(location.search);
     return String(params.get('token') || '').trim();
   }, [location.search]);
+  const isFirstAccess = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    const raw = String(params.get('firstAccess') || '').trim().toLowerCase();
+    return ['1', 'true', 'yes', 'on'].includes(raw);
+  }, [location.search]);
 
   const [emailOrUser, setEmailOrUser] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [validatingToken, setValidatingToken] = useState(false);
+  const [tokenValid, setTokenValid] = useState<boolean | null>(null);
+  const [tokenValidationMessage, setTokenValidationMessage] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const validate = async () => {
+      if (!token) {
+        setTokenValid(null);
+        setTokenValidationMessage('');
+        return;
+      }
+
+      setValidatingToken(true);
+      setTokenValidationMessage('');
+      try {
+        const result = await ApiService.validateResetPasswordToken(token);
+        if (cancelled) return;
+        if (result.ok) {
+          setTokenValid(true);
+          return;
+        }
+
+        setTokenValid(false);
+        if (result.reason === 'already_used') {
+          setTokenValidationMessage('Este link ja foi utilizado e nao pode ser usado novamente.');
+        } else if (result.reason === 'expired') {
+          setTokenValidationMessage('Este link expirou. Solicite um novo link de reset.');
+        } else {
+          setTokenValidationMessage('Link invalido. Solicite um novo reset de senha.');
+        }
+      } catch {
+        if (cancelled) return;
+        setTokenValid(false);
+        setTokenValidationMessage('Nao foi possivel validar o link neste momento.');
+      } finally {
+        if (!cancelled) setValidatingToken(false);
+      }
+    };
+
+    void validate();
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
 
   const requestReset = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -36,6 +87,11 @@ const ResetPassword: React.FC = () => {
     event.preventDefault();
     setError('');
     setSuccess('');
+
+    if (tokenValid === false) {
+      setError(tokenValidationMessage || 'Link invalido ou expirado.');
+      return;
+    }
 
     if (newPassword.length < 6) {
       setError('A nova senha deve ter pelo menos 6 caracteres.');
@@ -69,11 +125,13 @@ const ResetPassword: React.FC = () => {
             <Icons.Lock className="w-8 h-8" />
           </div>
           <h2 className="text-3xl font-black text-white uppercase italic tracking-wide">
-            {token ? 'Nova Senha' : 'Reset de Senha'}
+            {token ? (isFirstAccess ? 'Primeiro Acesso' : 'Nova Senha') : 'Reset de Senha'}
           </h2>
           <p className="mt-2 text-sm text-zinc-500">
             {token
-              ? 'Defina uma nova senha para sua conta.'
+              ? isFirstAccess
+                ? 'Defina sua senha para concluir o primeiro acesso ao painel.'
+                : 'Defina uma nova senha para sua conta.'
               : 'Informe seu usuario ou e-mail para receber o link de reset.'}
           </p>
         </div>
@@ -101,6 +159,25 @@ const ResetPassword: React.FC = () => {
                 value={emailOrUser}
                 onChange={(e) => setEmailOrUser(e.target.value)}
               />
+            </div>
+          ) : validatingToken ? (
+            <div className="rounded border border-zinc-800 bg-zinc-950/40 p-3 text-sm text-zinc-400 text-center">
+              Validando link...
+            </div>
+          ) : tokenValid === false ? (
+            <div className="space-y-3">
+              <div className="rounded border border-amber-900/50 bg-amber-900/20 p-3 text-sm text-amber-300">
+                {tokenValidationMessage || 'Este link nao e mais valido.'}
+              </div>
+              {isFirstAccess ? (
+                <p className="text-xs text-zinc-500">
+                  Para primeiro acesso com link invalido/expirado, solicite que um SUPERADMIN gere um novo convite.
+                </p>
+              ) : (
+                <p className="text-xs text-zinc-500">
+                  Volte para a tela de reset e solicite um novo link.
+                </p>
+              )}
             </div>
           ) : (
             <div className="space-y-4">
@@ -132,7 +209,7 @@ const ResetPassword: React.FC = () => {
           <div>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || validatingToken || (Boolean(token) && tokenValid === false)}
               className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold uppercase tracking-wider rounded text-white bg-red-700 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-700 transition-all shadow-lg shadow-red-900/20 disabled:opacity-50"
             >
               {loading

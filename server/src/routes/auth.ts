@@ -6,7 +6,11 @@ import { UserEmailTokenType } from '@prisma/client';
 import { prisma } from '../db/client';
 import { User, UserRole } from '../domain';
 import { authMiddleware } from '../middleware/auth';
-import { consumeUserEmailToken, issueUserEmailToken } from '../services/authEmailTokens';
+import {
+  consumeUserEmailToken,
+  issueUserEmailToken,
+  validateUserEmailToken,
+} from '../services/authEmailTokens';
 import { buildFrontendAppUrl, sendTransactionalEmail } from '../services/email';
 import {
   buildEmailVerificationTemplate,
@@ -410,6 +414,15 @@ router.post('/request-password-reset', requestPasswordResetLimiter, async (req, 
   }
 
   return res.status(200).json({ ok: true, message: 'If the account exists, an email was sent.' });
+});
+
+router.get('/reset-password/validate', async (req, res) => {
+  const token = String(req.query.token || '').trim();
+  const validation = await validateUserEmailToken(UserEmailTokenType.PASSWORD_RESET, token);
+  return res.json({
+    ok: validation.valid,
+    ...(validation.reason ? { reason: validation.reason } : {}),
+  });
 });
 
 router.post('/reset-password', async (req, res) => {

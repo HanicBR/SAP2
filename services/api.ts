@@ -571,6 +571,20 @@ export const ApiService = {
     });
   },
 
+  validateResetPasswordToken: async (
+    token: string,
+  ): Promise<{ ok: boolean; reason?: string }> => {
+    if (!hasApi) throw new Error('API base URL not configured');
+    const params = new URLSearchParams();
+    params.set('token', token);
+    return apiFetch<{ ok: boolean; reason?: string }>(
+      `/auth/reset-password/validate?${params.toString()}`,
+      {
+        method: 'GET',
+      },
+    );
+  },
+
   resetPasswordWithToken: async (token: string, newPassword: string): Promise<void> => {
     if (!hasApi) throw new Error('API base URL not configured');
     await apiFetch<{ ok: boolean }>('/auth/reset-password', {
