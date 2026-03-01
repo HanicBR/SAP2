@@ -13,6 +13,8 @@ import {
   PlayerIpHistoryResponseV2,
   RelatedAccountsResponseV2,
   RelatedAccountItemV2,
+  PlayerAliasHistoryItem,
+  PlayerAvatarHistoryItem,
 } from '../../types';
 import { Icons } from '../../components/Icon';
 import { formatLogMessage } from '../../components/logMessage';
@@ -52,6 +54,14 @@ const PlayerProfile: React.FC = () => {
   const [ipHistoryV2, setIpHistoryV2] = useState<PlayerIpHistoryResponseV2 | null>(null);
   const [selectedIpHistoryMap, setSelectedIpHistoryMap] =
     useState<PlayerIpHistoryResponseV2['items'][number] | null>(null);
+  const [identityTab, setIdentityTab] = useState<'aliases' | 'avatars'>('aliases');
+  const [aliasHistory, setAliasHistory] = useState<PlayerAliasHistoryItem[]>([]);
+  const [aliasHistoryTotal, setAliasHistoryTotal] = useState(0);
+  const [avatarHistory, setAvatarHistory] = useState<PlayerAvatarHistoryItem[]>([]);
+  const [avatarHistoryTotal, setAvatarHistoryTotal] = useState(0);
+  const [identityLoading, setIdentityLoading] = useState(false);
+  const [identitySyncing, setIdentitySyncing] = useState(false);
+  const [identityError, setIdentityError] = useState('');
   
   // Note state
   const [newNote, setNewNote] = useState('');
@@ -191,6 +201,46 @@ const PlayerProfile: React.FC = () => {
       window.clearInterval(intervalId);
     };
   }, [steamId, servers]);
+
+  const loadIdentityHistory = async (
+    targetSteamId: string,
+    options?: { sync?: boolean },
+  ) => {
+    const shouldSync = Boolean(options?.sync);
+    if (shouldSync) setIdentitySyncing(true);
+    else setIdentityLoading(true);
+    setIdentityError('');
+
+    try {
+      const [aliasesResponse, avatarsResponse] = await Promise.all([
+        ApiService.getPlayerAliases(targetSteamId, 120, { sync: shouldSync }),
+        ApiService.getPlayerAvatarHistory(targetSteamId, 80, { sync: shouldSync }),
+      ]);
+      setAliasHistory(aliasesResponse.items || []);
+      setAliasHistoryTotal(Number(aliasesResponse.total || 0));
+      setAvatarHistory(avatarsResponse.items || []);
+      setAvatarHistoryTotal(Number(avatarsResponse.total || 0));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao carregar historico de identidade.';
+      setIdentityError(message);
+    } finally {
+      setIdentityLoading(false);
+      setIdentitySyncing(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!player?.steamId) {
+      setAliasHistory([]);
+      setAliasHistoryTotal(0);
+      setAvatarHistory([]);
+      setAvatarHistoryTotal(0);
+      setIdentityError('');
+      return;
+    }
+
+    void loadIdentityHistory(player.steamId);
+  }, [player?.steamId]);
 
   useEffect(() => {
     const fetchPlayerLogs = async () => {
@@ -449,6 +499,24 @@ const PlayerProfile: React.FC = () => {
     } catch {
       setShowCopyFallback(true);
       setCopyToast({ message: 'Nao foi possivel copiar automaticamente.', tone: 'error' });
+    }
+  };
+
+  const formatHistoryDate = (value?: string) => {
+    if (!value) return '-';
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return '-';
+    return parsed.toLocaleString();
+  };
+
+  const handleIdentitySync = async () => {
+    if (!player?.steamId) return;
+    await loadIdentityHistory(player.steamId, { sync: true });
+    try {
+      const refreshed = await ApiService.getPlayerBySteamId(player.steamId, { activityWindowDays });
+      if (refreshed) setPlayer(refreshed);
+    } catch {
+      // keep current player snapshot
     }
   };
 
@@ -1069,6 +1137,129 @@ const PlayerProfile: React.FC = () => {
                       </div>
                       <div className="text-zinc-600">
                         Ultimo: {new Date(entry.lastSeen).toLocaleString()}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Identity History */}
+          <div className="bg-zinc-900 border border-zinc-800 rounded overflow-hidden">
+            <div className="p-4 border-b border-zinc-800 bg-zinc-950/30 flex items-center justify-between gap-3">
+              <h3 className="text-sm font-bold text-zinc-300 uppercase flex items-center">
+                <Icons.UserGroup className="w-4 h-4 mr-2" /> Historico de Identidade
+              </h3>
+              <button
+                type="button"
+                onClick={() => void handleIdentitySync()}
+                disabled={identityLoading || identitySyncing || !player?.steamId}
+                className="inline-flex items-center gap-1 rounded border border-zinc-700 px-2 py-1 text-[10px] font-bold uppercase text-zinc-300 hover:bg-zinc-800 disabled:opacity-50"
+              >
+                <Icons.RefreshCw className="h-3 w-3" />
+                {identitySyncing ? 'Sincronizando...' : 'Atualizar'}
+              </button>
+            </div>
+
+            <div className="border-b border-zinc-800 px-4 py-2 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIdentityTab('aliases')}
+                className={`rounded px-2.5 py-1 text-[11px] font-bold uppercase transition-colors ${
+                  identityTab === 'aliases'
+                    ? 'bg-red-900/30 text-red-300 border border-red-900/60'
+                    : 'bg-zinc-950 text-zinc-400 border border-zinc-800 hover:text-zinc-200'
+                }`}
+              >
+                Nicks ({aliasHistoryTotal})
+              </button>
+              <button
+                type="button"
+                onClick={() => setIdentityTab('avatars')}
+                className={`rounded px-2.5 py-1 text-[11px] font-bold uppercase transition-colors ${
+                  identityTab === 'avatars'
+                    ? 'bg-red-900/30 text-red-300 border border-red-900/60'
+                    : 'bg-zinc-950 text-zinc-400 border border-zinc-800 hover:text-zinc-200'
+                }`}
+              >
+                Fotos ({avatarHistoryTotal})
+              </button>
+            </div>
+
+            <div className="max-h-80 overflow-y-auto p-3">
+              {identityLoading || identitySyncing ? (
+                <div className="py-6 text-center text-sm text-zinc-500">Carregando historico...</div>
+              ) : identityError ? (
+                <div className="rounded border border-red-900/40 bg-red-900/10 p-3 text-xs text-red-300">
+                  {identityError}
+                </div>
+              ) : identityTab === 'aliases' ? (
+                aliasHistory.length === 0 ? (
+                  <div className="py-6 text-center text-sm text-zinc-500">
+                    Nenhum historico de nick encontrado.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-zinc-800 text-xs">
+                      <thead className="bg-zinc-950/50">
+                        <tr>
+                          <th className="px-2 py-2 text-left uppercase text-zinc-500">Nick</th>
+                          <th className="px-2 py-2 text-left uppercase text-zinc-500">Primeira vez</th>
+                          <th className="px-2 py-2 text-left uppercase text-zinc-500">Ultima vez</th>
+                          <th className="px-2 py-2 text-right uppercase text-zinc-500">Ocorrencias</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-zinc-800">
+                        {aliasHistory.map((item) => (
+                          <tr key={`${item.name}_${item.lastSeen || ''}`}>
+                            <td className="px-2 py-2 text-zinc-200">{item.name}</td>
+                            <td className="px-2 py-2 text-zinc-400">{formatHistoryDate(item.firstSeen)}</td>
+                            <td className="px-2 py-2 text-zinc-400">{formatHistoryDate(item.lastSeen)}</td>
+                            <td className="px-2 py-2 text-right text-zinc-300">{item.seenCount}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )
+              ) : avatarHistory.length === 0 ? (
+                <div className="py-6 text-center text-sm text-zinc-500">
+                  Nenhum historico de foto encontrado.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {avatarHistory.map((item) => (
+                    <div
+                      key={`${item.avatarUrl}_${item.lastSeen || ''}`}
+                      className="rounded border border-zinc-800 bg-zinc-950/60 p-2"
+                    >
+                      <div className="flex items-start gap-3">
+                        <img
+                          src={item.avatarUrl}
+                          alt="Avatar historico"
+                          className="h-12 w-12 rounded border border-zinc-700 object-cover"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <a
+                            href={item.avatarUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="block truncate text-[11px] text-cyan-300 hover:text-cyan-200"
+                            title={item.avatarUrl}
+                          >
+                            {item.avatarUrl}
+                          </a>
+                          <div className="mt-1 text-[11px] text-zinc-500">
+                            1a vez: {formatHistoryDate(item.firstSeen)}
+                          </div>
+                          <div className="text-[11px] text-zinc-500">
+                            Ultima: {formatHistoryDate(item.lastSeen)}
+                          </div>
+                          <div className="text-[11px] text-zinc-400">
+                            Ocorrencias: {item.seenCount}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))}

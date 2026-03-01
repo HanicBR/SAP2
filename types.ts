@@ -482,6 +482,19 @@ export interface PlayerAliasHistoryResponse {
   items: PlayerAliasHistoryItem[];
 }
 
+export interface PlayerAvatarHistoryItem {
+  avatarUrl: string;
+  firstSeen?: string;
+  lastSeen?: string;
+  seenCount: number;
+}
+
+export interface PlayerAvatarHistoryResponse {
+  steamId: string;
+  total: number;
+  items: PlayerAvatarHistoryItem[];
+}
+
 // Chart Data Types
 export interface DailyStats {
   date: string;

@@ -112,6 +112,7 @@ model PlayerProfile {
   punishments      Punishment[]
   ipHistory        PlayerIpHistory[]
   aliases          PlayerAliasHistory[]
+  avatarHistory    PlayerAvatarHistory[]
 }
 
 model PlayerAliasHistory {
@@ -129,6 +130,22 @@ model PlayerAliasHistory {
   @@unique([steamId, name], name: "steamId_name")
   @@index([steamId, lastSeen])
   @@index([name, lastSeen])
+}
+
+model PlayerAvatarHistory {
+  id        String   @id @default(cuid())
+  steamId   String
+  avatarUrl String
+  firstSeen DateTime @default(now())
+  lastSeen  DateTime @default(now())
+  seenCount Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  player PlayerProfile @relation(fields: [steamId], references: [steamId], onDelete: Cascade)
+
+  @@unique([steamId, avatarUrl], name: "steamId_avatarUrl")
+  @@index([steamId, lastSeen])
 }
 
 model VipAutomationAction {

@@ -8,6 +8,7 @@ import {
   getRelatedAccountsV2,
   isDuplicateAnalysisV2Enabled,
 } from '../services/duplicateAnalysis';
+import { resolveSteamProfile } from '../services/steamProfile';
 
 const router = Router();
 const VALID_PUNISHMENT_TYPES = new Set(['BAN', 'MUTE', 'GAG', 'KICK']);
@@ -25,6 +26,139 @@ const parseActivityWindowDays = (value: unknown, fallback: 7 | 14 | 30 | 90 = 30
   const parsed = Number.parseInt(String(value ?? ''), 10);
   if (parsed === 7 || parsed === 14 || parsed === 30 || parsed === 90) return parsed;
   return fallback;
+};
+
+const parseBooleanQuery = (value: unknown, fallback = false): boolean => {
+  const normalized = String(value ?? '')
+    .trim()
+    .toLowerCase();
+  if (!normalized) return fallback;
+  if (['1', 'true', 'yes', 'on'].includes(normalized)) return true;
+  if (['0', 'false', 'no', 'off'].includes(normalized)) return false;
+  return fallback;
+};
+
+const getPlayerAliasHistoryClient = () => (prisma as any).playerAliasHistory;
+const getPlayerAvatarHistoryClient = () => (prisma as any).playerAvatarHistory;
+
+const upsertAliasHistoryEntry = async (steamId: string, nameRaw: string, seenAt: Date) => {
+  const client = getPlayerAliasHistoryClient();
+  if (!client) return;
+  const name = String(nameRaw || '').trim();
+  if (!name) return;
+
+  const existing = await client.findUnique({
+    where: {
+      steamId_name: {
+        steamId,
+        name,
+      },
+    },
+    select: {
+      firstSeen: true,
+      lastSeen: true,
+      seenCount: true,
+    },
+  });
+
+  if (!existing) {
+    await client.create({
+      data: {
+        steamId,
+        name,
+        firstSeen: seenAt,
+        lastSeen: seenAt,
+        seenCount: 1,
+      },
+    });
+    return;
+  }
+
+  await client.update({
+    where: {
+      steamId_name: {
+        steamId,
+        name,
+      },
+    },
+    data: {
+      firstSeen: seenAt.getTime() < existing.firstSeen.getTime() ? seenAt : existing.firstSeen,
+      lastSeen: seenAt.getTime() > existing.lastSeen.getTime() ? seenAt : existing.lastSeen,
+      seenCount: Number(existing.seenCount || 0) + 1,
+    },
+  });
+};
+
+const upsertAvatarHistoryEntry = async (steamId: string, avatarUrlRaw: string, seenAt: Date) => {
+  const client = getPlayerAvatarHistoryClient();
+  if (!client) return;
+  const avatarUrl = String(avatarUrlRaw || '').trim();
+  if (!avatarUrl) return;
+
+  const existing = await client.findUnique({
+    where: {
+      steamId_avatarUrl: {
+        steamId,
+        avatarUrl,
+      },
+    },
+    select: {
+      firstSeen: true,
+      lastSeen: true,
+      seenCount: true,
+    },
+  });
+
+  if (!existing) {
+    await client.create({
+      data: {
+        steamId,
+        avatarUrl,
+        firstSeen: seenAt,
+        lastSeen: seenAt,
+        seenCount: 1,
+      },
+    });
+    return;
+  }
+
+  await client.update({
+    where: {
+      steamId_avatarUrl: {
+        steamId,
+        avatarUrl,
+      },
+    },
+    data: {
+      firstSeen: seenAt.getTime() < existing.firstSeen.getTime() ? seenAt : existing.firstSeen,
+      lastSeen: seenAt.getTime() > existing.lastSeen.getTime() ? seenAt : existing.lastSeen,
+      seenCount: Number(existing.seenCount || 0) + 1,
+    },
+  });
+};
+
+const syncPlayerIdentityFromSteam = async (steamId: string) => {
+  const profile = await resolveSteamProfile(steamId);
+  const personaName = String(profile.personaName || '').trim();
+  const avatarUrl = String(profile.avatarUrl || '').trim();
+  if (!personaName && !avatarUrl) return;
+
+  const now = new Date();
+  const data: Record<string, unknown> = {};
+  if (personaName) data.name = personaName;
+  if (avatarUrl) data.avatarUrl = avatarUrl;
+
+  if (Object.keys(data).length > 0) {
+    await prisma.playerProfile.update({
+      where: { steamId },
+      data: data as any,
+    });
+  }
+
+  await Promise.all([
+    personaName ? upsertAliasHistoryEntry(steamId, personaName, now) : Promise.resolve(),
+    avatarUrl ? upsertAvatarHistoryEntry(steamId, avatarUrl, now) : Promise.resolve(),
+  ]);
 };
 
 const quoteConsoleArg = (value: string) => {
@@ -1714,6 +1848,7 @@ router.get('/:steamId', async (req, res) => {
 router.get('/:steamId/aliases', async (req, res) => {
   const { steamId } = req.params as { steamId: string };
   const limit = parsePositiveInt((req.query as any)?.limit, 50, 500);
+  const sync = parseBooleanQuery((req.query as any)?.sync, false);
 
   const profile = await prisma.playerProfile.findUnique({
     where: { steamId },
@@ -1723,7 +1858,15 @@ router.get('/:steamId/aliases', async (req, res) => {
     return res.status(404).json({ error: 'Player not found' });
   }
 
-  const aliasClient = (prisma as any).playerAliasHistory;
+  if (sync) {
+    try {
+      await syncPlayerIdentityFromSteam(steamId);
+    } catch {
+      // best effort sync; fallback to local history
+    }
+  }
+
+  const aliasClient = getPlayerAliasHistoryClient();
   if (!aliasClient) {
     return res.json({ steamId, total: 0, items: [] });
   }
@@ -1750,6 +1893,95 @@ router.get('/:steamId/aliases', async (req, res) => {
     total,
     items: items.map((item: any) => ({
       name: String(item.name || ''),
+      firstSeen: item.firstSeen instanceof Date ? item.firstSeen.toISOString() : undefined,
+      lastSeen: item.lastSeen instanceof Date ? item.lastSeen.toISOString() : undefined,
+      seenCount: Number(item.seenCount || 0),
+    })),
+  });
+});
+
+router.get('/:steamId/avatars', async (req, res) => {
+  const { steamId } = req.params as { steamId: string };
+  const limit = parsePositiveInt((req.query as any)?.limit, 50, 500);
+  const sync = parseBooleanQuery((req.query as any)?.sync, false);
+
+  const profile = await prisma.playerProfile.findUnique({
+    where: { steamId },
+    select: { steamId: true, avatarUrl: true },
+  });
+  if (!profile) {
+    return res.status(404).json({ error: 'Player not found' });
+  }
+
+  if (sync) {
+    try {
+      await syncPlayerIdentityFromSteam(steamId);
+    } catch {
+      // best effort sync; fallback to local history
+    }
+  }
+
+  const avatarClient = getPlayerAvatarHistoryClient();
+  if (!avatarClient) {
+    const fallbackUrl = String(profile.avatarUrl || '').trim();
+    return res.json({
+      steamId,
+      total: fallbackUrl ? 1 : 0,
+      items: fallbackUrl
+        ? [
+            {
+              avatarUrl: fallbackUrl,
+              firstSeen: undefined,
+              lastSeen: undefined,
+              seenCount: 1,
+            },
+          ]
+        : [],
+    });
+  }
+
+  const [items, total] = await Promise.all([
+    avatarClient.findMany({
+      where: { steamId },
+      orderBy: [{ lastSeen: 'desc' }, { seenCount: 'desc' }],
+      take: limit,
+      select: {
+        avatarUrl: true,
+        firstSeen: true,
+        lastSeen: true,
+        seenCount: true,
+      },
+    }),
+    avatarClient.count({
+      where: { steamId },
+    }),
+  ]);
+
+  if (!items.length) {
+    const fallbackUrl = String(profile.avatarUrl || '').trim();
+    if (fallbackUrl) {
+      const now = new Date();
+      await upsertAvatarHistoryEntry(steamId, fallbackUrl, now).catch(() => undefined);
+      return res.json({
+        steamId,
+        total: 1,
+        items: [
+          {
+            avatarUrl: fallbackUrl,
+            firstSeen: now.toISOString(),
+            lastSeen: now.toISOString(),
+            seenCount: 1,
+          },
+        ],
+      });
+    }
+  }
+
+  return res.json({
+    steamId,
+    total,
+    items: items.map((item: any) => ({
+      avatarUrl: String(item.avatarUrl || ''),
       firstSeen: item.firstSeen instanceof Date ? item.firstSeen.toISOString() : undefined,
       lastSeen: item.lastSeen instanceof Date ? item.lastSeen.toISOString() : undefined,
       seenCount: Number(item.seenCount || 0),
