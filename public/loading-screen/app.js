@@ -98,6 +98,7 @@
   };
 
   var isGmod = /GMod/i.test(navigator.userAgent || '');
+  var enableTelemetry = isGmod || /[?&]bsb_telemetry=1(?:&|$)/i.test(window.location.search || '');
 
   var dom = {
     bgLayer: document.getElementById('bg-layer'),
@@ -122,6 +123,226 @@
     infoMap: document.getElementById('info-map'),
     infoMode: document.getElementById('info-mode'),
   };
+
+  var telemetry = {
+    endpoint: '/api/loading-telemetry/ingest',
+    source: isGmod ? 'gmod-cef-appjs' : 'web-preview-appjs',
+    sessionKey: '',
+    slug: '',
+    startedAt: '',
+    seq: 0,
+    queue: [],
+    flushTimer: null,
+    flushInFlight: false,
+    heartbeatTimer: null,
+    finalized: false,
+    sentStart: false,
+    sentGameDetails: false,
+    lastStatus: '',
+    lastFile: '',
+  };
+
+  function telemetryTrimTo(value, maxLength) {
+    var text = String(value || '').trim();
+    if (!text) return '';
+    if (text.length <= maxLength) return text;
+    return text.slice(0, maxLength);
+  }
+
+  function sanitizeProgress(value) {
+    var parsed = Number(value);
+    if (!Number.isFinite(parsed)) return undefined;
+    if (parsed < 0) return 0;
+    if (parsed > 100) return 100;
+    return Math.round(parsed);
+  }
+
+  function createTelemetrySessionKey(slug) {
+    var rand = Math.random().toString(36).slice(2, 10);
+    return 'ls_' + String(slug || 'loading') + '_' + Date.now().toString(36) + '_' + rand;
+  }
+
+  function scheduleTelemetryFlush(delayMs) {
+    if (!enableTelemetry || !telemetry.sessionKey) return;
+    if (telemetry.flushTimer) return;
+    telemetry.flushTimer = window.setTimeout(function () {
+      telemetry.flushTimer = null;
+      flushTelemetry(false);
+    }, typeof delayMs === 'number' ? delayMs : 2200);
+  }
+
+  function buildTelemetryPayload(events) {
+    return {
+      sessionKey: telemetry.sessionKey,
+      slug: telemetry.slug,
+      startedAt: telemetry.startedAt,
+      source: telemetry.source,
+      events: events,
+    };
+  }
+
+  function sendTelemetryPayload(payload, preferBeacon) {
+    var body = JSON.stringify(payload);
+    if (preferBeacon && typeof navigator.sendBeacon === 'function') {
+      try {
+        var blob = new Blob([body], { type: 'application/json' });
+        var sent = navigator.sendBeacon(telemetry.endpoint, blob);
+        if (sent) return Promise.resolve(true);
+      } catch (_err) {}
+    }
+
+    return fetch(telemetry.endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: body,
+      keepalive: !!preferBeacon,
+    })
+      .then(function (response) {
+        return response.ok;
+      })
+      .catch(function () {
+        return false;
+      });
+  }
+
+  function flushTelemetry(preferBeacon) {
+    if (!enableTelemetry || !telemetry.sessionKey) return;
+    if (!telemetry.queue.length) return;
+    if (preferBeacon) {
+      var batches = 0;
+      while (telemetry.queue.length > 0 && batches < 4) {
+        var beaconChunk = telemetry.queue.slice(0, 120);
+        telemetry.queue = telemetry.queue.slice(beaconChunk.length);
+        sendTelemetryPayload(buildTelemetryPayload(beaconChunk), true);
+        batches += 1;
+      }
+      return;
+    }
+
+    if (telemetry.flushInFlight) return;
+
+    var chunk = telemetry.queue.slice(0, 120);
+    telemetry.queue = telemetry.queue.slice(chunk.length);
+    var payload = buildTelemetryPayload(chunk);
+
+    telemetry.flushInFlight = true;
+
+    sendTelemetryPayload(payload, false)
+      .then(function (ok) {
+        if (!ok) {
+          telemetry.queue = chunk.concat(telemetry.queue);
+          if (telemetry.queue.length > 480) {
+            telemetry.queue = telemetry.queue.slice(telemetry.queue.length - 480);
+          }
+        }
+      })
+      .finally(function () {
+        telemetry.flushInFlight = false;
+
+        if (telemetry.queue.length > 0) {
+          scheduleTelemetryFlush(200);
+        }
+      });
+  }
+
+  function pushTelemetryEvent(type, options) {
+    if (!enableTelemetry || !telemetry.sessionKey || telemetry.finalized) return;
+    var entry = {
+      seq: telemetry.seq + 1,
+      type: type,
+      at: new Date().toISOString(),
+    };
+    telemetry.seq += 1;
+
+    if (options && typeof options === 'object') {
+      var statusText = telemetryTrimTo(options.statusText, 300);
+      if (statusText) entry.statusText = statusText;
+
+      var fileName = telemetryTrimTo(options.fileName, 600);
+      if (fileName) entry.fileName = fileName;
+
+      var progressPct = sanitizeProgress(options.progressPct);
+      if (typeof progressPct === 'number') entry.progressPct = progressPct;
+
+      if (options.payload !== undefined) {
+        try {
+          entry.payload = JSON.parse(JSON.stringify(options.payload));
+        } catch (_err) {}
+      }
+    }
+
+    telemetry.queue.push(entry);
+    if (telemetry.queue.length > 480) {
+      telemetry.queue = telemetry.queue.slice(telemetry.queue.length - 480);
+    }
+
+    if (telemetry.queue.length >= 24) {
+      flushTelemetry(false);
+      return;
+    }
+    scheduleTelemetryFlush(2200);
+  }
+
+  function finalizeTelemetry(reason) {
+    if (!enableTelemetry || !telemetry.sessionKey) return;
+    if (telemetry.finalized) return;
+
+    if (telemetry.heartbeatTimer) {
+      window.clearInterval(telemetry.heartbeatTimer);
+      telemetry.heartbeatTimer = null;
+    }
+    if (telemetry.flushTimer) {
+      window.clearTimeout(telemetry.flushTimer);
+      telemetry.flushTimer = null;
+    }
+
+    pushTelemetryEvent('SESSION_END', {
+      statusText: telemetry.lastStatus,
+      fileName: telemetry.lastFile,
+      progressPct: state.progress,
+      payload: {
+        reason: String(reason || 'unknown'),
+      },
+    });
+    telemetry.finalized = true;
+    flushTelemetry(true);
+  }
+
+  function startTelemetry(slug) {
+    if (!enableTelemetry) return;
+    var normalizedSlug = String(slug || '').trim().toLowerCase();
+    if (!normalizedSlug) return;
+
+    telemetry.slug = normalizedSlug;
+    telemetry.sessionKey = createTelemetrySessionKey(normalizedSlug);
+    telemetry.startedAt = new Date().toISOString();
+
+    pushTelemetryEvent('SESSION_START', {
+      statusText: 'Conectando ao servidor...',
+      progressPct: 0,
+      payload: {
+        path: window.location.pathname,
+      },
+    });
+    telemetry.sentStart = true;
+
+    telemetry.heartbeatTimer = window.setInterval(function () {
+      pushTelemetryEvent('HEARTBEAT', {
+        statusText: telemetry.lastStatus,
+        fileName: telemetry.lastFile,
+        progressPct: state.progress,
+      });
+    }, 10000);
+
+    window.addEventListener('pagehide', function () {
+      finalizeTelemetry('pagehide');
+    });
+    window.addEventListener('beforeunload', function () {
+      finalizeTelemetry('beforeunload');
+    });
+  }
 
   function getSlug() {
     var fromGlobal = String(window.BSB_LOADING_SLUG || '').trim().toLowerCase();
@@ -449,6 +670,21 @@
     if (dom.serverSub) dom.serverSub.textContent = 'Conectando ao servidor...';
     if (dom.infoMap) dom.infoMap.textContent = 'mapa: ' + String(mapname || '-');
     if (dom.infoMode) dom.infoMode.textContent = 'modo: ' + String(gamemode || (state.profile && state.profile.mode) || '-');
+
+    if (!telemetry.sentGameDetails) {
+      pushTelemetryEvent('STAGE_MARK', {
+        statusText: 'game_details',
+        progressPct: state.progress,
+        payload: {
+          serverName: telemetryTrimTo(servername, 120),
+          map: telemetryTrimTo(mapname, 80),
+          gamemode: telemetryTrimTo(gamemode, 80),
+          maxPlayers: Number(maxplayers) || undefined,
+          steamId: telemetryTrimTo(steamid, 80),
+        },
+      });
+      telemetry.sentGameDetails = true;
+    }
   }
 
   function SetStatusChanged(status) {
@@ -469,12 +705,46 @@
     if (text === 'Starting Lua...') {
       setProgress(100);
     }
+
+    if (text && text !== telemetry.lastStatus) {
+      telemetry.lastStatus = text;
+      pushTelemetryEvent('STATUS_CHANGE', {
+        statusText: text,
+        progressPct: state.progress,
+      });
+    }
+
+    if (
+      text === 'Workshop Complete' ||
+      text === 'Mounting Addons' ||
+      text === 'Client info sent!' ||
+      text === 'Client info sent' ||
+      text === 'Starting Lua...' ||
+      text === 'Starting Lua'
+    ) {
+      pushTelemetryEvent('STAGE_MARK', {
+        statusText: text,
+        progressPct: state.progress,
+      });
+    }
+
+    if (text === 'Starting Lua...' || text === 'Starting Lua') {
+      finalizeTelemetry('starting_lua');
+    }
   }
 
   function DownloadingFile(fileName) {
+    var trimmedName = String(fileName || '').trim();
     if (dom.fileText) {
-      var name = String(fileName || '').trim();
-      dom.fileText.textContent = name ? 'Baixando: ' + name : '';
+      dom.fileText.textContent = trimmedName ? 'Baixando: ' + trimmedName : '';
+    }
+
+    if (trimmedName && trimmedName !== telemetry.lastFile) {
+      telemetry.lastFile = trimmedName;
+      pushTelemetryEvent('FILE_DOWNLOAD', {
+        fileName: trimmedName,
+        progressPct: state.progress,
+      });
     }
   }
 
@@ -537,6 +807,8 @@
 
   async function init() {
     state.slug = getSlug();
+    startTelemetry(state.slug);
+
     var profile = await fetchProfile(state.slug);
     applyProfile(profile);
 

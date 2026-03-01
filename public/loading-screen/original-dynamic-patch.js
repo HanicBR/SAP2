@@ -453,6 +453,319 @@
     applyMusic(profile.musicTracks);
   }
 
+  function initLoadingTelemetry() {
+    var isGmod = /GMod/i.test(navigator.userAgent || '');
+    var telemetryEnabled = isGmod || /[?&]bsb_telemetry=1(?:&|$)/i.test(window.location.search || '');
+    if (!telemetryEnabled) return;
+
+    var slug = sanitizeSlug(getSlug());
+    if (!slug) return;
+
+    var telemetry = {
+      endpoint: '/api/loading-telemetry/ingest',
+      source: isGmod ? 'gmod-cef-template' : 'web-preview-template',
+      slug: slug,
+      startedAt: new Date().toISOString(),
+      sessionKey:
+        'ls_' +
+        slug +
+        '_' +
+        Date.now().toString(36) +
+        '_' +
+        Math.random().toString(36).slice(2, 10),
+      seq: 0,
+      queue: [],
+      flushTimer: null,
+      flushInFlight: false,
+      heartbeatTimer: null,
+      finalized: false,
+      lastStatus: '',
+      lastFile: '',
+      sentGameDetails: false,
+      hooksPatched: false,
+    };
+
+    function trimTo(value, maxLength) {
+      var text = String(value || '').trim();
+      if (!text) return '';
+      if (text.length <= maxLength) return text;
+      return text.slice(0, maxLength);
+    }
+
+    function sanitizeProgress(value) {
+      var parsed = Number(value);
+      if (!Number.isFinite(parsed)) return undefined;
+      if (parsed < 0) return 0;
+      if (parsed > 100) return 100;
+      return Math.round(parsed);
+    }
+
+    function readProgressFromDom() {
+      var percentEl = document.getElementById('progress-percent');
+      if (!percentEl) return undefined;
+      var text = String(percentEl.textContent || '');
+      var match = text.match(/(\d+)/);
+      if (!match) return undefined;
+      return sanitizeProgress(match[1]);
+    }
+
+    function buildPayload(events) {
+      return {
+        sessionKey: telemetry.sessionKey,
+        slug: telemetry.slug,
+        startedAt: telemetry.startedAt,
+        source: telemetry.source,
+        events: events,
+      };
+    }
+
+    function sendPayload(payload, preferBeacon) {
+      var body = JSON.stringify(payload);
+      if (preferBeacon && typeof navigator.sendBeacon === 'function') {
+        try {
+          var blob = new Blob([body], { type: 'application/json' });
+          if (navigator.sendBeacon(telemetry.endpoint, blob)) {
+            return Promise.resolve(true);
+          }
+        } catch (_err) {}
+      }
+
+      return fetch(telemetry.endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: body,
+        keepalive: !!preferBeacon,
+      })
+        .then(function (response) {
+          return response.ok;
+        })
+        .catch(function () {
+          return false;
+        });
+    }
+
+    function scheduleFlush(delayMs) {
+      if (telemetry.flushTimer) return;
+      telemetry.flushTimer = setTimeout(function () {
+        telemetry.flushTimer = null;
+        flush(false);
+      }, typeof delayMs === 'number' ? delayMs : 2200);
+    }
+
+    function pushEvent(type, options, allowWhenFinalized) {
+      if (telemetry.finalized && !allowWhenFinalized) return;
+      var event = {
+        seq: telemetry.seq + 1,
+        type: type,
+        at: new Date().toISOString(),
+      };
+      telemetry.seq += 1;
+
+      if (options && typeof options === 'object') {
+        var statusText = trimTo(options.statusText, 300);
+        if (statusText) event.statusText = statusText;
+
+        var fileName = trimTo(options.fileName, 600);
+        if (fileName) event.fileName = fileName;
+
+        var progressPct = sanitizeProgress(options.progressPct);
+        if (typeof progressPct === 'number') event.progressPct = progressPct;
+
+        if (options.payload !== undefined) {
+          try {
+            event.payload = JSON.parse(JSON.stringify(options.payload));
+          } catch (_err) {}
+        }
+      }
+
+      telemetry.queue.push(event);
+      if (telemetry.queue.length > 480) {
+        telemetry.queue = telemetry.queue.slice(telemetry.queue.length - 480);
+      }
+      if (telemetry.queue.length >= 24) {
+        flush(false);
+        return;
+      }
+      scheduleFlush(2200);
+    }
+
+    function flush(preferBeacon) {
+      if (!telemetry.queue.length) return;
+
+      if (preferBeacon) {
+        var batches = 0;
+        while (telemetry.queue.length > 0 && batches < 4) {
+          var beaconChunk = telemetry.queue.slice(0, 120);
+          telemetry.queue = telemetry.queue.slice(beaconChunk.length);
+          sendPayload(buildPayload(beaconChunk), true);
+          batches += 1;
+        }
+        return;
+      }
+
+      if (telemetry.flushInFlight) return;
+      var chunk = telemetry.queue.slice(0, 120);
+      telemetry.queue = telemetry.queue.slice(chunk.length);
+      telemetry.flushInFlight = true;
+
+      sendPayload(buildPayload(chunk), false)
+        .then(function (ok) {
+          if (!ok) {
+            telemetry.queue = chunk.concat(telemetry.queue);
+            if (telemetry.queue.length > 480) {
+              telemetry.queue = telemetry.queue.slice(telemetry.queue.length - 480);
+            }
+          }
+        })
+        .finally(function () {
+          telemetry.flushInFlight = false;
+          if (telemetry.queue.length > 0) {
+            scheduleFlush(200);
+          }
+        });
+    }
+
+    function finalize(reason) {
+      if (telemetry.finalized) return;
+      if (telemetry.heartbeatTimer) {
+        clearInterval(telemetry.heartbeatTimer);
+        telemetry.heartbeatTimer = null;
+      }
+      if (telemetry.flushTimer) {
+        clearTimeout(telemetry.flushTimer);
+        telemetry.flushTimer = null;
+      }
+
+      pushEvent(
+        'SESSION_END',
+        {
+          statusText: telemetry.lastStatus,
+          fileName: telemetry.lastFile,
+          progressPct: readProgressFromDom(),
+          payload: {
+            reason: String(reason || 'unknown'),
+          },
+        },
+        true
+      );
+      telemetry.finalized = true;
+      flush(true);
+    }
+
+    function patchHooks() {
+      if (telemetry.hooksPatched) return;
+      var hasStatus = typeof window.SetStatusChanged === 'function';
+      var hasDownload = typeof window.DownloadingFile === 'function';
+      var hasDetails = typeof window.GameDetails === 'function';
+      if (!hasStatus && !hasDownload && !hasDetails) return;
+
+      if (hasDetails) {
+        var originalGameDetails = window.GameDetails;
+        window.GameDetails = function (servername, serverurl, mapname, maxplayers, steamid, gamemode) {
+          var result = originalGameDetails.apply(this, arguments);
+          if (!telemetry.sentGameDetails) {
+            pushEvent('STAGE_MARK', {
+              statusText: 'game_details',
+              progressPct: readProgressFromDom(),
+              payload: {
+                serverName: trimTo(servername, 120),
+                map: trimTo(mapname, 80),
+                gamemode: trimTo(gamemode, 80),
+                maxPlayers: Number(maxplayers) || undefined,
+                steamId: trimTo(steamid, 80),
+              },
+            });
+            telemetry.sentGameDetails = true;
+          }
+          return result;
+        };
+      }
+
+      if (hasStatus) {
+        var originalSetStatusChanged = window.SetStatusChanged;
+        window.SetStatusChanged = function (status) {
+          var result = originalSetStatusChanged.apply(this, arguments);
+          var text = String(status || '').trim();
+          var progress = readProgressFromDom();
+
+          if (text && text !== telemetry.lastStatus) {
+            telemetry.lastStatus = text;
+            pushEvent('STATUS_CHANGE', {
+              statusText: text,
+              progressPct: progress,
+            });
+          }
+
+          if (
+            text === 'Workshop Complete' ||
+            text === 'Mounting Addons' ||
+            text === 'Client info sent!' ||
+            text === 'Client info sent' ||
+            text === 'Starting Lua...' ||
+            text === 'Starting Lua'
+          ) {
+            pushEvent('STAGE_MARK', {
+              statusText: text,
+              progressPct: progress,
+            });
+          }
+
+          if (text === 'Starting Lua...' || text === 'Starting Lua') {
+            finalize('starting_lua');
+          }
+          return result;
+        };
+      }
+
+      if (hasDownload) {
+        var originalDownloadingFile = window.DownloadingFile;
+        window.DownloadingFile = function (fileName) {
+          var result = originalDownloadingFile.apply(this, arguments);
+          var name = String(fileName || '').trim();
+          if (name && name !== telemetry.lastFile) {
+            telemetry.lastFile = name;
+            pushEvent('FILE_DOWNLOAD', {
+              fileName: name,
+              progressPct: readProgressFromDom(),
+            });
+          }
+          return result;
+        };
+      }
+
+      telemetry.hooksPatched = true;
+    }
+
+    pushEvent('SESSION_START', {
+      statusText: 'Conectando ao servidor...',
+      progressPct: 0,
+      payload: {
+        path: window.location.pathname,
+      },
+    });
+
+    telemetry.heartbeatTimer = setInterval(function () {
+      pushEvent('HEARTBEAT', {
+        statusText: telemetry.lastStatus,
+        fileName: telemetry.lastFile,
+        progressPct: readProgressFromDom(),
+      });
+    }, 10000);
+
+    patchHooks();
+    setTimeout(patchHooks, 500);
+    setTimeout(patchHooks, 1500);
+
+    window.addEventListener('pagehide', function () {
+      finalize('pagehide');
+    });
+    window.addEventListener('beforeunload', function () {
+      finalize('beforeunload');
+    });
+  }
+
   async function fetchAndApply() {
     var slug = sanitizeSlug(getSlug());
     if (!slug) return;
@@ -475,4 +788,5 @@
   }
 
   fetchAndApply();
+  initLoadingTelemetry();
 })();
