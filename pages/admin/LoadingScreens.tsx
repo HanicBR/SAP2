@@ -119,6 +119,9 @@ const LoadingScreens: React.FC = () => {
   const [heroDescInput, setHeroDescInput] = useState('');
   const [noticeLinesInput, setNoticeLinesInput] = useState('');
   const [rulesInput, setRulesInput] = useState('');
+  const [activeEditorTab, setActiveEditorTab] = useState<'identity' | 'content' | 'media' | 'vip'>(
+    'identity',
+  );
 
   const hydrateDraftInputs = (profile: LoadingScreenProfile) => {
     setBgInput(toLineInput(profile.backgroundImages));
@@ -452,31 +455,47 @@ const LoadingScreens: React.FC = () => {
 
   return (
     <div className="space-y-5 animate-fade-in pb-24">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <h1 className="flex items-center text-2xl font-black text-white">
-            <Icons.Image className="mr-3 h-6 w-6 text-red-500" />
-            Telas de Loading
-          </h1>
-          <p className="mt-1 text-sm text-zinc-500">
-            Configure conteudo, musicas e visual das loading screens publicas dos servidores.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
+      <div className="rounded-2xl border border-red-900/30 bg-gradient-to-r from-red-950/45 via-zinc-900 to-cyan-950/35 p-4 md:p-5">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <h1 className="flex items-center text-2xl font-black text-white">
+              <Icons.Image className="mr-3 h-6 w-6 text-red-400" />
+              Telas de Loading
+            </h1>
+            <p className="mt-1 text-sm text-zinc-300">
+              Configure conteudo, musicas e visual das loading screens publicas dos servidores.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <span className="rounded-full border border-zinc-700 bg-zinc-900/70 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-zinc-300">
+                Perfis: {profiles.length}
+              </span>
+              <span
+                className={`rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide ${
+                  draft.enabled
+                    ? 'border-emerald-800/60 bg-emerald-900/30 text-emerald-300'
+                    : 'border-zinc-700 bg-zinc-900/70 text-zinc-400'
+                }`}
+              >
+                Status atual: {draft.enabled ? 'Ativo' : 'Desativado'}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={createNewProfile}
-            className="rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-xs font-bold uppercase text-zinc-200"
+            className="rounded-lg border border-cyan-700/60 bg-cyan-900/25 px-3 py-2 text-xs font-bold uppercase text-cyan-200"
           >
             + Nova tela
           </button>
           <button
             type="button"
             onClick={duplicateCurrent}
-            className="rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-xs font-bold uppercase text-zinc-200"
+            className="rounded-lg border border-violet-700/60 bg-violet-900/25 px-3 py-2 text-xs font-bold uppercase text-violet-200"
           >
             Duplicar
           </button>
+          </div>
         </div>
       </div>
 
@@ -484,9 +503,9 @@ const LoadingScreens: React.FC = () => {
         <div className={`rounded border px-3 py-2 text-sm ${noticeClass(notice.tone)}`}>{notice.message}</div>
       ) : null}
 
-      <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
+      <div className="grid gap-4 lg:grid-cols-[300px_1fr]">
         <aside className="space-y-3">
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900/70 p-3">
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/85 p-3 shadow-[0_12px_30px_rgba(0,0,0,0.2)]">
             <h2 className="text-xs font-black uppercase tracking-wide text-zinc-300">Perfis</h2>
             <div className="mt-3 space-y-2">
               {profiles.map((profile) => (
@@ -494,9 +513,9 @@ const LoadingScreens: React.FC = () => {
                   key={profile.slug}
                   type="button"
                   onClick={() => selectProfile(profile.slug)}
-                  className={`w-full rounded border px-3 py-2 text-left transition ${
+                  className={`w-full rounded-lg border px-3 py-2 text-left transition ${
                     selectedSlug === profile.slug
-                      ? 'border-red-800 bg-red-900/25 text-red-200'
+                      ? 'border-red-700 bg-red-900/25 text-red-100 shadow-[0_0_0_1px_rgba(185,28,28,0.25)]'
                       : 'border-zinc-800 bg-zinc-950 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
                   }`}
                 >
@@ -519,16 +538,16 @@ const LoadingScreens: React.FC = () => {
             </div>
           </div>
 
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900/70 p-3">
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/85 p-3 shadow-[0_12px_30px_rgba(0,0,0,0.2)]">
             <h3 className="text-xs font-black uppercase tracking-wide text-zinc-300">URL publica</h3>
-            <p className="mt-2 break-all rounded border border-zinc-800 bg-zinc-950 px-2 py-1 text-xs text-zinc-400">
+            <p className="mt-2 break-all rounded-lg border border-zinc-800 bg-zinc-950 px-2 py-1 text-xs text-zinc-300">
               {publicUrl || '---'}
             </p>
             <div className="mt-2 flex gap-2">
               <button
                 type="button"
                 onClick={copyPublicUrl}
-                className="flex-1 rounded border border-zinc-700 bg-zinc-950 px-2 py-1.5 text-[11px] font-bold uppercase text-zinc-200"
+                className="flex-1 rounded-lg border border-zinc-700 bg-zinc-950 px-2 py-1.5 text-[11px] font-bold uppercase text-zinc-200"
               >
                 Copiar
               </button>
@@ -536,7 +555,7 @@ const LoadingScreens: React.FC = () => {
                 href={publicUrl || '#'}
                 target="_blank"
                 rel="noreferrer"
-                className="flex-1 rounded border border-zinc-700 bg-zinc-950 px-2 py-1.5 text-center text-[11px] font-bold uppercase text-zinc-200"
+                className="flex-1 rounded-lg border border-zinc-700 bg-zinc-950 px-2 py-1.5 text-center text-[11px] font-bold uppercase text-zinc-200"
               >
                 Preview
               </a>
@@ -550,7 +569,60 @@ const LoadingScreens: React.FC = () => {
         </aside>
 
         <section className="space-y-4">
-          <div className={CARD_CLASS}>
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/85 p-3">
+            <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+              <button
+                type="button"
+                onClick={() => setActiveEditorTab('identity')}
+                className={`flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-bold uppercase tracking-wide transition ${
+                  activeEditorTab === 'identity'
+                    ? 'border-red-700 bg-red-900/30 text-red-200'
+                    : 'border-zinc-700 bg-zinc-950 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200'
+                }`}
+              >
+                <Icons.Settings className="mr-2 h-4 w-4" />
+                Identidade
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveEditorTab('content')}
+                className={`flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-bold uppercase tracking-wide transition ${
+                  activeEditorTab === 'content'
+                    ? 'border-red-700 bg-red-900/30 text-red-200'
+                    : 'border-zinc-700 bg-zinc-950 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200'
+                }`}
+              >
+                <Icons.FileText className="mr-2 h-4 w-4" />
+                Conteudo
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveEditorTab('media')}
+                className={`flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-bold uppercase tracking-wide transition ${
+                  activeEditorTab === 'media'
+                    ? 'border-red-700 bg-red-900/30 text-red-200'
+                    : 'border-zinc-700 bg-zinc-950 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200'
+                }`}
+              >
+                <Icons.Image className="mr-2 h-4 w-4" />
+                Midia
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveEditorTab('vip')}
+                className={`flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-bold uppercase tracking-wide transition ${
+                  activeEditorTab === 'vip'
+                    ? 'border-red-700 bg-red-900/30 text-red-200'
+                    : 'border-zinc-700 bg-zinc-950 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200'
+                }`}
+              >
+                <Icons.Crown className="mr-2 h-4 w-4" />
+                VIPs
+              </button>
+            </div>
+          </div>
+          {activeEditorTab === 'identity' ? (
+            <div className={`${CARD_CLASS} border-red-900/25 bg-zinc-900/90`}>
             <h3 className="text-sm font-black uppercase tracking-wide text-white">Identificacao</h3>
             <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
               <div>
@@ -614,9 +686,11 @@ const LoadingScreens: React.FC = () => {
               />
               Loading screen habilitada para uso publico
             </label>
-          </div>
+            </div>
+          ) : null}
 
-          <div className={CARD_CLASS}>
+          {activeEditorTab === 'content' ? (
+            <div className={`${CARD_CLASS} border-cyan-900/25 bg-zinc-900/90`}>
             <h3 className="text-sm font-black uppercase tracking-wide text-white">Hero</h3>
             <div className="mt-4 grid gap-3 md:grid-cols-3">
               <div>
@@ -659,9 +733,11 @@ const LoadingScreens: React.FC = () => {
                 className={TEXTAREA_CLASS}
               />
             </div>
-          </div>
+            </div>
+          ) : null}
 
-          <div className={CARD_CLASS}>
+          {activeEditorTab === 'content' ? (
+            <div className={`${CARD_CLASS} border-amber-900/25 bg-zinc-900/90`}>
             <h3 className="text-sm font-black uppercase tracking-wide text-white">Card de aviso</h3>
             <div className="mt-4 grid gap-3 md:grid-cols-2">
               <div>
@@ -715,9 +791,11 @@ const LoadingScreens: React.FC = () => {
                 className={TEXTAREA_CLASS}
               />
             </div>
-          </div>
+            </div>
+          ) : null}
 
-          <div className={CARD_CLASS}>
+          {activeEditorTab === 'content' ? (
+            <div className={`${CARD_CLASS} border-violet-900/25 bg-zinc-900/90`}>
             <h3 className="text-sm font-black uppercase tracking-wide text-white">Regras / dicas</h3>
             <label className={`${LABEL_CLASS} mt-4`}>Uma linha por item</label>
             <textarea
@@ -727,11 +805,13 @@ const LoadingScreens: React.FC = () => {
                 setRulesInput(event.target.value);
                 updateDraft({ rules: parseLineInput(event.target.value) });
               }}
-              className={TEXTAREA_CLASS}
-            />
-          </div>
+                className={TEXTAREA_CLASS}
+              />
+            </div>
+          ) : null}
 
-          <div className={CARD_CLASS}>
+          {activeEditorTab === 'media' ? (
+            <div className={`${CARD_CLASS} border-emerald-900/25 bg-zinc-900/90`}>
             <h3 className="text-sm font-black uppercase tracking-wide text-white">Media</h3>
             <div className="mt-4 grid gap-4 xl:grid-cols-2">
               <div>
@@ -759,9 +839,11 @@ const LoadingScreens: React.FC = () => {
                 />
               </div>
             </div>
-          </div>
+            </div>
+          ) : null}
 
-          <div className={CARD_CLASS}>
+          {activeEditorTab === 'vip' ? (
+            <div className={`${CARD_CLASS} border-fuchsia-900/25 bg-zinc-900/90`}>
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-sm font-black uppercase tracking-wide text-white">Destaques/VIPs exibidos</h3>
               <button
@@ -826,7 +908,8 @@ const LoadingScreens: React.FC = () => {
                 </div>
               ))}
             </div>
-          </div>
+            </div>
+          ) : null}
         </section>
       </div>
 

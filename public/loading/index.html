@@ -1,81 +1,1010 @@
-<!doctype html>
+<!DOCTYPE html> 
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Backstabber - Loading</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Teko:wght@500;700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="../loading-screen/style.css" />
-  </head>
-  <body>
-    <div id="bg-layer" aria-hidden="true"></div>
+<head>
+  <meta charset="utf-8" />
+  <title>Backstabber Brasil - Loading</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <main id="root">
-      <section class="top-grid">
-        <article class="card">
-          <div class="card-title-row">
-            <span id="hero-badge" class="badge">BACK</span>
-            <h1 id="hero-title" class="title">Loading Screen</h1>
-          </div>
-          <p id="hero-subtitle" class="subtitle">Conectando ao servidor</p>
-          <div class="scroll-area">
-            <div id="hero-list" class="list"></div>
-          </div>
-        </article>
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Teko:wght@400;600;700&display=swap" rel="stylesheet">
 
-        <article class="card">
-          <h2 id="notice-title" class="notice-title">Avisos importantes</h2>
-          <div id="notice-lines" class="notice-lines"></div>
-          <a id="notice-cta" class="notice-cta" target="_blank" rel="noreferrer">Abrir link</a>
-          <div id="notice-qr-wrap" class="notice-qr-wrap">
-            <img id="notice-qr" class="notice-qr" alt="QR" />
-          </div>
-        </article>
+  <style>
+    /* =========================================================
+       CONFIG VISUAL
+       ========================================================= */
+    :root{
+      /* >>> AINDA MAIS CLARO (reduz “escuro” pela metade) <<< */
+      --bg: #2a3145;               /* fallback bem menos escuro */
+      --bg-brightness: 0.82;       /* clareia MUITO a imagem */
+      --bg-saturate: 1.02;
+      --bg-contrast: 1.00;
 
-        <article class="card">
-          <h2 class="notice-title">Regras e dicas</h2>
-          <div class="scroll-area">
-            <ol id="rules-list" class="rules-list"></ol>
-          </div>
-        </article>
-      </section>
+      /* CARDS MAIS TRANSPARENTES */
+      --glass: rgba(255,255,255,0.50);
+      --glass-strong: rgba(255,255,255,0.58);
+      --glass-border: rgba(0,0,0,0.05);
 
-      <section class="vip-card">
-        <h3 id="vip-title" class="vip-title">Destaques</h3>
-        <div id="vip-list" class="vip-list"></div>
-      </section>
+      --text: #0b1220;
+      --muted: #475569;
 
-      <footer class="footer-card">
-        <div class="footer-top">
-          <div>
-            <p id="server-name" class="server-name">BACKSTABBER BRASIL</p>
-            <p id="server-sub" class="server-sub">Conectando ao servidor...</p>
+      --red: #BE1B3C;
+      --red-soft: rgba(190,27,60,0.10);
+      --blue: #2563eb;
+      --green: #16a34a;
+
+      --radius-lg: 28px;
+      --radius-md: 20px;
+      --radius-sm: 14px;
+
+      --pad-x: clamp(12px, 2vw, 28px);
+      --pad-y: clamp(10px, 1.6vw, 24px);
+
+      --fs-xs: clamp(10px, 0.9vw, 12px);
+      --fs-sm: clamp(12px, 1vw, 14px);
+      --fs-md: clamp(14px, 1.15vw, 16px);
+      --fs-lg: clamp(16px, 1.4vw, 18px);
+      --fs-xl: clamp(20px, 2vw, 26px);
+      --fs-2xl: clamp(26px, 3vw, 36px);
+
+      --shadow-soft: 0 10px 28px rgba(0,0,0,0.08);
+      --shadow-deep: 0 18px 50px rgba(0,0,0,0.12);
+
+      --ui-scale: 1;
+    }
+
+    * { box-sizing: border-box; margin:0; padding:0; }
+
+    /* >>> FIX PRINCIPAL PARA 16:10 / CEF <<< */
+    html, body {
+      width: 100%;
+      height: 100%;
+      min-height: 100vh;
+      margin: 0;
+      overflow: hidden;         /* padrão: sem scroll */
+      background: var(--bg);    /* fallback (agora bem mais claro) */
+    }
+
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      background: transparent;
+      color: var(--text);
+      position: relative;
+    }
+
+    /* =========================================================
+       BACKGROUND (cover total, sem faixa em 16:10)
+       ========================================================= */
+    .bg-layer{
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+
+      background: var(--bg);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    /* >>> OVERLAY ~50% MAIS LEVE (reduz escuro pela metade) <<< */
+    .bg-layer::before{
+      content:"";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background:
+        radial-gradient(circle at 50% 30%,
+          rgba(0,0,0,0.02),
+          rgba(0,0,0,0.15) 70%),
+        linear-gradient(180deg,
+          rgba(0,0,0,0.09),
+          rgba(0,0,0,0.18));
+    }
+
+    .bg-layer img{
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      margin: auto;
+      min-width: 50%;
+      min-height: 50%;
+      transform: scale(1.05);
+
+      z-index: 0;
+      filter:
+        brightness(var(--bg-brightness))
+        saturate(var(--bg-saturate))
+        contrast(var(--bg-contrast));
+    }
+
+    /* =========================================================
+       LAYOUT
+       ========================================================= */
+    .wrap {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100vh;
+      min-height: 100vh;
+      padding: var(--pad-y) var(--pad-x);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: clamp(10px, 1.4vw, 18px);
+      transform: scale(var(--ui-scale));
+      transform-origin: center center;
+    }
+
+    .container {
+      width: 100%;
+      height: 100%;
+      max-width: 1500px;
+      margin: 0 auto;
+      margin-top: 2%;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: inherit;
+      min-height: 0;
+    }
+
+    .top-grid {
+      display:grid;
+      grid-template-columns: 1.25fr 1fr 1fr;
+      grid-auto-rows: auto;
+      gap: clamp(10px, 1.4vw, 18px);
+      align-items: stretch;
+    }
+
+    .card-ttt { grid-column: 1; grid-row: 1; }
+    .card-vipclub { grid-column: 2; grid-row: 1; }
+    .card-rules { grid-column: 3; grid-row: 1; }
+
+    .card-vips {
+      grid-row: 2;
+      grid-column: 2 / span 1;
+      justify-self: stretch;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .glass-card{
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: clamp(12px, 1.4vw, 18px);
+      box-shadow:
+        var(--shadow-soft),
+        inset 0 1px 0 rgba(255,255,255,0.45);
+      min-height: clamp(145px, 18vh, 220px);
+      overflow: hidden;
+      display:flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+    }
+
+    .glass-card::after{
+      content:"";
+      position:absolute;
+      inset:-30%;
+      background: radial-gradient(circle at 30% 10%, rgba(255,255,255,0.30), transparent 50%);
+      opacity: 0.15;
+      pointer-events:none;
+    }
+
+    .card-scroll{
+      overflow:auto;
+      padding-right: 4px;
+      scrollbar-width: thin;
+    }
+
+    /* =========================================================
+       TTT CARD
+       ========================================================= */
+    .ttt-header {
+      display:flex; align-items:center; gap:10px;
+      font-weight:800; font-size: var(--fs-xl);
+    }
+    .ttt-badge{
+      background: rgba(239,68,68,0.80);
+      color:white;
+      font-weight:900;
+      letter-spacing:0.10em;
+      padding:5px 8px;
+      border-radius: 7px;
+      font-size: var(--fs-sm);
+      box-shadow: 0 6px 16px rgba(239,68,68,0.30);
+    }
+    .ttt-subtitle{
+      font-size: var(--fs-sm);
+      font-weight:900; letter-spacing:0.10em;
+      text-transform:uppercase; color:#111827;
+    }
+    .ttt-text{
+      font-size: var(--fs-md);
+      color:var(--text);
+      line-height:1.42;
+    }
+    .role-line{ margin-top:7px; }
+    .dot{
+      display:inline-block; width:9px; height:9px;
+      border-radius:999px; margin-right:7px;
+      transform: translateY(1px);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12);
+      opacity: 0.9;
+    }
+    .dot-red{ background:#ef4444; }
+    .dot-green{ background:#22c55e; }
+    .dot-blue{ background:#3b82f6; }
+
+    /* =========================================================
+       MAPA / CRASH FIX CARD
+       ========================================================= */
+    .maps-fix-card{
+      justify-content:center;
+      text-align:left;
+
+      background:
+        radial-gradient(circle at top, rgba(190,27,60,0.20), transparent 60%),
+        rgba(255,255,255,0.86);
+      border: 1px solid rgba(190,27,60,0.28);
+
+      box-shadow:
+        0 12px 34px rgba(0,0,0,0.10),
+        inset 0 1px 0 rgba(255,255,255,0.65);
+    }
+
+    .maps-fix-topline{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+
+    .maps-fix-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(190,27,60,0.92);
+      color:#fff;
+      font-weight: 900;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      font-size: clamp(12px, 1.1vw, 14px);
+      box-shadow:
+        0 14px 28px rgba(190,27,60,0.24),
+        0 0 0 3px rgba(190,27,60,0.12);
+    }
+
+    .maps-fix-title{
+      font-weight: 900;
+      font-size: clamp(18px, 1.9vw, 26px);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color:#111827;
+      text-shadow: 0 2px 0 rgba(255,255,255,0.6);
+    }
+
+    .maps-fix-grid{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .maps-fix-text{
+      font-size: var(--fs-md);
+      color:#111827;
+      line-height: 1.35;
+    }
+
+    .maps-fix-linkbig{
+      margin-top: 10px;
+      display:block;
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 16px;
+      background: rgba(190,27,60,0.10);
+      border: 1px solid rgba(190,27,60,0.22);
+      font-weight: 900;
+      font-size: clamp(16px, 1.6vw, 20px);
+      letter-spacing: 0.02em;
+      color: rgba(190,27,60,0.98);
+      text-decoration: none;
+      text-align:center;
+      user-select: all;
+    }
+
+    .maps-fix-linkbig:hover{
+      filter: brightness(1.03);
+      background: rgba(190,27,60,0.12);
+    }
+
+    .maps-fix-hint{
+      margin-top: 6px;
+      font-size: var(--fs-xs);
+      color: var(--muted);
+      text-align:center;
+    }
+
+    .maps-fix-qrwrap{
+      flex-shrink: 0;
+      width: clamp(70px, 7vw, 96px);
+      height: clamp(70px, 7vw, 96px);
+      border-radius: 16px;
+      overflow:hidden;
+      border: 2px solid rgba(190,27,60,0.35);
+      background: rgba(255,255,255,0.90);
+      box-shadow: 0 12px 26px rgba(0,0,0,0.10);
+    }
+    .maps-fix-qrwrap img{
+      width:100%;
+      height:100%;
+      object-fit: cover;
+    }
+
+    /* =========================================================
+       VIPS CARD (CENTRAL)
+       ========================================================= */
+    .vip-box{
+      background: var(--glass-strong);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: clamp(10px, 1.2vw, 14px);
+      min-height: clamp(160px, 20vh, 240px);
+      max-height: 100%;
+      display:flex; flex-direction:column; gap:10px;
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+      position: relative;
+    }
+    .vip-head{
+      display:flex; align-items:center; justify-content:center; gap:8px;
+      flex-shrink:0;
+    }
+    .vip-badge{
+      font-size: var(--fs-xs);
+      font-weight:900;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:#fff;
+      background: rgba(190,27,60,0.85);
+      padding: 4px 8px;
+      border-radius: 999px;
+      box-shadow: 0 6px 14px rgba(190,27,60,0.28);
+    }
+    .vip-title{
+      font-size: var(--fs-sm);
+      font-weight:900;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:#111827;
+    }
+
+    .vip-list{
+      display:grid;
+      grid-template-rows: repeat(4, auto);
+      grid-auto-flow: column;
+      row-gap: 8px;
+      column-gap: 8px;
+      padding-right: 4px;
+      overflow:auto;
+    }
+
+    .vip-card{
+      display:flex; align-items:center; gap:10px;
+      padding:8px 10px;
+      border-radius: var(--radius-sm);
+      border:1px solid rgba(0,0,0,0.06);
+      flex-shrink:0;
+      background: rgba(255,255,255,0.68);
+    }
+    .vip-avatar{
+      width: clamp(36px, 4vw, 50px);
+      height: clamp(36px, 4vw, 50px);
+      border-radius:999px; object-fit:cover;
+      border:2px solid rgba(190,27,60,0.9);
+      flex-shrink:0;
+      background: rgba(255,255,255,0.9);
+    }
+    .vip-name{
+      font-weight:900; font-size: clamp(14px, 1.8vw, 18px); line-height:1;
+    }
+    .vip-id{
+      font-size: var(--fs-xs); color:var(--muted);
+      margin-top: 2px;
+    }
+
+    .rainbow-text{
+      background: linear-gradient(90deg,#ff0000,#ff7f00,#ffff00,#00ff00,#00ffff,#0000ff,#8b00ff,#ff0000);
+      background-size: 400% 100%;
+      -webkit-background-clip:text; background-clip:text;
+      color:transparent;
+      animation: rainbowMove 4s linear infinite;
+      filter: drop-shadow(0 1px 0 rgba(0,0,0,0.15));
+    }
+    @keyframes rainbowMove {
+      0%{ background-position:0% 50%; }
+      100%{ background-position:400% 50%; }
+    }
+
+    /* =========================================================
+       RULES CARD
+       ========================================================= */
+    .rules-title{
+      font-weight:900; font-size: var(--fs-lg);
+      text-align:center;
+    }
+    .rules-list{
+      display:flex; flex-direction:column;
+      gap: clamp(6px, 1vh, 10px);
+      font-size: var(--fs-lg); color:#111827;
+    }
+    .rule-item{ display:flex; gap:12px; align-items:flex-start; }
+    .rule-num{
+      min-width: clamp(34px, 3.5vw, 44px);
+      min-height: clamp(34px, 3.5vw, 44px);
+      border-radius:10px;
+      display:flex; align-items:center; justify-content:center;
+      font-weight:900; font-size: clamp(16px, 2vw, 22px);
+      color:#1d4ed8;
+      background: rgba(29,78,216,0.07);
+      border: 1px solid rgba(29,78,216,0.10);
+      flex-shrink: 0;
+    }
+
+    /* =========================================================
+       BOTTOM LOADING BAR
+       ========================================================= */
+    .loading-bar{
+      background: var(--glass-strong);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: clamp(10px, 1.2vw, 14px) clamp(12px, 1.4vw, 16px);
+      width: 100%;
+      box-shadow: var(--shadow-deep);
+      display:flex; flex-direction:column; gap:8px;
+    }
+
+    .loading-top{
+      display:flex; align-items:flex-end; justify-content:space-between; gap:12px;
+      flex-wrap: wrap;
+    }
+    .server-name{
+      font-family: Teko, Inter, sans-serif;
+      font-size: var(--fs-2xl);
+      letter-spacing:0.18em; text-transform:uppercase;
+      color:#111827;
+    }
+    .server-sub{
+      font-size: var(--fs-xs);
+      color:var(--muted);
+      letter-spacing:0.12em; text-transform:uppercase;
+    }
+
+    .progress-bg{
+      width:100%; height: clamp(10px, 1.2vw, 14px);
+      border-radius:999px;
+      background: rgba(15,23,42,0.07);
+      overflow:hidden;
+      border:1px solid rgba(0,0,0,0.06);
+    }
+    .progress-fill{
+      height:100%; width:0%;
+      border-radius:999px;
+      background: linear-gradient(90deg, rgba(190,27,60,0.92), rgba(251,113,133,0.92));
+      transition: width .2s ease;
+      box-shadow: 0 0 10px rgba(190,27,60,0.45);
+    }
+
+    .loading-bottom{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      flex-wrap: wrap;
+      font-size: var(--fs-sm);
+      color:#111827;
+    }
+    .percent{
+      font-weight:900;
+      font-size: clamp(16px, 2vw, 20px);
+      color:#111827;
+      margin-left:auto;
+    }
+    .status{
+      font-size: var(--fs-md);
+      color:#0f172a;
+      max-width: 75ch;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .file{
+      font-size: var(--fs-xs); color:var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 60vw;
+    }
+    .mini-info{
+      text-align:right; font-size:var(--fs-xs); color:var(--muted);
+      display:flex; flex-direction:column; gap:2px;
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      * { animation: none !important; transition: none !important; }
+    }
+
+    .bottom-area{
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .credits-card{
+      width: fit-content;
+      max-width: 90%;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 6px 10px;
+      font-size: var(--fs-xs);
+      color: var(--muted);
+      box-shadow: var(--shadow-soft);
+      text-align: right;
+      margin-left: auto;
+    }
+
+    /* =========================================================
+       RESPONSIVIDADE POR LARGURA
+       ========================================================= */
+    @media (max-width: 1280px){
+      .container{ max-width: 1200px; margin-top: 3%; }
+      .wrap{ padding: 10px var(--pad-x); }
+      .glass-card, .vip-box, .loading-bar{ border-radius: 22px; padding: 10px 14px; }
+      .rules-list{ font-size: var(--fs-md); }
+    }
+
+    @media (max-width: 1024px){
+      :root{ --fs-xs: 10px; --fs-sm: 11px; --fs-md: 12px; --fs-lg: 13px; --fs-xl: 18px; --fs-2xl: 22px; }
+      .container{ max-width: 1150px; margin-top: 1%; }
+      .glass-card{ min-height: 130px; }
+      .vip-box{ min-height: 140px; }
+      .server-name{ letter-spacing: 0.14em; }
+    }
+
+    @media (max-width: 820px){
+      .container{ max-width: 1100px; margin-top: 0; }
+      .wrap{ padding: 8px 10px; gap: 8px; }
+      .glass-card, .vip-box{ padding: 8px 10px; gap: 6px; }
+      .rules-list{ gap: 4px; }
+      .vip-avatar{ width: 32px; height: 32px; }
+    }
+
+    @media (max-width: 640px){
+      :root{ --fs-xs: 9px; --fs-sm: 10px; --fs-md: 11px; --fs-lg: 12px; --fs-xl: 16px; --fs-2xl: 18px; }
+      .container{ max-width: 900px; }
+      .wrap{ padding: 6px 8px; gap: 6px; }
+      .glass-card, .vip-box{ padding: 8px 9px; border-radius: 18px; }
+      .loading-bottom{ gap: 4px; }
+      .file{ max-width: 85vw; }
+      .ttt-subtitle{ font-size: var(--fs-xs); }
+    }
+
+    /* =========================================================
+       RESPONSIVIDADE POR ALTURA
+       ========================================================= */
+    @media (max-height: 800px){
+      html, body{ overflow-y: auto; overflow-x: hidden; }
+      .container{ margin-top: 0; }
+      .wrap{ height: auto; min-height: 100vh; padding: 8px 10px; gap: 8px; }
+      .top-grid{ gap: 8px; }
+      .glass-card{ min-height: 120px; padding: 10px 12px; }
+      .vip-box{ min-height: 130px; padding: 9px 12px; }
+      .loading-bar{ padding: 8px 10px; gap: 6px; }
+      .status{ white-space: normal; max-width: none; }
+      .container > div:nth-child(2){ display: none; }
+    }
+
+    @media (max-height: 650px){
+      .wrap{ padding: 6px 8px; gap: 6px; }
+      .top-grid{ gap: 6px; }
+      .glass-card, .vip-box{ min-height: 100px; padding: 8px 10px; }
+      .ttt-header{ font-size: var(--fs-lg); }
+      .ttt-subtitle{ font-size: var(--fs-xs); }
+      .server-name{ font-size: clamp(18px, 4vw, 26px); letter-spacing: 0.12em; }
+      .loading-top{ gap: 6px; }
+      .loading-bottom{ font-size: var(--fs-xs); }
+      .rule-num{ min-width: 30px; min-height: 30px; font-size: clamp(14px, 3vw, 18px); }
+    }
+
+    @media (max-height: 520px){
+      .card-vips{ width: 100%; }
+      .glass-card, .vip-box{ min-height: auto; gap: 6px; padding: 8px 10px; }
+      .ttt-subtitle{ display:none; }
+      .rules-list{ font-size: var(--fs-sm); }
+      .vip-card{ padding: 6px 8px; }
+      .vip-avatar{ width: 32px; height: 32px; }
+    }
+  </style>
+</head>
+<body>
+  <audio id="bg-music" preload="auto" loop>
+    <source src="assets/music/gtavicecity.ogg" type="audio/ogg">
+  </audio>
+
+  <!-- background fixo -->
+  <div class="bg-layer" id="bg-layer">
+    <img id="bg-img" alt="">
+  </div>
+
+  <div class="wrap" id="wrap">
+    <div class="container">
+
+      <!-- TOP GRID -->
+      <div class="top-grid">
+
+        <!-- TTT -->
+        <div class="glass-card card-ttt">
+          <div class="ttt-header">
+            <span class="ttt-badge">TTT</span>
+            <span>Trouble in Terrorist Town</span>
           </div>
-          <div id="progress-percent" class="progress-percent">0%</div>
+          <div class="ttt-subtitle">Quem é o assassino?</div>
+
+          <div class="card-scroll ttt-text">
+            Em Trouble in Terrorist Town, a paranóia é sua melhor amiga.
+            <div class="role-line"><span class="dot dot-red"></span><b>TRAIDORES</b> (Minoria): Matem todos sem serem descobertos.</div>
+            <div class="role-line"><span class="dot dot-green"></span><b>INOCENTES</b> (Maioria): Descubram quem são os traidores antes que seja tarde.</div>
+            <div class="role-line"><span class="dot dot-blue"></span><b>DETETIVE</b> (Líder): Use ferramentas forenses para caçar os culpados.</div>
+            <div class="role-line"><b>Dica:</b> Viu algo suspeito? Avise no chat de voz!</div>
+          </div>
         </div>
 
-        <div class="progress-track">
-          <div id="progress-bar" class="progress-fill"></div>
+        <!-- AVISO: MAPAS / CRASH FIX -->
+        <div class="glass-card maps-fix-card card-vipclub">
+          <div class="maps-fix-topline">
+            <span class="maps-fix-pill">AVISO</span>
+            <div class="maps-fix-title">Travou / crashou ao entrar?</div>
+          </div>
+
+          <div class="maps-fix-grid">
+            <div style="flex:1; min-width:0;">
+              <div class="maps-fix-text">
+                Está faltando mapas em seu jogo. Acesse o link e <b>Inscreva-se na coleção de mapas</b>. Depois, entre novamente.
+              </div>
+
+              <a class="maps-fix-linkbig" href="https://bit.ly/mapasback" target="_blank" rel="noreferrer">
+                bit.ly/mapasback
+              </a>
+              <div class="maps-fix-hint">
+                Abra o link e clique em <b>“Inscrever-se em todos”</b>.
+              </div>
+            </div>
+
+            <div class="maps-fix-qrwrap" title="Aponte a câmera do celular">
+              <img src="https://i.imgur.com/5873D1j.jpeg" alt="QR Code - Mapas do Backstabber Brasil">
+            </div>
+          </div>
         </div>
 
-        <div class="footer-bottom">
-          <div class="status-wrap">
-            <div id="status-text" class="status">Aguardando resposta do jogo...</div>
-            <div id="file-text" class="file"></div>
-          </div>
-          <div class="mini">
-            <div id="info-map">mapa: -</div>
-            <div id="info-mode">modo: -</div>
+        <!-- Rules -->
+        <div class="glass-card card-rules">
+          <div class="rules-title">O que você deve saber</div>
+          <div class="card-scroll rules-list">
+            <div class="rule-item"><div class="rule-num">1</div><div>Não mate sem motivo</div></div>
+            <div class="rule-item"><div class="rule-num">2</div><div>Não ofenda nenhum jogador</div></div>
+            <div class="rule-item"><div class="rule-num">3</div><div>Não abuse de props</div></div>
+            <div class="rule-item"><div class="rule-num">4</div><div>Entre no nosso Discord para estar atualizado, digite <b>!discord</b></div></div>
+            <div class="rule-item"><div class="rule-num">5</div><div>Entre no nosso grupo Steam, digite <b>!steam</b></div></div>
           </div>
         </div>
-      </footer>
-    </main>
 
-    <script src="../loading-screen/app.js"></script>
-  </body>
+        <!-- VIPs CENTRAL -->
+        <div class="vip-box card-vips">
+          <div class="vip-head">
+            <span class="vip-badge">VIP</span>
+            <span class="vip-title">Jogadores do servidor</span>
+          </div>
+          <div class="vip-list" id="vip-list"></div>
+        </div>
+
+      </div>
+
+      <!-- espaço do meio -->
+      <div style="min-height:0;"></div>
+
+      <!-- BOTTOM loading + créditos separados -->
+      <div class="bottom-area">
+
+        <div class="loading-bar">
+          <div class="loading-top">
+            <div>
+              <div class="server-name" id="server-name">BACKSTABBER BRASIL</div>
+              <div class="server-sub" id="server-sub">Conectando ao servidor...</div>
+            </div>
+            <div class="percent" id="progress-percent">0%</div>
+          </div>
+
+          <div class="progress-bg">
+            <div class="progress-fill" id="progress-bar"></div>
+          </div>
+
+          <div class="loading-bottom">
+            <div>
+              <div class="status" id="status-text">Aguardando resposta do jogo...</div>
+              <div class="file" id="file-text"></div>
+            </div>
+            <div class="mini-info">
+              <div id="info-map">mapa: –</div>
+              <div id="info-gamemode">modo: –</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- cardzinho separado -->
+        <div class="credits-card">
+          Feito por: <b>Sushi</b> e <b>Hanic</b>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+  /* =========================================================
+     CONFIG
+     ========================================================= */
+  var LOADING_CONFIG = {
+    fallbackServerName: "Backstabber Brasil",
+    subtitleWhenIdle: "Conectando ao servidor...",
+    backgroundImages: [
+      "https://i.imgur.com/HnZfcKR.jpeg"
+    ],
+    backgroundChangeSeconds: 12
+  };
+
+  var VIPS = [
+    { steamId: "", name: "Mr.B-O-M-B-A-S-T-I-C", avatar: "https://shared.akamai.steamstatic.com/community_assets/images/items/2181720/097978e42477d98190ed9e14e971c2b9976fc8d1.gif" },
+    { steamId: "", name: "Gatogames435", avatar: "https://shared.akamai.steamstatic.com/community_assets/images/items/2459330/11bbadea5154c316c883df0f3f1944395b3715b8.gif" },
+    { steamId: "", name: "Índio Véio", avatar: "https://avatars.akamai.steamstatic.com/bf0675b97b1d51792473515563a54b795bd7e0b2_full.jpg" },
+    { steamId: "", name: "the dr.freeman", avatar: "https://avatars.fastly.steamstatic.com/833ac0e625f63f06f99712b1412a48145fc307ae_full.jpg" },
+    { steamId: "", name: "tutuzinhorod", avatar: "https://avatars.fastly.steamstatic.com/0b7e2573fada1ef30de1e09e2a9c032c1ed212fc_full.jpg" },
+    { steamId: "", name: "nony", avatar: "https://shared.fastly.steamstatic.com/community_assets/images/items/2753900/d5834548b35dcb0db420a147dd0d31eb2eea9252.gif" },
+    { steamId: "", name: "cezinha", avatar: "https://avatars.fastly.steamstatic.com/09f6e21154a0ac391b6fa4a98e207b4a18a8c43d_full.jpg" },
+    { steamId: "", name: "Ten_Mav", avatar: "https://shared.akamai.steamstatic.com/community_assets/images/items/2782610/b8dfa9a0b2c1783c1ae207703bbbaed1293e50ae.gif" },
+    { steamId: "", name: "Nikolania", avatar: "https://avatars.fastly.steamstatic.com/3f50e12733eb64b010aa80a2bbdd7638bc521a31_full.jpg" },
+    { steamId: "", name: "Pempsi Br", avatar: "https://avatars.fastly.steamstatic.com/28c98ae7bfaa446979f6de883c437408a297397f_full.jpg" },
+    { steamId: "", name: "ALPH©D3LT4d™D.H.P", avatar: "https://shared.fastly.steamstatic.com/community_assets/images/items/408410/e3698a58ccaf9fbe682a6b22d7ff72472c75a459.gif" },
+    { steamId: "", name: "Juninho", avatar: "https://avatars.fastly.steamstatic.com/b1fd9965610445f56468618842bb49d30ebf2fc7_full.jpg" },
+    { steamId: "", name: "LuizPelado", avatar: "https://shared.fastly.steamstatic.com/community_assets/images/items/1676860/8d4e167b2c961e3789f893b6e3c38f1d6298f88a.gif" },
+    { steamId: "", name: "Belasi77", avatar: "https://avatars.fastly.steamstatic.com/535006592d717358efba3502675d5555b5bb3694_full.jpg" }
+  ];
+
+  /* =========================================================
+     BACKGROUND FIXO (cover total)
+     ========================================================= */
+  (function initBackground(){
+    var layer = document.getElementById("bg-layer");
+    if(!layer) return;
+    if(!LOADING_CONFIG.backgroundImages || LOADING_CONFIG.backgroundImages.length === 0) return;
+
+    var url = LOADING_CONFIG.backgroundImages[0];
+    layer.style.backgroundImage = "url('" + url + "')";
+
+    var pre = new Image();
+    pre.src = url;
+  })();
+
+  /* =========================================================
+     VIP RENDER + AJUSTE DE LARGURA DO CARD
+     ========================================================= */
+  function renderVips(){
+    var list = document.getElementById("vip-list");
+    if(!list) return;
+    list.innerHTML = "";
+
+    for(var i=0; i<VIPS.length; i++){
+      var v = VIPS[i];
+      var card = document.createElement("div");
+      card.className = "vip-card";
+      card.innerHTML =
+        '<img class="vip-avatar" src="'+v.avatar+'" alt="'+v.name+'">' +
+        '<div>' +
+          '<div class="vip-name rainbow-text">'+v.name+'</div>' +
+          '<div class="vip-id">'+(v.steamId||"")+'</div>' +
+        '</div>';
+      list.appendChild(card);
+    }
+
+    var box = document.querySelector(".card-vips");
+    if(box){
+      var count = VIPS.length;
+      var cols = Math.ceil(count / 4) || 1;
+
+      if(cols <= 1){
+        box.style.gridColumn = "2 / span 1";
+        box.style.maxWidth  = "100%";
+        box.style.margin    = "0";
+      } else if(cols === 2){
+        box.style.gridColumn = "1 / span 3";
+        box.style.maxWidth   = "66.666%";
+        box.style.margin     = "0 auto";
+      } else {
+        box.style.gridColumn = "1 / span 3";
+        box.style.maxWidth   = "100%";
+        box.style.margin     = "0";
+      }
+    }
+  }
+  renderVips();
+
+  /* =========================================================
+     MÚSICA DE FUNDO
+     ========================================================= */
+  (function initMusic(){
+    var audio = document.getElementById("bg-music");
+    if(!audio) return;
+
+    audio.volume = 0.25;
+
+    function tryPlay(){
+      try {
+        var p = audio.play();
+        if(p && typeof p.catch === "function"){
+          p.catch(function(){});
+        }
+      } catch(e){}
+    }
+
+    var ua = navigator.userAgent || "";
+    if(ua.indexOf("GMod") !== -1){
+      tryPlay();
+    } else {
+      window.addEventListener("click", tryPlay, { once:true });
+      window.addEventListener("keydown", tryPlay, { once:true });
+    }
+  })();
+
+  /* =========================================================
+     PROGRESSO / STATUS
+     ========================================================= */
+  var currentProgress = 0;
+  var mountingAddons = false;
+
+  function setProgress(target){
+    if(target < 0) target = 0;
+    if(target > 100) target = 100;
+    if(target < currentProgress) target = currentProgress;
+    currentProgress = target;
+
+    document.getElementById("progress-bar").style.width = target + "%";
+    document.getElementById("progress-percent").textContent = Math.round(target) + "%";
+
+    if(target >= 99){
+      document.getElementById("server-sub").textContent = "Pronto para entrar!";
+    }
+  }
+
+  /* =========================================================
+     HOOKS DO GMOD
+     ========================================================= */
+  function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode){
+    document.getElementById("server-name").textContent =
+      servername || LOADING_CONFIG.fallbackServerName;
+
+    document.getElementById("server-sub").textContent =
+      LOADING_CONFIG.subtitleWhenIdle;
+
+    document.getElementById("info-map").textContent =
+      "mapa: " + (mapname || "–");
+
+    document.getElementById("info-gamemode").textContent =
+      "modo: " + (gamemode || "–");
+  }
+
+  function SetStatusChanged(status){
+    document.getElementById("status-text").textContent = status || "";
+
+    if(status && status.indexOf("/") !== -1){
+      var match = status.match(/(\d+)\s*\/\s*(\d+)/);
+      if(match){
+        var cur = parseInt(match[1],10) || 0;
+        var tot = parseInt(match[2],10) || 1;
+        var base = mountingAddons ? 40 : 10;
+        var pct = base + (cur/tot)*60;
+        setProgress(pct);
+      }
+    }
+
+    if(status === "Mounting Addons" || status === "Workshop Complete"){
+      mountingAddons = true;
+      setProgress(80);
+    }
+    if(status === "Client info sent!" || status === "Client info sent"){
+      setProgress(92);
+    }
+    if(status === "Starting Lua..."){
+      setProgress(100);
+    }
+  }
+
+  function DownloadingFile(fileName){
+    document.getElementById("file-text").textContent =
+      fileName ? "Baixando: " + fileName : "";
+  }
+
+  window.GameDetails = GameDetails;
+  window.SetStatusChanged = SetStatusChanged;
+  window.DownloadingFile = DownloadingFile;
+
+  /* =========================================================
+     AUTO SCALE
+     ========================================================= */
+  (function autoScale(){
+    function apply(){
+      var w = window.innerWidth;
+      var h = window.innerHeight;
+      var scaleW = w / 1920;
+      var scaleH = h / 1080;
+      var s = Math.min(scaleW, scaleH);
+      s = Math.max(0.7, Math.min(1.18, s));
+      document.documentElement.style.setProperty("--ui-scale", s.toFixed(3));
+    }
+    apply();
+    window.addEventListener("resize", apply);
+  })();
+
+  /* =========================================================
+     PREVIEW FORA DO GMOD
+     ========================================================= */
+  (function preview(){
+    var ua = navigator.userAgent || "";
+    if(ua.indexOf("GMod") !== -1) return;
+
+    GameDetails(
+      LOADING_CONFIG.fallbackServerName,
+      "", "ttt_minecraft_b5", 24, "", "Trouble in Terrorist Town"
+    );
+
+    var steps = [
+      "Conectando ao servidor...",
+      "Autenticando...",
+      "3/20","7/20","14/20","20/20",
+      "Workshop Complete",
+      "Client info sent!",
+      "Starting Lua..."
+    ];
+
+    var i=0;
+    function tick(){
+      if(i>=steps.length) return;
+      SetStatusChanged(steps[i++]);
+      setTimeout(tick, 900);
+    }
+    setTimeout(tick, 800);
+  })();
+
+  (function initBackgroundImg(){
+    var imgEl = document.getElementById("bg-img");
+    if(!imgEl) return;
+
+    var ABS_BG = "https://hanicbr.github.io/backtttloading/assets/bg.png";
+
+    var pre = new Image();
+    pre.onload = function(){
+      imgEl.src = ABS_BG;
+    };
+    pre.onerror = function(){};
+
+    pre.src = ABS_BG + (ABS_BG.indexOf("?") === -1 ? "?" : "&") + "v=" + Date.now();
+  })();
+  </script>
+  <script src="../loading-screen/original-dynamic-patch.js"></script>
+</body>
 </html>
