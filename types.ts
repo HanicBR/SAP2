@@ -457,6 +457,7 @@ export interface User {
   id: string;
   username: string;
   email: string;
+  emailVerifiedAt?: string;
   role: UserRole;
   mustChangePassword?: boolean;
   createdAt: string;
@@ -467,6 +468,13 @@ export interface User {
   steamPersonaName?: string;
   steamLinkedAt?: string;
   steamLastSyncAt?: string;
+}
+
+export interface AuthRegisterResponse {
+  user: User;
+  token?: string | null;
+  requiresEmailVerification?: boolean;
+  verificationEmailSent?: boolean;
 }
 
 export interface PlayerAliasHistoryItem {

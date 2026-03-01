@@ -8,6 +8,8 @@ import { authMiddleware, requireRole } from '../middleware/auth';
 import { UserRole } from '../domain';
 import { TransactionType, TransactionCategory } from '@prisma/client';
 import { dispatchVipAutomationAction } from '../services/vipAutomation';
+import { sendTransactionalEmail } from '../services/email';
+import { buildVipPurchaseReceiptTemplate } from '../services/emailTemplates';
 
 const router = Router();
 const proofUploadDir =
@@ -261,6 +263,63 @@ router.post('/', async (req, res) => {
         reason: 'dispatch_error',
       };
     }
+  }
+
+  // Email notifications are best-effort and must never break transaction creation.
+  const emailJobs: Promise<any>[] = [];
+
+  if (creator.email) {
+    emailJobs.push(
+      sendTransactionalEmail({
+        to: creator.email,
+        subject: `Transacao registrada [${tx.type}] - ${tx.id}`,
+        text: [
+          `Uma transacao foi registrada no painel Backstabber Brasil.`,
+          `ID: ${tx.id}`,
+          `Tipo: ${tx.type}`,
+          `Categoria: ${tx.category}`,
+          `Valor: R$ ${Number(tx.amount).toFixed(2)}`,
+          `Descricao: ${tx.description}`,
+          `Data: ${tx.date.toISOString()}`,
+          relatedSteamId ? `SteamID relacionado: ${relatedSteamId}` : 'SteamID relacionado: -',
+          relatedPlayerName ? `Jogador relacionado: ${relatedPlayerName}` : 'Jogador relacionado: -',
+        ].join('\n'),
+      }),
+    );
+  }
+
+  if (type === 'INCOME' && relatedSteamId && vipPlan) {
+    const linkedUser = await prisma.user.findFirst({
+      where: {
+        steamId64: relatedSteamId,
+      },
+      select: {
+        email: true,
+        username: true,
+      },
+    });
+
+    if (linkedUser?.email) {
+      const receipt = buildVipPurchaseReceiptTemplate({
+        username: linkedUser.username,
+        plan: String(vipPlan),
+        ...(vipDurationDays ? { durationDays: Number(vipDurationDays) } : {}),
+        amount: Number(tx.amount),
+        transactionDateIso: tx.date.toISOString(),
+      });
+      emailJobs.push(
+        sendTransactionalEmail({
+          to: linkedUser.email,
+          subject: receipt.subject,
+          text: receipt.text,
+          html: receipt.html,
+        }),
+      );
+    }
+  }
+
+  if (emailJobs.length > 0) {
+    Promise.allSettled(emailJobs).catch(() => undefined);
   }
 
   return res.status(201).json({

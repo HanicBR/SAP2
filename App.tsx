@@ -11,6 +11,8 @@ import Login from './pages/Login';
 
 const Vip = lazy(() => import('./pages/Vip'));
 const Register = lazy(() => import('./pages/Register'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
 const TutorialTtt = lazy(() => import('./pages/help/TutorialTtt'));
 const TutorialMurder = lazy(() => import('./pages/help/TutorialMurder'));
 
@@ -140,6 +142,8 @@ const App: React.FC = () => {
           <Route path="/tutorial/murder" element={<PublicLayout><TutorialMurder /></PublicLayout>} />
 
           <Route path="/register" element={<Register />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/admin/login" element={<Login />} />
 
           <Route path="/admin/dashboard" element={<RoleRoute page="dashboard"><Dashboard /></RoleRoute>} />

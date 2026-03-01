@@ -10,6 +10,7 @@ const Register: React.FC = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -25,14 +26,26 @@ const Register: React.FC = () => {
     }
 
     setError('');
+    setSuccess('');
     setLoading(true);
 
     try {
-      await ApiService.register(username, email, password);
-      // Auto login or redirect to login
+      const result = await ApiService.register(username, email, password);
+
+      if (result.requiresEmailVerification) {
+        setSuccess(
+          result.verificationEmailSent
+            ? 'Conta criada. Enviamos um e-mail de confirmacao para voce ativar o acesso.'
+            : 'Conta criada. O e-mail de confirmacao nao foi enviado, tente reenviar na tela de login.',
+        );
+        setPassword('');
+        setConfirmPassword('');
+        return;
+      }
+
       navigate('/admin/login');
-    } catch (err) {
-      setError('Erro ao criar conta. Tente novamente.');
+    } catch (err: any) {
+      setError(err?.message || 'Erro ao criar conta. Tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -56,6 +69,11 @@ const Register: React.FC = () => {
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleRegister}>
+          {success && (
+            <div className="bg-emerald-900/20 border border-emerald-900/50 text-emerald-400 text-sm p-3 rounded text-center">
+              {success}
+            </div>
+          )}
           {error && (
             <div className="bg-red-900/20 border border-red-900/50 text-red-500 text-sm p-3 rounded text-center">
               {error}

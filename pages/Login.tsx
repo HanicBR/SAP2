@@ -15,6 +15,8 @@ const Login: React.FC = () => {
   const [currentPassword, setCurrentPassword] = useState('');
   const [changingPassword, setChangingPassword] = useState(false);
   const [pendingUser, setPendingUser] = useState<User | null>(null);
+  const [notice, setNotice] = useState('');
+  const [resendingVerification, setResendingVerification] = useState(false);
   const navigate = useNavigate();
 
   // Se já estiver logado e exigir troca de senha, abre modal ao carregar a página
@@ -37,6 +39,7 @@ const Login: React.FC = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setNotice('');
     setLoading(true);
 
     try {
@@ -60,12 +63,14 @@ const Login: React.FC = () => {
         } else {
             setError('Credenciais inválidas.');
         }
-    } catch (err) {
-        setError('Erro ao conectar ao servidor.');
+    } catch (err: any) {
+        setError(err?.message || 'Erro ao conectar ao servidor.');
     } finally {
         setLoading(false);
     }
   };
+
+  const canResendVerification = error.toLowerCase().includes('email not verified');
 
   return (
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-4 sm:px-6 lg:px-8 relative overflow-hidden">
@@ -85,6 +90,11 @@ const Login: React.FC = () => {
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleLogin}>
+          {notice && (
+            <div className="bg-emerald-900/20 border border-emerald-900/50 text-emerald-400 text-sm p-3 rounded text-center">
+              {notice}
+            </div>
+          )}
           {error && (
             <div className="bg-red-900/20 border border-red-900/50 text-red-500 text-sm p-3 rounded text-center">
               {error}
@@ -113,6 +123,33 @@ const Login: React.FC = () => {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
+          </div>
+
+          <div className="flex items-center justify-between text-xs">
+            <Link to="/reset-password" className="text-cyan-500 hover:text-cyan-400 font-bold uppercase tracking-wide">
+              Esqueci minha senha
+            </Link>
+            {canResendVerification && (
+              <button
+                type="button"
+                disabled={resendingVerification || !emailOrUser.trim()}
+                onClick={async () => {
+                  setResendingVerification(true);
+                  setNotice('');
+                  try {
+                    await ApiService.resendVerificationEmail(emailOrUser.trim());
+                    setNotice('Se a conta existir e estiver pendente, enviamos um novo e-mail de confirmacao.');
+                  } catch (err: any) {
+                    setError(err?.message || 'Nao foi possivel reenviar o e-mail de confirmacao.');
+                  } finally {
+                    setResendingVerification(false);
+                  }
+                }}
+                className="text-zinc-400 hover:text-zinc-200 font-bold uppercase tracking-wide disabled:opacity-50"
+              >
+                {resendingVerification ? 'Reenviando...' : 'Reenviar confirmacao'}
+              </button>
+            )}
           </div>
 
           <div>

@@ -1,7 +1,7 @@
 
 
 import { MOCK_SERVERS, MOCK_EVENTS, MOCK_STATS, VIP_PLANS, MOCK_SUSPICIOUS_GROUPS, MOCK_PLAYERS, MOCK_USERS, MOCK_TRANSACTIONS, generateServerAnalytics, DEFAULT_SITE_CONFIG } from '../constants';
-import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionProofUploadResult, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel, ServerLiveStateResponse, ServerWsLiveStateListResponse, PlayerAliasHistoryResponse, PlayerAvatarHistoryResponse, LoadingScreenProfile, LoadingScreensResponse, LoadingMediaUploadResult, LoadingTelemetryRange, LoadingTelemetrySlugsResponse, LoadingTelemetrySummaryResponse } from '../types';
+import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionProofUploadResult, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel, ServerLiveStateResponse, ServerWsLiveStateListResponse, PlayerAliasHistoryResponse, PlayerAvatarHistoryResponse, LoadingScreenProfile, LoadingScreensResponse, LoadingMediaUploadResult, LoadingTelemetryRange, LoadingTelemetrySlugsResponse, LoadingTelemetrySummaryResponse, AuthRegisterResponse } from '../types';
 
 // Utility to simulate network delay (used as fallback)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -405,18 +405,25 @@ export const ApiService = {
     return result.user;
   },
 
-  register: async (username: string, email: string, password: string): Promise<User> => {
+  register: async (username: string, email: string, password: string): Promise<AuthRegisterResponse> => {
     if (!hasApi) {
       throw new Error('API base URL not configured');
     }
 
-    const result = await apiFetch<{ user: User; token: string }>('/auth/register', {
+    const result = await apiFetch<AuthRegisterResponse>('/auth/register', {
       method: 'POST',
       body: JSON.stringify({ username, email, password }),
     });
-    localStorage.setItem('backstabber_token', result.token);
-    localStorage.setItem('backstabber_user', JSON.stringify(result.user));
-    return result.user;
+
+    if (result.token) {
+      localStorage.setItem('backstabber_token', result.token);
+      localStorage.setItem('backstabber_user', JSON.stringify(result.user));
+    } else {
+      localStorage.removeItem('backstabber_token');
+      localStorage.removeItem('backstabber_user');
+    }
+
+    return result;
   },
 
   getCurrentUser: async (): Promise<User> => {
@@ -538,6 +545,38 @@ export const ApiService = {
       body: JSON.stringify({ currentPassword, newPassword }),
     });
     return result.user;
+  },
+
+  resendVerificationEmail: async (emailOrUser: string): Promise<void> => {
+    if (!hasApi) throw new Error('API base URL not configured');
+    await apiFetch<{ ok: boolean }>('/auth/resend-verification', {
+      method: 'POST',
+      body: JSON.stringify({ emailOrUser }),
+    });
+  },
+
+  verifyEmailToken: async (token: string): Promise<{ ok: boolean; user?: User }> => {
+    if (!hasApi) throw new Error('API base URL not configured');
+    return apiFetch<{ ok: boolean; user?: User }>('/auth/verify-email', {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    });
+  },
+
+  requestPasswordReset: async (emailOrUser: string): Promise<void> => {
+    if (!hasApi) throw new Error('API base URL not configured');
+    await apiFetch<{ ok: boolean }>('/auth/request-password-reset', {
+      method: 'POST',
+      body: JSON.stringify({ emailOrUser }),
+    });
+  },
+
+  resetPasswordWithToken: async (token: string, newPassword: string): Promise<void> => {
+    if (!hasApi) throw new Error('API base URL not configured');
+    await apiFetch<{ ok: boolean }>('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ token, newPassword }),
+    });
   },
 
   // --- SITE CONFIGURATION ---

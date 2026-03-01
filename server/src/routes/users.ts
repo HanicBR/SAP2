@@ -50,13 +50,16 @@ router.post('/', requireRole(UserRole.SUPERADMIN), async (req, res) => {
     return res.status(400).json({ error: 'Missing fields' });
   }
 
+  const parsedUsername = String(username).trim();
+  const parsedEmail = String(email).trim().toLowerCase();
+
   if (!Object.values(UserRole).includes(role)) {
     return res.status(400).json({ error: 'Invalid role' });
   }
 
   const existing = await prisma.user.findFirst({
     where: {
-      OR: [{ email }, { username }],
+      OR: [{ email: parsedEmail }, { username: parsedUsername }],
     },
   });
   if (existing) {
@@ -65,16 +68,17 @@ router.post('/', requireRole(UserRole.SUPERADMIN), async (req, res) => {
 
   const passwordHash = bcrypt.hashSync(password, 10);
   const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(
-    username,
+    parsedUsername,
   )}`;
 
   const created = await prisma.user.create({
     data: {
-      username,
-      email,
+      username: parsedUsername,
+      email: parsedEmail,
       role,
       avatarUrl,
       passwordHash,
+      emailVerifiedAt: new Date(),
       mustChangePassword: true,
     },
   });

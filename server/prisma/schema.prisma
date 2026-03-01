@@ -46,10 +46,16 @@ enum LoadingTelemetryEventType {
   SESSION_END
 }
 
+enum UserEmailTokenType {
+  EMAIL_VERIFY
+  PASSWORD_RESET
+}
+
 model User {
   id           String   @id @default(cuid())
   username     String   @unique
   email        String   @unique
+  emailVerifiedAt DateTime?
   passwordHash String
   role         UserRole
   avatarUrl    String?
@@ -63,6 +69,23 @@ model User {
   createdAt    DateTime @default(now())
 
   transactions Transaction[]
+  emailTokens  UserEmailToken[]
+}
+
+model UserEmailToken {
+  id        String            @id @default(cuid())
+  userId    String
+  type      UserEmailTokenType
+  tokenHash String            @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  metadata  Json?
+  createdAt DateTime          @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type, createdAt])
+  @@index([type, expiresAt])
 }
 
 model SiteConfig {
