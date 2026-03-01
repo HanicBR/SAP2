@@ -1,7 +1,7 @@
 
 
 import { MOCK_SERVERS, MOCK_EVENTS, MOCK_STATS, VIP_PLANS, MOCK_SUSPICIOUS_GROUPS, MOCK_PLAYERS, MOCK_USERS, MOCK_TRANSACTIONS, generateServerAnalytics, DEFAULT_SITE_CONFIG } from '../constants';
-import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionProofUploadResult, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel, ServerLiveStateResponse, ServerWsLiveStateListResponse, PlayerAliasHistoryResponse, LoadingScreenProfile, LoadingScreensResponse, LoadingMediaUploadResult } from '../types';
+import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionProofUploadResult, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel, ServerLiveStateResponse, ServerWsLiveStateListResponse, PlayerAliasHistoryResponse, LoadingScreenProfile, LoadingScreensResponse, LoadingMediaUploadResult, LoadingTelemetryRange, LoadingTelemetrySlugsResponse, LoadingTelemetrySummaryResponse } from '../types';
 
 // Utility to simulate network delay (used as fallback)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -757,6 +757,142 @@ export const ApiService = {
     return {
       updatedAt: new Date().toISOString(),
       profiles: [...loadingScreensDb],
+    };
+  },
+
+  getLoadingTelemetrySlugs: async (
+    range: LoadingTelemetryRange,
+  ): Promise<LoadingTelemetrySlugsResponse> => {
+    const safeRange: LoadingTelemetryRange =
+      range === '24h' || range === '30d' ? range : '7d';
+
+    if (hasApi) {
+      try {
+        return await apiFetch<LoadingTelemetrySlugsResponse>(
+          `/loading-telemetry/admin/slugs?range=${encodeURIComponent(safeRange)}`,
+        );
+      } catch (error) {
+        console.error('API getLoadingTelemetrySlugs failed, falling back to local mock:', error);
+      }
+    }
+
+    await delay(80);
+    const now = new Date();
+    const windowMs =
+      safeRange === '24h'
+        ? 24 * 60 * 60 * 1000
+        : safeRange === '30d'
+        ? 30 * 24 * 60 * 60 * 1000
+        : 7 * 24 * 60 * 60 * 1000;
+    const from = new Date(now.getTime() - windowMs);
+
+    return {
+      range: safeRange,
+      window: {
+        from: from.toISOString(),
+        to: now.toISOString(),
+      },
+      totalSessionsScanned: 0,
+      truncated: false,
+      items: loadingScreensDb.map((entry) => ({
+        slug: entry.slug,
+        sessions: 0,
+        completed: 0,
+        abandoned: 0,
+        completionRatePct: 0,
+        lastStartedAt: null,
+      })),
+    };
+  },
+
+  getLoadingTelemetrySummary: async (params: {
+    range: LoadingTelemetryRange;
+    slug?: string;
+  }): Promise<LoadingTelemetrySummaryResponse> => {
+    const safeRange: LoadingTelemetryRange =
+      params.range === '24h' || params.range === '30d' ? params.range : '7d';
+    const safeSlug = String(params.slug || '')
+      .trim()
+      .toLowerCase();
+
+    if (hasApi) {
+      try {
+        const search = new URLSearchParams();
+        search.set('range', safeRange);
+        if (safeSlug) search.set('slug', safeSlug);
+        return await apiFetch<LoadingTelemetrySummaryResponse>(
+          `/loading-telemetry/admin/summary?${search.toString()}`,
+        );
+      } catch (error) {
+        console.error('API getLoadingTelemetrySummary failed, falling back to local mock:', error);
+      }
+    }
+
+    await delay(120);
+    const now = new Date();
+    const windowMs =
+      safeRange === '24h'
+        ? 24 * 60 * 60 * 1000
+        : safeRange === '30d'
+        ? 30 * 24 * 60 * 60 * 1000
+        : 7 * 24 * 60 * 60 * 1000;
+    const from = new Date(now.getTime() - windowMs);
+    const bucketCount = safeRange === '24h' ? 24 : safeRange === '30d' ? 30 : 7;
+    const timeline = Array.from({ length: bucketCount }).map((_, idx) => {
+      const startMs = from.getTime() + Math.floor((windowMs / bucketCount) * idx);
+      const endMs =
+        idx === bucketCount - 1
+          ? now.getTime()
+          : from.getTime() + Math.floor((windowMs / bucketCount) * (idx + 1));
+      return {
+        from: new Date(startMs).toISOString(),
+        to: new Date(endMs).toISOString(),
+        label:
+          safeRange === '24h'
+            ? new Date(startMs).toISOString().slice(11, 16)
+            : new Date(startMs).toISOString().slice(5, 10),
+        sessions: 0,
+        completed: 0,
+        abandoned: 0,
+        avgDurationMs: 0,
+        p95DurationMs: 0,
+      };
+    });
+
+    return {
+      generatedAt: now.toISOString(),
+      range: safeRange,
+      window: {
+        from: from.toISOString(),
+        to: now.toISOString(),
+      },
+      slug: safeSlug || null,
+      limits: {
+        maxSessions: 0,
+        maxEvents: 0,
+        maxTrackedFiles: 0,
+        maxStepDurationMs: 0,
+      },
+      totals: {
+        sessions: 0,
+        completed: 0,
+        abandoned: 0,
+        completionRatePct: 0,
+        eventsAnalyzed: 0,
+        sessionsWithDuration: 0,
+        avgDurationMs: 0,
+        p50DurationMs: 0,
+        p95DurationMs: 0,
+      },
+      statusBreakdown: [],
+      stageDurations: [],
+      slowFiles: [],
+      sources: [],
+      timeline,
+      truncated: {
+        sessions: false,
+        events: false,
+      },
     };
   },
 

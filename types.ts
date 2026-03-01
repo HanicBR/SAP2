@@ -809,3 +809,101 @@ export interface LoadingMediaUploadResult {
   size: number;
   mime: string;
 }
+
+export type LoadingTelemetryRange = '24h' | '7d' | '30d';
+
+export interface LoadingTelemetrySlugItem {
+  slug: string;
+  sessions: number;
+  completed: number;
+  abandoned: number;
+  completionRatePct: number;
+  lastStartedAt: string | null;
+}
+
+export interface LoadingTelemetrySlugsResponse {
+  range: LoadingTelemetryRange;
+  window: {
+    from: string;
+    to: string;
+  };
+  totalSessionsScanned: number;
+  truncated: boolean;
+  items: LoadingTelemetrySlugItem[];
+}
+
+export interface LoadingTelemetrySummaryTotals {
+  sessions: number;
+  completed: number;
+  abandoned: number;
+  completionRatePct: number;
+  eventsAnalyzed: number;
+  sessionsWithDuration: number;
+  avgDurationMs: number;
+  p50DurationMs: number;
+  p95DurationMs: number;
+}
+
+export interface LoadingTelemetryStatusItem {
+  status: string;
+  count: number;
+}
+
+export interface LoadingTelemetryStageDurationItem {
+  stage: string;
+  count: number;
+  avgMs: number;
+  p50Ms: number;
+  p95Ms: number;
+  maxMs: number;
+}
+
+export interface LoadingTelemetrySlowFileItem {
+  fileName: string;
+  occurrences: number;
+  avgMs: number;
+  p95Ms: number;
+  maxMs: number;
+}
+
+export interface LoadingTelemetrySourceItem {
+  source: string;
+  count: number;
+}
+
+export interface LoadingTelemetryTimelineItem {
+  from: string;
+  to: string;
+  label: string;
+  sessions: number;
+  completed: number;
+  abandoned: number;
+  avgDurationMs: number;
+  p95DurationMs: number;
+}
+
+export interface LoadingTelemetrySummaryResponse {
+  generatedAt: string;
+  range: LoadingTelemetryRange;
+  window: {
+    from: string;
+    to: string;
+  };
+  slug: string | null;
+  limits: {
+    maxSessions: number;
+    maxEvents: number;
+    maxTrackedFiles: number;
+    maxStepDurationMs: number;
+  };
+  totals: LoadingTelemetrySummaryTotals;
+  statusBreakdown: LoadingTelemetryStatusItem[];
+  stageDurations: LoadingTelemetryStageDurationItem[];
+  slowFiles: LoadingTelemetrySlowFileItem[];
+  sources: LoadingTelemetrySourceItem[];
+  timeline: LoadingTelemetryTimelineItem[];
+  truncated: {
+    sessions: boolean;
+    events: boolean;
+  };
+}

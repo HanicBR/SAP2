@@ -1,7 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Icons } from '../../components/Icon';
 import { ApiService } from '../../services/api';
-import { LoadingScreenMode, LoadingScreenProfile, LoadingScreenVipEntry } from '../../types';
+import {
+  LoadingScreenMode,
+  LoadingScreenProfile,
+  LoadingScreenVipEntry,
+  LoadingTelemetryRange,
+  LoadingTelemetrySlugsResponse,
+  LoadingTelemetrySummaryResponse,
+} from '../../types';
 
 type NoticeTone = 'success' | 'error' | 'info';
 
@@ -109,6 +116,30 @@ const buildPublicUrl = (slug: string): string => {
   return `${origin}/loading/?screen=${encodeURIComponent(safeSlug)}`;
 };
 
+const formatNumber = (value: number): string => Number(value || 0).toLocaleString('pt-BR');
+
+const formatPercent = (value: number): string => `${Number(value || 0).toFixed(1)}%`;
+
+const formatDuration = (valueMs: number): string => {
+  const safe = Math.max(0, Math.round(Number(valueMs || 0)));
+  if (!safe) return '0s';
+  const totalSeconds = Math.round(safe / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  if (minutes > 0) return `${minutes}m ${seconds}s`;
+  return `${seconds}s`;
+};
+
+const formatDateTime = (iso: string | null | undefined): string => {
+  const raw = String(iso || '').trim();
+  if (!raw) return '-';
+  const parsed = new Date(raw);
+  if (!Number.isFinite(parsed.getTime())) return '-';
+  return parsed.toLocaleString('pt-BR');
+};
+
 const LoadingScreens: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -128,7 +159,14 @@ const LoadingScreens: React.FC = () => {
   const [activeEditorTab, setActiveEditorTab] = useState<'identity' | 'content' | 'media' | 'vip'>(
     'identity',
   );
+  const [activeMainTab, setActiveMainTab] = useState<'editor' | 'telemetry'>('editor');
   const [mediaUploading, setMediaUploading] = useState<null | 'background' | 'music'>(null);
+  const [telemetryRange, setTelemetryRange] = useState<LoadingTelemetryRange>('7d');
+  const [telemetrySlug, setTelemetrySlug] = useState<string>('all');
+  const [telemetryLoading, setTelemetryLoading] = useState(false);
+  const [telemetryError, setTelemetryError] = useState<string | null>(null);
+  const [telemetrySlugs, setTelemetrySlugs] = useState<LoadingTelemetrySlugsResponse | null>(null);
+  const [telemetrySummary, setTelemetrySummary] = useState<LoadingTelemetrySummaryResponse | null>(null);
 
   const hydrateDraftInputs = (profile: LoadingScreenProfile) => {
     setBgInput(toLineInput(profile.backgroundImages));
@@ -176,6 +214,67 @@ const LoadingScreens: React.FC = () => {
   useEffect(() => {
     void loadProfiles();
   }, []);
+
+  const telemetrySlugOptions = useMemo(() => {
+    const source = new Map<
+      string,
+      {
+        slug: string;
+        sessions: number;
+      }
+    >();
+
+    profiles.forEach((profile) => {
+      source.set(profile.slug, {
+        slug: profile.slug,
+        sessions: 0,
+      });
+    });
+
+    (telemetrySlugs?.items || []).forEach((item) => {
+      source.set(item.slug, {
+        slug: item.slug,
+        sessions: item.sessions,
+      });
+    });
+
+    return [...source.values()].sort((a, b) => {
+      if (b.sessions !== a.sessions) return b.sessions - a.sessions;
+      return a.slug.localeCompare(b.slug, 'pt-BR', { sensitivity: 'base' });
+    });
+  }, [profiles, telemetrySlugs]);
+
+  const loadTelemetry = async (
+    nextRange: LoadingTelemetryRange = telemetryRange,
+    nextSlug: string = telemetrySlug,
+  ) => {
+    setTelemetryLoading(true);
+    setTelemetryError(null);
+    try {
+      const [slugResponse, summaryResponse] = await Promise.all([
+        ApiService.getLoadingTelemetrySlugs(nextRange),
+        ApiService.getLoadingTelemetrySummary({
+          range: nextRange,
+          ...(nextSlug && nextSlug !== 'all' ? { slug: nextSlug } : {}),
+        }),
+      ]);
+      setTelemetrySlugs(slugResponse);
+      setTelemetrySummary(summaryResponse);
+    } catch (error: any) {
+      setTelemetryError(
+        error?.message
+          ? String(error.message)
+          : 'Falha ao carregar telemetria das loading screens.',
+      );
+    } finally {
+      setTelemetryLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeMainTab !== 'telemetry') return;
+    void loadTelemetry();
+  }, [activeMainTab, telemetryRange, telemetrySlug]);
 
   const draftSignature = useMemo(() => JSON.stringify(draft), [draft]);
   const hasChanges = Boolean(draft) && draftSignature !== savedSignature;
@@ -243,6 +342,9 @@ const LoadingScreens: React.FC = () => {
     const profile = profiles.find((entry) => entry.slug === slug);
     if (!profile) return;
     applyDraft(profile, false);
+    if (activeMainTab === 'telemetry') {
+      setTelemetrySlug(slug);
+    }
     setNotice(null);
   };
 
@@ -635,6 +737,40 @@ const LoadingScreens: React.FC = () => {
 
         <section className="space-y-4">
           <div className="rounded-xl border border-zinc-800 bg-zinc-900/85 p-3">
+            <div className="grid gap-2 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => setActiveMainTab('editor')}
+                className={`flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-bold uppercase tracking-wide transition ${
+                  activeMainTab === 'editor'
+                    ? 'border-red-700 bg-red-900/30 text-red-200'
+                    : 'border-zinc-700 bg-zinc-950 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200'
+                }`}
+              >
+                <Icons.Settings className="mr-2 h-4 w-4" />
+                Editor
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveMainTab('telemetry');
+                  setTelemetrySlug((prev) => (prev === 'all' ? draft.slug : prev));
+                }}
+                className={`flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-bold uppercase tracking-wide transition ${
+                  activeMainTab === 'telemetry'
+                    ? 'border-cyan-700 bg-cyan-900/30 text-cyan-200'
+                    : 'border-zinc-700 bg-zinc-950 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200'
+                }`}
+              >
+                <Icons.BarChart className="mr-2 h-4 w-4" />
+                Telemetria
+              </button>
+            </div>
+          </div>
+
+          {activeMainTab === 'editor' ? (
+            <>
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/85 p-3">
             <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
               <button
                 type="button"
@@ -1025,9 +1161,237 @@ const LoadingScreens: React.FC = () => {
             </div>
             </div>
           ) : null}
+            </>
+          ) : (
+            <div className="space-y-4">
+              <div className={`${CARD_CLASS} border-cyan-900/25 bg-zinc-900/90`}>
+                <div className="grid gap-3 xl:grid-cols-[1fr_auto_auto] xl:items-end">
+                  <div>
+                    <label className={LABEL_CLASS}>Loading screen</label>
+                    <select
+                      value={telemetrySlug}
+                      onChange={(event) => setTelemetrySlug(event.target.value)}
+                      className={INPUT_CLASS}
+                    >
+                      <option value="all">Todos os loadings</option>
+                      {telemetrySlugOptions.map((entry) => (
+                        <option key={entry.slug} value={entry.slug}>
+                          {entry.slug}
+                          {entry.sessions > 0 ? ` (${entry.sessions})` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={LABEL_CLASS}>Periodo</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {(['24h', '7d', '30d'] as LoadingTelemetryRange[]).map((range) => (
+                        <button
+                          key={range}
+                          type="button"
+                          onClick={() => setTelemetryRange(range)}
+                          className={`rounded border px-3 py-2 text-xs font-bold uppercase ${
+                            telemetryRange === range
+                              ? 'border-cyan-700 bg-cyan-900/30 text-cyan-200'
+                              : 'border-zinc-700 bg-zinc-950 text-zinc-300'
+                          }`}
+                        >
+                          {range}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => void loadTelemetry()}
+                    disabled={telemetryLoading}
+                    className="h-10 rounded border border-zinc-700 bg-zinc-950 px-4 text-xs font-bold uppercase text-zinc-200 disabled:opacity-50"
+                  >
+                    {telemetryLoading ? 'Atualizando...' : 'Atualizar'}
+                  </button>
+                </div>
+                <p className="mt-2 text-xs text-zinc-400">
+                  Janela: {formatDateTime(telemetrySummary?.window.from || telemetrySlugs?.window.from)} ate{' '}
+                  {formatDateTime(telemetrySummary?.window.to || telemetrySlugs?.window.to)}
+                </p>
+              </div>
+
+              {telemetryError ? (
+                <div className="rounded border border-red-900/40 bg-red-900/10 px-3 py-2 text-sm text-red-300">
+                  {telemetryError}
+                </div>
+              ) : null}
+
+              {!telemetrySummary ? (
+                <div className={`${CARD_CLASS} text-sm text-zinc-400`}>
+                  {telemetryLoading ? 'Carregando telemetria...' : 'Sem dados de telemetria para exibir.'}
+                </div>
+              ) : (
+                <>
+                  {(telemetrySummary.truncated.sessions || telemetrySummary.truncated.events) && (
+                    <div className="rounded border border-amber-900/40 bg-amber-900/10 px-3 py-2 text-xs text-amber-300">
+                      Resultado parcial: limite de analise atingido (sessions/events). Ajuste filtros para maior precisao.
+                    </div>
+                  )}
+
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                    <div className={`${CARD_CLASS} border-zinc-700/70`}>
+                      <div className="text-[11px] font-bold uppercase tracking-wide text-zinc-500">Sessoes</div>
+                      <div className="mt-1 text-2xl font-black text-white">{formatNumber(telemetrySummary.totals.sessions)}</div>
+                      <div className="mt-1 text-xs text-zinc-500">Eventos: {formatNumber(telemetrySummary.totals.eventsAnalyzed)}</div>
+                    </div>
+                    <div className={`${CARD_CLASS} border-emerald-900/40 bg-emerald-900/10`}>
+                      <div className="text-[11px] font-bold uppercase tracking-wide text-emerald-300">Conclusao</div>
+                      <div className="mt-1 text-2xl font-black text-emerald-200">
+                        {formatPercent(telemetrySummary.totals.completionRatePct)}
+                      </div>
+                      <div className="mt-1 text-xs text-emerald-300/80">
+                        {formatNumber(telemetrySummary.totals.completed)} completas /{' '}
+                        {formatNumber(telemetrySummary.totals.abandoned)} abandonadas
+                      </div>
+                    </div>
+                    <div className={`${CARD_CLASS} border-cyan-900/40 bg-cyan-900/10`}>
+                      <div className="text-[11px] font-bold uppercase tracking-wide text-cyan-300">Duracao media</div>
+                      <div className="mt-1 text-2xl font-black text-cyan-200">
+                        {formatDuration(telemetrySummary.totals.avgDurationMs)}
+                      </div>
+                      <div className="mt-1 text-xs text-cyan-300/80">
+                        p50 {formatDuration(telemetrySummary.totals.p50DurationMs)} / p95{' '}
+                        {formatDuration(telemetrySummary.totals.p95DurationMs)}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 xl:grid-cols-2">
+                    <div className={`${CARD_CLASS} border-indigo-900/30 bg-zinc-900/90`}>
+                      <h3 className="text-sm font-black uppercase tracking-wide text-white">Etapas mais lentas</h3>
+                      {telemetrySummary.stageDurations.length === 0 ? (
+                        <p className="mt-3 text-xs text-zinc-500">Sem etapas suficientes no periodo.</p>
+                      ) : (
+                        <div className="mt-3 space-y-2">
+                          {telemetrySummary.stageDurations.slice(0, 10).map((item) => (
+                            <div
+                              key={item.stage}
+                              className="rounded border border-zinc-800 bg-zinc-950/80 px-3 py-2"
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="truncate text-xs font-bold text-zinc-200">{item.stage}</span>
+                                <span className="text-[10px] text-zinc-500">{formatNumber(item.count)}x</span>
+                              </div>
+                              <div className="mt-1 text-[11px] text-zinc-400">
+                                media {formatDuration(item.avgMs)} | p95 {formatDuration(item.p95Ms)} | max{' '}
+                                {formatDuration(item.maxMs)}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className={`${CARD_CLASS} border-amber-900/30 bg-zinc-900/90`}>
+                      <h3 className="text-sm font-black uppercase tracking-wide text-white">Arquivos mais lentos</h3>
+                      {telemetrySummary.slowFiles.length === 0 ? (
+                        <p className="mt-3 text-xs text-zinc-500">Sem arquivos registrados no periodo.</p>
+                      ) : (
+                        <div className="mt-3 space-y-2">
+                          {telemetrySummary.slowFiles.slice(0, 10).map((item) => (
+                            <div
+                              key={item.fileName}
+                              className="rounded border border-zinc-800 bg-zinc-950/80 px-3 py-2"
+                            >
+                              <div className="truncate text-xs font-bold text-zinc-200">{item.fileName}</div>
+                              <div className="mt-1 text-[11px] text-zinc-400">
+                                {formatNumber(item.occurrences)}x | media {formatDuration(item.avgMs)} | p95{' '}
+                                {formatDuration(item.p95Ms)}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 xl:grid-cols-2">
+                    <div className={`${CARD_CLASS} border-zinc-800 bg-zinc-900/90`}>
+                      <h3 className="text-sm font-black uppercase tracking-wide text-white">Status mais comuns</h3>
+                      {telemetrySummary.statusBreakdown.length === 0 ? (
+                        <p className="mt-3 text-xs text-zinc-500">Sem status no periodo.</p>
+                      ) : (
+                        <div className="mt-3 space-y-2">
+                          {telemetrySummary.statusBreakdown.slice(0, 12).map((item) => (
+                            <div key={item.status} className="flex items-center justify-between text-xs">
+                              <span className="truncate text-zinc-300">{item.status}</span>
+                              <span className="ml-2 rounded border border-zinc-700 px-2 py-0.5 text-zinc-400">
+                                {formatNumber(item.count)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className={`${CARD_CLASS} border-zinc-800 bg-zinc-900/90`}>
+                      <h3 className="text-sm font-black uppercase tracking-wide text-white">Origem da telemetria</h3>
+                      {telemetrySummary.sources.length === 0 ? (
+                        <p className="mt-3 text-xs text-zinc-500">Sem origem registrada.</p>
+                      ) : (
+                        <div className="mt-3 space-y-2">
+                          {telemetrySummary.sources.map((item) => (
+                            <div key={item.source} className="flex items-center justify-between text-xs">
+                              <span className="truncate font-mono text-zinc-300">{item.source}</span>
+                              <span className="ml-2 rounded border border-zinc-700 px-2 py-0.5 text-zinc-400">
+                                {formatNumber(item.count)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className={`${CARD_CLASS} border-zinc-800 bg-zinc-900/90`}>
+                    <h3 className="text-sm font-black uppercase tracking-wide text-white">Timeline</h3>
+                    {telemetrySummary.timeline.length === 0 ? (
+                      <p className="mt-3 text-xs text-zinc-500">Sem buckets para o periodo selecionado.</p>
+                    ) : (
+                      <div className="mt-3 overflow-x-auto">
+                        <table className="min-w-full text-left text-xs">
+                          <thead>
+                            <tr className="border-b border-zinc-800 text-zinc-500">
+                              <th className="px-2 py-2 font-bold uppercase">Bucket</th>
+                              <th className="px-2 py-2 font-bold uppercase">Sessoes</th>
+                              <th className="px-2 py-2 font-bold uppercase">Conclusao</th>
+                              <th className="px-2 py-2 font-bold uppercase">p95</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {telemetrySummary.timeline.map((item) => (
+                              <tr key={`${item.from}-${item.label}`} className="border-b border-zinc-900">
+                                <td className="px-2 py-2 text-zinc-300">{item.label}</td>
+                                <td className="px-2 py-2 text-zinc-300">{formatNumber(item.sessions)}</td>
+                                <td className="px-2 py-2 text-zinc-300">
+                                  {item.sessions > 0
+                                    ? formatPercent((item.completed / item.sessions) * 100)
+                                    : '0.0%'}
+                                </td>
+                                <td className="px-2 py-2 text-zinc-300">
+                                  {formatDuration(item.p95DurationMs)}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </section>
       </div>
 
+      {activeMainTab === 'editor' ? (
       <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-zinc-800 bg-zinc-950/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-end gap-2 px-4 py-3">
           <button
@@ -1056,6 +1420,7 @@ const LoadingScreens: React.FC = () => {
           </button>
         </div>
       </div>
+      ) : null}
     </div>
   );
 };
