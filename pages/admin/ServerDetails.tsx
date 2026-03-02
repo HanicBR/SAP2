@@ -6,6 +6,8 @@ import {
   ServerAnalytics,
   ServerLiveStateResponse,
   ServerStatus,
+  ServerViewerActionStatusResponse,
+  ServerViewerActionType,
   ServerViewerStatePlayer,
   ServerViewerStateSnapshot,
 } from '../../types';
@@ -28,6 +30,9 @@ const LIVE_STATE_MAX_AGE_SECONDS = 30;
 const VIEWER_STATE_STALE_SECONDS = 8;
 const VIEWER_RECONNECT_BASE_MS = 1000;
 const VIEWER_RECONNECT_MAX_MS = 15000;
+const VIEWER_ACTION_STATUS_POLL_INTERVAL_MS = 1200;
+const VIEWER_ACTION_STATUS_MAX_POLLS = 18;
+const VIEWER_ACTION_REASON_MAX_LENGTH = 160;
 
 type ViewerWsStatus = 'idle' | 'connecting' | 'connected' | 'subscribed' | 'error';
 
@@ -194,6 +199,23 @@ const formatCoord = (value: number | undefined): string => {
   });
 };
 
+const viewerActionStatusLabel = (status: string): string => {
+  const normalized = String(status || '').trim().toUpperCase();
+  if (normalized === 'ACK_OK') return 'Confirmada (ACK)';
+  if (normalized === 'ACK_FAILED') return 'Falhou no servidor';
+  if (normalized === 'HTTP_PULLED') return 'Fallback HTTP';
+  if (normalized === 'QUEUED') return 'Na fila';
+  return normalized || 'Desconhecido';
+};
+
+const viewerActionStatusClass = (status: string): string => {
+  const normalized = String(status || '').trim().toUpperCase();
+  if (normalized === 'ACK_OK') return 'bg-emerald-900/20 text-emerald-300 border-emerald-700';
+  if (normalized === 'ACK_FAILED') return 'bg-red-900/20 text-red-300 border-red-700';
+  if (normalized === 'HTTP_PULLED') return 'bg-yellow-900/20 text-yellow-300 border-yellow-700';
+  return 'bg-zinc-800 text-zinc-300 border-zinc-700';
+};
+
 const toViewerWsUrl = (): string | null => {
   if (typeof window === 'undefined') return null;
   const token = localStorage.getItem('backstabber_token');
@@ -280,6 +302,11 @@ const ServerDetails: React.FC = () => {
   const [viewerZoomPct, setViewerZoomPct] = useState<number>(100);
   const [viewerSelectedSteamId, setViewerSelectedSteamId] = useState<string | null>(null);
   const [viewerReconnectNonce, setViewerReconnectNonce] = useState<number>(0);
+  const [viewerActionReason, setViewerActionReason] = useState<string>('Acao via painel WebViewer');
+  const [viewerActionBusy, setViewerActionBusy] = useState(false);
+  const [viewerActionError, setViewerActionError] = useState<string | null>(null);
+  const [viewerActionStatus, setViewerActionStatus] = useState<ServerViewerActionStatusResponse | null>(null);
+  const viewerActionPollTokenRef = useRef<number>(0);
 
   const loadData = useCallback(
     async (silent = false) => {
@@ -549,6 +576,10 @@ const ServerDetails: React.FC = () => {
     [viewerPlayers, viewerSelectedSteamId],
   );
 
+  useEffect(() => {
+    setViewerActionError(null);
+  }, [viewerSelectedSteamId]);
+
   const viewerMapPoints = useMemo(() => {
     if (!viewerPlayers.length) return [];
 
@@ -597,6 +628,79 @@ const ServerDetails: React.FC = () => {
     }
     return { label: 'Live frame', className: 'bg-emerald-900/20 text-emerald-300 border-emerald-700' };
   }, [hasFreshViewerSnapshot, viewerState, viewerWsStatus]);
+
+  useEffect(() => {
+    return () => {
+      viewerActionPollTokenRef.current += 1;
+    };
+  }, []);
+
+  const pollViewerActionStatus = useCallback(
+    async (actionId: string, pollToken: number) => {
+      if (!serverId) return;
+
+      for (let attempt = 0; attempt < VIEWER_ACTION_STATUS_MAX_POLLS; attempt += 1) {
+        const status = await ApiService.getServerViewerActionStatus(serverId, actionId);
+        if (viewerActionPollTokenRef.current !== pollToken) return;
+        setViewerActionStatus(status);
+        if (status.status !== 'QUEUED') return;
+        await new Promise<void>((resolve) => {
+          window.setTimeout(resolve, VIEWER_ACTION_STATUS_POLL_INTERVAL_MS);
+        });
+      }
+    },
+    [serverId],
+  );
+
+  const dispatchViewerAction = useCallback(
+    async (action: ServerViewerActionType) => {
+      if (!serverId || !selectedViewerPlayer || viewerActionBusy) return;
+
+      setViewerActionBusy(true);
+      setViewerActionError(null);
+
+      try {
+        const parsedReason = String(viewerActionReason || '')
+          .replace(/[\r\n\t]+/g, ' ')
+          .trim()
+          .slice(0, VIEWER_ACTION_REASON_MAX_LENGTH);
+        const response = await ApiService.dispatchServerViewerAction(serverId, {
+          action,
+          steamId: selectedViewerPlayer.steamId,
+          ...(parsedReason ? { reason: parsedReason } : {}),
+        });
+
+        setViewerActionStatus({
+          ok: true,
+          actionId: response.actionId,
+          serverId: response.serverId,
+          command: '',
+          status: response.status,
+          createdAt: response.requestedAt,
+          updatedAt: response.requestedAt,
+          wsAttemptCount: 0,
+          metadata: { targetSteamId: selectedViewerPlayer.steamId },
+        });
+
+        const pollToken = Date.now();
+        viewerActionPollTokenRef.current = pollToken;
+        await pollViewerActionStatus(response.actionId, pollToken);
+      } catch (err: any) {
+        setViewerActionError(String(err?.message || 'Falha ao disparar acao do WebViewer.'));
+      } finally {
+        setViewerActionBusy(false);
+      }
+    },
+    [pollViewerActionStatus, selectedViewerPlayer, serverId, viewerActionBusy, viewerActionReason],
+  );
+
+  const viewerActionForSelected = useMemo(() => {
+    if (!viewerActionStatus || !selectedViewerPlayer) return null;
+    const metadata = viewerActionStatus.metadata as { targetSteamId?: string } | undefined;
+    const targetSteamId = String(metadata?.targetSteamId || '').trim();
+    if (targetSteamId && targetSteamId !== selectedViewerPlayer.steamId) return null;
+    return viewerActionStatus;
+  }, [selectedViewerPlayer, viewerActionStatus]);
 
   if (loading) return <div className="p-8 text-zinc-500">Carregando detalhes do servidor...</div>;
   if (!server || !analytics) return <div className="p-8 text-zinc-500">Servidor não encontrado.</div>;
@@ -803,8 +907,95 @@ const ServerDetails: React.FC = () => {
                 ))}
               </div>
               {selectedViewerPlayer && (
-                <div className="mt-3 text-[11px] text-zinc-500 border-t border-zinc-800 pt-2">
-                  Foco: {selectedViewerPlayer.name || selectedViewerPlayer.steamId}
+                <div className="mt-3 border-t border-zinc-800 pt-3 space-y-3">
+                  <div className="text-[11px] text-zinc-500">
+                    Foco: {selectedViewerPlayer.name || selectedViewerPlayer.steamId}
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] text-zinc-500 uppercase font-bold">
+                      Motivo da acao
+                    </label>
+                    <input
+                      type="text"
+                      value={viewerActionReason}
+                      maxLength={VIEWER_ACTION_REASON_MAX_LENGTH}
+                      onChange={(event) => setViewerActionReason(event.target.value)}
+                      placeholder="Acao via painel WebViewer"
+                      className="mt-1 w-full rounded border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-xs text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-700"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => dispatchViewerAction('KICK')}
+                      disabled={viewerActionBusy}
+                      className="px-2 py-1.5 rounded border border-red-800 bg-red-900/20 text-red-300 text-xs font-bold uppercase disabled:opacity-50"
+                    >
+                      Kick
+                    </button>
+                    <button
+                      onClick={() => dispatchViewerAction('MUTE_10M')}
+                      disabled={viewerActionBusy}
+                      className="px-2 py-1.5 rounded border border-yellow-800 bg-yellow-900/20 text-yellow-300 text-xs font-bold uppercase disabled:opacity-50"
+                    >
+                      Mute 10m
+                    </button>
+                    <button
+                      onClick={() => dispatchViewerAction('GAG_10M')}
+                      disabled={viewerActionBusy}
+                      className="px-2 py-1.5 rounded border border-orange-800 bg-orange-900/20 text-orange-300 text-xs font-bold uppercase disabled:opacity-50"
+                    >
+                      Gag 10m
+                    </button>
+                    <button
+                      onClick={() => dispatchViewerAction('UNMUTE')}
+                      disabled={viewerActionBusy}
+                      className="px-2 py-1.5 rounded border border-emerald-800 bg-emerald-900/20 text-emerald-300 text-xs font-bold uppercase disabled:opacity-50"
+                    >
+                      Unmute
+                    </button>
+                    <button
+                      onClick={() => dispatchViewerAction('UNGAG')}
+                      disabled={viewerActionBusy}
+                      className="col-span-2 px-2 py-1.5 rounded border border-emerald-800 bg-emerald-900/20 text-emerald-300 text-xs font-bold uppercase disabled:opacity-50"
+                    >
+                      Ungag
+                    </button>
+                  </div>
+
+                  {viewerActionError && (
+                    <div className="rounded border border-red-900/50 bg-red-900/10 px-2 py-1.5 text-[11px] text-red-300">
+                      {viewerActionError}
+                    </div>
+                  )}
+
+                  {viewerActionForSelected && (
+                    <div className="rounded border border-zinc-700 bg-zinc-900/60 px-2 py-2 text-[11px] space-y-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-zinc-400 uppercase font-bold">Status da acao</span>
+                        <span
+                          className={`px-1.5 py-0.5 rounded border uppercase font-bold ${viewerActionStatusClass(
+                            viewerActionForSelected.status,
+                          )}`}
+                        >
+                          {viewerActionStatusLabel(viewerActionForSelected.status)}
+                        </span>
+                      </div>
+                      <div className="text-zinc-500 font-mono truncate">
+                        actionId: {viewerActionForSelected.actionId}
+                      </div>
+                      <div className="text-zinc-500">
+                        Tentativas WS: {viewerActionForSelected.wsAttemptCount}
+                        {viewerActionForSelected.wsLastAckAt
+                          ? ` | ack ${new Date(viewerActionForSelected.wsLastAckAt).toLocaleTimeString('pt-BR')}`
+                          : ''}
+                      </div>
+                      {viewerActionForSelected.error && (
+                        <div className="text-red-300">{viewerActionForSelected.error}</div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
               <div className="mt-2 text-[11px] text-zinc-600">

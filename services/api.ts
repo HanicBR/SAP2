@@ -1,7 +1,7 @@
 
 
 import { MOCK_SERVERS, MOCK_EVENTS, MOCK_STATS, VIP_PLANS, MOCK_SUSPICIOUS_GROUPS, MOCK_PLAYERS, MOCK_USERS, MOCK_TRANSACTIONS, generateServerAnalytics, DEFAULT_SITE_CONFIG } from '../constants';
-import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionProofUploadResult, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel, ServerLiveStateResponse, ServerWsLiveStateListResponse, PlayerAliasHistoryResponse, PlayerAvatarHistoryResponse, LoadingScreenProfile, LoadingScreensResponse, LoadingMediaUploadResult, LoadingTelemetryRange, LoadingTelemetrySlugsResponse, LoadingTelemetrySummaryResponse, AuthRegisterResponse } from '../types';
+import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionProofUploadResult, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel, ServerLiveStateResponse, ServerViewerActionDispatchResponse, ServerViewerActionRequest, ServerViewerActionStatusResponse, ServerWsLiveStateListResponse, PlayerAliasHistoryResponse, PlayerAvatarHistoryResponse, LoadingScreenProfile, LoadingScreensResponse, LoadingMediaUploadResult, LoadingTelemetryRange, LoadingTelemetrySlugsResponse, LoadingTelemetrySummaryResponse, AuthRegisterResponse } from '../types';
 
 // Utility to simulate network delay (used as fallback)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -341,6 +341,51 @@ export const ApiService = {
         ...(mockServer?.currentMap ? { currentMap: mockServer.currentMap } : {}),
         ...(mockServer?.lastHeartbeat ? { lastHeartbeat: mockServer.lastHeartbeat } : {}),
       },
+    };
+  },
+
+  dispatchServerViewerAction: async (
+    serverId: string,
+    payload: ServerViewerActionRequest,
+  ): Promise<ServerViewerActionDispatchResponse> => {
+    if (hasApi) {
+      return apiFetch<ServerViewerActionDispatchResponse>(`/servers/${serverId}/viewer-actions`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    }
+
+    await delay(120);
+    return {
+      ok: true,
+      serverId,
+      actionId: `mock_action_${Date.now()}`,
+      status: 'QUEUED',
+      requestedAt: new Date().toISOString(),
+    };
+  },
+
+  getServerViewerActionStatus: async (
+    serverId: string,
+    actionId: string,
+  ): Promise<ServerViewerActionStatusResponse> => {
+    if (hasApi) {
+      return apiFetch<ServerViewerActionStatusResponse>(`/servers/${serverId}/viewer-actions/${actionId}`);
+    }
+
+    await delay(120);
+    const now = new Date().toISOString();
+    return {
+      ok: true,
+      serverId,
+      actionId,
+      command: 'sam kick "STEAM_0:1:123456" "Mock action"',
+      status: 'ACK_OK',
+      createdAt: now,
+      updatedAt: now,
+      wsAttemptCount: 1,
+      wsLastSentAt: now,
+      wsLastAckAt: now,
     };
   },
 

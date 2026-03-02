@@ -64,6 +64,38 @@ export interface ServerViewerStateSnapshot {
   players: ServerViewerStatePlayer[];
 }
 
+export type ServerViewerActionType = 'KICK' | 'MUTE_10M' | 'GAG_10M' | 'UNMUTE' | 'UNGAG';
+export type ServerActionDispatchStatus = 'QUEUED' | 'ACK_OK' | 'ACK_FAILED' | 'HTTP_PULLED';
+
+export interface ServerViewerActionRequest {
+  action: ServerViewerActionType;
+  steamId: string;
+  reason?: string;
+}
+
+export interface ServerViewerActionDispatchResponse {
+  ok: boolean;
+  serverId: string;
+  actionId: string;
+  status: ServerActionDispatchStatus;
+  requestedAt: string;
+}
+
+export interface ServerViewerActionStatusResponse {
+  ok: boolean;
+  actionId: string;
+  serverId: string;
+  command: string;
+  status: ServerActionDispatchStatus;
+  createdAt: string;
+  updatedAt: string;
+  wsAttemptCount: number;
+  wsLastSentAt?: string;
+  wsLastAckAt?: string;
+  error?: string;
+  metadata?: Record<string, unknown>;
+}
+
 export interface ServerWsLiveStateItem {
   serverId: string;
   transport: 'websocket';

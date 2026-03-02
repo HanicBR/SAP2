@@ -3,7 +3,11 @@ import { prisma } from '../db/client';
 import { GameMode, ServerStatus, UserRole } from '../domain';
 import { authMiddleware, requireRole } from '../middleware/auth';
 import { hashApiKey } from '../utils/apiKey';
-import { drainServerActions } from '../services/serverActions';
+import {
+  drainServerActions,
+  enqueueServerAction,
+  getServerActionOutcome,
+} from '../services/serverActions';
 import { getVipAutomationMetrics, previewVipAutomationBuild, VipAutomationActionType } from '../services/vipAutomation';
 import { normalizeIp } from '../utils/normalizeIp';
 import { findServerByApiKey } from '../services/serverAuth';
@@ -114,6 +118,46 @@ const parseMode = (value: unknown): 'TTT' | 'SANDBOX' | 'MURDER' | undefined => 
   if (raw === 'MURDER') return 'MURDER';
   if (raw === 'TTT') return 'TTT';
   return undefined;
+};
+
+type ViewerActionType = 'KICK' | 'MUTE_10M' | 'GAG_10M' | 'UNMUTE' | 'UNGAG';
+
+const VIEWER_ACTIONS = new Set<ViewerActionType>([
+  'KICK',
+  'MUTE_10M',
+  'GAG_10M',
+  'UNMUTE',
+  'UNGAG',
+]);
+
+const quoteConsoleArg = (value: string) => {
+  const raw = String(value || '');
+  return `"${raw.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+};
+
+const sanitizeViewerActionReason = (value: unknown): string => {
+  const compact = String(value ?? '')
+    .replace(/[\r\n\t]+/g, ' ')
+    .trim();
+  if (!compact) return 'Acao via painel WebViewer';
+  if (compact.length <= 160) return compact;
+  return compact.slice(0, 160);
+};
+
+const buildViewerActionCommand = (
+  action: ViewerActionType,
+  steamId: string,
+  reason: string,
+): string | null => {
+  const sid = quoteConsoleArg(steamId);
+  const parsedReason = quoteConsoleArg(reason);
+
+  if (action === 'KICK') return `sam kick ${sid} ${parsedReason}`;
+  if (action === 'MUTE_10M') return `sam mute ${sid} 10 ${parsedReason}`;
+  if (action === 'GAG_10M') return `sam gag ${sid} 10 ${parsedReason}`;
+  if (action === 'UNMUTE') return `sam unmute ${sid}`;
+  if (action === 'UNGAG') return `sam ungag ${sid}`;
+  return null;
 };
 
 const parsePort = (value: unknown): number | undefined => {
@@ -361,6 +405,111 @@ router.post('/actions/vip/preview', authMiddleware, requireRole(UserRole.ADMIN),
 // VIP automation metrics (build failures)
 router.get('/actions/vip/metrics', authMiddleware, requireRole(UserRole.ADMIN), async (_req, res) => {
   return res.json(getVipAutomationMetrics());
+});
+
+// WebViewer player actions (PR-04): secure command dispatch via queue + audit log
+router.post('/:id/viewer-actions', authMiddleware, requireRole(UserRole.ADMIN), async (req, res) => {
+  const { id } = req.params as { id: string };
+  const { steamId, action, reason } = (req as any).body || {};
+
+  const parsedSteamId = String(steamId || '').trim();
+  if (!isTrackableSteamId(parsedSteamId)) {
+    return res.status(400).json({ error: 'Invalid steamId' });
+  }
+
+  const parsedAction = String(action || '')
+    .trim()
+    .toUpperCase() as ViewerActionType;
+  if (!VIEWER_ACTIONS.has(parsedAction)) {
+    return res.status(400).json({ error: 'Invalid viewer action' });
+  }
+
+  const server = await prisma.gameServer.findUnique({
+    where: { id },
+    select: { id: true, mode: true, name: true },
+  });
+  if (!server) {
+    return res.status(404).json({ error: 'Server not found' });
+  }
+
+  const parsedReason = sanitizeViewerActionReason(reason);
+  const command = buildViewerActionCommand(parsedAction, parsedSteamId, parsedReason);
+  if (!command) {
+    return res.status(400).json({ error: 'Unable to build viewer command' });
+  }
+
+  const requestedByUsername = String(req.user?.username || 'Console').trim() || 'Console';
+  const requestedByUserId = String(req.user?.id || '').trim() || undefined;
+
+  const queued = enqueueServerAction(server.id, command, {
+    source: 'admin_panel',
+    sourceTag: 'VIEWER_ACTION',
+    action: parsedAction,
+    targetSteamId: parsedSteamId,
+    reason: parsedReason,
+    requestedByUserId,
+    requestedByUsername,
+    serverName: server.name,
+  });
+
+  if (!queued) {
+    return res.status(500).json({ error: 'Failed to queue viewer action' });
+  }
+
+  try {
+    await prisma.log.create({
+      data: {
+        serverId: server.id,
+        gameMode: server.mode as any,
+        type: 'PUNISH',
+        timestamp: new Date(),
+        playerName: requestedByUsername,
+        rawText: `${requestedByUsername} solicitou ${parsedAction} para ${parsedSteamId} via WebViewer`,
+        metadata: {
+          source: 'admin_panel',
+          sourceTag: 'VIEWER_ACTION',
+          action: parsedAction,
+          targetSteamId: parsedSteamId,
+          reason: parsedReason,
+          command,
+          actionId: queued.id,
+        } as any,
+      } as any,
+    });
+  } catch {
+    // best effort audit log
+  }
+
+  return res.status(202).json({
+    ok: true,
+    serverId: server.id,
+    actionId: queued.id,
+    status: 'QUEUED',
+    requestedAt: new Date().toISOString(),
+  });
+});
+
+// WebViewer action status by actionId (PR-04): poll until ACK/HTTP fallback outcome
+router.get('/:id/viewer-actions/:actionId', authMiddleware, requireRole(UserRole.ADMIN), async (req, res) => {
+  const { id, actionId } = req.params as { id: string; actionId: string };
+
+  const server = await prisma.gameServer.findUnique({
+    where: { id },
+    select: { id: true },
+  });
+  if (!server) {
+    return res.status(404).json({ error: 'Server not found' });
+  }
+
+  const outcome = getServerActionOutcome(id, actionId);
+  if (!outcome) {
+    return res.status(404).json({ error: 'Action not found' });
+  }
+
+  return res.json({
+    ok: true,
+    ...outcome,
+  });
 });
 
 // WebSocket server connectivity health (PR-01 transport bootstrap)
