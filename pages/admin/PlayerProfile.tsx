@@ -345,7 +345,11 @@ const PlayerProfile: React.FC = () => {
     setPlayer(updatedPlayer);
   };
 
-  const openApplyPunishmentModal = () => {
+  const openApplyPunishmentModal = (event?: React.MouseEvent<HTMLButtonElement>) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
     setPunishmentType('BAN');
     setPunishmentReason('');
     setPunishmentDuration('');
@@ -385,9 +389,11 @@ const PlayerProfile: React.FC = () => {
       await reloadPunishments(1);
       setPunishmentsPage(1);
       setShowPunishmentForm(false);
+      alert('Punicao aplicada com sucesso.');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Erro desconhecido';
       setPunishmentFormError(`Nao foi possivel aplicar a punicao: ${message}`);
+      alert(`Erro ao aplicar punicao: ${message}`);
     } finally {
       setPunishmentSubmitting(false);
     }
@@ -666,7 +672,7 @@ const PlayerProfile: React.FC = () => {
                   >
                      Copiar SteamID
                   </button>
-                  <button onClick={openApplyPunishmentModal} className="px-4 py-2 bg-red-900/20 hover:bg-red-900/40 text-red-500 rounded text-sm font-bold uppercase transition-colors border border-red-900/50 flex items-center">
+                  <button type="button" onClick={openApplyPunishmentModal} className="px-4 py-2 bg-red-900/20 hover:bg-red-900/40 text-red-500 rounded text-sm font-bold uppercase transition-colors border border-red-900/50 flex items-center">
                      <Icons.Gavel className="w-4 h-4 mr-2" />
                      Aplicar Punição
                   </button>
