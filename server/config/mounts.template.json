@@ -1,0 +1,21 @@
+{
+  "mounts": {
+    "gmod": [
+      "C:/Program Files (x86)/Steam/steamapps/common/GarrysMod/garrysmod",
+      "/home/steam/.local/share/Steam/steamapps/common/GarrysMod/garrysmod"
+    ],
+    "hl2": [
+      "C:/Program Files (x86)/Steam/steamapps/common/Half-Life 2/hl2",
+      "/home/steam/.local/share/Steam/steamapps/common/Half-Life 2/hl2"
+    ],
+    "css": [
+      "C:/Program Files (x86)/Steam/steamapps/common/Counter-Strike Source/cstrike",
+      "/home/steam/.local/share/Steam/steamapps/common/Counter-Strike Source/cstrike"
+    ],
+    "tf2": [
+      "C:/Program Files (x86)/Steam/steamapps/common/Team Fortress 2/tf",
+      "/home/steam/.local/share/Steam/steamapps/common/Team Fortress 2/tf"
+    ],
+    "custom": []
+  }
+}

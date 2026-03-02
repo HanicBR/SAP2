@@ -11,7 +11,9 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "backfill:player-ip-history": "ts-node src/scripts/backfillPlayerIpHistory.ts",
-    "audit:playtime-pulse": "ts-node src/scripts/auditPlaytimePulse.ts"
+    "audit:playtime-pulse": "ts-node src/scripts/auditPlaytimePulse.ts",
+    "audit:map-assets": "ts-node src/scripts/auditMapAssets.ts",
+    "audit:map-assets:evocity": "ts-node src/scripts/auditMapAssets.ts --map-bsp=../sandbox/rp_evocity_v33x_original/rp_evocity_v33x_original/maps/rp_evocity_v33x.bsp --map-root=../sandbox/rp_evocity_v33x_original/rp_evocity_v33x_original/maps --mounts=./config/mounts.json --report=../reports/audit-report.json"
   },
   "keywords": [],
   "author": "",
