@@ -30,34 +30,55 @@
     "totalTris": 4,
     "totalVerts": 8,
     "totalBytes": 288,
-    "drawCallsBeforeInstancing": 1,
+    "drawCallsBeforeInstancing": 2,
     "drawCallsAfterInstancing": 1
   },
   "world": {
-    "faces": [
+    "meshes": [
       {
-        "position": [
-          -512,
-          -8838,
-          764
-        ],
         "material": "tools/toolsskybox",
         "placeholderMaterial": true,
-        "vertexCount": 4,
-        "triCount": 2,
-        "byteEstimate": 144
-      },
-      {
-        "position": [
-          -1392,
+        "faceCount": 2,
+        "triCount": 4,
+        "vertexCount": 12,
+        "positions": [
+          -1024,
           -8838,
-          764
-        ],
-        "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
-        "vertexCount": 4,
-        "triCount": 2,
-        "byteEstimate": 144
+          856,
+          -1024,
+          -8838,
+          672,
+          0,
+          -8838,
+          672,
+          -1024,
+          -8838,
+          856,
+          0,
+          -8838,
+          672,
+          0,
+          -8838,
+          856,
+          -1024,
+          -8838,
+          672,
+          -1024,
+          -8838,
+          856,
+          -1760,
+          -8838,
+          856,
+          -1024,
+          -8838,
+          672,
+          -1760,
+          -8838,
+          856,
+          -1760,
+          -8838,
+          672
+        ]
       }
     ]
   },

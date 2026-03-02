@@ -109,6 +109,12 @@ Comportamento atual:
 - Descarte por distancia com `gracePeriodMs`.
 - Materiais/modelos faltantes usam placeholder.
 
+## PR-06 Geometria real por chunk
+
+- O pipeline agora exporta `world.meshes` triangulado por material em cada chunk.
+- O viewer passou de `Points` para `Mesh` no mundo (ainda com material placeholder, sem textura Source/PBR).
+- Resultado esperado: forma do mapa reconhecivel (ruas/prédios/terreno), mesmo sem fidelidade visual final.
+
 ## Mounts (template)
 
 Copie template:

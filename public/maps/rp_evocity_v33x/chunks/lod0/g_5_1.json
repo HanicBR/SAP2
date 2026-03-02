@@ -34,30 +34,60 @@
     "drawCallsAfterInstancing": 3
   },
   "world": {
-    "faces": [
+    "meshes": [
       {
-        "position": [
-          -3866,
-          -10733,
-          231
-        ],
         "material": "maps/rp_evocity_v33x/highrise/se1_garage_concretewall_08_-5124_-9585_138",
         "placeholderMaterial": false,
-        "vertexCount": 4,
+        "faceCount": 1,
         "triCount": 2,
-        "byteEstimate": 144
+        "vertexCount": 6,
+        "positions": [
+          -3636,
+          -10733,
+          199,
+          -3636,
+          -10733,
+          263,
+          -4096,
+          -10733,
+          263,
+          -3636,
+          -10733,
+          199,
+          -4096,
+          -10733,
+          263,
+          -4096,
+          -10733,
+          199
+        ]
       },
       {
-        "position": [
-          -3866,
-          -10733,
-          135
-        ],
         "material": "maps/rp_evocity_v33x/highrise/se1_garage_concretewall_07_-5124_-9585_138",
         "placeholderMaterial": false,
-        "vertexCount": 4,
+        "faceCount": 1,
         "triCount": 2,
-        "byteEstimate": 144
+        "vertexCount": 6,
+        "positions": [
+          -4096,
+          -10733,
+          71,
+          -3636,
+          -10733,
+          71,
+          -3636,
+          -10733,
+          199,
+          -4096,
+          -10733,
+          71,
+          -3636,
+          -10733,
+          199,
+          -4096,
+          -10733,
+          199
+        ]
       }
     ]
   },

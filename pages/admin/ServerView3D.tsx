@@ -68,6 +68,14 @@ type ChunkPayload = {
     drawCallsAfterInstancing?: number;
   };
   world?: {
+    meshes?: Array<{
+      material: string;
+      placeholderMaterial: boolean;
+      faceCount?: number;
+      triCount?: number;
+      vertexCount?: number;
+      positions: number[];
+    }>;
     faces?: Array<{
       position: [number, number, number];
       material: string;
@@ -237,36 +245,72 @@ const ServerView3D: React.FC = () => {
         const group = new THREE.Group();
         group.name = `chunk_${entry.id}`;
 
-        const worldFaces = Array.isArray(payload.world?.faces) ? payload.world?.faces : [];
-        if (worldFaces.length > 0) {
-          const positionArray = new Float32Array(worldFaces.length * 3);
-          const colorArray = new Float32Array(worldFaces.length * 3);
-          for (let i = 0; i < worldFaces.length; i += 1) {
-            const face = worldFaces[i];
-            const point = sourceToThree(face.position[0], face.position[1], face.position[2]);
-            positionArray[i * 3 + 0] = point.x;
-            positionArray[i * 3 + 1] = point.y;
-            positionArray[i * 3 + 2] = point.z;
-            const color = face.placeholderMaterial ? new THREE.Color(0x6b7280) : hashColor(face.material || 'world-material');
-            colorArray[i * 3 + 0] = color.r;
-            colorArray[i * 3 + 1] = color.g;
-            colorArray[i * 3 + 2] = color.b;
-          }
+        const worldMeshes = Array.isArray(payload.world?.meshes) ? payload.world?.meshes : [];
+        if (worldMeshes.length > 0) {
+          for (const meshData of worldMeshes) {
+            const rawPositions = Array.isArray(meshData.positions) ? meshData.positions : [];
+            if (rawPositions.length < 9) continue;
+            const positionArray = new Float32Array(rawPositions.length);
+            for (let i = 0; i < rawPositions.length; i += 3) {
+              const x = Number(rawPositions[i] || 0);
+              const y = Number(rawPositions[i + 1] || 0);
+              const z = Number(rawPositions[i + 2] || 0);
+              // Source1 (x,y,z-up) -> Three.js (x,y-up,z)
+              positionArray[i + 0] = x;
+              positionArray[i + 1] = z;
+              positionArray[i + 2] = y;
+            }
 
-          const worldGeo = new THREE.BufferGeometry();
-          worldGeo.setAttribute('position', new THREE.BufferAttribute(positionArray, 3));
-          worldGeo.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
-          const worldMat = new THREE.PointsMaterial({
-            size: 14,
-            sizeAttenuation: true,
-            vertexColors: true,
-            opacity: 0.92,
-            transparent: true,
-            depthWrite: false,
-          });
-          const points = new THREE.Points(worldGeo, worldMat);
-          points.frustumCulled = true;
-          group.add(points);
+            const worldGeo = new THREE.BufferGeometry();
+            worldGeo.setAttribute('position', new THREE.BufferAttribute(positionArray, 3));
+            worldGeo.computeVertexNormals();
+            worldGeo.computeBoundingSphere();
+
+            const color = meshData.placeholderMaterial
+              ? new THREE.Color(0x6b7280)
+              : hashColor(meshData.material || 'world-material', 0.9);
+            const worldMat = new THREE.MeshStandardMaterial({
+              color,
+              metalness: 0.04,
+              roughness: 0.94,
+              side: THREE.DoubleSide,
+            });
+            const worldMesh = new THREE.Mesh(worldGeo, worldMat);
+            worldMesh.frustumCulled = true;
+            group.add(worldMesh);
+          }
+        } else {
+          const worldFaces = Array.isArray(payload.world?.faces) ? payload.world?.faces : [];
+          if (worldFaces.length > 0) {
+            const positionArray = new Float32Array(worldFaces.length * 3);
+            const colorArray = new Float32Array(worldFaces.length * 3);
+            for (let i = 0; i < worldFaces.length; i += 1) {
+              const face = worldFaces[i];
+              const point = sourceToThree(face.position[0], face.position[1], face.position[2]);
+              positionArray[i * 3 + 0] = point.x;
+              positionArray[i * 3 + 1] = point.y;
+              positionArray[i * 3 + 2] = point.z;
+              const color = face.placeholderMaterial ? new THREE.Color(0x6b7280) : hashColor(face.material || 'world-material');
+              colorArray[i * 3 + 0] = color.r;
+              colorArray[i * 3 + 1] = color.g;
+              colorArray[i * 3 + 2] = color.b;
+            }
+
+            const worldGeo = new THREE.BufferGeometry();
+            worldGeo.setAttribute('position', new THREE.BufferAttribute(positionArray, 3));
+            worldGeo.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
+            const worldMat = new THREE.PointsMaterial({
+              size: 14,
+              sizeAttenuation: true,
+              vertexColors: true,
+              opacity: 0.92,
+              transparent: true,
+              depthWrite: false,
+            });
+            const points = new THREE.Points(worldGeo, worldMat);
+            points.frustumCulled = true;
+            group.add(points);
+          }
         }
 
         const props = Array.isArray(payload.props?.instances) ? payload.props.instances : [];

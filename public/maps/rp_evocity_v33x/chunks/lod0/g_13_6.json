@@ -34,18 +34,33 @@
     "drawCallsAfterInstancing": 1
   },
   "world": {
-    "faces": [
+    "meshes": [
       {
-        "position": [
-          12432,
-          -622,
-          764
-        ],
         "material": "tools/toolsskybox",
         "placeholderMaterial": true,
-        "vertexCount": 4,
+        "faceCount": 1,
         "triCount": 2,
-        "byteEstimate": 144
+        "vertexCount": 6,
+        "positions": [
+          12288,
+          -622,
+          856,
+          12288,
+          -622,
+          672,
+          12576,
+          -622,
+          672,
+          12288,
+          -622,
+          856,
+          12576,
+          -622,
+          672,
+          12576,
+          -622,
+          856
+        ]
       }
     ]
   },

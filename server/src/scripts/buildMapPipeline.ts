@@ -44,6 +44,7 @@ type WorldFace = {
   vertexCount: number;
   triCount: number;
   byteEstimate: number;
+  vertices: Array<[number, number, number]>;
 };
 
 type PropInstance = {
@@ -369,25 +370,39 @@ const parseWorldFacesFallback = (buffer: Buffer, lumps: BspLump[]): {
       invalid += 1;
       continue;
     }
-    let sx = 0;
-    let sy = 0;
-    let sz = 0;
-    let points = 0;
+    const vertexIndexes: number[] = [];
     for (let e = 0; e < edges; e += 1) {
       const surfEdge = buffer.readInt32LE(surfEdgesLump.offset + (firstEdge + e) * 4);
       const edgeIndex = Math.abs(surfEdge);
       const vertexIndex = readEdgeVertex(edgeIndex, surfEdge < 0);
       if (vertexIndex < 0 || vertexIndex >= vertexCount) continue;
-      const vb = verticesLump.offset + vertexIndex * 12;
-      sx += buffer.readFloatLE(vb + 0);
-      sy += buffer.readFloatLE(vb + 4);
-      sz += buffer.readFloatLE(vb + 8);
-      points += 1;
+      const last = vertexIndexes[vertexIndexes.length - 1];
+      if (last === vertexIndex) continue;
+      vertexIndexes.push(vertexIndex);
     }
-    if (points <= 0) {
+    if (vertexIndexes.length >= 2 && vertexIndexes[0] === vertexIndexes[vertexIndexes.length - 1]) {
+      vertexIndexes.pop();
+    }
+    if (vertexIndexes.length < 3) {
       invalid += 1;
       continue;
     }
+    let sx = 0;
+    let sy = 0;
+    let sz = 0;
+    const vertices: Array<[number, number, number]> = [];
+    for (const vertexIndex of vertexIndexes) {
+      const vb = verticesLump.offset + vertexIndex * 12;
+      const vx = buffer.readFloatLE(vb + 0);
+      const vy = buffer.readFloatLE(vb + 4);
+      const vz = buffer.readFloatLE(vb + 8);
+      vertices.push([vx, vy, vz]);
+      sx += vx;
+      sy += vy;
+      sz += vz;
+    }
+    const points = vertices.length;
+    const triCount = Math.max(1, points - 2);
     faces.push({
       x: sx / points,
       y: sy / points,
@@ -395,8 +410,9 @@ const parseWorldFacesFallback = (buffer: Buffer, lumps: BspLump[]): {
       texInfoId,
       dispInfoId,
       vertexCount: points,
-      triCount: Math.max(1, points - 2),
-      byteEstimate: Math.max(24, Math.max(1, points - 2) * 3 * 24),
+      triCount,
+      byteEstimate: Math.max(24, triCount * 3 * 24),
+      vertices,
     });
   }
 
@@ -547,6 +563,7 @@ const runSourceIO = (options: Options): { data: ImportData | null; warnings: str
         vertexCount: Math.max(3, Number(item?.[5] || 3)),
         triCount: Math.max(1, Number(item?.[6] || 1)),
         byteEstimate: Math.max(24, Number(item?.[7] || 24)),
+        vertices: [],
       }))
       : [],
     staticProps: Array.isArray(payload.staticProps?.instances)
@@ -720,6 +737,7 @@ const run = () => {
   const bspBuffer = fs.readFileSync(options.mapBsp);
   const { lumps } = parseBspLumps(bspBuffer);
   const materialByTexInfo = buildMaterialByTexInfo(bspBuffer, lumps);
+  const bspWorld = parseWorldFacesFallback(bspBuffer, lumps);
 
   const missingModels = new Set<string>();
   const missingWorldMaterials = new Set<string>();
@@ -735,7 +753,7 @@ const run = () => {
     }
   }
 
-  const faces: FaceAnnotated[] = importData.worldFaces.map((face) => {
+  const faces: FaceAnnotated[] = bspWorld.faces.map((face) => {
     const material = face.texInfoId >= 0 && face.texInfoId < materialByTexInfo.length
       ? materialByTexInfo[face.texInfoId] || '__missing_material'
       : '__missing_material';
@@ -757,8 +775,8 @@ const run = () => {
     };
   });
 
-  const minX = importData.worldBounds.min[0];
-  const minY = importData.worldBounds.min[1];
+  const minX = bspWorld.bounds.min[0];
+  const minY = bspWorld.bounds.min[1];
   const chunkMap = new Map<string, Chunk>();
   const ensureChunk = (cx: number, cy: number): Chunk => {
     const key = `${cx}:${cy}`;
@@ -882,27 +900,49 @@ const run = () => {
   }> = [];
 
   for (const chunk of chunks) {
-    const worldItems = chunk.worldFaceIndexes.map((idx) => {
+    const worldMeshBuckets = new Map<string, {
+      material: string;
+      placeholderMaterial: boolean;
+      positions: number[];
+      triCount: number;
+      faceCount: number;
+    }>();
+    let placeholderWorldFaces = 0;
+    for (const idx of chunk.worldFaceIndexes) {
       const face = faces[idx];
-      if (!face) {
-        return {
-          position: [0, 0, 0] as [number, number, number],
-          material: '__missing_material',
-          placeholderMaterial: true,
-          vertexCount: 3,
-          triCount: 1,
-          byteEstimate: 24,
-        };
-      }
-      return {
-        position: [face.x, face.y, face.z],
+      if (!face || face.vertices.length < 3) continue;
+      if (face.placeholderMaterial) placeholderWorldFaces += 1;
+      const key = `${face.material}|${face.placeholderMaterial ? 'ph' : 'ok'}`;
+      const bucket = worldMeshBuckets.get(key) || {
         material: face.material,
         placeholderMaterial: face.placeholderMaterial,
-        vertexCount: Math.max(3, Number(face.vertexCount || 3)),
-        triCount: Math.max(1, Number(face.triCount || 1)),
-        byteEstimate: Math.max(24, Number(face.byteEstimate || 24)),
+        positions: [],
+        triCount: 0,
+        faceCount: 0,
       };
-    });
+      const v0 = face.vertices[0];
+      if (!v0) continue;
+      for (let i = 1; i < face.vertices.length - 1; i += 1) {
+        const v1 = face.vertices[i];
+        const v2 = face.vertices[i + 1];
+        if (!v1 || !v2) continue;
+        bucket.positions.push(v0[0], v0[1], v0[2], v1[0], v1[1], v1[2], v2[0], v2[1], v2[2]);
+        bucket.triCount += 1;
+      }
+      bucket.faceCount += 1;
+      worldMeshBuckets.set(key, bucket);
+    }
+    const worldMeshes = Array.from(worldMeshBuckets.values())
+      .filter((item) => item.positions.length >= 9)
+      .map((item) => ({
+        material: item.material,
+        placeholderMaterial: item.placeholderMaterial,
+        faceCount: item.faceCount,
+        triCount: item.triCount,
+        vertexCount: Math.floor(item.positions.length / 3),
+        positions: item.positions,
+      }));
+    const worldFacesCount = chunk.worldFaceIndexes.length;
     const propItems = chunk.propIndexes.map((idx) => {
       const prop = props[idx];
       if (!prop) {
@@ -925,17 +965,17 @@ const run = () => {
       };
     });
 
-    chunkedWorldFaces += worldItems.length;
+    chunkedWorldFaces += worldFacesCount;
     const worldStats = computeChunkWorldStats(chunk, faces);
     const propModelSet = new Set(propItems.map((item) => item.model));
-    const worldMaterialSet = new Set(worldItems.map((item) => item.material));
+    const worldMaterialSet = new Set(worldMeshes.map((item) => item.material));
     const propsTris = propItems.length * PROP_TRI_ESTIMATE;
     const propsVerts = propItems.length * PROP_VERT_ESTIMATE;
     const propsBytes = propItems.length * PROP_BYTE_ESTIMATE;
     const totalTris = worldStats.tris + propsTris;
     const totalVerts = worldStats.verts + propsVerts;
     const totalBytes = worldStats.bytes + propsBytes;
-    const drawCallsBeforeInstancing = worldMaterialSet.size + propItems.length;
+    const drawCallsBeforeInstancing = worldFacesCount + propItems.length;
     const drawCallsAfterInstancing = worldMaterialSet.size + propModelSet.size;
 
     const splitReason = Array.isArray(chunk.splitReason) ? chunk.splitReason.filter(Boolean) : [];
@@ -978,9 +1018,9 @@ const run = () => {
       splitReason,
       baseCell: { x: baseCellX, y: baseCellY },
       counts: {
-        worldFaces: worldItems.length,
+        worldFaces: worldFacesCount,
         staticProps: propItems.length,
-        placeholderWorldFaces: worldItems.filter((item) => item.placeholderMaterial).length,
+        placeholderWorldFaces,
         placeholderStaticProps: propItems.filter((item) => item.placeholderModel).length,
       },
       stats: {
@@ -996,7 +1036,7 @@ const run = () => {
         drawCallsBeforeInstancing,
         drawCallsAfterInstancing,
       },
-      world: { faces: worldItems },
+      world: { meshes: worldMeshes },
       props: { instances: propItems },
       budgets: {
         perChunkMaxTris: options.perChunkMaxTris,
@@ -1015,9 +1055,9 @@ const run = () => {
       splitReason,
       baseCell: { x: baseCellX, y: baseCellY },
       counts: {
-        worldFaces: worldItems.length,
+        worldFaces: worldFacesCount,
         staticProps: propItems.length,
-        placeholderWorldFaces: worldItems.filter((item) => item.placeholderMaterial).length,
+        placeholderWorldFaces,
         placeholderStaticProps: propItems.filter((item) => item.placeholderModel).length,
       },
       stats: {

@@ -30,58 +30,118 @@
     "totalTris": 9,
     "totalVerts": 17,
     "totalBytes": 648,
-    "drawCallsBeforeInstancing": 3,
+    "drawCallsBeforeInstancing": 4,
     "drawCallsAfterInstancing": 3
   },
   "world": {
-    "faces": [
+    "meshes": [
       {
-        "position": [
-          8336,
-          -8838,
-          764
-        ],
         "material": "tools/toolsskybox",
         "placeholderMaterial": true,
-        "vertexCount": 4,
+        "faceCount": 1,
         "triCount": 2,
-        "byteEstimate": 144
+        "vertexCount": 6,
+        "positions": [
+          8192,
+          -8838,
+          856,
+          8192,
+          -8838,
+          672,
+          8480,
+          -8838,
+          672,
+          8192,
+          -8838,
+          856,
+          8480,
+          -8838,
+          672,
+          8480,
+          -8838,
+          856
+        ]
       },
       {
-        "position": [
-          8262.4,
-          -8675.2,
-          184
-        ],
         "material": "metal/metalwall030a",
         "placeholderMaterial": true,
-        "vertexCount": 5,
+        "faceCount": 1,
         "triCount": 3,
-        "byteEstimate": 216
-      },
-      {
-        "position": [
-          8248,
-          -8672,
-          124
-        ],
-        "material": "concrete/concretewall022a",
-        "placeholderMaterial": true,
-        "vertexCount": 4,
-        "triCount": 2,
-        "byteEstimate": 144
-      },
-      {
-        "position": [
-          8252,
+        "vertexCount": 9,
+        "positions": [
+          8192,
           -8680,
-          124
-        ],
+          184,
+          8192,
+          -8672,
+          184,
+          8304,
+          -8672,
+          184,
+          8192,
+          -8680,
+          184,
+          8304,
+          -8672,
+          184,
+          8312,
+          -8672,
+          184,
+          8192,
+          -8680,
+          184,
+          8312,
+          -8672,
+          184,
+          8312,
+          -8680,
+          184
+        ]
+      },
+      {
         "material": "concrete/concretewall022a",
         "placeholderMaterial": true,
-        "vertexCount": 4,
-        "triCount": 2,
-        "byteEstimate": 144
+        "faceCount": 2,
+        "triCount": 4,
+        "vertexCount": 12,
+        "positions": [
+          8192,
+          -8672,
+          64,
+          8304,
+          -8672,
+          64,
+          8304,
+          -8672,
+          184,
+          8192,
+          -8672,
+          64,
+          8304,
+          -8672,
+          184,
+          8192,
+          -8672,
+          184,
+          8192,
+          -8680,
+          184,
+          8312,
+          -8680,
+          184,
+          8312,
+          -8680,
+          64,
+          8192,
+          -8680,
+          184,
+          8312,
+          -8680,
+          64,
+          8192,
+          -8680,
+          64
+        ]
       }
     ]
   },

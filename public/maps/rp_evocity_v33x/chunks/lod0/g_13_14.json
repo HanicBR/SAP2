@@ -30,58 +30,100 @@
     "totalTris": 8,
     "totalVerts": 16,
     "totalBytes": 576,
-    "drawCallsBeforeInstancing": 2,
+    "drawCallsBeforeInstancing": 4,
     "drawCallsAfterInstancing": 2
   },
   "world": {
-    "faces": [
+    "meshes": [
       {
-        "position": [
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "faceCount": 3,
+        "triCount": 6,
+        "vertexCount": 18,
+        "positions": [
           12920,
-          14844,
-          810.5
-        ],
-        "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
-        "vertexCount": 4,
-        "triCount": 2,
-        "byteEstimate": 144
-      },
-      {
-        "position": [
-          12604,
           15352,
-          810.5
-        ],
-        "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
-        "vertexCount": 4,
-        "triCount": 2,
-        "byteEstimate": 144
-      },
-      {
-        "position": [
-          12604,
-          14844,
+          672,
+          12920,
+          15352,
+          949,
+          12920,
+          14336,
+          949,
+          12920,
+          15352,
+          672,
+          12920,
+          14336,
+          949,
+          12920,
+          14336,
+          672,
+          12920,
+          15352,
+          949,
+          12920,
+          15352,
+          672,
+          12288,
+          15352,
+          672,
+          12920,
+          15352,
+          949,
+          12288,
+          15352,
+          672,
+          12288,
+          15352,
+          949,
+          12288,
+          14336,
+          949,
+          12920,
+          14336,
+          949,
+          12920,
+          15352,
+          949,
+          12288,
+          14336,
+          949,
+          12920,
+          15352,
+          949,
+          12288,
+          15352,
           949
-        ],
-        "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
-        "vertexCount": 4,
-        "triCount": 2,
-        "byteEstimate": 144
+        ]
       },
       {
-        "position": [
-          12620,
-          14060,
-          58
-        ],
         "material": "nature/blendgrassgrass001a",
         "placeholderMaterial": false,
-        "vertexCount": 4,
+        "faceCount": 1,
         "triCount": 2,
-        "byteEstimate": 144
+        "vertexCount": 6,
+        "positions": [
+          12320,
+          12792,
+          58,
+          12320,
+          15328,
+          58,
+          12920,
+          15328,
+          58,
+          12320,
+          12792,
+          58,
+          12920,
+          15328,
+          58,
+          12920,
+          12792,
+          58
+        ]
       }
     ]
   },

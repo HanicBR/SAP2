@@ -30,58 +30,100 @@
     "totalTris": 8,
     "totalVerts": 16,
     "totalBytes": 576,
-    "drawCallsBeforeInstancing": 2,
+    "drawCallsBeforeInstancing": 4,
     "drawCallsAfterInstancing": 2
   },
   "world": {
-    "faces": [
+    "meshes": [
       {
-        "position": [
-          11776,
-          -622,
-          764
-        ],
         "material": "tools/toolsskybox",
         "placeholderMaterial": true,
-        "vertexCount": 4,
-        "triCount": 2,
-        "byteEstimate": 144
-      },
-      {
-        "position": [
-          10752,
+        "faceCount": 2,
+        "triCount": 4,
+        "vertexCount": 12,
+        "positions": [
+          12288,
           -622,
-          764
-        ],
-        "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
-        "vertexCount": 4,
-        "triCount": 2,
-        "byteEstimate": 144
+          672,
+          12288,
+          -622,
+          856,
+          11264,
+          -622,
+          856,
+          12288,
+          -622,
+          672,
+          11264,
+          -622,
+          856,
+          11264,
+          -622,
+          672,
+          11264,
+          -622,
+          672,
+          11264,
+          -622,
+          856,
+          10240,
+          -622,
+          856,
+          11264,
+          -622,
+          672,
+          10240,
+          -622,
+          856,
+          10240,
+          -622,
+          672
+        ]
       },
       {
-        "position": [
-          10516,
-          -598,
-          520
-        ],
         "material": "nature/cliffface001a",
         "placeholderMaterial": true,
-        "vertexCount": 4,
-        "triCount": 2,
-        "byteEstimate": 144
-      },
-      {
-        "position": [
-          10516,
+        "faceCount": 2,
+        "triCount": 4,
+        "vertexCount": 12,
+        "positions": [
+          8456,
           -598,
-          216
-        ],
-        "material": "nature/cliffface001a",
-        "placeholderMaterial": true,
-        "vertexCount": 4,
-        "triCount": 2,
-        "byteEstimate": 144
+          368,
+          12576,
+          -598,
+          368,
+          12576,
+          -598,
+          672,
+          8456,
+          -598,
+          368,
+          12576,
+          -598,
+          672,
+          8456,
+          -598,
+          672,
+          8456,
+          -598,
+          64,
+          12576,
+          -598,
+          64,
+          12576,
+          -598,
+          368,
+          8456,
+          -598,
+          64,
+          12576,
+          -598,
+          368,
+          8456,
+          -598,
+          368
+        ]
       }
     ]
   },
