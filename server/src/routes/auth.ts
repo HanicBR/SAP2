@@ -17,6 +17,7 @@ import {
   buildPasswordChangedTemplate,
   buildPasswordResetTemplate,
 } from '../services/emailTemplates';
+import { recordSiteAudit } from '../services/siteAudit';
 
 const router = Router();
 
@@ -231,6 +232,20 @@ router.post('/login', loginLimiter, async (req, res) => {
   };
 
   const token = signToken(payload);
+  await recordSiteAudit({
+    userId: userRecord.id,
+    username: userRecord.username,
+    userRole: userRecord.role as UserRole,
+    action: 'AUTH_LOGIN_SUCCESS',
+    method: 'POST',
+    path: '/api/auth/login',
+    statusCode: 200,
+    ipAddress: req.ip,
+    userAgent: req.get('user-agent') || undefined,
+    metadata: {
+      identifierType: identifier.includes('@') ? 'email' : 'username',
+    },
+  });
   return res.json({ user: toPublicUser(userRecord), token });
 });
 

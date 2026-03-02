@@ -70,6 +70,7 @@ model User {
 
   transactions Transaction[]
   emailTokens  UserEmailToken[]
+  siteAuditLogs SiteAuditLog[]
 }
 
 model UserEmailToken {
@@ -86,6 +87,28 @@ model UserEmailToken {
 
   @@index([userId, type, createdAt])
   @@index([type, expiresAt])
+}
+
+model SiteAuditLog {
+  id         String    @id @default(cuid())
+  userId     String?
+  username   String?
+  userRole   UserRole?
+  action     String
+  method     String
+  path       String
+  statusCode Int
+  ipAddress  String?
+  userAgent  String?
+  metadata   Json?
+  createdAt  DateTime  @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+  @@index([method, createdAt])
 }
 
 model SiteConfig {

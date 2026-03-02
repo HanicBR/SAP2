@@ -504,6 +504,43 @@ export interface LogsQueryResponse {
   totalPages?: number;
 }
 
+export interface SiteAuditLogEntry {
+  id: string;
+  userId?: string;
+  username?: string;
+  userRole?: UserRole;
+  action: string;
+  method: string;
+  path: string;
+  statusCode: number;
+  ipAddress?: string;
+  userAgent?: string;
+  metadata?: Record<string, unknown>;
+  createdAt: string;
+}
+
+export interface SiteAuditLogsQueryParams {
+  search?: string;
+  userId?: string;
+  username?: string;
+  action?: string;
+  from?: string;
+  to?: string;
+  limit?: number;
+  page?: number;
+}
+
+export interface SiteAuditLogsQueryResponse {
+  mode: 'page';
+  items: SiteAuditLogEntry[];
+  limit: number;
+  hasMore: boolean;
+  nextCursor?: string | null;
+  page: number;
+  total: number;
+  totalPages: number;
+}
+
 export interface LegacyImportSummary {
   format: 'ULX' | 'TAGGED';
   linesParsed: number;

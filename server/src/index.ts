@@ -20,6 +20,7 @@ import transactionsRoutes from './routes/transactions';
 import suspiciousRoutes from './routes/suspicious';
 import legacyLogsRoutes from './routes/legacyLogs';
 import vipsRoutes from './routes/vips';
+import { siteAuditMutationMiddleware } from './middleware/siteAudit';
 import { bootstrap } from './bootstrap';
 import { startVipExpiryReconcilerJob } from './services/vipExpiryReconciler';
 import { initializeServerWebSocket } from './services/serverWs';
@@ -60,6 +61,7 @@ app.use(
 );
 app.use(express.json());
 app.use(helmet());
+app.use(siteAuditMutationMiddleware);
 
 const proofUploadsDir =
   process.env.PROOF_UPLOAD_DIR || path.resolve(process.cwd(), 'uploads', 'proofs');

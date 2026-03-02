@@ -1,7 +1,7 @@
 
 
 import { MOCK_SERVERS, MOCK_EVENTS, MOCK_STATS, VIP_PLANS, MOCK_SUSPICIOUS_GROUPS, MOCK_PLAYERS, MOCK_USERS, MOCK_TRANSACTIONS, generateServerAnalytics, DEFAULT_SITE_CONFIG } from '../constants';
-import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionProofUploadResult, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel, ServerLiveStateResponse, ServerViewerActionDispatchResponse, ServerViewerActionRequest, ServerViewerActionStatusResponse, ServerViewerMapOverlayResponse, ServerViewerStateResponse, ServerWsLiveStateListResponse, ServerWsViewerStateListResponse, PlayerAliasHistoryResponse, PlayerAvatarHistoryResponse, LoadingScreenProfile, LoadingScreensResponse, LoadingMediaUploadResult, LoadingTelemetryRange, LoadingTelemetrySlugsResponse, LoadingTelemetrySummaryResponse, AuthRegisterResponse } from '../types';
+import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionProofUploadResult, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, SiteAuditLogsQueryParams, SiteAuditLogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel, ServerLiveStateResponse, ServerViewerActionDispatchResponse, ServerViewerActionRequest, ServerViewerActionStatusResponse, ServerViewerMapOverlayResponse, ServerViewerStateResponse, ServerWsLiveStateListResponse, ServerWsViewerStateListResponse, PlayerAliasHistoryResponse, PlayerAvatarHistoryResponse, LoadingScreenProfile, LoadingScreensResponse, LoadingMediaUploadResult, LoadingTelemetryRange, LoadingTelemetrySlugsResponse, LoadingTelemetrySummaryResponse, AuthRegisterResponse } from '../types';
 
 // Utility to simulate network delay (used as fallback)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -1288,6 +1288,44 @@ export const ApiService = {
       hasMore: safePage < totalPages,
       nextCursor: items.length ? items[items.length - 1].id : null,
       items,
+    };
+  },
+
+  getSiteAuditLogsQuery: async (
+    query: SiteAuditLogsQueryParams = {},
+  ): Promise<SiteAuditLogsQueryResponse> => {
+    const normalized: SiteAuditLogsQueryParams = { ...query };
+
+    if (hasApi) {
+      const params = new URLSearchParams();
+      if (normalized.search) params.set('search', normalized.search);
+      if (normalized.userId) params.set('userId', normalized.userId);
+      if (normalized.username) params.set('username', normalized.username);
+      if (normalized.action) params.set('action', normalized.action);
+      if (normalized.from) params.set('from', normalized.from);
+      if (normalized.to) params.set('to', normalized.to);
+      if (typeof normalized.limit === 'number' && Number.isFinite(normalized.limit) && normalized.limit > 0) {
+        params.set('limit', String(Math.floor(normalized.limit)));
+      }
+      if (typeof normalized.page === 'number' && Number.isFinite(normalized.page) && normalized.page > 0) {
+        params.set('page', String(Math.floor(normalized.page)));
+      }
+
+      const suffix = params.toString() ? `?${params.toString()}` : '';
+      return await apiFetch<SiteAuditLogsQueryResponse>(`/logs/site${suffix}`);
+    }
+
+    await delay(120);
+    const limit = Math.max(1, Math.min(200, Math.floor(normalized.limit || 20)));
+    return {
+      mode: 'page',
+      page: 1,
+      limit,
+      total: 0,
+      totalPages: 1,
+      hasMore: false,
+      nextCursor: null,
+      items: [],
     };
   },
 

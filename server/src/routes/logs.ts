@@ -2,8 +2,12 @@ import { Router } from 'express';
 import { GameMode as PrismaGameMode, LogType } from '@prisma/client';
 import { prisma } from '../db/client';
 import { GameMode } from '../domain';
+import { UserRole } from '../domain';
+import { authMiddleware, requireRole } from '../middleware/auth';
 
 const router = Router();
+router.use(authMiddleware);
+router.use(requireRole(UserRole.MODERATOR));
 
 const toDomainMode = (mode: PrismaGameMode): GameMode =>
   mode === 'SANDBOX' ? GameMode.SANDBOX : mode === 'MURDER' ? GameMode.MURDER : GameMode.TTT;
@@ -21,6 +25,12 @@ const parsePositiveInt = (value: unknown, fallback: number, max: number): number
   const parsed = Number.parseInt(String(value ?? ''), 10);
   if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
   return Math.min(parsed, max);
+};
+
+const parseSafeText = (value: unknown, max = 160): string => {
+  const parsed = String(value ?? '').trim();
+  if (!parsed) return '';
+  return parsed.length > max ? parsed.slice(0, max) : parsed;
 };
 
 const mapLog = (log: any) => ({
@@ -103,6 +113,21 @@ const buildBaseWhere = (query: Record<string, unknown>) => {
 
   return where;
 };
+
+const mapSiteAuditLog = (row: any) => ({
+  id: row.id,
+  userId: row.userId || undefined,
+  username: row.username || undefined,
+  userRole: row.userRole || undefined,
+  action: row.action,
+  method: row.method,
+  path: row.path,
+  statusCode: Number(row.statusCode || 0),
+  ipAddress: row.ipAddress || undefined,
+  userAgent: row.userAgent || undefined,
+  metadata: row.metadata || undefined,
+  createdAt: row.createdAt instanceof Date ? row.createdAt.toISOString() : String(row.createdAt || ''),
+});
 
 router.get('/', async (req, res) => {
   const where = buildBaseWhere(req.query as Record<string, unknown>);
@@ -294,6 +319,59 @@ router.get('/query', async (req, res) => {
     hasMore: safePage < totalPages,
     nextCursor: selected.length ? selected[selected.length - 1].id : null,
     items: selected.map(mapLog),
+  });
+});
+
+router.get('/site', requireRole(UserRole.SUPERADMIN), async (req, res) => {
+  const search = parseSafeText(req.query.search, 160);
+  const userId = parseSafeText(req.query.userId, 64);
+  const username = parseSafeText(req.query.username, 120);
+  const action = parseSafeText(req.query.action, 120);
+  const from = parseSafeText(req.query.from, 64);
+  const to = parseSafeText(req.query.to, 64);
+  const limit = parsePositiveInt(req.query.limit, 20, 200);
+  const page = parsePositiveInt(req.query.page, 1, 100000);
+
+  const where: any = {};
+  if (userId) where.userId = userId;
+  if (username) where.username = { contains: username, mode: 'insensitive' };
+  if (action) where.action = { contains: action, mode: 'insensitive' };
+  if (search) {
+    where.OR = [
+      { username: { contains: search, mode: 'insensitive' } },
+      { action: { contains: search, mode: 'insensitive' } },
+      { path: { contains: search, mode: 'insensitive' } },
+      { method: { contains: search, mode: 'insensitive' } },
+    ];
+  }
+  if (from || to) {
+    where.createdAt = {};
+    if (from) where.createdAt.gte = new Date(from);
+    if (to) where.createdAt.lte = new Date(to);
+  }
+
+  const total = await prisma.siteAuditLog.count({ where });
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const safePage = Math.min(page, totalPages);
+  const skip = (safePage - 1) * limit;
+
+  const rows = await prisma.siteAuditLog.findMany({
+    where,
+    orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+    skip,
+    take: limit,
+  });
+  const lastRow = rows.length > 0 ? rows[rows.length - 1] : null;
+
+  return res.json({
+    mode: 'page',
+    page: safePage,
+    limit,
+    total,
+    totalPages,
+    hasMore: safePage < totalPages,
+    nextCursor: lastRow ? lastRow.id : null,
+    items: rows.map(mapSiteAuditLog),
   });
 });
 

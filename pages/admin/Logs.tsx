@@ -1,7 +1,7 @@
 ﻿
 import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { ApiService } from '../../services/api';
-import { LogEntry, LogType, GameMode, SiteConfig } from '../../types';
+import { LogEntry, LogType, GameMode, SiteConfig, SiteAuditLogEntry, UserRole } from '../../types';
 import { Icons } from '../../components/Icon';
 import { Pagination } from '../../components/Pagination';
 import { Link } from 'react-router-dom';
@@ -87,6 +87,16 @@ const isRDM = (log: LogEntry) => {
          log.type === LogType.KILL && 
          log.metadata.attackerRole === 'innocent' && 
          log.metadata.victimRole === 'innocent';
+};
+
+const isSiteTriggeredPunishment = (log: LogEntry): boolean => {
+  const source = String(log?.metadata?.source || '').trim().toLowerCase();
+  const sourceTag = String(log?.metadata?.sourceTag || '').trim().toUpperCase();
+  if (source === 'admin_panel') return true;
+  if (sourceTag === 'VIEWER_ACTION') return true;
+  if (sourceTag.startsWith('PUNISHMENT_')) return true;
+  if (sourceTag === 'SITE_ACTION') return true;
+  return false;
 };
 
 const normalizeLabel = (value?: string): string | undefined => {
@@ -263,6 +273,11 @@ const LogRow = React.memo(({
                {log.metadata.reason ? (
                  <span className="text-zinc-500"> ({log.metadata.reason})</span>
                ) : null}
+               {isSiteTriggeredPunishment(log) ? (
+                 <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded border border-cyan-800 bg-cyan-950/40 text-[10px] font-bold uppercase text-cyan-300">
+                   via site
+                 </span>
+               ) : null}
             </span>
          ) : log.type === LogType.CONNECT ? (
             <span>
@@ -308,6 +323,49 @@ const LogRow = React.memo(({
         >
           <Icons.Copy className="w-3 h-3" />
         </button>
+      </div>
+    </div>
+  );
+});
+
+const SiteAuditRow = React.memo(({ entry }: { entry: SiteAuditLogEntry }) => {
+  const createdAt = new Date(entry.createdAt);
+  const statusCode = Number(entry.statusCode || 0);
+  const statusColor =
+    statusCode >= 500
+      ? 'text-red-300 border-red-900/50 bg-red-950/40'
+      : statusCode >= 400
+      ? 'text-yellow-300 border-yellow-900/40 bg-yellow-950/30'
+      : 'text-emerald-300 border-emerald-900/40 bg-emerald-950/30';
+
+  return (
+    <div className="p-3 border-l-2 border-cyan-700/40 hover:bg-zinc-800/40 transition-colors">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs text-zinc-500 font-mono">
+            {createdAt.toLocaleDateString()} {createdAt.toLocaleTimeString()}
+          </span>
+          <span className="px-1.5 py-0.5 rounded border border-zinc-700 bg-zinc-900 text-[10px] font-bold uppercase text-zinc-300">
+            {entry.method}
+          </span>
+          <span className="text-xs text-cyan-300 font-semibold">{entry.action}</span>
+        </div>
+        <span className={`px-2 py-0.5 rounded border text-[10px] font-bold uppercase ${statusColor}`}>
+          HTTP {statusCode || 0}
+        </span>
+      </div>
+
+      <div className="mt-1 text-sm text-zinc-200 break-all">{entry.path}</div>
+
+      <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-zinc-400">
+        <span className="px-1.5 py-0.5 rounded border border-zinc-800 bg-zinc-950">
+          {entry.username || 'Usuário desconhecido'}
+        </span>
+        {entry.userRole ? (
+          <span className="px-1.5 py-0.5 rounded border border-zinc-800 bg-zinc-950 uppercase">
+            {entry.userRole}
+          </span>
+        ) : null}
       </div>
     </div>
   );
@@ -655,12 +713,14 @@ const TTTMapGroupCard = React.memo(
 // --- MAIN PAGE COMPONENT ---
 const Logs: React.FC = () => {
   const [rawLogs, setRawLogs] = useState<LogEntry[]>([]);
+  const [siteAuditLogs, setSiteAuditLogs] = useState<SiteAuditLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const requestSeq = useRef(0);
+  const [currentUserRole, setCurrentUserRole] = useState<UserRole | null>(null);
   
   // Filters
   const [search, setSearch] = useState('');
-  const [selectedMode, setSelectedMode] = useState<GameMode | 'ALL'>('ALL');
+  const [selectedMode, setSelectedMode] = useState<GameMode | 'ALL' | 'SITE'>('ALL');
   const [logTypeFilter, setLogTypeFilter] = useState<string>('ALL');
   const [actorTypeFilter, setActorTypeFilter] = useState<ActorTypeFilter>('ALL');
   const [targetSearch, setTargetSearch] = useState('');
@@ -681,9 +741,22 @@ const Logs: React.FC = () => {
   const [cursorNext, setCursorNext] = useState<string | null>(null);
   const [cursorTrail, setCursorTrail] = useState<Array<string | null>>([]);
   const [cursorPage, setCursorPage] = useState(1);
+  const canViewSiteAudit = currentUserRole === UserRole.SUPERADMIN;
   const itemsPerPage = selectedMode === GameMode.SANDBOX ? 100 : 20;
 
   useEffect(() => {
+    try {
+      const raw = localStorage.getItem('backstabber_user');
+      if (raw) {
+        const parsed = JSON.parse(raw) as { role?: UserRole };
+        if (parsed?.role) {
+          setCurrentUserRole(parsed.role);
+        }
+      }
+    } catch {
+      setCurrentUserRole(null);
+    }
+
     ApiService.getSiteConfig().then((cfg) => {
       setSiteConfig(cfg);
       const logsCfg = cfg.logs || {};
@@ -701,6 +774,12 @@ const Logs: React.FC = () => {
     setCursorTrail([]);
     setCursorPage(1);
   }, [search, selectedMode, logTypeFilter, actorTypeFilter, targetSearch, pagingMode]);
+
+  useEffect(() => {
+    if (selectedMode === 'SITE' && !canViewSiteAudit) {
+      setSelectedMode('ALL');
+    }
+  }, [selectedMode, canViewSiteAudit]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -721,6 +800,35 @@ const Logs: React.FC = () => {
     setLoading(true);
 
     try {
+      if (selectedMode === 'SITE') {
+        if (!canViewSiteAudit) {
+          if (requestId !== requestSeq.current) return;
+          setSiteAuditLogs([]);
+          setRawLogs([]);
+          setCursorNext(null);
+          setTotalItemsServer(0);
+          return;
+        }
+
+        if (pagingMode !== 'page') {
+          setPagingMode('page');
+        }
+
+        const result = await ApiService.getSiteAuditLogsQuery({
+          search: debouncedSearch.trim() || undefined,
+          limit: itemsPerPage,
+          page: currentPage,
+        });
+
+        if (requestId !== requestSeq.current) return;
+
+        setSiteAuditLogs((result.items || []) as SiteAuditLogEntry[]);
+        setRawLogs([]);
+        setCursorNext(null);
+        setTotalItemsServer(result.total || 0);
+        return;
+      }
+
       const result = await ApiService.getEventsQuery({
         search: debouncedSearch.trim() || undefined,
         mode: selectedMode === 'ALL' ? undefined : selectedMode,
@@ -736,6 +844,7 @@ const Logs: React.FC = () => {
       if (requestId !== requestSeq.current) return;
 
       setRawLogs((result.items || []) as LogEntry[]);
+      setSiteAuditLogs([]);
       setCursorNext(result.nextCursor || null);
       if (pagingMode === 'page') {
         setTotalItemsServer(result.total || 0);
@@ -746,6 +855,7 @@ const Logs: React.FC = () => {
       if (requestId !== requestSeq.current) return;
       console.error('Falha ao carregar logs:', error);
       setRawLogs([]);
+      setSiteAuditLogs([]);
       setCursorNext(null);
       setTotalItemsServer(0);
     } finally {
@@ -763,6 +873,8 @@ const Logs: React.FC = () => {
     pagingMode,
     currentPage,
     cursorToken,
+    canViewSiteAudit,
+    setPagingMode,
   ]);
 
   useEffect(() => {
@@ -949,6 +1061,14 @@ const Logs: React.FC = () => {
     return filters;
   }, [search, selectedMode, logTypeFilter, actorTypeFilter, targetSearch]);
 
+  const modeOptions = useMemo<Array<GameMode | 'ALL' | 'SITE'>>(() => {
+    const base: Array<GameMode | 'ALL' | 'SITE'> = ['ALL', GameMode.TTT, GameMode.SANDBOX, GameMode.MURDER];
+    if (canViewSiteAudit) {
+      base.push('SITE');
+    }
+    return base;
+  }, [canViewSiteAudit]);
+
   const hasActiveFilters = activeFilters.length > 0;
 
   // Pagination Logic
@@ -1059,7 +1179,7 @@ const Logs: React.FC = () => {
         </h1>
         
         <div className="flex bg-zinc-900 p-1 rounded border border-zinc-800">
-           {['ALL', GameMode.TTT, GameMode.SANDBOX, GameMode.MURDER].map((mode) => (
+           {modeOptions.map((mode) => (
               <button
                  key={mode}
                  onClick={() => { setSelectedMode(mode as any); setCurrentPage(1); }}
@@ -1069,7 +1189,7 @@ const Logs: React.FC = () => {
                        : 'text-zinc-500 hover:text-zinc-300'
                  }`}
               >
-                 {mode === 'ALL' ? 'Todos' : mode}
+                 {mode === 'ALL' ? 'Todos' : mode === 'SITE' ? 'Site' : mode}
               </button>
            ))}
         </div>
@@ -1088,7 +1208,8 @@ const Logs: React.FC = () => {
                  onChange={(e) => setSearch(e.target.value)}
               />
            </div>
-           <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0">
+           {selectedMode !== 'SITE' ? (
+             <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0">
                <Icons.Filter className="w-4 h-4 text-zinc-500 mr-2 flex-shrink-0" />
                {['ALL', LogType.CHAT, LogType.COMMAND, LogType.PUNISH, LogType.CONNECT, LogType.DISCONNECT].map(type => (
                   <button
@@ -1103,9 +1224,16 @@ const Logs: React.FC = () => {
                      {type}
                   </button>
                ))}
-           </div>
+             </div>
+           ) : (
+             <div className="text-xs text-zinc-500 flex items-center">
+               <Icons.Shield className="w-4 h-4 mr-2 text-cyan-500" />
+               Auditoria de ações do painel (somente SUPERADMIN).
+             </div>
+           )}
         </div>
 
+        {selectedMode !== 'SITE' ? (
         <div className="bg-zinc-900 p-4 rounded border border-zinc-800 space-y-3">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
@@ -1165,7 +1293,27 @@ const Logs: React.FC = () => {
             </div>
           </div>
         </div>
+        ) : (
+        <div className="bg-zinc-900 p-4 rounded border border-zinc-800 space-y-3">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+            <p className="text-[11px] text-zinc-500">
+              {hasActiveFilters
+                ? `Filtros ativos: ${activeFilters.join(' | ')}`
+                : 'Auditoria sem filtros adicionais ativos.'}
+            </p>
+            <button
+              type="button"
+              onClick={handleClearFilters}
+              disabled={!hasActiveFilters}
+              className="self-start md:self-auto px-3 py-1.5 rounded border border-zinc-700 text-[10px] font-bold uppercase text-zinc-300 hover:border-zinc-500 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Limpar filtros
+            </button>
+          </div>
+        </div>
+        )}
 
+        {selectedMode !== 'SITE' ? (
         <div className="bg-zinc-900 p-4 rounded border border-zinc-800 space-y-3">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
@@ -1253,12 +1401,26 @@ const Logs: React.FC = () => {
             </button>
           </div>
         </div>
+        ) : null}
       </div>
 
       {/* Logs Container */}
       <div className="bg-zinc-950 rounded border border-zinc-800 min-h-[500px] flex flex-col">
          {loading ? (
             <div className="p-8 text-center text-zinc-500">Carregando eventos...</div>
+         ) : selectedMode === 'SITE' ? (
+            siteAuditLogs.length === 0 ? (
+              <div className="p-12 text-center flex flex-col items-center">
+                <Icons.Search className="w-12 h-12 text-zinc-800 mb-4" />
+                <p className="text-zinc-500 font-bold">Nenhum evento de auditoria encontrado.</p>
+              </div>
+            ) : (
+              <div className="flex-1 p-4 divide-y divide-zinc-800/70">
+                {siteAuditLogs.map((entry) => (
+                  <SiteAuditRow key={entry.id} entry={entry} />
+                ))}
+              </div>
+            )
          ) : processedData.length === 0 ? (
             <div className="p-12 text-center flex flex-col items-center">
                <Icons.Search className="w-12 h-12 text-zinc-800 mb-4" />
@@ -1304,7 +1466,7 @@ const Logs: React.FC = () => {
             </div>
          )}
          
-         {pagingMode === 'page' ? (
+         {selectedMode === 'SITE' || pagingMode === 'page' ? (
            <Pagination
              currentPage={currentPage}
              totalItems={totalItemsServer}
