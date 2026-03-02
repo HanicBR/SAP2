@@ -200,6 +200,40 @@ const formatCoord = (value: number | undefined): string => {
   });
 };
 
+const normalizeYawDeg = (value: number | undefined): number => {
+  const raw = Number(value || 0);
+  if (!Number.isFinite(raw)) return 0;
+  const normalized = ((raw % 360) + 360) % 360;
+  return normalized;
+};
+
+const TEAM_MARKER_COLORS = [
+  '#22c55e',
+  '#38bdf8',
+  '#f59e0b',
+  '#ef4444',
+  '#a78bfa',
+  '#14b8a6',
+  '#f472b6',
+  '#84cc16',
+];
+
+const hashSteamId = (steamId: string): number => {
+  let hash = 0;
+  for (let index = 0; index < steamId.length; index += 1) {
+    hash = (hash * 31 + steamId.charCodeAt(index)) >>> 0;
+  }
+  return hash;
+};
+
+const getViewerMarkerColor = (entry: ServerViewerStatePlayer): string => {
+  const teamId = Number(entry.teamId);
+  if (Number.isFinite(teamId)) {
+    return TEAM_MARKER_COLORS[Math.abs(Math.floor(teamId)) % TEAM_MARKER_COLORS.length];
+  }
+  return TEAM_MARKER_COLORS[hashSteamId(entry.steamId) % TEAM_MARKER_COLORS.length];
+};
+
 const viewerActionStatusLabel = (status: string): string => {
   const normalized = String(status || '').trim().toUpperCase();
   if (normalized === 'ACK_OK') return 'Confirmada (ACK)';
@@ -309,6 +343,13 @@ const ServerDetails: React.FC = () => {
   const [viewerActionStatus, setViewerActionStatus] = useState<ServerViewerActionStatusResponse | null>(null);
   const [viewerMapOverlay, setViewerMapOverlay] = useState<ServerViewerMapOverlayResolved | null>(null);
   const [viewerMapOverlayReason, setViewerMapOverlayReason] = useState<string | null>(null);
+  const [viewerSearch, setViewerSearch] = useState<string>('');
+  const [viewerShowDead, setViewerShowDead] = useState<boolean>(true);
+  const [viewerShowLabels, setViewerShowLabels] = useState<boolean>(true);
+  const [viewerShowHeading, setViewerShowHeading] = useState<boolean>(true);
+  const [viewerShowGrid, setViewerShowGrid] = useState<boolean>(true);
+  const [viewerMarkerScalePct, setViewerMarkerScalePct] = useState<number>(100);
+  const [viewerWorldCursor, setViewerWorldCursor] = useState<{ x: number; y: number } | null>(null);
   const viewerActionPollTokenRef = useRef<number>(0);
 
   const loadData = useCallback(
@@ -544,13 +585,23 @@ const ServerDetails: React.FC = () => {
   const pulseVsLegacyHours = Number(playtimeDiagnostics?.diffHours || 0);
   const pulseVsLegacyPct = Number(playtimeDiagnostics?.diffPct || 0);
   const viewerPlayers = useMemo(
-    () =>
-      [...(viewerState?.players || [])].sort((left, right) => {
-        const leftName = String(left.name || left.steamId || '').toLowerCase();
-        const rightName = String(right.name || right.steamId || '').toLowerCase();
-        return leftName.localeCompare(rightName);
-      }),
-    [viewerState],
+    () => {
+      const term = String(viewerSearch || '').trim().toLowerCase();
+      return [...(viewerState?.players || [])]
+        .filter((entry) => {
+          if (!viewerShowDead && entry.alive === false) return false;
+          if (!term) return true;
+          const byName = String(entry.name || '').toLowerCase().includes(term);
+          const bySteam = String(entry.steamId || '').toLowerCase().includes(term);
+          return byName || bySteam;
+        })
+        .sort((left, right) => {
+          const leftName = String(left.name || left.steamId || '').toLowerCase();
+          const rightName = String(right.name || right.steamId || '').toLowerCase();
+          return leftName.localeCompare(rightName);
+        });
+    },
+    [viewerSearch, viewerShowDead, viewerState],
   );
   const viewerSnapshotAgeSeconds = useMemo(() => {
     if (!viewerState?.receivedAt) return Number.POSITIVE_INFINITY;
@@ -569,6 +620,12 @@ const ServerDetails: React.FC = () => {
     return resolved;
   }, [currentState?.currentMap, liveState?.map, server?.currentMap, viewerState?.map]);
   const hasViewerMapOverlay = Boolean(viewerMapOverlay?.imageUrl);
+
+  useEffect(() => {
+    if (!hasViewerMapOverlay) {
+      setViewerWorldCursor(null);
+    }
+  }, [hasViewerMapOverlay]);
 
   useEffect(() => {
     let cancelled = false;
@@ -628,6 +685,8 @@ const ServerDetails: React.FC = () => {
 
   const viewerMapPoints = useMemo(() => {
     if (!viewerPlayers.length) return [];
+    const scale = Math.max(0.6, Math.min(2.4, viewerMarkerScalePct / 100));
+    const baseSizePx = Math.round(9 * scale);
 
     if (viewerMapOverlay) {
       const width = viewerMapOverlay.worldMaxX - viewerMapOverlay.worldMinX;
@@ -638,11 +697,17 @@ const ServerDetails: React.FC = () => {
           let ny = clamp01((Number(entry.pos?.y || 0) - viewerMapOverlay.worldMinY) / height);
           if (viewerMapOverlay.flipX) nx = 1 - nx;
           if (viewerMapOverlay.flipY) ny = 1 - ny;
+          let yawDeg = normalizeYawDeg(entry.eyeAngles?.yaw);
+          if (viewerMapOverlay.flipX) yawDeg = normalizeYawDeg(180 - yawDeg);
+          if (viewerMapOverlay.flipY) yawDeg = normalizeYawDeg(360 - yawDeg);
           return {
             player: entry,
             isSelected: entry.steamId === viewerSelectedSteamId,
             leftPct: nx * 100,
             topPct: ny * 100,
+            markerColor: getViewerMarkerColor(entry),
+            yawDeg,
+            sizePx: entry.steamId === viewerSelectedSteamId ? baseSizePx + 4 : baseSizePx,
           };
         });
       }
@@ -674,9 +739,19 @@ const ServerDetails: React.FC = () => {
         isSelected: entry.steamId === viewerSelectedSteamId,
         leftPct: nx * 100,
         topPct: (1 - ny) * 100,
+        markerColor: getViewerMarkerColor(entry),
+        yawDeg: normalizeYawDeg(360 - Number(entry.eyeAngles?.yaw || 0)),
+        sizePx: entry.steamId === viewerSelectedSteamId ? baseSizePx + 4 : baseSizePx,
       };
     });
-  }, [viewerMapOverlay, viewerPlayers, selectedViewerPlayer, viewerSelectedSteamId, viewerZoomPct]);
+  }, [
+    viewerMapOverlay,
+    viewerMarkerScalePct,
+    viewerPlayers,
+    selectedViewerPlayer,
+    viewerSelectedSteamId,
+    viewerZoomPct,
+  ]);
 
   const viewerStatusBadge = useMemo(() => {
     if (viewerWsStatus === 'error') {
@@ -794,6 +869,36 @@ const ServerDetails: React.FC = () => {
     !hasFreshViewerSnapshot ||
     viewerWsStatus === 'connecting' ||
     viewerWsStatus === 'error';
+
+  const handleViewerMapMouseMove = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (!viewerMapOverlay) {
+        setViewerWorldCursor(null);
+        return;
+      }
+
+      const rect = event.currentTarget.getBoundingClientRect();
+      const localX = (event.clientX - rect.left) / Math.max(1, rect.width);
+      const localY = (event.clientY - rect.top) / Math.max(1, rect.height);
+      let normalizedX = clamp01(localX);
+      let normalizedY = clamp01(localY);
+      if (viewerMapOverlay.flipX) normalizedX = 1 - normalizedX;
+      if (viewerMapOverlay.flipY) normalizedY = 1 - normalizedY;
+
+      const worldX =
+        viewerMapOverlay.worldMinX +
+        normalizedX * (viewerMapOverlay.worldMaxX - viewerMapOverlay.worldMinX);
+      const worldY =
+        viewerMapOverlay.worldMinY +
+        normalizedY * (viewerMapOverlay.worldMaxY - viewerMapOverlay.worldMinY);
+      setViewerWorldCursor({ x: worldX, y: worldY });
+    },
+    [viewerMapOverlay],
+  );
+
+  const handleViewerMapMouseLeave = useCallback(() => {
+    setViewerWorldCursor(null);
+  }, []);
 
   if (loading) return <div className="p-8 text-zinc-500">Carregando detalhes do servidor...</div>;
   if (!server || !analytics) return <div className="p-8 text-zinc-500">Servidor não encontrado.</div>;
@@ -922,7 +1027,7 @@ const ServerDetails: React.FC = () => {
                 <p className="text-xs text-zinc-400 uppercase font-bold">
                   Plano tatico 2D ({viewerState?.map || displayMap})
                 </p>
-                <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span
                     className={`px-2 py-0.5 rounded border text-[10px] font-bold uppercase ${
                       hasViewerMapOverlay
@@ -932,8 +1037,52 @@ const ServerDetails: React.FC = () => {
                   >
                     {hasViewerMapOverlay ? 'Overlay real' : 'Plano relativo'}
                   </span>
+                  <label className="inline-flex items-center gap-1 rounded border border-zinc-700 bg-zinc-900/50 px-2 py-1 text-[10px] font-bold uppercase text-zinc-300">
+                    <input
+                      type="checkbox"
+                      checked={viewerShowGrid}
+                      onChange={(event) => setViewerShowGrid(event.target.checked)}
+                    />
+                    Grid
+                  </label>
+                  <label className="inline-flex items-center gap-1 rounded border border-zinc-700 bg-zinc-900/50 px-2 py-1 text-[10px] font-bold uppercase text-zinc-300">
+                    <input
+                      type="checkbox"
+                      checked={viewerShowLabels}
+                      onChange={(event) => setViewerShowLabels(event.target.checked)}
+                    />
+                    Labels
+                  </label>
+                  <label className="inline-flex items-center gap-1 rounded border border-zinc-700 bg-zinc-900/50 px-2 py-1 text-[10px] font-bold uppercase text-zinc-300">
+                    <input
+                      type="checkbox"
+                      checked={viewerShowHeading}
+                      onChange={(event) => setViewerShowHeading(event.target.checked)}
+                    />
+                    Direcao
+                  </label>
+                  <label className="inline-flex items-center gap-1 rounded border border-zinc-700 bg-zinc-900/50 px-2 py-1 text-[10px] font-bold uppercase text-zinc-300">
+                    <input
+                      type="checkbox"
+                      checked={viewerShowDead}
+                      onChange={(event) => setViewerShowDead(event.target.checked)}
+                    />
+                    Mortos
+                  </label>
+                  <label className="text-[10px] text-zinc-400 flex items-center gap-2 rounded border border-zinc-700 bg-zinc-900/50 px-2 py-1">
+                    Marker
+                    <input
+                      type="range"
+                      min={70}
+                      max={180}
+                      step={5}
+                      value={viewerMarkerScalePct}
+                      onChange={(event) => setViewerMarkerScalePct(Number(event.target.value))}
+                    />
+                    <span className="font-mono text-zinc-200">{viewerMarkerScalePct}%</span>
+                  </label>
                   {!hasViewerMapOverlay && (
-                    <label className="text-xs text-zinc-400 flex items-center gap-2">
+                    <label className="text-[10px] text-zinc-400 flex items-center gap-2 rounded border border-zinc-700 bg-zinc-900/50 px-2 py-1">
                       Zoom
                       <input
                         type="range"
@@ -948,7 +1097,11 @@ const ServerDetails: React.FC = () => {
                   )}
                 </div>
               </div>
-              <div className="relative h-72 rounded border border-zinc-800 overflow-hidden bg-zinc-950">
+              <div
+                className="relative h-72 rounded border border-zinc-800 overflow-hidden bg-zinc-950"
+                onMouseMove={handleViewerMapMouseMove}
+                onMouseLeave={handleViewerMapMouseLeave}
+              >
                 {hasViewerMapOverlay && viewerMapOverlay ? (
                   <img
                     src={viewerMapOverlay.imageUrl}
@@ -964,7 +1117,7 @@ const ServerDetails: React.FC = () => {
                     backgroundImage:
                       'linear-gradient(rgba(63,63,70,0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(63,63,70,0.25) 1px, transparent 1px)',
                     backgroundSize: '32px 32px',
-                    opacity: hasViewerMapOverlay ? 0.2 : 1,
+                    opacity: viewerShowGrid ? (hasViewerMapOverlay ? 0.2 : 1) : 0,
                   }}
                 />
                 {!viewerMapPoints.length && (
@@ -973,19 +1126,56 @@ const ServerDetails: React.FC = () => {
                   </div>
                 )}
                 {viewerMapPoints.map((point) => (
-                  <button
-                    key={point.player.steamId}
-                    onClick={() => setViewerSelectedSteamId(point.player.steamId)}
-                    className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full border transition-all ${
-                      point.isSelected
-                        ? 'w-4 h-4 bg-cyan-300 border-cyan-100 shadow-[0_0_0_4px_rgba(34,211,238,0.15)]'
-                        : point.player.alive === false
-                        ? 'w-3 h-3 bg-red-400 border-red-200'
-                        : 'w-3 h-3 bg-emerald-300 border-emerald-100'
-                    }`}
-                    style={{ left: `${point.leftPct}%`, top: `${point.topPct}%` }}
-                    title={`${point.player.name || point.player.steamId} (${formatCoord(point.player.pos.x)}, ${formatCoord(point.player.pos.y)})`}
-                  />
+                  <React.Fragment key={point.player.steamId}>
+                    {viewerShowHeading && point.player.alive !== false && (
+                      <span
+                        className="pointer-events-none absolute"
+                        style={{
+                          left: `${point.leftPct}%`,
+                          top: `${point.topPct}%`,
+                          width: `${Math.max(10, Math.round(point.sizePx * 2))}px`,
+                          transform: `translate(-50%, -50%) rotate(${point.yawDeg}deg)`,
+                          transformOrigin: '50% 50%',
+                        }}
+                      >
+                        <span
+                          className="absolute left-0 top-1/2 h-[2px] w-full -translate-y-1/2 bg-zinc-50/80"
+                          style={{ boxShadow: '0 0 6px rgba(255,255,255,0.35)' }}
+                        />
+                        <span
+                          className="absolute right-[-1px] top-1/2 -translate-y-1/2 border-y-[4px] border-l-[7px] border-y-transparent border-l-zinc-50/90"
+                        />
+                      </span>
+                    )}
+                    <button
+                      onClick={() => setViewerSelectedSteamId(point.player.steamId)}
+                      className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2 transition-all"
+                      style={{
+                        left: `${point.leftPct}%`,
+                        top: `${point.topPct}%`,
+                        width: `${point.sizePx}px`,
+                        height: `${point.sizePx}px`,
+                        backgroundColor:
+                          point.player.alive === false ? 'rgba(239,68,68,0.85)' : point.markerColor,
+                        borderColor: point.isSelected ? 'rgba(34,211,238,0.95)' : 'rgba(255,255,255,0.85)',
+                        boxShadow: point.isSelected
+                          ? '0 0 0 4px rgba(34,211,238,0.2), 0 0 10px rgba(34,211,238,0.35)'
+                          : '0 0 8px rgba(0,0,0,0.35)',
+                      }}
+                      title={`${point.player.name || point.player.steamId} (${formatCoord(point.player.pos.x)}, ${formatCoord(point.player.pos.y)})`}
+                    />
+                    {viewerShowLabels && (
+                      <span
+                        className="pointer-events-none absolute max-w-[160px] -translate-x-1/2 rounded border border-zinc-700 bg-zinc-950/90 px-1.5 py-0.5 text-[10px] font-semibold text-zinc-100 truncate"
+                        style={{
+                          left: `${point.leftPct}%`,
+                          top: `${Math.max(2, point.topPct - 5)}%`,
+                        }}
+                      >
+                        {point.player.name || point.player.steamId}
+                      </span>
+                    )}
+                  </React.Fragment>
                 ))}
               </div>
               {hasViewerMapOverlay && viewerMapOverlay ? (
@@ -1000,10 +1190,29 @@ const ServerDetails: React.FC = () => {
                   {viewerMapOverlayReason ? ` (${viewerMapOverlayReason})` : ''}
                 </p>
               )}
+              {hasViewerMapOverlay && viewerWorldCursor && (
+                <p className="mt-1 text-[11px] text-zinc-500">
+                  Cursor world XY: <span className="font-mono">{formatCoord(viewerWorldCursor.x)}</span> /{' '}
+                  <span className="font-mono">{formatCoord(viewerWorldCursor.y)}</span>
+                </p>
+              )}
             </div>
 
             <div className="bg-zinc-950/40 border border-zinc-800 rounded p-3">
-              <p className="text-xs text-zinc-400 uppercase font-bold mb-3">Players do frame</p>
+              <p className="text-xs text-zinc-400 uppercase font-bold mb-2">Players do frame</p>
+              <div className="mb-3 space-y-2">
+                <input
+                  type="text"
+                  value={viewerSearch}
+                  onChange={(event) => setViewerSearch(event.target.value)}
+                  placeholder="Buscar por nome ou steamId"
+                  className="w-full rounded border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-xs text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-cyan-700"
+                />
+                <p className="text-[11px] text-zinc-500">
+                  Exibindo {viewerPlayers.length.toLocaleString('pt-BR')} de{' '}
+                  {Number(viewerState?.playerCount || viewerPlayers.length).toLocaleString('pt-BR')} players no frame.
+                </p>
+              </div>
               <div className="max-h-72 overflow-y-auto space-y-2 pr-1">
                 {!viewerPlayers.length && (
                   <p className="text-zinc-500 text-sm">Nenhum player no snapshot do viewer.</p>
