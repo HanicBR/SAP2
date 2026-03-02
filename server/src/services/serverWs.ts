@@ -2,7 +2,9 @@ import type { IncomingMessage } from 'http';
 import type { Server as HttpServer } from 'http';
 import type { Duplex } from 'stream';
 import { WebSocketServer, type RawData, type WebSocket } from 'ws';
+import jwt from 'jsonwebtoken';
 import { prisma } from '../db/client';
+import { UserRole } from '../domain';
 import { findServerByApiKey } from './serverAuth';
 import { ingestPlayerPulse, PlayerPulseIngestError } from './playerPulseIngest';
 import { getPlayerPulseSettings } from './playtimePulse';
@@ -16,6 +18,7 @@ import {
 } from './serverActions';
 
 const WS_SERVERS_PATH = '/ws/servers';
+const WS_ADMIN_VIEWER_PATH = '/ws/admin/viewer';
 const MAX_PLAYER_STATE_PLAYERS = 256;
 const MAX_PLAYER_STATE_PLAYER_NAME = 80;
 const MAX_PLAYER_STATE_MAP_LENGTH = 96;
@@ -115,33 +118,64 @@ type UpgradeError = {
   message: string;
 };
 
+type WsAuthUser = {
+  id: string;
+  username: string;
+  email: string;
+  role: UserRole;
+};
+
+type AdminViewerConnection = {
+  connectedAt: string;
+  lastMessageAt: string;
+  messagesReceived: number;
+  invalidMessages: number;
+  subscribedServerId?: string;
+  remoteAddress?: string;
+  userAgent?: string;
+  user: WsAuthUser;
+  socket: WebSocket;
+};
+
 const connectedByServerId = new Map<string, ConnectedServerSocket>();
 const liveStateByServerId = new Map<string, LiveServerPlayerState>();
 const viewerStateByServerId = new Map<string, LiveServerViewerState>();
 const wsPresenceByServerId = new Map<string, WsPresenceRecord>();
+const adminViewerConnections = new Map<WebSocket, AdminViewerConnection>();
 
 let initialized = false;
 let wsServer: WebSocketServer | null = null;
 let actionDispatchTimer: NodeJS.Timeout | null = null;
 
 const nowIso = () => new Date().toISOString();
+const getJwtSecret = () => process.env.JWT_SECRET || 'dev-secret-change-me';
+
+const roleOrder = [UserRole.USER, UserRole.MODERATOR, UserRole.ADMIN, UserRole.SUPERADMIN];
+
+const isRoleAtLeast = (role: UserRole, minRole: UserRole): boolean => {
+  const userIndex = roleOrder.indexOf(role);
+  const minIndex = roleOrder.indexOf(minRole);
+  if (userIndex < 0 || minIndex < 0) return false;
+  return userIndex >= minIndex;
+};
 
 const toOptionalString = (value: unknown): string | undefined => {
   const parsed = String(value ?? '').trim();
   return parsed || undefined;
 };
 
-const parsePathName = (req: IncomingMessage): string | undefined => {
+const parseRequestUrl = (req: IncomingMessage): URL | undefined => {
   const rawUrl = toOptionalString(req.url);
   const host = toOptionalString(req.headers.host) || 'localhost';
   if (!rawUrl) return undefined;
   try {
-    const parsed = new URL(rawUrl, `http://${host}`);
-    return parsed.pathname;
+    return new URL(rawUrl, `http://${host}`);
   } catch {
     return undefined;
   }
 };
+
+const parsePathName = (req: IncomingMessage): string | undefined => parseRequestUrl(req)?.pathname;
 
 const pickClientIp = (req: IncomingMessage): string | undefined => {
   const forwarded = toOptionalString(req.headers['x-forwarded-for']);
@@ -395,9 +429,28 @@ const sanitizeViewerStatePayload = (
   };
 };
 
+const mapViewerStateOutbound = (snapshot: LiveServerViewerState) => ({
+  serverId: snapshot.serverId,
+  receivedAt: snapshot.receivedAt,
+  ...(snapshot.sentAt ? { sentAt: snapshot.sentAt } : {}),
+  ...(snapshot.map ? { map: snapshot.map } : {}),
+  playerCount: snapshot.playerCount,
+  players: snapshot.players,
+});
+
 const trySend = (socket: WebSocket, payload: Record<string, unknown>) => {
   if (socket.readyState !== 1) return;
   socket.send(JSON.stringify(payload));
+};
+
+const broadcastViewerState = (snapshot: LiveServerViewerState) => {
+  adminViewerConnections.forEach((connection) => {
+    if (connection.subscribedServerId !== snapshot.serverId) return;
+    trySend(connection.socket, {
+      type: 'viewer_state',
+      ...mapViewerStateOutbound(snapshot),
+    });
+  });
 };
 
 const detachSocketIfCurrent = (serverId: string, socket: WebSocket) => {
@@ -590,6 +643,7 @@ const attachServerSocket = (
         ...sanitizedState,
       };
       viewerStateByServerId.set(serverId, snapshot);
+      broadcastViewerState(snapshot);
       state.lastViewerStateAt = receivedAt;
       state.lastViewerPlayers = snapshot.playerCount;
       touchServerPresenceFromWs(serverId, {
@@ -683,6 +737,199 @@ const authenticateUpgrade = async (request: IncomingMessage) => {
   return server;
 };
 
+const readBearerTokenFromRequest = (request: IncomingMessage): string | undefined => {
+  const authHeader = toOptionalString(request.headers.authorization);
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const tokenFromHeader = toOptionalString(authHeader.slice('Bearer '.length));
+    if (tokenFromHeader) return tokenFromHeader;
+  }
+
+  const parsed = parseRequestUrl(request);
+  const tokenFromQuery = toOptionalString(parsed?.searchParams.get('token') || undefined);
+  if (tokenFromQuery) return tokenFromQuery;
+  return undefined;
+};
+
+const authenticateAdminViewerUpgrade = async (request: IncomingMessage): Promise<WsAuthUser> => {
+  const token = readBearerTokenFromRequest(request);
+  if (!token) {
+    throw buildUpgradeError(401, 'Missing authorization token');
+  }
+
+  let payload: WsAuthUser;
+  try {
+    payload = jwt.verify(token, getJwtSecret()) as WsAuthUser;
+  } catch {
+    throw buildUpgradeError(401, 'Invalid or expired token');
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: payload.id },
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      role: true,
+    },
+  });
+  if (!user) {
+    throw buildUpgradeError(401, 'Invalid token (user not found)');
+  }
+
+  const role = user.role as UserRole;
+  if (!isRoleAtLeast(role, UserRole.ADMIN)) {
+    throw buildUpgradeError(403, 'Forbidden');
+  }
+
+  return {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    role,
+  };
+};
+
+const attachAdminViewerSocket = (
+  socket: WebSocket,
+  request: IncomingMessage,
+  user: WsAuthUser,
+) => {
+  const connectedAt = nowIso();
+  const remoteAddress = pickClientIp(request);
+  const userAgent = toOptionalString(request.headers['user-agent']);
+  const state: AdminViewerConnection = {
+    connectedAt,
+    lastMessageAt: connectedAt,
+    messagesReceived: 0,
+    invalidMessages: 0,
+    user,
+    socket,
+    ...(remoteAddress ? { remoteAddress } : {}),
+    ...(userAgent ? { userAgent } : {}),
+  };
+
+  adminViewerConnections.set(socket, state);
+
+  socket.on('message', (buffer: RawData, isBinary: boolean) => {
+    state.lastMessageAt = nowIso();
+    state.messagesReceived += 1;
+
+    if (isBinary) {
+      state.invalidMessages += 1;
+      trySend(socket, { type: 'error', reason: 'binary_not_supported' });
+      return;
+    }
+
+    const parsed = parseJsonMessage(buffer);
+    if (!parsed || typeof parsed !== 'object') {
+      state.invalidMessages += 1;
+      trySend(socket, { type: 'error', reason: 'invalid_json' });
+      return;
+    }
+
+    const type = toOptionalString((parsed as any).type)?.toLowerCase();
+    if (type === 'ping') {
+      trySend(socket, { type: 'pong', now: nowIso() });
+      return;
+    }
+
+    if (type === 'subscribe') {
+      const payload = (parsed as any).payload ?? (parsed as any).data ?? parsed;
+      const serverId = toOptionalString(payload?.serverId || payload?.id);
+      if (!serverId) {
+        state.invalidMessages += 1;
+        trySend(socket, { type: 'error', reason: 'subscribe_missing_server_id' });
+        return;
+      }
+      state.subscribedServerId = serverId;
+      trySend(socket, {
+        type: 'subscribed',
+        serverId,
+        at: nowIso(),
+      });
+
+      const snapshot = viewerStateByServerId.get(serverId);
+      if (snapshot) {
+        trySend(socket, {
+          type: 'viewer_state',
+          initial: true,
+          ...mapViewerStateOutbound(snapshot),
+        });
+      } else {
+        trySend(socket, {
+          type: 'viewer_state_unavailable',
+          serverId,
+          available: false,
+        });
+      }
+      return;
+    }
+
+    if (type === 'unsubscribe') {
+      const unsubscribedServerId = state.subscribedServerId;
+      delete state.subscribedServerId;
+      trySend(socket, {
+        type: 'unsubscribed',
+        ...(unsubscribedServerId ? { serverId: unsubscribedServerId } : {}),
+        at: nowIso(),
+      });
+      return;
+    }
+
+    if (type === 'get_state') {
+      const payload = (parsed as any).payload ?? (parsed as any).data ?? parsed;
+      const serverId = toOptionalString(payload?.serverId || state.subscribedServerId);
+      if (!serverId) {
+        state.invalidMessages += 1;
+        trySend(socket, { type: 'error', reason: 'get_state_missing_server_id' });
+        return;
+      }
+      const snapshot = viewerStateByServerId.get(serverId);
+      if (snapshot) {
+        trySend(socket, {
+          type: 'viewer_state',
+          initial: true,
+          ...mapViewerStateOutbound(snapshot),
+        });
+      } else {
+        trySend(socket, {
+          type: 'viewer_state_unavailable',
+          serverId,
+          available: false,
+        });
+      }
+      return;
+    }
+
+    state.invalidMessages += 1;
+    trySend(socket, { type: 'error', reason: 'unknown_message_type' });
+  });
+
+  socket.on('close', () => {
+    adminViewerConnections.delete(socket);
+  });
+
+  socket.on('error', (err: Error) => {
+    state.invalidMessages += 1;
+    console.error('Admin viewer WS socket error', {
+      userId: state.user.id,
+      error: err?.message || String(err),
+    });
+  });
+
+  trySend(socket, {
+    type: 'connected',
+    path: WS_ADMIN_VIEWER_PATH,
+    transport: 'websocket',
+    connectedAt,
+    user: {
+      id: user.id,
+      username: user.username,
+      role: user.role,
+    },
+  });
+};
+
 export const initializeServerWebSocket = (httpServer: HttpServer) => {
   if (initialized) return;
   initialized = true;
@@ -700,7 +947,7 @@ export const initializeServerWebSocket = (httpServer: HttpServer) => {
 
   httpServer.on('upgrade', (request, socket, head) => {
     const pathname = parsePathName(request);
-    if (pathname !== WS_SERVERS_PATH) {
+    if (pathname !== WS_SERVERS_PATH && pathname !== WS_ADMIN_VIEWER_PATH) {
       rejectUpgrade(socket, 404, 'Not Found');
       return;
     }
@@ -711,12 +958,20 @@ export const initializeServerWebSocket = (httpServer: HttpServer) => {
 
     void (async () => {
       try {
-        const authenticatedServer = await authenticateUpgrade(request);
         if (!wsServer) {
           rejectUpgrade(socket, 503, 'WebSocket server unavailable');
           return;
         }
 
+        if (pathname === WS_ADMIN_VIEWER_PATH) {
+          const authenticatedAdmin = await authenticateAdminViewerUpgrade(request);
+          wsServer.handleUpgrade(request, socket, head, (ws: WebSocket) => {
+            attachAdminViewerSocket(ws, request, authenticatedAdmin);
+          });
+          return;
+        }
+
+        const authenticatedServer = await authenticateUpgrade(request);
         wsServer.handleUpgrade(request, socket, head, (ws: WebSocket) => {
           attachServerSocket(ws, request, authenticatedServer.id);
         });
@@ -737,6 +992,17 @@ export const initializeServerWebSocket = (httpServer: HttpServer) => {
 export const getServerWsHealthSnapshot = () => {
   const nowMs = Date.now();
   const actionSummary = getServerActionHealthSummary();
+  const viewerSubscribersByServerId = new Map<string, number>();
+  let adminViewerInvalidMessagesTotal = 0;
+  let adminViewerMessagesReceivedTotal = 0;
+  adminViewerConnections.forEach((connection) => {
+    adminViewerMessagesReceivedTotal += connection.messagesReceived;
+    adminViewerInvalidMessagesTotal += connection.invalidMessages;
+    const serverId = connection.subscribedServerId;
+    if (!serverId) return;
+    viewerSubscribersByServerId.set(serverId, (viewerSubscribersByServerId.get(serverId) || 0) + 1);
+  });
+
   const servers = Array.from(connectedByServerId.values())
     .map((entry) => {
       const idleSeconds = Math.max(
@@ -769,6 +1035,7 @@ export const getServerWsHealthSnapshot = () => {
         actionWsAckErrorTotal: actionRuntime.wsAckErrorTotal,
         actionWsRetryTotal: actionRuntime.wsRetryTotal,
         actionHttpPulledTotal: actionRuntime.httpPulledTotal,
+        viewerSubscribers: viewerSubscribersByServerId.get(entry.serverId) || 0,
         ...(entry.lastPulseAt ? { lastPulseAt: entry.lastPulseAt } : {}),
         ...(entry.lastStateAt ? { lastStateAt: entry.lastStateAt } : {}),
         ...(entry.lastStatePlayers !== undefined ? { lastStatePlayers: entry.lastStatePlayers } : {}),
@@ -789,9 +1056,16 @@ export const getServerWsHealthSnapshot = () => {
 
   return {
     path: WS_SERVERS_PATH,
+    adminViewerPath: WS_ADMIN_VIEWER_PATH,
     connectedServers: servers.length,
     serversWithLiveState: liveStateByServerId.size,
     serversWithViewerState: viewerStateByServerId.size,
+    adminViewerConnected: adminViewerConnections.size,
+    adminViewerSubscribed: Array.from(adminViewerConnections.values()).filter(
+      (connection) => Boolean(connection.subscribedServerId),
+    ).length,
+    adminViewerMessagesReceivedTotal,
+    adminViewerInvalidMessagesTotal,
     serverActions: actionSummary,
     now: nowIso(),
     servers,
