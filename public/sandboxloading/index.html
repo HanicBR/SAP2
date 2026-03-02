@@ -1,26 +1,22 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
   <title>Backstabber Brasil - Loading</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Teko:wght@400;600;700&display=swap" rel="stylesheet">
 
   <style>
-    /* =========================================================
-       CONFIG VISUAL
-       ========================================================= */
+
     :root{
-      /* >>> APLICADO: MESMA MUDANÇA (menos escuro) <<< */
-      --bg: #2a3145;               /* fallback mais escuro porém confortável */
-      --bg-brightness: 0.82;       /* clareia a imagem */
+
+      --bg: #2a3145;
+      --bg-brightness: 0.82;
       --bg-saturate: 1.02;
       --bg-contrast: 1.00;
 
-      /* CARDS MAIS TRANSPARENTES */
       --glass: rgba(255,255,255,0.50);
       --glass-strong: rgba(255,255,255,0.60);
       --glass-border: rgba(0,0,0,0.05);
@@ -55,14 +51,13 @@
 
     * { box-sizing: border-box; margin:0; padding:0; }
 
-    /* >>> FIX PRINCIPAL PARA 16:10 / CEF <<< */
     html, body {
       width: 100%;
       height: 100%;
       min-height: 100vh;
       margin: 0;
-      overflow: hidden;         /* padrão: sem scroll */
-      background: var(--bg);    /* fallback */
+      overflow: hidden;
+      background: var(--bg);
     }
 
     body {
@@ -72,9 +67,6 @@
       position: relative;
     }
 
-    /* =========================================================
-       BACKGROUND (cover total, sem faixa em 16:10)
-       ========================================================= */
     .bg-layer{
       position: fixed;
       top: -50%;
@@ -91,7 +83,6 @@
       background-repeat: no-repeat;
     }
 
-    /* >>> overlay leve (metade do “escuro”) <<< */
     .bg-layer::before{
       content:"";
       position:absolute;
@@ -121,9 +112,6 @@
         contrast(var(--bg-contrast));
     }
 
-    /* =========================================================
-       LAYOUT
-       ========================================================= */
     .wrap {
       position: relative;
       z-index: 1;
@@ -150,7 +138,6 @@
       min-height: 0;
     }
 
-    /* TOP GRID: 3 cards em cima, VIP embaixo crescendo por colunas */
     .top-grid {
       display:grid;
       grid-template-columns: 1.25fr 1fr 1fr;
@@ -159,15 +146,13 @@
       align-items: stretch;
     }
 
-    /* primeira linha */
     .card-ttt { grid-column: 1; grid-row: 1; }
     .card-vipclub { grid-column: 2; grid-row: 1; }
     .card-rules { grid-column: 3; grid-row: 1; }
 
-    /* VIP na segunda linha – largura controlada via JS (grid-column) */
     .card-vips {
       grid-row: 2;
-      grid-column: 2 / span 1; /* padrão: só coluna do meio (até 4 VIPs) */
+      grid-column: 2 / span 1;
       justify-self: stretch;
       width: 100%;
       max-width: 100%;
@@ -189,7 +174,6 @@
       position: relative;
     }
 
-    /* brilho interno mais suave (não afeta texto) */
     .glass-card::after{
       content:"";
       position:absolute;
@@ -205,9 +189,6 @@
       scrollbar-width: thin;
     }
 
-    /* =========================================================
-       "TTT" CARD (aqui SANDBOX)
-       ========================================================= */
     .ttt-header {
       display:flex; align-items:center; gap:10px;
       font-weight:800; font-size: var(--fs-xl);
@@ -244,9 +225,6 @@
     .dot-green{ background:#22c55e; }
     .dot-blue{ background:#3b82f6; }
 
-    /* =========================================================
-       CARD DE ERRO AO ENTRAR (antes: VIP CLUB)
-       ========================================================= */
     .vip-club-card{
       justify-content:center;
       text-align:center;
@@ -266,9 +244,6 @@
       padding: 0 8px;
     }
 
-    /* =========================================================
-       VIPS CARD (CENTRAL)
-       ========================================================= */
     .vip-box{
       background: var(--glass-strong);
       border: 1px solid var(--glass-border);
@@ -304,7 +279,6 @@
       color:#111827;
     }
 
-    /* VIPs em colunas com no máximo 4 por coluna */
     .vip-list{
       display:grid;
       grid-template-rows: repeat(4, auto);
@@ -352,9 +326,6 @@
       100%{ background-position:400% 50%; }
     }
 
-    /* =========================================================
-       RULES CARD
-       ========================================================= */
     .rules-title{
       font-weight:900; font-size: var(--fs-lg);
       text-align:center;
@@ -377,9 +348,6 @@
       flex-shrink: 0;
     }
 
-    /* =========================================================
-       BOTTOM LOADING BAR
-       ========================================================= */
     .loading-bar{
       background: var(--glass-strong);
       border: 1px solid var(--glass-border);
@@ -486,9 +454,6 @@
       margin-left: auto;
     }
 
-    /* =========================================================
-       RESPONSIVIDADE POR LARGURA
-       ========================================================= */
     @media (max-width: 1280px){
       .container{ max-width: 1200px; margin-top: 2%; }
       .wrap{ padding: 10px var(--pad-x); }
@@ -522,9 +487,6 @@
       .ttt-subtitle{ font-size: var(--fs-xs); }
     }
 
-    /* =========================================================
-       RESPONSIVIDADE POR ALTURA
-       ========================================================= */
     @media (max-height: 800px){
       html, body{ overflow-y: auto; overflow-x: hidden; }
       .container{ margin-top: 0; }
@@ -564,7 +526,6 @@
     <source src="assets/music/gtavicecity.ogg" type="audio/ogg">
   </audio>
 
-  <!-- background fixo -->
   <div class="bg-layer" id="bg-layer">
     <img id="bg-img" alt="">
   </div>
@@ -572,10 +533,8 @@
   <div class="wrap" id="wrap">
     <div class="container">
 
-      <!-- TOP GRID -->
       <div class="top-grid">
 
-        <!-- SANDBOX -->
         <div class="glass-card card-ttt">
           <div class="ttt-header">
             <span>BACKSTABBER</span>
@@ -603,7 +562,6 @@
           </div>
         </div>
 
-        <!-- CARD DE ERRO AO ENTRAR -->
         <div class="glass-card vip-club-card card-vipclub">
           <div class="vip-club-title">Erro ao entrar no servidor?</div>
           <div class="card-scroll vip-club-text">
@@ -613,7 +571,6 @@
           </div>
         </div>
 
-        <!-- Rules -->
         <div class="glass-card card-rules">
           <div class="rules-title">O que você deve saber</div>
           <div class="card-scroll rules-list">
@@ -625,7 +582,6 @@
           </div>
         </div>
 
-        <!-- VIPs CENTRAL -->
         <div class="vip-box card-vips">
           <div class="vip-head">
             <span class="vip-badge">VIP</span>
@@ -636,10 +592,8 @@
 
       </div>
 
-      <!-- espaço do meio -->
       <div style="min-height:0;"></div>
 
-      <!-- BOTTOM loading + créditos separados -->
       <div class="bottom-area">
 
         <div class="loading-bar">
@@ -677,9 +631,7 @@
   </div>
 
   <script>
-  /* =========================================================
-     CONFIG
-     ========================================================= */
+
   var LOADING_CONFIG = {
     fallbackServerName: "Backstabber Brasil",
     subtitleWhenIdle: "Conectando ao servidor...",
@@ -704,9 +656,6 @@
     { steamId: "", name: "toshiba", avatar: "https://avatars.fastly.steamstatic.com/09dee4b78688c03e6e1181947f9f7ecbd73ce018_full.jpg" }
   ];
 
-  /* =========================================================
-     BACKGROUND FIXO (cover total)
-     ========================================================= */
   (function initBackground(){
     var layer = document.getElementById("bg-layer");
     if(!layer) return;
@@ -719,22 +668,6 @@
     pre.src = url;
   })();
 
-  (function initBackgroundImg(){
-    var imgEl = document.getElementById("bg-img");
-    if(!imgEl) return;
-
-    var ABS_BG = "https://hanicbr.github.io/backtttloading/assets/bg.png";
-
-    var pre = new Image();
-    pre.onload = function(){ imgEl.src = ABS_BG; };
-    pre.onerror = function(){};
-
-    pre.src = ABS_BG + (ABS_BG.indexOf("?") === -1 ? "?" : "&") + "v=" + Date.now();
-  })();
-
-  /* =========================================================
-     VIP RENDER + AJUSTE DE LARGURA DO CARD
-     ========================================================= */
   function renderVips(){
     var list = document.getElementById("vip-list");
     if(!list) return;
@@ -775,9 +708,6 @@
   }
   renderVips();
 
-  /* =========================================================
-     MÚSICA DE FUNDO
-     ========================================================= */
   (function initMusic(){
     var audio = document.getElementById("bg-music");
     if(!audio) return;
@@ -800,9 +730,6 @@
     }
   })();
 
-  /* =========================================================
-     PROGRESSO / STATUS
-     ========================================================= */
   var currentProgress = 0;
   var mountingAddons = false;
 
@@ -820,9 +747,6 @@
     }
   }
 
-  /* =========================================================
-     HOOKS DO GMOD
-     ========================================================= */
   function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode){
     document.getElementById("server-name").textContent =
       servername || LOADING_CONFIG.fallbackServerName;
@@ -872,9 +796,6 @@
   window.SetStatusChanged = SetStatusChanged;
   window.DownloadingFile = DownloadingFile;
 
-  /* =========================================================
-     AUTO SCALE (1920x1080 baseline)
-     ========================================================= */
   (function autoScale(){
     function apply(){
       var w = window.innerWidth;
@@ -889,9 +810,6 @@
     window.addEventListener("resize", apply);
   })();
 
-  /* =========================================================
-     PREVIEW FORA DO GMOD (Sandbox)
-     ========================================================= */
   (function preview(){
     var ua = navigator.userAgent || "";
     if(ua.indexOf("GMod") !== -1) return;

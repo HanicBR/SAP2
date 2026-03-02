@@ -2,6 +2,7 @@ if CLIENT then return end
 
 local sam = sam
 local math_floor = math.floor
+local math_ceil = math.ceil
 local math_min = math.min
 local math_max = math.max
 local math_random = math.random
@@ -31,7 +32,9 @@ local c_pulse_url = CreateConVar("bsb_pulse_url", "", FCVAR_ARCHIVE, "Backstabbe
 local c_pulse_seconds = CreateConVar("bsb_pulse_seconds", "60", FCVAR_ARCHIVE, "Player pulse interval in seconds.")
 local c_state_enable = CreateConVar("bsb_state_enable", "1", FCVAR_ARCHIVE, "Enable websocket player live-state snapshots.")
 local c_state_seconds = CreateConVar("bsb_state_seconds", "10", FCVAR_ARCHIVE, "Player live-state snapshot interval in seconds.")
-local c_ws_enable = CreateConVar("bsb_ws_enable", "0", FCVAR_ARCHIVE, "Enable Backstabber WebSocket transport for pulse/live-state updates.")
+local c_viewer_enable = CreateConVar("bsb_viewer_enable", "0", FCVAR_ARCHIVE, "Enable websocket viewer-state snapshots (player positions for admin webviewer).")
+local c_viewer_seconds = CreateConVar("bsb_viewer_seconds", "1", FCVAR_ARCHIVE, "Viewer-state snapshot interval in seconds.")
+local c_ws_enable = CreateConVar("bsb_ws_enable", "0", FCVAR_ARCHIVE, "Enable Backstabber WebSocket transport for pulse/live-state/viewer-state updates.")
 local c_ws_url = CreateConVar("bsb_ws_url", "", FCVAR_ARCHIVE, "Backstabber server WebSocket endpoint. Leave empty to auto-resolve from bsb_ingest_url.")
 local c_ws_verify_tls = CreateConVar("bsb_ws_verify_tls", "1", FCVAR_ARCHIVE, "Verify TLS certificate when connecting to WSS endpoint.")
 local c_ws_reconnect_seconds = CreateConVar("bsb_ws_reconnect_seconds", "5", FCVAR_ARCHIVE, "Base reconnect delay in seconds for Backstabber WebSocket.")
@@ -263,6 +266,7 @@ local function is_ws_transport_needed()
 	if not c_ws_enable:GetBool() then return false end
 	if c_pulse_enable:GetBool() then return true end
 	if c_state_enable:GetBool() then return true end
+	if c_viewer_enable:GetBool() then return true end
 	if c_actions_enable:GetBool() then return true end
 	return false
 end
@@ -470,6 +474,14 @@ local function connect_ws_socket()
 			return
 		end
 
+		if msg_type == "viewer_state_ack" then
+			ws_last_ack_at = RealTime()
+			if parsed.ok == false then
+				debug_log("ws viewer ack error: " .. tostring(parsed.error or "unknown"))
+			end
+			return
+		end
+
 		if msg_type == "server_action" then
 			handle_server_action_ws(socket, parsed)
 			return
@@ -534,7 +546,7 @@ local function send_ws_message(message_type, payload)
 	end)
 	if not ok_write then
 		ws_last_error = tostring(err_write or "ws_write_failed")
-		debug_log("ws pulse write failed: " .. ws_last_error)
+		debug_log("ws write failed: " .. ws_last_error)
 		close_ws_socket(true)
 		schedule_ws_reconnect()
 		return false
@@ -549,6 +561,10 @@ end
 
 local function send_player_state_ws(payload)
 	return send_ws_message("player_state", payload)
+end
+
+local function send_viewer_state_ws(payload)
+	return send_ws_message("viewer_state", payload)
 end
 
 local function ws_keepalive_tick()
@@ -1337,6 +1353,76 @@ local function collect_online_players()
 	return players
 end
 
+local function round_decimal(value, decimals)
+	local number = tonumber(value)
+	if not number then return 0 end
+	local scale = 10 ^ (decimals or 0)
+	if number >= 0 then
+		return math_floor(number * scale + 0.5) / scale
+	end
+	return math_ceil(number * scale - 0.5) / scale
+end
+
+local function collect_viewer_players()
+	local players = {}
+	local all_players = player.GetAll and player.GetAll() or {}
+	for i = 1, #all_players do
+		local ply = all_players[i]
+		if is_valid_player(ply) and not ply:IsBot() then
+			local steamid = normalize_steamid(ply:SteamID())
+			if steamid then
+				local pos = ply:GetPos()
+				local eye_angles = nil
+				if ply.EyeAngles then
+					eye_angles = ply:EyeAngles()
+				end
+				if not eye_angles and ply.GetAngles then
+					eye_angles = ply:GetAngles()
+				end
+
+				local team_id = nil
+				if ply.Team then
+					team_id = tonumber(ply:Team() or "")
+				end
+				local team_name = nil
+				if team_id and team and team.GetName then
+					local parsed_team_name = tostring(team.GetName(team_id) or "")
+					if parsed_team_name ~= "" then
+						team_name = parsed_team_name
+					end
+				end
+
+				local entry = {
+					steamId = steamid,
+					name = tostring(ply:Nick() or ""),
+					pos = {
+						x = round_decimal(pos and pos.x or 0, 1),
+						y = round_decimal(pos and pos.y or 0, 1),
+						z = round_decimal(pos and pos.z or 0, 1),
+					},
+					eyeAngles = {
+						pitch = round_decimal(eye_angles and eye_angles.p or 0, 1),
+						yaw = round_decimal(eye_angles and eye_angles.y or 0, 1),
+						roll = round_decimal(eye_angles and eye_angles.r or 0, 1),
+					},
+					health = math_max(0, math_floor(tonumber(ply:Health() or 0) or 0)),
+					armor = math_max(0, math_floor(tonumber(ply:Armor() or 0) or 0)),
+					alive = ply.Alive and (ply:Alive() and true or false) or false,
+				}
+				if team_id then
+					entry.teamId = math_floor(team_id)
+				end
+				if team_name then
+					entry.teamName = team_name
+				end
+
+				players[#players + 1] = entry
+			end
+		end
+	end
+	return players
+end
+
 local function send_player_live_state()
 	if not is_configured() then return end
 	if not c_state_enable:GetBool() then return end
@@ -1350,6 +1436,22 @@ local function send_player_live_state()
 	}
 
 	send_player_state_ws(payload)
+end
+
+local function send_viewer_state()
+	if not is_configured() then return end
+	if not c_ws_enable:GetBool() then return end
+	if not c_viewer_enable:GetBool() then return end
+
+	local players = collect_viewer_players()
+	local payload = {
+		sentAt = now_iso_utc(),
+		map = game.GetMap(),
+		playerCount = get_player_count(),
+		players = players,
+	}
+
+	send_viewer_state_ws(payload)
 end
 
 local function send_player_pulse()
@@ -2030,6 +2132,10 @@ end)
 
 timer.Create("bsb_ingest_player_state", math_max(5, c_state_seconds:GetFloat()), 0, function()
 	send_player_live_state()
+end)
+
+timer.Create("bsb_ingest_viewer_state", math_max(1, c_viewer_seconds:GetFloat()), 0, function()
+	send_viewer_state()
 end)
 
 timer.Create("bsb_ingest_ws_maintain", 5, 0, function()

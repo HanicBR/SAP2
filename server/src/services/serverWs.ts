@@ -19,6 +19,7 @@ const WS_SERVERS_PATH = '/ws/servers';
 const MAX_PLAYER_STATE_PLAYERS = 256;
 const MAX_PLAYER_STATE_PLAYER_NAME = 80;
 const MAX_PLAYER_STATE_MAP_LENGTH = 96;
+const MAX_VIEWER_TEAM_NAME_LENGTH = 64;
 const MAX_SERVER_ACTIONS_PER_DISPATCH = 20;
 const SERVER_ACTION_DISPATCH_TICK_MS = 2_000;
 const WS_PRESENCE_TOUCH_MIN_MS = 10_000;
@@ -44,6 +45,39 @@ type LiveServerPlayerState = {
   players: LiveStatePlayer[];
 };
 
+type ViewerStateVector3 = {
+  x: number;
+  y: number;
+  z: number;
+};
+
+type ViewerStateAngles = {
+  pitch: number;
+  yaw: number;
+  roll: number;
+};
+
+type ViewerStatePlayer = {
+  steamId: string;
+  name?: string;
+  pos: ViewerStateVector3;
+  eyeAngles: ViewerStateAngles;
+  health?: number;
+  armor?: number;
+  teamId?: number;
+  teamName?: string;
+  alive?: boolean;
+};
+
+type LiveServerViewerState = {
+  serverId: string;
+  receivedAt: string;
+  sentAt?: string;
+  map?: string;
+  playerCount: number;
+  players: ViewerStatePlayer[];
+};
+
 type ConnectedServerSocket = {
   serverId: string;
   connectedAt: string;
@@ -52,6 +86,7 @@ type ConnectedServerSocket = {
   invalidMessages: number;
   playerPulseMessages: number;
   playerStateMessages: number;
+  viewerStateMessages: number;
   serverActionMessages: number;
   serverActionAckMessages: number;
   serverActionAckOk: number;
@@ -61,6 +96,8 @@ type ConnectedServerSocket = {
   lastPulseAt?: string;
   lastStateAt?: string;
   lastStatePlayers?: number;
+  lastViewerStateAt?: string;
+  lastViewerPlayers?: number;
   lastActionSentAt?: string;
   lastActionId?: string;
   lastActionAckAt?: string;
@@ -80,6 +117,7 @@ type UpgradeError = {
 
 const connectedByServerId = new Map<string, ConnectedServerSocket>();
 const liveStateByServerId = new Map<string, LiveServerPlayerState>();
+const viewerStateByServerId = new Map<string, LiveServerViewerState>();
 const wsPresenceByServerId = new Map<string, WsPresenceRecord>();
 
 let initialized = false;
@@ -153,6 +191,13 @@ const parsePositiveInt = (value: unknown): number | undefined => {
   const parsed = Number.parseInt(String(value ?? '').trim(), 10);
   if (!Number.isFinite(parsed)) return undefined;
   if (parsed < 0) return undefined;
+  return parsed;
+};
+
+const parseFiniteNumber = (value: unknown): number | undefined => {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  const parsed = Number.parseFloat(String(value ?? '').trim());
+  if (!Number.isFinite(parsed)) return undefined;
   return parsed;
 };
 
@@ -277,6 +322,79 @@ const sanitizePlayerStatePayload = (input: unknown): Omit<LiveServerPlayerState,
   };
 };
 
+const sanitizeViewerVector3 = (raw: any): ViewerStateVector3 => {
+  const x = parseFiniteNumber(raw?.x);
+  const y = parseFiniteNumber(raw?.y);
+  const z = parseFiniteNumber(raw?.z);
+  return {
+    x: Number.isFinite(x) ? Number(x) : 0,
+    y: Number.isFinite(y) ? Number(y) : 0,
+    z: Number.isFinite(z) ? Number(z) : 0,
+  };
+};
+
+const sanitizeViewerAngles = (raw: any): ViewerStateAngles => {
+  const pitchRaw = parseFiniteNumber(raw?.pitch ?? raw?.p);
+  const yawRaw = parseFiniteNumber(raw?.yaw ?? raw?.y);
+  const rollRaw = parseFiniteNumber(raw?.roll ?? raw?.r);
+  return {
+    pitch: Number.isFinite(pitchRaw) ? Number(pitchRaw) : 0,
+    yaw: Number.isFinite(yawRaw) ? Number(yawRaw) : 0,
+    roll: Number.isFinite(rollRaw) ? Number(rollRaw) : 0,
+  };
+};
+
+const sanitizeViewerStatePayload = (
+  input: unknown,
+): Omit<LiveServerViewerState, 'serverId' | 'receivedAt'> => {
+  const body = (input && typeof input === 'object' ? input : {}) as any;
+  const playersRaw = Array.isArray(body.players) ? body.players : [];
+
+  const seenSteamId = new Set<string>();
+  const players: ViewerStatePlayer[] = [];
+  playersRaw.forEach((raw: any) => {
+    if (players.length >= MAX_PLAYER_STATE_PLAYERS) return;
+    const steamId = String(raw?.steamId || '').trim();
+    if (!isTrackableSteamId(steamId)) return;
+    if (seenSteamId.has(steamId)) return;
+    seenSteamId.add(steamId);
+
+    const parsedName = toOptionalString(raw?.name);
+    const teamName = toOptionalString(raw?.teamName)?.slice(0, MAX_VIEWER_TEAM_NAME_LENGTH);
+    const health = parsePositiveInt(raw?.health);
+    const armor = parsePositiveInt(raw?.armor);
+    const teamId = parsePositiveInt(raw?.teamId);
+    const posRaw = raw?.pos ?? raw?.position ?? raw?.origin;
+    const eyeAnglesRaw = raw?.eyeAngles ?? raw?.angles ?? raw?.ang;
+    const alive = typeof raw?.alive === 'boolean' ? raw.alive : undefined;
+
+    players.push({
+      steamId,
+      ...(parsedName ? { name: parsedName.slice(0, MAX_PLAYER_STATE_PLAYER_NAME) } : {}),
+      pos: sanitizeViewerVector3(posRaw),
+      eyeAngles: sanitizeViewerAngles(eyeAnglesRaw),
+      ...(health !== undefined ? { health } : {}),
+      ...(armor !== undefined ? { armor } : {}),
+      ...(teamId !== undefined ? { teamId } : {}),
+      ...(teamName ? { teamName } : {}),
+      ...(alive !== undefined ? { alive } : {}),
+    });
+  });
+
+  const mapRaw = toOptionalString(body.map);
+  const map = mapRaw ? mapRaw.slice(0, MAX_PLAYER_STATE_MAP_LENGTH) : undefined;
+  const sentAt = parseOptionalIsoDate(body.sentAt);
+  const parsedPlayerCount = parsePositiveInt(body.playerCount);
+  const playerCount = Math.max(0, Math.min(1000, parsedPlayerCount ?? players.length));
+
+  return {
+    ...(sentAt ? { sentAt } : {}),
+    ...(map ? { map } : {}),
+    playerCount,
+    players,
+  };
+};
+
 const trySend = (socket: WebSocket, payload: Record<string, unknown>) => {
   if (socket.readyState !== 1) return;
   socket.send(JSON.stringify(payload));
@@ -345,6 +463,7 @@ const attachServerSocket = (
     invalidMessages: 0,
     playerPulseMessages: 0,
     playerStateMessages: 0,
+    viewerStateMessages: 0,
     serverActionMessages: 0,
     serverActionAckMessages: 0,
     serverActionAckOk: 0,
@@ -451,6 +570,35 @@ const attachServerSocket = (
 
       trySend(socket, {
         type: 'player_state_ack',
+        ok: true,
+        serverId,
+        receivedAt,
+        playerCount: snapshot.playerCount,
+        playersReceived: snapshot.players.length,
+      });
+      return;
+    }
+
+    if (type === 'viewer_state') {
+      state.viewerStateMessages += 1;
+      const payload = (parsed as any).payload ?? (parsed as any).data ?? parsed;
+      const sanitizedState = sanitizeViewerStatePayload(payload);
+      const receivedAt = nowIso();
+      const snapshot: LiveServerViewerState = {
+        serverId,
+        receivedAt,
+        ...sanitizedState,
+      };
+      viewerStateByServerId.set(serverId, snapshot);
+      state.lastViewerStateAt = receivedAt;
+      state.lastViewerPlayers = snapshot.playerCount;
+      touchServerPresenceFromWs(serverId, {
+        playerCount: snapshot.playerCount,
+        ...(snapshot.map !== undefined ? { map: snapshot.map } : {}),
+      });
+
+      trySend(socket, {
+        type: 'viewer_state_ack',
         ok: true,
         serverId,
         receivedAt,
@@ -605,6 +753,7 @@ export const getServerWsHealthSnapshot = () => {
         invalidMessages: entry.invalidMessages,
         playerPulseMessages: entry.playerPulseMessages,
         playerStateMessages: entry.playerStateMessages,
+        viewerStateMessages: entry.viewerStateMessages,
         serverActionMessages: entry.serverActionMessages,
         serverActionAckMessages: entry.serverActionAckMessages,
         serverActionAckOk: entry.serverActionAckOk,
@@ -623,6 +772,8 @@ export const getServerWsHealthSnapshot = () => {
         ...(entry.lastPulseAt ? { lastPulseAt: entry.lastPulseAt } : {}),
         ...(entry.lastStateAt ? { lastStateAt: entry.lastStateAt } : {}),
         ...(entry.lastStatePlayers !== undefined ? { lastStatePlayers: entry.lastStatePlayers } : {}),
+        ...(entry.lastViewerStateAt ? { lastViewerStateAt: entry.lastViewerStateAt } : {}),
+        ...(entry.lastViewerPlayers !== undefined ? { lastViewerPlayers: entry.lastViewerPlayers } : {}),
         ...(entry.lastActionSentAt ? { lastActionSentAt: entry.lastActionSentAt } : {}),
         ...(entry.lastActionId ? { lastActionId: entry.lastActionId } : {}),
         ...(entry.lastActionAckAt ? { lastActionAckAt: entry.lastActionAckAt } : {}),
@@ -640,6 +791,7 @@ export const getServerWsHealthSnapshot = () => {
     path: WS_SERVERS_PATH,
     connectedServers: servers.length,
     serversWithLiveState: liveStateByServerId.size,
+    serversWithViewerState: viewerStateByServerId.size,
     serverActions: actionSummary,
     now: nowIso(),
     servers,
