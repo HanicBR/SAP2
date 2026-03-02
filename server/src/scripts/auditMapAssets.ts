@@ -6,13 +6,15 @@ import zlib from 'zlib';
 type Severity = 'critical' | 'major' | 'minor';
 type MissingType = 'mdl' | 'vmt' | 'vtf' | 'patch-include' | 'skybox' | 'world-material';
 type MountId = 'gmod' | 'hl2' | 'css' | 'tf2' | 'custom';
-type MountSource = 'config' | 'env' | 'auto';
+type MountSource = 'cli' | 'config' | 'env' | 'auto';
+type MountStatus = 'ok' | 'missing' | 'invalid';
 
 type CliOptions = {
   mapBsp: string;
   mapRoot: string;
   reportPath: string;
   mountsConfigPath: string;
+  mountOverrides: Partial<Record<MountId, string[]>>;
 };
 
 type MissingRecord = {
@@ -40,6 +42,12 @@ type ResolvedMount = {
   id: MountId;
   rootPath: string;
   source: MountSource;
+  sourceId: string;
+  checks: {
+    materials: boolean;
+    models: boolean;
+    maps: boolean;
+  };
 };
 
 type BspLump = {
@@ -67,6 +75,18 @@ type MountResolution = {
   configPathUsed: string;
   unresolvedInputPaths: Array<{ mount: MountId; path: string; source: MountSource }>;
   autoDetected: Record<MountId, string[]>;
+  attemptedCandidates: Record<MountId, string[]>;
+  libraryFoldersScanned: string[];
+  mountValidation: Array<{
+    mount: MountId;
+    source: MountSource;
+    inputPath: string;
+    status: MountStatus;
+    resolvedPath?: string;
+    checks: { materials: boolean; models: boolean; maps: boolean };
+    reason?: string;
+    sourceId?: string;
+  }>;
 };
 
 type MaterialAnalysis = {
@@ -109,7 +129,7 @@ const defaultMountsPath = (() => {
   return path.resolve(process.cwd(), 'server', 'config', 'mounts.json');
 })();
 
-const DEFAULT_OPTIONS: Omit<CliOptions, 'mapBsp' | 'mapRoot'> = {
+const DEFAULT_OPTIONS: Pick<CliOptions, 'reportPath' | 'mountsConfigPath'> = {
   reportPath: 'reports/audit-report.json',
   mountsConfigPath: defaultMountsPath,
 };
@@ -340,12 +360,19 @@ class PakArchive {
 
 class AssetCatalog {
   private files = new Map<string, AssetLocation[]>();
-  private roots: Array<{ id: string; kind: 'filesystem' | 'pak'; source: string }> = [];
+  private roots: Array<{
+    id: string;
+    kind: 'filesystem' | 'pak';
+    source: string;
+    role: 'pak' | 'map-root' | 'mount';
+    mountId?: MountId;
+  }> = [];
   private pakSources = new Map<string, PakArchive>();
+  private resolvedAssetsBySource = new Map<string, Set<string>>();
 
   addPakRoot(id: string, archive: PakArchive) {
     this.pakSources.set(id, archive);
-    this.roots.push({ id, kind: 'pak', source: 'bsp:pakfile' });
+    this.roots.push({ id, kind: 'pak', source: 'bsp:pakfile', role: 'pak' });
     for (const assetPath of archive.getIndexedAssetPaths()) {
       const existing = this.files.get(assetPath) || [];
       existing.push({
@@ -357,14 +384,27 @@ class AssetCatalog {
     }
   }
 
-  addRoot(id: string, rootPath: string) {
+  addRoot(
+    id: string,
+    rootPath: string,
+    options?: {
+      role?: 'map-root' | 'mount';
+      mountId?: MountId;
+    },
+  ) {
     const normalizedRoot = path.resolve(rootPath);
-    this.roots.push({ id, kind: 'filesystem', source: normalizedRoot });
-    this.indexExtensions(normalizedRoot, 'materials');
-    this.indexExtensions(normalizedRoot, 'models');
+    this.roots.push({
+      id,
+      kind: 'filesystem',
+      source: normalizedRoot,
+      role: options?.role || 'mount',
+      ...(options?.mountId ? { mountId: options.mountId } : {}),
+    });
+    this.indexExtensions(id, normalizedRoot, 'materials');
+    this.indexExtensions(id, normalizedRoot, 'models');
   }
 
-  private indexExtensions(rootPath: string, subDir: 'materials' | 'models') {
+  private indexExtensions(sourceId: string, rootPath: string, subDir: 'materials' | 'models') {
     const startDir = path.join(rootPath, subDir);
     if (!fs.existsSync(startDir) || !fs.statSync(startDir).isDirectory()) {
       return;
@@ -398,7 +438,7 @@ class AssetCatalog {
         const existing = this.files.get(rel) || [];
         existing.push({
           kind: 'filesystem',
-          sourceId: `fs:${rootPath}`,
+          sourceId,
           absolutePath: full,
         });
         this.files.set(rel, existing);
@@ -410,7 +450,13 @@ class AssetCatalog {
     const key = normalizeAssetPath(assetPath);
     const hit = this.files.get(key);
     if (!hit || hit.length === 0) return null;
-    return hit[0] || null;
+    const chosen = hit[0] || null;
+    if (chosen) {
+      const bySource = this.resolvedAssetsBySource.get(chosen.sourceId) || new Set<string>();
+      bySource.add(key);
+      this.resolvedAssetsBySource.set(chosen.sourceId, bySource);
+    }
+    return chosen;
   }
 
   resolve(assetPath: string): string | null {
@@ -456,10 +502,19 @@ class AssetCatalog {
     return `pak:${location.entryName}`;
   }
 
+  getResolvedCountsBySource(): Record<string, number> {
+    const out: Record<string, number> = {};
+    for (const [sourceId, assets] of this.resolvedAssetsBySource.entries()) {
+      out[sourceId] = assets.size;
+    }
+    return out;
+  }
+
   stats() {
     return {
       roots: this.roots.slice(),
       fileCount: this.files.size,
+      resolvedCountsBySource: this.getResolvedCountsBySource(),
     };
   }
 }
@@ -467,7 +522,43 @@ class AssetCatalog {
 const parseArgs = (): CliOptions => {
   const args = process.argv.slice(2);
   const options = new Map<string, string>();
-  for (const arg of args) {
+  const mountOverrides: Partial<Record<MountId, string[]>> = {};
+
+  const appendMountOverride = (specRaw: string) => {
+    const spec = String(specRaw || '').trim();
+    const eq = spec.indexOf('=');
+    if (eq <= 0) {
+      throw new Error(`invalid_mount_override: expected --mount <mountId>=<path>, got "${specRaw}"`);
+    }
+    const mountId = spec.slice(0, eq).trim().toLowerCase() as MountId;
+    const mountPath = spec.slice(eq + 1).trim();
+    if (!SUPPORTED_MOUNTS.includes(mountId)) {
+      throw new Error(`invalid_mount_id: ${mountId}. Use one of: ${SUPPORTED_MOUNTS.join(', ')}`);
+    }
+    if (!mountPath) {
+      throw new Error(`invalid_mount_override_path: ${specRaw}`);
+    }
+    const current = mountOverrides[mountId] || [];
+    current.push(mountPath);
+    mountOverrides[mountId] = current;
+  };
+
+  for (let i = 0; i < args.length; i += 1) {
+    const arg = String(args[i] || '').trim();
+    if (!arg) continue;
+    if (arg === '--mount') {
+      const next = String(args[i + 1] || '').trim();
+      if (!next || next.startsWith('--')) {
+        throw new Error('invalid_mount_override: --mount requires value <mountId>=<path>');
+      }
+      appendMountOverride(next);
+      i += 1;
+      continue;
+    }
+    if (arg.startsWith('--mount=')) {
+      appendMountOverride(arg.slice('--mount='.length));
+      continue;
+    }
     if (!arg.startsWith('--') || !arg.includes('=')) continue;
     const idx = arg.indexOf('=');
     options.set(arg.slice(0, idx), arg.slice(idx + 1));
@@ -478,6 +569,7 @@ const parseArgs = (): CliOptions => {
   const reportPath = String(options.get('--report') || DEFAULT_OPTIONS.reportPath).trim();
   const mountsConfigPath = String(
     options.get('--mounts') ||
+      process.env.MOUNTS_FILE ||
       process.env.MAP_AUDIT_MOUNTS_FILE ||
       DEFAULT_OPTIONS.mountsConfigPath,
   ).trim();
@@ -488,11 +580,21 @@ const parseArgs = (): CliOptions => {
     );
   }
 
+  const resolveWithParentFallback = (inputPath: string): string => {
+    const primary = path.resolve(inputPath);
+    if (fs.existsSync(primary)) return primary;
+    if (path.isAbsolute(inputPath)) return primary;
+    const parent = path.resolve(process.cwd(), '..', inputPath);
+    if (fs.existsSync(parent)) return parent;
+    return primary;
+  };
+
   return {
-    mapBsp: path.resolve(mapBsp),
-    mapRoot: path.resolve(mapRoot),
+    mapBsp: resolveWithParentFallback(mapBsp),
+    mapRoot: resolveWithParentFallback(mapRoot),
     reportPath: path.resolve(reportPath),
-    mountsConfigPath: path.resolve(mountsConfigPath),
+    mountsConfigPath: resolveWithParentFallback(mountsConfigPath),
+    mountOverrides,
   };
 };
 
@@ -593,32 +695,80 @@ const candidateMountSubdirs = (mount: MountId): string[] => {
   return [];
 };
 
-const directoryLooksLikeGameRoot = (dirPath: string): boolean => {
-  const materialsDir = path.join(dirPath, 'materials');
-  const modelsDir = path.join(dirPath, 'models');
-  return (
-    (fs.existsSync(materialsDir) && fs.statSync(materialsDir).isDirectory()) ||
-    (fs.existsSync(modelsDir) && fs.statSync(modelsDir).isDirectory())
-  );
+const inspectMountRoot = (dirPath: string): { materials: boolean; models: boolean; maps: boolean } => {
+  const hasDir = (name: string) => {
+    const target = path.join(dirPath, name);
+    return fs.existsSync(target) && fs.statSync(target).isDirectory();
+  };
+  return {
+    materials: hasDir('materials'),
+    models: hasDir('models'),
+    maps: hasDir('maps'),
+  };
 };
 
-const resolveMountPath = (mount: MountId, rawPath: string): string | null => {
+const validateMountCandidate = (
+  mount: MountId,
+  rawPath: string,
+): {
+  status: MountStatus;
+  resolvedPath?: string;
+  checks: { materials: boolean; models: boolean; maps: boolean };
+  reason?: string;
+} => {
   const absolute = path.resolve(rawPath);
-  if (!fs.existsSync(absolute) || !fs.statSync(absolute).isDirectory()) {
-    return null;
+  const emptyChecks = { materials: false, models: false, maps: false };
+  if (!fs.existsSync(absolute)) {
+    return { status: 'missing', checks: emptyChecks, reason: 'path_not_found' };
   }
-  if (directoryLooksLikeGameRoot(absolute)) {
-    return absolute;
+  if (!fs.statSync(absolute).isDirectory()) {
+    return { status: 'invalid', checks: emptyChecks, reason: 'path_is_not_directory' };
   }
 
-  for (const subDir of candidateMountSubdirs(mount)) {
-    const nested = path.join(absolute, subDir);
-    if (!fs.existsSync(nested) || !fs.statSync(nested).isDirectory()) continue;
-    if (directoryLooksLikeGameRoot(nested)) {
-      return nested;
+  const candidates = [absolute, ...candidateMountSubdirs(mount).map((sub) => path.join(absolute, sub))];
+  const seen = new Set<string>();
+  let bestInvalid: { materials: boolean; models: boolean; maps: boolean; resolvedPath: string } | null = null;
+
+  for (const candidate of candidates) {
+    const normalized = path.resolve(candidate);
+    if (seen.has(normalized)) continue;
+    seen.add(normalized);
+    if (!fs.existsSync(normalized) || !fs.statSync(normalized).isDirectory()) continue;
+    const checks = inspectMountRoot(normalized);
+    const isValid =
+      mount === 'custom'
+        ? checks.materials || checks.models || checks.maps
+        : checks.materials && checks.models;
+    if (isValid) {
+      return { status: 'ok', resolvedPath: normalized, checks };
     }
+    bestInvalid = { ...checks, resolvedPath: normalized };
   }
-  return null;
+
+  if (bestInvalid) {
+    const missing = [
+      ...(bestInvalid.materials ? [] : ['materials']),
+      ...(bestInvalid.models ? [] : ['models']),
+    ];
+    return {
+      status: 'invalid',
+      resolvedPath: bestInvalid.resolvedPath,
+      checks: {
+        materials: bestInvalid.materials,
+        models: bestInvalid.models,
+        maps: bestInvalid.maps,
+      },
+      reason: mount === 'custom'
+        ? 'custom_mount_missing_materials_models_maps'
+        : `missing_expected_subdirs:${missing.join('+')}`,
+    };
+  }
+
+  return {
+    status: 'invalid',
+    checks: emptyChecks,
+    reason: 'directory_exists_but_game_content_not_found',
+  };
 };
 
 const parseSteamLibraryFolders = (libraryVdfPath: string): string[] => {
@@ -641,8 +791,19 @@ const parseSteamLibraryFolders = (libraryVdfPath: string): string[] => {
   return dedupeSortedPaths(out);
 };
 
-const autoDetectMounts = (): Record<MountId, string[]> => {
+const autoDetectMounts = (): {
+  detected: Record<MountId, string[]>;
+  attemptedCandidates: Record<MountId, string[]>;
+  libraryFoldersScanned: string[];
+} => {
   const detected: Record<MountId, string[]> = {
+    gmod: [],
+    hl2: [],
+    css: [],
+    tf2: [],
+    custom: [],
+  };
+  const attemptedCandidates: Record<MountId, string[]> = {
     gmod: [],
     hl2: [],
     css: [],
@@ -669,9 +830,8 @@ const autoDetectMounts = (): Record<MountId, string[]> => {
   const libraryRoots = new Set<string>();
   for (const steamRoot of steamRoots) {
     const steamAppsDir = path.join(steamRoot, 'steamapps');
-    if (fs.existsSync(steamAppsDir)) {
-      libraryRoots.add(steamRoot);
-      libraryRoots.add(path.dirname(steamAppsDir));
+    if (fs.existsSync(steamAppsDir) && fs.statSync(steamAppsDir).isDirectory()) {
+      libraryRoots.add(path.resolve(steamRoot));
     }
     const vdfPath = path.join(steamAppsDir, 'libraryfolders.vdf');
     for (const libraryPath of parseSteamLibraryFolders(vdfPath)) {
@@ -679,35 +839,52 @@ const autoDetectMounts = (): Record<MountId, string[]> => {
     }
   }
 
-  const findGameDir = (libraryRoot: string, gameFolder: string, gameContent: string): string | null => {
-    const full = path.join(libraryRoot, 'steamapps', 'common', gameFolder, gameContent);
-    if (fs.existsSync(full) && fs.statSync(full).isDirectory() && directoryLooksLikeGameRoot(full)) {
-      return full;
-    }
-    return null;
+  const libraryFoldersScanned = Array.from(libraryRoots).sort((a, b) => a.localeCompare(b));
+  const gameByMount: Record<Exclude<MountId, 'custom'>, { gameFolder: string; contentFolder: string }> = {
+    gmod: { gameFolder: 'GarrysMod', contentFolder: 'garrysmod' },
+    hl2: { gameFolder: 'Half-Life 2', contentFolder: 'hl2' },
+    css: { gameFolder: 'Counter-Strike Source', contentFolder: 'cstrike' },
+    tf2: { gameFolder: 'Team Fortress 2', contentFolder: 'tf' },
   };
 
-  for (const root of libraryRoots) {
-    const gmod = findGameDir(root, 'GarrysMod', 'garrysmod');
-    if (gmod) detected.gmod.push(gmod);
-
-    const hl2 = findGameDir(root, 'Half-Life 2', 'hl2');
-    if (hl2) detected.hl2.push(hl2);
-
-    const css = findGameDir(root, 'Counter-Strike Source', 'cstrike');
-    if (css) detected.css.push(css);
-
-    const tf2 = findGameDir(root, 'Team Fortress 2', 'tf');
-    if (tf2) detected.tf2.push(tf2);
+  for (const libraryRoot of libraryFoldersScanned) {
+    for (const mount of ['gmod', 'hl2', 'css', 'tf2'] as const) {
+      const target = path.join(
+        libraryRoot,
+        'steamapps',
+        'common',
+        gameByMount[mount].gameFolder,
+        gameByMount[mount].contentFolder,
+      );
+      attemptedCandidates[mount].push(target);
+      if (fs.existsSync(target) && fs.statSync(target).isDirectory()) {
+        detected[mount].push(target);
+      }
+    }
   }
 
   for (const mount of SUPPORTED_MOUNTS) {
     detected[mount] = dedupeSortedPaths(detected[mount]);
+    attemptedCandidates[mount] = dedupeSortedPaths(attemptedCandidates[mount]);
   }
-  return detected;
+  return {
+    detected,
+    attemptedCandidates,
+    libraryFoldersScanned,
+  };
 };
 
-const resolveMounts = (configPath: string): MountResolution => {
+const resolveMounts = (
+  configPath: string,
+  cliOverrides: Partial<Record<MountId, string[]>>,
+): MountResolution => {
+  const fromCli: NormalizedMountConfig = {
+    gmod: cliOverrides.gmod || [],
+    hl2: cliOverrides.hl2 || [],
+    css: cliOverrides.css || [],
+    tf2: cliOverrides.tf2 || [],
+    custom: cliOverrides.custom || [],
+  };
   const fromConfig = loadConfigMounts(configPath);
   const fromEnv: NormalizedMountConfig = {
     gmod: splitEnvPaths(process.env[envVarByMount.gmod] || ''),
@@ -717,34 +894,80 @@ const resolveMounts = (configPath: string): MountResolution => {
     custom: splitEnvPaths(process.env[envVarByMount.custom] || ''),
   };
 
-  const autoDetected = autoDetectMounts();
+  const auto = autoDetectMounts();
+  const autoDetected = auto.detected;
   const mounts: ResolvedMount[] = [];
   const unresolvedInputPaths: Array<{ mount: MountId; path: string; source: MountSource }> = [];
+  const mountValidation: Array<{
+    mount: MountId;
+    source: MountSource;
+    inputPath: string;
+    status: MountStatus;
+    resolvedPath?: string;
+    checks: { materials: boolean; models: boolean; maps: boolean };
+    reason?: string;
+    sourceId?: string;
+  }> = [];
   const seen = new Set<string>();
+  const mountCounters: Record<MountId, number> = {
+    gmod: 0,
+    hl2: 0,
+    css: 0,
+    tf2: 0,
+    custom: 0,
+  };
 
   const ingest = (mount: MountId, entries: string[], source: MountSource) => {
     for (const entry of entries) {
-      const resolved = resolveMountPath(mount, entry);
-      if (!resolved) {
-        unresolvedInputPaths.push({ mount, path: path.resolve(entry), source });
+      const validation = validateMountCandidate(mount, entry);
+      const item = {
+        mount,
+        source,
+        inputPath: path.resolve(entry),
+        status: validation.status,
+        checks: validation.checks,
+        ...(validation.resolvedPath ? { resolvedPath: validation.resolvedPath } : {}),
+        ...(validation.reason ? { reason: validation.reason } : {}),
+      };
+
+      if (validation.status !== 'ok' || !validation.resolvedPath) {
+        mountValidation.push(item);
+        if (validation.status === 'missing') {
+          unresolvedInputPaths.push({ mount, path: path.resolve(entry), source });
+        }
         continue;
       }
-      const key = `${mount}|${normalizeAssetPath(resolved)}`;
-      if (seen.has(key)) continue;
+
+      const key = `${mount}|${normalizeAssetPath(validation.resolvedPath)}`;
+      if (seen.has(key)) {
+        mountValidation.push({ ...item, reason: item.reason || 'duplicate_mount_path' });
+        continue;
+      }
       seen.add(key);
-      mounts.push({ id: mount, rootPath: resolved, source });
+      const idx = mountCounters[mount];
+      mountCounters[mount] += 1;
+      const sourceId = `mount:${mount}:${idx}`;
+      mounts.push({
+        id: mount,
+        rootPath: validation.resolvedPath,
+        source,
+        sourceId,
+        checks: validation.checks,
+      });
+      mountValidation.push({ ...item, sourceId });
     }
   };
 
   for (const mount of SUPPORTED_MOUNTS) {
+    ingest(mount, fromCli[mount], 'cli');
     ingest(mount, fromConfig[mount], 'config');
     ingest(mount, fromEnv[mount], 'env');
   }
 
   for (const mount of SUPPORTED_MOUNTS) {
-    const hasManual = fromConfig[mount].length > 0 || fromEnv[mount].length > 0;
-    if (hasManual) continue;
-    ingest(mount, autoDetected[mount], 'auto');
+    const hasActive = mounts.some((item) => item.id === mount);
+    if (hasActive) continue;
+    ingest(mount, auto.attemptedCandidates[mount], 'auto');
   }
 
   mounts.sort((a, b) => {
@@ -758,6 +981,9 @@ const resolveMounts = (configPath: string): MountResolution => {
     configPathUsed: configPath,
     unresolvedInputPaths,
     autoDetected,
+    attemptedCandidates: auto.attemptedCandidates,
+    libraryFoldersScanned: auto.libraryFoldersScanned,
+    mountValidation,
   };
 };
 
@@ -1323,22 +1549,31 @@ const buildAudit = (options: CliOptions) => {
   }
 
   const bspData = parseBspData(options.mapBsp);
-  const mountResolution = resolveMounts(options.mountsConfigPath);
+  const mountResolution = resolveMounts(options.mountsConfigPath, options.mountOverrides);
   if (mountResolution.mounts.length === 0) {
+    const attempted = ['gmod', 'hl2', 'css', 'tf2']
+      .map((mount) => {
+        const attempts = mountResolution.attemptedCandidates[mount as MountId] || [];
+        const sample = attempts.slice(0, 2).join(' | ');
+        return `${mount}: ${sample || 'no_candidates'}`;
+      })
+      .join('; ');
+    const libraries = mountResolution.libraryFoldersScanned.slice(0, 5).join(' | ') || 'none';
     throw new Error(
       `mounts_not_found: no valid mount roots resolved from ${options.mountsConfigPath} and env vars (${Object.values(
         envVarByMount,
-      ).join(', ')}). Fill mounts.json with your local paths.`,
+      ).join(', ')}). Fill mounts.json with your local paths (or use --mount <mountId>=<path>). ` +
+      `Steam libraries scanned: ${libraries}. Candidate paths: ${attempted}`,
     );
   }
 
   const catalog = new AssetCatalog();
   if (bspData.pakArchive) {
-    catalog.addPakRoot('bsp-pak', bspData.pakArchive);
+    catalog.addPakRoot('pak', bspData.pakArchive);
   }
-  catalog.addRoot('map', options.mapRoot);
+  catalog.addRoot('map-root', options.mapRoot, { role: 'map-root' });
   for (const mount of mountResolution.mounts) {
-    catalog.addRoot(`${mount.id}:${mount.source}`, mount.rootPath);
+    catalog.addRoot(mount.sourceId, mount.rootPath, { role: 'mount', mountId: mount.id });
   }
 
   const missing = new MissingTracker();
@@ -1489,6 +1724,7 @@ const buildAudit = (options: CliOptions) => {
 
   const missingList = missing.toSortedList();
   const summary = missing.getSummary();
+  const resolvedCountsBySource = catalog.getResolvedCountsBySource();
   const notes: string[] = [];
   if (bspData.pakfileError) {
     notes.push(
@@ -1499,6 +1735,38 @@ const buildAudit = (options: CliOptions) => {
   const staticPropMissingModelsSorted = Array.from(missingModels.entries())
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
     .map(([model, instances]) => ({ model, instances }));
+
+  const mountsUsed = mountResolution.mountValidation.map((item) => ({
+    mount: item.mount,
+    source: item.source,
+    inputPath: item.inputPath,
+    status: item.status,
+    ...(item.resolvedPath ? { resolvedPath: item.resolvedPath } : {}),
+    checks: item.checks,
+    resolvedAssets: item.sourceId ? resolvedCountsBySource[item.sourceId] || 0 : 0,
+    ...(item.reason ? { reason: item.reason } : {}),
+  }));
+
+  const criticalTop50 = missingList
+    .filter((item) => item.severity === 'critical')
+    .sort((a, b) => b.occurrences - a.occurrences || a.asset.localeCompare(b.asset))
+    .slice(0, 50)
+    .map((item) => ({
+      type: item.type,
+      asset: item.asset,
+      occurrences: item.occurrences,
+      bestGuessMount: item.suggestedMount,
+      searchedIn: {
+        pak: bspData.pakfileScanned ? 'checked' : 'not_available',
+        mapRoot: options.mapRoot,
+        mounts: mountResolution.mounts.map((mount) => ({
+          mount: mount.id,
+          source: mount.source,
+          path: mount.rootPath,
+        })),
+      },
+      references: item.references.slice(0, 5),
+    }));
 
   return {
     generatedAt: new Date().toISOString(),
@@ -1516,8 +1784,12 @@ const buildAudit = (options: CliOptions) => {
       configPath: mountResolution.configPathUsed,
       resolved: mountResolution.mounts,
       autoDetected: mountResolution.autoDetected,
+      attemptedCandidates: mountResolution.attemptedCandidates,
+      libraryFoldersScanned: mountResolution.libraryFoldersScanned,
       unresolvedInputPaths: mountResolution.unresolvedInputPaths,
+      validation: mountResolution.mountValidation,
     },
+    mountsUsed,
     catalog: catalog.stats(),
     missingAssetsSummary: summary,
     counters: {
@@ -1540,6 +1812,7 @@ const buildAudit = (options: CliOptions) => {
       staticPropsModels: staticPropMissingModelsSorted.slice(0, 20),
       skyboxIssues,
     },
+    criticalTop50,
     notes,
   };
 };

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-02T18:18:14.705Z",
+  "generatedAt": "2026-03-02T18:34:27.630Z",
   "map": {
     "bspPath": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps\\rp_evocity_v33x.bsp",
     "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
@@ -16,7 +16,13 @@
       {
         "id": "gmod",
         "rootPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod",
-        "source": "auto"
+        "source": "auto",
+        "sourceId": "mount:gmod:0",
+        "checks": {
+          "materials": true,
+          "models": true,
+          "maps": true
+        }
       }
     ],
     "autoDetected": {
@@ -28,27 +34,298 @@
       "tf2": [],
       "custom": []
     },
-    "unresolvedInputPaths": []
+    "attemptedCandidates": {
+      "gmod": [
+        "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod",
+        "D:\\SteamLibrary\\steamapps\\common\\GarrysMod\\garrysmod"
+      ],
+      "hl2": [
+        "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Half-Life 2\\hl2",
+        "D:\\SteamLibrary\\steamapps\\common\\Half-Life 2\\hl2"
+      ],
+      "css": [
+        "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Counter-Strike Source\\cstrike",
+        "D:\\SteamLibrary\\steamapps\\common\\Counter-Strike Source\\cstrike"
+      ],
+      "tf2": [
+        "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Team Fortress 2\\tf",
+        "D:\\SteamLibrary\\steamapps\\common\\Team Fortress 2\\tf"
+      ],
+      "custom": []
+    },
+    "libraryFoldersScanned": [
+      "C:\\Program Files (x86)\\Steam",
+      "D:\\SteamLibrary"
+    ],
+    "unresolvedInputPaths": [
+      {
+        "mount": "gmod",
+        "path": "D:\\SteamLibrary\\steamapps\\common\\GarrysMod\\garrysmod",
+        "source": "auto"
+      },
+      {
+        "mount": "hl2",
+        "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Half-Life 2\\hl2",
+        "source": "auto"
+      },
+      {
+        "mount": "hl2",
+        "path": "D:\\SteamLibrary\\steamapps\\common\\Half-Life 2\\hl2",
+        "source": "auto"
+      },
+      {
+        "mount": "css",
+        "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Counter-Strike Source\\cstrike",
+        "source": "auto"
+      },
+      {
+        "mount": "css",
+        "path": "D:\\SteamLibrary\\steamapps\\common\\Counter-Strike Source\\cstrike",
+        "source": "auto"
+      },
+      {
+        "mount": "tf2",
+        "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Team Fortress 2\\tf",
+        "source": "auto"
+      },
+      {
+        "mount": "tf2",
+        "path": "D:\\SteamLibrary\\steamapps\\common\\Team Fortress 2\\tf",
+        "source": "auto"
+      }
+    ],
+    "validation": [
+      {
+        "mount": "gmod",
+        "source": "auto",
+        "inputPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod",
+        "status": "ok",
+        "checks": {
+          "materials": true,
+          "models": true,
+          "maps": true
+        },
+        "resolvedPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod",
+        "sourceId": "mount:gmod:0"
+      },
+      {
+        "mount": "gmod",
+        "source": "auto",
+        "inputPath": "D:\\SteamLibrary\\steamapps\\common\\GarrysMod\\garrysmod",
+        "status": "missing",
+        "checks": {
+          "materials": false,
+          "models": false,
+          "maps": false
+        },
+        "reason": "path_not_found"
+      },
+      {
+        "mount": "hl2",
+        "source": "auto",
+        "inputPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Half-Life 2\\hl2",
+        "status": "missing",
+        "checks": {
+          "materials": false,
+          "models": false,
+          "maps": false
+        },
+        "reason": "path_not_found"
+      },
+      {
+        "mount": "hl2",
+        "source": "auto",
+        "inputPath": "D:\\SteamLibrary\\steamapps\\common\\Half-Life 2\\hl2",
+        "status": "missing",
+        "checks": {
+          "materials": false,
+          "models": false,
+          "maps": false
+        },
+        "reason": "path_not_found"
+      },
+      {
+        "mount": "css",
+        "source": "auto",
+        "inputPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Counter-Strike Source\\cstrike",
+        "status": "missing",
+        "checks": {
+          "materials": false,
+          "models": false,
+          "maps": false
+        },
+        "reason": "path_not_found"
+      },
+      {
+        "mount": "css",
+        "source": "auto",
+        "inputPath": "D:\\SteamLibrary\\steamapps\\common\\Counter-Strike Source\\cstrike",
+        "status": "missing",
+        "checks": {
+          "materials": false,
+          "models": false,
+          "maps": false
+        },
+        "reason": "path_not_found"
+      },
+      {
+        "mount": "tf2",
+        "source": "auto",
+        "inputPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Team Fortress 2\\tf",
+        "status": "missing",
+        "checks": {
+          "materials": false,
+          "models": false,
+          "maps": false
+        },
+        "reason": "path_not_found"
+      },
+      {
+        "mount": "tf2",
+        "source": "auto",
+        "inputPath": "D:\\SteamLibrary\\steamapps\\common\\Team Fortress 2\\tf",
+        "status": "missing",
+        "checks": {
+          "materials": false,
+          "models": false,
+          "maps": false
+        },
+        "reason": "path_not_found"
+      }
+    ]
   },
+  "mountsUsed": [
+    {
+      "mount": "gmod",
+      "source": "auto",
+      "inputPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod",
+      "status": "ok",
+      "resolvedPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod",
+      "checks": {
+        "materials": true,
+        "models": true,
+        "maps": true
+      },
+      "resolvedAssets": 0
+    },
+    {
+      "mount": "gmod",
+      "source": "auto",
+      "inputPath": "D:\\SteamLibrary\\steamapps\\common\\GarrysMod\\garrysmod",
+      "status": "missing",
+      "checks": {
+        "materials": false,
+        "models": false,
+        "maps": false
+      },
+      "resolvedAssets": 0,
+      "reason": "path_not_found"
+    },
+    {
+      "mount": "hl2",
+      "source": "auto",
+      "inputPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Half-Life 2\\hl2",
+      "status": "missing",
+      "checks": {
+        "materials": false,
+        "models": false,
+        "maps": false
+      },
+      "resolvedAssets": 0,
+      "reason": "path_not_found"
+    },
+    {
+      "mount": "hl2",
+      "source": "auto",
+      "inputPath": "D:\\SteamLibrary\\steamapps\\common\\Half-Life 2\\hl2",
+      "status": "missing",
+      "checks": {
+        "materials": false,
+        "models": false,
+        "maps": false
+      },
+      "resolvedAssets": 0,
+      "reason": "path_not_found"
+    },
+    {
+      "mount": "css",
+      "source": "auto",
+      "inputPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Counter-Strike Source\\cstrike",
+      "status": "missing",
+      "checks": {
+        "materials": false,
+        "models": false,
+        "maps": false
+      },
+      "resolvedAssets": 0,
+      "reason": "path_not_found"
+    },
+    {
+      "mount": "css",
+      "source": "auto",
+      "inputPath": "D:\\SteamLibrary\\steamapps\\common\\Counter-Strike Source\\cstrike",
+      "status": "missing",
+      "checks": {
+        "materials": false,
+        "models": false,
+        "maps": false
+      },
+      "resolvedAssets": 0,
+      "reason": "path_not_found"
+    },
+    {
+      "mount": "tf2",
+      "source": "auto",
+      "inputPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Team Fortress 2\\tf",
+      "status": "missing",
+      "checks": {
+        "materials": false,
+        "models": false,
+        "maps": false
+      },
+      "resolvedAssets": 0,
+      "reason": "path_not_found"
+    },
+    {
+      "mount": "tf2",
+      "source": "auto",
+      "inputPath": "D:\\SteamLibrary\\steamapps\\common\\Team Fortress 2\\tf",
+      "status": "missing",
+      "checks": {
+        "materials": false,
+        "models": false,
+        "maps": false
+      },
+      "resolvedAssets": 0,
+      "reason": "path_not_found"
+    }
+  ],
   "catalog": {
     "roots": [
       {
-        "id": "bsp-pak",
+        "id": "pak",
         "kind": "pak",
-        "source": "bsp:pakfile"
+        "source": "bsp:pakfile",
+        "role": "pak"
       },
       {
-        "id": "map",
+        "id": "map-root",
         "kind": "filesystem",
-        "source": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps"
+        "source": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "role": "map-root"
       },
       {
-        "id": "gmod:auto",
+        "id": "mount:gmod:0",
         "kind": "filesystem",
-        "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+        "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod",
+        "role": "mount",
+        "mountId": "gmod"
       }
     ],
-    "fileCount": 3555
+    "fileCount": 3555,
+    "resolvedCountsBySource": {
+      "pak": 2255
+    }
   },
   "missingAssetsSummary": {
     "critical": 419,
@@ -6375,5 +6652,1008 @@
     ],
     "skyboxIssues": []
   },
+  "criticalTop50": [
+    {
+      "type": "vtf",
+      "asset": "materials/nature/forest_grass_01.vtf",
+      "occurrences": 2,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:maps/rp_evocity_v33x/nature/blendgrassdirt01_noprop_wvt_patch -> $basetexture",
+        "world:maps/rp_evocity_v33x/nature/blendgrassdirt02_noprop_wvt_patch -> $basetexture"
+      ]
+    },
+    {
+      "type": "vtf",
+      "asset": "materials/_rt_camera.vtf",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:dev/dev_comintmonitor1a -> $basetexture"
+      ]
+    },
+    {
+      "type": "world-material",
+      "asset": "materials/brick/brickwall004a.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:brick/brickwall004a"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/brick/brickwall014a.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:brick/brickwall014a"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/brick/brickwall014l.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:brick/brickwall014l"
+      ]
+    },
+    {
+      "type": "world-material",
+      "asset": "materials/brick/brickwall019a.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:brick/brickwall019a"
+      ]
+    },
+    {
+      "type": "world-material",
+      "asset": "materials/brick/brickwall031a.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:brick/brickwall031a"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/brick/brickwall031d.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:brick/brickwall031d"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/brick/brickwall037a.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:brick/brickwall037a"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/brick/brickwall040b.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:brick/brickwall040b"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/brick/brickwall040c.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:brick/brickwall040c"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/brick/brickwall044a.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:brick/brickwall044a"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/brick/brickwall045a.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:brick/brickwall045a"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/brick/brickwall045d.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:brick/brickwall045d"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/brick/brickwall045f.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:brick/brickwall045f"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/brick/brickwall049a.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:brick/brickwall049a"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/brick/brickwall053d.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:brick/brickwall053d"
+      ]
+    },
+    {
+      "type": "world-material",
+      "asset": "materials/brick/wall05.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:brick/wall05"
+      ]
+    },
+    {
+      "type": "world-material",
+      "asset": "materials/brick/wall06.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:brick/wall06"
+      ]
+    },
+    {
+      "type": "world-material",
+      "asset": "materials/brick/wall13.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:brick/wall13"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/building_template/building_template013a.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:building_template/building_template013a"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/building_template/building_template014a.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:building_template/building_template014a"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/building_template/building_template017j.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:building_template/building_template017j"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/building_template/building_template017o.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:building_template/building_template017o"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/building_template/building_template019a.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:building_template/building_template019a"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/building_template/building_trainstation_template002k.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:building_template/building_trainstation_template002k"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/building_template/roof_template001a.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:building_template/roof_template001a"
+      ]
+    },
+    {
+      "type": "world-material",
+      "asset": "materials/buildings/brick41b.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:buildings/brick41b"
+      ]
+    },
+    {
+      "type": "world-material",
+      "asset": "materials/buildings/roof07.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:buildings/roof07"
+      ]
+    },
+    {
+      "type": "world-material",
+      "asset": "materials/buildings/roof08.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:buildings/roof08"
+      ]
+    },
+    {
+      "type": "world-material",
+      "asset": "materials/carpet/blue04.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:carpet/blue04"
+      ]
+    },
+    {
+      "type": "world-material",
+      "asset": "materials/carpet/grey02.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:carpet/grey02"
+      ]
+    },
+    {
+      "type": "world-material",
+      "asset": "materials/concrete/concreteceiling003a.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:concrete/concreteceiling003a"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/concrete/concretefloor002a.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:concrete/concretefloor002a"
+      ]
+    },
+    {
+      "type": "world-material",
+      "asset": "materials/concrete/concretefloor008a.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:concrete/concretefloor008a"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/concrete/concretefloor009a.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:concrete/concretefloor009a"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/concrete/concretefloor023a.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:concrete/concretefloor023a"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/concrete/concretefloor024a.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:concrete/concretefloor024a"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/concrete/concretefloor026a.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:concrete/concretefloor026a"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/concrete/concretefloor034a.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:concrete/concretefloor034a"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/concrete/concretefloor037c.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:concrete/concretefloor037c"
+      ]
+    },
+    {
+      "type": "world-material",
+      "asset": "materials/concrete/concretefloor038a.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:concrete/concretefloor038a"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/concrete/concretefloor039a_cheap.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:concrete/concretefloor039a_cheap"
+      ]
+    },
+    {
+      "type": "world-material",
+      "asset": "materials/concrete/concretewall004b.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:concrete/concretewall004b"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/concrete/concretewall004c.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:concrete/concretewall004c"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/concrete/concretewall022a.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:concrete/concretewall022a"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/concrete/concretewall026a.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:concrete/concretewall026a"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/concrete/concretewall032a.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:concrete/concretewall032a"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/concrete/concretewall032b.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:concrete/concretewall032b"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/concrete/concretewall055b.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          }
+        ]
+      },
+      "references": [
+        "world:concrete/concretewall055b"
+      ]
+    }
+  ],
   "notes": []
 }
