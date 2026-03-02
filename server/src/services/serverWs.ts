@@ -1097,8 +1097,39 @@ export const getServerWsLiveState = (serverId: string) => {
   };
 };
 
+export const getServerWsViewerState = (serverId: string) => {
+  const viewerState = viewerStateByServerId.get(serverId);
+  if (!viewerState) return null;
+
+  const nowMs = Date.now();
+  const receivedMs = new Date(viewerState.receivedAt).getTime();
+  const ageSeconds = Number.isFinite(receivedMs)
+    ? Math.max(0, Math.floor((nowMs - receivedMs) / 1000))
+    : undefined;
+  const activeConnection = connectedByServerId.get(serverId);
+
+  return {
+    serverId,
+    transport: 'websocket' as const,
+    connected: Boolean(activeConnection),
+    ...(activeConnection ? { wsConnectedAt: activeConnection.connectedAt } : {}),
+    receivedAt: viewerState.receivedAt,
+    ...(ageSeconds !== undefined ? { ageSeconds } : {}),
+    ...(viewerState.sentAt ? { sentAt: viewerState.sentAt } : {}),
+    ...(viewerState.map ? { map: viewerState.map } : {}),
+    playerCount: viewerState.playerCount,
+    players: viewerState.players,
+  };
+};
+
 export const getAllServerWsLiveState = () =>
   Array.from(liveStateByServerId.keys())
     .map((serverId) => getServerWsLiveState(serverId))
     .filter((entry): entry is NonNullable<ReturnType<typeof getServerWsLiveState>> => Boolean(entry))
+    .sort((left, right) => left.serverId.localeCompare(right.serverId));
+
+export const getAllServerWsViewerState = () =>
+  Array.from(viewerStateByServerId.keys())
+    .map((serverId) => getServerWsViewerState(serverId))
+    .filter((entry): entry is NonNullable<ReturnType<typeof getServerWsViewerState>> => Boolean(entry))
     .sort((left, right) => left.serverId.localeCompare(right.serverId));

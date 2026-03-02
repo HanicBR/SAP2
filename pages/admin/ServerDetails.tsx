@@ -654,7 +654,21 @@ const ServerDetails: React.FC = () => {
 
   const dispatchViewerAction = useCallback(
     async (action: ServerViewerActionType) => {
-      if (!serverId || !selectedViewerPlayer || viewerActionBusy) return;
+      if (!serverId || viewerActionBusy) return;
+      if (!hasFreshViewerSnapshot) {
+        setViewerActionError('Acoes bloqueadas: snapshot do viewer stale/desconectado.');
+        return;
+      }
+      if (!selectedViewerPlayer) {
+        setViewerActionError('Selecione um player no frame para executar a acao.');
+        return;
+      }
+
+      if (action === 'KICK' || action === 'MUTE_10M' || action === 'GAG_10M') {
+        const playerLabel = selectedViewerPlayer.name || selectedViewerPlayer.steamId;
+        const confirmOk = window.confirm(`Confirmar ${action} em ${playerLabel}?`);
+        if (!confirmOk) return;
+      }
 
       setViewerActionBusy(true);
       setViewerActionError(null);
@@ -691,7 +705,14 @@ const ServerDetails: React.FC = () => {
         setViewerActionBusy(false);
       }
     },
-    [pollViewerActionStatus, selectedViewerPlayer, serverId, viewerActionBusy, viewerActionReason],
+    [
+      hasFreshViewerSnapshot,
+      pollViewerActionStatus,
+      selectedViewerPlayer,
+      serverId,
+      viewerActionBusy,
+      viewerActionReason,
+    ],
   );
 
   const viewerActionForSelected = useMemo(() => {
@@ -701,6 +722,13 @@ const ServerDetails: React.FC = () => {
     if (targetSteamId && targetSteamId !== selectedViewerPlayer.steamId) return null;
     return viewerActionStatus;
   }, [selectedViewerPlayer, viewerActionStatus]);
+
+  const viewerActionsDisabled =
+    viewerActionBusy ||
+    !selectedViewerPlayer ||
+    !hasFreshViewerSnapshot ||
+    viewerWsStatus === 'connecting' ||
+    viewerWsStatus === 'error';
 
   if (loading) return <div className="p-8 text-zinc-500">Carregando detalhes do servidor...</div>;
   if (!server || !analytics) return <div className="p-8 text-zinc-500">Servidor não encontrado.</div>;
@@ -929,40 +957,46 @@ const ServerDetails: React.FC = () => {
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={() => dispatchViewerAction('KICK')}
-                      disabled={viewerActionBusy}
+                      disabled={viewerActionsDisabled}
                       className="px-2 py-1.5 rounded border border-red-800 bg-red-900/20 text-red-300 text-xs font-bold uppercase disabled:opacity-50"
                     >
                       Kick
                     </button>
                     <button
                       onClick={() => dispatchViewerAction('MUTE_10M')}
-                      disabled={viewerActionBusy}
+                      disabled={viewerActionsDisabled}
                       className="px-2 py-1.5 rounded border border-yellow-800 bg-yellow-900/20 text-yellow-300 text-xs font-bold uppercase disabled:opacity-50"
                     >
                       Mute 10m
                     </button>
                     <button
                       onClick={() => dispatchViewerAction('GAG_10M')}
-                      disabled={viewerActionBusy}
+                      disabled={viewerActionsDisabled}
                       className="px-2 py-1.5 rounded border border-orange-800 bg-orange-900/20 text-orange-300 text-xs font-bold uppercase disabled:opacity-50"
                     >
                       Gag 10m
                     </button>
                     <button
                       onClick={() => dispatchViewerAction('UNMUTE')}
-                      disabled={viewerActionBusy}
+                      disabled={viewerActionsDisabled}
                       className="px-2 py-1.5 rounded border border-emerald-800 bg-emerald-900/20 text-emerald-300 text-xs font-bold uppercase disabled:opacity-50"
                     >
                       Unmute
                     </button>
                     <button
                       onClick={() => dispatchViewerAction('UNGAG')}
-                      disabled={viewerActionBusy}
+                      disabled={viewerActionsDisabled}
                       className="col-span-2 px-2 py-1.5 rounded border border-emerald-800 bg-emerald-900/20 text-emerald-300 text-xs font-bold uppercase disabled:opacity-50"
                     >
                       Ungag
                     </button>
                   </div>
+
+                  {!hasFreshViewerSnapshot && (
+                    <div className="rounded border border-yellow-900/50 bg-yellow-900/10 px-2 py-1.5 text-[11px] text-yellow-300">
+                      Acoes bloqueadas: snapshot do viewer stale/desconectado.
+                    </div>
+                  )}
 
                   {viewerActionError && (
                     <div className="rounded border border-red-900/50 bg-red-900/10 px-2 py-1.5 text-[11px] text-red-300">

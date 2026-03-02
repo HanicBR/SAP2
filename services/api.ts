@@ -1,7 +1,7 @@
 
 
 import { MOCK_SERVERS, MOCK_EVENTS, MOCK_STATS, VIP_PLANS, MOCK_SUSPICIOUS_GROUPS, MOCK_PLAYERS, MOCK_USERS, MOCK_TRANSACTIONS, generateServerAnalytics, DEFAULT_SITE_CONFIG } from '../constants';
-import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionProofUploadResult, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel, ServerLiveStateResponse, ServerViewerActionDispatchResponse, ServerViewerActionRequest, ServerViewerActionStatusResponse, ServerWsLiveStateListResponse, PlayerAliasHistoryResponse, PlayerAvatarHistoryResponse, LoadingScreenProfile, LoadingScreensResponse, LoadingMediaUploadResult, LoadingTelemetryRange, LoadingTelemetrySlugsResponse, LoadingTelemetrySummaryResponse, AuthRegisterResponse } from '../types';
+import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionProofUploadResult, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel, ServerLiveStateResponse, ServerViewerActionDispatchResponse, ServerViewerActionRequest, ServerViewerActionStatusResponse, ServerViewerStateResponse, ServerWsLiveStateListResponse, ServerWsViewerStateListResponse, PlayerAliasHistoryResponse, PlayerAvatarHistoryResponse, LoadingScreenProfile, LoadingScreensResponse, LoadingMediaUploadResult, LoadingTelemetryRange, LoadingTelemetrySlugsResponse, LoadingTelemetrySummaryResponse, AuthRegisterResponse } from '../types';
 
 // Utility to simulate network delay (used as fallback)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -325,6 +325,48 @@ export const ApiService = {
         return await apiFetch<ServerLiveStateResponse>(`/servers/${serverId}/live-state`);
       } catch (error) {
         console.error('API getServerLiveState failed, returning unavailable live-state fallback:', error);
+      }
+    }
+
+    await delay(100);
+    const mockServer = serversDb.find((item) => item.id === serverId);
+    return {
+      serverId,
+      available: false,
+      transport: 'websocket',
+      fallback: {
+        status: 'UNKNOWN',
+        currentPlayers: mockServer?.currentPlayers || 0,
+        maxPlayers: mockServer?.maxPlayers || 0,
+        ...(mockServer?.currentMap ? { currentMap: mockServer.currentMap } : {}),
+        ...(mockServer?.lastHeartbeat ? { lastHeartbeat: mockServer.lastHeartbeat } : {}),
+      },
+    };
+  },
+
+  getServersViewerState: async (): Promise<ServerWsViewerStateListResponse> => {
+    if (hasApi) {
+      try {
+        return await apiFetch<ServerWsViewerStateListResponse>('/servers/ws/viewer-state');
+      } catch (error) {
+        console.error('API getServersViewerState failed, returning empty viewer-state list:', error);
+      }
+    }
+
+    await delay(100);
+    return {
+      now: new Date().toISOString(),
+      total: 0,
+      items: [],
+    };
+  },
+
+  getServerViewerState: async (serverId: string): Promise<ServerViewerStateResponse> => {
+    if (hasApi) {
+      try {
+        return await apiFetch<ServerViewerStateResponse>(`/servers/${serverId}/viewer-state`);
+      } catch (error) {
+        console.error('API getServerViewerState failed, returning unavailable viewer-state fallback:', error);
       }
     }
 

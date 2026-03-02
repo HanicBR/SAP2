@@ -64,6 +64,32 @@ export interface ServerViewerStateSnapshot {
   players: ServerViewerStatePlayer[];
 }
 
+export interface ServerWsViewerStateItem {
+  serverId: string;
+  transport: 'websocket';
+  connected: boolean;
+  wsConnectedAt?: string;
+  receivedAt: string;
+  ageSeconds?: number;
+  sentAt?: string;
+  map?: string;
+  playerCount: number;
+  players: ServerViewerStatePlayer[];
+}
+
+export interface ServerWsViewerStateListResponse {
+  now: string;
+  total: number;
+  items: ServerWsViewerStateItem[];
+}
+
+export interface ServerViewerStateResponse extends Partial<ServerWsViewerStateItem> {
+  serverId: string;
+  available: boolean;
+  transport: 'websocket';
+  fallback: ServerLiveStateFallback;
+}
+
 export type ServerViewerActionType = 'KICK' | 'MUTE_10M' | 'GAG_10M' | 'UNMUTE' | 'UNGAG';
 export type ServerActionDispatchStatus = 'QUEUED' | 'ACK_OK' | 'ACK_FAILED' | 'HTTP_PULLED';
 

@@ -11,7 +11,13 @@ import {
 import { getVipAutomationMetrics, previewVipAutomationBuild, VipAutomationActionType } from '../services/vipAutomation';
 import { normalizeIp } from '../utils/normalizeIp';
 import { findServerByApiKey } from '../services/serverAuth';
-import { getAllServerWsLiveState, getServerWsHealthSnapshot, getServerWsLiveState } from '../services/serverWs';
+import {
+  getAllServerWsLiveState,
+  getAllServerWsViewerState,
+  getServerWsHealthSnapshot,
+  getServerWsLiveState,
+  getServerWsViewerState,
+} from '../services/serverWs';
 import { getPlayerPulseSettings } from '../services/playtimePulse';
 import { ingestPlayerPulse, PlayerPulseIngestError } from '../services/playerPulseIngest';
 
@@ -178,6 +184,9 @@ const MAX_ANALYTICS_LOGS = 120000;
 const MAX_ANALYTICS_SNAPSHOTS = 20000;
 const MAX_ORPHAN_SESSION_MS = 6 * 60 * 60 * 1000;
 const PULSE_MIN_COVERAGE_PCT = parsePercentEnv(process.env.PLAYTIME_PULSE_MIN_COVERAGE_PCT, 60);
+const VIEWER_ACTION_TARGET_MAX_AGE_SECONDS = 12;
+const VIEWER_ACTION_COOLDOWN_MS = 1500;
+const viewerActionCooldownByKey = new Map<string, number>();
 
 const isTrackableSteamId = (value: unknown): value is string => {
   const raw = String(value || '').trim();
@@ -438,6 +447,43 @@ router.post('/:id/viewer-actions', authMiddleware, requireRole(UserRole.ADMIN), 
     return res.status(400).json({ error: 'Unable to build viewer command' });
   }
 
+  const viewerState = getServerWsViewerState(server.id);
+  const viewerAgeSeconds = Number(viewerState?.ageSeconds ?? Number.POSITIVE_INFINITY);
+  const viewerSnapshotFresh =
+    Boolean(viewerState?.connected) &&
+    Number.isFinite(viewerAgeSeconds) &&
+    viewerAgeSeconds <= VIEWER_ACTION_TARGET_MAX_AGE_SECONDS;
+  if (viewerSnapshotFresh) {
+    const targetPresent = (viewerState?.players || []).some((entry) => entry.steamId === parsedSteamId);
+    if (!targetPresent) {
+      return res.status(409).json({
+        error: 'Viewer target is not present in latest snapshot',
+        code: 'viewer_target_not_present',
+        targetSteamId: parsedSteamId,
+      });
+    }
+  }
+
+  const nowMs = Date.now();
+  const cooldownKey = `${server.id}:${parsedSteamId}:${parsedAction}`;
+  const cooldownUntil = viewerActionCooldownByKey.get(cooldownKey) || 0;
+  if (cooldownUntil > nowMs) {
+    return res.status(429).json({
+      error: 'Viewer action cooldown',
+      code: 'viewer_action_cooldown',
+      retryAfterMs: cooldownUntil - nowMs,
+    });
+  }
+  viewerActionCooldownByKey.set(cooldownKey, nowMs + VIEWER_ACTION_COOLDOWN_MS);
+  if (viewerActionCooldownByKey.size > 5000) {
+    const staleThreshold = nowMs - 60_000;
+    Array.from(viewerActionCooldownByKey.entries()).forEach(([key, expiresAt]) => {
+      if (expiresAt < staleThreshold) {
+        viewerActionCooldownByKey.delete(key);
+      }
+    });
+  }
+
   const requestedByUsername = String(req.user?.username || 'Console').trim() || 'Console';
   const requestedByUserId = String(req.user?.id || '').trim() || undefined;
 
@@ -450,6 +496,8 @@ router.post('/:id/viewer-actions', authMiddleware, requireRole(UserRole.ADMIN), 
     requestedByUserId,
     requestedByUsername,
     serverName: server.name,
+    viewerSnapshotFresh,
+    ...(Number.isFinite(viewerAgeSeconds) ? { viewerSnapshotAgeSeconds: viewerAgeSeconds } : {}),
   });
 
   if (!queued) {
@@ -527,6 +575,16 @@ router.get('/ws/live-state', authMiddleware, requireRole(UserRole.ADMIN), async 
   });
 });
 
+// Aggregated viewer-state snapshots from WebSocket transport (PR-05 hardening/ops)
+router.get('/ws/viewer-state', authMiddleware, requireRole(UserRole.ADMIN), async (_req, res) => {
+  const items = getAllServerWsViewerState();
+  return res.json({
+    now: new Date().toISOString(),
+    total: items.length,
+    items,
+  });
+});
+
 // Live state from WebSocket snapshots (PR-03 near-real-time players/activity)
 router.get('/:id/live-state', authMiddleware, requireRole(UserRole.ADMIN), async (req, res) => {
   const { id } = req.params as { id: string };
@@ -565,6 +623,54 @@ router.get('/:id/live-state', authMiddleware, requireRole(UserRole.ADMIN), async
   return res.json({
     available: true,
     ...liveState,
+    fallback: {
+      status: server.status,
+      currentPlayers: server.currentPlayers,
+      maxPlayers: server.maxPlayers,
+      ...(server.currentMap ? { currentMap: server.currentMap } : {}),
+      ...(server.lastHeartbeat ? { lastHeartbeat: server.lastHeartbeat.toISOString() } : {}),
+    },
+  });
+});
+
+// Viewer-state from WebSocket snapshots (PR-05 hardening/ops)
+router.get('/:id/viewer-state', authMiddleware, requireRole(UserRole.ADMIN), async (req, res) => {
+  const { id } = req.params as { id: string };
+
+  const server = await prisma.gameServer.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      status: true,
+      currentPlayers: true,
+      maxPlayers: true,
+      currentMap: true,
+      lastHeartbeat: true,
+    },
+  });
+  if (!server) {
+    return res.status(404).json({ error: 'Server not found' });
+  }
+
+  const viewerState = getServerWsViewerState(id);
+  if (!viewerState) {
+    return res.json({
+      serverId: id,
+      available: false,
+      transport: 'websocket',
+      fallback: {
+        status: server.status,
+        currentPlayers: server.currentPlayers,
+        maxPlayers: server.maxPlayers,
+        ...(server.currentMap ? { currentMap: server.currentMap } : {}),
+        ...(server.lastHeartbeat ? { lastHeartbeat: server.lastHeartbeat.toISOString() } : {}),
+      },
+    });
+  }
+
+  return res.json({
+    available: true,
+    ...viewerState,
     fallback: {
       status: server.status,
       currentPlayers: server.currentPlayers,
