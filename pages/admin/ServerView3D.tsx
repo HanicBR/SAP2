@@ -3,6 +3,7 @@ import { Link, useParams, useSearchParams } from 'react-router-dom';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Icons } from '../../components/Icon';
+import { ServerViewerStatePlayer, ServerViewerStateSnapshot } from '../../types';
 
 type Bounds = {
   minX: number;
@@ -121,6 +122,24 @@ type RuntimeStats = {
   firstActiveLoadMs: number | null;
 };
 
+type ViewerWsStatus = 'idle' | 'connecting' | 'connected' | 'subscribed' | 'error';
+
+const VIEWER_STATE_STALE_SECONDS = 8;
+const VIEWER_RECONNECT_BASE_MS = 1000;
+const VIEWER_RECONNECT_MAX_MS = 15000;
+const PLAYER_MARKER_HEIGHT = 30;
+const PLAYER_MARKER_SMOOTH_RATE = 10;
+const PLAYER_MARKER_COLORS = [
+  0x22c55e,
+  0x38bdf8,
+  0xf59e0b,
+  0xef4444,
+  0xa78bfa,
+  0x14b8a6,
+  0xf472b6,
+  0x84cc16,
+];
+
 const toAssetUrl = (manifestUrl: string, relativeOrAbsoluteUrl: string): string => {
   const resolved = new URL(relativeOrAbsoluteUrl, new URL(manifestUrl, window.location.origin));
   return `${resolved.pathname}${resolved.search}${resolved.hash}`;
@@ -147,6 +166,89 @@ const hashColor = (input: string, alpha = 1): THREE.Color => {
 };
 
 const sourceToThree = (x: number, y: number, z: number): THREE.Vector3 => new THREE.Vector3(x, z, y);
+
+const toViewerWsUrl = (): string | null => {
+  if (typeof window === 'undefined') return null;
+  const token = localStorage.getItem('backstabber_token');
+  if (!token) return null;
+
+  const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+  const envApiBase = String((import.meta as any)?.env?.VITE_API_BASE_URL || '').trim();
+
+  if (envApiBase.startsWith('http://') || envApiBase.startsWith('https://')) {
+    try {
+      const apiUrl = new URL(envApiBase);
+      return `${wsProtocol}://${apiUrl.host}/ws/admin/viewer?token=${encodeURIComponent(token)}`;
+    } catch {
+      // fallback to current host
+    }
+  }
+
+  return `${wsProtocol}://${window.location.host}/ws/admin/viewer?token=${encodeURIComponent(token)}`;
+};
+
+const normalizeViewerPlayer = (raw: any): ServerViewerStatePlayer | null => {
+  const steamId = String(raw?.steamId || '').trim();
+  if (!steamId) return null;
+  const pos = raw?.pos || {};
+  const eyeAngles = raw?.eyeAngles || {};
+
+  return {
+    steamId,
+    ...(String(raw?.name || '').trim() ? { name: String(raw.name).trim() } : {}),
+    pos: {
+      x: Number(pos?.x || 0),
+      y: Number(pos?.y || 0),
+      z: Number(pos?.z || 0),
+    },
+    eyeAngles: {
+      pitch: Number(eyeAngles?.pitch || 0),
+      yaw: Number(eyeAngles?.yaw || 0),
+      roll: Number(eyeAngles?.roll || 0),
+    },
+    ...(Number.isFinite(Number(raw?.health)) ? { health: Math.max(0, Number(raw.health)) } : {}),
+    ...(Number.isFinite(Number(raw?.armor)) ? { armor: Math.max(0, Number(raw.armor)) } : {}),
+    ...(Number.isFinite(Number(raw?.teamId)) ? { teamId: Number(raw.teamId) } : {}),
+    ...(String(raw?.teamName || '').trim() ? { teamName: String(raw.teamName).trim() } : {}),
+    ...(typeof raw?.alive === 'boolean' ? { alive: raw.alive } : {}),
+  };
+};
+
+const parseViewerSnapshotMessage = (raw: any): ServerViewerStateSnapshot | null => {
+  const serverId = String(raw?.serverId || '').trim();
+  const receivedAt = String(raw?.receivedAt || '').trim();
+  if (!serverId || !receivedAt) return null;
+
+  const playersRaw = Array.isArray(raw?.players) ? raw.players : [];
+  const players = playersRaw
+    .map((entry: any) => normalizeViewerPlayer(entry))
+    .filter((entry: ServerViewerStatePlayer | null): entry is ServerViewerStatePlayer => Boolean(entry));
+
+  return {
+    serverId,
+    receivedAt,
+    ...(String(raw?.sentAt || '').trim() ? { sentAt: String(raw.sentAt).trim() } : {}),
+    ...(String(raw?.map || '').trim() ? { map: String(raw.map).trim() } : {}),
+    playerCount: Number.isFinite(Number(raw?.playerCount)) ? Math.max(0, Number(raw.playerCount)) : players.length,
+    players,
+  };
+};
+
+const hashSteamId = (steamId: string): number => {
+  let hash = 0;
+  for (let index = 0; index < steamId.length; index += 1) {
+    hash = (hash * 31 + steamId.charCodeAt(index)) >>> 0;
+  }
+  return hash;
+};
+
+const getViewerMarkerColorHex = (entry: ServerViewerStatePlayer): number => {
+  const teamId = Number(entry.teamId);
+  if (Number.isFinite(teamId)) {
+    return PLAYER_MARKER_COLORS[Math.abs(Math.floor(teamId)) % PLAYER_MARKER_COLORS.length];
+  }
+  return PLAYER_MARKER_COLORS[hashSteamId(entry.steamId) % PLAYER_MARKER_COLORS.length];
+};
 
 const disposeObject3D = (root: THREE.Object3D) => {
   root.traverse((obj) => {
@@ -182,9 +284,16 @@ const ServerView3D: React.FC = () => {
   const mapName = useMemo(() => normalizeMapName(searchParams.get('map')), [searchParams]);
   const manifestUrl = useMemo(() => `/maps/${mapName}/manifest.json`, [mapName]);
   const mountRef = useRef<HTMLDivElement | null>(null);
+  const viewerSocketRef = useRef<WebSocket | null>(null);
+  const viewerPingTimerRef = useRef<number | null>(null);
+  const viewerReconnectTimerRef = useRef<number | null>(null);
   const [status, setStatus] = useState<string>('Aguardando inicializacao...');
   const [error, setError] = useState<string | null>(null);
   const [manifest, setManifest] = useState<Manifest | null>(null);
+  const [viewerWsStatus, setViewerWsStatus] = useState<ViewerWsStatus>('idle');
+  const [viewerWsError, setViewerWsError] = useState<string | null>(null);
+  const [viewerLastMessageAt, setViewerLastMessageAt] = useState<string | null>(null);
+  const [viewerState, setViewerState] = useState<ServerViewerStateSnapshot | null>(null);
   const [runtimeStats, setRuntimeStats] = useState<RuntimeStats>({
     loadedChunks: 0,
     visibleChunks: 0,
@@ -194,6 +303,210 @@ const ServerView3D: React.FC = () => {
     firstActiveLoadMs: null,
   });
   const [streamingLogs, setStreamingLogs] = useState<string[]>([]);
+  const viewerStateRef = useRef<ServerViewerStateSnapshot | null>(null);
+
+  const viewerPlayers = useMemo(
+    () =>
+      [...(viewerState?.players || [])].sort((left, right) =>
+        String(left.name || left.steamId || '')
+          .toLowerCase()
+          .localeCompare(String(right.name || right.steamId || '').toLowerCase()),
+      ),
+    [viewerState],
+  );
+
+  const viewerSnapshotAgeSeconds = useMemo(() => {
+    if (!viewerState?.receivedAt) return Number.POSITIVE_INFINITY;
+    const parsed = new Date(viewerState.receivedAt).getTime();
+    if (!Number.isFinite(parsed)) return Number.POSITIVE_INFINITY;
+    return Math.max(0, Math.floor((Date.now() - parsed) / 1000));
+  }, [viewerState]);
+
+  const hasFreshViewerSnapshot =
+    Number.isFinite(viewerSnapshotAgeSeconds) && viewerSnapshotAgeSeconds <= VIEWER_STATE_STALE_SECONDS;
+
+  const viewerStatusBadge = useMemo(() => {
+    if (viewerWsStatus === 'error') {
+      return { label: 'WS error', className: 'bg-red-900/20 text-red-300 border-red-700' };
+    }
+    if (viewerWsStatus === 'connecting' || viewerWsStatus === 'idle') {
+      return { label: 'Connecting', className: 'bg-yellow-900/20 text-yellow-300 border-yellow-700' };
+    }
+    if (!viewerState) {
+      return { label: 'No frame', className: 'bg-zinc-800 text-zinc-400 border-zinc-700' };
+    }
+    if (!hasFreshViewerSnapshot) {
+      return { label: 'Frame stale', className: 'bg-orange-900/20 text-orange-300 border-orange-700' };
+    }
+    return { label: 'Live frame', className: 'bg-emerald-900/20 text-emerald-300 border-emerald-700' };
+  }, [hasFreshViewerSnapshot, viewerState, viewerWsStatus]);
+
+  useEffect(() => {
+    viewerStateRef.current = viewerState;
+  }, [viewerState]);
+
+  useEffect(() => {
+    if (!serverId) return undefined;
+
+    let closedByEffect = false;
+    let reconnectAttempts = 0;
+
+    const clearPingTimer = () => {
+      if (viewerPingTimerRef.current !== null) {
+        window.clearInterval(viewerPingTimerRef.current);
+        viewerPingTimerRef.current = null;
+      }
+    };
+
+    const clearReconnectTimer = () => {
+      if (viewerReconnectTimerRef.current !== null) {
+        window.clearTimeout(viewerReconnectTimerRef.current);
+        viewerReconnectTimerRef.current = null;
+      }
+    };
+
+    const closeSocket = () => {
+      const current = viewerSocketRef.current;
+      if (!current) return;
+      current.onopen = null;
+      current.onmessage = null;
+      current.onerror = null;
+      current.onclose = null;
+      try {
+        current.close();
+      } catch {
+        // ignore
+      }
+      viewerSocketRef.current = null;
+    };
+
+    const scheduleReconnect = () => {
+      if (closedByEffect) return;
+      clearReconnectTimer();
+      reconnectAttempts += 1;
+      const delayMs = Math.min(
+        VIEWER_RECONNECT_MAX_MS,
+        VIEWER_RECONNECT_BASE_MS * 2 ** Math.max(0, reconnectAttempts - 1),
+      );
+      viewerReconnectTimerRef.current = window.setTimeout(() => {
+        connectViewer();
+      }, delayMs);
+    };
+
+    const connectViewer = () => {
+      clearReconnectTimer();
+      clearPingTimer();
+      closeSocket();
+
+      const wsUrl = toViewerWsUrl();
+      if (!wsUrl) {
+        setViewerWsStatus('error');
+        setViewerWsError('Token de admin ausente para conectar no canal viewer_state.');
+        return;
+      }
+
+      setViewerWsStatus('connecting');
+      setViewerWsError(null);
+
+      let socket: WebSocket;
+      try {
+        socket = new WebSocket(wsUrl);
+      } catch (err: any) {
+        setViewerWsStatus('error');
+        setViewerWsError(String(err?.message || 'Falha ao abrir WebSocket viewer_state.'));
+        scheduleReconnect();
+        return;
+      }
+
+      viewerSocketRef.current = socket;
+
+      socket.onopen = () => {
+        reconnectAttempts = 0;
+        setViewerWsStatus('connected');
+        setViewerWsError(null);
+
+        try {
+          socket.send(JSON.stringify({ type: 'subscribe', payload: { serverId } }));
+        } catch {
+          // onclose/onerror handles retries
+        }
+
+        viewerPingTimerRef.current = window.setInterval(() => {
+          const active = viewerSocketRef.current;
+          if (!active || active.readyState !== WebSocket.OPEN) return;
+          try {
+            active.send(JSON.stringify({ type: 'ping' }));
+          } catch {
+            // ignore
+          }
+        }, 15000);
+      };
+
+      socket.onmessage = (event: MessageEvent) => {
+        setViewerLastMessageAt(new Date().toISOString());
+        let parsed: any = null;
+        try {
+          parsed = JSON.parse(String(event.data || ''));
+        } catch {
+          return;
+        }
+
+        const type = String(parsed?.type || '').trim().toLowerCase();
+        if (type === 'connected') {
+          setViewerWsStatus('connected');
+          return;
+        }
+        if (type === 'subscribed') {
+          setViewerWsStatus('subscribed');
+          return;
+        }
+        if (type === 'viewer_state') {
+          const snapshot = parseViewerSnapshotMessage(parsed);
+          if (!snapshot) return;
+          if (snapshot.serverId !== serverId) return;
+          setViewerState(snapshot);
+          setViewerWsStatus('subscribed');
+          return;
+        }
+        if (type === 'viewer_state_unavailable') {
+          if (String(parsed?.serverId || '') === serverId) {
+            setViewerState(null);
+          }
+          return;
+        }
+        if (type === 'error') {
+          const reason = String(parsed?.reason || 'viewer_ws_error');
+          setViewerWsError(reason);
+          if (reason === 'invalid_or_expired_token') {
+            setViewerWsStatus('error');
+          }
+        }
+      };
+
+      socket.onerror = () => {
+        setViewerWsError('Erro de conexao no canal viewer_state.');
+      };
+
+      socket.onclose = () => {
+        clearPingTimer();
+        if (viewerSocketRef.current === socket) {
+          viewerSocketRef.current = null;
+        }
+        if (closedByEffect) return;
+        setViewerWsStatus('connecting');
+        scheduleReconnect();
+      };
+    };
+
+    connectViewer();
+
+    return () => {
+      closedByEffect = true;
+      clearReconnectTimer();
+      clearPingTimer();
+      closeSocket();
+    };
+  }, [serverId]);
 
   useEffect(() => {
     const host = mountRef.current;
@@ -202,6 +515,8 @@ const ServerView3D: React.FC = () => {
     let cancelled = false;
     let animationFrameId = 0;
     let streamIntervalMs = 0;
+    let playerSyncIntervalMs = 0;
+    let lastFrameAtMs = performance.now();
     let startedAt = performance.now();
     let firstActiveLoadMs: number | null = null;
 
@@ -238,6 +553,10 @@ const ServerView3D: React.FC = () => {
     chunkRoot.name = 'chunk-root';
     scene.add(chunkRoot);
 
+    const playersRoot = new THREE.Group();
+    playersRoot.name = 'players-root';
+    scene.add(playersRoot);
+
     const grid = new THREE.GridHelper(36000, 120, 0x1f2937, 0x111827);
     grid.position.y = 0;
     scene.add(grid);
@@ -256,6 +575,13 @@ const ServerView3D: React.FC = () => {
     const textureLoading = new Set<string>();
     const pendingMaterialBindings = new Map<string, Set<THREE.MeshStandardMaterial>>();
     const materialDefs = new Map<string, { placeholder: boolean; textureUrl?: string }>();
+    const playerGeometry = new THREE.SphereGeometry(20, 14, 12);
+    const playerMarkers = new Map<string, {
+      mesh: THREE.Mesh;
+      targetPosition: THREE.Vector3;
+      lastSeenAtMs: number;
+    }>();
+    let lastPlayerSnapshotKey = '';
 
     const getWorldMaterial = (materialIdRaw: string, placeholderFlag: boolean): THREE.MeshStandardMaterial => {
       const materialId = String(materialIdRaw || '__missing_material');
@@ -323,6 +649,84 @@ const ServerView3D: React.FC = () => {
       textureCache.clear();
       textureLoading.clear();
       pendingMaterialBindings.clear();
+    };
+
+    const clearPlayerMarkers = () => {
+      for (const marker of playerMarkers.values()) {
+        playersRoot.remove(marker.mesh);
+        const material = marker.mesh.material as THREE.Material | THREE.Material[] | undefined;
+        if (Array.isArray(material)) {
+          material.forEach((item) => item.dispose());
+        } else {
+          material?.dispose();
+        }
+      }
+      playerMarkers.clear();
+    };
+
+    const upsertPlayersFromSnapshot = (snapshot: ServerViewerStateSnapshot | null) => {
+      if (!snapshot) {
+        clearPlayerMarkers();
+        return;
+      }
+
+      const now = performance.now();
+      const seen = new Set<string>();
+
+      for (const player of snapshot.players || []) {
+        const steamId = String(player.steamId || '').trim();
+        if (!steamId) continue;
+        seen.add(steamId);
+
+        const sourcePos = sourceToThree(
+          Number(player.pos?.x || 0),
+          Number(player.pos?.y || 0),
+          Number(player.pos?.z || 0),
+        );
+        sourcePos.y += PLAYER_MARKER_HEIGHT;
+
+        let marker = playerMarkers.get(steamId);
+        if (!marker) {
+          const markerMaterial = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(getViewerMarkerColorHex(player)),
+            metalness: 0.02,
+            roughness: 0.45,
+            transparent: true,
+            opacity: player.alive === false ? 0.35 : 0.95,
+            depthWrite: player.alive !== false,
+          });
+          const markerMesh = new THREE.Mesh(playerGeometry, markerMaterial);
+          markerMesh.position.copy(sourcePos);
+          markerMesh.frustumCulled = true;
+          playersRoot.add(markerMesh);
+          marker = {
+            mesh: markerMesh,
+            targetPosition: sourcePos.clone(),
+            lastSeenAtMs: now,
+          };
+          playerMarkers.set(steamId, marker);
+        } else {
+          marker.targetPosition.copy(sourcePos);
+          marker.lastSeenAtMs = now;
+          const mat = marker.mesh.material as THREE.MeshStandardMaterial;
+          mat.color.setHex(getViewerMarkerColorHex(player));
+          mat.opacity = player.alive === false ? 0.35 : 0.95;
+          mat.depthWrite = player.alive !== false;
+          mat.needsUpdate = true;
+        }
+      }
+
+      for (const [steamId, marker] of playerMarkers.entries()) {
+        if (seen.has(steamId)) continue;
+        playersRoot.remove(marker.mesh);
+        const material = marker.mesh.material as THREE.Material | THREE.Material[] | undefined;
+        if (Array.isArray(material)) {
+          material.forEach((item) => item.dispose());
+        } else {
+          material?.dispose();
+        }
+        playerMarkers.delete(steamId);
+      }
     };
 
     const loadChunkGroup = async (entry: ChunkEntry): Promise<void> => {
@@ -627,9 +1031,30 @@ const ServerView3D: React.FC = () => {
         const animate = () => {
           if (cancelled) return;
           animationFrameId = window.requestAnimationFrame(animate);
+
+          const now = performance.now();
+          const dtSec = Math.min(0.15, Math.max(0, (now - lastFrameAtMs) / 1000));
+          lastFrameAtMs = now;
+
+          const smoothAlpha = 1 - Math.exp(-PLAYER_MARKER_SMOOTH_RATE * dtSec);
+          for (const marker of playerMarkers.values()) {
+            marker.mesh.position.lerp(marker.targetPosition, smoothAlpha);
+          }
+
+          if (now - playerSyncIntervalMs >= 120) {
+            playerSyncIntervalMs = now;
+            const snapshot = viewerStateRef.current;
+            const snapshotKey = snapshot
+              ? `${snapshot.serverId}:${snapshot.receivedAt}:${snapshot.playerCount}:${snapshot.players.length}`
+              : '__none__';
+            if (snapshotKey !== lastPlayerSnapshotKey) {
+              lastPlayerSnapshotKey = snapshotKey;
+              upsertPlayersFromSnapshot(snapshot);
+            }
+          }
+
           controls.update();
           renderer.render(scene, camera);
-          const now = performance.now();
           if (now - streamIntervalMs >= 300) {
             streamIntervalMs = now;
             updateStreaming();
@@ -671,6 +1096,8 @@ const ServerView3D: React.FC = () => {
         disposeObject3D(record.group);
       }
       chunkRecords.clear();
+      clearPlayerMarkers();
+      playerGeometry.dispose();
       disposeTextureCache();
       renderer.dispose();
       host.innerHTML = '';
@@ -693,6 +1120,7 @@ const ServerView3D: React.FC = () => {
         <div className="bg-zinc-900 border border-zinc-800 rounded px-3 py-2 text-xs text-zinc-300 font-mono">
           <div>{status}</div>
           {manifest && <div>manifest v{manifest.version} | chunkSize={manifest.map.chunkSize}</div>}
+          <div>viewerState: {viewerStatusBadge.label}</div>
         </div>
       </div>
 
@@ -717,6 +1145,28 @@ const ServerView3D: React.FC = () => {
             <p>loadedTris(est): {runtimeStats.loadedTrisEstimate.toLocaleString('pt-BR')}</p>
             <p>loadedBytes(est): {Math.round(runtimeStats.loadedBytesEstimate / (1024 * 1024)).toLocaleString('pt-BR')} MB</p>
             <p>firstActiveLoadMs: {runtimeStats.firstActiveLoadMs ?? 'pendente'}</p>
+          </div>
+
+          <div className="rounded border border-zinc-800 bg-zinc-900 p-3 text-xs text-zinc-300 space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-zinc-500 uppercase font-bold text-[11px]">Players (viewer_state)</p>
+              <span className={`px-2 py-0.5 rounded border text-[10px] font-bold uppercase ${viewerStatusBadge.className}`}>
+                {viewerStatusBadge.label}
+              </span>
+            </div>
+            <p>framePlayers: {viewerState?.playerCount ?? 0}</p>
+            <p>frameAge: {Number.isFinite(viewerSnapshotAgeSeconds) ? `${viewerSnapshotAgeSeconds}s` : 'sem frame'}</p>
+            <p>lastWsMsg: {viewerLastMessageAt ? new Date(viewerLastMessageAt).toLocaleTimeString('pt-BR') : 'n/a'}</p>
+            <p>snapshotFresh: {hasFreshViewerSnapshot ? 'sim' : 'nao'}</p>
+            {viewerWsError && <p className="text-red-300 break-words">wsError: {viewerWsError}</p>}
+            <div className="max-h-[160px] overflow-y-auto space-y-1 pt-1 border-t border-zinc-800">
+              {!viewerPlayers.length && <p className="text-zinc-500">Sem players no frame.</p>}
+              {viewerPlayers.slice(0, 20).map((player) => (
+                <p key={player.steamId} className="font-mono">
+                  {player.name || player.steamId} [{player.alive === false ? 'dead' : 'alive'}]
+                </p>
+              ))}
+            </div>
           </div>
 
           <div className="rounded border border-zinc-800 bg-zinc-900 p-3">
