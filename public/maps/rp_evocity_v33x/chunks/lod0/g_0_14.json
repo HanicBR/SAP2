@@ -1,0 +1,222 @@
+{
+  "id": "g_0_14",
+  "lod": 0,
+  "bounds": {
+    "minX": -14336,
+    "minY": 13913,
+    "maxX": -12288,
+    "maxY": 15961
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 0,
+    "y": 14
+  },
+  "counts": {
+    "worldFaces": 11,
+    "staticProps": 2,
+    "placeholderWorldFaces": 9,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 22,
+    "worldVerts": 44,
+    "worldBytes": 1584,
+    "propsTris": 24,
+    "propsVerts": 16,
+    "propsBytes": 768,
+    "totalTris": 46,
+    "totalVerts": 60,
+    "totalBytes": 2352,
+    "drawCallsBeforeInstancing": 6,
+    "drawCallsAfterInstancing": 6
+  },
+  "world": {
+    "faces": [
+      {
+        "position": [
+          -12800,
+          14735,
+          153
+        ],
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_beneath_-13526_12206_292",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -12800,
+          14735,
+          153
+        ],
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_-13526_12206_292",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -12800,
+          15352,
+          810.5
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -12800,
+          14844,
+          949
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -13600,
+          14735,
+          153
+        ],
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_beneath_-13526_12206_292",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -13600,
+          14735,
+          153
+        ],
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_-13526_12206_292",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -13820,
+          15352,
+          810.5
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -13820,
+          14844,
+          949
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -14328,
+          14844,
+          810.5
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -13754,
+          14694,
+          58
+        ],
+        "material": "nature/blendgrassgrass001a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -12606,
+          14694,
+          58
+        ],
+        "material": "nature/blendgrassgrass001a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      }
+    ]
+  },
+  "props": {
+    "instances": [
+      {
+        "model": "props_foliage/tree_pine_tall_cluster_01",
+        "sourceModel": "props_foliage/tree_pine_tall_cluster_01",
+        "placeholderModel": false,
+        "origin": [
+          -13405,
+          14390,
+          167
+        ],
+        "angles": [
+          0,
+          77.5,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -12297,
+          14639,
+          122
+        ],
+        "angles": [
+          0.41574299335479736,
+          285.4930114746094,
+          -1.9563299417495728
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    ]
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

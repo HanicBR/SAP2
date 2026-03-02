@@ -1,0 +1,326 @@
+{
+  "id": "g_12_8",
+  "lod": 0,
+  "bounds": {
+    "minX": 10240,
+    "minY": 1625,
+    "maxX": 12288,
+    "maxY": 3673
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 12,
+    "y": 8
+  },
+  "counts": {
+    "worldFaces": 13,
+    "staticProps": 6,
+    "placeholderWorldFaces": 4,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 28,
+    "worldVerts": 54,
+    "worldBytes": 2016,
+    "propsTris": 72,
+    "propsVerts": 48,
+    "propsBytes": 2304,
+    "totalTris": 100,
+    "totalVerts": 102,
+    "totalBytes": 4320,
+    "drawCallsBeforeInstancing": 10,
+    "drawCallsAfterInstancing": 6
+  },
+  "world": {
+    "faces": [
+      {
+        "position": [
+          11776,
+          3584,
+          856
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          11776,
+          2560,
+          856
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          10581.333333333334,
+          3511,
+          856
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          10752,
+          2560,
+          856
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          11040,
+          2194,
+          64
+        ],
+        "material": "nature/blendgrassgravel001a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12064,
+          2194,
+          64
+        ],
+        "material": "nature/blendgrassgravel001a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          11040,
+          3596,
+          64
+        ],
+        "material": "nature/blendgrassgravel001a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12064,
+          3596,
+          64
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          10253,
+          2292.5,
+          496
+        ],
+        "material": "nature/miltree005",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          11650.5,
+          1830.5,
+          64
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          11845,
+          2121,
+          64
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          11978.5,
+          2444,
+          64
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12046.5,
+          2787,
+          64
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      }
+    ]
+  },
+  "props": {
+    "instances": [
+      {
+        "model": "props_foliage/tree_pine_tall_cluster_01",
+        "sourceModel": "props_foliage/tree_pine_tall_cluster_01",
+        "placeholderModel": false,
+        "origin": [
+          10291,
+          2266,
+          -2.1019299030303955
+        ],
+        "angles": [
+          0,
+          32.465999603271484,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_tall_cluster_01",
+        "sourceModel": "props_foliage/tree_pine_tall_cluster_01",
+        "placeholderModel": false,
+        "origin": [
+          10923,
+          2925,
+          -2.1019299030303955
+        ],
+        "angles": [
+          0,
+          145.46600341796875,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_tall_cluster_01",
+        "sourceModel": "props_foliage/tree_pine_tall_cluster_01",
+        "placeholderModel": false,
+        "origin": [
+          11136,
+          3651,
+          -2.1019299030303955
+        ],
+        "angles": [
+          0,
+          145.46600341796875,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          10363,
+          1757,
+          33
+        ],
+        "angles": [
+          -2.409019947052002,
+          15.514100074768066,
+          -0.6684899926185608
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          10936,
+          1815,
+          33
+        ],
+        "angles": [
+          -2.409019947052002,
+          15.514100074768066,
+          -0.6684899926185608
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          11513,
+          2323,
+          33
+        ],
+        "angles": [
+          -2.409019947052002,
+          15.514100074768066,
+          -0.6684899926185608
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    ]
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

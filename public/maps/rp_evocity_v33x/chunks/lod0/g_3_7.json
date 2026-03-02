@@ -1,0 +1,109 @@
+{
+  "id": "g_3_7",
+  "lod": 0,
+  "bounds": {
+    "minX": -8192,
+    "minY": -423,
+    "maxX": -6144,
+    "maxY": 1625
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 3,
+    "y": 7
+  },
+  "counts": {
+    "worldFaces": 5,
+    "staticProps": 0,
+    "placeholderWorldFaces": 5,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 11,
+    "worldVerts": 21,
+    "worldBytes": 792,
+    "propsTris": 0,
+    "propsVerts": 0,
+    "propsBytes": 0,
+    "totalTris": 11,
+    "totalVerts": 21,
+    "totalBytes": 792,
+    "drawCallsBeforeInstancing": 2,
+    "drawCallsAfterInstancing": 2
+  },
+  "world": {
+    "faces": [
+      {
+        "position": [
+          -6590,
+          385.8,
+          691.2
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6367,
+          645,
+          696
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6367,
+          322.5,
+          720
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6566,
+          -394.5,
+          216
+        ],
+        "material": "nature/cliffface001a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6566,
+          -394.5,
+          520
+        ],
+        "material": "nature/cliffface001a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      }
+    ]
+  },
+  "props": {
+    "instances": []
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

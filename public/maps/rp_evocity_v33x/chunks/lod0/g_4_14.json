@@ -1,0 +1,4334 @@
+{
+  "id": "g_4_14",
+  "lod": 0,
+  "bounds": {
+    "minX": -6144,
+    "minY": 13913,
+    "maxX": -4096,
+    "maxY": 15961
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 4,
+    "y": 14
+  },
+  "counts": {
+    "worldFaces": 312,
+    "staticProps": 27,
+    "placeholderWorldFaces": 80,
+    "placeholderStaticProps": 11
+  },
+  "stats": {
+    "worldTris": 888,
+    "worldVerts": 1512,
+    "worldBytes": 63936,
+    "propsTris": 324,
+    "propsVerts": 216,
+    "propsBytes": 10368,
+    "totalTris": 1212,
+    "totalVerts": 1728,
+    "totalBytes": 74304,
+    "drawCallsBeforeInstancing": 59,
+    "drawCallsAfterInstancing": 39
+  },
+  "world": {
+    "faces": [
+      {
+        "position": [
+          -6138,
+          14626,
+          264
+        ],
+        "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_-4564_13969_241",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5966,
+          14374,
+          212
+        ],
+        "material": "de_train/train_cement_floor_02",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6006,
+          14624,
+          268
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6136,
+          14604,
+          268
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6138,
+          14626,
+          266
+        ],
+        "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_-5946_14760_292",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6131,
+          14748,
+          272
+        ],
+        "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_-4564_13969_241",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6109,
+          14719,
+          272
+        ],
+        "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_-4564_13969_241",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6133.75,
+          14415.5,
+          234
+        ],
+        "material": "de_train/train_cement_floor_02",
+        "placeholderMaterial": true,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          -5990,
+          14374,
+          222
+        ],
+        "material": "de_train/train_cement_floor_02",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6131,
+          14748,
+          274
+        ],
+        "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_-5946_14760_292",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6112.4,
+          14738.8,
+          274
+        ],
+        "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_-5946_14760_292",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6110.8,
+          14342,
+          212.4
+        ],
+        "material": "stone/stonewall_inn03a",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5987.6,
+          14342,
+          205.6
+        ],
+        "material": "stone/stonewall_inn03a",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5963.6,
+          14342,
+          199.2
+        ],
+        "material": "stone/stonewall_inn03a",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5954,
+          14374,
+          199.33333333333334
+        ],
+        "material": "stone/stonewall_inn03a",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -5987.6,
+          14406,
+          205.6
+        ],
+        "material": "stone/stonewall_inn03a",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5963.6,
+          14406,
+          199.2
+        ],
+        "material": "stone/stonewall_inn03a",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6002,
+          14617.6,
+          246.8
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6002,
+          14385.333333333334,
+          208
+        ],
+        "material": "stone/stonewall_inn03a",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6010,
+          14626,
+          257.5
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          -6134,
+          14600,
+          244.66666666666666
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -5978,
+          14374,
+          217
+        ],
+        "material": "stone/stonewall_inn03a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6007.333333333333,
+          14644,
+          255
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6138,
+          14644,
+          265
+        ],
+        "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_-5946_14760_292",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6138,
+          14608,
+          257.5
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          -6138,
+          14720,
+          258.4
+        ],
+        "material": "wood/cabinets01a",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6092,
+          14732.5,
+          272.8333333333333
+        ],
+        "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_-5946_14760_292",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6092,
+          14736.4,
+          251.6
+        ],
+        "material": "wood/cabinets01a",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6092,
+          14741,
+          235
+        ],
+        "material": "maps/rp_evocity_v33x/env/brush/walls/wall_huron_1st_-5946_14760_292",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6136,
+          14748,
+          273
+        ],
+        "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_-9644_11438_292",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4802.5428466796875,
+          14815.5,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4901.122721354167,
+          14468.589518229166,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          -4972.588053385417,
+          14397.123372395834,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          -4956.109375,
+          14427.9775390625,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          -4931.976236979167,
+          14452.1103515625,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          -4817.541178385417,
+          14524.437825520834,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          -4850.669108072917,
+          14514.430338541666,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          -5011.030436197917,
+          14342.666666666666,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          -5065.1024169921875,
+          14365.782470703125,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4725.103190104167,
+          14562.623046875,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          -4759.676432291667,
+          14559.165690104166,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          -4729.8361328125,
+          14574.8994140625,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -4656.40205078125,
+          14782.8,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5034.4662109375,
+          14451.4125,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -4906.395128038194,
+          14684.673068576389,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 9,
+        "triCount": 7,
+        "byteEstimate": 504
+      },
+      {
+        "position": [
+          -4963.855747767857,
+          14574.4326171875,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          -4608,
+          15352,
+          810.5
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4608,
+          14844,
+          949
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4845.586159446023,
+          14726.824840198864,
+          122
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 11,
+        "triCount": 9,
+        "byteEstimate": 648
+      },
+      {
+        "position": [
+          -4711.190185546875,
+          15059.7412109375,
+          122
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5100.80390625,
+          14782.9248046875,
+          122
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -4759.676106770833,
+          14559.165690104166,
+          122
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          -4725.102864583333,
+          14562.623046875,
+          122
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          -5011.030436197917,
+          14342.666666666666,
+          122
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          -4817.54052734375,
+          14524.437825520834,
+          122
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          -4901.122395833333,
+          14468.589518229166,
+          122
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          -4888.658900669643,
+          14529.660853794643,
+          122
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          -4892.88779296875,
+          14489.831640625,
+          122
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5067.63994140625,
+          14528.4130859375,
+          122
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5017.656319754465,
+          14413.669642857143,
+          122
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          -4949.4820556640625,
+          14428.082763671875,
+          122
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4336.0001220703125,
+          14584,
+          146.5
+        ],
+        "material": "maps/rp_evocity_v33x/cs_assault/pavement001a_-3604_13969_241",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4336,
+          15096,
+          146.5
+        ],
+        "material": "maps/rp_evocity_v33x/cs_assault/pavement001a_-3604_13969_241",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4336.0001220703125,
+          14840,
+          171
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4880.9533203125,
+          15044.296484375,
+          147.6
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -4676.0045166015625,
+          15086,
+          154
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5049.59951171875,
+          14974.2029296875,
+          147.6
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -4625.9998779296875,
+          14579,
+          154
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4724,
+          14559.5,
+          154
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5007.340576171875,
+          14346,
+          154
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4816.00146484375,
+          14521.5,
+          154
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4969.998046875,
+          14395,
+          154
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4898.99951171875,
+          14466,
+          154
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4576,
+          14878.696484375,
+          119.6
+        ],
+        "material": "ajacks/ajacks_road2",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -4336,
+          14584,
+          111.5
+        ],
+        "material": "maps/rp_evocity_v33x/cs_assault/pavement001a_-3604_13969_241",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4336,
+          15096,
+          111.5
+        ],
+        "material": "maps/rp_evocity_v33x/cs_assault/pavement001a_-3604_13969_241",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4764.8,
+          14043.816015625,
+          186
+        ],
+        "material": "hall_concrete/hall_concrete11_wet",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5109.333333333333,
+          13965.333333333334,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          -5064.018359375,
+          14314.6841796875,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -4560,
+          13990,
+          186
+        ],
+        "material": "maps/rp_evocity_v33x/ajacks/art_woodfloor_-4564_13969_241",
+        "placeholderMaterial": false,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          -4542,
+          14168,
+          186
+        ],
+        "material": "carpet/grey02",
+        "placeholderMaterial": true,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          -4468,
+          14013,
+          186
+        ],
+        "material": "maps/rp_evocity_v33x/ajacks/art_woodfloor_-4564_13969_241",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4468,
+          14149,
+          186
+        ],
+        "material": "carpet/grey02",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4440,
+          13992.42857142857,
+          186
+        ],
+        "material": "carpet/grey02",
+        "placeholderMaterial": true,
+        "vertexCount": 14,
+        "triCount": 12,
+        "byteEstimate": 864
+      },
+      {
+        "position": [
+          -4404,
+          14149,
+          186
+        ],
+        "material": "carpet/grey02",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5100.8263671875,
+          14134.4732421875,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5096.7828369140625,
+          14230.44677734375,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4349.333333333333,
+          14162.777777777777,
+          186
+        ],
+        "material": "carpet/grey02",
+        "placeholderMaterial": true,
+        "vertexCount": 9,
+        "triCount": 7,
+        "byteEstimate": 504
+      },
+      {
+        "position": [
+          -5075.0439453125,
+          14205.333333333334,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          -4560,
+          13990,
+          314
+        ],
+        "material": "ajacks/ben_whiteceiling",
+        "placeholderMaterial": false,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          -4542,
+          14168,
+          314
+        ],
+        "material": "ajacks/ben_whiteceiling",
+        "placeholderMaterial": false,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          -4436,
+          14030.6,
+          314
+        ],
+        "material": "ajacks/ben_whiteceiling",
+        "placeholderMaterial": false,
+        "vertexCount": 10,
+        "triCount": 8,
+        "byteEstimate": 576
+      },
+      {
+        "position": [
+          -4349.333333333333,
+          14162.777777777777,
+          314
+        ],
+        "material": "ajacks/ben_whiteceiling",
+        "placeholderMaterial": false,
+        "vertexCount": 9,
+        "triCount": 7,
+        "byteEstimate": 504
+      },
+      {
+        "position": [
+          -4345.28251953125,
+          14233,
+          366.0081420898438
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -4562.402099609375,
+          14233,
+          378.6736094156901
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -4664,
+          14217.013671875,
+          315
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4264,
+          13953.013671875,
+          315
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4264,
+          14217.013671875,
+          315
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4659.2,
+          14218.6109375,
+          317.0249938964844
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -4560.0003662109375,
+          14229,
+          379.5208282470703
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4268.8,
+          14218.6109375,
+          317.02442626953126
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -4368.0003662109375,
+          14229,
+          379.5203552246094
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4656,
+          14002.146763392857,
+          316.1607099260603
+        ],
+        "material": "wood/mainstreet_woodsiding05c",
+        "placeholderMaterial": true,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          -4272,
+          14059.289620535714,
+          316.1603044782366
+        ],
+        "material": "wood/mainstreet_woodsiding05c",
+        "placeholderMaterial": true,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          -4480.0001220703125,
+          14225,
+          325.34019724527997
+        ],
+        "material": "wood/mainstreet_woodsiding05c",
+        "placeholderMaterial": true,
+        "vertexCount": 12,
+        "triCount": 10,
+        "byteEstimate": 720
+      },
+      {
+        "position": [
+          -4363.206787109375,
+          13953.013671875,
+          378.5
+        ],
+        "material": "wood/milroof005",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4363.206787109375,
+          14217.013671875,
+          378.5
+        ],
+        "material": "wood/milroof005",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4463.20703125,
+          14217.013671875,
+          441.5
+        ],
+        "material": "wood/milroof005",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4564.000244140625,
+          14057.017903645834,
+          379
+        ],
+        "material": "wood/milroof005",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -4464,
+          14081,
+          241
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4464,
+          14193,
+          259.2
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -4464,
+          13946.6,
+          259.2
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -4464,
+          14081,
+          302
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -4306.666666666667,
+          14217,
+          250.33333333333334
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -4389.333333333333,
+          14217,
+          250.33333333333334
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -4352,
+          14217,
+          297
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4352,
+          14217,
+          251
+        ],
+        "material": "hall_windows/hall_window04",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4352,
+          14217,
+          204
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4436,
+          14217,
+          250
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4304,
+          14225,
+          250.33333333333334
+        ],
+        "material": "wood/mainstreet_woodsiding05c",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -4410.666666666667,
+          14225,
+          250.33333333333334
+        ],
+        "material": "wood/mainstreet_woodsiding05c",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -4352,
+          14225,
+          297
+        ],
+        "material": "wood/mainstreet_woodsiding05c",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4352,
+          14225,
+          251
+        ],
+        "material": "hall_windows/hall_window04",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4352,
+          14225,
+          204
+        ],
+        "material": "wood/mainstreet_woodsiding05c",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4272,
+          14221,
+          250
+        ],
+        "material": "wood/mainstreet_woodsiding05c",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4408,
+          14149,
+          305
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4408,
+          14193,
+          259.2
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -4408,
+          14105,
+          259.2
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -4400,
+          14193,
+          259.2
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -4400,
+          14149,
+          305
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4280,
+          14169,
+          250
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4272,
+          14169,
+          250
+        ],
+        "material": "wood/mainstreet_woodsiding05c",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4272,
+          13917,
+          250
+        ],
+        "material": "wood/mainstreet_woodsiding05c",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4280,
+          14105,
+          250
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4344,
+          14081,
+          250
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4340,
+          14089,
+          250
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4400,
+          14108.2,
+          259.2
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -4472,
+          13949.8,
+          259.2
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -4472,
+          14013,
+          305
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4472,
+          14057,
+          259.2
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -4472,
+          14193,
+          259.2
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -4472,
+          14149,
+          305
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4472,
+          14108.2,
+          259.2
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -4468,
+          14225,
+          250
+        ],
+        "material": "wood/mainstreet_woodsiding05c",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4648,
+          14027.666666666666,
+          250.33333333333334
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -4648,
+          13923.666666666666,
+          250.33333333333334
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -4648,
+          13969,
+          297
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4648,
+          13969,
+          251
+        ],
+        "material": "hall_windows/hall_window04",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4648,
+          13969,
+          204
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4648,
+          14153,
+          250
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4520,
+          14217,
+          250.33333333333334
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -4621.333333333333,
+          14217,
+          250.33333333333334
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -4576,
+          14217,
+          297
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4576,
+          14217,
+          251
+        ],
+        "material": "hall_windows/hall_window04",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4576,
+          14217,
+          204
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4520,
+          14225,
+          250.33333333333334
+        ],
+        "material": "wood/mainstreet_woodsiding05c",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -4621.333333333333,
+          14225,
+          250.33333333333334
+        ],
+        "material": "wood/mainstreet_woodsiding05c",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -4576,
+          14225,
+          297
+        ],
+        "material": "wood/mainstreet_woodsiding05c",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4576,
+          14225,
+          251
+        ],
+        "material": "hall_windows/hall_window04",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4576,
+          14225,
+          204
+        ],
+        "material": "wood/mainstreet_woodsiding05c",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4560,
+          14081,
+          250
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4560,
+          14089,
+          250
+        ],
+        "material": "ajacks/ben_painttan",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4652,
+          14225,
+          250
+        ],
+        "material": "wood/mainstreet_woodsiding05c",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4656,
+          14075.666666666666,
+          250.33333333333334
+        ],
+        "material": "wood/mainstreet_woodsiding05c",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -4656,
+          13969,
+          297
+        ],
+        "material": "wood/mainstreet_woodsiding05c",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4656,
+          13969,
+          251
+        ],
+        "material": "hall_windows/hall_window04",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4656,
+          13969,
+          204
+        ],
+        "material": "wood/mainstreet_woodsiding05c",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5064.01826171875,
+          14314.6841796875,
+          122
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5101.5,
+          14124.091552734375,
+          122
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5091.7498779296875,
+          14229.44677734375,
+          122
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4688,
+          14185.013671875,
+          183
+        ],
+        "material": "hall_concrete/hall_concrete11_wet",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4272,
+          14035.666666666666,
+          184
+        ],
+        "material": "stone/stonewall017b",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -4362.666666666667,
+          14225,
+          184
+        ],
+        "material": "stone/stonewall017b",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -4656,
+          13969,
+          184
+        ],
+        "material": "stone/stonewall017b",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -4564,
+          14225,
+          184.5
+        ],
+        "material": "stone/stonewall017b",
+        "placeholderMaterial": true,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          -4880,
+          14020.51318359375,
+          183
+        ],
+        "material": "hall_concrete/hall_concrete11_wet",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4784,
+          14233,
+          183
+        ],
+        "material": "hall_concrete/hall_concrete11_wet",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4764.8,
+          14043.816015625,
+          180
+        ],
+        "material": "hall_concrete/hall_concrete11_wet",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5030.8406982421875,
+          14302,
+          154
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5083.0001220703125,
+          14122,
+          154
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5088,
+          13940.01318359375,
+          154
+        ],
+        "material": "maps/rp_evocity_v33x/cs_assault/pavement001a_-4564_13969_241",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5063.5,
+          14220,
+          154
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5969.272727272727,
+          14725.277876420454,
+          234
+        ],
+        "material": "carpet/blue04",
+        "placeholderMaterial": true,
+        "vertexCount": 11,
+        "triCount": 9,
+        "byteEstimate": 648
+      },
+      {
+        "position": [
+          -5939.6,
+          15000.411328125,
+          234
+        ],
+        "material": "carpet/blue04",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6135,
+          14444,
+          234
+        ],
+        "material": "carpet/blue04",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6054.666666666667,
+          14822.666666666666,
+          234
+        ],
+        "material": "maps/rp_evocity_v33x/ajacks/art_woodfloor_-5946_14760_292",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6006,
+          14820,
+          234
+        ],
+        "material": "maps/rp_evocity_v33x/ajacks/art_woodfloor_-5946_14760_292",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6052,
+          14916.004720052084,
+          234
+        ],
+        "material": "carpet/blue04",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6082.8,
+          15020.8,
+          234
+        ],
+        "material": "carpet/blue04",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6080.666666666667,
+          14498.666666666666,
+          234
+        ],
+        "material": "carpet/blue04",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6060.4,
+          14696,
+          234
+        ],
+        "material": "maps/rp_evocity_v33x/ajacks/art_woodfloor_-5946_14760_292",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5966,
+          14737.8056640625,
+          362
+        ],
+        "material": "ajacks/ben_whiteceiling",
+        "placeholderMaterial": false,
+        "vertexCount": 10,
+        "triCount": 8,
+        "byteEstimate": 576
+      },
+      {
+        "position": [
+          -5939.6,
+          15000.411328125,
+          362
+        ],
+        "material": "ajacks/ben_whiteceiling",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6054.666666666667,
+          14822.666666666666,
+          362
+        ],
+        "material": "ajacks/ben_whiteceiling",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6070.571428571428,
+          14581.714285714286,
+          362
+        ],
+        "material": "ajacks/ben_whiteceiling",
+        "placeholderMaterial": false,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          -6070.666666666667,
+          14989.333333333334,
+          362
+        ],
+        "material": "ajacks/ben_whiteceiling",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -5632,
+          15352,
+          810.5
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5632,
+          14844,
+          949
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5962.26826171875,
+          14424,
+          413.35992431640625
+        ],
+        "material": "ajacks/ben_white",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6105.469921875,
+          14424,
+          471.12001342773436
+        ],
+        "material": "ajacks/ben_white",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5962.26826171875,
+          15096,
+          413.35992431640625
+        ],
+        "material": "ajacks/ben_white",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6105.46826171875,
+          15096,
+          471.12001342773436
+        ],
+        "material": "ajacks/ben_white",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5882,
+          14672.01416015625,
+          366
+        ],
+        "material": "ajacks/ben_white",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5882,
+          15008.01416015625,
+          366
+        ],
+        "material": "ajacks/ben_white",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6106.80361328125,
+          14862.4166015625,
+          475.12018432617185
+        ],
+        "material": "wood/milroof005",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6113.00439453125,
+          14512.013671875,
+          471.40023040771484
+        ],
+        "material": "wood/milroof005",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6014.227945963542,
+          14618.6806640625,
+          449.3333333333333
+        ],
+        "material": "wood/milroof005",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6000.67001953125,
+          15025.611328125,
+          441.2
+        ],
+        "material": "wood/milroof005",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5890,
+          14711.154994419643,
+          364.0570765904018
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          -5890,
+          15000.411328125,
+          363.91998291015625
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5886.8,
+          14625.611328125,
+          364.8798400878906
+        ],
+        "material": "wood/milflr004",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5887.333333333333,
+          15008.01416015625,
+          365.1998596191406
+        ],
+        "material": "wood/milflr004",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6037.000061035156,
+          14440,
+          387.950008392334
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          -6036.857212611607,
+          15080,
+          391.6571524483817
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          -6113.0001220703125,
+          15088,
+          463.4000473022461
+        ],
+        "material": "wood/milflr004",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5986.0001220703125,
+          15088,
+          424.39989471435547
+        ],
+        "material": "wood/milflr004",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6113.0001220703125,
+          14432,
+          463.4000473022461
+        ],
+        "material": "wood/milflr004",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5986.0001220703125,
+          14432,
+          424.39989471435547
+        ],
+        "material": "wood/milflr004",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6091.714285714285,
+          14448,
+          304.57142857142856
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          -6135,
+          14448,
+          353
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5935.333333333333,
+          14448,
+          298
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6008.4,
+          14448,
+          246.8
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6008.4,
+          14448,
+          349.2
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6010,
+          14448,
+          298
+        ],
+        "material": "zolos textures/glass/oldwindowdp",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6002,
+          14820,
+          353
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6002,
+          14779.2,
+          307.2
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6002,
+          14916.007080078125,
+          353
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6002,
+          14995.211328125,
+          307.2
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6002,
+          14868,
+          313.3333333333333
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -5894,
+          14970,
+          298
+        ],
+        "material": "ajacks/ben_blackmetal",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5946,
+          15080,
+          298
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5898,
+          15004,
+          298
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -5890,
+          15006.666666666666,
+          298
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -5950,
+          15072,
+          298
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5894,
+          14858,
+          298
+        ],
+        "material": "ajacks/ben_blackmetal",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5894,
+          14914,
+          266
+        ],
+        "material": "ajacks/ben_blackmetal",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5894,
+          14914,
+          330
+        ],
+        "material": "ajacks/ben_blackmetal",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5898,
+          14920.0056640625,
+          349.2
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5890,
+          14918.4056640625,
+          349.2
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5898,
+          14914,
+          298
+        ],
+        "material": "zolos textures/glass/oldwindowdp",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5890,
+          14914,
+          298
+        ],
+        "material": "zolos textures/glass/oldwindowdp",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5898,
+          14920.0056640625,
+          246.8
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5890,
+          14918.4056640625,
+          246.8
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5898,
+          14721.333333333334,
+          298
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -5890,
+          14721.333333333334,
+          298
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6063.6,
+          14888,
+          307.2
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6074,
+          15072,
+          298
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6125,
+          15072,
+          250
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6125,
+          15072,
+          346
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6125,
+          15072,
+          298
+        ],
+        "material": "zolos textures/glass/oldwindowdp",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6106,
+          15076,
+          298
+        ],
+        "material": "ajacks/ben_blackmetal",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6071.333333333333,
+          15080,
+          298
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6125,
+          15080,
+          250
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6125,
+          15080,
+          346
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6125,
+          15080,
+          298
+        ],
+        "material": "zolos textures/glass/oldwindowdp",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6125,
+          15076,
+          266
+        ],
+        "material": "ajacks/ben_blackmetal",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6125,
+          15076,
+          330
+        ],
+        "material": "ajacks/ben_blackmetal",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6010,
+          14995.2,
+          307.2
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6010,
+          14916,
+          353
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6010,
+          14860.8,
+          307.2
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6010,
+          14820,
+          353
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6010,
+          14782.4,
+          307.2
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6006,
+          14760,
+          298
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6077,
+          14768,
+          298
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6077,
+          14880,
+          298
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6077,
+          14760,
+          298
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5932.666666666667,
+          14440,
+          298
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6008.4,
+          14440,
+          246.8
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6010,
+          14440,
+          346
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6010,
+          14440,
+          298
+        ],
+        "material": "zolos textures/glass/oldwindowdp",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6091.714285714285,
+          14440,
+          304.57142857142856
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          -6135,
+          14440,
+          353
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6066,
+          14444,
+          298
+        ],
+        "material": "ajacks/ben_blackmetal",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5954,
+          14444,
+          298
+        ],
+        "material": "ajacks/ben_blackmetal",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5890,
+          14444,
+          298
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6010,
+          14444,
+          266
+        ],
+        "material": "ajacks/ben_blackmetal",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6010,
+          14444,
+          330
+        ],
+        "material": "ajacks/ben_blackmetal",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5244.23681640625,
+          14588.103515625,
+          122
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 9,
+        "triCount": 7,
+        "byteEstimate": 504
+      },
+      {
+        "position": [
+          -5160.2572021484375,
+          14880.868896484375,
+          122
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5431.922688802083,
+          14378.666666666666,
+          122
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          -6009.428571428572,
+          15080,
+          208.85714285714286
+        ],
+        "material": "stone/stonewall_inn03a",
+        "placeholderMaterial": false,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          -5441.77490234375,
+          14388,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5505.110188802083,
+          14448,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          -5171.25048828125,
+          14805.179931640625,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5128.333821614583,
+          14915.046223958334,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          -5311.030517578125,
+          14442.021647135416,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -5241.750244140625,
+          14622.032470703125,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6024.222222222223,
+          14440,
+          218
+        ],
+        "material": "stone/stonewall_inn03a",
+        "placeholderMaterial": false,
+        "vertexCount": 9,
+        "triCount": 7,
+        "byteEstimate": 504
+      },
+      {
+        "position": [
+          -5890,
+          14676.3427734375,
+          218
+        ],
+        "material": "stone/stonewall_inn03a",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -5890,
+          15000.411328125,
+          214.8
+        ],
+        "material": "stone/stonewall_inn03a",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5930,
+          14374,
+          193
+        ],
+        "material": "stone/stonewall_inn03a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5942,
+          14342,
+          193
+        ],
+        "material": "stone/stonewall_inn03a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5942,
+          14406,
+          193
+        ],
+        "material": "stone/stonewall_inn03a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5942,
+          14374,
+          200
+        ],
+        "material": "de_train/train_cement_floor_02",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5890,
+          14688.01416015625,
+          178
+        ],
+        "material": "stone/stonewall_inn03a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5890,
+          15008.01416015625,
+          178
+        ],
+        "material": "stone/stonewall_inn03a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5538.91640625,
+          14408,
+          160.4
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5132.50048828125,
+          14929.70947265625,
+          154
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5363.5006103515625,
+          14718.5,
+          154
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5229.20703125,
+          14854.0056640625,
+          147.6
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5474.4991455078125,
+          14552.5,
+          154
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6014,
+          14440,
+          179.6
+        ],
+        "material": "stone/stonewall_inn03a",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5318.7537109375,
+          14284.357421875,
+          122
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5355,
+          14149.091552734375,
+          122
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5151.034016927083,
+          14323.140299479166,
+          122
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          -5151.034016927083,
+          14323.140299479166,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          -5355,
+          14149.091552734375,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5318.7537109375,
+          14284.357421875,
+          186
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5600,
+          13940.01318359375,
+          154
+        ],
+        "material": "maps/rp_evocity_v33x/cs_assault/pavement001a_-6032_12816_292",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5590,
+          14172,
+          154
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5570.333251953125,
+          14304,
+          154
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6112,
+          14694,
+          58
+        ],
+        "material": "nature/blendgrassgrass001a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      }
+    ]
+  },
+  "props": {
+    "instances": [
+      {
+        "model": "sickness/dooframe_01",
+        "sourceModel": "sickness/dooframe_01",
+        "placeholderModel": false,
+        "origin": [
+          -4468.7998046875,
+          14010.7998046875,
+          184
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "sickness/dooframe_01",
+        "sourceModel": "sickness/dooframe_01",
+        "placeholderModel": false,
+        "origin": [
+          -4468.7998046875,
+          14146.7998046875,
+          184
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "sickness/dooframe_01",
+        "sourceModel": "sickness/dooframe_01",
+        "placeholderModel": false,
+        "origin": [
+          -4404.7998046875,
+          14146.7998046875,
+          184
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "__placeholder_box__",
+        "sourceModel": "props_c17/light_domelight02_on",
+        "placeholderModel": true,
+        "origin": [
+          -4561,
+          13990,
+          314
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "__placeholder_box__",
+        "sourceModel": "props_c17/light_domelight02_on",
+        "placeholderModel": true,
+        "origin": [
+          -4560,
+          14153,
+          314
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "__placeholder_box__",
+        "sourceModel": "props_c17/light_domelight02_on",
+        "placeholderModel": true,
+        "origin": [
+          -4337,
+          14147,
+          314
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "__placeholder_box__",
+        "sourceModel": "props_c17/light_domelight02_on",
+        "placeholderModel": true,
+        "origin": [
+          -4440,
+          14149,
+          314
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "__placeholder_box__",
+        "sourceModel": "props_c17/light_domelight02_on",
+        "placeholderModel": true,
+        "origin": [
+          -4368,
+          13969,
+          314
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "sickness/dooframe_01",
+        "sourceModel": "sickness/dooframe_01",
+        "placeholderModel": false,
+        "origin": [
+          -6006.7998046875,
+          14913.7998046875,
+          232
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "sickness/dooframe_01",
+        "sourceModel": "sickness/dooframe_01",
+        "placeholderModel": false,
+        "origin": [
+          -6006.7998046875,
+          14817.7998046875,
+          232
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "__placeholder_box__",
+        "sourceModel": "props_c17/light_domelight02_on",
+        "placeholderModel": true,
+        "origin": [
+          -6103.7998046875,
+          14520,
+          362.30999755859375
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "__placeholder_box__",
+        "sourceModel": "props_c17/light_domelight02_on",
+        "placeholderModel": true,
+        "origin": [
+          -6103.60009765625,
+          14686,
+          361.7200012207031
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "__placeholder_box__",
+        "sourceModel": "props_c17/light_domelight02_on",
+        "placeholderModel": true,
+        "origin": [
+          -5944,
+          15012,
+          361.7200012207031
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "__placeholder_box__",
+        "sourceModel": "props_c17/light_domelight02_on",
+        "placeholderModel": true,
+        "origin": [
+          -5942,
+          14846,
+          361.7200012207031
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "__placeholder_box__",
+        "sourceModel": "props_c17/light_domelight02_on",
+        "placeholderModel": true,
+        "origin": [
+          -6140,
+          14984,
+          361.7200012207031
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "__placeholder_box__",
+        "sourceModel": "props_c17/light_domelight02_on",
+        "placeholderModel": true,
+        "origin": [
+          -6138,
+          14818,
+          361.7200012207031
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "sickness/fridge_01",
+        "sourceModel": "sickness/fridge_01",
+        "placeholderModel": false,
+        "origin": [
+          -6059,
+          14736,
+          232.2100067138672
+        ],
+        "angles": [
+          0,
+          270,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "hall_suburbs/mailbox_pole",
+        "sourceModel": "hall_suburbs/mailbox_pole",
+        "placeholderModel": false,
+        "origin": [
+          -6004,
+          14346,
+          234
+        ],
+        "angles": [
+          0,
+          270,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "hall_suburbs/porch_railing01",
+        "sourceModel": "hall_suburbs/porch_railing01",
+        "placeholderModel": false,
+        "origin": [
+          -6024,
+          14346,
+          250.281005859375
+        ],
+        "angles": [
+          0,
+          270,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "hall_suburbs/porch_railing01",
+        "sourceModel": "hall_suburbs/porch_railing01",
+        "placeholderModel": false,
+        "origin": [
+          -6064,
+          14346,
+          250.281005859375
+        ],
+        "angles": [
+          0,
+          270,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "hall_suburbs/window_louver",
+        "sourceModel": "hall_suburbs/window_louver",
+        "placeholderModel": false,
+        "origin": [
+          -6076,
+          14439,
+          298
+        ],
+        "angles": [
+          0,
+          270,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "hall_suburbs/window_louver",
+        "sourceModel": "hall_suburbs/window_louver",
+        "placeholderModel": false,
+        "origin": [
+          -5944,
+          14439,
+          298
+        ],
+        "angles": [
+          0,
+          270,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -4704,
+          14466,
+          122
+        ],
+        "angles": [
+          0.41574299335479736,
+          42.99300003051758,
+          -1.9563299417495728
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -5028,
+          13962,
+          122
+        ],
+        "angles": [
+          0.41574299335479736,
+          42.99300003051758,
+          -1.9563299417495728
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -5621,
+          14538,
+          122
+        ],
+        "angles": [
+          0.41574299335479736,
+          42.99300003051758,
+          -1.9563299417495728
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -5578,
+          14882,
+          122
+        ],
+        "angles": [
+          0.41574299335479736,
+          42.99300003051758,
+          -1.9563299417495728
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -5306,
+          15068,
+          122
+        ],
+        "angles": [
+          0.41574299335479736,
+          42.99300003051758,
+          -1.9563299417495728
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    ]
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

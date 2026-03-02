@@ -1,0 +1,121 @@
+{
+  "id": "g_13_11",
+  "lod": 0,
+  "bounds": {
+    "minX": 12288,
+    "minY": 7769,
+    "maxX": 14336,
+    "maxY": 9817
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 13,
+    "y": 11
+  },
+  "counts": {
+    "worldFaces": 6,
+    "staticProps": 0,
+    "placeholderWorldFaces": 0,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 16,
+    "worldVerts": 28,
+    "worldBytes": 1152,
+    "propsTris": 0,
+    "propsVerts": 0,
+    "propsBytes": 0,
+    "totalTris": 16,
+    "totalVerts": 28,
+    "totalBytes": 1152,
+    "drawCallsBeforeInstancing": 1,
+    "drawCallsAfterInstancing": 1
+  },
+  "world": {
+    "faces": [
+      {
+        "position": [
+          12288,
+          9539.2255859375,
+          166.4
+        ],
+        "material": "maps/rp_evocity_v33x/bridge/se1_metal_wall_02_9811_4479_70",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          12288,
+          9232.01806640625,
+          192
+        ],
+        "material": "maps/rp_evocity_v33x/bridge/se1_metal_wall_02_9811_4479_70",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12288,
+          8515.2228515625,
+          166.4
+        ],
+        "material": "maps/rp_evocity_v33x/bridge/se1_metal_wall_02_9811_4479_70",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          12288,
+          8208.01611328125,
+          192
+        ],
+        "material": "maps/rp_evocity_v33x/bridge/se1_metal_wall_02_9811_4479_70",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12288,
+          9011.2134765625,
+          166.4
+        ],
+        "material": "maps/rp_evocity_v33x/bridge/se1_metal_wall_02_9811_4479_70",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          12288,
+          7987.2119140625,
+          166.4
+        ],
+        "material": "maps/rp_evocity_v33x/bridge/se1_metal_wall_02_9811_4479_70",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      }
+    ]
+  },
+  "props": {
+    "instances": []
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

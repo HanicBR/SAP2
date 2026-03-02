@@ -1,0 +1,154 @@
+{
+  "id": "g_11_6",
+  "lod": 0,
+  "bounds": {
+    "minX": 8192,
+    "minY": -2471,
+    "maxX": 10240,
+    "maxY": -423
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 11,
+    "y": 6
+  },
+  "counts": {
+    "worldFaces": 7,
+    "staticProps": 1,
+    "placeholderWorldFaces": 6,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 16,
+    "worldVerts": 30,
+    "worldBytes": 1152,
+    "propsTris": 12,
+    "propsVerts": 8,
+    "propsBytes": 384,
+    "totalTris": 28,
+    "totalVerts": 38,
+    "totalBytes": 1536,
+    "drawCallsBeforeInstancing": 3,
+    "drawCallsAfterInstancing": 3
+  },
+  "world": {
+    "faces": [
+      {
+        "position": [
+          9728,
+          -622,
+          764
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          8480,
+          -823,
+          764
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          8779.2,
+          -622,
+          745.6
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          8364.8,
+          -534,
+          856
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          8480,
+          -1536,
+          764
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          8336,
+          -1536,
+          856
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          8234,
+          -1658,
+          64
+        ],
+        "material": "nature/blendgrassgravel001a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      }
+    ]
+  },
+  "props": {
+    "instances": [
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          8219,
+          -850,
+          43.27619934082031
+        ],
+        "angles": [
+          0,
+          54.5,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    ]
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

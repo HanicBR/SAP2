@@ -1,0 +1,73 @@
+{
+  "id": "g_6_2",
+  "lod": 0,
+  "bounds": {
+    "minX": -2048,
+    "minY": -10663,
+    "maxX": 0,
+    "maxY": -8615
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 6,
+    "y": 2
+  },
+  "counts": {
+    "worldFaces": 2,
+    "staticProps": 0,
+    "placeholderWorldFaces": 2,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 4,
+    "worldVerts": 8,
+    "worldBytes": 288,
+    "propsTris": 0,
+    "propsVerts": 0,
+    "propsBytes": 0,
+    "totalTris": 4,
+    "totalVerts": 8,
+    "totalBytes": 288,
+    "drawCallsBeforeInstancing": 1,
+    "drawCallsAfterInstancing": 1
+  },
+  "world": {
+    "faces": [
+      {
+        "position": [
+          -512,
+          -8838,
+          764
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -1392,
+          -8838,
+          764
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      }
+    ]
+  },
+  "props": {
+    "instances": []
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

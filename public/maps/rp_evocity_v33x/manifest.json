@@ -1,0 +1,3417 @@
+{
+  "version": 2,
+  "generatedAt": "2026-03-02T20:34:44.991Z",
+  "map": {
+    "name": "rp_evocity_v33x",
+    "worldBounds": {
+      "min": [
+        -14336,
+        -14759,
+        -573
+      ],
+      "max": [
+        12944,
+        15376,
+        4456
+      ]
+    },
+    "chunkSize": 2048
+  },
+  "coordTransform": {
+    "source": "source1_z_up",
+    "target": "threejs_y_up",
+    "mapping": {
+      "x": "x",
+      "y": "z",
+      "z": "y"
+    }
+  },
+  "streaming": {
+    "activeWindow": "3x3",
+    "prefetchWindow": "5x5",
+    "activeRadiusChunks": 1,
+    "prefetchRadiusChunks": 2,
+    "discardRadiusChunks": 2,
+    "gracePeriodMs": 4000
+  },
+  "budgets": {
+    "perChunk": {
+      "tris": 250000,
+      "verts": 190000,
+      "bytes": 12582912
+    },
+    "active3x3": {
+      "tris": 1800000,
+      "drawCalls": 1800,
+      "bytes": 100663296
+    },
+    "active5x5": {
+      "tris": 4200000,
+      "drawCalls": 4200,
+      "bytes": 230686720
+    }
+  },
+  "assets": {
+    "base": [
+      {
+        "id": "base_scene",
+        "format": "scene-json",
+        "url": "./base/base.scene.json"
+      }
+    ],
+    "chunks": {
+      "lod0IndexUrl": "./chunks/lod0/index.json",
+      "format": "scene-json"
+    }
+  },
+  "chunks": [
+    {
+      "id": "g_0_12",
+      "lod": 0,
+      "url": "./chunks/lod0/g_0_12.json",
+      "bounds": {
+        "minX": -14336,
+        "minY": 9817,
+        "maxX": -12288,
+        "maxY": 11865
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 0,
+        "y": 12
+      },
+      "worldFaces": 223,
+      "staticProps": 35,
+      "tris": 1050,
+      "bytes": 58800
+    },
+    {
+      "id": "g_0_13",
+      "lod": 0,
+      "url": "./chunks/lod0/g_0_13.json",
+      "bounds": {
+        "minX": -14336,
+        "minY": 11865,
+        "maxX": -12288,
+        "maxY": 13913
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 0,
+        "y": 13
+      },
+      "worldFaces": 196,
+      "staticProps": 19,
+      "tris": 788,
+      "bytes": 47616
+    },
+    {
+      "id": "g_0_14",
+      "lod": 0,
+      "url": "./chunks/lod0/g_0_14.json",
+      "bounds": {
+        "minX": -14336,
+        "minY": 13913,
+        "maxX": -12288,
+        "maxY": 15961
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 0,
+        "y": 14
+      },
+      "worldFaces": 11,
+      "staticProps": 2,
+      "tris": 46,
+      "bytes": 2352
+    },
+    {
+      "id": "g_1_1",
+      "lod": 0,
+      "url": "./chunks/lod0/g_1_1.json",
+      "bounds": {
+        "minX": -12288,
+        "minY": -12711,
+        "maxX": -10240,
+        "maxY": -10663
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 1,
+        "y": 1
+      },
+      "worldFaces": 153,
+      "staticProps": 22,
+      "tris": 684,
+      "bytes": 38688
+    },
+    {
+      "id": "g_1_11",
+      "lod": 0,
+      "url": "./chunks/lod0/g_1_11.json",
+      "bounds": {
+        "minX": -12288,
+        "minY": 7769,
+        "maxX": -10240,
+        "maxY": 9817
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 1,
+        "y": 11
+      },
+      "worldFaces": 276,
+      "staticProps": 60,
+      "tris": 1441,
+      "bytes": 74952
+    },
+    {
+      "id": "g_1_12",
+      "lod": 0,
+      "url": "./chunks/lod0/g_1_12.json",
+      "bounds": {
+        "minX": -12288,
+        "minY": 9817,
+        "maxX": -10240,
+        "maxY": 11865
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 1,
+        "y": 12
+      },
+      "worldFaces": 93,
+      "staticProps": 11,
+      "tris": 363,
+      "bytes": 20856
+    },
+    {
+      "id": "g_1_13",
+      "lod": 0,
+      "url": "./chunks/lod0/g_1_13.json",
+      "bounds": {
+        "minX": -12288,
+        "minY": 11865,
+        "maxX": -10240,
+        "maxY": 13913
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 1,
+        "y": 13
+      },
+      "worldFaces": 27,
+      "staticProps": 0,
+      "tris": 58,
+      "bytes": 4176
+    },
+    {
+      "id": "g_1_14",
+      "lod": 0,
+      "url": "./chunks/lod0/g_1_14.json",
+      "bounds": {
+        "minX": -12288,
+        "minY": 13913,
+        "maxX": -10240,
+        "maxY": 15961
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 1,
+        "y": 14
+      },
+      "worldFaces": 11,
+      "staticProps": 3,
+      "tris": 58,
+      "bytes": 2736
+    },
+    {
+      "id": "g_1_2",
+      "lod": 0,
+      "url": "./chunks/lod0/g_1_2.json",
+      "bounds": {
+        "minX": -12288,
+        "minY": -10663,
+        "maxX": -10240,
+        "maxY": -8615
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 1,
+        "y": 2
+      },
+      "worldFaces": 1801,
+      "staticProps": 194,
+      "tris": 7476,
+      "bytes": 445152
+    },
+    {
+      "id": "g_1_3",
+      "lod": 0,
+      "url": "./chunks/lod0/g_1_3.json",
+      "bounds": {
+        "minX": -12288,
+        "minY": -8615,
+        "maxX": -10240,
+        "maxY": -6567
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 1,
+        "y": 3
+      },
+      "worldFaces": 30,
+      "staticProps": 5,
+      "tris": 130,
+      "bytes": 6960
+    },
+    {
+      "id": "g_10_11",
+      "lod": 0,
+      "url": "./chunks/lod0/g_10_11.json",
+      "bounds": {
+        "minX": 6144,
+        "minY": 7769,
+        "maxX": 8192,
+        "maxY": 9817
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 10,
+        "y": 11
+      },
+      "worldFaces": 7,
+      "staticProps": 0,
+      "tris": 14,
+      "bytes": 1008
+    },
+    {
+      "id": "g_10_12",
+      "lod": 0,
+      "url": "./chunks/lod0/g_10_12.json",
+      "bounds": {
+        "minX": 6144,
+        "minY": 9817,
+        "maxX": 8192,
+        "maxY": 11865
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 10,
+        "y": 12
+      },
+      "worldFaces": 15,
+      "staticProps": 1,
+      "tris": 43,
+      "bytes": 2616
+    },
+    {
+      "id": "g_10_13",
+      "lod": 0,
+      "url": "./chunks/lod0/g_10_13.json",
+      "bounds": {
+        "minX": 6144,
+        "minY": 11865,
+        "maxX": 8192,
+        "maxY": 13913
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 10,
+        "y": 13
+      },
+      "worldFaces": 8,
+      "staticProps": 2,
+      "tris": 40,
+      "bytes": 1920
+    },
+    {
+      "id": "g_10_14",
+      "lod": 0,
+      "url": "./chunks/lod0/g_10_14.json",
+      "bounds": {
+        "minX": 6144,
+        "minY": 13913,
+        "maxX": 8192,
+        "maxY": 15961
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 10,
+        "y": 14
+      },
+      "worldFaces": 5,
+      "staticProps": 2,
+      "tris": 34,
+      "bytes": 1488
+    },
+    {
+      "id": "g_10_2",
+      "lod": 0,
+      "url": "./chunks/lod0/g_10_2.json",
+      "bounds": {
+        "minX": 6144,
+        "minY": -10663,
+        "maxX": 8192,
+        "maxY": -8615
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 10,
+        "y": 2
+      },
+      "worldFaces": 20,
+      "staticProps": 0,
+      "tris": 52,
+      "bytes": 3744
+    },
+    {
+      "id": "g_10_3",
+      "lod": 0,
+      "url": "./chunks/lod0/g_10_3.json",
+      "bounds": {
+        "minX": 6144,
+        "minY": -8615,
+        "maxX": 8192,
+        "maxY": -6567
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 10,
+        "y": 3
+      },
+      "worldFaces": 112,
+      "staticProps": 12,
+      "tris": 472,
+      "bytes": 28224
+    },
+    {
+      "id": "g_10_4",
+      "lod": 0,
+      "url": "./chunks/lod0/g_10_4.json",
+      "bounds": {
+        "minX": 6144,
+        "minY": -6567,
+        "maxX": 8192,
+        "maxY": -4519
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 10,
+        "y": 4
+      },
+      "worldFaces": 38,
+      "staticProps": 10,
+      "tris": 206,
+      "bytes": 10032
+    },
+    {
+      "id": "g_10_5",
+      "lod": 0,
+      "url": "./chunks/lod0/g_10_5.json",
+      "bounds": {
+        "minX": 6144,
+        "minY": -4519,
+        "maxX": 8192,
+        "maxY": -2471
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 10,
+        "y": 5
+      },
+      "worldFaces": 41,
+      "staticProps": 8,
+      "tris": 190,
+      "bytes": 9840
+    },
+    {
+      "id": "g_10_6",
+      "lod": 0,
+      "url": "./chunks/lod0/g_10_6.json",
+      "bounds": {
+        "minX": 6144,
+        "minY": -2471,
+        "maxX": 8192,
+        "maxY": -423
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 10,
+        "y": 6
+      },
+      "worldFaces": 10,
+      "staticProps": 7,
+      "tris": 105,
+      "bytes": 4200
+    },
+    {
+      "id": "g_10_7",
+      "lod": 0,
+      "url": "./chunks/lod0/g_10_7.json",
+      "bounds": {
+        "minX": 6144,
+        "minY": -423,
+        "maxX": 8192,
+        "maxY": 1625
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 10,
+        "y": 7
+      },
+      "worldFaces": 15,
+      "staticProps": 5,
+      "tris": 90,
+      "bytes": 4080
+    },
+    {
+      "id": "g_10_8",
+      "lod": 0,
+      "url": "./chunks/lod0/g_10_8.json",
+      "bounds": {
+        "minX": 6144,
+        "minY": 1625,
+        "maxX": 8192,
+        "maxY": 3673
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 10,
+        "y": 8
+      },
+      "worldFaces": 14,
+      "staticProps": 2,
+      "tris": 55,
+      "bytes": 3000
+    },
+    {
+      "id": "g_10_9",
+      "lod": 0,
+      "url": "./chunks/lod0/g_10_9.json",
+      "bounds": {
+        "minX": 6144,
+        "minY": 3673,
+        "maxX": 8192,
+        "maxY": 5721
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 10,
+        "y": 9
+      },
+      "worldFaces": 214,
+      "staticProps": 10,
+      "tris": 741,
+      "bytes": 48552
+    },
+    {
+      "id": "g_11_11",
+      "lod": 0,
+      "url": "./chunks/lod0/g_11_11.json",
+      "bounds": {
+        "minX": 8192,
+        "minY": 7769,
+        "maxX": 10240,
+        "maxY": 9817
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 11,
+        "y": 11
+      },
+      "worldFaces": 6,
+      "staticProps": 0,
+      "tris": 12,
+      "bytes": 864
+    },
+    {
+      "id": "g_11_12",
+      "lod": 0,
+      "url": "./chunks/lod0/g_11_12.json",
+      "bounds": {
+        "minX": 8192,
+        "minY": 9817,
+        "maxX": 10240,
+        "maxY": 11865
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 11,
+        "y": 12
+      },
+      "worldFaces": 14,
+      "staticProps": 2,
+      "tris": 53,
+      "bytes": 2856
+    },
+    {
+      "id": "g_11_13",
+      "lod": 0,
+      "url": "./chunks/lod0/g_11_13.json",
+      "bounds": {
+        "minX": 8192,
+        "minY": 11865,
+        "maxX": 10240,
+        "maxY": 13913
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 11,
+        "y": 13
+      },
+      "worldFaces": 122,
+      "staticProps": 4,
+      "tris": 377,
+      "bytes": 25224
+    },
+    {
+      "id": "g_11_14",
+      "lod": 0,
+      "url": "./chunks/lod0/g_11_14.json",
+      "bounds": {
+        "minX": 8192,
+        "minY": 13913,
+        "maxX": 10240,
+        "maxY": 15961
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 11,
+        "y": 14
+      },
+      "worldFaces": 17,
+      "staticProps": 1,
+      "tris": 58,
+      "bytes": 3696
+    },
+    {
+      "id": "g_11_2",
+      "lod": 0,
+      "url": "./chunks/lod0/g_11_2.json",
+      "bounds": {
+        "minX": 8192,
+        "minY": -10663,
+        "maxX": 10240,
+        "maxY": -8615
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 11,
+        "y": 2
+      },
+      "worldFaces": 4,
+      "staticProps": 0,
+      "tris": 9,
+      "bytes": 648
+    },
+    {
+      "id": "g_11_3",
+      "lod": 0,
+      "url": "./chunks/lod0/g_11_3.json",
+      "bounds": {
+        "minX": 8192,
+        "minY": -8615,
+        "maxX": 10240,
+        "maxY": -6567
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 11,
+        "y": 3
+      },
+      "worldFaces": 20,
+      "staticProps": 0,
+      "tris": 47,
+      "bytes": 3384
+    },
+    {
+      "id": "g_11_4",
+      "lod": 0,
+      "url": "./chunks/lod0/g_11_4.json",
+      "bounds": {
+        "minX": 8192,
+        "minY": -6567,
+        "maxX": 10240,
+        "maxY": -4519
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 11,
+        "y": 4
+      },
+      "worldFaces": 9,
+      "staticProps": 1,
+      "tris": 30,
+      "bytes": 1680
+    },
+    {
+      "id": "g_11_5",
+      "lod": 0,
+      "url": "./chunks/lod0/g_11_5.json",
+      "bounds": {
+        "minX": 8192,
+        "minY": -4519,
+        "maxX": 10240,
+        "maxY": -2471
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 11,
+        "y": 5
+      },
+      "worldFaces": 5,
+      "staticProps": 1,
+      "tris": 22,
+      "bytes": 1104
+    },
+    {
+      "id": "g_11_6",
+      "lod": 0,
+      "url": "./chunks/lod0/g_11_6.json",
+      "bounds": {
+        "minX": 8192,
+        "minY": -2471,
+        "maxX": 10240,
+        "maxY": -423
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 11,
+        "y": 6
+      },
+      "worldFaces": 7,
+      "staticProps": 1,
+      "tris": 28,
+      "bytes": 1536
+    },
+    {
+      "id": "g_11_7",
+      "lod": 0,
+      "url": "./chunks/lod0/g_11_7.json",
+      "bounds": {
+        "minX": 8192,
+        "minY": -423,
+        "maxX": 10240,
+        "maxY": 1625
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 11,
+        "y": 7
+      },
+      "worldFaces": 14,
+      "staticProps": 10,
+      "tris": 149,
+      "bytes": 5928
+    },
+    {
+      "id": "g_11_8",
+      "lod": 0,
+      "url": "./chunks/lod0/g_11_8.json",
+      "bounds": {
+        "minX": 8192,
+        "minY": 1625,
+        "maxX": 10240,
+        "maxY": 3673
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 11,
+        "y": 8
+      },
+      "worldFaces": 398,
+      "staticProps": 31,
+      "tris": 1512,
+      "bytes": 93984
+    },
+    {
+      "id": "g_11_9",
+      "lod": 0,
+      "url": "./chunks/lod0/g_11_9.json",
+      "bounds": {
+        "minX": 8192,
+        "minY": 3673,
+        "maxX": 10240,
+        "maxY": 5721
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 11,
+        "y": 9
+      },
+      "worldFaces": 339,
+      "staticProps": 22,
+      "tris": 1274,
+      "bytes": 81168
+    },
+    {
+      "id": "g_12_10",
+      "lod": 0,
+      "url": "./chunks/lod0/g_12_10.json",
+      "bounds": {
+        "minX": 10240,
+        "minY": 5721,
+        "maxX": 12288,
+        "maxY": 7769
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 12,
+        "y": 10
+      },
+      "worldFaces": 56,
+      "staticProps": 0,
+      "tris": 122,
+      "bytes": 8784
+    },
+    {
+      "id": "g_12_11",
+      "lod": 0,
+      "url": "./chunks/lod0/g_12_11.json",
+      "bounds": {
+        "minX": 10240,
+        "minY": 7769,
+        "maxX": 12288,
+        "maxY": 9817
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 12,
+        "y": 11
+      },
+      "worldFaces": 54,
+      "staticProps": 0,
+      "tris": 120,
+      "bytes": 8640
+    },
+    {
+      "id": "g_12_12",
+      "lod": 0,
+      "url": "./chunks/lod0/g_12_12.json",
+      "bounds": {
+        "minX": 10240,
+        "minY": 9817,
+        "maxX": 12288,
+        "maxY": 11865
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 12,
+        "y": 12
+      },
+      "worldFaces": 63,
+      "staticProps": 1,
+      "tris": 182,
+      "bytes": 12624
+    },
+    {
+      "id": "g_12_13",
+      "lod": 0,
+      "url": "./chunks/lod0/g_12_13.json",
+      "bounds": {
+        "minX": 10240,
+        "minY": 11865,
+        "maxX": 12288,
+        "maxY": 13913
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 12,
+        "y": 13
+      },
+      "worldFaces": 428,
+      "staticProps": 20,
+      "tris": 1370,
+      "bytes": 89040
+    },
+    {
+      "id": "g_12_14",
+      "lod": 0,
+      "url": "./chunks/lod0/g_12_14.json",
+      "bounds": {
+        "minX": 10240,
+        "minY": 13913,
+        "maxX": 12288,
+        "maxY": 15961
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 12,
+        "y": 14
+      },
+      "worldFaces": 35,
+      "staticProps": 1,
+      "tris": 101,
+      "bytes": 6792
+    },
+    {
+      "id": "g_12_6",
+      "lod": 0,
+      "url": "./chunks/lod0/g_12_6.json",
+      "bounds": {
+        "minX": 10240,
+        "minY": -2471,
+        "maxX": 12288,
+        "maxY": -423
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 12,
+        "y": 6
+      },
+      "worldFaces": 4,
+      "staticProps": 0,
+      "tris": 8,
+      "bytes": 576
+    },
+    {
+      "id": "g_12_7",
+      "lod": 0,
+      "url": "./chunks/lod0/g_12_7.json",
+      "bounds": {
+        "minX": 10240,
+        "minY": -423,
+        "maxX": 12288,
+        "maxY": 1625
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 12,
+        "y": 7
+      },
+      "worldFaces": 14,
+      "staticProps": 2,
+      "tris": 52,
+      "bytes": 2784
+    },
+    {
+      "id": "g_12_8",
+      "lod": 0,
+      "url": "./chunks/lod0/g_12_8.json",
+      "bounds": {
+        "minX": 10240,
+        "minY": 1625,
+        "maxX": 12288,
+        "maxY": 3673
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 12,
+        "y": 8
+      },
+      "worldFaces": 13,
+      "staticProps": 6,
+      "tris": 100,
+      "bytes": 4320
+    },
+    {
+      "id": "g_12_9",
+      "lod": 0,
+      "url": "./chunks/lod0/g_12_9.json",
+      "bounds": {
+        "minX": 10240,
+        "minY": 3673,
+        "maxX": 12288,
+        "maxY": 5721
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 12,
+        "y": 9
+      },
+      "worldFaces": 37,
+      "staticProps": 1,
+      "tris": 110,
+      "bytes": 7440
+    },
+    {
+      "id": "g_13_10",
+      "lod": 0,
+      "url": "./chunks/lod0/g_13_10.json",
+      "bounds": {
+        "minX": 12288,
+        "minY": 5721,
+        "maxX": 14336,
+        "maxY": 7769
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 13,
+        "y": 10
+      },
+      "worldFaces": 6,
+      "staticProps": 0,
+      "tris": 16,
+      "bytes": 1152
+    },
+    {
+      "id": "g_13_11",
+      "lod": 0,
+      "url": "./chunks/lod0/g_13_11.json",
+      "bounds": {
+        "minX": 12288,
+        "minY": 7769,
+        "maxX": 14336,
+        "maxY": 9817
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 13,
+        "y": 11
+      },
+      "worldFaces": 6,
+      "staticProps": 0,
+      "tris": 16,
+      "bytes": 1152
+    },
+    {
+      "id": "g_13_12",
+      "lod": 0,
+      "url": "./chunks/lod0/g_13_12.json",
+      "bounds": {
+        "minX": 12288,
+        "minY": 9817,
+        "maxX": 14336,
+        "maxY": 11865
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 13,
+        "y": 12
+      },
+      "worldFaces": 19,
+      "staticProps": 0,
+      "tris": 49,
+      "bytes": 3528
+    },
+    {
+      "id": "g_13_13",
+      "lod": 0,
+      "url": "./chunks/lod0/g_13_13.json",
+      "bounds": {
+        "minX": 12288,
+        "minY": 11865,
+        "maxX": 14336,
+        "maxY": 13913
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 13,
+        "y": 13
+      },
+      "worldFaces": 8,
+      "staticProps": 0,
+      "tris": 16,
+      "bytes": 1152
+    },
+    {
+      "id": "g_13_14",
+      "lod": 0,
+      "url": "./chunks/lod0/g_13_14.json",
+      "bounds": {
+        "minX": 12288,
+        "minY": 13913,
+        "maxX": 14336,
+        "maxY": 15961
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 13,
+        "y": 14
+      },
+      "worldFaces": 4,
+      "staticProps": 0,
+      "tris": 8,
+      "bytes": 576
+    },
+    {
+      "id": "g_13_6",
+      "lod": 0,
+      "url": "./chunks/lod0/g_13_6.json",
+      "bounds": {
+        "minX": 12288,
+        "minY": -2471,
+        "maxX": 14336,
+        "maxY": -423
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 13,
+        "y": 6
+      },
+      "worldFaces": 1,
+      "staticProps": 0,
+      "tris": 2,
+      "bytes": 144
+    },
+    {
+      "id": "g_13_7",
+      "lod": 0,
+      "url": "./chunks/lod0/g_13_7.json",
+      "bounds": {
+        "minX": 12288,
+        "minY": -423,
+        "maxX": 14336,
+        "maxY": 1625
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 13,
+        "y": 7
+      },
+      "worldFaces": 8,
+      "staticProps": 0,
+      "tris": 16,
+      "bytes": 1152
+    },
+    {
+      "id": "g_13_8",
+      "lod": 0,
+      "url": "./chunks/lod0/g_13_8.json",
+      "bounds": {
+        "minX": 12288,
+        "minY": 1625,
+        "maxX": 14336,
+        "maxY": 3673
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 13,
+        "y": 8
+      },
+      "worldFaces": 8,
+      "staticProps": 0,
+      "tris": 16,
+      "bytes": 1152
+    },
+    {
+      "id": "g_13_9",
+      "lod": 0,
+      "url": "./chunks/lod0/g_13_9.json",
+      "bounds": {
+        "minX": 12288,
+        "minY": 3673,
+        "maxX": 14336,
+        "maxY": 5721
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 13,
+        "y": 9
+      },
+      "worldFaces": 15,
+      "staticProps": 0,
+      "tris": 35,
+      "bytes": 2520
+    },
+    {
+      "id": "g_2_1",
+      "lod": 0,
+      "url": "./chunks/lod0/g_2_1.json",
+      "bounds": {
+        "minX": -10240,
+        "minY": -12711,
+        "maxX": -8192,
+        "maxY": -10663
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 2,
+        "y": 1
+      },
+      "worldFaces": 264,
+      "staticProps": 13,
+      "tris": 831,
+      "bytes": 53592
+    },
+    {
+      "id": "g_2_11",
+      "lod": 0,
+      "url": "./chunks/lod0/g_2_11.json",
+      "bounds": {
+        "minX": -10240,
+        "minY": 7769,
+        "maxX": -8192,
+        "maxY": 9817
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 2,
+        "y": 11
+      },
+      "worldFaces": 373,
+      "staticProps": 105,
+      "tris": 2277,
+      "bytes": 113544
+    },
+    {
+      "id": "g_2_12",
+      "lod": 0,
+      "url": "./chunks/lod0/g_2_12.json",
+      "bounds": {
+        "minX": -10240,
+        "minY": 9817,
+        "maxX": -8192,
+        "maxY": 11865
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 2,
+        "y": 12
+      },
+      "worldFaces": 253,
+      "staticProps": 35,
+      "tris": 1117,
+      "bytes": 63624
+    },
+    {
+      "id": "g_2_13",
+      "lod": 0,
+      "url": "./chunks/lod0/g_2_13.json",
+      "bounds": {
+        "minX": -10240,
+        "minY": 11865,
+        "maxX": -8192,
+        "maxY": 13913
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 2,
+        "y": 13
+      },
+      "worldFaces": 18,
+      "staticProps": 0,
+      "tris": 36,
+      "bytes": 2592
+    },
+    {
+      "id": "g_2_14",
+      "lod": 0,
+      "url": "./chunks/lod0/g_2_14.json",
+      "bounds": {
+        "minX": -10240,
+        "minY": 13913,
+        "maxX": -8192,
+        "maxY": 15961
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 2,
+        "y": 14
+      },
+      "worldFaces": 11,
+      "staticProps": 4,
+      "tris": 70,
+      "bytes": 3120
+    },
+    {
+      "id": "g_2_2",
+      "lod": 0,
+      "url": "./chunks/lod0/g_2_2.json",
+      "bounds": {
+        "minX": -10240,
+        "minY": -10663,
+        "maxX": -8192,
+        "maxY": -8615
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 2,
+        "y": 2
+      },
+      "worldFaces": 204,
+      "staticProps": 36,
+      "tris": 906,
+      "bytes": 47952
+    },
+    {
+      "id": "g_2_3",
+      "lod": 0,
+      "url": "./chunks/lod0/g_2_3.json",
+      "bounds": {
+        "minX": -10240,
+        "minY": -8615,
+        "maxX": -8192,
+        "maxY": -6567
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 2,
+        "y": 3
+      },
+      "worldFaces": 139,
+      "staticProps": 8,
+      "tris": 458,
+      "bytes": 29136
+    },
+    {
+      "id": "g_2_4",
+      "lod": 0,
+      "url": "./chunks/lod0/g_2_4.json",
+      "bounds": {
+        "minX": -10240,
+        "minY": -6567,
+        "maxX": -8192,
+        "maxY": -4519
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 2,
+        "y": 4
+      },
+      "worldFaces": 39,
+      "staticProps": 3,
+      "tris": 152,
+      "bytes": 9504
+    },
+    {
+      "id": "g_2_5",
+      "lod": 0,
+      "url": "./chunks/lod0/g_2_5.json",
+      "bounds": {
+        "minX": -10240,
+        "minY": -4519,
+        "maxX": -8192,
+        "maxY": -2471
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 2,
+        "y": 5
+      },
+      "worldFaces": 6,
+      "staticProps": 3,
+      "tris": 48,
+      "bytes": 2016
+    },
+    {
+      "id": "g_3_0",
+      "lod": 0,
+      "url": "./chunks/lod0/g_3_0.json",
+      "bounds": {
+        "minX": -8192,
+        "minY": -14759,
+        "maxX": -6144,
+        "maxY": -12711
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 3,
+        "y": 0
+      },
+      "worldFaces": 1323,
+      "staticProps": 174,
+      "tris": 5682,
+      "bytes": 325584
+    },
+    {
+      "id": "g_3_1",
+      "lod": 0,
+      "url": "./chunks/lod0/g_3_1.json",
+      "bounds": {
+        "minX": -8192,
+        "minY": -12711,
+        "maxX": -6144,
+        "maxY": -10663
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 3,
+        "y": 1
+      },
+      "worldFaces": 625,
+      "staticProps": 10,
+      "tris": 2073,
+      "bytes": 144456
+    },
+    {
+      "id": "g_3_11",
+      "lod": 0,
+      "url": "./chunks/lod0/g_3_11.json",
+      "bounds": {
+        "minX": -8192,
+        "minY": 7769,
+        "maxX": -6144,
+        "maxY": 9817
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 3,
+        "y": 11
+      },
+      "worldFaces": 27,
+      "staticProps": 21,
+      "tris": 310,
+      "bytes": 12240
+    },
+    {
+      "id": "g_3_12",
+      "lod": 0,
+      "url": "./chunks/lod0/g_3_12.json",
+      "bounds": {
+        "minX": -8192,
+        "minY": 9817,
+        "maxX": -6144,
+        "maxY": 11865
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 3,
+        "y": 12
+      },
+      "worldFaces": 231,
+      "staticProps": 11,
+      "tris": 752,
+      "bytes": 48864
+    },
+    {
+      "id": "g_3_13",
+      "lod": 0,
+      "url": "./chunks/lod0/g_3_13.json",
+      "bounds": {
+        "minX": -8192,
+        "minY": 11865,
+        "maxX": -6144,
+        "maxY": 13913
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 3,
+        "y": 13
+      },
+      "worldFaces": 81,
+      "staticProps": 10,
+      "tris": 330,
+      "bytes": 18960
+    },
+    {
+      "id": "g_3_14",
+      "lod": 0,
+      "url": "./chunks/lod0/g_3_14.json",
+      "bounds": {
+        "minX": -8192,
+        "minY": 13913,
+        "maxX": -6144,
+        "maxY": 15961
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 3,
+        "y": 14
+      },
+      "worldFaces": 76,
+      "staticProps": 9,
+      "tris": 311,
+      "bytes": 18072
+    },
+    {
+      "id": "g_3_2",
+      "lod": 0,
+      "url": "./chunks/lod0/g_3_2.json",
+      "bounds": {
+        "minX": -8192,
+        "minY": -10663,
+        "maxX": -6144,
+        "maxY": -8615
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 3,
+        "y": 2
+      },
+      "worldFaces": 3548,
+      "staticProps": 358,
+      "tris": 14164,
+      "bytes": 847968
+    },
+    {
+      "id": "g_3_3",
+      "lod": 0,
+      "url": "./chunks/lod0/g_3_3.json",
+      "bounds": {
+        "minX": -8192,
+        "minY": -8615,
+        "maxX": -6144,
+        "maxY": -6567
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 3,
+        "y": 3
+      },
+      "worldFaces": 526,
+      "staticProps": 83,
+      "tris": 2394,
+      "bytes": 132528
+    },
+    {
+      "id": "g_3_4",
+      "lod": 0,
+      "url": "./chunks/lod0/g_3_4.json",
+      "bounds": {
+        "minX": -8192,
+        "minY": -6567,
+        "maxX": -6144,
+        "maxY": -4519
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 3,
+        "y": 4
+      },
+      "worldFaces": 652,
+      "staticProps": 83,
+      "tris": 2991,
+      "bytes": 175512
+    },
+    {
+      "id": "g_3_5",
+      "lod": 0,
+      "url": "./chunks/lod0/g_3_5.json",
+      "bounds": {
+        "minX": -8192,
+        "minY": -4519,
+        "maxX": -6144,
+        "maxY": -2471
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 3,
+        "y": 5
+      },
+      "worldFaces": 312,
+      "staticProps": 53,
+      "tris": 1562,
+      "bytes": 87024
+    },
+    {
+      "id": "g_3_6",
+      "lod": 0,
+      "url": "./chunks/lod0/g_3_6.json",
+      "bounds": {
+        "minX": -8192,
+        "minY": -2471,
+        "maxX": -6144,
+        "maxY": -423
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 3,
+        "y": 6
+      },
+      "worldFaces": 30,
+      "staticProps": 1,
+      "tris": 83,
+      "bytes": 5496
+    },
+    {
+      "id": "g_3_7",
+      "lod": 0,
+      "url": "./chunks/lod0/g_3_7.json",
+      "bounds": {
+        "minX": -8192,
+        "minY": -423,
+        "maxX": -6144,
+        "maxY": 1625
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 3,
+        "y": 7
+      },
+      "worldFaces": 5,
+      "staticProps": 0,
+      "tris": 11,
+      "bytes": 792
+    },
+    {
+      "id": "g_4_1",
+      "lod": 0,
+      "url": "./chunks/lod0/g_4_1.json",
+      "bounds": {
+        "minX": -6144,
+        "minY": -12711,
+        "maxX": -4096,
+        "maxY": -10663
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 4,
+        "y": 1
+      },
+      "worldFaces": 125,
+      "staticProps": 6,
+      "tris": 405,
+      "bytes": 26280
+    },
+    {
+      "id": "g_4_10",
+      "lod": 0,
+      "url": "./chunks/lod0/g_4_10.json",
+      "bounds": {
+        "minX": -6144,
+        "minY": 5721,
+        "maxX": -4096,
+        "maxY": 7769
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 4,
+        "y": 10
+      },
+      "worldFaces": 12,
+      "staticProps": 13,
+      "tris": 180,
+      "bytes": 6720
+    },
+    {
+      "id": "g_4_11",
+      "lod": 0,
+      "url": "./chunks/lod0/g_4_11.json",
+      "bounds": {
+        "minX": -6144,
+        "minY": 7769,
+        "maxX": -4096,
+        "maxY": 9817
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 4,
+        "y": 11
+      },
+      "worldFaces": 61,
+      "staticProps": 17,
+      "tris": 333,
+      "bytes": 15816
+    },
+    {
+      "id": "g_4_12",
+      "lod": 0,
+      "url": "./chunks/lod0/g_4_12.json",
+      "bounds": {
+        "minX": -6144,
+        "minY": 9817,
+        "maxX": -4096,
+        "maxY": 11865
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 4,
+        "y": 12
+      },
+      "worldFaces": 141,
+      "staticProps": 15,
+      "tris": 549,
+      "bytes": 32328
+    },
+    {
+      "id": "g_4_13",
+      "lod": 0,
+      "url": "./chunks/lod0/g_4_13.json",
+      "bounds": {
+        "minX": -6144,
+        "minY": 11865,
+        "maxX": -4096,
+        "maxY": 13913
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 4,
+        "y": 13
+      },
+      "worldFaces": 410,
+      "staticProps": 55,
+      "tris": 1829,
+      "bytes": 105288
+    },
+    {
+      "id": "g_4_14",
+      "lod": 0,
+      "url": "./chunks/lod0/g_4_14.json",
+      "bounds": {
+        "minX": -6144,
+        "minY": 13913,
+        "maxX": -4096,
+        "maxY": 15961
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 4,
+        "y": 14
+      },
+      "worldFaces": 312,
+      "staticProps": 27,
+      "tris": 1212,
+      "bytes": 74304
+    },
+    {
+      "id": "g_4_2",
+      "lod": 0,
+      "url": "./chunks/lod0/g_4_2.json",
+      "bounds": {
+        "minX": -6144,
+        "minY": -10663,
+        "maxX": -4096,
+        "maxY": -8615
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 4,
+        "y": 2
+      },
+      "worldFaces": 1225,
+      "staticProps": 158,
+      "tris": 5518,
+      "bytes": 321456
+    },
+    {
+      "id": "g_4_3",
+      "lod": 0,
+      "url": "./chunks/lod0/g_4_3.json",
+      "bounds": {
+        "minX": -6144,
+        "minY": -8615,
+        "maxX": -4096,
+        "maxY": -6567
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 4,
+        "y": 3
+      },
+      "worldFaces": 444,
+      "staticProps": 52,
+      "tris": 1889,
+      "bytes": 111048
+    },
+    {
+      "id": "g_4_4",
+      "lod": 0,
+      "url": "./chunks/lod0/g_4_4.json",
+      "bounds": {
+        "minX": -6144,
+        "minY": -6567,
+        "maxX": -4096,
+        "maxY": -4519
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 4,
+        "y": 4
+      },
+      "worldFaces": 1256,
+      "staticProps": 161,
+      "tris": 5587,
+      "bytes": 324984
+    },
+    {
+      "id": "g_4_5",
+      "lod": 0,
+      "url": "./chunks/lod0/g_4_5.json",
+      "bounds": {
+        "minX": -6144,
+        "minY": -4519,
+        "maxX": -4096,
+        "maxY": -2471
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 4,
+        "y": 5
+      },
+      "worldFaces": 349,
+      "staticProps": 32,
+      "tris": 1367,
+      "bytes": 83064
+    },
+    {
+      "id": "g_4_6",
+      "lod": 0,
+      "url": "./chunks/lod0/g_4_6.json",
+      "bounds": {
+        "minX": -6144,
+        "minY": -2471,
+        "maxX": -4096,
+        "maxY": -423
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 4,
+        "y": 6
+      },
+      "worldFaces": 57,
+      "staticProps": 3,
+      "tris": 174,
+      "bytes": 11088
+    },
+    {
+      "id": "g_4_7",
+      "lod": 0,
+      "url": "./chunks/lod0/g_4_7.json",
+      "bounds": {
+        "minX": -6144,
+        "minY": -423,
+        "maxX": -4096,
+        "maxY": 1625
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 4,
+        "y": 7
+      },
+      "worldFaces": 93,
+      "staticProps": 13,
+      "tris": 393,
+      "bytes": 22056
+    },
+    {
+      "id": "g_4_8",
+      "lod": 0,
+      "url": "./chunks/lod0/g_4_8.json",
+      "bounds": {
+        "minX": -6144,
+        "minY": 1625,
+        "maxX": -4096,
+        "maxY": 3673
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 4,
+        "y": 8
+      },
+      "worldFaces": 72,
+      "staticProps": 0,
+      "tris": 160,
+      "bytes": 11520
+    },
+    {
+      "id": "g_4_9",
+      "lod": 0,
+      "url": "./chunks/lod0/g_4_9.json",
+      "bounds": {
+        "minX": -6144,
+        "minY": 3673,
+        "maxX": -4096,
+        "maxY": 5721
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 4,
+        "y": 9
+      },
+      "worldFaces": 78,
+      "staticProps": 7,
+      "tris": 271,
+      "bytes": 16152
+    },
+    {
+      "id": "g_5_1",
+      "lod": 0,
+      "url": "./chunks/lod0/g_5_1.json",
+      "bounds": {
+        "minX": -4096,
+        "minY": -12711,
+        "maxX": -2048,
+        "maxY": -10663
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 5,
+        "y": 1
+      },
+      "worldFaces": 2,
+      "staticProps": 1,
+      "tris": 16,
+      "bytes": 672
+    },
+    {
+      "id": "g_5_10",
+      "lod": 0,
+      "url": "./chunks/lod0/g_5_10.json",
+      "bounds": {
+        "minX": -4096,
+        "minY": 5721,
+        "maxX": -2048,
+        "maxY": 7769
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 5,
+        "y": 10
+      },
+      "worldFaces": 579,
+      "staticProps": 54,
+      "tris": 2640,
+      "bytes": 164160
+    },
+    {
+      "id": "g_5_11",
+      "lod": 0,
+      "url": "./chunks/lod0/g_5_11.json",
+      "bounds": {
+        "minX": -4096,
+        "minY": 7769,
+        "maxX": -2048,
+        "maxY": 9817
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 5,
+        "y": 11
+      },
+      "worldFaces": 174,
+      "staticProps": 22,
+      "tris": 771,
+      "bytes": 44952
+    },
+    {
+      "id": "g_5_12",
+      "lod": 0,
+      "url": "./chunks/lod0/g_5_12.json",
+      "bounds": {
+        "minX": -4096,
+        "minY": 9817,
+        "maxX": -2048,
+        "maxY": 11865
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 5,
+        "y": 12
+      },
+      "worldFaces": 137,
+      "staticProps": 12,
+      "tris": 503,
+      "bytes": 30456
+    },
+    {
+      "id": "g_5_13",
+      "lod": 0,
+      "url": "./chunks/lod0/g_5_13.json",
+      "bounds": {
+        "minX": -4096,
+        "minY": 11865,
+        "maxX": -2048,
+        "maxY": 13913
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 5,
+        "y": 13
+      },
+      "worldFaces": 186,
+      "staticProps": 46,
+      "tris": 1081,
+      "bytes": 55752
+    },
+    {
+      "id": "g_5_14",
+      "lod": 0,
+      "url": "./chunks/lod0/g_5_14.json",
+      "bounds": {
+        "minX": -4096,
+        "minY": 13913,
+        "maxX": -2048,
+        "maxY": 15961
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 5,
+        "y": 14
+      },
+      "worldFaces": 145,
+      "staticProps": 12,
+      "tris": 565,
+      "bytes": 34920
+    },
+    {
+      "id": "g_5_2",
+      "lod": 0,
+      "url": "./chunks/lod0/g_5_2.json",
+      "bounds": {
+        "minX": -4096,
+        "minY": -10663,
+        "maxX": -2048,
+        "maxY": -8615
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 5,
+        "y": 2
+      },
+      "worldFaces": 82,
+      "staticProps": 16,
+      "tris": 426,
+      "bytes": 22992
+    },
+    {
+      "id": "g_5_3",
+      "lod": 0,
+      "url": "./chunks/lod0/g_5_3.json",
+      "bounds": {
+        "minX": -4096,
+        "minY": -8615,
+        "maxX": -2048,
+        "maxY": -6567
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 5,
+        "y": 3
+      },
+      "worldFaces": 408,
+      "staticProps": 47,
+      "tris": 1816,
+      "bytes": 108192
+    },
+    {
+      "id": "g_5_4",
+      "lod": 0,
+      "url": "./chunks/lod0/g_5_4.json",
+      "bounds": {
+        "minX": -4096,
+        "minY": -6567,
+        "maxX": -2048,
+        "maxY": -4519
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 5,
+        "y": 4
+      },
+      "worldFaces": 437,
+      "staticProps": 96,
+      "tris": 2516,
+      "bytes": 135072
+    },
+    {
+      "id": "g_5_5",
+      "lod": 0,
+      "url": "./chunks/lod0/g_5_5.json",
+      "bounds": {
+        "minX": -4096,
+        "minY": -4519,
+        "maxX": -2048,
+        "maxY": -2471
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 5,
+        "y": 5
+      },
+      "worldFaces": 83,
+      "staticProps": 28,
+      "tris": 571,
+      "bytes": 27672
+    },
+    {
+      "id": "g_5_6",
+      "lod": 0,
+      "url": "./chunks/lod0/g_5_6.json",
+      "bounds": {
+        "minX": -4096,
+        "minY": -2471,
+        "maxX": -2048,
+        "maxY": -423
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 5,
+        "y": 6
+      },
+      "worldFaces": 10,
+      "staticProps": 3,
+      "tris": 58,
+      "bytes": 2736
+    },
+    {
+      "id": "g_5_7",
+      "lod": 0,
+      "url": "./chunks/lod0/g_5_7.json",
+      "bounds": {
+        "minX": -4096,
+        "minY": -423,
+        "maxX": -2048,
+        "maxY": 1625
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 5,
+        "y": 7
+      },
+      "worldFaces": 428,
+      "staticProps": 37,
+      "tris": 1582,
+      "bytes": 96144
+    },
+    {
+      "id": "g_5_8",
+      "lod": 0,
+      "url": "./chunks/lod0/g_5_8.json",
+      "bounds": {
+        "minX": -4096,
+        "minY": 1625,
+        "maxX": -2048,
+        "maxY": 3673
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 5,
+        "y": 8
+      },
+      "worldFaces": 158,
+      "staticProps": 27,
+      "tris": 803,
+      "bytes": 44856
+    },
+    {
+      "id": "g_5_9",
+      "lod": 0,
+      "url": "./chunks/lod0/g_5_9.json",
+      "bounds": {
+        "minX": -4096,
+        "minY": 3673,
+        "maxX": -2048,
+        "maxY": 5721
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 5,
+        "y": 9
+      },
+      "worldFaces": 296,
+      "staticProps": 36,
+      "tris": 1406,
+      "bytes": 83952
+    },
+    {
+      "id": "g_6_10",
+      "lod": 0,
+      "url": "./chunks/lod0/g_6_10.json",
+      "bounds": {
+        "minX": -2048,
+        "minY": 5721,
+        "maxX": 0,
+        "maxY": 7769
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 6,
+        "y": 10
+      },
+      "worldFaces": 270,
+      "staticProps": 31,
+      "tris": 1122,
+      "bytes": 65904
+    },
+    {
+      "id": "g_6_11",
+      "lod": 0,
+      "url": "./chunks/lod0/g_6_11.json",
+      "bounds": {
+        "minX": -2048,
+        "minY": 7769,
+        "maxX": 0,
+        "maxY": 9817
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 6,
+        "y": 11
+      },
+      "worldFaces": 145,
+      "staticProps": 24,
+      "tris": 678,
+      "bytes": 37296
+    },
+    {
+      "id": "g_6_12",
+      "lod": 0,
+      "url": "./chunks/lod0/g_6_12.json",
+      "bounds": {
+        "minX": -2048,
+        "minY": 9817,
+        "maxX": 0,
+        "maxY": 11865
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 6,
+        "y": 12
+      },
+      "worldFaces": 26,
+      "staticProps": 7,
+      "tris": 137,
+      "bytes": 6504
+    },
+    {
+      "id": "g_6_13",
+      "lod": 0,
+      "url": "./chunks/lod0/g_6_13.json",
+      "bounds": {
+        "minX": -2048,
+        "minY": 11865,
+        "maxX": 0,
+        "maxY": 13913
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 6,
+        "y": 13
+      },
+      "worldFaces": 66,
+      "staticProps": 10,
+      "tris": 275,
+      "bytes": 15000
+    },
+    {
+      "id": "g_6_14",
+      "lod": 0,
+      "url": "./chunks/lod0/g_6_14.json",
+      "bounds": {
+        "minX": -2048,
+        "minY": 13913,
+        "maxX": 0,
+        "maxY": 15961
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 6,
+        "y": 14
+      },
+      "worldFaces": 29,
+      "staticProps": 2,
+      "tris": 86,
+      "bytes": 5232
+    },
+    {
+      "id": "g_6_2",
+      "lod": 0,
+      "url": "./chunks/lod0/g_6_2.json",
+      "bounds": {
+        "minX": -2048,
+        "minY": -10663,
+        "maxX": 0,
+        "maxY": -8615
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 6,
+        "y": 2
+      },
+      "worldFaces": 2,
+      "staticProps": 0,
+      "tris": 4,
+      "bytes": 288
+    },
+    {
+      "id": "g_6_3",
+      "lod": 0,
+      "url": "./chunks/lod0/g_6_3.json",
+      "bounds": {
+        "minX": -2048,
+        "minY": -8615,
+        "maxX": 0,
+        "maxY": -6567
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 6,
+        "y": 3
+      },
+      "worldFaces": 222,
+      "staticProps": 18,
+      "tris": 816,
+      "bytes": 50112
+    },
+    {
+      "id": "g_6_4",
+      "lod": 0,
+      "url": "./chunks/lod0/g_6_4.json",
+      "bounds": {
+        "minX": -2048,
+        "minY": -6567,
+        "maxX": 0,
+        "maxY": -4519
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 6,
+        "y": 4
+      },
+      "worldFaces": 64,
+      "staticProps": 4,
+      "tris": 201,
+      "bytes": 12552
+    },
+    {
+      "id": "g_6_5",
+      "lod": 0,
+      "url": "./chunks/lod0/g_6_5.json",
+      "bounds": {
+        "minX": -2048,
+        "minY": -4519,
+        "maxX": 0,
+        "maxY": -2471
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 6,
+        "y": 5
+      },
+      "worldFaces": 75,
+      "staticProps": 0,
+      "tris": 150,
+      "bytes": 10800
+    },
+    {
+      "id": "g_6_6",
+      "lod": 0,
+      "url": "./chunks/lod0/g_6_6.json",
+      "bounds": {
+        "minX": -2048,
+        "minY": -2471,
+        "maxX": 0,
+        "maxY": -423
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 6,
+        "y": 6
+      },
+      "worldFaces": 75,
+      "staticProps": 3,
+      "tris": 230,
+      "bytes": 15120
+    },
+    {
+      "id": "g_6_7",
+      "lod": 0,
+      "url": "./chunks/lod0/g_6_7.json",
+      "bounds": {
+        "minX": -2048,
+        "minY": -423,
+        "maxX": 0,
+        "maxY": 1625
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 6,
+        "y": 7
+      },
+      "worldFaces": 57,
+      "staticProps": 16,
+      "tris": 351,
+      "bytes": 17592
+    },
+    {
+      "id": "g_6_8",
+      "lod": 0,
+      "url": "./chunks/lod0/g_6_8.json",
+      "bounds": {
+        "minX": -2048,
+        "minY": 1625,
+        "maxX": 0,
+        "maxY": 3673
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 6,
+        "y": 8
+      },
+      "worldFaces": 274,
+      "staticProps": 41,
+      "tris": 1241,
+      "bytes": 69672
+    },
+    {
+      "id": "g_6_9",
+      "lod": 0,
+      "url": "./chunks/lod0/g_6_9.json",
+      "bounds": {
+        "minX": -2048,
+        "minY": 3673,
+        "maxX": 0,
+        "maxY": 5721
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 6,
+        "y": 9
+      },
+      "worldFaces": 333,
+      "staticProps": 30,
+      "tris": 1440,
+      "bytes": 89280
+    },
+    {
+      "id": "g_7_10",
+      "lod": 0,
+      "url": "./chunks/lod0/g_7_10.json",
+      "bounds": {
+        "minX": 0,
+        "minY": 5721,
+        "maxX": 2048,
+        "maxY": 7769
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 7,
+        "y": 10
+      },
+      "worldFaces": 370,
+      "staticProps": 45,
+      "tris": 1548,
+      "bytes": 89856
+    },
+    {
+      "id": "g_7_11",
+      "lod": 0,
+      "url": "./chunks/lod0/g_7_11.json",
+      "bounds": {
+        "minX": 0,
+        "minY": 7769,
+        "maxX": 2048,
+        "maxY": 9817
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 7,
+        "y": 11
+      },
+      "worldFaces": 92,
+      "staticProps": 8,
+      "tris": 325,
+      "bytes": 19560
+    },
+    {
+      "id": "g_7_12",
+      "lod": 0,
+      "url": "./chunks/lod0/g_7_12.json",
+      "bounds": {
+        "minX": 0,
+        "minY": 9817,
+        "maxX": 2048,
+        "maxY": 11865
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 7,
+        "y": 12
+      },
+      "worldFaces": 69,
+      "staticProps": 5,
+      "tris": 218,
+      "bytes": 13296
+    },
+    {
+      "id": "g_7_13",
+      "lod": 0,
+      "url": "./chunks/lod0/g_7_13.json",
+      "bounds": {
+        "minX": 0,
+        "minY": 11865,
+        "maxX": 2048,
+        "maxY": 13913
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 7,
+        "y": 13
+      },
+      "worldFaces": 108,
+      "staticProps": 6,
+      "tris": 340,
+      "bytes": 21600
+    },
+    {
+      "id": "g_7_14",
+      "lod": 0,
+      "url": "./chunks/lod0/g_7_14.json",
+      "bounds": {
+        "minX": 0,
+        "minY": 13913,
+        "maxX": 2048,
+        "maxY": 15961
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 7,
+        "y": 14
+      },
+      "worldFaces": 16,
+      "staticProps": 2,
+      "tris": 56,
+      "bytes": 3072
+    },
+    {
+      "id": "g_7_2",
+      "lod": 0,
+      "url": "./chunks/lod0/g_7_2.json",
+      "bounds": {
+        "minX": 0,
+        "minY": -10663,
+        "maxX": 2048,
+        "maxY": -8615
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 7,
+        "y": 2
+      },
+      "worldFaces": 2,
+      "staticProps": 0,
+      "tris": 4,
+      "bytes": 288
+    },
+    {
+      "id": "g_7_3",
+      "lod": 0,
+      "url": "./chunks/lod0/g_7_3.json",
+      "bounds": {
+        "minX": 0,
+        "minY": -8615,
+        "maxX": 2048,
+        "maxY": -6567
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 7,
+        "y": 3
+      },
+      "worldFaces": 10,
+      "staticProps": 10,
+      "tris": 140,
+      "bytes": 5280
+    },
+    {
+      "id": "g_7_4",
+      "lod": 0,
+      "url": "./chunks/lod0/g_7_4.json",
+      "bounds": {
+        "minX": 0,
+        "minY": -6567,
+        "maxX": 2048,
+        "maxY": -4519
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 7,
+        "y": 4
+      },
+      "worldFaces": 12,
+      "staticProps": 6,
+      "tris": 96,
+      "bytes": 4032
+    },
+    {
+      "id": "g_7_6",
+      "lod": 0,
+      "url": "./chunks/lod0/g_7_6.json",
+      "bounds": {
+        "minX": 0,
+        "minY": -2471,
+        "maxX": 2048,
+        "maxY": -423
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 7,
+        "y": 6
+      },
+      "worldFaces": 5,
+      "staticProps": 1,
+      "tris": 23,
+      "bytes": 1176
+    },
+    {
+      "id": "g_7_7",
+      "lod": 0,
+      "url": "./chunks/lod0/g_7_7.json",
+      "bounds": {
+        "minX": 0,
+        "minY": -423,
+        "maxX": 2048,
+        "maxY": 1625
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 7,
+        "y": 7
+      },
+      "worldFaces": 42,
+      "staticProps": 7,
+      "tris": 187,
+      "bytes": 10104
+    },
+    {
+      "id": "g_7_8",
+      "lod": 0,
+      "url": "./chunks/lod0/g_7_8.json",
+      "bounds": {
+        "minX": 0,
+        "minY": 1625,
+        "maxX": 2048,
+        "maxY": 3673
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 7,
+        "y": 8
+      },
+      "worldFaces": 77,
+      "staticProps": 19,
+      "tris": 436,
+      "bytes": 22272
+    },
+    {
+      "id": "g_7_9",
+      "lod": 0,
+      "url": "./chunks/lod0/g_7_9.json",
+      "bounds": {
+        "minX": 0,
+        "minY": 3673,
+        "maxX": 2048,
+        "maxY": 5721
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 7,
+        "y": 9
+      },
+      "worldFaces": 404,
+      "staticProps": 32,
+      "tris": 1608,
+      "bytes": 100416
+    },
+    {
+      "id": "g_8_10",
+      "lod": 0,
+      "url": "./chunks/lod0/g_8_10.json",
+      "bounds": {
+        "minX": 2048,
+        "minY": 5721,
+        "maxX": 4096,
+        "maxY": 7769
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 8,
+        "y": 10
+      },
+      "worldFaces": 298,
+      "staticProps": 83,
+      "tris": 1768,
+      "bytes": 87456
+    },
+    {
+      "id": "g_8_11",
+      "lod": 0,
+      "url": "./chunks/lod0/g_8_11.json",
+      "bounds": {
+        "minX": 2048,
+        "minY": 7769,
+        "maxX": 4096,
+        "maxY": 9817
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 8,
+        "y": 11
+      },
+      "worldFaces": 53,
+      "staticProps": 12,
+      "tris": 283,
+      "bytes": 14616
+    },
+    {
+      "id": "g_8_12",
+      "lod": 0,
+      "url": "./chunks/lod0/g_8_12.json",
+      "bounds": {
+        "minX": 2048,
+        "minY": 9817,
+        "maxX": 4096,
+        "maxY": 11865
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 8,
+        "y": 12
+      },
+      "worldFaces": 777,
+      "staticProps": 46,
+      "tris": 2997,
+      "bytes": 193704
+    },
+    {
+      "id": "g_8_13",
+      "lod": 0,
+      "url": "./chunks/lod0/g_8_13.json",
+      "bounds": {
+        "minX": 2048,
+        "minY": 11865,
+        "maxX": 4096,
+        "maxY": 13913
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 8,
+        "y": 13
+      },
+      "worldFaces": 389,
+      "staticProps": 45,
+      "tris": 1714,
+      "bytes": 101808
+    },
+    {
+      "id": "g_8_14",
+      "lod": 0,
+      "url": "./chunks/lod0/g_8_14.json",
+      "bounds": {
+        "minX": 2048,
+        "minY": 13913,
+        "maxX": 4096,
+        "maxY": 15961
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 8,
+        "y": 14
+      },
+      "worldFaces": 350,
+      "staticProps": 18,
+      "tris": 1332,
+      "bytes": 87264
+    },
+    {
+      "id": "g_8_2",
+      "lod": 0,
+      "url": "./chunks/lod0/g_8_2.json",
+      "bounds": {
+        "minX": 2048,
+        "minY": -10663,
+        "maxX": 4096,
+        "maxY": -8615
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 8,
+        "y": 2
+      },
+      "worldFaces": 22,
+      "staticProps": 0,
+      "tris": 55,
+      "bytes": 3960
+    },
+    {
+      "id": "g_8_3",
+      "lod": 0,
+      "url": "./chunks/lod0/g_8_3.json",
+      "bounds": {
+        "minX": 2048,
+        "minY": -8615,
+        "maxX": 4096,
+        "maxY": -6567
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 8,
+        "y": 3
+      },
+      "worldFaces": 277,
+      "staticProps": 22,
+      "tris": 1056,
+      "bytes": 65472
+    },
+    {
+      "id": "g_8_4",
+      "lod": 0,
+      "url": "./chunks/lod0/g_8_4.json",
+      "bounds": {
+        "minX": 2048,
+        "minY": -6567,
+        "maxX": 4096,
+        "maxY": -4519
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 8,
+        "y": 4
+      },
+      "worldFaces": 59,
+      "staticProps": 4,
+      "tris": 192,
+      "bytes": 11904
+    },
+    {
+      "id": "g_8_5",
+      "lod": 0,
+      "url": "./chunks/lod0/g_8_5.json",
+      "bounds": {
+        "minX": 2048,
+        "minY": -4519,
+        "maxX": 4096,
+        "maxY": -2471
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 8,
+        "y": 5
+      },
+      "worldFaces": 53,
+      "staticProps": 2,
+      "tris": 156,
+      "bytes": 10272
+    },
+    {
+      "id": "g_8_6",
+      "lod": 0,
+      "url": "./chunks/lod0/g_8_6.json",
+      "bounds": {
+        "minX": 2048,
+        "minY": -2471,
+        "maxX": 4096,
+        "maxY": -423
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 8,
+        "y": 6
+      },
+      "worldFaces": 7,
+      "staticProps": 0,
+      "tris": 14,
+      "bytes": 1008
+    },
+    {
+      "id": "g_8_7",
+      "lod": 0,
+      "url": "./chunks/lod0/g_8_7.json",
+      "bounds": {
+        "minX": 2048,
+        "minY": -423,
+        "maxX": 4096,
+        "maxY": 1625
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 8,
+        "y": 7
+      },
+      "worldFaces": 12,
+      "staticProps": 0,
+      "tris": 24,
+      "bytes": 1728
+    },
+    {
+      "id": "g_8_8",
+      "lod": 0,
+      "url": "./chunks/lod0/g_8_8.json",
+      "bounds": {
+        "minX": 2048,
+        "minY": 1625,
+        "maxX": 4096,
+        "maxY": 3673
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 8,
+        "y": 8
+      },
+      "worldFaces": 94,
+      "staticProps": 6,
+      "tris": 313,
+      "bytes": 19656
+    },
+    {
+      "id": "g_8_9",
+      "lod": 0,
+      "url": "./chunks/lod0/g_8_9.json",
+      "bounds": {
+        "minX": 2048,
+        "minY": 3673,
+        "maxX": 4096,
+        "maxY": 5721
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 8,
+        "y": 9
+      },
+      "worldFaces": 481,
+      "staticProps": 52,
+      "tris": 1992,
+      "bytes": 118464
+    },
+    {
+      "id": "g_9_10",
+      "lod": 0,
+      "url": "./chunks/lod0/g_9_10.json",
+      "bounds": {
+        "minX": 4096,
+        "minY": 5721,
+        "maxX": 6144,
+        "maxY": 7769
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 9,
+        "y": 10
+      },
+      "worldFaces": 510,
+      "staticProps": 20,
+      "tris": 2125,
+      "bytes": 143400
+    },
+    {
+      "id": "g_9_11",
+      "lod": 0,
+      "url": "./chunks/lod0/g_9_11.json",
+      "bounds": {
+        "minX": 4096,
+        "minY": 7769,
+        "maxX": 6144,
+        "maxY": 9817
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 9,
+        "y": 11
+      },
+      "worldFaces": 50,
+      "staticProps": 7,
+      "tris": 186,
+      "bytes": 10032
+    },
+    {
+      "id": "g_9_12",
+      "lod": 0,
+      "url": "./chunks/lod0/g_9_12.json",
+      "bounds": {
+        "minX": 4096,
+        "minY": 9817,
+        "maxX": 6144,
+        "maxY": 11865
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 9,
+        "y": 12
+      },
+      "worldFaces": 417,
+      "staticProps": 47,
+      "tris": 1779,
+      "bytes": 105528
+    },
+    {
+      "id": "g_9_13",
+      "lod": 0,
+      "url": "./chunks/lod0/g_9_13.json",
+      "bounds": {
+        "minX": 4096,
+        "minY": 11865,
+        "maxX": 6144,
+        "maxY": 13913
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 9,
+        "y": 13
+      },
+      "worldFaces": 550,
+      "staticProps": 58,
+      "tris": 2258,
+      "bytes": 134736
+    },
+    {
+      "id": "g_9_14",
+      "lod": 0,
+      "url": "./chunks/lod0/g_9_14.json",
+      "bounds": {
+        "minX": 4096,
+        "minY": 13913,
+        "maxX": 6144,
+        "maxY": 15961
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 9,
+        "y": 14
+      },
+      "worldFaces": 376,
+      "staticProps": 13,
+      "tris": 1237,
+      "bytes": 82824
+    },
+    {
+      "id": "g_9_2",
+      "lod": 0,
+      "url": "./chunks/lod0/g_9_2.json",
+      "bounds": {
+        "minX": 4096,
+        "minY": -10663,
+        "maxX": 6144,
+        "maxY": -8615
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 9,
+        "y": 2
+      },
+      "worldFaces": 19,
+      "staticProps": 0,
+      "tris": 50,
+      "bytes": 3600
+    },
+    {
+      "id": "g_9_3",
+      "lod": 0,
+      "url": "./chunks/lod0/g_9_3.json",
+      "bounds": {
+        "minX": 4096,
+        "minY": -8615,
+        "maxX": 6144,
+        "maxY": -6567
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 9,
+        "y": 3
+      },
+      "worldFaces": 515,
+      "staticProps": 31,
+      "tris": 1990,
+      "bytes": 128400
+    },
+    {
+      "id": "g_9_4",
+      "lod": 0,
+      "url": "./chunks/lod0/g_9_4.json",
+      "bounds": {
+        "minX": 4096,
+        "minY": -6567,
+        "maxX": 6144,
+        "maxY": -4519
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 9,
+        "y": 4
+      },
+      "worldFaces": 215,
+      "staticProps": 16,
+      "tris": 909,
+      "bytes": 57768
+    },
+    {
+      "id": "g_9_5",
+      "lod": 0,
+      "url": "./chunks/lod0/g_9_5.json",
+      "bounds": {
+        "minX": 4096,
+        "minY": -4519,
+        "maxX": 6144,
+        "maxY": -2471
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 9,
+        "y": 5
+      },
+      "worldFaces": 436,
+      "staticProps": 56,
+      "tris": 1954,
+      "bytes": 113808
+    },
+    {
+      "id": "g_9_6",
+      "lod": 0,
+      "url": "./chunks/lod0/g_9_6.json",
+      "bounds": {
+        "minX": 4096,
+        "minY": -2471,
+        "maxX": 6144,
+        "maxY": -423
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 9,
+        "y": 6
+      },
+      "worldFaces": 4,
+      "staticProps": 0,
+      "tris": 8,
+      "bytes": 576
+    },
+    {
+      "id": "g_9_7",
+      "lod": 0,
+      "url": "./chunks/lod0/g_9_7.json",
+      "bounds": {
+        "minX": 4096,
+        "minY": -423,
+        "maxX": 6144,
+        "maxY": 1625
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 9,
+        "y": 7
+      },
+      "worldFaces": 7,
+      "staticProps": 0,
+      "tris": 14,
+      "bytes": 1008
+    },
+    {
+      "id": "g_9_8",
+      "lod": 0,
+      "url": "./chunks/lod0/g_9_8.json",
+      "bounds": {
+        "minX": 4096,
+        "minY": 1625,
+        "maxX": 6144,
+        "maxY": 3673
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 9,
+        "y": 8
+      },
+      "worldFaces": 32,
+      "staticProps": 6,
+      "tris": 143,
+      "bytes": 7416
+    },
+    {
+      "id": "g_9_9",
+      "lod": 0,
+      "url": "./chunks/lod0/g_9_9.json",
+      "bounds": {
+        "minX": 4096,
+        "minY": 3673,
+        "maxX": 6144,
+        "maxY": 5721
+      },
+      "size": 2048,
+      "splitDepth": 0,
+      "splitReason": [],
+      "baseCell": {
+        "x": 9,
+        "y": 9
+      },
+      "worldFaces": 70,
+      "staticProps": 14,
+      "tris": 366,
+      "bytes": 19632
+    }
+  ],
+  "reports": {
+    "pipeline": "./reports/report.json",
+    "audit": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\reports\\audit-report.json"
+  }
+}

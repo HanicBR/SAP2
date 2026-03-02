@@ -1,0 +1,1222 @@
+{
+  "id": "g_3_13",
+  "lod": 0,
+  "bounds": {
+    "minX": -8192,
+    "minY": 11865,
+    "maxX": -6144,
+    "maxY": 13913
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 3,
+    "y": 13
+  },
+  "counts": {
+    "worldFaces": 81,
+    "staticProps": 10,
+    "placeholderWorldFaces": 18,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 210,
+    "worldVerts": 372,
+    "worldBytes": 15120,
+    "propsTris": 120,
+    "propsVerts": 80,
+    "propsBytes": 3840,
+    "totalTris": 330,
+    "totalVerts": 452,
+    "totalBytes": 18960,
+    "drawCallsBeforeInstancing": 16,
+    "drawCallsAfterInstancing": 9
+  },
+  "world": {
+    "faces": [
+      {
+        "position": [
+          -6864,
+          13579,
+          101
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6864,
+          13717,
+          101
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6859,
+          13579,
+          208
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6551,
+          13579,
+          208
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6551,
+          13717,
+          208
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6859,
+          13717,
+          208
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6323,
+          13579,
+          208
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6323,
+          13717,
+          208
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6328,
+          13579,
+          101
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6328,
+          13717,
+          101
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6871,
+          13589.333333333334,
+          187.66666666666666
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6871,
+          13706.666666666666,
+          187.66666666666666
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6871,
+          13648,
+          187
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6231,
+          13589.333333333334,
+          187.66666666666666
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6231,
+          13706.666666666666,
+          187.66666666666666
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6231,
+          13648,
+          187
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6859,
+          13584,
+          101
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6551,
+          13584,
+          101
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6323,
+          13584,
+          101
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6859,
+          13574,
+          101
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6551,
+          13574,
+          101
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6323,
+          13574,
+          101
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6854,
+          13579,
+          101
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6854,
+          13717,
+          101
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6556,
+          13579,
+          101
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6556,
+          13717,
+          101
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6546,
+          13579,
+          101
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6546,
+          13717,
+          101
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6551,
+          13722,
+          101
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6859,
+          13722,
+          101
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6323,
+          13722,
+          101
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6551,
+          13712,
+          101
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6859,
+          13712,
+          101
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6323,
+          13712,
+          101
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6318,
+          13579,
+          101
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6318,
+          13717,
+          101
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6799.00634765625,
+          13704,
+          187.5
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          -6458.20751953125,
+          13704,
+          187.6
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 10,
+        "triCount": 8,
+        "byteEstimate": 576
+      },
+      {
+        "position": [
+          -6303.006103515625,
+          13712,
+          188
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6623.006103515625,
+          13712,
+          188
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6799.00634765625,
+          13592,
+          187.5
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          -6458.20751953125,
+          13592,
+          187.6
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 10,
+        "triCount": 8,
+        "byteEstimate": 576
+      },
+      {
+        "position": [
+          -6303.006103515625,
+          13584,
+          188
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6623.006103515625,
+          13584,
+          188
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6303.006103515625,
+          13708,
+          184
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6643.807421875,
+          13707.2,
+          184
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6303.006103515625,
+          13588,
+          184
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6643.807421875,
+          13588.8,
+          184
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6799.00634765625,
+          13648,
+          186
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6479.00634765625,
+          13648,
+          186
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6799.00634765625,
+          13648,
+          188
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6479.00634765625,
+          13648,
+          188
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6303.006103515625,
+          13708,
+          192
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6643.807421875,
+          13707.2,
+          192
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6303.006103515625,
+          13588,
+          192
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6643.807421875,
+          13588.8,
+          192
+        ],
+        "material": "customtext/gc textures/wood/wood_unfinished09",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6725,
+          13824,
+          153
+        ],
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_beneath_-6032_12816_292",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6725,
+          13824,
+          153
+        ],
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_-6032_12816_292",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6656,
+          13824,
+          949
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6725,
+          12800,
+          153
+        ],
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_beneath_-6032_12816_292",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6725,
+          12800,
+          153
+        ],
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_-6032_12816_292",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6656,
+          12800,
+          949
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -7092.0008544921875,
+          11877.699951171875,
+          153
+        ],
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_beneath_-6032_12816_292",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6747.717912946428,
+          12003,
+          153
+        ],
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_beneath_-6032_12816_292",
+        "placeholderMaterial": true,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          -7092.0008544921875,
+          11877.699951171875,
+          153
+        ],
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_-6032_12816_292",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6747.717912946428,
+          12003,
+          153
+        ],
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_-6032_12816_292",
+        "placeholderMaterial": true,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          -6378.339599609375,
+          11889,
+          169.5
+        ],
+        "material": "maps/rp_evocity_v33x/cs_assault/pavement001a_-6032_12816_292",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6778.00751953125,
+          11889,
+          166.2
+        ],
+        "material": "maps/rp_evocity_v33x/cs_assault/pavement001a_-6032_12816_292",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -7016.001708984375,
+          11879,
+          169.5
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6213,
+          11889,
+          137.5
+        ],
+        "material": "maps/rp_evocity_v33x/cs_assault/pavement001a_-6032_12816_292",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6552.0078125,
+          11889,
+          140.6
+        ],
+        "material": "maps/rp_evocity_v33x/cs_assault/pavement001a_-6032_12816_292",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6847.0057373046875,
+          11889,
+          137.5
+        ],
+        "material": "maps/rp_evocity_v33x/cs_assault/pavement001a_-6032_12816_292",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -7016.0001220703125,
+          11879,
+          137.5
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -7680,
+          13824,
+          153
+        ],
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_beneath_-6032_12816_292",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -7680,
+          13824,
+          153
+        ],
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_-6032_12816_292",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -7680,
+          13824,
+          949
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -7680,
+          12800,
+          153
+        ],
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_beneath_-6032_12816_292",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -7680,
+          12800,
+          153
+        ],
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_-6032_12816_292",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -7680,
+          12800,
+          949
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -7480.571637834822,
+          11933.8642578125,
+          153
+        ],
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_beneath_-6032_12816_292",
+        "placeholderMaterial": true,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          -7480.571637834822,
+          11933.8642578125,
+          153
+        ],
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_-6032_12816_292",
+        "placeholderMaterial": true,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      }
+    ]
+  },
+  "props": {
+    "instances": [
+      {
+        "model": "props_foliage/tree_pine_03",
+        "sourceModel": "props_foliage/tree_pine_03",
+        "placeholderModel": false,
+        "origin": [
+          -7467.60009765625,
+          12149.400390625,
+          183.08999633789062
+        ],
+        "angles": [
+          0,
+          300.5,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_03",
+        "sourceModel": "props_foliage/tree_pine_03",
+        "placeholderModel": false,
+        "origin": [
+          -6899.06982421875,
+          12283,
+          184
+        ],
+        "angles": [
+          0,
+          300.5,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -6156,
+          13846,
+          122
+        ],
+        "angles": [
+          0.41574299335479736,
+          300.4930114746094,
+          -1.9563299417495728
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -6400,
+          13862,
+          122
+        ],
+        "angles": [
+          0.41574299335479736,
+          300.4930114746094,
+          -1.9563299417495728
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "msc/e_tree_b",
+        "sourceModel": "msc/e_tree_b",
+        "placeholderModel": false,
+        "origin": [
+          -6239,
+          13175,
+          180
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "msc/e_tree_b",
+        "sourceModel": "msc/e_tree_b",
+        "placeholderModel": false,
+        "origin": [
+          -6258,
+          12637,
+          180
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -7172,
+          12105,
+          122
+        ],
+        "angles": [
+          0.41574299335479736,
+          325.9930114746094,
+          -1.9563299417495728
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -7531,
+          11905,
+          122
+        ],
+        "angles": [
+          0.41574299335479736,
+          228.9929962158203,
+          -1.9563299417495728
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -6668,
+          12105,
+          122
+        ],
+        "angles": [
+          0.41574299335479736,
+          285.4930114746094,
+          -1.9563299417495728
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -6294,
+          12292,
+          122
+        ],
+        "angles": [
+          0.41574299335479736,
+          285.4930114746094,
+          -1.9563299417495728
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    ]
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

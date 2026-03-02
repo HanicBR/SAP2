@@ -1,0 +1,7810 @@
+{
+  "id": "g_9_13",
+  "lod": 0,
+  "bounds": {
+    "minX": 4096,
+    "minY": 11865,
+    "maxX": 6144,
+    "maxY": 13913
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 9,
+    "y": 13
+  },
+  "counts": {
+    "worldFaces": 550,
+    "staticProps": 58,
+    "placeholderWorldFaces": 186,
+    "placeholderStaticProps": 2
+  },
+  "stats": {
+    "worldTris": 1562,
+    "worldVerts": 2662,
+    "worldBytes": 112464,
+    "propsTris": 696,
+    "propsVerts": 464,
+    "propsBytes": 22272,
+    "totalTris": 2258,
+    "totalVerts": 3126,
+    "totalBytes": 134736,
+    "drawCallsBeforeInstancing": 110,
+    "drawCallsAfterInstancing": 72
+  },
+  "world": {
+    "faces": [
+      {
+        "position": [
+          5569,
+          12764,
+          58
+        ],
+        "material": "de_train/train_cementwear_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5676,
+          12568,
+          58
+        ],
+        "material": "de_train/train_cementwear_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4264,
+          12900.8,
+          58
+        ],
+        "material": "concrete/concretewall060c",
+        "placeholderMaterial": true,
+        "vertexCount": 10,
+        "triCount": 8,
+        "byteEstimate": 576
+      },
+      {
+        "position": [
+          5672,
+          12568,
+          54
+        ],
+        "material": "de_train/train_cementwear_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5567,
+          12760,
+          54
+        ],
+        "material": "de_train/train_cementwear_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5286,
+          12762.666666666666,
+          55.333333333333336
+        ],
+        "material": "de_train/train_cementwear_01",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          4264,
+          12902.666666666666,
+          26
+        ],
+        "material": "maps/rp_evocity_v33x/concrete/blendconcreterock001a_wvt_patch",
+        "placeholderMaterial": false,
+        "vertexCount": 12,
+        "triCount": 10,
+        "byteEstimate": 720
+      },
+      {
+        "position": [
+          5462,
+          12762.666666666666,
+          55.333333333333336
+        ],
+        "material": "de_train/train_cementwear_01",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          4308,
+          12904,
+          10
+        ],
+        "material": "concrete/concretewall060c",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4264,
+          12904,
+          10
+        ],
+        "material": "concrete/concretewall060c",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4220,
+          12904,
+          10
+        ],
+        "material": "concrete/concretewall060c",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4155,
+          12904,
+          23.125
+        ],
+        "material": "concrete/concretewall060c",
+        "placeholderMaterial": true,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          4189.333333333333,
+          12904,
+          6.166666666666667
+        ],
+        "material": "concrete/concretewall060c",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4338.666666666667,
+          12904,
+          6.166666666666667
+        ],
+        "material": "concrete/concretewall060c",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4373,
+          12904,
+          23.125
+        ],
+        "material": "concrete/concretewall060c",
+        "placeholderMaterial": true,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          4264,
+          12904,
+          31.333333333333332
+        ],
+        "material": "concrete/concretewall060c",
+        "placeholderMaterial": true,
+        "vertexCount": 12,
+        "triCount": 10,
+        "byteEstimate": 720
+      },
+      {
+        "position": [
+          4192,
+          12879,
+          4.125
+        ],
+        "material": "concrete/concretewall060c",
+        "placeholderMaterial": true,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          4336,
+          12879,
+          4.125
+        ],
+        "material": "concrete/concretewall060c",
+        "placeholderMaterial": true,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          5808,
+          12221,
+          138
+        ],
+        "material": "de_aztec/stonework05d",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4272,
+          12872,
+          10
+        ],
+        "material": "concrete/concretewall060c",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4224,
+          12872,
+          10
+        ],
+        "material": "concrete/concretewall060c",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4216,
+          12872,
+          10
+        ],
+        "material": "concrete/concretewall060c",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4256,
+          12872,
+          10
+        ],
+        "material": "concrete/concretewall060c",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4304,
+          12872,
+          10
+        ],
+        "material": "concrete/concretewall060c",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4312,
+          12872,
+          10
+        ],
+        "material": "concrete/concretewall060c",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5800,
+          12221,
+          98
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5816,
+          12221,
+          98
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5798,
+          12221,
+          139.5
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5818,
+          12221,
+          139.5
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5801.333333333333,
+          12221,
+          142.66666666666666
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          5814.666666666667,
+          12221,
+          142.66666666666666
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          5808,
+          12213,
+          84.66666666666667
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5808,
+          12229,
+          84.66666666666667
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5808,
+          12211,
+          139.5
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5808,
+          12231,
+          139.5
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5808,
+          12214.333333333334,
+          142.66666666666666
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          5808,
+          12227.666666666666,
+          142.66666666666666
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          5374,
+          12764,
+          54
+        ],
+        "material": "ajacks/ajacks_10",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4163.689697265625,
+          13152.0126953125,
+          26.5
+        ],
+        "material": "concrete/concretewall060f",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4159.7517578125,
+          13610.8365234375,
+          32.8
+        ],
+        "material": "concrete/concretewall060f",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4364.31494140625,
+          13092.0537109375,
+          26.5
+        ],
+        "material": "concrete/concretewall060f",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4368.251953125,
+          13514.8814453125,
+          32.8
+        ],
+        "material": "concrete/concretewall060f",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5804,
+          11965.01123046875,
+          94
+        ],
+        "material": "de_aztec/stonework05d",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5804,
+          13879.01318359375,
+          94
+        ],
+        "material": "de_aztec/stonework05d",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5804,
+          13383.0390625,
+          94
+        ],
+        "material": "de_aztec/stonework05d",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5804,
+          12434.0380859375,
+          94
+        ],
+        "material": "de_aztec/stonework05d",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5804,
+          12880.863671875,
+          101.2
+        ],
+        "material": "de_aztec/stonework05d",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4392,
+          13137.341796875,
+          17.166666666666668
+        ],
+        "material": "concrete/concretewall060c",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4392,
+          13638.701985677084,
+          26.5
+        ],
+        "material": "concrete/concretewall060c",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4136,
+          13054.44296875,
+          21.6
+        ],
+        "material": "concrete/concretewall060c",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4136,
+          13481.06787109375,
+          26.5
+        ],
+        "material": "concrete/concretewall060c",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5808,
+          12589.03759765625,
+          130
+        ],
+        "material": "de_aztec/stonework05d",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5808,
+          13458.791137695312,
+          130
+        ],
+        "material": "de_aztec/stonework05d",
+        "placeholderMaterial": false,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          4489.0087890625,
+          12760,
+          54
+        ],
+        "material": "de_train/train_cementwear_01",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5267.013916015625,
+          12760,
+          54
+        ],
+        "material": "de_train/train_cementwear_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5012.298688616072,
+          12760,
+          53.42857142857143
+        ],
+        "material": "de_train/train_cementwear_01",
+        "placeholderMaterial": false,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          5388.80732421875,
+          12376,
+          54.8
+        ],
+        "material": "de_train/train_cementwear_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4930.677408854167,
+          12376,
+          54
+        ],
+        "material": "de_train/train_cementwear_01",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4434.681966145833,
+          12376,
+          54
+        ],
+        "material": "de_train/train_cementwear_01",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5812,
+          12198.5439453125,
+          94
+        ],
+        "material": "de_aztec/stonework05d",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5812,
+          11936.076171875,
+          94
+        ],
+        "material": "de_aztec/stonework05d",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5812,
+          12477.01220703125,
+          94
+        ],
+        "material": "de_aztec/stonework05d",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5812,
+          12949.6421875,
+          101.2
+        ],
+        "material": "de_aztec/stonework05d",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5812,
+          13469.06298828125,
+          94
+        ],
+        "material": "de_aztec/stonework05d",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4388,
+          13235.364908854166,
+          58
+        ],
+        "material": "concrete/concretewall060c",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4388,
+          13772.717936197916,
+          58
+        ],
+        "material": "concrete/concretewall060c",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4140,
+          13235.364908854166,
+          58
+        ],
+        "material": "concrete/concretewall060c",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4140,
+          13772.717936197916,
+          58
+        ],
+        "material": "concrete/concretewall060c",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4539.21025390625,
+          12372.8,
+          58
+        ],
+        "material": "de_train/train_cementwear_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5462.01318359375,
+          12372,
+          58
+        ],
+        "material": "de_train/train_cementwear_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5035.21904296875,
+          12372.8,
+          58
+        ],
+        "material": "de_train/train_cementwear_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5080.00556640625,
+          12763.2,
+          58
+        ],
+        "material": "de_train/train_cementwear_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4584.010546875,
+          12763.2,
+          58
+        ],
+        "material": "de_train/train_cementwear_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5123.6,
+          13769.8,
+          218
+        ],
+        "material": "maps/rp_evocity_v33x/env/brush/ceilings/ceil_lightorange_4992_13788_146",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5130,
+          13821,
+          218
+        ],
+        "material": "maps/rp_evocity_v33x/env/brush/ceilings/ceil_lightorange_5340_14006_146",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5206.727272727273,
+          13879.90909090909,
+          218
+        ],
+        "material": "maps/rp_evocity_v33x/env/brush/ceilings/ceil_lightorange_5340_14006_146",
+        "placeholderMaterial": false,
+        "vertexCount": 11,
+        "triCount": 9,
+        "byteEstimate": 648
+      },
+      {
+        "position": [
+          5342,
+          13769,
+          218
+        ],
+        "material": "plaster/prodceilinga",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5200.285714285715,
+          13658.714285714286,
+          218
+        ],
+        "material": "maps/rp_evocity_v33x/env/brush/ceilings/ceil_lightorange_5340_14006_146",
+        "placeholderMaterial": false,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          5270,
+          13566.6,
+          222.08368530273438
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5270,
+          13578.333333333334,
+          219.1365966796875
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          5270,
+          13584.47265625,
+          231.32786560058594
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          5270,
+          13608.706217447916,
+          243.83517201741537
+        ],
+        "material": "cs_italy/pwtrim2",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5707,
+          13824,
+          949
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5486,
+          13683,
+          274
+        ],
+        "material": "cs_italy/pwtrim2",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5398,
+          13549,
+          221.2
+        ],
+        "material": "cs_italy/pwtrim2",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5356.4,
+          13709.7638671875,
+          288.38453979492186
+        ],
+        "material": "wood/shingles004",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5478,
+          13767.009114583334,
+          239.90115102132162
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5481.2,
+          13657.8,
+          260.22089233398435
+        ],
+        "material": "cs_italy/pwtrim2",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5374,
+          13557,
+          219.55229949951172
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5374,
+          13553,
+          219.55229949951172
+        ],
+        "material": "cs_italy/pwtrim2",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5126,
+          13618.333333333334,
+          224.25134785970053
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5198,
+          13824,
+          949
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5198,
+          13573,
+          222
+        ],
+        "material": "cs_italy/pwtrim2",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5222,
+          13700.706217447916,
+          280.4321009318034
+        ],
+        "material": "wood/shingles004",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5194,
+          13581,
+          219.1365966796875
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5198,
+          13577,
+          219.70489501953125
+        ],
+        "material": "cs_italy/pwtrim2",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5123,
+          13824,
+          949
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5123,
+          13573,
+          222
+        ],
+        "material": "cs_italy/pwtrim2",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5123,
+          13695,
+          278
+        ],
+        "material": "wood/shingles004",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5123,
+          13653,
+          235.0491485595703
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5123.6,
+          13606.6,
+          232.32127685546874
+        ],
+        "material": "cs_italy/pwtrim2",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5123.6,
+          13769.8,
+          90
+        ],
+        "material": "maps/rp_evocity_v33x/ajacks/art_woodfloor_4992_13788_146",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5130,
+          13821,
+          90
+        ],
+        "material": "maps/rp_evocity_v33x/ajacks/art_woodfloor_4992_13788_146",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5194,
+          13753,
+          90
+        ],
+        "material": "maps/rp_evocity_v33x/ajacks/art_woodfloor_4992_13788_146",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5274,
+          13849,
+          90
+        ],
+        "material": "maps/rp_evocity_v33x/ajacks/art_woodfloor_5340_14006_146",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5124.285714285715,
+          13614.142857142857,
+          90
+        ],
+        "material": "maps/rp_evocity_v33x/env/brush/floors/floor_dark_wood_4992_13788_146",
+        "placeholderMaterial": false,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          5189.111111111111,
+          13669,
+          90
+        ],
+        "material": "maps/rp_evocity_v33x/ajacks/art_woodfloor_4992_13788_146",
+        "placeholderMaterial": false,
+        "vertexCount": 9,
+        "triCount": 7,
+        "byteEstimate": 504
+      },
+      {
+        "position": [
+          5134,
+          13583,
+          158
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5134,
+          13587,
+          158
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5134,
+          13697,
+          158
+        ],
+        "material": "ajacks/ben_painttan2",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5134,
+          13593,
+          178
+        ],
+        "material": "ajacks/ben_painttan2",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5134,
+          13647,
+          102
+        ],
+        "material": "ajacks/ben_painttan2",
+        "placeholderMaterial": false,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          5134,
+          13667.4,
+          208.4
+        ],
+        "material": "ajacks/ben_painttan2",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5270,
+          13849,
+          209.5
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5270,
+          13669,
+          154
+        ],
+        "material": "ajacks/ben_painttan2",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5270,
+          13799.666666666666,
+          157.83333333333334
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5270,
+          13567.666666666666,
+          170
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5270,
+          13887.285714285714,
+          153.85714285714286
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          5374,
+          13565,
+          196.66666666666666
+        ],
+        "material": "concrete/prodwllh",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5374,
+          13565,
+          184
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5281.2,
+          13565,
+          136.4
+        ],
+        "material": "concrete/prodwllh",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5288,
+          13565,
+          137
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5466,
+          13565,
+          138
+        ],
+        "material": "concrete/prodwllh",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5460,
+          13565,
+          137
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5470,
+          13752.42857142857,
+          152.28571428571428
+        ],
+        "material": "concrete/prodwllh",
+        "placeholderMaterial": true,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          5478,
+          13866.347005208334,
+          154
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5278,
+          13849,
+          209.5
+        ],
+        "material": "concrete/prodwllh",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5278,
+          13885,
+          171.83333333333334
+        ],
+        "material": "concrete/prodwllh",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5278,
+          13693,
+          180.5
+        ],
+        "material": "concrete/prodwllh",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5374,
+          13893,
+          176
+        ],
+        "material": "concrete/prodwllh",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5374,
+          13901,
+          176
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5374,
+          13893,
+          132
+        ],
+        "material": "concrete/prodwllh",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5374,
+          13901,
+          132
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5274.8,
+          13901,
+          166
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5278,
+          13885,
+          110
+        ],
+        "material": "concrete/prodwllh",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5278,
+          13705.8,
+          106
+        ],
+        "material": "concrete/prodwllh",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5378,
+          13901,
+          101.42857142857143
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          5374,
+          13893,
+          110
+        ],
+        "material": "concrete/prodwllh",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5274,
+          13901,
+          110
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5278,
+          13557,
+          138
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5288,
+          13557,
+          137
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5470,
+          13557,
+          138
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5460,
+          13557,
+          137
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5374,
+          13557,
+          196.66666666666666
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5374,
+          13557,
+          184
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5290,
+          13561,
+          136
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5478,
+          13560.2,
+          160.4
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5374,
+          13561,
+          182
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5458,
+          13561,
+          136
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5248.666666666667,
+          13581,
+          155.33333333333334
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5186,
+          13581,
+          207.33333333333334
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5214,
+          13581,
+          158
+        ],
+        "material": "zolos textures/glass/oldwindowdp",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5186,
+          13581,
+          158
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5158,
+          13581,
+          158
+        ],
+        "material": "zolos textures/glass/oldwindowdp",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5186,
+          13581,
+          106
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5150,
+          13749,
+          149.83333333333334
+        ],
+        "material": "ajacks/ben_painttan2",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5175.6,
+          13749,
+          208.4
+        ],
+        "material": "ajacks/ben_painttan2",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5194,
+          13749,
+          201.5
+        ],
+        "material": "ajacks/ben_painttan2",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5238,
+          13749,
+          169.83333333333334
+        ],
+        "material": "ajacks/ben_painttan2",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5153.2,
+          13757,
+          163.4
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5241.2,
+          13757,
+          163.4
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5194,
+          13757,
+          209.5
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5238,
+          13583,
+          158
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5238,
+          13587,
+          158
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5248.666666666667,
+          13589,
+          155.33333333333334
+        ],
+        "material": "ajacks/ben_painttan2",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5158,
+          13583,
+          114
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5158,
+          13587,
+          114
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5214,
+          13583,
+          114
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5214,
+          13587,
+          114
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5158,
+          13583,
+          202
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5158,
+          13587,
+          202
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5214,
+          13583,
+          202
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5214,
+          13587,
+          202
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5186,
+          13589,
+          207.33333333333334
+        ],
+        "material": "ajacks/ben_painttan2",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5182,
+          13583,
+          158
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5182,
+          13587,
+          158
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5190,
+          13583,
+          158
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5190,
+          13587,
+          158
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5214,
+          13585,
+          158
+        ],
+        "material": "zolos textures/glass/oldwindowdp",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5186,
+          13589,
+          158
+        ],
+        "material": "ajacks/ben_painttan2",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5158,
+          13585,
+          158
+        ],
+        "material": "zolos textures/glass/oldwindowdp",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5186,
+          13589,
+          106
+        ],
+        "material": "ajacks/ben_painttan2",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5126,
+          13647.666666666666,
+          155.33333333333334
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5126,
+          13621,
+          102
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5126,
+          13621,
+          210
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5126,
+          13621,
+          158
+        ],
+        "material": "zolos textures/glass/oldwindowdp",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5126,
+          13709,
+          154
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5126,
+          13591.285714285714,
+          146
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          5128,
+          13645,
+          158
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5132,
+          13645,
+          158
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5130,
+          13885,
+          154
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5130,
+          13757,
+          154
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5128,
+          13597,
+          158
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5132,
+          13597,
+          158
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5128,
+          13621,
+          114
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5132,
+          13621,
+          114
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5128,
+          13621,
+          202
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5132,
+          13621,
+          202
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5130,
+          13621,
+          158
+        ],
+        "material": "zolos textures/glass/oldwindowdp",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5131.333333333333,
+          13581,
+          155.33333333333334
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5122.4,
+          13661,
+          146
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5122.4,
+          13885,
+          146
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5122.4,
+          13893,
+          146
+        ],
+        "material": "env/brush/walls/wall_creampanels",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5122.4,
+          13653,
+          146
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5362.8,
+          13561.8,
+          58
+        ],
+        "material": "concrete/concretefloor009a",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5391.5,
+          13718,
+          58
+        ],
+        "material": "concrete/concretefloor009a",
+        "placeholderMaterial": true,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          5291.777777777777,
+          13674.333333333334,
+          58
+        ],
+        "material": "concrete/concretefloor009a",
+        "placeholderMaterial": true,
+        "vertexCount": 9,
+        "triCount": 7,
+        "byteEstimate": 504
+      },
+      {
+        "position": [
+          5298.8,
+          13883.4,
+          58
+        ],
+        "material": "concrete/concretefloor009a",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5352,
+          13475.75,
+          58
+        ],
+        "material": "ajacks/ajacks_10",
+        "placeholderMaterial": false,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          5123,
+          13557,
+          78
+        ],
+        "material": "concrete/concretefloor026a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5288,
+          13557,
+          74
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5460,
+          13557,
+          74
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5470,
+          13557,
+          74
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5278,
+          13557,
+          70.8
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5278,
+          13795.4,
+          75.6
+        ],
+        "material": "concrete/prodwllh",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5278,
+          13849,
+          86
+        ],
+        "material": "concrete/prodwllh",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5278,
+          13883.4,
+          75.6
+        ],
+        "material": "concrete/prodwllh",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5278,
+          13646.6,
+          70.8
+        ],
+        "material": "concrete/prodwllh",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5288,
+          13565,
+          74
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5282,
+          13565,
+          74
+        ],
+        "material": "concrete/prodwllh",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5466,
+          13565,
+          74
+        ],
+        "material": "concrete/prodwllh",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5460,
+          13565,
+          74
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5362.8,
+          13893,
+          70.8
+        ],
+        "material": "concrete/prodwllh",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5302,
+          13849,
+          78
+        ],
+        "material": "maps/rp_evocity_v33x/concrete/concretefloor028a_5340_14006_146",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5318,
+          13849,
+          66
+        ],
+        "material": "maps/rp_evocity_v33x/concrete/concretefloor028a_5340_14006_146",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5470,
+          13729,
+          74
+        ],
+        "material": "concrete/prodwllh",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5478,
+          13729,
+          74
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5310,
+          13821,
+          66
+        ],
+        "material": "maps/rp_evocity_v33x/concrete/concretefloor028a_4992_13788_146",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5310,
+          13877,
+          66
+        ],
+        "material": "maps/rp_evocity_v33x/concrete/concretefloor028a_5340_14006_146",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5310,
+          13849,
+          74
+        ],
+        "material": "maps/rp_evocity_v33x/concrete/concretefloor011a_c17_5340_14006_146",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5292.4,
+          13821,
+          70.8
+        ],
+        "material": "maps/rp_evocity_v33x/concrete/concretefloor028a_4992_13788_146",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5292.4,
+          13877,
+          70.8
+        ],
+        "material": "maps/rp_evocity_v33x/concrete/concretefloor028a_5340_14006_146",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5290,
+          13849,
+          82
+        ],
+        "material": "maps/rp_evocity_v33x/concrete/concretefloor011a_c17_5340_14006_146",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5458,
+          13561,
+          74
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5478,
+          13561,
+          74
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5290,
+          13561,
+          74
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5270,
+          13568.2,
+          70.8
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5123,
+          13581,
+          86
+        ],
+        "material": "brick/brickwall045f",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5184.285714285715,
+          13581,
+          79.71428571428571
+        ],
+        "material": "brick/brickwall045f",
+        "placeholderMaterial": true,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          5126,
+          13566.6,
+          70.8
+        ],
+        "material": "concrete/concretefloor026a",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5123,
+          13569,
+          82
+        ],
+        "material": "concrete/concretefloor026a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5123,
+          13525,
+          62.5
+        ],
+        "material": "concrete/concretefloor026a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5206,
+          13525,
+          58.5
+        ],
+        "material": "stone/infflrc",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5123,
+          13541,
+          70
+        ],
+        "material": "concrete/concretefloor026a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5126,
+          13547.4,
+          66
+        ],
+        "material": "concrete/concretefloor026a",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5123,
+          13549,
+          74
+        ],
+        "material": "concrete/concretefloor026a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5126,
+          13531.4,
+          61.4
+        ],
+        "material": "concrete/concretefloor026a",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5123,
+          13533,
+          66
+        ],
+        "material": "concrete/concretefloor026a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5286,
+          13477,
+          58.5
+        ],
+        "material": "stone/infflrc",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5203,
+          13429,
+          58.5
+        ],
+        "material": "stone/infflrc",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5187.6,
+          13486.6,
+          59
+        ],
+        "material": "stone/infflrc",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5282,
+          13557,
+          54
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5470,
+          13557,
+          54
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5478,
+          13729,
+          55.333333333333336
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5286,
+          13382.2,
+          53.4
+        ],
+        "material": "maps/rp_evocity_v33x/nature/blendgrassdirt01_noprop_wvt_patch",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5286,
+          13477,
+          50.5
+        ],
+        "material": "maps/rp_evocity_v33x/nature/blendgrassdirt01_noprop_wvt_patch",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5286,
+          13537.8,
+          53.4
+        ],
+        "material": "maps/rp_evocity_v33x/nature/blendgrassdirt01_noprop_wvt_patch",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5462,
+          13434.5,
+          54
+        ],
+        "material": "maps/rp_evocity_v33x/nature/blendgrassdirt01_noprop_wvt_patch",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5203,
+          13429,
+          54.5
+        ],
+        "material": "stone/infflrc",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5187.6,
+          13525,
+          55.2
+        ],
+        "material": "stone/infflrc",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5203,
+          13477,
+          51
+        ],
+        "material": "stone/infflrc",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4264,
+          13824,
+          2
+        ],
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_beneath_4264_14112_94",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4264,
+          13824,
+          2
+        ],
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_4264_14112_94",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4598,
+          13617,
+          114
+        ],
+        "material": "nature/water_dx70_beneath",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4598,
+          13617,
+          114
+        ],
+        "material": "nature/water_canals_water2_dx70",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4536,
+          13853,
+          114
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4540,
+          13853,
+          114
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4918,
+          13655,
+          114
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4918,
+          13659,
+          114
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4974,
+          13655,
+          114
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4974,
+          13659,
+          114
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4587,
+          13731,
+          218
+        ],
+        "material": "maps/rp_evocity_v33x/env/brush/ceilings/ceil_lightorange_4992_13788_146",
+        "placeholderMaterial": false,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          4771.714285714285,
+          13717,
+          218
+        ],
+        "material": "maps/rp_evocity_v33x/env/brush/ceilings/ceil_lightorange_4992_13788_146",
+        "placeholderMaterial": false,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          4672,
+          13847.666666666666,
+          218
+        ],
+        "material": "maps/rp_evocity_v33x/env/brush/ceilings/ceil_lightorange_4992_13788_146",
+        "placeholderMaterial": false,
+        "vertexCount": 12,
+        "triCount": 10,
+        "byteEstimate": 720
+      },
+      {
+        "position": [
+          4998.4,
+          13766.6,
+          218
+        ],
+        "material": "maps/rp_evocity_v33x/env/brush/ceilings/ceil_lightorange_4992_13788_146",
+        "placeholderMaterial": false,
+        "vertexCount": 10,
+        "triCount": 8,
+        "byteEstimate": 576
+      },
+      {
+        "position": [
+          4886,
+          13617,
+          227.3770408630371
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5003,
+          13824,
+          949
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5003,
+          13573,
+          222
+        ],
+        "material": "cs_italy/pwtrim2",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5003,
+          13695,
+          278
+        ],
+        "material": "wood/shingles004",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5007.5,
+          13653,
+          226.52457809448242
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          4979.6,
+          13606.6,
+          232.3212921142578
+        ],
+        "material": "cs_italy/pwtrim2",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4491,
+          13824,
+          949
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4526,
+          13697.8974609375,
+          273.9015935262044
+        ],
+        "material": "cs_italy/pwtrim2",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4706,
+          13573,
+          222
+        ],
+        "material": "cs_italy/pwtrim2",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4706,
+          13695,
+          278
+        ],
+        "material": "wood/shingles004",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4740.666666666667,
+          13581,
+          219.13660939534506
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4706,
+          13912.285481770834,
+          289.3862482706706
+        ],
+        "material": "wood/shingles004",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4534,
+          13812.142857142857,
+          225.91568647112166
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 14,
+        "triCount": 12,
+        "byteEstimate": 864
+      },
+      {
+        "position": [
+          4530,
+          13699,
+          271.7048454284668
+        ],
+        "material": "cs_italy/pwtrim2",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4671.6,
+          13577.8,
+          220.04584350585938
+        ],
+        "material": "cs_italy/pwtrim2",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4878,
+          13583,
+          166
+        ],
+        "material": "env/brush/walls/wall_staffroom",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4878,
+          13587,
+          166
+        ],
+        "material": "env/brush/walls/wall_staffroom",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4878,
+          13853,
+          210
+        ],
+        "material": "env/brush/walls/wall_creampanels",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4878,
+          13663.666666666666,
+          166
+        ],
+        "material": "env/brush/walls/wall_staffroom",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5024,
+          13661,
+          177.83333333333334
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5111.6,
+          13661,
+          173
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5078,
+          13661,
+          209.5
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4946,
+          13661,
+          158
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4890,
+          13661,
+          158
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4936.285714285715,
+          13661,
+          206.57142857142858
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          4882,
+          13885,
+          158
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5066,
+          13885,
+          173.2
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4894,
+          13885,
+          178
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4966,
+          13885,
+          210
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5066,
+          13893,
+          173.2
+        ],
+        "material": "env/brush/walls/wall_creampanels",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4895.6,
+          13893,
+          173.2
+        ],
+        "material": "env/brush/walls/wall_creampanels",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4966,
+          13893,
+          210
+        ],
+        "material": "env/brush/walls/wall_creampanels",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5030,
+          13889,
+          158
+        ],
+        "material": "env/brush/walls/wall_creamplank",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4902,
+          13889,
+          158
+        ],
+        "material": "env/brush/walls/wall_creamplank",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4966,
+          13889,
+          202
+        ],
+        "material": "env/brush/walls/wall_creamplank",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4882,
+          13821,
+          158
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4886,
+          13853,
+          210
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4882,
+          13853,
+          202
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4886,
+          13741,
+          178
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4918,
+          13653,
+          158
+        ],
+        "material": "zolos textures/glass/oldwindowdp",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4974,
+          13653,
+          158
+        ],
+        "material": "zolos textures/glass/oldwindowdp",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4946,
+          13653,
+          158
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4946,
+          13653,
+          207.33333333333334
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5078,
+          13653,
+          209.5
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5111.6,
+          13653,
+          173
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5024,
+          13653,
+          177.83333333333334
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4890.8,
+          13653,
+          173.2
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4998,
+          13655,
+          158
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4998,
+          13659,
+          158
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4918,
+          13655,
+          202
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4918,
+          13659,
+          202
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4974,
+          13655,
+          202
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4974,
+          13659,
+          202
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4942,
+          13655,
+          158
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4942,
+          13659,
+          158
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4950,
+          13655,
+          158
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4950,
+          13659,
+          158
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4974,
+          13657,
+          158
+        ],
+        "material": "zolos textures/glass/oldwindowdp",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4894,
+          13655,
+          158
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4894,
+          13659,
+          158
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4918,
+          13657,
+          158
+        ],
+        "material": "zolos textures/glass/oldwindowdp",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4886,
+          13617,
+          166
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4880.666666666667,
+          13581,
+          166
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4556.4,
+          13813,
+          173
+        ],
+        "material": "env/brush/walls/ensuite_peach_brown",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4594,
+          13813,
+          209.5
+        ],
+        "material": "env/brush/walls/ensuite_peach_brown",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4641.2,
+          13813,
+          173
+        ],
+        "material": "env/brush/walls/ensuite_peach_brown",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4837.2,
+          13813,
+          173
+        ],
+        "material": "env/brush/walls/wall_staffroom",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4782,
+          13813,
+          209.5
+        ],
+        "material": "env/brush/walls/wall_staffroom",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4723.6,
+          13813,
+          173
+        ],
+        "material": "env/brush/walls/wall_staffroom",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4784.4,
+          13893,
+          173
+        ],
+        "material": "env/brush/walls/wall_secclass",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4616.4,
+          13893,
+          173
+        ],
+        "material": "env/brush/walls/wall_secclass",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4694,
+          13893,
+          209.5
+        ],
+        "material": "env/brush/walls/wall_secclass",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4844,
+          13821,
+          177.83333333333334
+        ],
+        "material": "env/brush/walls/wall_creampanels",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4782,
+          13821,
+          209.5
+        ],
+        "material": "env/brush/walls/wall_creampanels",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4594,
+          13821,
+          209.5
+        ],
+        "material": "env/brush/walls/wall_creampanels",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4556.4,
+          13821,
+          173
+        ],
+        "material": "env/brush/walls/wall_creampanels",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4688,
+          13821,
+          177.66666666666666
+        ],
+        "material": "env/brush/walls/wall_creampanels",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4542,
+          13880.2,
+          173.2
+        ],
+        "material": "env/brush/walls/wall_creampanels",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4542,
+          13825.8,
+          173.2
+        ],
+        "material": "env/brush/walls/wall_creampanels",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4542,
+          13853,
+          210
+        ],
+        "material": "env/brush/walls/wall_creampanels",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4800,
+          13885,
+          177.83333333333334
+        ],
+        "material": "env/brush/walls/wall_creampanels",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4616.4,
+          13885,
+          173
+        ],
+        "material": "env/brush/walls/wall_creampanels",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4694,
+          13885,
+          209.5
+        ],
+        "material": "env/brush/walls/wall_creampanels",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4534,
+          13883.4,
+          173.2
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4534,
+          13825.8,
+          173.2
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4534,
+          13853,
+          210
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4534,
+          13853,
+          158
+        ],
+        "material": "zolos textures/glass/oldwindowdp",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4536,
+          13877,
+          158
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4540,
+          13877,
+          158
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4536,
+          13829,
+          158
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4540,
+          13829,
+          158
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4536,
+          13853,
+          202
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4540,
+          13853,
+          202
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4538,
+          13853,
+          158
+        ],
+        "material": "zolos textures/glass/oldwindowdp",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4534,
+          13817,
+          166
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4606,
+          13589,
+          166
+        ],
+        "material": "env/brush/walls/ensuite_peach_brown",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4802,
+          13589,
+          124.66666666666667
+        ],
+        "material": "env/brush/walls/wall_staffroom",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4802,
+          13589,
+          207.33333333333334
+        ],
+        "material": "env/brush/walls/wall_staffroom",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4802,
+          13589,
+          166
+        ],
+        "material": "env/brush/walls/wall_staffroom",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4710,
+          13589,
+          166
+        ],
+        "material": "env/brush/walls/wall_staffroom",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4542,
+          13637,
+          164
+        ],
+        "material": "env/brush/walls/ensuite_peach_brown",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4542,
+          13663,
+          160
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4542,
+          13773,
+          168.28571428571428
+        ],
+        "material": "env/brush/walls/ensuite_peach_brown",
+        "placeholderMaterial": false,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          4542,
+          13754.6,
+          151.6
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4542,
+          13709,
+          208
+        ],
+        "material": "env/brush/walls/ensuite_peach_brown",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4542,
+          13708,
+          124
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4542,
+          13718.6,
+          195.6
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4542,
+          13717.8,
+          118.8
+        ],
+        "material": "env/brush/walls/ensuite_peach_brown",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4670,
+          13701,
+          166
+        ],
+        "material": "env/brush/walls/ensuite_peach_brown",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4678,
+          13701,
+          166
+        ],
+        "material": "env/brush/walls/wall_staffroom",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4534,
+          13637,
+          164
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4534,
+          13719.4,
+          195.6
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4534,
+          13773,
+          168.28571428571428
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          4534,
+          13754.6,
+          151.6
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4534,
+          13700.2,
+          206
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4534,
+          13708,
+          124
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4534,
+          13663.4,
+          167.6
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4534,
+          13717.8,
+          118.8
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4538,
+          13665,
+          160
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4538,
+          13709,
+          194
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4538,
+          13753,
+          160
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4538,
+          13709,
+          126
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4802,
+          13581,
+          124.66666666666667
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4802,
+          13581,
+          207.33333333333334
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4802,
+          13581,
+          166
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4844,
+          13581,
+          166
+        ],
+        "material": "maps/rp_evocity_v33x/zolos textures/glass/tripanelwindow_2752_13534_131",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4760,
+          13581,
+          166
+        ],
+        "material": "maps/rp_evocity_v33x/zolos textures/glass/tripanelwindow_2752_13534_131",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4662,
+          13581,
+          166
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4726,
+          13583,
+          166
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4726,
+          13587,
+          166
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4760,
+          13583,
+          130
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4760,
+          13587,
+          130
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4844,
+          13583,
+          130
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4844,
+          13587,
+          130
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4760,
+          13583,
+          202
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4760,
+          13587,
+          202
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4844,
+          13583,
+          202
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4844,
+          13587,
+          202
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4794,
+          13583,
+          166
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4794,
+          13587,
+          166
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4810,
+          13583,
+          166
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4810,
+          13587,
+          166
+        ],
+        "material": "cs_havana/woodm",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4844,
+          13585,
+          166
+        ],
+        "material": "maps/rp_evocity_v33x/zolos textures/glass/tripanelwindow_4992_13788_146",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4760,
+          13585,
+          166
+        ],
+        "material": "maps/rp_evocity_v33x/zolos textures/glass/tripanelwindow_4992_13788_146",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4534,
+          13585,
+          166
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4804,
+          13718,
+          90
+        ],
+        "material": "env/brush/floors/floor_plush_lightblue",
+        "placeholderMaterial": false,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          4594,
+          13817,
+          90
+        ],
+        "material": "maps/rp_evocity_v33x/ajacks/art_woodfloor_4992_13788_146",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4782,
+          13817,
+          90
+        ],
+        "material": "maps/rp_evocity_v33x/ajacks/art_woodfloor_4992_13788_146",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4694,
+          13889,
+          90
+        ],
+        "material": "maps/rp_evocity_v33x/ajacks/art_woodfloor_4992_13788_146",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5078,
+          13657,
+          90
+        ],
+        "material": "maps/rp_evocity_v33x/env/brush/floors/floor_dark_wood_4992_13788_146",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4998.444444444444,
+          13778.333333333334,
+          90
+        ],
+        "material": "maps/rp_evocity_v33x/ajacks/art_woodfloor_4992_13788_146",
+        "placeholderMaterial": false,
+        "vertexCount": 9,
+        "triCount": 7,
+        "byteEstimate": 504
+      },
+      {
+        "position": [
+          4966,
+          13889,
+          90
+        ],
+        "material": "env/brush/floors/floor_boutiquefloor",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4729.333333333333,
+          13847.666666666666,
+          90
+        ],
+        "material": "maps/rp_evocity_v33x/ajacks/art_woodfloor_4992_13788_146",
+        "placeholderMaterial": false,
+        "vertexCount": 12,
+        "triCount": 10,
+        "byteEstimate": 720
+      },
+      {
+        "position": [
+          5013,
+          13618,
+          90
+        ],
+        "material": "maps/rp_evocity_v33x/env/brush/floors/floor_dark_wood_4992_13788_146",
+        "placeholderMaterial": false,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          4602,
+          13738.333333333334,
+          90
+        ],
+        "material": "env/brush/old ship textures/brigfloor",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4878,
+          13686.333333333334,
+          98
+        ],
+        "material": "env/brush/walls/wall_staffroom",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5113,
+          13661,
+          102
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4957,
+          13661,
+          108
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          4894,
+          13893,
+          102
+        ],
+        "material": "env/brush/walls/wall_creampanels",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5075,
+          13893,
+          102
+        ],
+        "material": "env/brush/walls/wall_creampanels",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5075,
+          13885,
+          102
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4888.666666666667,
+          13885,
+          102
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4902,
+          13889,
+          102
+        ],
+        "material": "env/brush/walls/wall_creamplank",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5030,
+          13889,
+          102
+        ],
+        "material": "env/brush/walls/wall_creamplank",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4886,
+          13741,
+          102
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4882,
+          13821,
+          102
+        ],
+        "material": "env/brush/walls/wall_creamwood",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5113,
+          13653,
+          102
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4957,
+          13653,
+          108
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          4886,
+          13611.4,
+          99.6
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4882,
+          13581,
+          102
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4716,
+          13813,
+          102
+        ],
+        "material": "env/brush/walls/wall_staffroom",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4844,
+          13813,
+          102
+        ],
+        "material": "env/brush/walls/wall_staffroom",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4554,
+          13813,
+          102
+        ],
+        "material": "env/brush/walls/ensuite_peach_brown",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4646,
+          13813,
+          102
+        ],
+        "material": "env/brush/walls/ensuite_peach_brown",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4542,
+          13853,
+          106
+        ],
+        "material": "env/brush/walls/wall_creampanels",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4844,
+          13821,
+          102
+        ],
+        "material": "env/brush/walls/wall_creampanels",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4554,
+          13821,
+          102
+        ],
+        "material": "env/brush/walls/wall_creampanels",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4688,
+          13821,
+          102
+        ],
+        "material": "env/brush/walls/wall_creampanels",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4604,
+          13885,
+          102
+        ],
+        "material": "env/brush/walls/wall_creampanels",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4800,
+          13885,
+          102
+        ],
+        "material": "env/brush/walls/wall_creampanels",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4604,
+          13893,
+          102
+        ],
+        "material": "env/brush/walls/wall_secclass",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4800,
+          13893,
+          102
+        ],
+        "material": "env/brush/walls/wall_secclass",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4534,
+          13910.777777777777,
+          108.66666666666667
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 9,
+        "triCount": 7,
+        "byteEstimate": 504
+      },
+      {
+        "position": [
+          4767.6,
+          13589,
+          104.4
+        ],
+        "material": "env/brush/walls/wall_staffroom",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4606,
+          13589,
+          102
+        ],
+        "material": "env/brush/walls/ensuite_peach_brown",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4542,
+          13703.666666666666,
+          106
+        ],
+        "material": "env/brush/walls/ensuite_peach_brown",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4670,
+          13701,
+          102
+        ],
+        "material": "env/brush/walls/ensuite_peach_brown",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4678,
+          13701,
+          102
+        ],
+        "material": "env/brush/walls/wall_staffroom",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4534,
+          13703.666666666666,
+          106
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4684,
+          13581,
+          102
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4534,
+          13585,
+          102
+        ],
+        "material": "warehouse/se1_brick_02b",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4534,
+          13818.333333333334,
+          74
+        ],
+        "material": "brick/brickwall045f",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5050,
+          13566.6,
+          70.8
+        ],
+        "material": "concrete/concretefloor026a",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5050,
+          13547.4,
+          66
+        ],
+        "material": "concrete/concretefloor026a",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5050,
+          13531.4,
+          61.4
+        ],
+        "material": "concrete/concretefloor026a",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5050,
+          13477,
+          58.5
+        ],
+        "material": "stone/infflrc",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5085,
+          13557,
+          78
+        ],
+        "material": "concrete/concretefloor026a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5085,
+          13581,
+          86
+        ],
+        "material": "brick/brickwall045f",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5085,
+          13569,
+          82
+        ],
+        "material": "concrete/concretefloor026a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5085,
+          13525,
+          62.5
+        ],
+        "material": "concrete/concretefloor026a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5085,
+          13541,
+          70
+        ],
+        "material": "concrete/concretefloor026a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5085,
+          13549,
+          74
+        ],
+        "material": "concrete/concretefloor026a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5085,
+          13533,
+          66
+        ],
+        "material": "concrete/concretefloor026a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5085,
+          13429,
+          58.5
+        ],
+        "material": "stone/infflrc",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5085,
+          13477,
+          59
+        ],
+        "material": "stone/infflrc",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4534,
+          13585,
+          74
+        ],
+        "material": "brick/brickwall045f",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4860.285714285715,
+          13581,
+          79.71428571428571
+        ],
+        "material": "brick/brickwall045f",
+        "placeholderMaterial": true,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          4544,
+          13581,
+          74
+        ],
+        "material": "brick/brickwall045f",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5050,
+          13477,
+          54.5
+        ],
+        "material": "stone/infflrc",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5085,
+          13429,
+          54.5
+        ],
+        "material": "stone/infflrc",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5085,
+          13525,
+          54.5
+        ],
+        "material": "stone/infflrc",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5085,
+          13477,
+          51
+        ],
+        "material": "stone/infflrc",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4264,
+          13559.361002604166,
+          -5
+        ],
+        "material": "maps/rp_evocity_v33x/concrete/blendconcreterock001a_wvt_patch",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          5384.575404575893,
+          12650.285714285714,
+          50
+        ],
+        "material": "ajacks/ajacks_road7",
+        "placeholderMaterial": false,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          5148,
+          12568,
+          50
+        ],
+        "material": "ajacks/ajacks_road7",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5596.8041015625,
+          12297.6,
+          58
+        ],
+        "material": "toronto/pavement/concrete_tile/pavement_tile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5216.005126953125,
+          12296,
+          58
+        ],
+        "material": "toronto/pavement/concrete_tile/pavement_tile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5776,
+          12584.01171875,
+          58
+        ],
+        "material": "toronto/pavement/concrete_tile/pavement_tile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5776,
+          12320.01171875,
+          58
+        ],
+        "material": "toronto/pavement/concrete_tile/pavement_tile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5371.002685546875,
+          12864,
+          58
+        ],
+        "material": "toronto/pavement/concrete_tile/pavement_tile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          5718.404296875,
+          12857.6,
+          58
+        ],
+        "material": "toronto/pavement/concrete_tile/pavement_tile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5374,
+          13104,
+          58
+        ],
+        "material": "ajacks/ajacks_10",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5374,
+          12800,
+          58
+        ],
+        "material": "ajacks/ajacks_10",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5441.742885044643,
+          12873.142857142857,
+          949
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          5203,
+          12896,
+          54
+        ],
+        "material": "toronto/pavement/concrete_tile/pavement_tile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5631.2021484375,
+          12896,
+          54.8
+        ],
+        "material": "toronto/pavement/concrete_tile/pavement_tile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5286,
+          13104,
+          54
+        ],
+        "material": "maps/rp_evocity_v33x/nature/blendgrassdirt01_noprop_wvt_patch",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5462,
+          13104,
+          54
+        ],
+        "material": "maps/rp_evocity_v33x/nature/blendgrassdirt01_noprop_wvt_patch",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4264,
+          12880,
+          2
+        ],
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_beneath_4992_13788_146",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4264,
+          12880,
+          2
+        ],
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_4992_13788_146",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4264,
+          13040,
+          2
+        ],
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_beneath_4264_14112_94",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4264,
+          13040,
+          2
+        ],
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_4264_14112_94",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4324.010009765625,
+          12568,
+          50
+        ],
+        "material": "ajacks/ajacks_road7",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4112.00830078125,
+          12568,
+          50
+        ],
+        "material": "ajacks/ajacks_road7",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4820.006103515625,
+          12568,
+          50
+        ],
+        "material": "ajacks/ajacks_road7",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          4376.00830078125,
+          12296,
+          58
+        ],
+        "material": "toronto/pavement/concrete_tile/pavement_tile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4112.00830078125,
+          12296,
+          58
+        ],
+        "material": "toronto/pavement/concrete_tile/pavement_tile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4872,
+          12296,
+          58
+        ],
+        "material": "toronto/pavement/concrete_tile/pavement_tile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4796.807421875,
+          12870.4,
+          58
+        ],
+        "material": "toronto/pavement/concrete_tile/pavement_tile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5104.00927734375,
+          12864,
+          58
+        ],
+        "material": "toronto/pavement/concrete_tile/pavement_tile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4284.4462890625,
+          12881.777777777777,
+          58
+        ],
+        "material": "toronto/pavement/concrete_tile/pavement_tile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 9,
+        "triCount": 7,
+        "byteEstimate": 504
+      },
+      {
+        "position": [
+          4663.6,
+          12902.4,
+          949
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4350.225911458333,
+          12896,
+          56.22222222222222
+        ],
+        "material": "toronto/pavement/concrete_tile/pavement_tile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 9,
+        "triCount": 7,
+        "byteEstimate": 504
+      },
+      {
+        "position": [
+          4112.00830078125,
+          12896,
+          54
+        ],
+        "material": "toronto/pavement/concrete_tile/pavement_tile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4915.2037109375,
+          12896,
+          54.8
+        ],
+        "material": "toronto/pavement/concrete_tile/pavement_tile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4264,
+          12849.333333333334,
+          26
+        ],
+        "material": "maps/rp_evocity_v33x/concrete/blendconcreterock001a_wvt_patch",
+        "placeholderMaterial": false,
+        "vertexCount": 12,
+        "triCount": 10,
+        "byteEstimate": 720
+      },
+      {
+        "position": [
+          4264,
+          12840,
+          19.142857142857142
+        ],
+        "material": "tools/toolsblack",
+        "placeholderMaterial": true,
+        "vertexCount": 14,
+        "triCount": 12,
+        "byteEstimate": 864
+      },
+      {
+        "position": [
+          4188,
+          12868,
+          -6
+        ],
+        "material": "maps/rp_evocity_v33x/concrete/blendconcreterock001a_wvt_patch",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4264,
+          12851.2,
+          -6
+        ],
+        "material": "maps/rp_evocity_v33x/concrete/blendconcreterock001a_wvt_patch",
+        "placeholderMaterial": false,
+        "vertexCount": 10,
+        "triCount": 8,
+        "byteEstimate": 576
+      },
+      {
+        "position": [
+          4340,
+          12868,
+          -6
+        ],
+        "material": "maps/rp_evocity_v33x/concrete/blendconcreterock001a_wvt_patch",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4188,
+          12840,
+          -2
+        ],
+        "material": "tools/toolsblack",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4264,
+          12840,
+          -4.4
+        ],
+        "material": "tools/toolsblack",
+        "placeholderMaterial": true,
+        "vertexCount": 10,
+        "triCount": 8,
+        "byteEstimate": 576
+      },
+      {
+        "position": [
+          4340,
+          12840,
+          -2
+        ],
+        "material": "tools/toolsblack",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4249.77880859375,
+          13036.456380208334,
+          -5
+        ],
+        "material": "maps/rp_evocity_v33x/concrete/blendconcreterock001a_wvt_patch",
+        "placeholderMaterial": false,
+        "vertexCount": 9,
+        "triCount": 7,
+        "byteEstimate": 504
+      },
+      {
+        "position": [
+          4360.1259765625,
+          12900.8,
+          -5
+        ],
+        "material": "maps/rp_evocity_v33x/concrete/blendconcreterock001a_wvt_patch",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          4264,
+          12900,
+          -5
+        ],
+        "material": "maps/rp_evocity_v33x/concrete/blendconcreterock001a_wvt_patch",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4167.87587890625,
+          12900.8,
+          -5
+        ],
+        "material": "maps/rp_evocity_v33x/concrete/blendconcreterock001a_wvt_patch",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          5560.005126953125,
+          12264,
+          58
+        ],
+        "material": "toronto/pavement/concrete_tile/pavement_tile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5216.005126953125,
+          12264,
+          58
+        ],
+        "material": "toronto/pavement/concrete_tile/pavement_tile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4376.00830078125,
+          12264,
+          58
+        ],
+        "material": "toronto/pavement/concrete_tile/pavement_tile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4112.00830078125,
+          12264,
+          58
+        ],
+        "material": "toronto/pavement/concrete_tile/pavement_tile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4872,
+          12264,
+          58
+        ],
+        "material": "toronto/pavement/concrete_tile/pavement_tile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4527,
+          12800,
+          58
+        ],
+        "material": "ajacks/ajacks_grass01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5712,
+          12568,
+          58
+        ],
+        "material": "ajacks/ajacks_grass01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5712,
+          12336,
+          58
+        ],
+        "material": "nature/blendgrassdirt01_noprop",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5712,
+          12800,
+          58
+        ],
+        "material": "ajacks/ajacks_grass01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4724,
+          12336,
+          58
+        ],
+        "material": "ajacks/ajacks_grass01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5571,
+          12800,
+          58
+        ],
+        "material": "ajacks/ajacks_grass01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5633,
+          13226.5,
+          58
+        ],
+        "material": "ajacks/ajacks_grass01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          5633,
+          13837,
+          58
+        ],
+        "material": "ajacks/ajacks_grass01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4839,
+          13837,
+          58
+        ],
+        "material": "ajacks/ajacks_grass01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4839,
+          13226.5,
+          58
+        ],
+        "material": "ajacks/ajacks_grass01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4605.8701171875,
+          13644,
+          114
+        ],
+        "material": "maps/rp_evocity_v33x/env/brush/walls/wall_red_tile_4992_13788_146",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4605.8701171875,
+          13645,
+          102
+        ],
+        "material": "maps/rp_evocity_v33x/env/brush/walls/wall_red_tile_4992_13788_146",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4662,
+          13616,
+          114
+        ],
+        "material": "maps/rp_evocity_v33x/env/brush/walls/wall_red_tile_4992_13788_146",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      }
+    ]
+  },
+  "props": {
+    "instances": [
+      {
+        "model": "props/de_inferno/wood_fence_corner",
+        "sourceModel": "props/de_inferno/wood_fence_corner",
+        "placeholderModel": false,
+        "origin": [
+          4126,
+          12905,
+          57.34000015258789
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/de_inferno/wood_fence_end",
+        "sourceModel": "props/de_inferno/wood_fence_end",
+        "placeholderModel": false,
+        "origin": [
+          4126,
+          12967,
+          57.34000015258789
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/de_inferno/wood_fence_corner",
+        "sourceModel": "props/de_inferno/wood_fence_corner",
+        "placeholderModel": false,
+        "origin": [
+          4406.43994140625,
+          12904.099609375,
+          57.34000015258789
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/de_inferno/wood_fence_end",
+        "sourceModel": "props/de_inferno/wood_fence_end",
+        "placeholderModel": false,
+        "origin": [
+          4468.43994140625,
+          12904.099609375,
+          57.34000015258789
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/de_inferno/wood_fence_end",
+        "sourceModel": "props/de_inferno/wood_fence_end",
+        "placeholderModel": false,
+        "origin": [
+          4406.43994140625,
+          12966.099609375,
+          57.34000015258789
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_tall_01",
+        "sourceModel": "props_foliage/tree_pine_tall_01",
+        "placeholderModel": false,
+        "origin": [
+          5565.2001953125,
+          12028.2001953125,
+          53
+        ],
+        "angles": [
+          0,
+          270,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          5220.2001953125,
+          12208.2001953125,
+          52
+        ],
+        "angles": [
+          0,
+          270,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_03",
+        "sourceModel": "props_foliage/tree_pine_03",
+        "placeholderModel": false,
+        "origin": [
+          5047.2001953125,
+          12203.2001953125,
+          56
+        ],
+        "angles": [
+          0,
+          270,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          4865.2001953125,
+          12194.2001953125,
+          52
+        ],
+        "angles": [
+          0,
+          270,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          4130.2001953125,
+          12100.2001953125,
+          52
+        ],
+        "angles": [
+          0,
+          270,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_03",
+        "sourceModel": "props_foliage/tree_pine_03",
+        "placeholderModel": false,
+        "origin": [
+          4667.2001953125,
+          12186.2001953125,
+          56
+        ],
+        "angles": [
+          0,
+          270,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/cs_militia/mailbox01",
+        "sourceModel": "props/cs_militia/mailbox01",
+        "placeholderModel": false,
+        "origin": [
+          5250.330078125,
+          12772,
+          58.2400016784668
+        ],
+        "angles": [
+          0,
+          270,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "__placeholder_box__",
+        "sourceModel": "props_lab/handrail01_long_stairwell01",
+        "placeholderModel": true,
+        "origin": [
+          4264,
+          12900,
+          58.279998779296875
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "msc/e_tree3",
+        "sourceModel": "msc/e_tree3",
+        "placeholderModel": false,
+        "origin": [
+          4322.2001953125,
+          12179.2001953125,
+          38
+        ],
+        "angles": [
+          0,
+          25,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/de_inferno/light_streetlight",
+        "sourceModel": "props/de_inferno/light_streetlight",
+        "placeholderModel": false,
+        "origin": [
+          4565.919921875,
+          12336,
+          58.290000915527344
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/de_inferno/light_streetlight",
+        "sourceModel": "props/de_inferno/light_streetlight",
+        "placeholderModel": false,
+        "origin": [
+          5081.4599609375,
+          12336,
+          58.290000915527344
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/de_inferno/light_streetlight",
+        "sourceModel": "props/de_inferno/light_streetlight",
+        "placeholderModel": false,
+        "origin": [
+          5597,
+          12336,
+          58.290000915527344
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/de_inferno/light_streetlight",
+        "sourceModel": "props/de_inferno/light_streetlight",
+        "placeholderModel": false,
+        "origin": [
+          5081.4599609375,
+          12798,
+          58.290000915527344
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/de_inferno/light_streetlight",
+        "sourceModel": "props/de_inferno/light_streetlight",
+        "placeholderModel": false,
+        "origin": [
+          5597,
+          12798,
+          58.290000915527344
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/de_inferno/light_streetlight",
+        "sourceModel": "props/de_inferno/light_streetlight",
+        "placeholderModel": false,
+        "origin": [
+          4486.9501953125,
+          12798,
+          58.290000915527344
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "msc/e_tree1b",
+        "sourceModel": "msc/e_tree1b",
+        "placeholderModel": false,
+        "origin": [
+          4444.43994140625,
+          12937.099609375,
+          55
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          4525,
+          13357,
+          53.25
+        ],
+        "angles": [
+          0,
+          270,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          5625,
+          13075,
+          53.25
+        ],
+        "angles": [
+          0,
+          165.5,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "__placeholder_box__",
+        "sourceModel": "props_lab/freightelevatorbutton",
+        "placeholderModel": true,
+        "origin": [
+          5282,
+          13806,
+          106.76000213623047
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "env/decor/nar_rail/a_mid_stara",
+        "sourceModel": "env/decor/nar_rail/a_mid_stara",
+        "placeholderModel": false,
+        "origin": [
+          4922,
+          13585,
+          90
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "env/furniture/ensuite1_sink/ensuite1_sink",
+        "sourceModel": "env/furniture/ensuite1_sink/ensuite1_sink",
+        "placeholderModel": false,
+        "origin": [
+          4670,
+          13773,
+          90
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "env/furniture/ensuite1_toilet/ensuite1_toilet",
+        "sourceModel": "env/furniture/ensuite1_toilet/ensuite1_toilet",
+        "placeholderModel": false,
+        "origin": [
+          4662,
+          13699,
+          90
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "env/furniture/ensuite1_bath/ensuite1_bath",
+        "sourceModel": "env/furniture/ensuite1_bath/ensuite1_bath",
+        "placeholderModel": false,
+        "origin": [
+          4598,
+          13617,
+          90
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "env/decor/mirrora/mirrora",
+        "sourceModel": "env/decor/mirrora/mirrora",
+        "placeholderModel": false,
+        "origin": [
+          4669,
+          13775,
+          172
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "env/lighting/corridorlamp/corridorlamp",
+        "sourceModel": "env/lighting/corridorlamp/corridorlamp",
+        "placeholderModel": false,
+        "origin": [
+          4670,
+          13673,
+          180
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "env/lighting/corridorlamp/corridorlamp",
+        "sourceModel": "env/lighting/corridorlamp/corridorlamp",
+        "placeholderModel": false,
+        "origin": [
+          4625,
+          13589,
+          180
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "env/lighting/corridorlamp/corridorlamp",
+        "sourceModel": "env/lighting/corridorlamp/corridorlamp",
+        "placeholderModel": false,
+        "origin": [
+          4567,
+          13589,
+          180
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "env/lighting/corridor_ceil_lamp/corridor_ceil_lamp",
+        "sourceModel": "env/lighting/corridor_ceil_lamp/corridor_ceil_lamp",
+        "placeholderModel": false,
+        "origin": [
+          5070,
+          13708.7998046875,
+          217
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "env/lighting/corridor_ceil_lamp/corridor_ceil_lamp",
+        "sourceModel": "env/lighting/corridor_ceil_lamp/corridor_ceil_lamp",
+        "placeholderModel": false,
+        "origin": [
+          4942,
+          13837,
+          217
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "env/lighting/corridor_ceil_lamp/corridor_ceil_lamp",
+        "sourceModel": "env/lighting/corridor_ceil_lamp/corridor_ceil_lamp",
+        "placeholderModel": false,
+        "origin": [
+          4940,
+          13709,
+          217
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "env/lighting/lamp_trumpet/lamp_trumpet_tall",
+        "sourceModel": "env/lighting/lamp_trumpet/lamp_trumpet_tall",
+        "placeholderModel": false,
+        "origin": [
+          4694,
+          13789,
+          102
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "env/lighting/corridorlamp/corridorlamp",
+        "sourceModel": "env/lighting/corridorlamp/corridorlamp",
+        "placeholderModel": false,
+        "origin": [
+          4542,
+          13654,
+          180
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "env/lighting/corridorlamp/corridorlamp",
+        "sourceModel": "env/lighting/corridorlamp/corridorlamp",
+        "placeholderModel": false,
+        "origin": [
+          4542,
+          13764,
+          180
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "env/lighting/lamp_trumpet/lamp_trumpet_tall",
+        "sourceModel": "env/lighting/lamp_trumpet/lamp_trumpet_tall",
+        "placeholderModel": false,
+        "origin": [
+          4560,
+          13909,
+          102
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "env/lighting/lamp_trumpet/lamp_trumpet_tall",
+        "sourceModel": "env/lighting/lamp_trumpet/lamp_trumpet_tall",
+        "placeholderModel": false,
+        "origin": [
+          4864,
+          13907,
+          102
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/cs_office/light_inset",
+        "sourceModel": "props/cs_office/light_inset",
+        "placeholderModel": false,
+        "origin": [
+          5458,
+          13906.599609375,
+          218
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "env/lighting/corridor_ceil_lamp/corridor_ceil_lamp",
+        "sourceModel": "env/lighting/corridor_ceil_lamp/corridor_ceil_lamp",
+        "placeholderModel": false,
+        "origin": [
+          5072,
+          13836.7998046875,
+          217
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "env/lighting/corridorlamp/corridorlamp",
+        "sourceModel": "env/lighting/corridorlamp/corridorlamp",
+        "placeholderModel": false,
+        "origin": [
+          4872,
+          13821,
+          180
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "env/lighting/corridorlamp/corridorlamp",
+        "sourceModel": "env/lighting/corridorlamp/corridorlamp",
+        "placeholderModel": false,
+        "origin": [
+          4871,
+          13885,
+          180
+        ],
+        "angles": [
+          0,
+          270,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "env/lighting/corridorlamp/corridorlamp",
+        "sourceModel": "env/lighting/corridorlamp/corridorlamp",
+        "placeholderModel": false,
+        "origin": [
+          4735,
+          13885,
+          180
+        ],
+        "angles": [
+          0,
+          270,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "env/lighting/corridorlamp/corridorlamp",
+        "sourceModel": "env/lighting/corridorlamp/corridorlamp",
+        "placeholderModel": false,
+        "origin": [
+          4736,
+          13821,
+          180
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "env/lighting/corridorlamp/corridorlamp",
+        "sourceModel": "env/lighting/corridorlamp/corridorlamp",
+        "placeholderModel": false,
+        "origin": [
+          4640,
+          13821,
+          180
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "env/lighting/corridorlamp/corridorlamp",
+        "sourceModel": "env/lighting/corridorlamp/corridorlamp",
+        "placeholderModel": false,
+        "origin": [
+          4639,
+          13885,
+          180
+        ],
+        "angles": [
+          0,
+          270,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "env/lighting/corridorlamp/corridorlamp",
+        "sourceModel": "env/lighting/corridorlamp/corridorlamp",
+        "placeholderModel": false,
+        "origin": [
+          5247,
+          13589,
+          180
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "env/lighting/corridorlamp/corridorlamp",
+        "sourceModel": "env/lighting/corridorlamp/corridorlamp",
+        "placeholderModel": false,
+        "origin": [
+          5134,
+          13654,
+          180
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "env/lighting/corridorlamp/corridorlamp",
+        "sourceModel": "env/lighting/corridorlamp/corridorlamp",
+        "placeholderModel": false,
+        "origin": [
+          5134,
+          13728,
+          180
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "env/lighting/corridorlamp/corridorlamp",
+        "sourceModel": "env/lighting/corridorlamp/corridorlamp",
+        "placeholderModel": false,
+        "origin": [
+          4670,
+          13738,
+          180
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "sickness/dooframe_01",
+        "sourceModel": "sickness/dooframe_01",
+        "placeholderModel": false,
+        "origin": [
+          5080.14013671875,
+          13656.2001953125,
+          89
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "sickness/dooframe_01",
+        "sourceModel": "sickness/dooframe_01",
+        "placeholderModel": false,
+        "origin": [
+          4779.85986328125,
+          13817.7998046875,
+          89
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "sickness/dooframe_01",
+        "sourceModel": "sickness/dooframe_01",
+        "placeholderModel": false,
+        "origin": [
+          4591.85009765625,
+          13817.7998046875,
+          89
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "sickness/dooframe_01",
+        "sourceModel": "sickness/dooframe_01",
+        "placeholderModel": false,
+        "origin": [
+          4696.14990234375,
+          13888.2001953125,
+          89
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "sickness/dooframe_01",
+        "sourceModel": "sickness/dooframe_01",
+        "placeholderModel": false,
+        "origin": [
+          5191.85986328125,
+          13753.7998046875,
+          89
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "sickness/dooframe_01",
+        "sourceModel": "sickness/dooframe_01",
+        "placeholderModel": false,
+        "origin": [
+          5273.18994140625,
+          13846.900390625,
+          89
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    ]
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

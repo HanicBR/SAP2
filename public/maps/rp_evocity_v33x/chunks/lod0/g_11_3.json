@@ -1,0 +1,289 @@
+{
+  "id": "g_11_3",
+  "lod": 0,
+  "bounds": {
+    "minX": 8192,
+    "minY": -8615,
+    "maxX": 10240,
+    "maxY": -6567
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 11,
+    "y": 3
+  },
+  "counts": {
+    "worldFaces": 20,
+    "staticProps": 0,
+    "placeholderWorldFaces": 20,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 47,
+    "worldVerts": 87,
+    "worldBytes": 3384,
+    "propsTris": 0,
+    "propsVerts": 0,
+    "propsBytes": 0,
+    "totalTris": 47,
+    "totalVerts": 87,
+    "totalBytes": 3384,
+    "drawCallsBeforeInstancing": 3,
+    "drawCallsAfterInstancing": 3
+  },
+  "world": {
+    "faces": [
+      {
+        "position": [
+          8480,
+          -6656,
+          764
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          8336,
+          -6656,
+          856
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          8480,
+          -7680,
+          764
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          8308,
+          -7851.010091145833,
+          184
+        ],
+        "material": "metal/metalwall030a",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          8308,
+          -7349.0146484375,
+          184
+        ],
+        "material": "metal/metalwall030a",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          8262.4,
+          -7178.8,
+          184
+        ],
+        "material": "metal/metalwall030a",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          8336,
+          -7680,
+          856
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          8248,
+          -7182,
+          124
+        ],
+        "material": "concrete/concretewall022a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          8252,
+          -7174,
+          124
+        ],
+        "material": "concrete/concretewall022a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          8304,
+          -7491.4203125,
+          136
+        ],
+        "material": "concrete/concretewall022a",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          8304,
+          -7191.01416015625,
+          124
+        ],
+        "material": "concrete/concretewall022a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          8304,
+          -7944.00732421875,
+          124
+        ],
+        "material": "concrete/concretewall022a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          8312,
+          -7491.4203125,
+          136
+        ],
+        "material": "concrete/concretewall022a",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          8312,
+          -7191.01416015625,
+          124
+        ],
+        "material": "concrete/concretewall022a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          8312,
+          -7944.00732421875,
+          124
+        ],
+        "material": "concrete/concretewall022a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          8480,
+          -8515,
+          764
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          8308,
+          -8432,
+          184
+        ],
+        "material": "metal/metalwall030a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          8336,
+          -8515,
+          856
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          8304,
+          -8432,
+          124
+        ],
+        "material": "concrete/concretewall022a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          8312,
+          -8432,
+          124
+        ],
+        "material": "concrete/concretewall022a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      }
+    ]
+  },
+  "props": {
+    "instances": []
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

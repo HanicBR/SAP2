@@ -1,0 +1,978 @@
+{
+  "id": "g_7_12",
+  "lod": 0,
+  "bounds": {
+    "minX": 0,
+    "minY": 9817,
+    "maxX": 2048,
+    "maxY": 11865
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 7,
+    "y": 12
+  },
+  "counts": {
+    "worldFaces": 69,
+    "staticProps": 5,
+    "placeholderWorldFaces": 15,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 158,
+    "worldVerts": 296,
+    "worldBytes": 11376,
+    "propsTris": 60,
+    "propsVerts": 40,
+    "propsBytes": 1920,
+    "totalTris": 218,
+    "totalVerts": 336,
+    "totalBytes": 13296,
+    "drawCallsBeforeInstancing": 12,
+    "drawCallsAfterInstancing": 10
+  },
+  "world": {
+    "faces": [
+      {
+        "position": [
+          1072,
+          10192,
+          84.66666666666667
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          1056,
+          10201,
+          98
+        ],
+        "material": "wood/inffence01",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          1056,
+          10192,
+          98
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          1056,
+          10201,
+          151.75
+        ],
+        "material": "wood/inffence01",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          1261,
+          10192,
+          130
+        ],
+        "material": "de_aztec/stonework05d",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          1261,
+          10196,
+          94
+        ],
+        "material": "de_aztec/stonework05d",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          1062.6666666666667,
+          10195.333333333334,
+          138
+        ],
+        "material": "de_aztec/stonework05d",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          1458,
+          10192,
+          138
+        ],
+        "material": "de_aztec/stonework05d",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          1261,
+          10188,
+          94
+        ],
+        "material": "de_aztec/stonework05d",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          1064,
+          10184,
+          98
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          1458,
+          10184,
+          98
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          1064,
+          10200,
+          98
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          1458,
+          10200,
+          98
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          1060,
+          10200,
+          152
+        ],
+        "material": "wood/inffence01",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          1064,
+          10182,
+          139.5
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          1458,
+          10182,
+          139.5
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          1062,
+          10202,
+          139.5
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          1458,
+          10202,
+          139.5
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          1064,
+          10185.333333333334,
+          142.66666666666666
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          1458,
+          10185.333333333334,
+          142.66666666666666
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          1061.3333333333333,
+          10200,
+          142
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          1458,
+          10198.666666666666,
+          142.66666666666666
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          1466,
+          10192,
+          84.66666666666667
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          1450,
+          10192,
+          84.66666666666667
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          1448,
+          10192,
+          139.5
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          1468,
+          10192,
+          139.5
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          1451.3333333333333,
+          10192,
+          142.66666666666666
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          1464.6666666666667,
+          10192,
+          142.66666666666666
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          1054,
+          10192,
+          139.5
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          1074,
+          10192,
+          139.5
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          1057,
+          10194,
+          142.5
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          1070.6666666666667,
+          10192,
+          142.66666666666666
+        ],
+        "material": "cs_havana/stonework01a",
+        "placeholderMaterial": false,
+        "vertexCount": 3,
+        "triCount": 1,
+        "byteEstimate": 72
+      },
+      {
+        "position": [
+          1064,
+          10201,
+          98
+        ],
+        "material": "wood/inffence01",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          1064,
+          10201,
+          151.75
+        ],
+        "material": "wood/inffence01",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          1064,
+          10367.340169270834,
+          119.83333333333333
+        ],
+        "material": "wood/inffence01",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          1064,
+          10946.03125,
+          110
+        ],
+        "material": "wood/inffence01",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          1064,
+          11442.05322265625,
+          110
+        ],
+        "material": "wood/inffence01",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          1761.8,
+          10188,
+          101.2
+        ],
+        "material": "de_aztec/stonework05d",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          1601.0062866210938,
+          10196,
+          94
+        ],
+        "material": "de_aztec/stonework05d",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          2008.146449497768,
+          10196,
+          88.85714285714286
+        ],
+        "material": "de_aztec/stonework05d",
+        "placeholderMaterial": false,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          1714.8025146484374,
+          10192.8,
+          130
+        ],
+        "material": "de_aztec/stonework05d",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          1056,
+          11456.033203125,
+          110
+        ],
+        "material": "wood/inffence01",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          1056,
+          10372.021484375,
+          119.83333333333333
+        ],
+        "material": "wood/inffence01",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          1056,
+          10960.05419921875,
+          110
+        ],
+        "material": "wood/inffence01",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          1536,
+          11776,
+          949
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          512,
+          11776,
+          949
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          1638.4,
+          10819.2,
+          949
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          512,
+          10752,
+          949
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          288,
+          11208,
+          58
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          800,
+          11768,
+          58
+        ],
+        "material": "nature/blendgrassgrass001a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          800,
+          10952,
+          58
+        ],
+        "material": "nature/blendgrassgrass001a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          288,
+          10420,
+          58
+        ],
+        "material": "nature/blendgrassgrass001a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          800,
+          10420,
+          58
+        ],
+        "material": "nature/blendgrassgrass001a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          288,
+          10164,
+          58
+        ],
+        "material": "nature/blendgrassgrass001a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          800,
+          10164,
+          58
+        ],
+        "material": "nature/blendgrassgrass001a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          288,
+          9880,
+          58
+        ],
+        "material": "nature/blendgrassgrass001a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          800,
+          9880,
+          58
+        ],
+        "material": "nature/blendgrassgrass001a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          288,
+          11768,
+          58
+        ],
+        "material": "nature/blendgrassgrass001a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          295.5,
+          10573,
+          58
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          324.75,
+          10426,
+          58
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          382,
+          10287.75,
+          58
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          465.25,
+          10163.25,
+          58
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          571.25,
+          10057.25,
+          58
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          695.75,
+          9974,
+          58
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          834,
+          9916.75,
+          58
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          981,
+          9887.5,
+          58
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          280.5,
+          11843,
+          58
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          1568,
+          11472,
+          58
+        ],
+        "material": "ajacks/ajacks_grass01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          1568,
+          10642,
+          58
+        ],
+        "material": "ajacks/ajacks_grass01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      }
+    ]
+  },
+  "props": {
+    "instances": [
+      {
+        "model": "trees/pi_tree4",
+        "sourceModel": "trees/pi_tree4",
+        "placeholderModel": false,
+        "origin": [
+          1183.260009765625,
+          10436.099609375,
+          60.869998931884766
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "trees/pi_tree4",
+        "sourceModel": "trees/pi_tree4",
+        "placeholderModel": false,
+        "origin": [
+          1757.9599609375,
+          11257.2998046875,
+          55.79999923706055
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "trees/pi_tree5",
+        "sourceModel": "trees/pi_tree5",
+        "placeholderModel": false,
+        "origin": [
+          1134.77001953125,
+          11145,
+          63.15999984741211
+        ],
+        "angles": [
+          0,
+          293,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "trees/pi_tree5",
+        "sourceModel": "trees/pi_tree5",
+        "placeholderModel": false,
+        "origin": [
+          1141.06005859375,
+          11670.2998046875,
+          54.36000061035156
+        ],
+        "angles": [
+          0,
+          293,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "sickness/speedlimit_02",
+        "sourceModel": "sickness/speedlimit_02",
+        "placeholderModel": false,
+        "origin": [
+          1344,
+          10151.7001953125,
+          57
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    ]
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

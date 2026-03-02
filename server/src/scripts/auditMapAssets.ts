@@ -5,16 +5,19 @@ import zlib from 'zlib';
 
 type Severity = 'critical' | 'major' | 'minor';
 type MissingType = 'mdl' | 'vmt' | 'vtf' | 'patch-include' | 'skybox' | 'world-material';
-type MountId = 'gmod' | 'hl2' | 'css' | 'tf2' | 'custom';
+type MountId = 'gmod' | 'css' | 'hl2' | 'hl2ep1' | 'hl2ep2' | 'tf2' | 'custom';
 type MountSource = 'cli' | 'config' | 'env' | 'auto';
 type MountStatus = 'ok' | 'missing' | 'invalid';
 
-type CliOptions = {
+export type AssetResolutionMode = 'strict' | 'permissive';
+
+export type CliOptions = {
   mapBsp: string;
   mapRoot: string;
   reportPath: string;
   mountsConfigPath: string;
   mountOverrides: Partial<Record<MountId, string[]>>;
+  assetResolutionMode: AssetResolutionMode;
 };
 
 type MissingRecord = {
@@ -113,7 +116,7 @@ type AssetLocation =
   | { kind: 'filesystem'; sourceId: string; absolutePath: string }
   | { kind: 'pak'; sourceId: string; entryName: string };
 
-const SUPPORTED_MOUNTS: MountId[] = ['gmod', 'hl2', 'css', 'tf2', 'custom'];
+const SUPPORTED_MOUNTS: MountId[] = ['gmod', 'css', 'hl2', 'hl2ep1', 'hl2ep2', 'tf2', 'custom'];
 const SKYBOX_SIDES = ['bk', 'dn', 'ft', 'lf', 'rt', 'up'];
 const SEVERITY_ORDER: Record<Severity, number> = {
   critical: 0,
@@ -147,15 +150,21 @@ class MissingTracker {
 
   add(input: MissingInput) {
     const normalizedAsset = normalizeAssetPath(input.asset);
-    const key = `${input.type}|${normalizedAsset}`;
     const reference = String(input.reference || '').trim() || 'unknown';
     const suggestedMount = input.suggestedMount || inferMountSuggestion(normalizedAsset);
+    const normalizedSeverity = applySeverityPolicy(
+      input.severity,
+      input.type,
+      reference,
+      suggestedMount,
+    );
+    const key = `${input.type}|${normalizedAsset}`;
     const current = this.items.get(key);
     if (current) {
       current.occurrences += 1;
       current.references.add(reference);
-      if (SEVERITY_ORDER[input.severity] < SEVERITY_ORDER[current.severity]) {
-        current.severity = input.severity;
+      if (SEVERITY_ORDER[normalizedSeverity] < SEVERITY_ORDER[current.severity]) {
+        current.severity = normalizedSeverity;
       }
       if (!current.note && input.note) {
         current.note = input.note;
@@ -166,7 +175,7 @@ class MissingTracker {
     this.items.set(key, {
       type: input.type,
       asset: normalizedAsset,
-      severity: input.severity,
+      severity: normalizedSeverity,
       suggestedMount,
       references: new Set([reference]),
       occurrences: 1,
@@ -369,8 +378,20 @@ class AssetCatalog {
   }> = [];
   private pakSources = new Map<string, PakArchive>();
   private resolvedAssetsBySource = new Map<string, Set<string>>();
+  private sourceMeta = new Map<string, { priority: number; order: number }>();
+  private sourceOrderCounter = 0;
+
+  private registerSource(sourceId: string, priority: number) {
+    if (this.sourceMeta.has(sourceId)) return;
+    this.sourceMeta.set(sourceId, {
+      priority,
+      order: this.sourceOrderCounter,
+    });
+    this.sourceOrderCounter += 1;
+  }
 
   addPakRoot(id: string, archive: PakArchive) {
+    this.registerSource(id, 0);
     this.pakSources.set(id, archive);
     this.roots.push({ id, kind: 'pak', source: 'bsp:pakfile', role: 'pak' });
     for (const assetPath of archive.getIndexedAssetPaths()) {
@@ -393,6 +414,15 @@ class AssetCatalog {
     },
   ) {
     const normalizedRoot = path.resolve(rootPath);
+    const normalizedRootForMatch = normalizeAssetPath(normalizedRoot);
+    const isGmodBase = options?.mountId === 'gmod' && normalizedRootForMatch.endsWith('/garrysmod');
+    const isAddonContent = normalizedRootForMatch.includes('/garrysmod/addons/');
+    let priority = 4;
+    if (options?.role === 'map-root') priority = 1;
+    else if (isGmodBase) priority = 2;
+    else if (isAddonContent) priority = 3;
+
+    this.registerSource(id, priority);
     this.roots.push({
       id,
       kind: 'filesystem',
@@ -450,7 +480,26 @@ class AssetCatalog {
     const key = normalizeAssetPath(assetPath);
     const hit = this.files.get(key);
     if (!hit || hit.length === 0) return null;
-    const chosen = hit[0] || null;
+    let chosen: AssetLocation | null = null;
+    for (const candidate of hit) {
+      if (!chosen) {
+        chosen = candidate;
+        continue;
+      }
+      const chosenMeta = this.sourceMeta.get(chosen.sourceId) || { priority: 999, order: 999999 };
+      const candidateMeta = this.sourceMeta.get(candidate.sourceId) || { priority: 999, order: 999999 };
+      if (candidateMeta.priority < chosenMeta.priority) {
+        chosen = candidate;
+        continue;
+      }
+      if (candidateMeta.priority > chosenMeta.priority) {
+        continue;
+      }
+      if (candidateMeta.order < chosenMeta.order) {
+        chosen = candidate;
+      }
+    }
+
     if (chosen) {
       const bySource = this.resolvedAssetsBySource.get(chosen.sourceId) || new Set<string>();
       bySource.add(key);
@@ -515,6 +564,7 @@ class AssetCatalog {
       roots: this.roots.slice(),
       fileCount: this.files.size,
       resolvedCountsBySource: this.getResolvedCountsBySource(),
+      sourceMeta: Array.from(this.sourceMeta.entries()).map(([sourceId, meta]) => ({ sourceId, ...meta })),
     };
   }
 }
@@ -555,6 +605,21 @@ const parseArgs = (): CliOptions => {
       i += 1;
       continue;
     }
+    if (
+      arg === '--mounts' ||
+      arg === '--map-bsp' ||
+      arg === '--map-root' ||
+      arg === '--report' ||
+      arg === '--asset-resolution-mode'
+    ) {
+      const next = String(args[i + 1] || '').trim();
+      if (!next || next.startsWith('--')) {
+        throw new Error(`invalid_arg_value: ${arg} requires a value`);
+      }
+      options.set(arg, next);
+      i += 1;
+      continue;
+    }
     if (arg.startsWith('--mount=')) {
       appendMountOverride(arg.slice('--mount='.length));
       continue;
@@ -573,6 +638,14 @@ const parseArgs = (): CliOptions => {
       process.env.MAP_AUDIT_MOUNTS_FILE ||
       DEFAULT_OPTIONS.mountsConfigPath,
   ).trim();
+  const resolutionModeRaw = String(
+    options.get('--asset-resolution-mode') ||
+      process.env.MAP_AUDIT_ASSET_RESOLUTION_MODE ||
+      'permissive',
+  )
+    .trim()
+    .toLowerCase();
+  const assetResolutionMode: AssetResolutionMode = resolutionModeRaw === 'strict' ? 'strict' : 'permissive';
 
   if (!mapBsp || !mapRoot) {
     throw new Error(
@@ -595,6 +668,7 @@ const parseArgs = (): CliOptions => {
     reportPath: path.resolve(reportPath),
     mountsConfigPath: resolveWithParentFallback(mountsConfigPath),
     mountOverrides,
+    assetResolutionMode,
   };
 };
 
@@ -652,8 +726,10 @@ const dedupeSortedPaths = (items: string[]): string[] => {
 
 const envVarByMount: Record<MountId, string> = {
   gmod: 'MAP_AUDIT_MOUNT_GMOD',
-  hl2: 'MAP_AUDIT_MOUNT_HL2',
   css: 'MAP_AUDIT_MOUNT_CSS',
+  hl2: 'MAP_AUDIT_MOUNT_HL2',
+  hl2ep1: 'MAP_AUDIT_MOUNT_HL2EP1',
+  hl2ep2: 'MAP_AUDIT_MOUNT_HL2EP2',
   tf2: 'MAP_AUDIT_MOUNT_TF2',
   custom: 'MAP_AUDIT_MOUNT_CUSTOM',
 };
@@ -661,8 +737,10 @@ const envVarByMount: Record<MountId, string> = {
 const loadConfigMounts = (configPath: string): NormalizedMountConfig => {
   const out: NormalizedMountConfig = {
     gmod: [],
-    hl2: [],
     css: [],
+    hl2: [],
+    hl2ep1: [],
+    hl2ep2: [],
     tf2: [],
     custom: [],
   };
@@ -692,6 +770,7 @@ const candidateMountSubdirs = (mount: MountId): string[] => {
   if (mount === 'hl2') return ['hl2'];
   if (mount === 'css') return ['cstrike'];
   if (mount === 'tf2') return ['tf'];
+  if (mount === 'hl2ep1' || mount === 'hl2ep2') return [];
   return [];
 };
 
@@ -791,6 +870,16 @@ const parseSteamLibraryFolders = (libraryVdfPath: string): string[] => {
   return dedupeSortedPaths(out);
 };
 
+const guessMountFromAddonFolderName = (folderName: string): MountId | null => {
+  const name = String(folderName || '').toLowerCase();
+  if (!name) return null;
+  if (name.includes('css')) return 'css';
+  if (name.includes('hl2ep1') || name.includes('episode1') || name.includes('ep1')) return 'hl2ep1';
+  if (name.includes('hl2ep2') || name.includes('episode2') || name.includes('ep2')) return 'hl2ep2';
+  if (name.includes('tf2') || name.includes('teamfortress2') || name.includes('team_fortress_2')) return 'tf2';
+  return null;
+};
+
 const autoDetectMounts = (): {
   detected: Record<MountId, string[]>;
   attemptedCandidates: Record<MountId, string[]>;
@@ -798,15 +887,19 @@ const autoDetectMounts = (): {
 } => {
   const detected: Record<MountId, string[]> = {
     gmod: [],
-    hl2: [],
     css: [],
+    hl2: [],
+    hl2ep1: [],
+    hl2ep2: [],
     tf2: [],
     custom: [],
   };
   const attemptedCandidates: Record<MountId, string[]> = {
     gmod: [],
-    hl2: [],
     css: [],
+    hl2: [],
+    hl2ep1: [],
+    hl2ep2: [],
     tf2: [],
     custom: [],
   };
@@ -840,7 +933,7 @@ const autoDetectMounts = (): {
   }
 
   const libraryFoldersScanned = Array.from(libraryRoots).sort((a, b) => a.localeCompare(b));
-  const gameByMount: Record<Exclude<MountId, 'custom'>, { gameFolder: string; contentFolder: string }> = {
+  const gameByMount: Record<'gmod' | 'hl2' | 'css' | 'tf2', { gameFolder: string; contentFolder: string }> = {
     gmod: { gameFolder: 'GarrysMod', contentFolder: 'garrysmod' },
     hl2: { gameFolder: 'Half-Life 2', contentFolder: 'hl2' },
     css: { gameFolder: 'Counter-Strike Source', contentFolder: 'cstrike' },
@@ -863,6 +956,43 @@ const autoDetectMounts = (): {
     }
   }
 
+  const addonDefaults: Array<{ mount: MountId; folder: string }> = [
+    { mount: 'css', folder: 'css-content-gmodcontent' },
+    { mount: 'hl2ep1', folder: 'hl2ep1-content-gmodcontent' },
+    { mount: 'hl2ep2', folder: 'hl2ep2-content-gmodcontent' },
+    { mount: 'tf2', folder: 'tf2-content-gmodcontent' },
+  ];
+
+  for (const gmodRoot of detected.gmod) {
+    const addonsDir = path.join(gmodRoot, 'addons');
+    if (!fs.existsSync(addonsDir) || !fs.statSync(addonsDir).isDirectory()) {
+      continue;
+    }
+
+    for (const item of addonDefaults) {
+      const expectedPath = path.join(addonsDir, item.folder);
+      attemptedCandidates[item.mount].push(expectedPath);
+      if (fs.existsSync(expectedPath) && fs.statSync(expectedPath).isDirectory()) {
+        detected[item.mount].push(expectedPath);
+      }
+    }
+
+    let addonEntries: fs.Dirent[] = [];
+    try {
+      addonEntries = fs.readdirSync(addonsDir, { withFileTypes: true });
+    } catch {
+      addonEntries = [];
+    }
+    for (const entry of addonEntries) {
+      if (!entry.isDirectory()) continue;
+      const guessed = guessMountFromAddonFolderName(entry.name);
+      if (!guessed) continue;
+      const candidate = path.join(addonsDir, entry.name);
+      attemptedCandidates[guessed].push(candidate);
+      detected[guessed].push(candidate);
+    }
+  }
+
   for (const mount of SUPPORTED_MOUNTS) {
     detected[mount] = dedupeSortedPaths(detected[mount]);
     attemptedCandidates[mount] = dedupeSortedPaths(attemptedCandidates[mount]);
@@ -880,16 +1010,20 @@ const resolveMounts = (
 ): MountResolution => {
   const fromCli: NormalizedMountConfig = {
     gmod: cliOverrides.gmod || [],
-    hl2: cliOverrides.hl2 || [],
     css: cliOverrides.css || [],
+    hl2: cliOverrides.hl2 || [],
+    hl2ep1: cliOverrides.hl2ep1 || [],
+    hl2ep2: cliOverrides.hl2ep2 || [],
     tf2: cliOverrides.tf2 || [],
     custom: cliOverrides.custom || [],
   };
   const fromConfig = loadConfigMounts(configPath);
   const fromEnv: NormalizedMountConfig = {
     gmod: splitEnvPaths(process.env[envVarByMount.gmod] || ''),
-    hl2: splitEnvPaths(process.env[envVarByMount.hl2] || ''),
     css: splitEnvPaths(process.env[envVarByMount.css] || ''),
+    hl2: splitEnvPaths(process.env[envVarByMount.hl2] || ''),
+    hl2ep1: splitEnvPaths(process.env[envVarByMount.hl2ep1] || ''),
+    hl2ep2: splitEnvPaths(process.env[envVarByMount.hl2ep2] || ''),
     tf2: splitEnvPaths(process.env[envVarByMount.tf2] || ''),
     custom: splitEnvPaths(process.env[envVarByMount.custom] || ''),
   };
@@ -911,8 +1045,10 @@ const resolveMounts = (
   const seen = new Set<string>();
   const mountCounters: Record<MountId, number> = {
     gmod: 0,
-    hl2: 0,
     css: 0,
+    hl2: 0,
+    hl2ep1: 0,
+    hl2ep2: 0,
     tf2: 0,
     custom: 0,
   };
@@ -1005,6 +1141,22 @@ const inferMountSuggestion = (assetPath: string): MountId => {
   }
 
   if (
+    normalized.includes('episode_1') ||
+    normalized.includes('/ep1/') ||
+    normalized.includes('hl2ep1')
+  ) {
+    return 'hl2ep1';
+  }
+
+  if (
+    normalized.includes('episode_2') ||
+    normalized.includes('/ep2/') ||
+    normalized.includes('hl2ep2')
+  ) {
+    return 'hl2ep2';
+  }
+
+  if (
     normalized.includes('/tf/') ||
     normalized.includes('2fort') ||
     normalized.includes('payload') ||
@@ -1026,6 +1178,31 @@ const inferMountSuggestion = (assetPath: string): MountId => {
   }
 
   return 'gmod';
+};
+
+const applySeverityPolicy = (
+  severity: Severity,
+  type: MissingType,
+  reference: string,
+  suggestedMount: MountId,
+): Severity => {
+  const ref = String(reference || '').toLowerCase();
+  const isWorldEssential =
+    type === 'world-material' ||
+    type === 'skybox' ||
+    ref.startsWith('world:') ||
+    ref.startsWith('skybox:');
+
+  if (suggestedMount === 'css') {
+    return 'critical';
+  }
+
+  const optionalMounts: MountId[] = ['hl2ep1', 'hl2ep2', 'tf2'];
+  if (optionalMounts.includes(suggestedMount) && !isWorldEssential) {
+    return 'major';
+  }
+
+  return severity;
 };
 
 const readCString = (buffer: Buffer, offset: number, maxLength = 4096): string => {
@@ -1540,7 +1717,7 @@ const createMaterialAnalyzer = (catalog: AssetCatalog) => {
   };
 };
 
-const buildAudit = (options: CliOptions) => {
+export const buildAudit = (options: CliOptions) => {
   if (!fs.existsSync(options.mapBsp)) {
     throw new Error(`map_bsp_not_found: ${options.mapBsp}`);
   }
@@ -1550,22 +1727,23 @@ const buildAudit = (options: CliOptions) => {
 
   const bspData = parseBspData(options.mapBsp);
   const mountResolution = resolveMounts(options.mountsConfigPath, options.mountOverrides);
-  if (mountResolution.mounts.length === 0) {
-    const attempted = ['gmod', 'hl2', 'css', 'tf2']
-      .map((mount) => {
-        const attempts = mountResolution.attemptedCandidates[mount as MountId] || [];
-        const sample = attempts.slice(0, 2).join(' | ');
-        return `${mount}: ${sample || 'no_candidates'}`;
-      })
-      .join('; ');
-    const libraries = mountResolution.libraryFoldersScanned.slice(0, 5).join(' | ') || 'none';
-    throw new Error(
-      `mounts_not_found: no valid mount roots resolved from ${options.mountsConfigPath} and env vars (${Object.values(
-        envVarByMount,
-      ).join(', ')}). Fill mounts.json with your local paths (or use --mount <mountId>=<path>). ` +
-      `Steam libraries scanned: ${libraries}. Candidate paths: ${attempted}`,
-    );
-  }
+  const mountsNotFoundWarning = mountResolution.mounts.length === 0
+    ? (() => {
+      const attempted = ['gmod', 'css', 'hl2', 'hl2ep1', 'hl2ep2', 'tf2']
+        .map((mount) => {
+          const attempts = mountResolution.attemptedCandidates[mount as MountId] || [];
+          const sample = attempts.slice(0, 2).join(' | ');
+          return `${mount}: ${sample || 'no_candidates'}`;
+        })
+        .join('; ');
+      const libraries = mountResolution.libraryFoldersScanned.slice(0, 5).join(' | ') || 'none';
+      return (
+        `mounts_not_found_warning: no valid mount roots resolved from ${options.mountsConfigPath} and env vars (` +
+        `${Object.values(envVarByMount).join(', ')}). Continuing with pak+map-root only. ` +
+        `Steam libraries scanned: ${libraries}. Candidate paths: ${attempted}`
+      );
+    })()
+    : null;
 
   const catalog = new AssetCatalog();
   if (bspData.pakArchive) {
@@ -1726,6 +1904,9 @@ const buildAudit = (options: CliOptions) => {
   const summary = missing.getSummary();
   const resolvedCountsBySource = catalog.getResolvedCountsBySource();
   const notes: string[] = [];
+  if (mountsNotFoundWarning) {
+    notes.push(mountsNotFoundWarning);
+  }
   if (bspData.pakfileError) {
     notes.push(
       `BSP pakfile parse failed: ${bspData.pakfileError}`,
@@ -1770,6 +1951,9 @@ const buildAudit = (options: CliOptions) => {
 
   return {
     generatedAt: new Date().toISOString(),
+    settings: {
+      assetResolutionMode: options.assetResolutionMode,
+    },
     map: {
       bspPath: options.mapBsp,
       mapRoot: options.mapRoot,
@@ -1817,7 +2001,7 @@ const buildAudit = (options: CliOptions) => {
   };
 };
 
-const writeReport = (reportPath: string, payload: unknown) => {
+export const writeReport = (reportPath: string, payload: unknown) => {
   const reportDir = path.dirname(reportPath);
   fs.mkdirSync(reportDir, { recursive: true });
   fs.writeFileSync(reportPath, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
@@ -1834,11 +2018,14 @@ const run = () => {
 
   console.log(`Map audit completed: ${options.mapBsp}`);
   console.log(`Report: ${options.reportPath}`);
+  console.log(`Asset resolution mode: ${options.assetResolutionMode}`);
   console.log(`Missing summary -> critical=${criticalMissing} major=${majorMissing} minor=${minorMissing}`);
 
-  if (criticalMissing > 0) {
+  if (options.assetResolutionMode === 'strict' && criticalMissing > 0) {
     throw new Error(`critical_missing_assets_detected: ${criticalMissing}`);
   }
 };
 
-run();
+if (require.main === module) {
+  run();
+}

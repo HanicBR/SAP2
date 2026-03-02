@@ -1,0 +1,289 @@
+{
+  "id": "g_10_2",
+  "lod": 0,
+  "bounds": {
+    "minX": 6144,
+    "minY": -10663,
+    "maxX": 8192,
+    "maxY": -8615
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 10,
+    "y": 2
+  },
+  "counts": {
+    "worldFaces": 20,
+    "staticProps": 0,
+    "placeholderWorldFaces": 18,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 52,
+    "worldVerts": 92,
+    "worldBytes": 3744,
+    "propsTris": 0,
+    "propsVerts": 0,
+    "propsBytes": 0,
+    "totalTris": 52,
+    "totalVerts": 92,
+    "totalBytes": 3744,
+    "drawCallsBeforeInstancing": 4,
+    "drawCallsAfterInstancing": 4
+  },
+  "world": {
+    "faces": [
+      {
+        "position": [
+          7680,
+          -8838,
+          764
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          7491.4203125,
+          -8680,
+          136
+        ],
+        "material": "concrete/concretewall022a",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          7184.01416015625,
+          -8680,
+          124
+        ],
+        "material": "concrete/concretewall022a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          7944.00732421875,
+          -8680,
+          124
+        ],
+        "material": "concrete/concretewall022a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          7862.62109375,
+          -8672,
+          136
+        ],
+        "material": "concrete/concretewall022a",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          8176.01513671875,
+          -8672,
+          124
+        ],
+        "material": "concrete/concretewall022a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          7416.00732421875,
+          -8672,
+          124
+        ],
+        "material": "concrete/concretewall022a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          7928.346028645833,
+          -8676,
+          184
+        ],
+        "material": "metal/metalwall030a",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          7421.679036458333,
+          -8676,
+          184
+        ],
+        "material": "metal/metalwall030a",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          6656,
+          -8838,
+          764
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          6467.417578125,
+          -8680,
+          136
+        ],
+        "material": "concrete/concretewall022a",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          6160.01220703125,
+          -8680,
+          124
+        ],
+        "material": "concrete/concretewall022a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          6920.00634765625,
+          -8680,
+          124
+        ],
+        "material": "concrete/concretewall022a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          6838.618359375,
+          -8672,
+          136
+        ],
+        "material": "concrete/concretewall022a",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          7152.01318359375,
+          -8672,
+          124
+        ],
+        "material": "concrete/concretewall022a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          6392.00634765625,
+          -8672,
+          124
+        ],
+        "material": "concrete/concretewall022a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          6904.344401041667,
+          -8676,
+          184
+        ],
+        "material": "metal/metalwall030a",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          6397.677408854167,
+          -8676,
+          184
+        ],
+        "material": "metal/metalwall030a",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          6271.5,
+          -8755,
+          64
+        ],
+        "material": "nature/blendgrassgravel001a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          7656.5,
+          -8755,
+          64
+        ],
+        "material": "nature/blendgrassgravel001a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      }
+    ]
+  },
+  "props": {
+    "instances": []
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

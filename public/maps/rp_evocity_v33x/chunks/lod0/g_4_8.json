@@ -1,0 +1,913 @@
+{
+  "id": "g_4_8",
+  "lod": 0,
+  "bounds": {
+    "minX": -6144,
+    "minY": 1625,
+    "maxX": -4096,
+    "maxY": 3673
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 4,
+    "y": 8
+  },
+  "counts": {
+    "worldFaces": 72,
+    "staticProps": 0,
+    "placeholderWorldFaces": 28,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 160,
+    "worldVerts": 304,
+    "worldBytes": 11520,
+    "propsTris": 0,
+    "propsVerts": 0,
+    "propsBytes": 0,
+    "totalTris": 160,
+    "totalVerts": 304,
+    "totalBytes": 11520,
+    "drawCallsBeforeInstancing": 4,
+    "drawCallsAfterInstancing": 4
+  },
+  "world": {
+    "faces": [
+      {
+        "position": [
+          -5192,
+          3371.00634765625,
+          292
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5192,
+          2875.01513671875,
+          292
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5192,
+          2379.0196533203125,
+          292
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5192,
+          1883.0233154296875,
+          292
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4998.99951171875,
+          3371.00634765625,
+          312
+        ],
+        "material": "metal/citadel_metalwall074a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4998.99951171875,
+          2875.01513671875,
+          312
+        ],
+        "material": "metal/citadel_metalwall074a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4998.99951171875,
+          2379.0196533203125,
+          312
+        ],
+        "material": "metal/citadel_metalwall074a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4998.99951171875,
+          1883.0233154296875,
+          312
+        ],
+        "material": "metal/citadel_metalwall074a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4960.99951171875,
+          3371.00634765625,
+          312
+        ],
+        "material": "metal/citadel_metalwall074a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4960.99951171875,
+          2875.01513671875,
+          312
+        ],
+        "material": "metal/citadel_metalwall074a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4960.99951171875,
+          2379.0196533203125,
+          312
+        ],
+        "material": "metal/citadel_metalwall074a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4960.99951171875,
+          1883.0233154296875,
+          312
+        ],
+        "material": "metal/citadel_metalwall074a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4768,
+          1855,
+          292
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4768,
+          2351.0068359375,
+          292
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4768,
+          2847.0166015625,
+          292
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4768,
+          3343.02294921875,
+          292
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5172,
+          3371.00634765625,
+          316
+        ],
+        "material": "concrete/concretewall070a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5172,
+          2875.01513671875,
+          316
+        ],
+        "material": "concrete/concretewall070a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5172,
+          2379.0196533203125,
+          316
+        ],
+        "material": "concrete/concretewall070a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5172,
+          1883.0233154296875,
+          316
+        ],
+        "material": "concrete/concretewall070a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4788,
+          1855,
+          316
+        ],
+        "material": "concrete/concretewall070a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4788,
+          2351.0068359375,
+          316
+        ],
+        "material": "concrete/concretewall070a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4788,
+          2847.0166015625,
+          316
+        ],
+        "material": "concrete/concretewall070a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4788,
+          3343.02294921875,
+          316
+        ],
+        "material": "concrete/concretewall070a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5216,
+          3371.00634765625,
+          272
+        ],
+        "material": "concrete/concretewall070a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5216,
+          2875.01513671875,
+          272
+        ],
+        "material": "concrete/concretewall070a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5216,
+          2379.0196533203125,
+          272
+        ],
+        "material": "concrete/concretewall070a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5216,
+          1883.0233154296875,
+          272
+        ],
+        "material": "concrete/concretewall070a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4744,
+          1855,
+          272
+        ],
+        "material": "concrete/concretewall070a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4744,
+          2351.0068359375,
+          272
+        ],
+        "material": "concrete/concretewall070a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4744,
+          2847.0166015625,
+          272
+        ],
+        "material": "concrete/concretewall070a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4744,
+          3343.02294921875,
+          272
+        ],
+        "material": "concrete/concretewall070a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4979.99951171875,
+          3371.00634765625,
+          304
+        ],
+        "material": "metal/citadel_metalwall074a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4979.99951171875,
+          2875.01513671875,
+          304
+        ],
+        "material": "metal/citadel_metalwall074a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4979.99951171875,
+          2379.0196533203125,
+          304
+        ],
+        "material": "metal/citadel_metalwall074a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4979.99951171875,
+          1883.0233154296875,
+          304
+        ],
+        "material": "metal/citadel_metalwall074a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4892,
+          3276.8025390625,
+          64
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -4930,
+          3352.00634765625,
+          320
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4930,
+          3088.00634765625,
+          320
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4740,
+          3395.205078125,
+          166.4
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -4740,
+          3088.00634765625,
+          192
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5180,
+          3276.8025390625,
+          64
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5170,
+          3352.00634765625,
+          320
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5170,
+          3088.00634765625,
+          320
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5220,
+          3395.205078125,
+          166.4
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5220,
+          3088.00634765625,
+          192
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4892,
+          2748.804296875,
+          64
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -4930,
+          3056.00537109375,
+          64
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4892,
+          2252.8,
+          64
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -4930,
+          2328,
+          320
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4930,
+          2064,
+          320
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4930,
+          2824,
+          320
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4740,
+          2371.2,
+          166.4
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -4740,
+          2064,
+          192
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4740,
+          2867.2021484375,
+          166.4
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -4892,
+          1724.8,
+          64
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -4930,
+          2032,
+          64
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4930,
+          1800,
+          320
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -4740,
+          1843.2,
+          166.4
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5170,
+          2328,
+          320
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5170,
+          2064,
+          320
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5170,
+          2824,
+          320
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5180,
+          2748.804296875,
+          64
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5170,
+          3056.00537109375,
+          64
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5180,
+          2252.8,
+          64
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5220,
+          2371.2,
+          166.4
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5220,
+          2064,
+          192
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5220,
+          2867.2021484375,
+          166.4
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5170,
+          1800,
+          320
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5180,
+          1724.8,
+          64
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -5170,
+          2032,
+          64
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -5220,
+          1843.2,
+          166.4
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      }
+    ]
+  },
+  "props": {
+    "instances": []
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

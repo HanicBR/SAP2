@@ -1,0 +1,490 @@
+{
+  "id": "g_12_14",
+  "lod": 0,
+  "bounds": {
+    "minX": 10240,
+    "minY": 13913,
+    "maxX": 12288,
+    "maxY": 15961
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 12,
+    "y": 14
+  },
+  "counts": {
+    "worldFaces": 35,
+    "staticProps": 1,
+    "placeholderWorldFaces": 4,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 89,
+    "worldVerts": 159,
+    "worldBytes": 6408,
+    "propsTris": 12,
+    "propsVerts": 8,
+    "propsBytes": 384,
+    "totalTris": 101,
+    "totalVerts": 167,
+    "totalBytes": 6792,
+    "drawCallsBeforeInstancing": 5,
+    "drawCallsAfterInstancing": 5
+  },
+  "world": {
+    "faces": [
+      {
+        "position": [
+          11776,
+          15352,
+          810.5
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          11776,
+          14844,
+          949
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          11278,
+          14056,
+          122
+        ],
+        "material": "de_train/train_cementwear_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          11296,
+          13934.01318359375,
+          90
+        ],
+        "material": "warehouse/se1_cinderblock_wall_03",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          11273.6,
+          14052,
+          85.2
+        ],
+        "material": "warehouse/se1_cinderblock_wall_03",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          11276.8,
+          14060,
+          85.2
+        ],
+        "material": "warehouse/se1_cinderblock_wall_03",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          11288,
+          13930.01318359375,
+          90
+        ],
+        "material": "warehouse/se1_cinderblock_wall_03",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          10752,
+          15352,
+          810.5
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          10752,
+          14844,
+          949
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          10768.0126953125,
+          14052,
+          88.4
+        ],
+        "material": "warehouse/se1_cinderblock_wall_03",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          11161.6169921875,
+          14052,
+          88.4
+        ],
+        "material": "warehouse/se1_cinderblock_wall_03",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          10768.0126953125,
+          14060,
+          88.4
+        ],
+        "material": "warehouse/se1_cinderblock_wall_03",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          11161.6169921875,
+          14060,
+          88.4
+        ],
+        "material": "warehouse/se1_cinderblock_wall_03",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          10938.673828125,
+          14056,
+          122
+        ],
+        "material": "de_train/train_cementwear_01",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          10524,
+          14052,
+          94
+        ],
+        "material": "warehouse/se1_cinderblock_wall_03",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          10524,
+          14060,
+          94
+        ],
+        "material": "warehouse/se1_cinderblock_wall_03",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          10524,
+          14056,
+          122
+        ],
+        "material": "de_train/train_cementwear_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          10392,
+          14052,
+          94
+        ],
+        "material": "warehouse/se1_cinderblock_wall_03",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          10392,
+          14060,
+          94
+        ],
+        "material": "warehouse/se1_cinderblock_wall_03",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          10392,
+          14056,
+          122
+        ],
+        "material": "de_train/train_cementwear_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          10260,
+          14052,
+          94
+        ],
+        "material": "warehouse/se1_cinderblock_wall_03",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          10260,
+          14060,
+          94
+        ],
+        "material": "warehouse/se1_cinderblock_wall_03",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          10260,
+          14056,
+          122
+        ],
+        "material": "de_train/train_cementwear_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          10248,
+          14052,
+          94
+        ],
+        "material": "warehouse/se1_cinderblock_wall_03",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          10248,
+          14060,
+          94
+        ],
+        "material": "warehouse/se1_cinderblock_wall_03",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          10248,
+          14056,
+          122
+        ],
+        "material": "de_train/train_cementwear_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          11014.357747395834,
+          14052,
+          62
+        ],
+        "material": "warehouse/se1_cinderblock_wall_03",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          11248.02099609375,
+          14052,
+          62
+        ],
+        "material": "warehouse/se1_cinderblock_wall_03",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          10440.005126953125,
+          14052,
+          64
+        ],
+        "material": "warehouse/se1_cinderblock_wall_03",
+        "placeholderMaterial": false,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          10992.029296875,
+          14060,
+          62.8
+        ],
+        "material": "warehouse/se1_cinderblock_wall_03",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          11248.02099609375,
+          14060,
+          62
+        ],
+        "material": "warehouse/se1_cinderblock_wall_03",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          10440.005126953125,
+          14060,
+          64
+        ],
+        "material": "warehouse/se1_cinderblock_wall_03",
+        "placeholderMaterial": false,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          11552,
+          14060,
+          58
+        ],
+        "material": "nature/blendgrassgrass001a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12064,
+          14060,
+          58
+        ],
+        "material": "nature/blendgrassgrass001a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          10272,
+          14694,
+          58
+        ],
+        "material": "nature/blendgrassgrass001a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      }
+    ]
+  },
+  "props": {
+    "instances": [
+      {
+        "model": "props_foliage/tree_pine_tall_cluster_01",
+        "sourceModel": "props_foliage/tree_pine_tall_cluster_01",
+        "placeholderModel": false,
+        "origin": [
+          11477,
+          14586,
+          61.89799880981445
+        ],
+        "angles": [
+          0,
+          77.5,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    ]
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

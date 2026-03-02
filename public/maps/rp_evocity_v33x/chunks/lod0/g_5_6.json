@@ -1,0 +1,230 @@
+{
+  "id": "g_5_6",
+  "lod": 0,
+  "bounds": {
+    "minX": -4096,
+    "minY": -2471,
+    "maxX": -2048,
+    "maxY": -423
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 5,
+    "y": 6
+  },
+  "counts": {
+    "worldFaces": 10,
+    "staticProps": 3,
+    "placeholderWorldFaces": 8,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 22,
+    "worldVerts": 42,
+    "worldBytes": 1584,
+    "propsTris": 36,
+    "propsVerts": 24,
+    "propsBytes": 1152,
+    "totalTris": 58,
+    "totalVerts": 66,
+    "totalBytes": 2736,
+    "drawCallsBeforeInstancing": 7,
+    "drawCallsAfterInstancing": 5
+  },
+  "world": {
+    "faces": [
+      {
+        "position": [
+          -2560,
+          -641,
+          720
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -2560,
+          -1442,
+          696
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -2560,
+          -1233,
+          720
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3557.3333333333335,
+          -513.3333333333334,
+          720
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -3584,
+          -1442,
+          696
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3584,
+          -1233,
+          720
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -2976,
+          -641,
+          64
+        ],
+        "material": "sgtsicktextures/sicknessroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3485.5,
+          -1404,
+          520
+        ],
+        "material": "nature/cliffface001a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3485.5,
+          -1404,
+          216
+        ],
+        "material": "nature/cliffface001a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -2976,
+          -1153,
+          64
+        ],
+        "material": "nature/blendgrassdirt001a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      }
+    ]
+  },
+  "props": {
+    "instances": [
+      {
+        "model": "props/cs_militia/trees2",
+        "sourceModel": "props/cs_militia/trees2",
+        "placeholderModel": false,
+        "origin": [
+          -2446,
+          -1180,
+          32
+        ],
+        "angles": [
+          0,
+          255.5,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/cs_militia/trees2",
+        "sourceModel": "props/cs_militia/trees2",
+        "placeholderModel": false,
+        "origin": [
+          -3172,
+          -1088,
+          32
+        ],
+        "angles": [
+          0,
+          71.5,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/cs_militia/trees2",
+        "sourceModel": "props/cs_militia/trees2",
+        "placeholderModel": false,
+        "origin": [
+          -4024,
+          -1088,
+          32
+        ],
+        "angles": [
+          0,
+          71.5,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    ]
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

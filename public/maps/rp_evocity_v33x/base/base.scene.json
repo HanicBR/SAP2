@@ -1,0 +1,23 @@
+{
+  "generatedAt": "2026-03-02T20:34:44.990Z",
+  "map": {
+    "name": "rp_evocity_v33x",
+    "bounds": {
+      "min": [
+        -14336,
+        -14759,
+        -573
+      ],
+      "max": [
+        12944,
+        15376,
+        4456
+      ]
+    },
+    "chunkSize": 2048
+  },
+  "placeholderAssets": {
+    "material": "__placeholder_checker__",
+    "model": "__placeholder_box__"
+  }
+}

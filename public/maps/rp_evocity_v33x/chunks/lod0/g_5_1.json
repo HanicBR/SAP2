@@ -1,0 +1,94 @@
+{
+  "id": "g_5_1",
+  "lod": 0,
+  "bounds": {
+    "minX": -4096,
+    "minY": -12711,
+    "maxX": -2048,
+    "maxY": -10663
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 5,
+    "y": 1
+  },
+  "counts": {
+    "worldFaces": 2,
+    "staticProps": 1,
+    "placeholderWorldFaces": 0,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 4,
+    "worldVerts": 8,
+    "worldBytes": 288,
+    "propsTris": 12,
+    "propsVerts": 8,
+    "propsBytes": 384,
+    "totalTris": 16,
+    "totalVerts": 16,
+    "totalBytes": 672,
+    "drawCallsBeforeInstancing": 3,
+    "drawCallsAfterInstancing": 3
+  },
+  "world": {
+    "faces": [
+      {
+        "position": [
+          -3866,
+          -10733,
+          231
+        ],
+        "material": "maps/rp_evocity_v33x/highrise/se1_garage_concretewall_08_-5124_-9585_138",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3866,
+          -10733,
+          135
+        ],
+        "material": "maps/rp_evocity_v33x/highrise/se1_garage_concretewall_07_-5124_-9585_138",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      }
+    ]
+  },
+  "props": {
+    "instances": [
+      {
+        "model": "props/cs_office/light_security",
+        "sourceModel": "props/cs_office/light_security",
+        "placeholderModel": false,
+        "origin": [
+          -3955.719970703125,
+          -10733,
+          208.63699340820312
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    ]
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

@@ -1,0 +1,826 @@
+{
+  "id": "g_12_12",
+  "lod": 0,
+  "bounds": {
+    "minX": 10240,
+    "minY": 9817,
+    "maxX": 12288,
+    "maxY": 11865
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 12,
+    "y": 12
+  },
+  "counts": {
+    "worldFaces": 63,
+    "staticProps": 1,
+    "placeholderWorldFaces": 9,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 170,
+    "worldVerts": 296,
+    "worldBytes": 12240,
+    "propsTris": 12,
+    "propsVerts": 8,
+    "propsBytes": 384,
+    "totalTris": 182,
+    "totalVerts": 304,
+    "totalBytes": 12624,
+    "drawCallsBeforeInstancing": 11,
+    "drawCallsAfterInstancing": 11
+  },
+  "world": {
+    "faces": [
+      {
+        "position": [
+          12071.113715277777,
+          11258.666666666666,
+          320
+        ],
+        "material": "maps/rp_evocity_v33x/bridge/se1_concrete_flat_01_10272_12536_120",
+        "placeholderMaterial": false,
+        "vertexCount": 9,
+        "triCount": 7,
+        "byteEstimate": 504
+      },
+      {
+        "position": [
+          11808,
+          11262.666666666666,
+          182
+        ],
+        "material": "maps/rp_evocity_v33x/bridge/se1_concrete_flat_01_10272_12536_120",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          12267.2,
+          11256,
+          299.2
+        ],
+        "material": "bridge/se1_metal_flat_steel_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          12048,
+          11256,
+          312
+        ],
+        "material": "bridge/se1_metal_flat_steel_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          11828.8,
+          11256,
+          299.2
+        ],
+        "material": "bridge/se1_metal_flat_steel_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          11760,
+          11260,
+          344
+        ],
+        "material": "maps/rp_evocity_v33x/bridge/se1_concrete_flat_01_10272_12536_120",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          11760,
+          11266,
+          189
+        ],
+        "material": "maps/rp_evocity_v33x/bridge/se1_concrete_flat_01_10272_12536_120",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          11784,
+          11276,
+          189
+        ],
+        "material": "maps/rp_evocity_v33x/bridge/se1_concrete_flat_01_10272_12536_120",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          11968.009375,
+          11264,
+          339.2
+        ],
+        "material": "maps/rp_evocity_v33x/bridge/se1_concrete_flat_01_10272_12536_120",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          11836,
+          11008.01025390625,
+          292
+        ],
+        "material": "maps/rp_evocity_v33x/labs/se1_marble_lab_tiles_01_9811_4479_70",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          11836,
+          10512.0302734375,
+          292
+        ],
+        "material": "maps/rp_evocity_v33x/labs/se1_marble_lab_tiles_01_9811_4479_70",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          11836,
+          10016.04931640625,
+          292
+        ],
+        "material": "maps/rp_evocity_v33x/labs/se1_marble_lab_tiles_01_9811_4479_70",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          11856,
+          11008.01025390625,
+          316
+        ],
+        "material": "bridge/se1_metal_flat_steel_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          11856,
+          10512.0302734375,
+          316
+        ],
+        "material": "bridge/se1_metal_flat_steel_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          11856,
+          10016.04931640625,
+          316
+        ],
+        "material": "bridge/se1_metal_flat_steel_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12029,
+          11008.01025390625,
+          312
+        ],
+        "material": "bridge/se1_metal_flat_steel_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12029,
+          10512.0302734375,
+          312
+        ],
+        "material": "bridge/se1_metal_flat_steel_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12029,
+          10016.04931640625,
+          312
+        ],
+        "material": "bridge/se1_metal_flat_steel_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12067,
+          11008.01025390625,
+          312
+        ],
+        "material": "bridge/se1_metal_flat_steel_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12067,
+          10512.0302734375,
+          312
+        ],
+        "material": "bridge/se1_metal_flat_steel_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12067,
+          10016.04931640625,
+          312
+        ],
+        "material": "bridge/se1_metal_flat_steel_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12260,
+          10210.146484375,
+          292
+        ],
+        "material": "maps/rp_evocity_v33x/labs/se1_marble_lab_tiles_01_9811_4479_70",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12260,
+          11105.08837890625,
+          292
+        ],
+        "material": "maps/rp_evocity_v33x/labs/se1_marble_lab_tiles_01_9811_4479_70",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12260,
+          10706.16650390625,
+          292
+        ],
+        "material": "maps/rp_evocity_v33x/labs/se1_marble_lab_tiles_01_9811_4479_70",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12240,
+          10210.146484375,
+          316
+        ],
+        "material": "bridge/se1_metal_flat_steel_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12240,
+          11105.08837890625,
+          316
+        ],
+        "material": "bridge/se1_metal_flat_steel_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12240,
+          10706.16650390625,
+          316
+        ],
+        "material": "bridge/se1_metal_flat_steel_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          11812,
+          11008.01025390625,
+          272
+        ],
+        "material": "bridge/se1_metal_flat_steel_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          11812,
+          10512.0302734375,
+          272
+        ],
+        "material": "bridge/se1_metal_flat_steel_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          11812,
+          10016.04931640625,
+          272
+        ],
+        "material": "bridge/se1_metal_flat_steel_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12284,
+          10210.146484375,
+          272
+        ],
+        "material": "bridge/se1_metal_flat_steel_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12284,
+          11105.08837890625,
+          272
+        ],
+        "material": "bridge/se1_metal_flat_steel_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12284,
+          10706.16650390625,
+          272
+        ],
+        "material": "bridge/se1_metal_flat_steel_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12048,
+          11008.01025390625,
+          304
+        ],
+        "material": "bridge/se1_metal_flat_steel_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12048,
+          10512.0302734375,
+          304
+        ],
+        "material": "bridge/se1_metal_flat_steel_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12048,
+          10016.04931640625,
+          304
+        ],
+        "material": "bridge/se1_metal_flat_steel_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          11961.609375,
+          11259.2,
+          368
+        ],
+        "material": "concrete/concretewall064a",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          12048,
+          11256,
+          38.666666666666664
+        ],
+        "material": "ajacks/ajacks_road2",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          11776,
+          11256,
+          782.8
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          11776,
+          11260,
+          949
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12048,
+          10909.361002604166,
+          64
+        ],
+        "material": "ajacks/ajacks_road2",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          12048,
+          11244.02099609375,
+          64
+        ],
+        "material": "ajacks/ajacks_road2",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12048,
+          10413.353515625,
+          64
+        ],
+        "material": "ajacks/ajacks_road2",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          12009.6,
+          10512.0302734375,
+          320
+        ],
+        "material": "maps/rp_evocity_v33x/labs/se1_marble_lab_tiles_01_9811_4479_70",
+        "placeholderMaterial": false,
+        "vertexCount": 10,
+        "triCount": 8,
+        "byteEstimate": 576
+      },
+      {
+        "position": [
+          12020.57142857143,
+          10257.171456473214,
+          320
+        ],
+        "material": "maps/rp_evocity_v33x/labs/se1_marble_lab_tiles_01_9811_4479_70",
+        "placeholderMaterial": false,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          12030.545454545454,
+          11030.55477627841,
+          320
+        ],
+        "material": "maps/rp_evocity_v33x/labs/se1_marble_lab_tiles_01_9811_4479_70",
+        "placeholderMaterial": false,
+        "vertexCount": 11,
+        "triCount": 9,
+        "byteEstimate": 648
+      },
+      {
+        "position": [
+          11808,
+          10544.028878348214,
+          196.57142857142858
+        ],
+        "material": "maps/rp_evocity_v33x/bridge/se1_metal_wall_02_9811_4479_70",
+        "placeholderMaterial": false,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          11808,
+          10254.4240234375,
+          208
+        ],
+        "material": "maps/rp_evocity_v33x/bridge/se1_metal_wall_02_9811_4479_70",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          11808,
+          11040.01478794643,
+          196.57142857142858
+        ],
+        "material": "maps/rp_evocity_v33x/bridge/se1_metal_wall_02_9811_4479_70",
+        "placeholderMaterial": false,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          12048,
+          9992.00927734375,
+          320
+        ],
+        "material": "maps/rp_evocity_v33x/labs/se1_marble_lab_tiles_01_9811_4479_70",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12048,
+          9888.025065104166,
+          64
+        ],
+        "material": "ajacks/ajacks_road2",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          12048,
+          10224.01904296875,
+          64
+        ],
+        "material": "ajacks/ajacks_road2",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          11808,
+          10035.2150390625,
+          166.4
+        ],
+        "material": "maps/rp_evocity_v33x/bridge/se1_metal_wall_02_9811_4479_70",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          10752,
+          11776,
+          949
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          10752,
+          11256,
+          810.5
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          10752,
+          11260,
+          949
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12048,
+          11280,
+          520
+        ],
+        "material": "nature/cliffface001a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12064,
+          11512,
+          58
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          11552,
+          11512,
+          58
+        ],
+        "material": "nature/blendgrassgrass001a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          10272,
+          11768,
+          58
+        ],
+        "material": "nature/blendgrassgrass001a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          10492,
+          11280,
+          520
+        ],
+        "material": "nature/cliffface001a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          10492,
+          11280,
+          216
+        ],
+        "material": "nature/cliffface001a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          12056.5,
+          11843,
+          58
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      }
+    ]
+  },
+  "props": {
+    "instances": [
+      {
+        "model": "props_foliage/tree_pine_tall_cluster_01",
+        "sourceModel": "props_foliage/tree_pine_tall_cluster_01",
+        "placeholderModel": false,
+        "origin": [
+          10444,
+          11854,
+          61.89799880981445
+        ],
+        "angles": [
+          0,
+          77.5,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    ]
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

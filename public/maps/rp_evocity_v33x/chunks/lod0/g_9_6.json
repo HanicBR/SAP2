@@ -1,0 +1,97 @@
+{
+  "id": "g_9_6",
+  "lod": 0,
+  "bounds": {
+    "minX": 4096,
+    "minY": -2471,
+    "maxX": 6144,
+    "maxY": -423
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 9,
+    "y": 6
+  },
+  "counts": {
+    "worldFaces": 4,
+    "staticProps": 0,
+    "placeholderWorldFaces": 4,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 8,
+    "worldVerts": 16,
+    "worldBytes": 576,
+    "propsTris": 0,
+    "propsVerts": 0,
+    "propsBytes": 0,
+    "totalTris": 8,
+    "totalVerts": 16,
+    "totalBytes": 576,
+    "drawCallsBeforeInstancing": 1,
+    "drawCallsAfterInstancing": 1
+  },
+  "world": {
+    "faces": [
+      {
+        "position": [
+          4371.18505859375,
+          -430.7074890136719,
+          950.0479736328125
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4371.18505859375,
+          -430.7074890136719,
+          226.32699584960938
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4646.3701171875,
+          -430.7074890136719,
+          588.1874847412109
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          4371.18505859375,
+          -861.4149780273438,
+          588.1874847412109
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      }
+    ]
+  },
+  "props": {
+    "instances": []
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

@@ -1,0 +1,1354 @@
+{
+  "id": "g_5_2",
+  "lod": 0,
+  "bounds": {
+    "minX": -4096,
+    "minY": -10663,
+    "maxX": -2048,
+    "maxY": -8615
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 5,
+    "y": 2
+  },
+  "counts": {
+    "worldFaces": 82,
+    "staticProps": 16,
+    "placeholderWorldFaces": 35,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 234,
+    "worldVerts": 398,
+    "worldBytes": 16848,
+    "propsTris": 192,
+    "propsVerts": 128,
+    "propsBytes": 6144,
+    "totalTris": 426,
+    "totalVerts": 526,
+    "totalBytes": 22992,
+    "drawCallsBeforeInstancing": 42,
+    "drawCallsAfterInstancing": 28
+  },
+  "world": {
+    "faces": [
+      {
+        "position": [
+          -3666,
+          -9652.666666666666,
+          1565.6666666666667
+        ],
+        "material": "stone/stonewall037e",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -3666,
+          -8916.142857142857,
+          1571.7142857142858
+        ],
+        "material": "stone/stonewall037e",
+        "placeholderMaterial": true,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          -3644.5,
+          -9629,
+          1607.5
+        ],
+        "material": "stone/stonewall037e",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3660.5,
+          -9634.5,
+          1607.5
+        ],
+        "material": "stone/stonewall037e",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3644.5,
+          -8941,
+          1607.5
+        ],
+        "material": "stone/stonewall037e",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3660.5,
+          -8935.5,
+          1607.5
+        ],
+        "material": "stone/stonewall037e",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3979,
+          -8645,
+          1547.25
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          -4003.5,
+          -8645,
+          459
+        ],
+        "material": "intro/se1_storefront_02j",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3871.8,
+          -8645,
+          715.6
+        ],
+        "material": "intro/se1_storefront_02j",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -3985,
+          -8645,
+          353.2
+        ],
+        "material": "intro/se1_storefront_02i",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -3517.5,
+          -8637,
+          780
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3769.5,
+          -8641,
+          462
+        ],
+        "material": "de_nuke/nukroofa",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3628,
+          -8641.8,
+          843.2
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -3862,
+          -8641,
+          1098
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3911,
+          -8641.8,
+          457.6
+        ],
+        "material": "bridge/se1_metal_flat_steel_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -4003.5,
+          -8629,
+          200
+        ],
+        "material": "maps/rp_evocity_v33x/sgtsicktextures/building_01a_-4356_-8253_272",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3911,
+          -8630.6,
+          352.4
+        ],
+        "material": "brick/wall06",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -3962.285714285714,
+          -8901,
+          1522.857142857143
+        ],
+        "material": "intro/se1_storefront_02j",
+        "placeholderMaterial": false,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          -3862,
+          -8901,
+          1168
+        ],
+        "material": "intro/se1_storefront_02j",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3865,
+          -8901,
+          327
+        ],
+        "material": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-4868_-9285_138",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3818.8,
+          -8901,
+          686
+        ],
+        "material": "intro/se1_storefront_02j",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -3631,
+          -8901,
+          839
+        ],
+        "material": "intro/se1_storefront_02j",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3862,
+          -8901,
+          1800
+        ],
+        "material": "intro/se1_storefront_02i",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3628,
+          -8805,
+          1483.5
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          -3862,
+          -8773,
+          1096
+        ],
+        "material": "warehouse/se1_metal_roof_corrug_04",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3862,
+          -8773,
+          1869
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3881,
+          -9058.833333333334,
+          1480
+        ],
+        "material": "env/brush/floors/textiles_bankcarpet",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -3652.285714285714,
+          -9005.42857142857,
+          1480
+        ],
+        "material": "env/brush/floors/textiles_bankcarpet",
+        "placeholderMaterial": false,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          -3628,
+          -9058.5,
+          1866.5
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3911.2,
+          -9081.4,
+          1736
+        ],
+        "material": "env/brush/ceilings/broom_ceiling",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -3908.8,
+          -9078.2,
+          1864
+        ],
+        "material": "warehouse/se1_metal_roof_corrug_04",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -3908.8,
+          -9078.2,
+          1869
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -3634,
+          -9001.285714285714,
+          1607.857142857143
+        ],
+        "material": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-4159_-9295_1524",
+        "placeholderMaterial": true,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          -3952.6666666666665,
+          -8909,
+          1547.3333333333333
+        ],
+        "material": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-4977_-9016_1672",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -3653.2,
+          -8909,
+          1532
+        ],
+        "material": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-4977_-9016_1672",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -3793.3333333333335,
+          -8909,
+          1671.8333333333333
+        ],
+        "material": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-4159_-9295_1524",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -3881,
+          -8917,
+          1482
+        ],
+        "material": "bridge/se1_metal_flat_steel_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3881,
+          -8913,
+          1484
+        ],
+        "material": "lights/blue002",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3628,
+          -9058.5,
+          839
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3631,
+          -9058.5,
+          838
+        ],
+        "material": "warehouse/se1_metal_roof_corrug_04",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3628,
+          -9773,
+          1513.25
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          -3628,
+          -9442.5,
+          839
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3628,
+          -9442.5,
+          1866.5
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3628,
+          -9941,
+          569.75
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          -3816.4,
+          -9669,
+          1326.4
+        ],
+        "material": "intro/se1_storefront_02j",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -3816.4,
+          -9669,
+          1787.2
+        ],
+        "material": "intro/se1_storefront_02i",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -3865,
+          -9669,
+          328
+        ],
+        "material": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-4868_-9285_138",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3911.2,
+          -9669,
+          120.8
+        ],
+        "material": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-4868_-9285_138",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -3942,
+          -9669,
+          1588.6666666666667
+        ],
+        "material": "intro/se1_storefront_02j",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -3631,
+          -9669,
+          1608
+        ],
+        "material": "intro/se1_storefront_02j",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3838,
+          -9475.6,
+          1480
+        ],
+        "material": "env/brush/floors/textiles_bankcarpet",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -3652.285714285714,
+          -9525.142857142857,
+          1480
+        ],
+        "material": "env/brush/floors/textiles_bankcarpet",
+        "placeholderMaterial": false,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          -3825.2,
+          -9483,
+          1736
+        ],
+        "material": "env/brush/ceilings/broom_ceiling",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -3862,
+          -9442.5,
+          1869
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3862,
+          -9442.5,
+          1864
+        ],
+        "material": "warehouse/se1_metal_roof_corrug_04",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3634,
+          -9507.333333333334,
+          1607.8333333333333
+        ],
+        "material": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-4159_-9295_1524",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -3934.75,
+          -9661,
+          1610.375
+        ],
+        "material": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-4915_-9285_1524",
+        "placeholderMaterial": true,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          -3652.285714285714,
+          -9661,
+          1626.5714285714287
+        ],
+        "material": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-4915_-9285_1524",
+        "placeholderMaterial": true,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          -3881,
+          -9653,
+          1482
+        ],
+        "material": "bridge/se1_metal_flat_steel_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3881,
+          -9657,
+          1484
+        ],
+        "material": "lights/blue002",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3631,
+          -9442.5,
+          838
+        ],
+        "material": "warehouse/se1_metal_roof_corrug_04",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3862,
+          -9957,
+          231.5
+        ],
+        "material": "maps/rp_evocity_v33x/highrise/se1_garage_concretewall_08_-5124_-9585_138",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3862,
+          -9957,
+          455
+        ],
+        "material": "maps/rp_evocity_v33x/building_template/building_trainstation_template002b_-5124_-9585_138",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3920.5,
+          -9957,
+          1370.5
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          -3862,
+          -9941,
+          200
+        ],
+        "material": "maps/rp_evocity_v33x/sgtsicktextures/building_01a_-4915_-9285_1524",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3862,
+          -9797,
+          1096
+        ],
+        "material": "warehouse/se1_metal_roof_corrug_04",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3862,
+          -9813,
+          1869
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3862,
+          -9925,
+          848
+        ],
+        "material": "intro/se1_storefront_02j",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3862,
+          -9925,
+          528
+        ],
+        "material": "intro/se1_storefront_02j",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3862,
+          -9925,
+          328
+        ],
+        "material": "intro/se1_storefront_02i",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3866,
+          -10102.5,
+          71
+        ],
+        "material": "maps/rp_evocity_v33x/highrise/se1_garage_concretefloor_01_-5124_-9585_138",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3866,
+          -10102.5,
+          263
+        ],
+        "material": "maps/rp_evocity_v33x/highrise/se1_garage_concretewall_02_-5124_-9585_138",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3912,
+          -9965,
+          126.4
+        ],
+        "material": "maps/rp_evocity_v33x/highrise/se1_garage_concretewall_07_-5995_-11284_125",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -3866,
+          -9965,
+          231
+        ],
+        "material": "maps/rp_evocity_v33x/highrise/se1_garage_concretewall_08_-5995_-11284_125",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3636,
+          -10102.5,
+          231
+        ],
+        "material": "maps/rp_evocity_v33x/highrise/se1_garage_concretewall_08_-4868_-9285_138",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3636,
+          -10102.5,
+          135
+        ],
+        "material": "maps/rp_evocity_v33x/highrise/se1_garage_concretewall_07_-4868_-9285_138",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3866,
+          -10486.5,
+          71
+        ],
+        "material": "maps/rp_evocity_v33x/highrise/se1_garage_concretefloor_01_-5124_-9585_138",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3866,
+          -10486.5,
+          263
+        ],
+        "material": "maps/rp_evocity_v33x/highrise/se1_garage_concretewall_02_-5124_-9585_138",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3636,
+          -10486.5,
+          231
+        ],
+        "material": "maps/rp_evocity_v33x/highrise/se1_garage_concretewall_08_-4868_-9285_138",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3636,
+          -10486.5,
+          135
+        ],
+        "material": "maps/rp_evocity_v33x/highrise/se1_garage_concretewall_07_-4868_-9285_138",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3922,
+          -9658,
+          1609.5
+        ],
+        "material": "maps/rp_evocity_v33x/sgtsicktextures/waterfalltextglass_-4159_-9295_1524",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -3922,
+          -8912,
+          1609.5
+        ],
+        "material": "maps/rp_evocity_v33x/sgtsicktextures/waterfalltextglass_-4159_-9295_1524",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      }
+    ]
+  },
+  "props": {
+    "instances": [
+      {
+        "model": "props/cs_office/light_inset",
+        "sourceModel": "props/cs_office/light_inset",
+        "placeholderModel": false,
+        "origin": [
+          -3666.409912109375,
+          -9628,
+          1735.030029296875
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/cs_office/light_inset",
+        "sourceModel": "props/cs_office/light_inset",
+        "placeholderModel": false,
+        "origin": [
+          -3811,
+          -9628,
+          1735.030029296875
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/cs_office/light_inset",
+        "sourceModel": "props/cs_office/light_inset",
+        "placeholderModel": false,
+        "origin": [
+          -3811,
+          -9456,
+          1735.030029296875
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/cs_office/light_inset",
+        "sourceModel": "props/cs_office/light_inset",
+        "placeholderModel": false,
+        "origin": [
+          -3666.409912109375,
+          -9456,
+          1735.030029296875
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/cs_office/light_inset",
+        "sourceModel": "props/cs_office/light_inset",
+        "placeholderModel": false,
+        "origin": [
+          -3955.409912109375,
+          -9628,
+          1735.030029296875
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/cs_office/light_inset",
+        "sourceModel": "props/cs_office/light_inset",
+        "placeholderModel": false,
+        "origin": [
+          -3955.409912109375,
+          -9456,
+          1735.030029296875
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/cs_office/light_inset",
+        "sourceModel": "props/cs_office/light_inset",
+        "placeholderModel": false,
+        "origin": [
+          -3666.409912109375,
+          -9284,
+          1735.030029296875
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/cs_office/light_inset",
+        "sourceModel": "props/cs_office/light_inset",
+        "placeholderModel": false,
+        "origin": [
+          -3811,
+          -9284,
+          1735.030029296875
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/cs_office/light_inset",
+        "sourceModel": "props/cs_office/light_inset",
+        "placeholderModel": false,
+        "origin": [
+          -3811,
+          -9112,
+          1735.030029296875
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/cs_office/light_inset",
+        "sourceModel": "props/cs_office/light_inset",
+        "placeholderModel": false,
+        "origin": [
+          -3666.409912109375,
+          -9112,
+          1735.030029296875
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/cs_office/light_inset",
+        "sourceModel": "props/cs_office/light_inset",
+        "placeholderModel": false,
+        "origin": [
+          -3955.409912109375,
+          -9284,
+          1735.030029296875
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/cs_office/light_inset",
+        "sourceModel": "props/cs_office/light_inset",
+        "placeholderModel": false,
+        "origin": [
+          -3955.409912109375,
+          -9112,
+          1735.030029296875
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/cs_office/light_inset",
+        "sourceModel": "props/cs_office/light_inset",
+        "placeholderModel": false,
+        "origin": [
+          -3811,
+          -8940,
+          1735.030029296875
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/cs_office/light_inset",
+        "sourceModel": "props/cs_office/light_inset",
+        "placeholderModel": false,
+        "origin": [
+          -3666.409912109375,
+          -8940,
+          1735.030029296875
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/cs_office/light_inset",
+        "sourceModel": "props/cs_office/light_inset",
+        "placeholderModel": false,
+        "origin": [
+          -3955.409912109375,
+          -8940,
+          1735.030029296875
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/cs_office/light_security",
+        "sourceModel": "props/cs_office/light_security",
+        "placeholderModel": false,
+        "origin": [
+          -4033.340087890625,
+          -9965.3203125,
+          208.63699340820312
+        ],
+        "angles": [
+          0,
+          270,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    ]
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

@@ -1,0 +1,1142 @@
+{
+  "id": "g_3_14",
+  "lod": 0,
+  "bounds": {
+    "minX": -8192,
+    "minY": 13913,
+    "maxX": -6144,
+    "maxY": 15961
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 3,
+    "y": 14
+  },
+  "counts": {
+    "worldFaces": 76,
+    "staticProps": 9,
+    "placeholderWorldFaces": 37,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 203,
+    "worldVerts": 355,
+    "worldBytes": 14616,
+    "propsTris": 108,
+    "propsVerts": 72,
+    "propsBytes": 3456,
+    "totalTris": 311,
+    "totalVerts": 427,
+    "totalBytes": 18072,
+    "drawCallsBeforeInstancing": 29,
+    "drawCallsAfterInstancing": 28
+  },
+  "world": {
+    "faces": [
+      {
+        "position": [
+          -6183,
+          14748,
+          272
+        ],
+        "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_-4564_13969_241",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6207.5,
+          14719,
+          272
+        ],
+        "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_-4564_13969_241",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6157.6,
+          14726.8,
+          272
+        ],
+        "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_-4564_13969_241",
+        "placeholderMaterial": true,
+        "vertexCount": 10,
+        "triCount": 8,
+        "byteEstimate": 576
+      },
+      {
+        "position": [
+          -6183,
+          14748,
+          274
+        ],
+        "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_-5946_14760_292",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6204,
+          14738.8,
+          274
+        ],
+        "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_-5946_14760_292",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6157.333333333333,
+          14730.333333333334,
+          274
+        ],
+        "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_-5946_14760_292",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6274,
+          14391,
+          210
+        ],
+        "material": "stone/stonewall_inn03a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6207.5,
+          14720,
+          255
+        ],
+        "material": "wood/cabinets01a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6225,
+          14732.5,
+          272.8333333333333
+        ],
+        "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_-9644_11438_292",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6225,
+          14741,
+          235
+        ],
+        "material": "maps/rp_evocity_v33x/env/brush/walls/wall_huron_1st_-9644_11438_292",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6225,
+          14736.4,
+          251.6
+        ],
+        "material": "wood/cabinets01a",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6158.5,
+          14722,
+          235
+        ],
+        "material": "maps/rp_evocity_v33x/env/brush/walls/wall_huron_1st_-4564_13969_241",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6158.333333333333,
+          14718,
+          272.3333333333333
+        ],
+        "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_-4564_13969_241",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6158.333333333333,
+          14718.666666666666,
+          273.6666666666667
+        ],
+        "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_-4564_13969_241",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6156,
+          14736,
+          273
+        ],
+        "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_-5946_14760_292",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6176,
+          14748,
+          273
+        ],
+        "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_-5946_14760_292",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6725,
+          14735,
+          153
+        ],
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_beneath_-6032_12816_292",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6725,
+          14735,
+          153
+        ],
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_-6032_12816_292",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6163,
+          14444,
+          234
+        ],
+        "material": "carpet/blue04",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6200.4,
+          14508.8,
+          234
+        ],
+        "material": "carpet/blue04",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6205,
+          14680,
+          234
+        ],
+        "material": "maps/rp_evocity_v33x/ajacks/art_woodfloor_-5946_14760_292",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6205,
+          14824,
+          234
+        ],
+        "material": "maps/rp_evocity_v33x/ajacks/art_woodfloor_-5946_14760_292",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6197,
+          14989.333333333334,
+          234
+        ],
+        "material": "carpet/blue04",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6200.4,
+          14572.8,
+          362
+        ],
+        "material": "ajacks/ben_whiteceiling",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6205,
+          14824,
+          362
+        ],
+        "material": "ajacks/ben_whiteceiling",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6207.6,
+          14998.4,
+          362
+        ],
+        "material": "ajacks/ben_whiteceiling",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6656,
+          15352,
+          810.5
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6656,
+          14844,
+          949
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6282,
+          14657.616796875,
+          366.8
+        ],
+        "material": "ajacks/ben_white",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6282,
+          15008.01416015625,
+          366
+        ],
+        "material": "ajacks/ben_white",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6225.2,
+          14424,
+          399.2803466796875
+        ],
+        "material": "ajacks/ben_white",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6225.2,
+          15096,
+          399.2803466796875
+        ],
+        "material": "ajacks/ben_white",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6226.8,
+          14862.4166015625,
+          403.12018432617185
+        ],
+        "material": "wood/milroof005",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6213,
+          14512.013671875,
+          411.40023040771484
+        ],
+        "material": "wood/milroof005",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6274,
+          14686.680826822916,
+          364.4002634684245
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6274,
+          15008.01416015625,
+          363.59998575846356
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6203.6,
+          14440,
+          379.5200134277344
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6210.8,
+          15080,
+          379.5200134277344
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6209,
+          15088,
+          405.80045318603516
+        ],
+        "material": "wood/milflr004",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6209,
+          14432,
+          405.80045318603516
+        ],
+        "material": "wood/milflr004",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6277.2,
+          14625.611328125,
+          364.8806579589844
+        ],
+        "material": "wood/milflr004",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6276.666666666667,
+          15008.01416015625,
+          365.20054117838544
+        ],
+        "material": "wood/milflr004",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6181,
+          15080,
+          346
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6181,
+          15080,
+          298
+        ],
+        "material": "zolos textures/glass/oldwindowdp",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6181,
+          15080,
+          250
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6236.666666666667,
+          15080,
+          298
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6163,
+          14448,
+          353
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6215.6,
+          14448,
+          307.2
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6234,
+          15072,
+          298
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6181,
+          15072,
+          250
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6181,
+          15072,
+          298
+        ],
+        "material": "zolos textures/glass/oldwindowdp",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6181,
+          15072,
+          346
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6218,
+          15076,
+          298
+        ],
+        "material": "ajacks/ben_blackmetal",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6181,
+          15076,
+          330
+        ],
+        "material": "ajacks/ben_blackmetal",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6181,
+          15076,
+          266
+        ],
+        "material": "ajacks/ben_blackmetal",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6274,
+          15076,
+          298
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6266,
+          14603.2,
+          285.2
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6266,
+          14824,
+          298
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6266,
+          14980,
+          298
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6205,
+          14880,
+          298
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6205,
+          14888,
+          298
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6205,
+          14760,
+          298
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6205,
+          14768,
+          298
+        ],
+        "material": "ajacks/ben_paintdarkred",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6274,
+          14776.018880208334,
+          298
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6274,
+          15008.01416015625,
+          298
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6163,
+          14440,
+          353
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6274,
+          14444,
+          298
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -6218.8,
+          14440,
+          307.2
+        ],
+        "material": "wood/siding04",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -6274,
+          14606.676106770834,
+          204.66666666666666
+        ],
+        "material": "stone/stonewall_inn03a",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6274,
+          15008.01416015625,
+          212.66666666666666
+        ],
+        "material": "stone/stonewall_inn03a",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          -6205.142857142857,
+          14440,
+          202
+        ],
+        "material": "stone/stonewall_inn03a",
+        "placeholderMaterial": false,
+        "vertexCount": 7,
+        "triCount": 5,
+        "byteEstimate": 360
+      },
+      {
+        "position": [
+          -6210.8,
+          15080,
+          208.4
+        ],
+        "material": "stone/stonewall_inn03a",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          -7680,
+          14735,
+          153
+        ],
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_beneath_-6032_12816_292",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -7680,
+          14735,
+          153
+        ],
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_-6032_12816_292",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -7680,
+          15352,
+          810.5
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          -7680,
+          14844,
+          949
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      }
+    ]
+  },
+  "props": {
+    "instances": [
+      {
+        "model": "sickness/dooframe_01",
+        "sourceModel": "sickness/dooframe_01",
+        "placeholderModel": false,
+        "origin": [
+          -6156.2001953125,
+          14444.7998046875,
+          232
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "sickness/stove_01",
+        "sourceModel": "sickness/stove_01",
+        "placeholderModel": false,
+        "origin": [
+          -6247,
+          14738,
+          232
+        ],
+        "angles": [
+          0,
+          270,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_interiors/sink_kitchen",
+        "sourceModel": "props_interiors/sink_kitchen",
+        "placeholderModel": false,
+        "origin": [
+          -6156,
+          14748,
+          274
+        ],
+        "angles": [
+          0,
+          270,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "hall_suburbs/porch_railing01c",
+        "sourceModel": "hall_suburbs/porch_railing01c",
+        "placeholderModel": false,
+        "origin": [
+          -6180,
+          14346,
+          250.281005859375
+        ],
+        "angles": [
+          0,
+          270,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "hall_suburbs/mailbox_pole",
+        "sourceModel": "hall_suburbs/mailbox_pole",
+        "placeholderModel": false,
+        "origin": [
+          -6272,
+          14346,
+          234
+        ],
+        "angles": [
+          0,
+          270,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "hall_suburbs/porch_railing01b",
+        "sourceModel": "hall_suburbs/porch_railing01b",
+        "placeholderModel": false,
+        "origin": [
+          -6272,
+          14395,
+          250.281005859375
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "gm_forest/tree_alder",
+        "sourceModel": "gm_forest/tree_alder",
+        "placeholderModel": false,
+        "origin": [
+          -6644,
+          14460,
+          176
+        ],
+        "angles": [
+          0,
+          353,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "gm_forest/tree_alder",
+        "sourceModel": "gm_forest/tree_alder",
+        "placeholderModel": false,
+        "origin": [
+          -7298,
+          14936,
+          176
+        ],
+        "angles": [
+          0,
+          76.5,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "msc/e_tree_b",
+        "sourceModel": "msc/e_tree_b",
+        "placeholderModel": false,
+        "origin": [
+          -6335,
+          14191,
+          180
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    ]
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "id": "g_11_11",
+  "lod": 0,
+  "bounds": {
+    "minX": 8192,
+    "minY": 7769,
+    "maxX": 10240,
+    "maxY": 9817
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 11,
+    "y": 11
+  },
+  "counts": {
+    "worldFaces": 6,
+    "staticProps": 0,
+    "placeholderWorldFaces": 5,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 12,
+    "worldVerts": 24,
+    "worldBytes": 864,
+    "propsTris": 0,
+    "propsVerts": 0,
+    "propsBytes": 0,
+    "totalTris": 12,
+    "totalVerts": 24,
+    "totalBytes": 864,
+    "drawCallsBeforeInstancing": 2,
+    "drawCallsAfterInstancing": 2
+  },
+  "world": {
+    "faces": [
+      {
+        "position": [
+          9248,
+          9804,
+          810.5
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          9232,
+          9368,
+          810.5
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          9232,
+          9804,
+          949
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          8704,
+          9368,
+          810.5
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          8704,
+          9804,
+          949
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          8224,
+          9496,
+          58
+        ],
+        "material": "nature/blendgrassgrass001a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      }
+    ]
+  },
+  "props": {
+    "instances": []
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

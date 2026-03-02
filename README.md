@@ -1,67 +1,118 @@
-﻿# SAP2
+# SAP2 - GMod 3D Pipeline (MVP)
 
-## PR-01.2: Auditoria de Assets e Mounts (rp_evocity_v33x)
+## Estado atual
 
-### 1) Preparar mounts
+- Modo default: `permissive`.
+- Missing assets continuam no report, mas nao bloqueiam build em `permissive`.
+- Gates bloqueantes ativos:
+  - Gate A: import/parse/export precisa finalizar.
+  - Gate B: `worldGeometryCoveragePct` >= threshold.
+  - Budget Gate: violacoes graves de performance bloqueiam.
 
-1. Copie o template:
-   - PowerShell: `Copy-Item server/config/mounts.template.json server/config/mounts.json`
-2. Edite `server/config/mounts.json` com os caminhos reais da sua instalacao.
-3. Se preferir, sobrescreva por variaveis de ambiente:
-   - `MOUNTS_FILE`
-   - `MAP_AUDIT_MOUNTS_FILE`
-   - `MAP_AUDIT_MOUNT_GMOD`
-   - `MAP_AUDIT_MOUNT_HL2`
-   - `MAP_AUDIT_MOUNT_CSS`
-   - `MAP_AUDIT_MOUNT_TF2`
-   - `MAP_AUDIT_MOUNT_CUSTOM`
+## Comandos
 
-Formato das variaveis:
-- Windows: separado por `;`
-- Linux: separado por `:`
-
-### 2) Rodar auditoria
+Audit:
 
 ```bash
 npm --prefix server run audit:map-assets:evocity
+npm --prefix server run audit:map-assets:evocity:strict
 ```
 
-Windows (mounts custom + override rapido):
-
-```powershell
-npm --prefix server run audit:map-assets:evocity -- --mounts C:\meu\mounts.json --mount css=C:\Steam\steamapps\common\Counter-Strike Source\cstrike
-```
-
-Linux (via env):
+Pipeline completo (evocity):
 
 ```bash
-MOUNTS_FILE=/home/steam/mounts.json npm --prefix server run audit:map-assets:evocity
+npm --prefix server run map:pipeline:build:evocity
 ```
 
-### 3) Saida
+Pipeline em strict (missing critico volta a bloquear):
 
-- Relatorio JSON: `reports/audit-report.json`
-- Gate obrigatorio:
-  - o comando retorna erro se `missingAssetsSummary.critical > 0`.
-- Prioridade de resolucao de assets:
-  - `pakfile` interno do BSP (mount virtual, sem extrair em disco)
-  - mapa extraido (`--map-root`)
-  - mounts externos (`gmod/hl2/css/tf2/custom`)
-- Auto-discovery:
-  - parse de `libraryfolders.vdf` (Windows/Linux) para detectar candidatos de `gmod/hl2/css/tf2`
-  - validacao por path com status `ok|missing|invalid` e checks de `materials/models/maps`
+```bash
+npm --prefix server run map:pipeline:build:evocity -- --asset-resolution-mode strict
+```
 
-O relatorio inclui:
-- `missingAssetsSummary` (`critical` / `major` / `minor`)
-- lista `missingAssets` com tipo (`mdl`, `vmt`, `vtf`, `patch-include`, `skybox`, `world-material`), referencias e sugestao de mount
-- `mountsUsed` com status por mount path e `resolvedAssets` por mount
-- `criticalTop50` com `bestGuessMount` e `searchedIn` (`pak/map-root/mounts`)
-- contadores obrigatorios:
-  - `staticProps.uniqueMissingModels`
-  - `staticProps.affectedInstances`
-  - `usedMaterialsTotal`
-  - `usedWorldMaterialsWithoutResolvedBaseTexture`
-  - `vmtPatchIncludesMissingUnique`
-  - `pakfileScanned`
-  - `pakfileFilesCount`
-  - `skyboxInvalid`
+## Artefatos gerados
+
+Base path:
+
+- `public/maps/rp_evocity_v33x/`
+
+Estrutura:
+
+- `manifest.json`
+- `base/base.scene.json`
+- `chunks/lod0/index.json`
+- `chunks/lod0/<chunkId>.json`
+- `reports/report.json`
+- `reports/scene.intermediate.json`
+
+## PR-04 Hardening (budgets como gates)
+
+O `report.json` agora inclui:
+
+- `metrics.totals.totalTrisWorld`
+- `metrics.totals.totalTrisPerChunk.min/avg/max`
+- `metrics.totals.totalBytesEstimate`
+- `metrics.drawCallsEstimate.beforeInstancing/afterInstancing/reductionPct`
+- `metrics.topChunks` (top 20 mais pesados)
+- `budgets.budgetPass`
+- `budgets.violations[]`
+- `metrics.activeSets.set3x3` e `metrics.activeSets.set5x5`
+
+Se qualquer violacao grave ocorrer, o pipeline falha com `budget_gate_failed`.
+
+## Ajuste de budgets e chunk size (CLI/env)
+
+CLI:
+
+```bash
+--chunk-size <n>
+--per-chunk-max-tris <n>
+--per-chunk-max-verts <n>
+--per-chunk-max-bytes <n>
+--active-3x3-max-tris <n>
+--active-3x3-max-drawcalls <n>
+--active-3x3-max-bytes <n>
+--active-5x5-max-tris <n>
+--active-5x5-max-drawcalls <n>
+--active-5x5-max-bytes <n>
+--world-coverage-min-pct <n>
+```
+
+Env vars equivalentes:
+
+- `MAP_PIPELINE_PER_CHUNK_MAX_TRIS`
+- `MAP_PIPELINE_PER_CHUNK_MAX_VERTS`
+- `MAP_PIPELINE_PER_CHUNK_MAX_BYTES`
+- `MAP_PIPELINE_ACTIVE_3X3_MAX_TRIS`
+- `MAP_PIPELINE_ACTIVE_3X3_MAX_DRAWCALLS`
+- `MAP_PIPELINE_ACTIVE_3X3_MAX_BYTES`
+- `MAP_PIPELINE_ACTIVE_5X5_MAX_TRIS`
+- `MAP_PIPELINE_ACTIVE_5X5_MAX_DRAWCALLS`
+- `MAP_PIPELINE_ACTIVE_5X5_MAX_BYTES`
+
+## PR-05 Viewer minimo
+
+Rota nova:
+
+- `/admin/servers/:serverId/view3d?map=rp_evocity_v33x`
+
+Como abrir pelo painel:
+
+- Em `ServerDetails`, clique no botao `Viewer 3D`.
+
+Comportamento atual:
+
+- Carrega `manifest.json`.
+- Carrega `base` e faz streaming de chunks `lod0`.
+- Janela ativa: 3x3.
+- Prefetch: 5x5.
+- Descarte por distancia com `gracePeriodMs`.
+- Materiais/modelos faltantes usam placeholder.
+
+## Mounts (template)
+
+Copie template:
+
+```powershell
+Copy-Item server/config/mounts.template.json server/config/mounts.json
+```

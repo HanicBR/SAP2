@@ -20,6 +20,7 @@ const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
 const Logs = lazy(() => import('./pages/admin/Logs'));
 const Servers = lazy(() => import('./pages/admin/Servers'));
 const ServerDetails = lazy(() => import('./pages/admin/ServerDetails'));
+const ServerView3D = lazy(() => import('./pages/admin/ServerView3D'));
 const DuplicateDetection = lazy(() => import('./pages/admin/DuplicateDetection'));
 const Players = lazy(() => import('./pages/admin/Players'));
 const PlayerProfile = lazy(() => import('./pages/admin/PlayerProfile'));
@@ -163,6 +164,7 @@ const App: React.FC = () => {
           <Route path="/admin/import-logs" element={<RoleRoute page="importLogs"><ImportLogs /></RoleRoute>} />
           <Route path="/admin/servers" element={<RoleRoute page="servers"><Servers /></RoleRoute>} />
           <Route path="/admin/servers/:serverId" element={<RoleRoute page="serverDetails"><ServerDetails /></RoleRoute>} />
+          <Route path="/admin/servers/:serverId/view3d" element={<RoleRoute page="serverView3d"><ServerView3D /></RoleRoute>} />
           <Route path="/admin/duplicates" element={<RoleRoute page="duplicates"><DuplicateDetection /></RoleRoute>} />
           <Route path="/admin/addon-commands" element={<RoleRoute page="addonCommands"><AddonCommands /></RoleRoute>} />
           <Route path="/admin/users" element={<RoleRoute page="users"><Users /></RoleRoute>} />

@@ -1,5 +1,8 @@
 {
-  "generatedAt": "2026-03-02T18:34:27.630Z",
+  "generatedAt": "2026-03-02T20:34:43.915Z",
+  "settings": {
+    "assetResolutionMode": "permissive"
+  },
   "map": {
     "bspPath": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps\\rp_evocity_v33x.bsp",
     "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
@@ -16,12 +19,56 @@
       {
         "id": "gmod",
         "rootPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod",
-        "source": "auto",
+        "source": "config",
         "sourceId": "mount:gmod:0",
         "checks": {
           "materials": true,
           "models": true,
           "maps": true
+        }
+      },
+      {
+        "id": "css",
+        "rootPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent",
+        "source": "auto",
+        "sourceId": "mount:css:0",
+        "checks": {
+          "materials": true,
+          "models": true,
+          "maps": false
+        }
+      },
+      {
+        "id": "hl2ep1",
+        "rootPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent",
+        "source": "auto",
+        "sourceId": "mount:hl2ep1:0",
+        "checks": {
+          "materials": true,
+          "models": true,
+          "maps": true
+        }
+      },
+      {
+        "id": "hl2ep2",
+        "rootPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent",
+        "source": "auto",
+        "sourceId": "mount:hl2ep2:0",
+        "checks": {
+          "materials": true,
+          "models": true,
+          "maps": false
+        }
+      },
+      {
+        "id": "tf2",
+        "rootPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent",
+        "source": "auto",
+        "sourceId": "mount:tf2:0",
+        "checks": {
+          "materials": true,
+          "models": true,
+          "maps": false
         }
       }
     ],
@@ -29,9 +76,19 @@
       "gmod": [
         "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
       ],
+      "css": [
+        "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+      ],
       "hl2": [],
-      "css": [],
-      "tf2": [],
+      "hl2ep1": [
+        "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+      ],
+      "hl2ep2": [
+        "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+      ],
+      "tf2": [
+        "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
+      ],
       "custom": []
     },
     "attemptedCandidates": {
@@ -39,15 +96,23 @@
         "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod",
         "D:\\SteamLibrary\\steamapps\\common\\GarrysMod\\garrysmod"
       ],
+      "css": [
+        "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Counter-Strike Source\\cstrike",
+        "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent",
+        "D:\\SteamLibrary\\steamapps\\common\\Counter-Strike Source\\cstrike"
+      ],
       "hl2": [
         "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Half-Life 2\\hl2",
         "D:\\SteamLibrary\\steamapps\\common\\Half-Life 2\\hl2"
       ],
-      "css": [
-        "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Counter-Strike Source\\cstrike",
-        "D:\\SteamLibrary\\steamapps\\common\\Counter-Strike Source\\cstrike"
+      "hl2ep1": [
+        "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+      ],
+      "hl2ep2": [
+        "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
       ],
       "tf2": [
+        "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent",
         "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Team Fortress 2\\tf",
         "D:\\SteamLibrary\\steamapps\\common\\Team Fortress 2\\tf"
       ],
@@ -60,7 +125,17 @@
     "unresolvedInputPaths": [
       {
         "mount": "gmod",
-        "path": "D:\\SteamLibrary\\steamapps\\common\\GarrysMod\\garrysmod",
+        "path": "C:\\home\\steam\\.local\\share\\Steam\\steamapps\\common\\GarrysMod\\garrysmod",
+        "source": "config"
+      },
+      {
+        "mount": "css",
+        "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Counter-Strike Source\\cstrike",
+        "source": "auto"
+      },
+      {
+        "mount": "css",
+        "path": "D:\\SteamLibrary\\steamapps\\common\\Counter-Strike Source\\cstrike",
         "source": "auto"
       },
       {
@@ -71,16 +146,6 @@
       {
         "mount": "hl2",
         "path": "D:\\SteamLibrary\\steamapps\\common\\Half-Life 2\\hl2",
-        "source": "auto"
-      },
-      {
-        "mount": "css",
-        "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Counter-Strike Source\\cstrike",
-        "source": "auto"
-      },
-      {
-        "mount": "css",
-        "path": "D:\\SteamLibrary\\steamapps\\common\\Counter-Strike Source\\cstrike",
         "source": "auto"
       },
       {
@@ -97,7 +162,7 @@
     "validation": [
       {
         "mount": "gmod",
-        "source": "auto",
+        "source": "config",
         "inputPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod",
         "status": "ok",
         "checks": {
@@ -110,8 +175,45 @@
       },
       {
         "mount": "gmod",
+        "source": "config",
+        "inputPath": "C:\\home\\steam\\.local\\share\\Steam\\steamapps\\common\\GarrysMod\\garrysmod",
+        "status": "missing",
+        "checks": {
+          "materials": false,
+          "models": false,
+          "maps": false
+        },
+        "reason": "path_not_found"
+      },
+      {
+        "mount": "css",
         "source": "auto",
-        "inputPath": "D:\\SteamLibrary\\steamapps\\common\\GarrysMod\\garrysmod",
+        "inputPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Counter-Strike Source\\cstrike",
+        "status": "missing",
+        "checks": {
+          "materials": false,
+          "models": false,
+          "maps": false
+        },
+        "reason": "path_not_found"
+      },
+      {
+        "mount": "css",
+        "source": "auto",
+        "inputPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent",
+        "status": "ok",
+        "checks": {
+          "materials": true,
+          "models": true,
+          "maps": false
+        },
+        "resolvedPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent",
+        "sourceId": "mount:css:0"
+      },
+      {
+        "mount": "css",
+        "source": "auto",
+        "inputPath": "D:\\SteamLibrary\\steamapps\\common\\Counter-Strike Source\\cstrike",
         "status": "missing",
         "checks": {
           "materials": false,
@@ -145,28 +247,43 @@
         "reason": "path_not_found"
       },
       {
-        "mount": "css",
+        "mount": "hl2ep1",
         "source": "auto",
-        "inputPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Counter-Strike Source\\cstrike",
-        "status": "missing",
+        "inputPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent",
+        "status": "ok",
         "checks": {
-          "materials": false,
-          "models": false,
-          "maps": false
+          "materials": true,
+          "models": true,
+          "maps": true
         },
-        "reason": "path_not_found"
+        "resolvedPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent",
+        "sourceId": "mount:hl2ep1:0"
       },
       {
-        "mount": "css",
+        "mount": "hl2ep2",
         "source": "auto",
-        "inputPath": "D:\\SteamLibrary\\steamapps\\common\\Counter-Strike Source\\cstrike",
-        "status": "missing",
+        "inputPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent",
+        "status": "ok",
         "checks": {
-          "materials": false,
-          "models": false,
+          "materials": true,
+          "models": true,
           "maps": false
         },
-        "reason": "path_not_found"
+        "resolvedPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent",
+        "sourceId": "mount:hl2ep2:0"
+      },
+      {
+        "mount": "tf2",
+        "source": "auto",
+        "inputPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent",
+        "status": "ok",
+        "checks": {
+          "materials": true,
+          "models": true,
+          "maps": false
+        },
+        "resolvedPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent",
+        "sourceId": "mount:tf2:0"
       },
       {
         "mount": "tf2",
@@ -197,7 +314,7 @@
   "mountsUsed": [
     {
       "mount": "gmod",
-      "source": "auto",
+      "source": "config",
       "inputPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod",
       "status": "ok",
       "resolvedPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod",
@@ -210,8 +327,47 @@
     },
     {
       "mount": "gmod",
+      "source": "config",
+      "inputPath": "C:\\home\\steam\\.local\\share\\Steam\\steamapps\\common\\GarrysMod\\garrysmod",
+      "status": "missing",
+      "checks": {
+        "materials": false,
+        "models": false,
+        "maps": false
+      },
+      "resolvedAssets": 0,
+      "reason": "path_not_found"
+    },
+    {
+      "mount": "css",
       "source": "auto",
-      "inputPath": "D:\\SteamLibrary\\steamapps\\common\\GarrysMod\\garrysmod",
+      "inputPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Counter-Strike Source\\cstrike",
+      "status": "missing",
+      "checks": {
+        "materials": false,
+        "models": false,
+        "maps": false
+      },
+      "resolvedAssets": 0,
+      "reason": "path_not_found"
+    },
+    {
+      "mount": "css",
+      "source": "auto",
+      "inputPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent",
+      "status": "ok",
+      "resolvedPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent",
+      "checks": {
+        "materials": true,
+        "models": true,
+        "maps": false
+      },
+      "resolvedAssets": 21
+    },
+    {
+      "mount": "css",
+      "source": "auto",
+      "inputPath": "D:\\SteamLibrary\\steamapps\\common\\Counter-Strike Source\\cstrike",
       "status": "missing",
       "checks": {
         "materials": false,
@@ -248,30 +404,43 @@
       "reason": "path_not_found"
     },
     {
-      "mount": "css",
+      "mount": "hl2ep1",
       "source": "auto",
-      "inputPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Counter-Strike Source\\cstrike",
-      "status": "missing",
+      "inputPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent",
+      "status": "ok",
+      "resolvedPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent",
       "checks": {
-        "materials": false,
-        "models": false,
-        "maps": false
+        "materials": true,
+        "models": true,
+        "maps": true
       },
-      "resolvedAssets": 0,
-      "reason": "path_not_found"
+      "resolvedAssets": 16
     },
     {
-      "mount": "css",
+      "mount": "hl2ep2",
       "source": "auto",
-      "inputPath": "D:\\SteamLibrary\\steamapps\\common\\Counter-Strike Source\\cstrike",
-      "status": "missing",
+      "inputPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent",
+      "status": "ok",
+      "resolvedPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent",
       "checks": {
-        "materials": false,
-        "models": false,
+        "materials": true,
+        "models": true,
         "maps": false
       },
-      "resolvedAssets": 0,
-      "reason": "path_not_found"
+      "resolvedAssets": 57
+    },
+    {
+      "mount": "tf2",
+      "source": "auto",
+      "inputPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent",
+      "status": "ok",
+      "resolvedPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent",
+      "checks": {
+        "materials": true,
+        "models": true,
+        "maps": false
+      },
+      "resolvedAssets": 9
     },
     {
       "mount": "tf2",
@@ -320,28 +489,97 @@
         "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod",
         "role": "mount",
         "mountId": "gmod"
+      },
+      {
+        "id": "mount:css:0",
+        "kind": "filesystem",
+        "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent",
+        "role": "mount",
+        "mountId": "css"
+      },
+      {
+        "id": "mount:hl2ep1:0",
+        "kind": "filesystem",
+        "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent",
+        "role": "mount",
+        "mountId": "hl2ep1"
+      },
+      {
+        "id": "mount:hl2ep2:0",
+        "kind": "filesystem",
+        "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent",
+        "role": "mount",
+        "mountId": "hl2ep2"
+      },
+      {
+        "id": "mount:tf2:0",
+        "kind": "filesystem",
+        "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent",
+        "role": "mount",
+        "mountId": "tf2"
       }
     ],
-    "fileCount": 3555,
+    "fileCount": 60899,
     "resolvedCountsBySource": {
-      "pak": 2255
-    }
+      "pak": 2255,
+      "mount:hl2ep1:0": 16,
+      "mount:tf2:0": 9,
+      "mount:hl2ep2:0": 57,
+      "mount:css:0": 21
+    },
+    "sourceMeta": [
+      {
+        "sourceId": "pak",
+        "priority": 0,
+        "order": 0
+      },
+      {
+        "sourceId": "map-root",
+        "priority": 1,
+        "order": 1
+      },
+      {
+        "sourceId": "mount:gmod:0",
+        "priority": 2,
+        "order": 2
+      },
+      {
+        "sourceId": "mount:css:0",
+        "priority": 3,
+        "order": 3
+      },
+      {
+        "sourceId": "mount:hl2ep1:0",
+        "priority": 3,
+        "order": 4
+      },
+      {
+        "sourceId": "mount:hl2ep2:0",
+        "priority": 3,
+        "order": 5
+      },
+      {
+        "sourceId": "mount:tf2:0",
+        "priority": 3,
+        "order": 6
+      }
+    ]
   },
   "missingAssetsSummary": {
-    "critical": 419,
-    "major": 154,
+    "critical": 391,
+    "major": 139,
     "minor": 0
   },
   "counters": {
     "staticProps": {
       "totalInstances": 3415,
       "uniqueModels": 257,
-      "uniqueMissingModels": 61,
-      "affectedInstances": 555
+      "uniqueMissingModels": 47,
+      "affectedInstances": 504
     },
     "usedMaterialsTotal": 1217,
-    "usedWorldMaterialsWithoutResolvedBaseTexture": 310,
-    "vmtPatchIncludesMissingUnique": 29,
+    "usedWorldMaterialsWithoutResolvedBaseTexture": 302,
+    "vmtPatchIncludesMissingUnique": 23,
     "pakfileScanned": true,
     "pakfileFilesCount": 4879,
     "skyboxInvalid": false,
@@ -550,16 +788,6 @@
     },
     {
       "type": "vmt",
-      "asset": "materials/concrete/concretefloor009a.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:concrete/concretefloor009a"
-      ]
-    },
-    {
-      "type": "vmt",
       "asset": "materials/concrete/concretefloor023a.vmt",
       "severity": "critical",
       "suggestedMount": "gmod",
@@ -616,16 +844,6 @@
       "occurrences": 1,
       "references": [
         "world:concrete/concretefloor039a_cheap"
-      ]
-    },
-    {
-      "type": "vmt",
-      "asset": "materials/concrete/concretewall004c.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:concrete/concretewall004c"
       ]
     },
     {
@@ -760,16 +978,6 @@
     },
     {
       "type": "vmt",
-      "asset": "materials/glass/glasswindow006b.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:glass/glasswindow006b"
-      ]
-    },
-    {
-      "type": "vmt",
       "asset": "materials/glass/glasswindow041c.vmt",
       "severity": "critical",
       "suggestedMount": "gmod",
@@ -780,72 +988,12 @@
     },
     {
       "type": "vmt",
-      "asset": "materials/lights/blue001.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:lights/blue001"
-      ]
-    },
-    {
-      "type": "vmt",
-      "asset": "materials/lights/blue002.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:lights/blue002"
-      ]
-    },
-    {
-      "type": "vmt",
-      "asset": "materials/lights/white001_nochop.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:lights/white001_nochop"
-      ]
-    },
-    {
-      "type": "vmt",
-      "asset": "materials/lights/white003_nochop.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:lights/white003_nochop"
-      ]
-    },
-    {
-      "type": "vmt",
-      "asset": "materials/metal/metal_emergencystripe01a.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:metal/metal_emergencystripe01a"
-      ]
-    },
-    {
-      "type": "vmt",
       "asset": "materials/metal/metaldoor032a.vmt",
       "severity": "critical",
       "suggestedMount": "gmod",
       "occurrences": 1,
       "references": [
         "world:metal/metaldoor032a"
-      ]
-    },
-    {
-      "type": "vmt",
-      "asset": "materials/metal/metalfloor005a.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:metal/metalfloor005a"
       ]
     },
     {
@@ -950,16 +1098,6 @@
     },
     {
       "type": "vmt",
-      "asset": "materials/metal/metalwall018f.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:metal/metalwall018f"
-      ]
-    },
-    {
-      "type": "vmt",
       "asset": "materials/metal/metalwall026a_c17.vmt",
       "severity": "critical",
       "suggestedMount": "gmod",
@@ -986,76 +1124,6 @@
       "occurrences": 1,
       "references": [
         "world:metal/metalwall065f"
-      ]
-    },
-    {
-      "type": "vmt",
-      "asset": "materials/nature/blendgrassdirt01_noprop.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:nature/blendgrassdirt01_noprop"
-      ]
-    },
-    {
-      "type": "vmt",
-      "asset": "materials/nature/blendgrassdirt01.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:nature/blendgrassdirt01"
-      ]
-    },
-    {
-      "type": "vmt",
-      "asset": "materials/nature/blendgrassdirt02_noprop.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:nature/blendgrassdirt02_noprop"
-      ]
-    },
-    {
-      "type": "vmt",
-      "asset": "materials/nature/blendgrassgravel01.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:nature/blendgrassgravel01"
-      ]
-    },
-    {
-      "type": "vmt",
-      "asset": "materials/nature/blendpavedirt01.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:nature/blendpavedirt01"
-      ]
-    },
-    {
-      "type": "vmt",
-      "asset": "materials/nature/blendrocksand08c.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:nature/blendrocksand08c"
-      ]
-    },
-    {
-      "type": "vmt",
-      "asset": "materials/nature/cliff04a.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:nature/cliff04a"
       ]
     },
     {
@@ -1186,26 +1254,6 @@
       "occurrences": 1,
       "references": [
         "world:skybox/sky_fake_white"
-      ]
-    },
-    {
-      "type": "vmt",
-      "asset": "materials/stone/stonewall_inn01d.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:stone/stonewall_inn01d"
-      ]
-    },
-    {
-      "type": "vmt",
-      "asset": "materials/stone/stonewall_inn03a.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:stone/stonewall_inn03a"
       ]
     },
     {
@@ -1369,46 +1417,6 @@
       ]
     },
     {
-      "type": "vmt",
-      "asset": "materials/wood/woodwall047a.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:wood/woodwall047a"
-      ]
-    },
-    {
-      "type": "vmt",
-      "asset": "materials/wood/woodwall047b.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:wood/woodwall047b"
-      ]
-    },
-    {
-      "type": "vmt",
-      "asset": "materials/wood/woodwall047c.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:wood/woodwall047c"
-      ]
-    },
-    {
-      "type": "vmt",
-      "asset": "materials/wood/woodwall047d.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:wood/woodwall047d"
-      ]
-    },
-    {
       "type": "vtf",
       "asset": "materials/_rt_camera.vtf",
       "severity": "critical",
@@ -1420,13 +1428,32 @@
     },
     {
       "type": "vtf",
-      "asset": "materials/nature/forest_grass_01.vtf",
+      "asset": "materials/concrete/concretefloor009a.vtf",
       "severity": "critical",
       "suggestedMount": "gmod",
-      "occurrences": 2,
+      "occurrences": 1,
       "references": [
-        "world:maps/rp_evocity_v33x/nature/blendgrassdirt01_noprop_wvt_patch -> $basetexture",
-        "world:maps/rp_evocity_v33x/nature/blendgrassdirt02_noprop_wvt_patch -> $basetexture"
+        "world:concrete/concretefloor009a -> $basetexture"
+      ]
+    },
+    {
+      "type": "vtf",
+      "asset": "materials/metal/metalfloor005a.vtf",
+      "severity": "critical",
+      "suggestedMount": "gmod",
+      "occurrences": 1,
+      "references": [
+        "world:metal/metalfloor005a -> $basetexture"
+      ]
+    },
+    {
+      "type": "vtf",
+      "asset": "materials/metal/metalwall018f.vtf",
+      "severity": "critical",
+      "suggestedMount": "gmod",
+      "occurrences": 1,
+      "references": [
+        "world:metal/metalwall018f -> $basetexture"
       ]
     },
     {
@@ -1437,6 +1464,16 @@
       "occurrences": 1,
       "references": [
         "world:de_nuke/nukroof01 -> $basetexture"
+      ]
+    },
+    {
+      "type": "vtf",
+      "asset": "materials/wood/woodfloor007a.vtf",
+      "severity": "critical",
+      "suggestedMount": "gmod",
+      "occurrences": 1,
+      "references": [
+        "world:maps/rp_evocity_v33x/wood/woodfloor007a_c17_2975_-7313_189 -> $basetexture"
       ]
     },
     {
@@ -2299,28 +2336,6 @@
     },
     {
       "type": "world-material",
-      "asset": "materials/maps/rp_evocity_v33x/concrete/concretefloor028a_4992_13788_146.vmt",
-      "severity": "critical",
-      "suggestedMount": "custom",
-      "occurrences": 1,
-      "references": [
-        "world:maps/rp_evocity_v33x/concrete/concretefloor028a_4992_13788_146"
-      ],
-      "note": "No resolved $basetexture after patch/include chain"
-    },
-    {
-      "type": "world-material",
-      "asset": "materials/maps/rp_evocity_v33x/concrete/concretefloor028a_5340_14006_146.vmt",
-      "severity": "critical",
-      "suggestedMount": "custom",
-      "occurrences": 1,
-      "references": [
-        "world:maps/rp_evocity_v33x/concrete/concretefloor028a_5340_14006_146"
-      ],
-      "note": "No resolved $basetexture after patch/include chain"
-    },
-    {
-      "type": "world-material",
       "asset": "materials/maps/rp_evocity_v33x/concrete/concretefloor037a_-4032_382_128.vmt",
       "severity": "critical",
       "suggestedMount": "custom",
@@ -2899,39 +2914,6 @@
       "occurrences": 1,
       "references": [
         "world:maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-7847_-9509_-374"
-      ],
-      "note": "No resolved $basetexture after patch/include chain"
-    },
-    {
-      "type": "world-material",
-      "asset": "materials/maps/rp_evocity_v33x/metal/forest_metal_02c_-10508_-10529_138.vmt",
-      "severity": "critical",
-      "suggestedMount": "custom",
-      "occurrences": 1,
-      "references": [
-        "world:maps/rp_evocity_v33x/metal/forest_metal_02c_-10508_-10529_138"
-      ],
-      "note": "No resolved $basetexture after patch/include chain"
-    },
-    {
-      "type": "world-material",
-      "asset": "materials/maps/rp_evocity_v33x/metal/forest_metal_02c_-7041_-12249_125.vmt",
-      "severity": "critical",
-      "suggestedMount": "custom",
-      "occurrences": 1,
-      "references": [
-        "world:maps/rp_evocity_v33x/metal/forest_metal_02c_-7041_-12249_125"
-      ],
-      "note": "No resolved $basetexture after patch/include chain"
-    },
-    {
-      "type": "world-material",
-      "asset": "materials/maps/rp_evocity_v33x/metal/forest_metal_02c_-7598_-9493_1804.vmt",
-      "severity": "critical",
-      "suggestedMount": "custom",
-      "occurrences": 1,
-      "references": [
-        "world:maps/rp_evocity_v33x/metal/forest_metal_02c_-7598_-9493_1804"
       ],
       "note": "No resolved $basetexture after patch/include chain"
     },
@@ -3740,28 +3722,6 @@
     },
     {
       "type": "world-material",
-      "asset": "materials/maps/rp_evocity_v33x/tile/tilewall009e_-7832_-10042_-374.vmt",
-      "severity": "critical",
-      "suggestedMount": "custom",
-      "occurrences": 1,
-      "references": [
-        "world:maps/rp_evocity_v33x/tile/tilewall009e_-7832_-10042_-374"
-      ],
-      "note": "No resolved $basetexture after patch/include chain"
-    },
-    {
-      "type": "world-material",
-      "asset": "materials/maps/rp_evocity_v33x/tile/tilewall009e_-8019_-10242_-374.vmt",
-      "severity": "critical",
-      "suggestedMount": "custom",
-      "occurrences": 1,
-      "references": [
-        "world:maps/rp_evocity_v33x/tile/tilewall009e_-8019_-10242_-374"
-      ],
-      "note": "No resolved $basetexture after patch/include chain"
-    },
-    {
-      "type": "world-material",
       "asset": "materials/maps/rp_evocity_v33x/tile/urban_countertop01b_-10460_-9253_324.vmt",
       "severity": "critical",
       "suggestedMount": "custom",
@@ -4274,17 +4234,6 @@
       "occurrences": 1,
       "references": [
         "world:maps/rp_evocity_v33x/wood/desk02_9928_13424_120"
-      ],
-      "note": "No resolved $basetexture after patch/include chain"
-    },
-    {
-      "type": "world-material",
-      "asset": "materials/maps/rp_evocity_v33x/wood/woodfloor007a_c17_2975_-7313_189.vmt",
-      "severity": "critical",
-      "suggestedMount": "custom",
-      "occurrences": 1,
-      "references": [
-        "world:maps/rp_evocity_v33x/wood/woodfloor007a_c17_2975_-7313_189"
       ],
       "note": "No resolved $basetexture after patch/include chain"
     },
@@ -4851,28 +4800,6 @@
     },
     {
       "type": "mdl",
-      "asset": "models/cliffs/rocks_medium01_veg.mdl",
-      "severity": "major",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "static-prop:cliffs/rocks_medium01_veg"
-      ],
-      "note": "instances=2"
-    },
-    {
-      "type": "mdl",
-      "asset": "models/cliffs/rocks_medium02.mdl",
-      "severity": "major",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "static-prop:cliffs/rocks_medium02"
-      ],
-      "note": "instances=2"
-    },
-    {
-      "type": "mdl",
       "asset": "models/props_buildings/watertower_001c.mdl",
       "severity": "major",
       "suggestedMount": "gmod",
@@ -4881,17 +4808,6 @@
         "static-prop:props_buildings/watertower_001c"
       ],
       "note": "instances=1"
-    },
-    {
-      "type": "mdl",
-      "asset": "models/props_c17/awning002a.mdl",
-      "severity": "major",
-      "suggestedMount": "hl2",
-      "occurrences": 1,
-      "references": [
-        "static-prop:props_c17/awning002a"
-      ],
-      "note": "instances=5"
     },
     {
       "type": "mdl",
@@ -4947,17 +4863,6 @@
         "static-prop:props_c17/handrail04_medium"
       ],
       "note": "instances=10"
-    },
-    {
-      "type": "mdl",
-      "asset": "models/props_c17/hospital_surgerytable01.mdl",
-      "severity": "major",
-      "suggestedMount": "hl2",
-      "occurrences": 1,
-      "references": [
-        "static-prop:props_c17/hospital_surgerytable01"
-      ],
-      "note": "instances=2"
     },
     {
       "type": "mdl",
@@ -5049,17 +4954,6 @@
     },
     {
       "type": "mdl",
-      "asset": "models/props_canal/rock_riverbed01b.mdl",
-      "severity": "major",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "static-prop:props_canal/rock_riverbed01b"
-      ],
-      "note": "instances=2"
-    },
-    {
-      "type": "mdl",
       "asset": "models/props_canal/rock_riverbed01d.mdl",
       "severity": "major",
       "suggestedMount": "gmod",
@@ -5068,17 +4962,6 @@
         "static-prop:props_canal/rock_riverbed01d"
       ],
       "note": "instances=2"
-    },
-    {
-      "type": "mdl",
-      "asset": "models/props_combine/combine_interface001a.mdl",
-      "severity": "major",
-      "suggestedMount": "hl2",
-      "occurrences": 1,
-      "references": [
-        "static-prop:props_combine/combine_interface001a"
-      ],
-      "note": "instances=9"
     },
     {
       "type": "mdl",
@@ -5101,28 +4984,6 @@
         "static-prop:props_foliage/tree_deciduous_03a"
       ],
       "note": "instances=1"
-    },
-    {
-      "type": "mdl",
-      "asset": "models/props_forest/light_security.mdl",
-      "severity": "major",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "static-prop:props_forest/light_security"
-      ],
-      "note": "instances=2"
-    },
-    {
-      "type": "mdl",
-      "asset": "models/props_forest/utilitypole01b.mdl",
-      "severity": "major",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "static-prop:props_forest/utilitypole01b"
-      ],
-      "note": "instances=10"
     },
     {
       "type": "mdl",
@@ -5214,17 +5075,6 @@
     },
     {
       "type": "mdl",
-      "asset": "models/props_silo/camera.mdl",
-      "severity": "major",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "static-prop:props_silo/camera"
-      ],
-      "note": "instances=5"
-    },
-    {
-      "type": "mdl",
       "asset": "models/props_trainstation/trashcan_indoor001b.mdl",
       "severity": "major",
       "suggestedMount": "gmod",
@@ -5277,39 +5127,6 @@
         "static-prop:props_wasteland/coolingtank01"
       ],
       "note": "instances=1"
-    },
-    {
-      "type": "mdl",
-      "asset": "models/props_wasteland/coolingtank02.mdl",
-      "severity": "major",
-      "suggestedMount": "hl2",
-      "occurrences": 1,
-      "references": [
-        "static-prop:props_wasteland/coolingtank02"
-      ],
-      "note": "instances=1"
-    },
-    {
-      "type": "mdl",
-      "asset": "models/props_wasteland/exterior_fence_notbarbed002d.mdl",
-      "severity": "major",
-      "suggestedMount": "hl2",
-      "occurrences": 1,
-      "references": [
-        "static-prop:props_wasteland/exterior_fence_notbarbed002d"
-      ],
-      "note": "instances=1"
-    },
-    {
-      "type": "mdl",
-      "asset": "models/props_wasteland/exterior_fence_notbarbed002e.mdl",
-      "severity": "major",
-      "suggestedMount": "hl2",
-      "occurrences": 1,
-      "references": [
-        "static-prop:props_wasteland/exterior_fence_notbarbed002e"
-      ],
-      "note": "instances=7"
     },
     {
       "type": "mdl",
@@ -5499,28 +5316,6 @@
       "note": "instances=7"
     },
     {
-      "type": "mdl",
-      "asset": "models/props_wasteland/rockcliff_cluster01b.mdl",
-      "severity": "major",
-      "suggestedMount": "hl2",
-      "occurrences": 1,
-      "references": [
-        "static-prop:props_wasteland/rockcliff_cluster01b"
-      ],
-      "note": "instances=2"
-    },
-    {
-      "type": "mdl",
-      "asset": "models/props_wasteland/rockcliff_cluster02a.mdl",
-      "severity": "major",
-      "suggestedMount": "hl2",
-      "occurrences": 1,
-      "references": [
-        "static-prop:props_wasteland/rockcliff_cluster02a"
-      ],
-      "note": "instances=1"
-    },
-    {
       "type": "patch-include",
       "asset": "materials/brick/brickwall014b.vmt",
       "severity": "major",
@@ -5659,17 +5454,6 @@
     },
     {
       "type": "patch-include",
-      "asset": "materials/concrete/concretefloor028a.vmt",
-      "severity": "major",
-      "suggestedMount": "gmod",
-      "occurrences": 2,
-      "references": [
-        "world:maps/rp_evocity_v33x/concrete/concretefloor028a_4992_13788_146 -> include",
-        "world:maps/rp_evocity_v33x/concrete/concretefloor028a_5340_14006_146 -> include"
-      ]
-    },
-    {
-      "type": "patch-include",
       "asset": "materials/concrete/concretefloor037a.vmt",
       "severity": "major",
       "suggestedMount": "gmod",
@@ -5699,18 +5483,6 @@
         "world:maps/rp_evocity_v33x/glass/glasswindow070c_-6946_-9041_-374 -> include",
         "world:maps/rp_evocity_v33x/glass/glasswindow070c_5234_-4057_160 -> include",
         "world:maps/rp_evocity_v33x/glass/glasswindow070c_6271_-7407_189 -> include"
-      ]
-    },
-    {
-      "type": "patch-include",
-      "asset": "materials/metal/forest_metal_02c.vmt",
-      "severity": "major",
-      "suggestedMount": "gmod",
-      "occurrences": 3,
-      "references": [
-        "world:maps/rp_evocity_v33x/metal/forest_metal_02c_-10508_-10529_138 -> include",
-        "world:maps/rp_evocity_v33x/metal/forest_metal_02c_-7041_-12249_125 -> include",
-        "world:maps/rp_evocity_v33x/metal/forest_metal_02c_-7598_-9493_1804 -> include"
       ]
     },
     {
@@ -5800,32 +5572,6 @@
     },
     {
       "type": "patch-include",
-      "asset": "materials/nature/water_pretty1_beneath.vmt",
-      "severity": "major",
-      "suggestedMount": "gmod",
-      "occurrences": 4,
-      "references": [
-        "world:maps/rp_evocity_v33x/nature/water_pretty1_beneath_-13526_12206_292 -> include",
-        "world:maps/rp_evocity_v33x/nature/water_pretty1_beneath_-6032_12816_292 -> include",
-        "world:maps/rp_evocity_v33x/nature/water_pretty1_beneath_4264_14112_94 -> include",
-        "world:maps/rp_evocity_v33x/nature/water_pretty1_beneath_4992_13788_146 -> include"
-      ]
-    },
-    {
-      "type": "patch-include",
-      "asset": "materials/nature/water_pretty1.vmt",
-      "severity": "major",
-      "suggestedMount": "gmod",
-      "occurrences": 4,
-      "references": [
-        "world:maps/rp_evocity_v33x/nature/water_pretty1_-13526_12206_292 -> include",
-        "world:maps/rp_evocity_v33x/nature/water_pretty1_-6032_12816_292 -> include",
-        "world:maps/rp_evocity_v33x/nature/water_pretty1_4264_14112_94 -> include",
-        "world:maps/rp_evocity_v33x/nature/water_pretty1_4992_13788_146 -> include"
-      ]
-    },
-    {
-      "type": "patch-include",
       "asset": "materials/plaster/plasterwallpaper005a.vmt",
       "severity": "major",
       "suggestedMount": "gmod",
@@ -5861,27 +5607,6 @@
       ]
     },
     {
-      "type": "patch-include",
-      "asset": "materials/tile/tilewall009e.vmt",
-      "severity": "major",
-      "suggestedMount": "gmod",
-      "occurrences": 2,
-      "references": [
-        "world:maps/rp_evocity_v33x/tile/tilewall009e_-7832_-10042_-374 -> include",
-        "world:maps/rp_evocity_v33x/tile/tilewall009e_-8019_-10242_-374 -> include"
-      ]
-    },
-    {
-      "type": "patch-include",
-      "asset": "materials/wood/woodfloor007a_c17.vmt",
-      "severity": "major",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:maps/rp_evocity_v33x/wood/woodfloor007a_c17_2975_-7313_189 -> include"
-      ]
-    },
-    {
       "type": "vmt",
       "asset": "materials/env/glass/metal_greychrome.vmt",
       "severity": "major",
@@ -5899,6 +5624,36 @@
       "occurrences": 1,
       "references": [
         "model:env/decor/mirrora/mirrora"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/models/props_canal/rock_riverbed01a.vmt",
+      "severity": "major",
+      "suggestedMount": "gmod",
+      "occurrences": 1,
+      "references": [
+        "model:props_canal/rock_riverbed01b"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/models/props_combine/combine_interface_disp.vmt",
+      "severity": "major",
+      "suggestedMount": "hl2",
+      "occurrences": 1,
+      "references": [
+        "model:props_combine/combine_interface001a"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/models/props_combine/combine_interface001.vmt",
+      "severity": "major",
+      "suggestedMount": "hl2",
+      "occurrences": 1,
+      "references": [
+        "model:props_combine/combine_interface001a"
       ]
     },
     {
@@ -5943,12 +5698,22 @@
     },
     {
       "type": "vmt",
-      "asset": "materials/models/props/cs_office/computer.vmt",
+      "asset": "materials/models/props_wasteland/coolingtank02_skin2.vmt",
       "severity": "major",
-      "suggestedMount": "gmod",
+      "suggestedMount": "hl2",
       "occurrences": 1,
       "references": [
-        "model:props/cs_office/computer"
+        "model:props_wasteland/coolingtank02"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/models/props_wasteland/coolingtank02_skin3.vmt",
+      "severity": "major",
+      "suggestedMount": "hl2",
+      "occurrences": 1,
+      "references": [
+        "model:props_wasteland/coolingtank02"
       ]
     },
     {
@@ -6161,6 +5926,17 @@
       "occurrences": 1,
       "references": [
         "model:hall_suburbs/window_louver -> $basetexture"
+      ]
+    },
+    {
+      "type": "vtf",
+      "asset": "materials/nature/rockwall011g.vtf",
+      "severity": "major",
+      "suggestedMount": "gmod",
+      "occurrences": 2,
+      "references": [
+        "model:props_wasteland/rockcliff_cluster01b -> $basetexture",
+        "model:props_wasteland/rockcliff_cluster02a -> $basetexture"
       ]
     },
     {
@@ -6610,14 +6386,6 @@
         "instances": 10
       },
       {
-        "model": "props_forest/utilitypole01b",
-        "instances": 10
-      },
-      {
-        "model": "props_combine/combine_interface001a",
-        "instances": 9
-      },
-      {
         "model": "props_wasteland/exterior_fence002d",
         "instances": 9
       },
@@ -6630,10 +6398,6 @@
         "instances": 8
       },
       {
-        "model": "props_wasteland/exterior_fence_notbarbed002e",
-        "instances": 7
-      },
-      {
         "model": "props_wasteland/prison_switchbox001a",
         "instances": 7
       },
@@ -6642,38 +6406,29 @@
         "instances": 6
       },
       {
-        "model": "props_c17/awning002a",
+        "model": "props_lab/powerbox01a",
         "instances": 5
       },
       {
-        "model": "props_lab/powerbox01a",
-        "instances": 5
+        "model": "props_c17/utilitypole01b",
+        "instances": 4
+      },
+      {
+        "model": "props_rooftop/scaffolding01a",
+        "instances": 4
+      },
+      {
+        "model": "props_c17/fence01a",
+        "instances": 3
+      },
+      {
+        "model": "props_canal/rock_riverbed01a",
+        "instances": 3
       }
     ],
     "skyboxIssues": []
   },
   "criticalTop50": [
-    {
-      "type": "vtf",
-      "asset": "materials/nature/forest_grass_01.vtf",
-      "occurrences": 2,
-      "bestGuessMount": "gmod",
-      "searchedIn": {
-        "pak": "checked",
-        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
-        "mounts": [
-          {
-            "mount": "gmod",
-            "source": "auto",
-            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
-          }
-        ]
-      },
-      "references": [
-        "world:maps/rp_evocity_v33x/nature/blendgrassdirt01_noprop_wvt_patch -> $basetexture",
-        "world:maps/rp_evocity_v33x/nature/blendgrassdirt02_noprop_wvt_patch -> $basetexture"
-      ]
-    },
     {
       "type": "vtf",
       "asset": "materials/_rt_camera.vtf",
@@ -6685,8 +6440,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -6705,8 +6480,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -6725,8 +6520,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -6745,8 +6560,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -6765,8 +6600,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -6785,8 +6640,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -6805,8 +6680,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -6825,8 +6720,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -6845,8 +6760,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -6865,8 +6800,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -6885,8 +6840,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -6905,8 +6880,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -6925,8 +6920,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -6945,8 +6960,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -6965,8 +7000,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -6985,8 +7040,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7005,8 +7080,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7025,8 +7120,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7045,8 +7160,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7065,8 +7200,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7085,8 +7240,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7105,8 +7280,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7125,8 +7320,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7145,8 +7360,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7165,8 +7400,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7185,8 +7440,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7205,8 +7480,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7225,8 +7520,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7245,8 +7560,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7265,8 +7600,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7285,8 +7640,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7305,8 +7680,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7325,8 +7720,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7345,8 +7760,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7355,8 +7790,8 @@
       ]
     },
     {
-      "type": "vmt",
-      "asset": "materials/concrete/concretefloor009a.vmt",
+      "type": "vtf",
+      "asset": "materials/concrete/concretefloor009a.vtf",
       "occurrences": 1,
       "bestGuessMount": "gmod",
       "searchedIn": {
@@ -7365,13 +7800,33 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
       "references": [
-        "world:concrete/concretefloor009a"
+        "world:concrete/concretefloor009a -> $basetexture"
       ]
     },
     {
@@ -7385,8 +7840,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7405,8 +7880,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7425,8 +7920,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7445,8 +7960,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7465,8 +8000,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7485,8 +8040,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7505,8 +8080,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7525,33 +8120,33 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
       "references": [
         "world:concrete/concretewall004b"
-      ]
-    },
-    {
-      "type": "vmt",
-      "asset": "materials/concrete/concretewall004c.vmt",
-      "occurrences": 1,
-      "bestGuessMount": "gmod",
-      "searchedIn": {
-        "pak": "checked",
-        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
-        "mounts": [
-          {
-            "mount": "gmod",
-            "source": "auto",
-            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
-          }
-        ]
-      },
-      "references": [
-        "world:concrete/concretewall004c"
       ]
     },
     {
@@ -7565,8 +8160,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7585,8 +8200,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7605,8 +8240,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7625,8 +8280,28 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
@@ -7645,13 +8320,113 @@
         "mounts": [
           {
             "mount": "gmod",
-            "source": "auto",
+            "source": "config",
             "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
           }
         ]
       },
       "references": [
         "world:concrete/concretewall055b"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/concrete/concretewall060c.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "config",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
+          }
+        ]
+      },
+      "references": [
+        "world:concrete/concretewall060c"
+      ]
+    },
+    {
+      "type": "vmt",
+      "asset": "materials/concrete/concretewall060f.vmt",
+      "occurrences": 1,
+      "bestGuessMount": "gmod",
+      "searchedIn": {
+        "pak": "checked",
+        "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
+        "mounts": [
+          {
+            "mount": "gmod",
+            "source": "config",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+          },
+          {
+            "mount": "css",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\css-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep1",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep1-content-gmodcontent"
+          },
+          {
+            "mount": "hl2ep2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\hl2ep2-content-gmodcontent"
+          },
+          {
+            "mount": "tf2",
+            "source": "auto",
+            "path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod\\addons\\tf2-content-gmodcontent"
+          }
+        ]
+      },
+      "references": [
+        "world:concrete/concretewall060f"
       ]
     }
   ],

@@ -1,0 +1,694 @@
+{
+  "id": "g_7_7",
+  "lod": 0,
+  "bounds": {
+    "minX": 0,
+    "minY": -423,
+    "maxX": 2048,
+    "maxY": 1625
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 7,
+    "y": 7
+  },
+  "counts": {
+    "worldFaces": 42,
+    "staticProps": 7,
+    "placeholderWorldFaces": 8,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 103,
+    "worldVerts": 187,
+    "worldBytes": 7416,
+    "propsTris": 84,
+    "propsVerts": 56,
+    "propsBytes": 2688,
+    "totalTris": 187,
+    "totalVerts": 243,
+    "totalBytes": 10104,
+    "drawCallsBeforeInstancing": 18,
+    "drawCallsAfterInstancing": 14
+  },
+  "world": {
+    "faces": [
+      {
+        "position": [
+          332,
+          623,
+          376
+        ],
+        "material": "cs_italy/stonewall01a",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          308,
+          593.3333333333334,
+          160
+        ],
+        "material": "cs_italy/stonewall01",
+        "placeholderMaterial": false,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          343.0091796875,
+          589,
+          179.2
+        ],
+        "material": "cs_italy/stonewall01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          332,
+          530,
+          88
+        ],
+        "material": "cs_italy/stonewall01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          328.6091796875,
+          576.2,
+          241.6
+        ],
+        "material": "cs_italy/stonewall01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          247.2,
+          607,
+          366.4
+        ],
+        "material": "cs_italy/stonewall01a",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          93.59986877441406,
+          619.8,
+          424
+        ],
+        "material": "cs_italy/stonewall01a",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          135.4999179840088,
+          623,
+          328
+        ],
+        "material": "cs_italy/stonewall01",
+        "placeholderMaterial": false,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          308,
+          1291,
+          262
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 8,
+        "triCount": 6,
+        "byteEstimate": 432
+      },
+      {
+        "position": [
+          308,
+          1040,
+          196
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          308,
+          1044,
+          340.8
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          308,
+          1278,
+          344
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          154,
+          1041,
+          360
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          154,
+          1278,
+          360
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          154,
+          1078,
+          328
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          154,
+          1478,
+          328
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          154,
+          1098,
+          344
+        ],
+        "material": "maps/rp_evocity_v33x/bridge/se1_metal_wall_02_-16_1668_137",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          154,
+          1458,
+          344
+        ],
+        "material": "maps/rp_evocity_v33x/bridge/se1_metal_wall_02_-11_748_137",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          154,
+          1498,
+          344
+        ],
+        "material": "maps/rp_evocity_v33x/bridge/se1_metal_wall_02_-16_1668_137",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          154,
+          1058,
+          344
+        ],
+        "material": "maps/rp_evocity_v33x/bridge/se1_metal_wall_02_-11_748_137",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          154,
+          1304,
+          64
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          154,
+          1040,
+          64
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          578,
+          428,
+          696
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 6,
+        "triCount": 4,
+        "byteEstimate": 288
+      },
+      {
+        "position": [
+          154,
+          639,
+          344
+        ],
+        "material": "maps/rp_evocity_v33x/bridge/se1_metal_wall_02_-2736_126_128",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          294.4,
+          645,
+          691.2
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          289,
+          642,
+          720
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          308,
+          801,
+          222.4
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 5,
+        "triCount": 3,
+        "byteEstimate": 216
+      },
+      {
+        "position": [
+          308,
+          851.5,
+          344
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          154,
+          851.5,
+          360
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          154,
+          659,
+          328
+        ],
+        "material": "de_train/train_officetile_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          154,
+          679,
+          344
+        ],
+        "material": "maps/rp_evocity_v33x/bridge/se1_metal_wall_02_-11_748_137",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          154,
+          831.5,
+          64
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          289,
+          319.5,
+          720
+        ],
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          308,
+          627,
+          29
+        ],
+        "material": "maps/rp_evocity_v33x/cs_assault/pavement001a_847_3906_126",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          154,
+          627,
+          64
+        ],
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          455,
+          615,
+          520
+        ],
+        "material": "nature/cliffface001a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          455,
+          615,
+          216
+        ],
+        "material": "nature/cliffface001a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          554,
+          -405.5,
+          216
+        ],
+        "material": "nature/cliffface001a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          554,
+          -405.5,
+          520
+        ],
+        "material": "nature/cliffface001a",
+        "placeholderMaterial": true,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          52,
+          371,
+          64
+        ],
+        "material": "sgtsicktextures/sicknessroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          15.250030517578125,
+          -94.9998950958252,
+          64
+        ],
+        "material": "sgtsicktextures/sicknessroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      },
+      {
+        "position": [
+          44.500003814697266,
+          52.000017166137695,
+          64
+        ],
+        "material": "sgtsicktextures/sicknessroad_01",
+        "placeholderMaterial": false,
+        "vertexCount": 4,
+        "triCount": 2,
+        "byteEstimate": 144
+      }
+    ]
+  },
+  "props": {
+    "instances": [
+      {
+        "model": "sickness/speedlimit_02",
+        "sourceModel": "sickness/speedlimit_02",
+        "placeholderModel": false,
+        "origin": [
+          345.01800537109375,
+          334.66900634765625,
+          62.49909973144531
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/cs_office/light_security",
+        "sourceModel": "props/cs_office/light_security",
+        "placeholderModel": false,
+        "origin": [
+          308,
+          1478,
+          192
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/cs_office/light_security",
+        "sourceModel": "props/cs_office/light_security",
+        "placeholderModel": false,
+        "origin": [
+          308,
+          1078,
+          192
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_lighting/corner_light_180",
+        "sourceModel": "props_lighting/corner_light_180",
+        "placeholderModel": false,
+        "origin": [
+          308,
+          878,
+          359.8370056152344
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_lighting/corner_light_180",
+        "sourceModel": "props_lighting/corner_light_180",
+        "placeholderModel": false,
+        "origin": [
+          308,
+          1058,
+          359.8370056152344
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_lighting/corner_light_180",
+        "sourceModel": "props_lighting/corner_light_180",
+        "placeholderModel": false,
+        "origin": [
+          308,
+          1278,
+          359.8370056152344
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_lighting/corner_light_180",
+        "sourceModel": "props_lighting/corner_light_180",
+        "placeholderModel": false,
+        "origin": [
+          308,
+          1458,
+          359.8370056152344
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    ]
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

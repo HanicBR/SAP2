@@ -10,6 +10,7 @@ export type AdminPageKey =
   | 'importLogs'
   | 'servers'
   | 'serverDetails'
+  | 'serverView3d'
   | 'duplicates'
   | 'users'
   | 'settings'
@@ -26,6 +27,7 @@ const SUPERADMIN_PAGES: AdminPageKey[] = [
   'importLogs',
   'servers',
   'serverDetails',
+  'serverView3d',
   'duplicates',
   'users',
   'settings',
