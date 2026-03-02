@@ -111,7 +111,8 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
         highlight: true
       }
     ]
-  }
+  },
+  viewerMapOverlays: []
 };
 
 // Mock Servers

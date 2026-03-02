@@ -57,6 +57,39 @@ const normalizeVipPlans = (plans: SiteConfig['vip']['plans']): SiteConfig['vip']
     };
   });
 
+const normalizeViewerMapOverlays = (
+  overlays: unknown,
+): NonNullable<SiteConfig['viewerMapOverlays']> => {
+  if (!Array.isArray(overlays)) return [];
+  return overlays
+    .map((entry) => {
+      if (!entry || typeof entry !== 'object') return null;
+      const source = entry as Record<string, unknown>;
+      const map = String(source.map || '').trim();
+      const imageUrl = String(source.imageUrl || '').trim();
+      const worldMinX = Number(source.worldMinX);
+      const worldMinY = Number(source.worldMinY);
+      const worldMaxX = Number(source.worldMaxX);
+      const worldMaxY = Number(source.worldMaxY);
+      if (!map || !imageUrl) return null;
+      if (!Number.isFinite(worldMinX) || !Number.isFinite(worldMinY)) return null;
+      if (!Number.isFinite(worldMaxX) || !Number.isFinite(worldMaxY)) return null;
+      if (worldMaxX <= worldMinX || worldMaxY <= worldMinY) return null;
+      return {
+        map,
+        imageUrl,
+        worldMinX,
+        worldMinY,
+        worldMaxX,
+        worldMaxY,
+        enabled: source.enabled !== false,
+        flipX: source.flipX === true,
+        flipY: source.flipY !== false,
+      };
+    })
+    .filter((entry): entry is NonNullable<SiteConfig['viewerMapOverlays']>[number] => Boolean(entry));
+};
+
 const normalizeSiteConfig = (raw?: Partial<SiteConfig>): SiteConfig => {
   const next = (raw || {}) as Partial<SiteConfig>;
   const nextVip = (next.vip || {}) as Partial<SiteConfig['vip']>;
@@ -116,6 +149,7 @@ const normalizeSiteConfig = (raw?: Partial<SiteConfig>): SiteConfig => {
           },
         }
       : {}),
+    viewerMapOverlays: normalizeViewerMapOverlays(next.viewerMapOverlays),
   };
 };
 

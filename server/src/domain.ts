@@ -185,6 +185,18 @@ export interface VipFaqItemConfig {
   highlight?: boolean;
 }
 
+export interface ViewerMapOverlayConfig {
+  map: string;
+  imageUrl: string;
+  worldMinX: number;
+  worldMinY: number;
+  worldMaxX: number;
+  worldMaxY: number;
+  enabled?: boolean;
+  flipX?: boolean;
+  flipY?: boolean;
+}
+
 export interface SiteConfig {
   general: {
     siteName: string;
@@ -229,4 +241,5 @@ export interface SiteConfig {
     grantTemplate: string;
     revokeTemplate: string;
   };
+  viewerMapOverlays?: ViewerMapOverlayConfig[];
 }

@@ -126,6 +126,72 @@ const parseMode = (value: unknown): 'TTT' | 'SANDBOX' | 'MURDER' | undefined => 
   return undefined;
 };
 
+type ViewerMapOverlayResolved = {
+  map: string;
+  imageUrl: string;
+  worldMinX: number;
+  worldMinY: number;
+  worldMaxX: number;
+  worldMaxY: number;
+  enabled: boolean;
+  flipX: boolean;
+  flipY: boolean;
+};
+
+const normalizeMapKey = (value: unknown): string =>
+  String(value || '')
+    .trim()
+    .toLowerCase();
+
+const toFiniteNumber = (value: unknown): number | undefined => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
+const parseViewerMapOverlayEntry = (entry: unknown): ViewerMapOverlayResolved | null => {
+  if (!entry || typeof entry !== 'object') return null;
+  const source = entry as Record<string, unknown>;
+
+  const map = String(source.map || '').trim();
+  const imageUrl = String(source.imageUrl || '').trim();
+  const worldMinX = toFiniteNumber(source.worldMinX);
+  const worldMinY = toFiniteNumber(source.worldMinY);
+  const worldMaxX = toFiniteNumber(source.worldMaxX);
+  const worldMaxY = toFiniteNumber(source.worldMaxY);
+
+  if (!map || !imageUrl) return null;
+  if (worldMinX === undefined || worldMinY === undefined) return null;
+  if (worldMaxX === undefined || worldMaxY === undefined) return null;
+  if (worldMaxX <= worldMinX || worldMaxY <= worldMinY) return null;
+
+  return {
+    map,
+    imageUrl,
+    worldMinX,
+    worldMinY,
+    worldMaxX,
+    worldMaxY,
+    enabled: source.enabled !== false,
+    flipX: source.flipX === true,
+    flipY: source.flipY !== false,
+  };
+};
+
+const getViewerMapOverlaysFromSiteConfig = async (): Promise<ViewerMapOverlayResolved[]> => {
+  const row = await prisma.siteConfig.findUnique({
+    where: { id: 1 },
+    select: { data: true },
+  });
+
+  const rawList = Array.isArray((row?.data as any)?.viewerMapOverlays)
+    ? ((row?.data as any).viewerMapOverlays as unknown[])
+    : [];
+
+  return rawList
+    .map((entry) => parseViewerMapOverlayEntry(entry))
+    .filter((entry): entry is ViewerMapOverlayResolved => Boolean(entry));
+};
+
 type ViewerActionType = 'KICK' | 'MUTE_10M' | 'GAG_10M' | 'UNMUTE' | 'UNGAG';
 
 const VIEWER_ACTIONS = new Set<ViewerActionType>([
@@ -677,6 +743,78 @@ router.get('/:id/viewer-state', authMiddleware, requireRole(UserRole.ADMIN), asy
       maxPlayers: server.maxPlayers,
       ...(server.currentMap ? { currentMap: server.currentMap } : {}),
       ...(server.lastHeartbeat ? { lastHeartbeat: server.lastHeartbeat.toISOString() } : {}),
+    },
+  });
+});
+
+// Viewer map overlay metadata from site-config (PR-06 WebViewer map projection)
+router.get('/:id/viewer-map-overlay', authMiddleware, requireRole(UserRole.ADMIN), async (req, res) => {
+  const { id } = req.params as { id: string };
+  const requestedMapRaw = String((req.query as any)?.map || '').trim();
+
+  const server = await prisma.gameServer.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      currentMap: true,
+    },
+  });
+  if (!server) {
+    return res.status(404).json({ error: 'Server not found' });
+  }
+
+  const viewerState = getServerWsViewerState(id);
+  const currentMap = normalizeMapName(viewerState?.map || server.currentMap || undefined);
+  const requestedMap = normalizeMapName(requestedMapRaw || currentMap || undefined);
+
+  if (!requestedMap) {
+    return res.json({
+      serverId: id,
+      ...(requestedMapRaw ? { requestedMap: requestedMapRaw } : {}),
+      ...(currentMap ? { currentMap } : {}),
+      available: false,
+      reason: 'map_not_provided',
+    });
+  }
+
+  const overlays = await getViewerMapOverlaysFromSiteConfig();
+  if (!overlays.length) {
+    return res.json({
+      serverId: id,
+      requestedMap,
+      ...(currentMap ? { currentMap } : {}),
+      available: false,
+      reason: 'overlay_config_empty',
+    });
+  }
+
+  const targetKey = normalizeMapKey(requestedMap);
+  const resolved = overlays.find((entry) => entry.enabled && normalizeMapKey(entry.map) === targetKey);
+
+  if (!resolved) {
+    return res.json({
+      serverId: id,
+      requestedMap,
+      ...(currentMap ? { currentMap } : {}),
+      available: false,
+      reason: 'overlay_not_found',
+    });
+  }
+
+  return res.json({
+    serverId: id,
+    requestedMap,
+    ...(currentMap ? { currentMap } : {}),
+    available: true,
+    overlay: {
+      map: resolved.map,
+      imageUrl: resolved.imageUrl,
+      worldMinX: resolved.worldMinX,
+      worldMinY: resolved.worldMinY,
+      worldMaxX: resolved.worldMaxX,
+      worldMaxY: resolved.worldMaxY,
+      flipX: resolved.flipX,
+      flipY: resolved.flipY,
     },
   });
 });

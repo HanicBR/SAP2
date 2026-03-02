@@ -64,6 +64,38 @@ export interface ServerViewerStateSnapshot {
   players: ServerViewerStatePlayer[];
 }
 
+export interface ViewerMapOverlayConfig {
+  map: string;
+  imageUrl: string;
+  worldMinX: number;
+  worldMinY: number;
+  worldMaxX: number;
+  worldMaxY: number;
+  enabled?: boolean;
+  flipX?: boolean;
+  flipY?: boolean;
+}
+
+export interface ServerViewerMapOverlayResolved {
+  map: string;
+  imageUrl: string;
+  worldMinX: number;
+  worldMinY: number;
+  worldMaxX: number;
+  worldMaxY: number;
+  flipX: boolean;
+  flipY: boolean;
+}
+
+export interface ServerViewerMapOverlayResponse {
+  serverId: string;
+  requestedMap?: string;
+  currentMap?: string;
+  available: boolean;
+  overlay?: ServerViewerMapOverlayResolved;
+  reason?: string;
+}
+
 export interface ServerWsViewerStateItem {
   serverId: string;
   transport: 'websocket';
@@ -868,6 +900,7 @@ export interface SiteConfig {
     grantTemplate: string;
     revokeTemplate: string;
   };
+  viewerMapOverlays?: ViewerMapOverlayConfig[];
 }
 
 export type LoadingScreenMode = 'TTT' | 'SANDBOX' | 'MURDER' | 'CUSTOM';

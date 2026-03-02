@@ -128,6 +128,7 @@ const defaultSiteConfig = {
     ignoredCommands: [],
     rawTextFilters: [],
   },
+  viewerMapOverlays: [],
 };
 
 const defaultServers = [

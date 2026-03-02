@@ -6,6 +6,7 @@ import { GameMode, SiteConfig, VipBillingOptionConfig, VipFaqItemConfig, VipPlan
 
 type TabId = 'branding' | 'home' | 'vip' | 'ops';
 type NoticeTone = 'success' | 'error' | 'info';
+type ViewerMapOverlayDraft = NonNullable<SiteConfig['viewerMapOverlays']>[number];
 
 type Notice = {
   tone: NoticeTone;
@@ -75,8 +76,49 @@ const makeNewFaqItem = (): VipFaqItemConfig => ({
   highlight: false,
 });
 
+const makeNewViewerMapOverlay = (): ViewerMapOverlayDraft => ({
+  map: 'rp_evocity_v33x',
+  imageUrl: '',
+  worldMinX: -16384,
+  worldMinY: -16384,
+  worldMaxX: 16384,
+  worldMaxY: 16384,
+  enabled: true,
+  flipX: false,
+  flipY: true,
+});
+
 const normalizeConfig = (raw: SiteConfig): SiteConfig => {
   const source = clone(raw || DEFAULT_SITE_CONFIG);
+  const rawViewerMapOverlays = Array.isArray((source as any).viewerMapOverlays)
+    ? ((source as any).viewerMapOverlays as any[])
+    : [];
+  const viewerMapOverlays: ViewerMapOverlayDraft[] = rawViewerMapOverlays
+    .map((entry) => {
+      if (!entry || typeof entry !== 'object') return null;
+      const map = String((entry as any).map || '').trim();
+      const imageUrl = String((entry as any).imageUrl || '').trim();
+      const worldMinX = parseFloatSafe(String((entry as any).worldMinX ?? '-16384'), -16384);
+      const worldMinY = parseFloatSafe(String((entry as any).worldMinY ?? '-16384'), -16384);
+      const worldMaxX = parseFloatSafe(String((entry as any).worldMaxX ?? '16384'), 16384);
+      const worldMaxY = parseFloatSafe(String((entry as any).worldMaxY ?? '16384'), 16384);
+      const enabled = (entry as any).enabled !== false;
+      const flipX = (entry as any).flipX === true;
+      const flipY = (entry as any).flipY !== false;
+      if (!map) return null;
+      return {
+        map,
+        imageUrl,
+        worldMinX,
+        worldMinY,
+        worldMaxX,
+        worldMaxY,
+        enabled,
+        flipX,
+        flipY,
+      } as ViewerMapOverlayDraft;
+    })
+    .filter((entry): entry is ViewerMapOverlayDraft => Boolean(entry));
   return {
     ...DEFAULT_SITE_CONFIG,
     ...source,
@@ -123,6 +165,7 @@ const normalizeConfig = (raw: SiteConfig): SiteConfig => {
       grantTemplate: String(source.vipAutomation?.grantTemplate || '').trim(),
       revokeTemplate: String(source.vipAutomation?.revokeTemplate || '').trim(),
     },
+    viewerMapOverlays,
   };
 };
 
@@ -146,6 +189,29 @@ const buildPayload = (
     grantTemplate: String(draft.vipAutomation?.grantTemplate || '').trim(),
     revokeTemplate: String(draft.vipAutomation?.revokeTemplate || '').trim(),
   },
+  viewerMapOverlays: (draft.viewerMapOverlays || [])
+    .map((entry) => ({
+      map: String(entry.map || '').trim(),
+      imageUrl: String(entry.imageUrl || '').trim(),
+      worldMinX: Number(entry.worldMinX),
+      worldMinY: Number(entry.worldMinY),
+      worldMaxX: Number(entry.worldMaxX),
+      worldMaxY: Number(entry.worldMaxY),
+      enabled: entry.enabled !== false,
+      flipX: entry.flipX === true,
+      flipY: entry.flipY !== false,
+    }))
+    .filter(
+      (entry) =>
+        entry.map &&
+        entry.imageUrl &&
+        Number.isFinite(entry.worldMinX) &&
+        Number.isFinite(entry.worldMinY) &&
+        Number.isFinite(entry.worldMaxX) &&
+        Number.isFinite(entry.worldMaxY) &&
+        entry.worldMaxX > entry.worldMinX &&
+        entry.worldMaxY > entry.worldMinY,
+    ),
 });
 
 const tabs: Array<{
@@ -234,6 +300,29 @@ const Settings: React.FC = () => {
         revokeTemplate: String(prev.vipAutomation?.revokeTemplate || ''),
         ...patch,
       },
+    }));
+  };
+
+  const updateViewerMapOverlay = (index: number, patch: Partial<ViewerMapOverlayDraft>) => {
+    setDraft((prev) => {
+      const current = [...(prev.viewerMapOverlays || [])];
+      if (!current[index]) return prev;
+      current[index] = { ...current[index], ...patch };
+      return { ...prev, viewerMapOverlays: current };
+    });
+  };
+
+  const addViewerMapOverlay = () => {
+    setDraft((prev) => ({
+      ...prev,
+      viewerMapOverlays: [...(prev.viewerMapOverlays || []), makeNewViewerMapOverlay()],
+    }));
+  };
+
+  const removeViewerMapOverlay = (index: number) => {
+    setDraft((prev) => ({
+      ...prev,
+      viewerMapOverlays: (prev.viewerMapOverlays || []).filter((_, entryIndex) => entryIndex !== index),
     }));
   };
 
@@ -1067,6 +1156,151 @@ const Settings: React.FC = () => {
           </div>
         ) : (
           <p className="mt-3 text-xs text-zinc-500">Painel recolhido para evitar alteracao acidental.</p>
+        )}
+      </div>
+
+      <div className={CARD_CLASS}>
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <div>
+            <h3 className="text-sm font-black uppercase tracking-wide text-white">WebViewer map overlays</h3>
+            <p className="mt-1 text-xs text-zinc-500">
+              Mapeia coordenadas XY do `viewer_state` para imagem tatica por mapa.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={addViewerMapOverlay}
+            className="rounded border border-zinc-700 bg-zinc-950 px-2.5 py-1 text-xs font-bold uppercase text-zinc-300"
+          >
+            + Overlay
+          </button>
+        </div>
+
+        {(draft.viewerMapOverlays || []).length === 0 ? (
+          <p className="text-xs text-zinc-500">
+            Nenhum overlay configurado. Adicione um mapa para sair do plano relativo no WebViewer.
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {(draft.viewerMapOverlays || []).map((overlay, index) => (
+              <div
+                key={`overlay-${index}-${overlay.map}`}
+                className="rounded border border-zinc-800 bg-zinc-950 p-3"
+              >
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <span className="text-xs font-bold uppercase text-zinc-400">Overlay #{index + 1}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeViewerMapOverlay(index)}
+                    className="rounded border border-red-900/60 bg-red-900/20 px-2 py-1 text-xs font-bold uppercase text-red-300"
+                  >
+                    Remover
+                  </button>
+                </div>
+
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div>
+                    <label className={LABEL_CLASS}>Map name</label>
+                    <input
+                      type="text"
+                      value={overlay.map}
+                      onChange={(event) => updateViewerMapOverlay(index, { map: event.target.value })}
+                      className={`${INPUT_CLASS} font-mono`}
+                      placeholder="rp_evocity_v33x"
+                    />
+                  </div>
+                  <div>
+                    <label className={LABEL_CLASS}>Image URL</label>
+                    <input
+                      type="text"
+                      value={overlay.imageUrl}
+                      onChange={(event) => updateViewerMapOverlay(index, { imageUrl: event.target.value })}
+                      className={INPUT_CLASS}
+                      placeholder="https://.../map.png"
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-3 grid gap-3 md:grid-cols-4">
+                  <div>
+                    <label className={LABEL_CLASS}>worldMinX</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={overlay.worldMinX}
+                      onChange={(event) =>
+                        updateViewerMapOverlay(index, { worldMinX: parseFloatSafe(event.target.value, overlay.worldMinX) })
+                      }
+                      className={`${INPUT_CLASS} font-mono`}
+                    />
+                  </div>
+                  <div>
+                    <label className={LABEL_CLASS}>worldMinY</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={overlay.worldMinY}
+                      onChange={(event) =>
+                        updateViewerMapOverlay(index, { worldMinY: parseFloatSafe(event.target.value, overlay.worldMinY) })
+                      }
+                      className={`${INPUT_CLASS} font-mono`}
+                    />
+                  </div>
+                  <div>
+                    <label className={LABEL_CLASS}>worldMaxX</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={overlay.worldMaxX}
+                      onChange={(event) =>
+                        updateViewerMapOverlay(index, { worldMaxX: parseFloatSafe(event.target.value, overlay.worldMaxX) })
+                      }
+                      className={`${INPUT_CLASS} font-mono`}
+                    />
+                  </div>
+                  <div>
+                    <label className={LABEL_CLASS}>worldMaxY</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={overlay.worldMaxY}
+                      onChange={(event) =>
+                        updateViewerMapOverlay(index, { worldMaxY: parseFloatSafe(event.target.value, overlay.worldMaxY) })
+                      }
+                      className={`${INPUT_CLASS} font-mono`}
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-3 grid gap-2 md:grid-cols-3">
+                  <label className="inline-flex items-center gap-2 rounded border border-zinc-800 bg-zinc-900/40 px-3 py-2 text-xs text-zinc-300">
+                    <input
+                      type="checkbox"
+                      checked={overlay.enabled !== false}
+                      onChange={(event) => updateViewerMapOverlay(index, { enabled: event.target.checked })}
+                    />
+                    Enabled
+                  </label>
+                  <label className="inline-flex items-center gap-2 rounded border border-zinc-800 bg-zinc-900/40 px-3 py-2 text-xs text-zinc-300">
+                    <input
+                      type="checkbox"
+                      checked={overlay.flipX === true}
+                      onChange={(event) => updateViewerMapOverlay(index, { flipX: event.target.checked })}
+                    />
+                    Flip X
+                  </label>
+                  <label className="inline-flex items-center gap-2 rounded border border-zinc-800 bg-zinc-900/40 px-3 py-2 text-xs text-zinc-300">
+                    <input
+                      type="checkbox"
+                      checked={overlay.flipY !== false}
+                      onChange={(event) => updateViewerMapOverlay(index, { flipY: event.target.checked })}
+                    />
+                    Flip Y
+                  </label>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>

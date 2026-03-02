@@ -8,6 +8,7 @@ import {
   ServerStatus,
   ServerViewerActionStatusResponse,
   ServerViewerActionType,
+  ServerViewerMapOverlayResolved,
   ServerViewerStatePlayer,
   ServerViewerStateSnapshot,
 } from '../../types';
@@ -306,6 +307,8 @@ const ServerDetails: React.FC = () => {
   const [viewerActionBusy, setViewerActionBusy] = useState(false);
   const [viewerActionError, setViewerActionError] = useState<string | null>(null);
   const [viewerActionStatus, setViewerActionStatus] = useState<ServerViewerActionStatusResponse | null>(null);
+  const [viewerMapOverlay, setViewerMapOverlay] = useState<ServerViewerMapOverlayResolved | null>(null);
+  const [viewerMapOverlayReason, setViewerMapOverlayReason] = useState<string | null>(null);
   const viewerActionPollTokenRef = useRef<number>(0);
 
   const loadData = useCallback(
@@ -557,6 +560,49 @@ const ServerDetails: React.FC = () => {
   }, [viewerState]);
   const hasFreshViewerSnapshot =
     Number.isFinite(viewerSnapshotAgeSeconds) && viewerSnapshotAgeSeconds <= VIEWER_STATE_STALE_SECONDS;
+  const viewerMapName = useMemo(() => {
+    const resolved = String(
+      viewerState?.map || liveState?.map || currentState?.currentMap || server?.currentMap || '',
+    ).trim();
+    if (!resolved) return '';
+    if (resolved.toLowerCase() === 'desconhecido') return '';
+    return resolved;
+  }, [currentState?.currentMap, liveState?.map, server?.currentMap, viewerState?.map]);
+  const hasViewerMapOverlay = Boolean(viewerMapOverlay?.imageUrl);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadOverlay = async () => {
+      if (!serverId) return;
+      if (!viewerMapName) {
+        setViewerMapOverlay(null);
+        setViewerMapOverlayReason('map_not_available');
+        return;
+      }
+
+      try {
+        const response = await ApiService.getServerViewerMapOverlay(serverId, viewerMapName);
+        if (cancelled) return;
+        if (response.available && response.overlay) {
+          setViewerMapOverlay(response.overlay);
+          setViewerMapOverlayReason(null);
+          return;
+        }
+        setViewerMapOverlay(null);
+        setViewerMapOverlayReason(String(response.reason || 'overlay_not_found'));
+      } catch {
+        if (cancelled) return;
+        setViewerMapOverlay(null);
+        setViewerMapOverlayReason('overlay_lookup_failed');
+      }
+    };
+
+    void loadOverlay();
+    return () => {
+      cancelled = true;
+    };
+  }, [serverId, viewerMapName]);
 
   useEffect(() => {
     if (!viewerPlayers.length) {
@@ -582,6 +628,25 @@ const ServerDetails: React.FC = () => {
 
   const viewerMapPoints = useMemo(() => {
     if (!viewerPlayers.length) return [];
+
+    if (viewerMapOverlay) {
+      const width = viewerMapOverlay.worldMaxX - viewerMapOverlay.worldMinX;
+      const height = viewerMapOverlay.worldMaxY - viewerMapOverlay.worldMinY;
+      if (width > 0 && height > 0) {
+        return viewerPlayers.map((entry) => {
+          let nx = clamp01((Number(entry.pos?.x || 0) - viewerMapOverlay.worldMinX) / width);
+          let ny = clamp01((Number(entry.pos?.y || 0) - viewerMapOverlay.worldMinY) / height);
+          if (viewerMapOverlay.flipX) nx = 1 - nx;
+          if (viewerMapOverlay.flipY) ny = 1 - ny;
+          return {
+            player: entry,
+            isSelected: entry.steamId === viewerSelectedSteamId,
+            leftPct: nx * 100,
+            topPct: ny * 100,
+          };
+        });
+      }
+    }
 
     const focusX =
       selectedViewerPlayer?.pos?.x ??
@@ -611,7 +676,7 @@ const ServerDetails: React.FC = () => {
         topPct: (1 - ny) * 100,
       };
     });
-  }, [viewerPlayers, selectedViewerPlayer, viewerSelectedSteamId, viewerZoomPct]);
+  }, [viewerMapOverlay, viewerPlayers, selectedViewerPlayer, viewerSelectedSteamId, viewerZoomPct]);
 
   const viewerStatusBadge = useMemo(() => {
     if (viewerWsStatus === 'error') {
@@ -857,28 +922,51 @@ const ServerDetails: React.FC = () => {
                 <p className="text-xs text-zinc-400 uppercase font-bold">
                   Plano tatico 2D ({viewerState?.map || displayMap})
                 </p>
-                <label className="text-xs text-zinc-400 flex items-center gap-2">
-                  Zoom
-                  <input
-                    type="range"
-                    min={50}
-                    max={220}
-                    step={5}
-                    value={viewerZoomPct}
-                    onChange={(event) => setViewerZoomPct(Number(event.target.value))}
-                  />
-                  <span className="font-mono text-zinc-200">{viewerZoomPct}%</span>
-                </label>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span
+                    className={`px-2 py-0.5 rounded border text-[10px] font-bold uppercase ${
+                      hasViewerMapOverlay
+                        ? 'border-emerald-700 bg-emerald-900/20 text-emerald-300'
+                        : 'border-zinc-700 bg-zinc-800 text-zinc-400'
+                    }`}
+                  >
+                    {hasViewerMapOverlay ? 'Overlay real' : 'Plano relativo'}
+                  </span>
+                  {!hasViewerMapOverlay && (
+                    <label className="text-xs text-zinc-400 flex items-center gap-2">
+                      Zoom
+                      <input
+                        type="range"
+                        min={50}
+                        max={220}
+                        step={5}
+                        value={viewerZoomPct}
+                        onChange={(event) => setViewerZoomPct(Number(event.target.value))}
+                      />
+                      <span className="font-mono text-zinc-200">{viewerZoomPct}%</span>
+                    </label>
+                  )}
+                </div>
               </div>
-              <div
-                className="relative h-72 rounded border border-zinc-800 overflow-hidden"
-                style={{
-                  backgroundColor: '#0a0a0a',
-                  backgroundImage:
-                    'linear-gradient(rgba(63,63,70,0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(63,63,70,0.25) 1px, transparent 1px)',
-                  backgroundSize: '32px 32px',
-                }}
-              >
+              <div className="relative h-72 rounded border border-zinc-800 overflow-hidden bg-zinc-950">
+                {hasViewerMapOverlay && viewerMapOverlay ? (
+                  <img
+                    src={viewerMapOverlay.imageUrl}
+                    alt={`Overlay ${viewerMapOverlay.map}`}
+                    className="pointer-events-none absolute inset-0 h-full w-full select-none object-fill"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ) : null}
+                <div
+                  className="pointer-events-none absolute inset-0"
+                  style={{
+                    backgroundImage:
+                      'linear-gradient(rgba(63,63,70,0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(63,63,70,0.25) 1px, transparent 1px)',
+                    backgroundSize: '32px 32px',
+                    opacity: hasViewerMapOverlay ? 0.2 : 1,
+                  }}
+                />
                 {!viewerMapPoints.length && (
                   <div className="absolute inset-0 flex items-center justify-center text-zinc-500 text-sm">
                     Sem dados de viewer_state para renderizar.
@@ -900,9 +988,18 @@ const ServerDetails: React.FC = () => {
                   />
                 ))}
               </div>
-              <p className="mt-2 text-[11px] text-zinc-500">
-                Referencia relativa ao frame atual. Sem geometria real do mapa nesta fase.
-              </p>
+              {hasViewerMapOverlay && viewerMapOverlay ? (
+                <p className="mt-2 text-[11px] text-zinc-500">
+                  Overlay ativo para <span className="font-mono">{viewerMapOverlay.map}</span> (
+                  {viewerMapOverlay.flipX ? 'flipX on' : 'flipX off'} /{' '}
+                  {viewerMapOverlay.flipY ? 'flipY on' : 'flipY off'}).
+                </p>
+              ) : (
+                <p className="mt-2 text-[11px] text-zinc-500">
+                  Referencia relativa ao frame atual. Sem geometria real do mapa nesta fase.
+                  {viewerMapOverlayReason ? ` (${viewerMapOverlayReason})` : ''}
+                </p>
+              )}
             </div>
 
             <div className="bg-zinc-950/40 border border-zinc-800 rounded p-3">

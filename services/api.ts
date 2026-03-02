@@ -1,7 +1,7 @@
 
 
 import { MOCK_SERVERS, MOCK_EVENTS, MOCK_STATS, VIP_PLANS, MOCK_SUSPICIOUS_GROUPS, MOCK_PLAYERS, MOCK_USERS, MOCK_TRANSACTIONS, generateServerAnalytics, DEFAULT_SITE_CONFIG } from '../constants';
-import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionProofUploadResult, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel, ServerLiveStateResponse, ServerViewerActionDispatchResponse, ServerViewerActionRequest, ServerViewerActionStatusResponse, ServerViewerStateResponse, ServerWsLiveStateListResponse, ServerWsViewerStateListResponse, PlayerAliasHistoryResponse, PlayerAvatarHistoryResponse, LoadingScreenProfile, LoadingScreensResponse, LoadingMediaUploadResult, LoadingTelemetryRange, LoadingTelemetrySlugsResponse, LoadingTelemetrySummaryResponse, AuthRegisterResponse } from '../types';
+import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionProofUploadResult, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel, ServerLiveStateResponse, ServerViewerActionDispatchResponse, ServerViewerActionRequest, ServerViewerActionStatusResponse, ServerViewerMapOverlayResponse, ServerViewerStateResponse, ServerWsLiveStateListResponse, ServerWsViewerStateListResponse, PlayerAliasHistoryResponse, PlayerAvatarHistoryResponse, LoadingScreenProfile, LoadingScreensResponse, LoadingMediaUploadResult, LoadingTelemetryRange, LoadingTelemetrySlugsResponse, LoadingTelemetrySummaryResponse, AuthRegisterResponse } from '../types';
 
 // Utility to simulate network delay (used as fallback)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -383,6 +383,31 @@ export const ApiService = {
         ...(mockServer?.currentMap ? { currentMap: mockServer.currentMap } : {}),
         ...(mockServer?.lastHeartbeat ? { lastHeartbeat: mockServer.lastHeartbeat } : {}),
       },
+    };
+  },
+
+  getServerViewerMapOverlay: async (
+    serverId: string,
+    map?: string,
+  ): Promise<ServerViewerMapOverlayResponse> => {
+    if (hasApi) {
+      try {
+        const query = String(map || '').trim();
+        const path = query
+          ? `/servers/${serverId}/viewer-map-overlay?map=${encodeURIComponent(query)}`
+          : `/servers/${serverId}/viewer-map-overlay`;
+        return await apiFetch<ServerViewerMapOverlayResponse>(path);
+      } catch (error) {
+        console.error('API getServerViewerMapOverlay failed, returning unavailable overlay:', error);
+      }
+    }
+
+    await delay(80);
+    return {
+      serverId,
+      ...(String(map || '').trim() ? { requestedMap: String(map || '').trim() } : {}),
+      available: false,
+      reason: 'api_unavailable',
     };
   },
 
