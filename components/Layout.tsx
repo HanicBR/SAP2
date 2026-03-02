@@ -194,6 +194,7 @@ const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   { key: 'logs', name: 'Logs e Eventos', path: '/admin/logs', icon: Icons.List },
   { key: 'servers', name: 'Servidores', path: '/admin/servers', icon: Icons.Server },
   { key: 'duplicates', name: 'Deteccao de Duplicatas', path: '/admin/duplicates', icon: Icons.Fingerprint },
+  { key: 'addonCommands', name: 'Comandos Addon', path: '/admin/addon-commands', icon: Icons.Terminal },
   { key: 'settings', name: 'Configuracoes Site', path: '/admin/settings', icon: Icons.Settings },
   { key: 'loadingScreens', name: 'Telas de Loading', path: '/admin/loading-screens', icon: Icons.Image },
   { key: 'users', name: 'Usuarios do Sistema', path: '/admin/users', icon: Icons.Users },

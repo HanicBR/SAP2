@@ -29,6 +29,7 @@ const Vips = lazy(() => import('./pages/admin/Vips'));
 const Settings = lazy(() => import('./pages/admin/Settings'));
 const ImportLogs = lazy(() => import('./pages/admin/ImportLogs'));
 const LoadingScreens = lazy(() => import('./pages/admin/LoadingScreens'));
+const AddonCommands = lazy(() => import('./pages/admin/AddonCommands'));
 
 const PageLoader = () => (
   <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center text-zinc-500">
@@ -163,6 +164,7 @@ const App: React.FC = () => {
           <Route path="/admin/servers" element={<RoleRoute page="servers"><Servers /></RoleRoute>} />
           <Route path="/admin/servers/:serverId" element={<RoleRoute page="serverDetails"><ServerDetails /></RoleRoute>} />
           <Route path="/admin/duplicates" element={<RoleRoute page="duplicates"><DuplicateDetection /></RoleRoute>} />
+          <Route path="/admin/addon-commands" element={<RoleRoute page="addonCommands"><AddonCommands /></RoleRoute>} />
           <Route path="/admin/users" element={<RoleRoute page="users"><Users /></RoleRoute>} />
           <Route path="/admin/settings" element={<RoleRoute page="settings"><Settings /></RoleRoute>} />
           <Route path="/admin/loading-screens" element={<RoleRoute page="loadingScreens"><LoadingScreens /></RoleRoute>} />

@@ -13,7 +13,8 @@ export type AdminPageKey =
   | 'duplicates'
   | 'users'
   | 'settings'
-  | 'loadingScreens';
+  | 'loadingScreens'
+  | 'addonCommands';
 
 const SUPERADMIN_PAGES: AdminPageKey[] = [
   'dashboard',
@@ -29,6 +30,7 @@ const SUPERADMIN_PAGES: AdminPageKey[] = [
   'users',
   'settings',
   'loadingScreens',
+  'addonCommands',
 ];
 
 const ADMIN_PAGES: AdminPageKey[] = [
@@ -39,6 +41,7 @@ const ADMIN_PAGES: AdminPageKey[] = [
   'importLogs',
   'duplicates',
   'settings',
+  'addonCommands',
 ];
 
 const MODERATOR_PAGES: AdminPageKey[] = [
@@ -48,6 +51,7 @@ const MODERATOR_PAGES: AdminPageKey[] = [
   'logs',
   'importLogs',
   'duplicates',
+  'addonCommands',
 ];
 
 const PAGE_ACCESS: Record<UserRole, Set<AdminPageKey>> = {
