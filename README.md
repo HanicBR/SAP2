@@ -1,6 +1,6 @@
 ﻿# SAP2
 
-## PR-01: Auditoria de Assets e Mounts (rp_evocity_v33x)
+## PR-01.1: Auditoria de Assets e Mounts (rp_evocity_v33x)
 
 ### 1) Preparar mounts
 
@@ -29,6 +29,10 @@ npm --prefix server run audit:map-assets:evocity
 - Relatorio JSON: `reports/audit-report.json`
 - Gate obrigatorio:
   - o comando retorna erro se `missingAssetsSummary.critical > 0`.
+- Prioridade de resolucao de assets:
+  - `pakfile` interno do BSP (mount virtual, sem extrair em disco)
+  - mapa extraido (`--map-root`)
+  - mounts externos (`gmod/hl2/css/tf2/custom`)
 
 O relatorio inclui:
 - `missingAssetsSummary` (`critical` / `major` / `minor`)
@@ -36,6 +40,9 @@ O relatorio inclui:
 - contadores obrigatorios:
   - `staticProps.uniqueMissingModels`
   - `staticProps.affectedInstances`
+  - `usedMaterialsTotal`
+  - `usedWorldMaterialsWithoutResolvedBaseTexture`
   - `vmtPatchIncludesMissingUnique`
-  - `worldMaterialsWithoutResolvedBaseTexture`
+  - `pakfileScanned`
+  - `pakfileFilesCount`
   - `skyboxInvalid`

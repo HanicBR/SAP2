@@ -1,6 +1,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import zlib from 'zlib';
 
 type Severity = 'critical' | 'major' | 'minor';
 type MissingType = 'mdl' | 'vmt' | 'vtf' | 'patch-include' | 'skybox' | 'world-material';
@@ -49,12 +50,16 @@ type BspLump = {
 };
 
 type BspParsedData = {
-  worldMaterials: string[];
+  usedWorldMaterials: string[];
   staticPropModelNames: string[];
   staticPropModelRefs: number[];
   skyName: string | null;
   bspVersion: number;
   pakfileLength: number;
+  pakfileScanned: boolean;
+  pakfileFilesCount: number;
+  pakArchive: PakArchive | null;
+  pakfileError?: string;
 };
 
 type MountResolution = {
@@ -73,6 +78,20 @@ type MaterialAnalysis = {
   baseTextureCandidates: string[];
   resolvedBaseTexture?: string;
 };
+
+type PakEntry = {
+  name: string;
+  normalizedName: string;
+  flags: number;
+  method: number;
+  compressedSize: number;
+  uncompressedSize: number;
+  localHeaderOffset: number;
+};
+
+type AssetLocation =
+  | { kind: 'filesystem'; sourceId: string; absolutePath: string }
+  | { kind: 'pak'; sourceId: string; entryName: string };
 
 const SUPPORTED_MOUNTS: MountId[] = ['gmod', 'hl2', 'css', 'tf2', 'custom'];
 const SKYBOX_SIDES = ['bk', 'dn', 'ft', 'lf', 'rt', 'up'];
@@ -108,13 +127,16 @@ class MissingTracker {
 
   add(input: MissingInput) {
     const normalizedAsset = normalizeAssetPath(input.asset);
-    const key = `${input.severity}|${input.type}|${normalizedAsset}`;
+    const key = `${input.type}|${normalizedAsset}`;
     const reference = String(input.reference || '').trim() || 'unknown';
     const suggestedMount = input.suggestedMount || inferMountSuggestion(normalizedAsset);
     const current = this.items.get(key);
     if (current) {
       current.occurrences += 1;
       current.references.add(reference);
+      if (SEVERITY_ORDER[input.severity] < SEVERITY_ORDER[current.severity]) {
+        current.severity = input.severity;
+      }
       if (!current.note && input.note) {
         current.note = input.note;
       }
@@ -168,13 +190,176 @@ class MissingTracker {
   }
 }
 
+class PakArchive {
+  private entriesByAsset = new Map<string, PakEntry>();
+  private entriesAll: PakEntry[] = [];
+  private bufferCache = new Map<string, Buffer | null>();
+
+  constructor(private readonly pakData: Buffer) {}
+
+  static fromBuffer(pakData: Buffer): PakArchive {
+    const archive = new PakArchive(pakData);
+    archive.parseCentralDirectory();
+    return archive;
+  }
+
+  private parseCentralDirectory() {
+    if (this.pakData.length < 22) {
+      throw new Error('pak_zip_too_small');
+    }
+
+    let eocdOffset = -1;
+    const minOffset = Math.max(0, this.pakData.length - (0xffff + 22));
+    for (let i = this.pakData.length - 22; i >= minOffset; i -= 1) {
+      if (this.pakData.readUInt32LE(i) === 0x06054b50) {
+        eocdOffset = i;
+        break;
+      }
+    }
+    if (eocdOffset < 0) {
+      throw new Error('pak_eocd_not_found');
+    }
+
+    const totalEntries = this.pakData.readUInt16LE(eocdOffset + 10);
+    const centralDirSize = this.pakData.readUInt32LE(eocdOffset + 12);
+    const centralDirOffset = this.pakData.readUInt32LE(eocdOffset + 16);
+    if (centralDirOffset < 0 || centralDirSize < 0 || centralDirOffset + centralDirSize > this.pakData.length) {
+      throw new Error('pak_central_directory_out_of_bounds');
+    }
+
+    let cursor = centralDirOffset;
+    let parsed = 0;
+    while (cursor + 46 <= this.pakData.length && parsed < totalEntries) {
+      if (this.pakData.readUInt32LE(cursor) !== 0x02014b50) {
+        break;
+      }
+      const flags = this.pakData.readUInt16LE(cursor + 8);
+      const method = this.pakData.readUInt16LE(cursor + 10);
+      const compressedSize = this.pakData.readUInt32LE(cursor + 20);
+      const uncompressedSize = this.pakData.readUInt32LE(cursor + 24);
+      const nameLen = this.pakData.readUInt16LE(cursor + 28);
+      const extraLen = this.pakData.readUInt16LE(cursor + 30);
+      const commentLen = this.pakData.readUInt16LE(cursor + 32);
+      const localHeaderOffset = this.pakData.readUInt32LE(cursor + 42);
+
+      const nameStart = cursor + 46;
+      const nameEnd = nameStart + nameLen;
+      if (nameEnd > this.pakData.length) {
+        break;
+      }
+
+      const isUtf8 = (flags & 0x0800) !== 0;
+      const rawName = this.pakData.subarray(nameStart, nameEnd).toString(isUtf8 ? 'utf8' : 'latin1');
+      const normalizedName = normalizeAssetPath(rawName);
+      const entry: PakEntry = {
+        name: rawName,
+        normalizedName,
+        flags,
+        method,
+        compressedSize,
+        uncompressedSize,
+        localHeaderOffset,
+      };
+      this.entriesAll.push(entry);
+
+      if (!normalizedName.endsWith('/')) {
+        const ext = path.extname(normalizedName).toLowerCase();
+        if ((ext === '.mdl' || ext === '.vmt' || ext === '.vtf') && !this.entriesByAsset.has(normalizedName)) {
+          this.entriesByAsset.set(normalizedName, entry);
+        }
+      }
+
+      cursor = nameEnd + extraLen + commentLen;
+      parsed += 1;
+    }
+  }
+
+  getAllEntriesCount(): number {
+    return this.entriesAll.length;
+  }
+
+  getIndexedAssetEntriesCount(): number {
+    return this.entriesByAsset.size;
+  }
+
+  getIndexedAssetPaths(): string[] {
+    return Array.from(this.entriesByAsset.keys()).sort((a, b) => a.localeCompare(b));
+  }
+
+  resolveEntry(assetPath: string): PakEntry | null {
+    const normalized = normalizeAssetPath(assetPath);
+    return this.entriesByAsset.get(normalized) || null;
+  }
+
+  readEntry(assetPath: string): Buffer | null {
+    const normalized = normalizeAssetPath(assetPath);
+    if (this.bufferCache.has(normalized)) {
+      return this.bufferCache.get(normalized) || null;
+    }
+    const entry = this.entriesByAsset.get(normalized);
+    if (!entry) {
+      this.bufferCache.set(normalized, null);
+      return null;
+    }
+
+    const localOffset = entry.localHeaderOffset;
+    if (localOffset < 0 || localOffset + 30 > this.pakData.length) {
+      this.bufferCache.set(normalized, null);
+      return null;
+    }
+    if (this.pakData.readUInt32LE(localOffset) !== 0x04034b50) {
+      this.bufferCache.set(normalized, null);
+      return null;
+    }
+
+    const localNameLen = this.pakData.readUInt16LE(localOffset + 26);
+    const localExtraLen = this.pakData.readUInt16LE(localOffset + 28);
+    const dataStart = localOffset + 30 + localNameLen + localExtraLen;
+    const dataEnd = dataStart + entry.compressedSize;
+    if (dataStart < 0 || dataEnd > this.pakData.length || dataEnd < dataStart) {
+      this.bufferCache.set(normalized, null);
+      return null;
+    }
+
+    const compressed = this.pakData.subarray(dataStart, dataEnd);
+    let out: Buffer | null = null;
+    if (entry.method === 0) {
+      out = Buffer.from(compressed);
+    } else if (entry.method === 8) {
+      try {
+        out = zlib.inflateRawSync(compressed);
+      } catch {
+        out = null;
+      }
+    }
+
+    this.bufferCache.set(normalized, out);
+    return out;
+  }
+}
+
 class AssetCatalog {
-  private files = new Map<string, string[]>();
-  private roots: Array<{ id: string; rootPath: string }> = [];
+  private files = new Map<string, AssetLocation[]>();
+  private roots: Array<{ id: string; kind: 'filesystem' | 'pak'; source: string }> = [];
+  private pakSources = new Map<string, PakArchive>();
+
+  addPakRoot(id: string, archive: PakArchive) {
+    this.pakSources.set(id, archive);
+    this.roots.push({ id, kind: 'pak', source: 'bsp:pakfile' });
+    for (const assetPath of archive.getIndexedAssetPaths()) {
+      const existing = this.files.get(assetPath) || [];
+      existing.push({
+        kind: 'pak',
+        sourceId: id,
+        entryName: assetPath,
+      });
+      this.files.set(assetPath, existing);
+    }
+  }
 
   addRoot(id: string, rootPath: string) {
     const normalizedRoot = path.resolve(rootPath);
-    this.roots.push({ id, rootPath: normalizedRoot });
+    this.roots.push({ id, kind: 'filesystem', source: normalizedRoot });
     this.indexExtensions(normalizedRoot, 'materials');
     this.indexExtensions(normalizedRoot, 'models');
   }
@@ -210,25 +395,65 @@ class AssetCatalog {
           continue;
         }
         const rel = normalizeAssetPath(path.relative(rootPath, full));
-        const existing = this.files.get(rel);
-        if (existing) {
-          existing.push(full);
-        } else {
-          this.files.set(rel, [full]);
-        }
+        const existing = this.files.get(rel) || [];
+        existing.push({
+          kind: 'filesystem',
+          sourceId: `fs:${rootPath}`,
+          absolutePath: full,
+        });
+        this.files.set(rel, existing);
       }
     }
   }
 
-  resolve(assetPath: string): string | null {
+  resolveLocation(assetPath: string): AssetLocation | null {
     const key = normalizeAssetPath(assetPath);
     const hit = this.files.get(key);
     if (!hit || hit.length === 0) return null;
     return hit[0] || null;
   }
 
+  resolve(assetPath: string): string | null {
+    const location = this.resolveLocation(assetPath);
+    if (!location) return null;
+    if (location.kind === 'filesystem') return location.absolutePath;
+    return `pak:${location.entryName}`;
+  }
+
   exists(assetPath: string): boolean {
-    return this.resolve(assetPath) !== null;
+    return this.resolveLocation(assetPath) !== null;
+  }
+
+  readBuffer(assetPath: string): Buffer | null {
+    const location = this.resolveLocation(assetPath);
+    if (!location) return null;
+    if (location.kind === 'filesystem') {
+      try {
+        return fs.readFileSync(location.absolutePath);
+      } catch {
+        return null;
+      }
+    }
+    const pak = this.pakSources.get(location.sourceId);
+    if (!pak) return null;
+    return pak.readEntry(location.entryName);
+  }
+
+  readText(assetPath: string): string | null {
+    const buffer = this.readBuffer(assetPath);
+    if (!buffer) return null;
+    try {
+      return buffer.toString('utf8');
+    } catch {
+      return buffer.toString('latin1');
+    }
+  }
+
+  describeLocation(location: AssetLocation): string {
+    if (location.kind === 'filesystem') {
+      return location.absolutePath;
+    }
+    return `pak:${location.entryName}`;
   }
 
   stats() {
@@ -658,6 +883,115 @@ const parseTexdataStringsCandidate = (
   return out;
 };
 
+const parseTexdataNameStringTable = (buffer: Buffer, texLump43: BspLump, texLump44: BspLump): string[] => {
+  const texFrom43_44 = parseTexdataStringsCandidate(buffer, texLump43, texLump44);
+  const texFrom44_43 = parseTexdataStringsCandidate(buffer, texLump44, texLump43);
+  return texFrom44_43.length > texFrom43_44.length ? texFrom44_43 : texFrom43_44;
+};
+
+const parseTexdataNameIds = (buffer: Buffer, texdataLump: BspLump): number[] => {
+  if (texdataLump.length <= 0 || texdataLump.offset < 0 || texdataLump.offset + texdataLump.length > buffer.length) {
+    return [];
+  }
+  const structSize = 32;
+  const count = Math.floor(texdataLump.length / structSize);
+  const out: number[] = [];
+  for (let i = 0; i < count; i += 1) {
+    const base = texdataLump.offset + i * structSize;
+    out.push(buffer.readInt32LE(base + 12));
+  }
+  return out;
+};
+
+const parseTexinfoTexdataIndices = (buffer: Buffer, texinfoLump: BspLump): number[] => {
+  if (texinfoLump.length <= 0 || texinfoLump.offset < 0 || texinfoLump.offset + texinfoLump.length > buffer.length) {
+    return [];
+  }
+  const structSize = 72;
+  const count = Math.floor(texinfoLump.length / structSize);
+  const out: number[] = [];
+  for (let i = 0; i < count; i += 1) {
+    const base = texinfoLump.offset + i * structSize;
+    out.push(buffer.readInt32LE(base + 68));
+  }
+  return out;
+};
+
+const parseFaceTexinfoIndices = (buffer: Buffer, facesLump: BspLump): number[] => {
+  if (facesLump.length <= 0 || facesLump.offset < 0 || facesLump.offset + facesLump.length > buffer.length) {
+    return [];
+  }
+  const structSize = 56;
+  const count = Math.floor(facesLump.length / structSize);
+  const out: number[] = [];
+  for (let i = 0; i < count; i += 1) {
+    const base = facesLump.offset + i * structSize;
+    out.push(buffer.readInt16LE(base + 10));
+  }
+  return out;
+};
+
+const collectUsedWorldMaterials = (buffer: Buffer, lumps: BspLump[]): string[] => {
+  const texdataLump = lumps[2];
+  const texinfoLump = lumps[6];
+  const facesLump = lumps[7];
+  const texLump43 = lumps[43];
+  const texLump44 = lumps[44];
+  if (!texdataLump || !texinfoLump || !facesLump || !texLump43 || !texLump44) {
+    return [];
+  }
+
+  const texStrings = parseTexdataNameStringTable(buffer, texLump43, texLump44);
+  const texdataNameIds = parseTexdataNameIds(buffer, texdataLump);
+  const texinfoTexdata = parseTexinfoTexdataIndices(buffer, texinfoLump);
+  const faceTexinfos = parseFaceTexinfoIndices(buffer, facesLump);
+
+  const used = new Set<string>();
+  for (const texinfoIdx of faceTexinfos) {
+    if (texinfoIdx < 0 || texinfoIdx >= texinfoTexdata.length) continue;
+    const texdataIdx = texinfoTexdata[texinfoIdx];
+    if (texdataIdx === undefined || texdataIdx < 0 || texdataIdx >= texdataNameIds.length) continue;
+    const nameStringIdx = texdataNameIds[texdataIdx];
+    if (nameStringIdx === undefined) continue;
+    if (nameStringIdx < 0 || nameStringIdx >= texStrings.length) continue;
+    const name = normalizeMaterialName(texStrings[nameStringIdx] || '');
+    if (!name) continue;
+    used.add(name);
+  }
+
+  if (used.size > 0) {
+    return Array.from(used).sort((a, b) => a.localeCompare(b));
+  }
+
+  // Fallback defensivo: se não conseguimos mapear faces, usa a tabela de strings de texdata.
+  return dedupeSortedStrings(texStrings.map((name) => normalizeMaterialName(name)).filter(Boolean));
+};
+
+const parsePakArchiveFromLump = (
+  buffer: Buffer,
+  pakLump: BspLump,
+): { archive: PakArchive | null; scanned: boolean; filesCount: number; error?: string } => {
+  if (pakLump.length <= 0 || pakLump.offset < 0 || pakLump.offset + pakLump.length > buffer.length) {
+    return { archive: null, scanned: false, filesCount: 0 };
+  }
+  const pakData = buffer.subarray(pakLump.offset, pakLump.offset + pakLump.length);
+  try {
+    const archive = PakArchive.fromBuffer(pakData);
+    return {
+      archive,
+      scanned: true,
+      filesCount: archive.getAllEntriesCount(),
+    };
+  } catch (error) {
+    return {
+      archive: null,
+      scanned: false,
+      filesCount: 0,
+      error: (error as Error)?.message || 'pak_parse_failed',
+    };
+  }
+};
+
 const parseStaticPropsFromGameLump = (
   buffer: Buffer,
   gameLump: BspLump,
@@ -740,9 +1074,7 @@ const parseBspData = (bspPath: string): BspParsedData => {
   const entitiesLump = lumps[0];
   const gameLump = lumps[35];
   const pakLump = lumps[40];
-  const texLump43 = lumps[43];
-  const texLump44 = lumps[44];
-  if (!entitiesLump || !gameLump || !texLump43 || !texLump44 || !pakLump) {
+  if (!entitiesLump || !gameLump || !pakLump) {
     throw new Error('bsp_lumps_missing');
   }
   let skyName: string | null = null;
@@ -753,33 +1085,25 @@ const parseBspData = (bspPath: string): BspParsedData => {
     skyName = parseWorldspawnSkyname(entitiesRaw);
   }
 
-  const texFrom43_44 = parseTexdataStringsCandidate(buffer, texLump43, texLump44);
-  const texFrom44_43 = parseTexdataStringsCandidate(buffer, texLump44, texLump43);
-  const picked = texFrom44_43.length > texFrom43_44.length ? texFrom44_43 : texFrom43_44;
-  const worldMaterials = dedupeSortedStrings(
-    picked
-      .map((name) => normalizeMaterialName(name))
-      .filter((name) => name.length > 0),
-  );
+  const usedWorldMaterials = collectUsedWorldMaterials(buffer, lumps);
+  const pakInfo = parsePakArchiveFromLump(buffer, pakLump);
 
   const staticProp = parseStaticPropsFromGameLump(buffer, gameLump);
   return {
-    worldMaterials,
+    usedWorldMaterials,
     staticPropModelNames: staticProp.modelNames,
     staticPropModelRefs: staticProp.refs,
     skyName,
     bspVersion: version,
     pakfileLength: pakLump.length,
+    pakfileScanned: pakInfo.scanned,
+    pakfileFilesCount: pakInfo.filesCount,
+    pakArchive: pakInfo.archive,
+    ...(pakInfo.error ? { pakfileError: pakInfo.error } : {}),
   };
 };
 
-const parseMdlMaterialRefs = (mdlPath: string): string[] => {
-  let buffer: Buffer;
-  try {
-    buffer = fs.readFileSync(mdlPath);
-  } catch {
-    return [];
-  }
+const parseMdlMaterialRefsFromBuffer = (buffer: Buffer): string[] => {
   if (buffer.length < 224) return [];
   if (buffer.toString('latin1', 0, 4) !== 'IDST') return [];
 
@@ -844,6 +1168,12 @@ const parseMdlMaterialRefs = (mdlPath: string): string[] => {
   }
 
   return Array.from(out).sort((a, b) => a.localeCompare(b));
+};
+
+const parseMdlMaterialRefs = (catalog: AssetCatalog, mdlAsset: string): string[] => {
+  const buffer = catalog.readBuffer(mdlAsset);
+  if (!buffer) return [];
+  return parseMdlMaterialRefsFromBuffer(buffer);
 };
 
 const stripLineComments = (raw: string): string => {
@@ -920,8 +1250,8 @@ const createMaterialAnalyzer = (catalog: AssetCatalog) => {
     }
 
     const vmtAsset = `materials/${normalizedMaterial}.vmt`;
-    const vmtPath = catalog.resolve(vmtAsset);
-    if (!vmtPath) {
+    const vmtLocation = catalog.resolveLocation(vmtAsset);
+    if (!vmtLocation) {
       const missingResult: MaterialAnalysis = {
         material: normalizedMaterial,
         found: false,
@@ -933,24 +1263,18 @@ const createMaterialAnalyzer = (catalog: AssetCatalog) => {
       return missingResult;
     }
 
-    let text = '';
-    try {
-      text = fs.readFileSync(vmtPath, 'utf8');
-    } catch {
-      try {
-        text = fs.readFileSync(vmtPath, 'latin1');
-      } catch {
-        const invalidResult: MaterialAnalysis = {
-          material: normalizedMaterial,
-          found: true,
-          sourcePath: vmtPath,
-          includeMaterials: [],
-          missingIncludes: [],
-          baseTextureCandidates: [],
-        };
-        cache.set(normalizedMaterial, invalidResult);
-        return invalidResult;
-      }
+    const text = catalog.readText(vmtAsset);
+    if (text === null) {
+      const invalidResult: MaterialAnalysis = {
+        material: normalizedMaterial,
+        found: true,
+        sourcePath: catalog.describeLocation(vmtLocation),
+        includeMaterials: [],
+        missingIncludes: [],
+        baseTextureCandidates: [],
+      };
+      cache.set(normalizedMaterial, invalidResult);
+      return invalidResult;
     }
 
     const parsed = parseVmtTokens(text);
@@ -975,7 +1299,7 @@ const createMaterialAnalyzer = (catalog: AssetCatalog) => {
     const result: MaterialAnalysis = {
       material: normalizedMaterial,
       found: true,
-      sourcePath: vmtPath,
+      sourcePath: catalog.describeLocation(vmtLocation),
       includeMaterials,
       missingIncludes: dedupeSortedStrings(missingIncludes),
       baseTextureCandidates: parsed.baseTextures,
@@ -998,6 +1322,7 @@ const buildAudit = (options: CliOptions) => {
     throw new Error(`map_root_not_found: ${options.mapRoot}`);
   }
 
+  const bspData = parseBspData(options.mapBsp);
   const mountResolution = resolveMounts(options.mountsConfigPath);
   if (mountResolution.mounts.length === 0) {
     throw new Error(
@@ -1008,16 +1333,18 @@ const buildAudit = (options: CliOptions) => {
   }
 
   const catalog = new AssetCatalog();
+  if (bspData.pakArchive) {
+    catalog.addPakRoot('bsp-pak', bspData.pakArchive);
+  }
   catalog.addRoot('map', options.mapRoot);
   for (const mount of mountResolution.mounts) {
     catalog.addRoot(`${mount.id}:${mount.source}`, mount.rootPath);
   }
 
-  const bspData = parseBspData(options.mapBsp);
   const missing = new MissingTracker();
   const analyzeMaterial = createMaterialAnalyzer(catalog).analyze;
 
-  const worldBaseTextureUnresolved = new Set<string>();
+  const usedWorldMaterialsNoResolvedBase = new Set<string>();
   const patchIncludeMissingSet = new Set<string>();
 
   const auditMaterial = (
@@ -1037,9 +1364,6 @@ const buildAudit = (options: CliOptions) => {
         severity: unresolvedBaseIsCritical ? 'critical' : 'major',
         reference,
       });
-      if (unresolvedBaseAsWorldCounter) {
-        worldBaseTextureUnresolved.add(normalized);
-      }
       return;
     }
 
@@ -1072,7 +1396,7 @@ const buildAudit = (options: CliOptions) => {
         });
       }
       if (unresolvedBaseAsWorldCounter) {
-        worldBaseTextureUnresolved.add(normalized);
+        usedWorldMaterialsNoResolvedBase.add(normalized);
       }
       return;
     }
@@ -1086,13 +1410,10 @@ const buildAudit = (options: CliOptions) => {
         severity: unresolvedBaseIsCritical ? 'critical' : 'major',
         reference: `${reference} -> $basetexture`,
       });
-      if (unresolvedBaseAsWorldCounter) {
-        worldBaseTextureUnresolved.add(normalized);
-      }
     }
   };
 
-  const worldMaterials = bspData.worldMaterials.slice().sort((a, b) => a.localeCompare(b));
+  const worldMaterials = bspData.usedWorldMaterials.slice().sort((a, b) => a.localeCompare(b));
   for (const worldMat of worldMaterials) {
     auditMaterial(worldMat, `world:${worldMat}`, true, true);
   }
@@ -1109,8 +1430,8 @@ const buildAudit = (options: CliOptions) => {
   const missingModels = new Map<string, number>();
   for (const [model, instances] of sortedModelRefs) {
     const mdlAsset = `models/${normalizeModelName(model)}.mdl`;
-    const mdlPath = catalog.resolve(mdlAsset);
-    if (!mdlPath) {
+    const mdlExists = catalog.exists(mdlAsset);
+    if (!mdlExists) {
       missingModels.set(normalizeModelName(model), instances);
       missing.add({
         type: 'mdl',
@@ -1122,7 +1443,7 @@ const buildAudit = (options: CliOptions) => {
       continue;
     }
 
-    const materialRefs = parseMdlMaterialRefs(mdlPath);
+    const materialRefs = parseMdlMaterialRefs(catalog, mdlAsset);
     for (const matRef of materialRefs) {
       auditMaterial(matRef, `model:${model}`, false, false);
     }
@@ -1145,10 +1466,14 @@ const buildAudit = (options: CliOptions) => {
     const skyBase = normalizeMaterialName(skyNameRaw).replace(/^skybox\//, '');
     for (const side of SKYBOX_SIDES) {
       const sideMaterial = `skybox/${skyBase}${side}`;
-      const before = missing.getSummary().critical;
       auditMaterial(sideMaterial, `skybox:${skyBase}:${side}`, true, false);
-      const after = missing.getSummary().critical;
-      if (after > before) {
+
+      const skyAnalysis = analyzeMaterial(sideMaterial);
+      const skyVmtMissing = !skyAnalysis.found;
+      const skyNoBase = !skyAnalysis.resolvedBaseTexture;
+      const skyVtfMissing = !!skyAnalysis.resolvedBaseTexture &&
+        !catalog.exists(`materials/${normalizeMaterialName(skyAnalysis.resolvedBaseTexture)}.vtf`);
+      if (skyVmtMissing || skyNoBase || skyVtfMissing) {
         skyboxInvalid = true;
         skyboxIssues.push(`${sideMaterial} unresolved`);
         missing.add({
@@ -1165,9 +1490,9 @@ const buildAudit = (options: CliOptions) => {
   const missingList = missing.toSortedList();
   const summary = missing.getSummary();
   const notes: string[] = [];
-  if (bspData.pakfileLength > 0) {
+  if (bspData.pakfileError) {
     notes.push(
-      `BSP pakfile detected (${bspData.pakfileLength} bytes). Packed assets are not scanned in PR-01 and may appear as missing.`,
+      `BSP pakfile parse failed: ${bspData.pakfileError}`,
     );
   }
 
@@ -1184,6 +1509,8 @@ const buildAudit = (options: CliOptions) => {
       bspVersion: bspData.bspVersion,
       skyName: bspData.skyName,
       pakfileLength: bspData.pakfileLength,
+      pakfileScanned: bspData.pakfileScanned,
+      pakfileFilesCount: bspData.pakfileFilesCount,
     },
     mounts: {
       configPath: mountResolution.configPathUsed,
@@ -1200,8 +1527,11 @@ const buildAudit = (options: CliOptions) => {
         uniqueMissingModels: missingModels.size,
         affectedInstances: staticPropMissingModelsSorted.reduce((acc, item) => acc + item.instances, 0),
       },
+      usedMaterialsTotal: worldMaterials.length,
+      usedWorldMaterialsWithoutResolvedBaseTexture: usedWorldMaterialsNoResolvedBase.size,
       vmtPatchIncludesMissingUnique: patchIncludeMissingSet.size,
-      worldMaterialsWithoutResolvedBaseTexture: worldBaseTextureUnresolved.size,
+      pakfileScanned: bspData.pakfileScanned,
+      pakfileFilesCount: bspData.pakfileFilesCount,
       skyboxInvalid,
       skyboxIssueCount: skyboxIssues.length,
     },

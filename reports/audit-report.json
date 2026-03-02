@@ -1,12 +1,14 @@
 {
-  "generatedAt": "2026-03-02T17:59:58.180Z",
+  "generatedAt": "2026-03-02T18:18:14.705Z",
   "map": {
     "bspPath": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps\\rp_evocity_v33x.bsp",
     "mapRoot": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
     "mapName": "rp_evocity_v33x",
     "bspVersion": 20,
     "skyName": "militia_hdr",
-    "pakfileLength": 315661474
+    "pakfileLength": 315661474,
+    "pakfileScanned": true,
+    "pakfileFilesCount": 4879
   },
   "mounts": {
     "configPath": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\server\\config\\mounts.json",
@@ -31,18 +33,25 @@
   "catalog": {
     "roots": [
       {
+        "id": "bsp-pak",
+        "kind": "pak",
+        "source": "bsp:pakfile"
+      },
+      {
         "id": "map",
-        "rootPath": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps"
+        "kind": "filesystem",
+        "source": "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps"
       },
       {
         "id": "gmod:auto",
-        "rootPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
+        "kind": "filesystem",
+        "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod"
       }
     ],
     "fileCount": 3555
   },
   "missingAssetsSummary": {
-    "critical": 432,
+    "critical": 419,
     "major": 154,
     "minor": 0
   },
@@ -53,8 +62,11 @@
       "uniqueMissingModels": 61,
       "affectedInstances": 555
     },
+    "usedMaterialsTotal": 1217,
+    "usedWorldMaterialsWithoutResolvedBaseTexture": 310,
     "vmtPatchIncludesMissingUnique": 29,
-    "worldMaterialsWithoutResolvedBaseTexture": 433,
+    "pakfileScanned": true,
+    "pakfileFilesCount": 4879,
     "skyboxInvalid": false,
     "skyboxIssueCount": 0
   },
@@ -431,16 +443,6 @@
     },
     {
       "type": "vmt",
-      "asset": "materials/decals/decalgraffiti061a.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:decals/decalgraffiti061a"
-      ]
-    },
-    {
-      "type": "vmt",
       "asset": "materials/decals/decalindustrialnumber01a.vmt",
       "severity": "critical",
       "suggestedMount": "gmod",
@@ -477,26 +479,6 @@
       "occurrences": 1,
       "references": [
         "world:decals/decalindustrialnumber05b"
-      ]
-    },
-    {
-      "type": "vmt",
-      "asset": "materials/decals/decalposter003a.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:decals/decalposter003a"
-      ]
-    },
-    {
-      "type": "vmt",
-      "asset": "materials/decals/decalshipsign004e.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:decals/decalshipsign004e"
       ]
     },
     {
@@ -837,16 +819,6 @@
       "occurrences": 1,
       "references": [
         "world:nature/snowwall004a"
-      ]
-    },
-    {
-      "type": "vmt",
-      "asset": "materials/overlays/garagegroundmarking01j.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:overlays/garagegroundmarking01j"
       ]
     },
     {
@@ -1390,39 +1362,6 @@
     },
     {
       "type": "world-material",
-      "asset": "materials/concrete/roadparkinglot_stripes.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:concrete/roadparkinglot_stripes"
-      ],
-      "note": "No resolved $basetexture after patch/include chain"
-    },
-    {
-      "type": "world-material",
-      "asset": "materials/concrete/street_overlay_noparking.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:concrete/street_overlay_noparking"
-      ],
-      "note": "No resolved $basetexture after patch/include chain"
-    },
-    {
-      "type": "world-material",
-      "asset": "materials/concrete/street_overlay_noparking00.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:concrete/street_overlay_noparking00"
-      ],
-      "note": "No resolved $basetexture after patch/include chain"
-    },
-    {
-      "type": "world-material",
       "asset": "materials/cs_havana/woodm.vmt",
       "severity": "critical",
       "suggestedMount": "css",
@@ -1511,34 +1450,12 @@
     },
     {
       "type": "world-material",
-      "asset": "materials/decals/buildingsign01.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:decals/buildingsign01"
-      ],
-      "note": "No resolved $basetexture after patch/include chain"
-    },
-    {
-      "type": "world-material",
       "asset": "materials/decals/decalindustrialnumber04b.vmt",
       "severity": "critical",
       "suggestedMount": "gmod",
       "occurrences": 1,
       "references": [
         "world:decals/decalindustrialnumber04b"
-      ],
-      "note": "No resolved $basetexture after patch/include chain"
-    },
-    {
-      "type": "world-material",
-      "asset": "materials/decals/decalstain013a.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:decals/decalstain013a"
       ],
       "note": "No resolved $basetexture after patch/include chain"
     },
@@ -1583,17 +1500,6 @@
       "occurrences": 1,
       "references": [
         "world:glass/glasswindow015a"
-      ],
-      "note": "No resolved $basetexture after patch/include chain"
-    },
-    {
-      "type": "world-material",
-      "asset": "materials/glass/sign_emergency01.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:glass/sign_emergency01"
       ],
       "note": "No resolved $basetexture after patch/include chain"
     },
@@ -4338,45 +4244,12 @@
     },
     {
       "type": "world-material",
-      "asset": "materials/tools/toolshint.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:tools/toolshint"
-      ],
-      "note": "No resolved $basetexture after patch/include chain"
-    },
-    {
-      "type": "world-material",
-      "asset": "materials/tools/toolsinvisible.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:tools/toolsinvisible"
-      ],
-      "note": "No resolved $basetexture after patch/include chain"
-    },
-    {
-      "type": "world-material",
       "asset": "materials/tools/toolsnodraw.vmt",
       "severity": "critical",
       "suggestedMount": "gmod",
       "occurrences": 1,
       "references": [
         "world:tools/toolsnodraw"
-      ],
-      "note": "No resolved $basetexture after patch/include chain"
-    },
-    {
-      "type": "world-material",
-      "asset": "materials/tools/toolsskip.vmt",
-      "severity": "critical",
-      "suggestedMount": "gmod",
-      "occurrences": 1,
-      "references": [
-        "world:tools/toolsskip"
       ],
       "note": "No resolved $basetexture after patch/include chain"
     },
@@ -6502,7 +6375,5 @@
     ],
     "skyboxIssues": []
   },
-  "notes": [
-    "BSP pakfile detected (315661474 bytes). Packed assets are not scanned in PR-01 and may appear as missing."
-  ]
+  "notes": []
 }
