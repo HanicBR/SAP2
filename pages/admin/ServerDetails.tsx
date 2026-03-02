@@ -1,7 +1,14 @@
-import React, { useCallback, useEffect, useMemo, useState, memo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ApiService } from '../../services/api';
-import { GameServer, ServerAnalytics, ServerLiveStateResponse, ServerStatus } from '../../types';
+import {
+  GameServer,
+  ServerAnalytics,
+  ServerLiveStateResponse,
+  ServerStatus,
+  ServerViewerStatePlayer,
+  ServerViewerStateSnapshot,
+} from '../../types';
 import { Icons } from '../../components/Icon';
 import {
   LineChart,
@@ -18,6 +25,11 @@ import {
 
 type RangeKey = '24h' | '7d' | '30d';
 const LIVE_STATE_MAX_AGE_SECONDS = 30;
+const VIEWER_STATE_STALE_SECONDS = 8;
+const VIEWER_RECONNECT_BASE_MS = 1000;
+const VIEWER_RECONNECT_MAX_MS = 15000;
+
+type ViewerWsStatus = 'idle' | 'connecting' | 'connected' | 'subscribed' | 'error';
 
 const KPICard = memo(
   ({
@@ -172,6 +184,83 @@ const playtimeDecisionLabel = (reason?: string) => {
   return normalized ? normalized : 'Nao informado';
 };
 
+const clamp01 = (value: number): number => Math.max(0, Math.min(1, value));
+
+const formatCoord = (value: number | undefined): string => {
+  if (!Number.isFinite(Number(value))) return '0.0';
+  return Number(value || 0).toLocaleString('pt-BR', {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
+};
+
+const toViewerWsUrl = (): string | null => {
+  if (typeof window === 'undefined') return null;
+  const token = localStorage.getItem('backstabber_token');
+  if (!token) return null;
+
+  const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+  const envApiBase = String((import.meta as any)?.env?.VITE_API_BASE_URL || '').trim();
+
+  if (envApiBase.startsWith('http://') || envApiBase.startsWith('https://')) {
+    try {
+      const apiUrl = new URL(envApiBase);
+      return `${wsProtocol}://${apiUrl.host}/ws/admin/viewer?token=${encodeURIComponent(token)}`;
+    } catch {
+      // fallback to current host
+    }
+  }
+
+  return `${wsProtocol}://${window.location.host}/ws/admin/viewer?token=${encodeURIComponent(token)}`;
+};
+
+const normalizeViewerPlayer = (raw: any): ServerViewerStatePlayer | null => {
+  const steamId = String(raw?.steamId || '').trim();
+  if (!steamId) return null;
+  const pos = raw?.pos || {};
+  const eyeAngles = raw?.eyeAngles || {};
+
+  return {
+    steamId,
+    ...(String(raw?.name || '').trim() ? { name: String(raw.name).trim() } : {}),
+    pos: {
+      x: Number(pos?.x || 0),
+      y: Number(pos?.y || 0),
+      z: Number(pos?.z || 0),
+    },
+    eyeAngles: {
+      pitch: Number(eyeAngles?.pitch || 0),
+      yaw: Number(eyeAngles?.yaw || 0),
+      roll: Number(eyeAngles?.roll || 0),
+    },
+    ...(Number.isFinite(Number(raw?.health)) ? { health: Math.max(0, Number(raw.health)) } : {}),
+    ...(Number.isFinite(Number(raw?.armor)) ? { armor: Math.max(0, Number(raw.armor)) } : {}),
+    ...(Number.isFinite(Number(raw?.teamId)) ? { teamId: Number(raw.teamId) } : {}),
+    ...(String(raw?.teamName || '').trim() ? { teamName: String(raw.teamName).trim() } : {}),
+    ...(typeof raw?.alive === 'boolean' ? { alive: raw.alive } : {}),
+  };
+};
+
+const parseViewerSnapshotMessage = (raw: any): ServerViewerStateSnapshot | null => {
+  const serverId = String(raw?.serverId || '').trim();
+  const receivedAt = String(raw?.receivedAt || '').trim();
+  if (!serverId || !receivedAt) return null;
+
+  const playersRaw = Array.isArray(raw?.players) ? raw.players : [];
+  const players = playersRaw
+    .map((entry: any) => normalizeViewerPlayer(entry))
+    .filter((entry: ServerViewerStatePlayer | null): entry is ServerViewerStatePlayer => Boolean(entry));
+
+  return {
+    serverId,
+    receivedAt,
+    ...(String(raw?.sentAt || '').trim() ? { sentAt: String(raw.sentAt).trim() } : {}),
+    ...(String(raw?.map || '').trim() ? { map: String(raw.map).trim() } : {}),
+    playerCount: Number.isFinite(Number(raw?.playerCount)) ? Math.max(0, Number(raw.playerCount)) : players.length,
+    players,
+  };
+};
+
 const ServerDetails: React.FC = () => {
   const { serverId } = useParams<{ serverId: string }>();
   const [server, setServer] = useState<GameServer | null>(null);
@@ -180,6 +269,17 @@ const ServerDetails: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [range, setRange] = useState<RangeKey>('7d');
+  const viewerSocketRef = useRef<WebSocket | null>(null);
+  const viewerPingTimerRef = useRef<number | null>(null);
+  const viewerReconnectTimerRef = useRef<number | null>(null);
+  const [viewerWsStatus, setViewerWsStatus] = useState<ViewerWsStatus>('idle');
+  const [viewerWsError, setViewerWsError] = useState<string | null>(null);
+  const [viewerConnectedAt, setViewerConnectedAt] = useState<string | null>(null);
+  const [viewerLastMessageAt, setViewerLastMessageAt] = useState<string | null>(null);
+  const [viewerState, setViewerState] = useState<ServerViewerStateSnapshot | null>(null);
+  const [viewerZoomPct, setViewerZoomPct] = useState<number>(100);
+  const [viewerSelectedSteamId, setViewerSelectedSteamId] = useState<string | null>(null);
+  const [viewerReconnectNonce, setViewerReconnectNonce] = useState<number>(0);
 
   const loadData = useCallback(
     async (silent = false) => {
@@ -211,6 +311,175 @@ const ServerDetails: React.FC = () => {
     }, 20000);
     return () => window.clearInterval(interval);
   }, [loadData]);
+
+  useEffect(() => {
+    if (!serverId) return undefined;
+
+    let closedByEffect = false;
+    let reconnectAttempts = 0;
+
+    const clearPingTimer = () => {
+      if (viewerPingTimerRef.current !== null) {
+        window.clearInterval(viewerPingTimerRef.current);
+        viewerPingTimerRef.current = null;
+      }
+    };
+
+    const clearReconnectTimer = () => {
+      if (viewerReconnectTimerRef.current !== null) {
+        window.clearTimeout(viewerReconnectTimerRef.current);
+        viewerReconnectTimerRef.current = null;
+      }
+    };
+
+    const closeSocket = () => {
+      const current = viewerSocketRef.current;
+      if (!current) return;
+      current.onopen = null;
+      current.onmessage = null;
+      current.onerror = null;
+      current.onclose = null;
+      try {
+        current.close();
+      } catch {
+        // ignore
+      }
+      viewerSocketRef.current = null;
+    };
+
+    const scheduleReconnect = () => {
+      if (closedByEffect) return;
+      clearReconnectTimer();
+      reconnectAttempts += 1;
+      const delayMs = Math.min(
+        VIEWER_RECONNECT_MAX_MS,
+        VIEWER_RECONNECT_BASE_MS * 2 ** Math.max(0, reconnectAttempts - 1),
+      );
+      viewerReconnectTimerRef.current = window.setTimeout(() => {
+        connectViewer();
+      }, delayMs);
+    };
+
+    const connectViewer = () => {
+      clearReconnectTimer();
+      clearPingTimer();
+      closeSocket();
+
+      const wsUrl = toViewerWsUrl();
+      if (!wsUrl) {
+        setViewerWsStatus('error');
+        setViewerWsError('Token de admin ausente para conectar no WebViewer.');
+        return;
+      }
+
+      setViewerWsStatus('connecting');
+      setViewerWsError(null);
+
+      let socket: WebSocket;
+      try {
+        socket = new WebSocket(wsUrl);
+      } catch (err: any) {
+        setViewerWsStatus('error');
+        setViewerWsError(String(err?.message || 'Falha ao abrir WebSocket do WebViewer.'));
+        scheduleReconnect();
+        return;
+      }
+
+      viewerSocketRef.current = socket;
+
+      socket.onopen = () => {
+        reconnectAttempts = 0;
+        setViewerWsStatus('connected');
+        setViewerWsError(null);
+        setViewerConnectedAt(new Date().toISOString());
+
+        try {
+          socket.send(JSON.stringify({ type: 'subscribe', payload: { serverId } }));
+        } catch {
+          // ignore send error here; onclose/onerror handles retry
+        }
+
+        viewerPingTimerRef.current = window.setInterval(() => {
+          const active = viewerSocketRef.current;
+          if (!active || active.readyState !== WebSocket.OPEN) return;
+          try {
+            active.send(JSON.stringify({ type: 'ping' }));
+          } catch {
+            // no-op
+          }
+        }, 15000);
+      };
+
+      socket.onmessage = (event: MessageEvent) => {
+        setViewerLastMessageAt(new Date().toISOString());
+
+        let parsed: any = null;
+        try {
+          parsed = JSON.parse(String(event.data || ''));
+        } catch {
+          return;
+        }
+        const type = String(parsed?.type || '').trim().toLowerCase();
+
+        if (type === 'connected') {
+          setViewerWsStatus('connected');
+          return;
+        }
+
+        if (type === 'subscribed') {
+          setViewerWsStatus('subscribed');
+          return;
+        }
+
+        if (type === 'viewer_state') {
+          const snapshot = parseViewerSnapshotMessage(parsed);
+          if (!snapshot) return;
+          if (snapshot.serverId !== serverId) return;
+          setViewerState(snapshot);
+          setViewerWsStatus('subscribed');
+          return;
+        }
+
+        if (type === 'viewer_state_unavailable') {
+          if (String(parsed?.serverId || '') === serverId) {
+            setViewerState(null);
+          }
+          return;
+        }
+
+        if (type === 'error') {
+          const reason = String(parsed?.reason || 'viewer_ws_error');
+          setViewerWsError(reason);
+          if (reason === 'invalid_or_expired_token') {
+            setViewerWsStatus('error');
+          }
+        }
+      };
+
+      socket.onerror = () => {
+        setViewerWsError('Erro de conexao no canal do WebViewer.');
+      };
+
+      socket.onclose = () => {
+        clearPingTimer();
+        if (viewerSocketRef.current === socket) {
+          viewerSocketRef.current = null;
+        }
+        if (closedByEffect) return;
+        setViewerWsStatus('connecting');
+        scheduleReconnect();
+      };
+    };
+
+    connectViewer();
+
+    return () => {
+      closedByEffect = true;
+      clearReconnectTimer();
+      clearPingTimer();
+      closeSocket();
+    };
+  }, [serverId, viewerReconnectNonce]);
 
   const currentState = useMemo(() => analytics?.currentState, [analytics]);
   const liveStateAgeSeconds = Number(liveState?.ageSeconds ?? Number.POSITIVE_INFINITY);
@@ -244,6 +513,90 @@ const ServerDetails: React.FC = () => {
   const pulseCoveragePct = Number(analytics?.pulseCoveragePct || 0);
   const pulseVsLegacyHours = Number(playtimeDiagnostics?.diffHours || 0);
   const pulseVsLegacyPct = Number(playtimeDiagnostics?.diffPct || 0);
+  const viewerPlayers = useMemo(
+    () =>
+      [...(viewerState?.players || [])].sort((left, right) => {
+        const leftName = String(left.name || left.steamId || '').toLowerCase();
+        const rightName = String(right.name || right.steamId || '').toLowerCase();
+        return leftName.localeCompare(rightName);
+      }),
+    [viewerState],
+  );
+  const viewerSnapshotAgeSeconds = useMemo(() => {
+    if (!viewerState?.receivedAt) return Number.POSITIVE_INFINITY;
+    const parsed = new Date(viewerState.receivedAt).getTime();
+    if (!Number.isFinite(parsed)) return Number.POSITIVE_INFINITY;
+    return Math.max(0, Math.floor((Date.now() - parsed) / 1000));
+  }, [viewerState]);
+  const hasFreshViewerSnapshot =
+    Number.isFinite(viewerSnapshotAgeSeconds) && viewerSnapshotAgeSeconds <= VIEWER_STATE_STALE_SECONDS;
+
+  useEffect(() => {
+    if (!viewerPlayers.length) {
+      setViewerSelectedSteamId(null);
+      return;
+    }
+    const hasSelected = viewerSelectedSteamId
+      ? viewerPlayers.some((entry) => entry.steamId === viewerSelectedSteamId)
+      : false;
+    if (!hasSelected) {
+      setViewerSelectedSteamId(viewerPlayers[0].steamId);
+    }
+  }, [viewerPlayers, viewerSelectedSteamId]);
+
+  const selectedViewerPlayer = useMemo(
+    () => viewerPlayers.find((entry) => entry.steamId === viewerSelectedSteamId) || null,
+    [viewerPlayers, viewerSelectedSteamId],
+  );
+
+  const viewerMapPoints = useMemo(() => {
+    if (!viewerPlayers.length) return [];
+
+    const focusX =
+      selectedViewerPlayer?.pos?.x ??
+      viewerPlayers.reduce((acc, entry) => acc + Number(entry.pos?.x || 0), 0) / viewerPlayers.length;
+    const focusY =
+      selectedViewerPlayer?.pos?.y ??
+      viewerPlayers.reduce((acc, entry) => acc + Number(entry.pos?.y || 0), 0) / viewerPlayers.length;
+
+    let radius = 1;
+    viewerPlayers.forEach((entry) => {
+      const dx = Number(entry.pos?.x || 0) - focusX;
+      const dy = Number(entry.pos?.y || 0) - focusY;
+      radius = Math.max(radius, Math.sqrt(dx * dx + dy * dy));
+    });
+    const zoomFactor = Math.max(0.5, Math.min(2.2, viewerZoomPct / 100));
+    const effectiveRadius = Math.max(1, radius / zoomFactor);
+
+    return viewerPlayers.map((entry) => {
+      const dx = Number(entry.pos?.x || 0) - focusX;
+      const dy = Number(entry.pos?.y || 0) - focusY;
+      const nx = clamp01(dx / (effectiveRadius * 2) + 0.5);
+      const ny = clamp01(dy / (effectiveRadius * 2) + 0.5);
+      return {
+        player: entry,
+        isSelected: entry.steamId === viewerSelectedSteamId,
+        leftPct: nx * 100,
+        topPct: (1 - ny) * 100,
+      };
+    });
+  }, [viewerPlayers, selectedViewerPlayer, viewerSelectedSteamId, viewerZoomPct]);
+
+  const viewerStatusBadge = useMemo(() => {
+    if (viewerWsStatus === 'error') {
+      return { label: 'WS error', className: 'bg-red-900/20 text-red-300 border-red-700' };
+    }
+    if (viewerWsStatus === 'connecting' || viewerWsStatus === 'idle') {
+      return { label: 'Connecting', className: 'bg-yellow-900/20 text-yellow-300 border-yellow-700' };
+    }
+    if (!viewerState) {
+      return { label: 'No frame', className: 'bg-zinc-800 text-zinc-400 border-zinc-700' };
+    }
+    if (!hasFreshViewerSnapshot) {
+      return { label: 'Frame stale', className: 'bg-orange-900/20 text-orange-300 border-orange-700' };
+    }
+    return { label: 'Live frame', className: 'bg-emerald-900/20 text-emerald-300 border-emerald-700' };
+  }, [hasFreshViewerSnapshot, viewerState, viewerWsStatus]);
 
   if (loading) return <div className="p-8 text-zinc-500">Carregando detalhes do servidor...</div>;
   if (!server || !analytics) return <div className="p-8 text-zinc-500">Servidor não encontrado.</div>;
@@ -313,6 +666,154 @@ const ServerDetails: React.FC = () => {
                 ? 'WebSocket stale, usando fallback'
                 : 'Heartbeat/Pulse fallback'}
             </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-zinc-900 rounded border border-zinc-800 overflow-hidden">
+        <div className="p-4 border-b border-zinc-800 bg-zinc-950/30 flex items-center justify-between gap-3 flex-wrap">
+          <h3 className="text-sm font-bold text-zinc-300 uppercase flex items-center">
+            <Icons.Crosshair className="w-4 h-4 mr-2 text-zinc-500" /> WebViewer (Beta)
+          </h3>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className={`px-2 py-0.5 rounded border text-xs font-bold uppercase ${viewerStatusBadge.className}`}>
+              {viewerStatusBadge.label}
+            </span>
+            <button
+              onClick={() => setViewerReconnectNonce((prev) => prev + 1)}
+              className="px-2.5 py-1.5 rounded border border-zinc-700 bg-zinc-800 hover:bg-zinc-700 text-xs font-bold uppercase tracking-wider text-zinc-100"
+            >
+              Reconectar
+            </button>
+          </div>
+        </div>
+        <div className="p-4 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
+            <div className="bg-zinc-950/40 border border-zinc-800 rounded px-3 py-2">
+              <p className="text-zinc-500 uppercase font-bold">Canal</p>
+              <p className="text-zinc-200 mt-0.5">{viewerWsStatus.toUpperCase()}</p>
+            </div>
+            <div className="bg-zinc-950/40 border border-zinc-800 rounded px-3 py-2">
+              <p className="text-zinc-500 uppercase font-bold">Players no frame</p>
+              <p className="text-zinc-200 mt-0.5">
+                {(viewerState?.playerCount ?? viewerPlayers.length).toLocaleString('pt-BR')}
+              </p>
+            </div>
+            <div className="bg-zinc-950/40 border border-zinc-800 rounded px-3 py-2">
+              <p className="text-zinc-500 uppercase font-bold">Frame recebido</p>
+              <p className="text-zinc-200 mt-0.5">
+                {viewerState?.receivedAt ? new Date(viewerState.receivedAt).toLocaleTimeString('pt-BR') : 'Sem frame'}
+              </p>
+            </div>
+            <div className="bg-zinc-950/40 border border-zinc-800 rounded px-3 py-2">
+              <p className="text-zinc-500 uppercase font-bold">Idade do frame</p>
+              <p className="text-zinc-200 mt-0.5">
+                {Number.isFinite(viewerSnapshotAgeSeconds) ? `${viewerSnapshotAgeSeconds}s` : 'N/A'}
+              </p>
+            </div>
+          </div>
+
+          {viewerWsError && (
+            <div className="bg-red-900/10 border border-red-900/40 text-red-300 rounded px-3 py-2 text-xs">
+              {viewerWsError}
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+            <div className="xl:col-span-2 bg-zinc-950/40 border border-zinc-800 rounded p-3">
+              <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
+                <p className="text-xs text-zinc-400 uppercase font-bold">
+                  Plano tatico 2D ({viewerState?.map || displayMap})
+                </p>
+                <label className="text-xs text-zinc-400 flex items-center gap-2">
+                  Zoom
+                  <input
+                    type="range"
+                    min={50}
+                    max={220}
+                    step={5}
+                    value={viewerZoomPct}
+                    onChange={(event) => setViewerZoomPct(Number(event.target.value))}
+                  />
+                  <span className="font-mono text-zinc-200">{viewerZoomPct}%</span>
+                </label>
+              </div>
+              <div
+                className="relative h-72 rounded border border-zinc-800 overflow-hidden"
+                style={{
+                  backgroundColor: '#0a0a0a',
+                  backgroundImage:
+                    'linear-gradient(rgba(63,63,70,0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(63,63,70,0.25) 1px, transparent 1px)',
+                  backgroundSize: '32px 32px',
+                }}
+              >
+                {!viewerMapPoints.length && (
+                  <div className="absolute inset-0 flex items-center justify-center text-zinc-500 text-sm">
+                    Sem dados de viewer_state para renderizar.
+                  </div>
+                )}
+                {viewerMapPoints.map((point) => (
+                  <button
+                    key={point.player.steamId}
+                    onClick={() => setViewerSelectedSteamId(point.player.steamId)}
+                    className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full border transition-all ${
+                      point.isSelected
+                        ? 'w-4 h-4 bg-cyan-300 border-cyan-100 shadow-[0_0_0_4px_rgba(34,211,238,0.15)]'
+                        : point.player.alive === false
+                        ? 'w-3 h-3 bg-red-400 border-red-200'
+                        : 'w-3 h-3 bg-emerald-300 border-emerald-100'
+                    }`}
+                    style={{ left: `${point.leftPct}%`, top: `${point.topPct}%` }}
+                    title={`${point.player.name || point.player.steamId} (${formatCoord(point.player.pos.x)}, ${formatCoord(point.player.pos.y)})`}
+                  />
+                ))}
+              </div>
+              <p className="mt-2 text-[11px] text-zinc-500">
+                Referencia relativa ao frame atual. Sem geometria real do mapa nesta fase.
+              </p>
+            </div>
+
+            <div className="bg-zinc-950/40 border border-zinc-800 rounded p-3">
+              <p className="text-xs text-zinc-400 uppercase font-bold mb-3">Players do frame</p>
+              <div className="max-h-72 overflow-y-auto space-y-2 pr-1">
+                {!viewerPlayers.length && (
+                  <p className="text-zinc-500 text-sm">Nenhum player no snapshot do viewer.</p>
+                )}
+                {viewerPlayers.map((entry) => (
+                  <button
+                    key={entry.steamId}
+                    onClick={() => setViewerSelectedSteamId(entry.steamId)}
+                    className={`w-full text-left rounded border px-3 py-2 transition-colors ${
+                      viewerSelectedSteamId === entry.steamId
+                        ? 'border-cyan-700 bg-cyan-900/20'
+                        : 'border-zinc-800 bg-zinc-900/40 hover:bg-zinc-800/60'
+                    }`}
+                  >
+                    <p className="text-sm text-white font-semibold truncate">{entry.name || 'Sem nome'}</p>
+                    <p className="text-[11px] text-zinc-500 font-mono truncate">{entry.steamId}</p>
+                    <p className="text-[11px] text-zinc-400 mt-1">
+                      x:{formatCoord(entry.pos.x)} y:{formatCoord(entry.pos.y)} z:{formatCoord(entry.pos.z)}
+                    </p>
+                    <p className="text-[11px] text-zinc-500 mt-0.5">
+                      HP {Math.floor(Number(entry.health || 0))} | ARM {Math.floor(Number(entry.armor || 0))} |{' '}
+                      {entry.alive === false ? 'Morto' : 'Vivo'}
+                      {entry.teamName ? ` | ${entry.teamName}` : ''}
+                    </p>
+                  </button>
+                ))}
+              </div>
+              {selectedViewerPlayer && (
+                <div className="mt-3 text-[11px] text-zinc-500 border-t border-zinc-800 pt-2">
+                  Foco: {selectedViewerPlayer.name || selectedViewerPlayer.steamId}
+                </div>
+              )}
+              <div className="mt-2 text-[11px] text-zinc-600">
+                Ultima msg WS: {viewerLastMessageAt ? new Date(viewerLastMessageAt).toLocaleTimeString('pt-BR') : 'N/A'}
+              </div>
+              <div className="text-[11px] text-zinc-600">
+                Conectado em: {viewerConnectedAt ? new Date(viewerConnectedAt).toLocaleTimeString('pt-BR') : 'N/A'}
+              </div>
+            </div>
           </div>
         </div>
       </div>

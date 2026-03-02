@@ -31,6 +31,39 @@ export interface ServerWsLivePlayer {
   name?: string;
 }
 
+export interface ViewerStateVector3 {
+  x: number;
+  y: number;
+  z: number;
+}
+
+export interface ViewerStateAngles {
+  pitch: number;
+  yaw: number;
+  roll: number;
+}
+
+export interface ServerViewerStatePlayer {
+  steamId: string;
+  name?: string;
+  pos: ViewerStateVector3;
+  eyeAngles: ViewerStateAngles;
+  health?: number;
+  armor?: number;
+  teamId?: number;
+  teamName?: string;
+  alive?: boolean;
+}
+
+export interface ServerViewerStateSnapshot {
+  serverId: string;
+  receivedAt: string;
+  sentAt?: string;
+  map?: string;
+  playerCount: number;
+  players: ServerViewerStatePlayer[];
+}
+
 export interface ServerWsLiveStateItem {
   serverId: string;
   transport: 'websocket';
