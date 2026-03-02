@@ -1,0 +1,6194 @@
+{
+  "generatedAt": "2026-03-02T23:38:41.048Z",
+  "total": 210,
+  "models": [
+    {
+      "id": "burgershelf",
+      "model": "burgershelf",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/burgershelf.mdl",
+      "meshUrl": "./models/meshes/burgershelf_cdd97121071d480c0d.json",
+      "lodUsed": 0,
+      "mdlVersion": 48,
+      "triCount": 1006,
+      "vertexCount": 1137,
+      "subMeshCount": 5,
+      "byteEstimate": 34812,
+      "bounds": {
+        "min": [
+          -18.8136043548584,
+          -29.999540328979492,
+          0.035273998975753784
+        ],
+        "max": [
+          18.410612106323242,
+          30.730566024780273,
+          65.44297790527344
+        ]
+      },
+      "materials": [
+        "models/burgershelf/bm_burgershot_box",
+        "models/burgershelf/bm_chrome_grill",
+        "models/burgershelf/bm_juicemachine02",
+        "models/burgershelf/bm_machinebuttons",
+        "models/burgershelf/cj_napkin1"
+      ]
+    },
+    {
+      "id": "cliffs/rocks_medium01_veg",
+      "model": "cliffs/rocks_medium01_veg",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/cliffs/rocks_medium01_veg.mdl",
+      "meshUrl": "./models/meshes/cliffs_rocks_medium01_veg_d4fb17d7eebc5a0e78.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 775,
+      "vertexCount": 675,
+      "subMeshCount": 2,
+      "byteEstimate": 22800,
+      "bounds": {
+        "min": [
+          -58.67570114135742,
+          -68.28630065917969,
+          -2.256500005722046
+        ],
+        "max": [
+          56.7318000793457,
+          79.70330047607422,
+          49.489898681640625
+        ]
+      },
+      "materials": [
+        "models/cliffs/rocks02",
+        "models/cliffs/rocks_vegetation"
+      ]
+    },
+    {
+      "id": "cliffs/rocks_medium02",
+      "model": "cliffs/rocks_medium02",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/cliffs/rocks_medium02.mdl",
+      "meshUrl": "./models/meshes/cliffs_rocks_medium02_6d778a2a00b8537bdd.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 618,
+      "vertexCount": 415,
+      "subMeshCount": 1,
+      "byteEstimate": 15716,
+      "bounds": {
+        "min": [
+          -47.252899169921875,
+          -46.48889923095703,
+          -0.9696999788284302
+        ],
+        "max": [
+          50.87409973144531,
+          49.62080001831055,
+          46.58729934692383
+        ]
+      },
+      "materials": [
+        "models/cliffs/rocks02"
+      ]
+    },
+    {
+      "id": "de_vegas/card_table",
+      "model": "de_vegas/card_table",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/de_vegas/card_table.mdl",
+      "meshUrl": "./models/meshes/de_vegas_card_table_3f0aff4f47c31dd080.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 796,
+      "vertexCount": 676,
+      "subMeshCount": 1,
+      "byteEstimate": 23072,
+      "bounds": {
+        "min": [
+          -34.0000114440918,
+          -64,
+          -20.6929931640625
+        ],
+        "max": [
+          34,
+          64.00001525878906,
+          20.6929931640625
+        ]
+      },
+      "materials": [
+        "models/de_vegas/card_table"
+      ]
+    },
+    {
+      "id": "env/decor/deck_column_tall/deck_column_tall",
+      "model": "env/decor/deck_column_tall/deck_column_tall",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/decor/deck_column_tall/deck_column_tall.mdl",
+      "meshUrl": "./models/meshes/env_decor_deck_column_tall_deck_column_tall_117256306dc2813fd8.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 132,
+      "vertexCount": 160,
+      "subMeshCount": 1,
+      "byteEstimate": 4784,
+      "bounds": {
+        "min": [
+          -12.000000953674316,
+          -12.000000953674316,
+          -5.245366310191457e-7
+        ],
+        "max": [
+          12.000000953674316,
+          12.000000953674316,
+          128
+        ]
+      },
+      "materials": [
+        "env/obj/deck/deck_column"
+      ]
+    },
+    {
+      "id": "env/decor/gents_display/gents_display",
+      "model": "env/decor/gents_display/gents_display",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/decor/gents_display/gents_display.mdl",
+      "meshUrl": "./models/meshes/env_decor_gents_display_gents_display_f3cda0d06e11dfdfe5.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 501,
+      "vertexCount": 478,
+      "subMeshCount": 1,
+      "byteEstimate": 15572,
+      "bounds": {
+        "min": [
+          -5.245366310191457e-7,
+          -31.999998092651367,
+          -1.7484555314695172e-7
+        ],
+        "max": [
+          23.000003814697266,
+          32,
+          96
+        ]
+      },
+      "materials": [
+        "env/obj/gents/gents_display"
+      ]
+    },
+    {
+      "id": "env/decor/mirrora/mirrora",
+      "model": "env/decor/mirrora/mirrora",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/decor/mirrora/mirrora.mdl",
+      "meshUrl": "./models/meshes/env_decor_mirrora_mirrora_f839f13268f1fc9071.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 26,
+      "vertexCount": 36,
+      "subMeshCount": 2,
+      "byteEstimate": 1032,
+      "bounds": {
+        "min": [
+          -1.1202129125595093,
+          -21.126609802246094,
+          -31.4398193359375
+        ],
+        "max": [
+          0.17321588099002838,
+          20.8734130859375,
+          32.5601806640625
+        ]
+      },
+      "materials": [
+        "env/glass/glass_cubicmirrorpurple",
+        "env/metal/metal_greychrome"
+      ]
+    },
+    {
+      "id": "env/decor/nar_rail/a_mid_stara",
+      "model": "env/decor/nar_rail/a_mid_stara",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/decor/nar_rail/a_mid_stara.mdl",
+      "meshUrl": "./models/meshes/env_decor_nar_rail_a_mid_stara_dc1529860940f809a5.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 452,
+      "vertexCount": 520,
+      "subMeshCount": 1,
+      "byteEstimate": 15824,
+      "bounds": {
+        "min": [
+          -128.35052490234375,
+          -3.7971744537353516,
+          -0.000005610382231679978
+        ],
+        "max": [
+          128.3505859375,
+          3.797215223312378,
+          40.552207946777344
+        ]
+      },
+      "materials": [
+        "env/obj/deck/nar_railing"
+      ]
+    },
+    {
+      "id": "env/decor/painting/paint_ship_a",
+      "model": "env/decor/painting/paint_ship_a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/decor/painting/paint_ship_a.mdl",
+      "meshUrl": "./models/meshes/env_decor_painting_paint_ship_a_99acfc11bb2717913c.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 26,
+      "vertexCount": 36,
+      "subMeshCount": 1,
+      "byteEstimate": 1032,
+      "bounds": {
+        "min": [
+          -0.0000019234378214605385,
+          -18.999820709228516,
+          -25.00330924987793
+        ],
+        "max": [
+          1.0000019073486328,
+          18.999820709228516,
+          25.00330924987793
+        ]
+      },
+      "materials": [
+        "env/paper/paint_ship_a"
+      ]
+    },
+    {
+      "id": "env/decor/plant_decofern/plant_decofern",
+      "model": "env/decor/plant_decofern/plant_decofern",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/decor/plant_decofern/plant_decofern.mdl",
+      "meshUrl": "./models/meshes/env_decor_plant_decofern_plant_decofern_efaa7d8a782e027043.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 1097,
+      "vertexCount": 1332,
+      "subMeshCount": 1,
+      "byteEstimate": 39804,
+      "bounds": {
+        "min": [
+          -35.123775482177734,
+          -38.12907028198242,
+          -3.4969110629390343e-7
+        ],
+        "max": [
+          37.111141204833984,
+          37.09654998779297,
+          80.39083862304688
+        ]
+      },
+      "materials": [
+        "env/plant/plant_decofern"
+      ]
+    },
+    {
+      "id": "env/decor/tall_plant_b/tall_plant_b",
+      "model": "env/decor/tall_plant_b/tall_plant_b",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/decor/tall_plant_b/tall_plant_b.mdl",
+      "meshUrl": "./models/meshes/env_decor_tall_plant_b_tall_plant_b_b679d2d3d54f4693ca.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 545,
+      "vertexCount": 552,
+      "subMeshCount": 1,
+      "byteEstimate": 17580,
+      "bounds": {
+        "min": [
+          -19.546016693115234,
+          -22.798479080200195,
+          -3.49690679968262e-7
+        ],
+        "max": [
+          25.767683029174805,
+          18.543380737304688,
+          99.76380157470703
+        ]
+      },
+      "materials": [
+        "env/plant/plant_tall"
+      ]
+    },
+    {
+      "id": "env/decor/vous_display/vous_display",
+      "model": "env/decor/vous_display/vous_display",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/decor/vous_display/vous_display.mdl",
+      "meshUrl": "./models/meshes/env_decor_vous_display_vous_display_ec5949f427cf24accc.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 514,
+      "vertexCount": 460,
+      "subMeshCount": 1,
+      "byteEstimate": 15368,
+      "bounds": {
+        "min": [
+          -5.245366310191457e-7,
+          -31.999998092651367,
+          -1.7484555314695172e-7
+        ],
+        "max": [
+          23.000003814697266,
+          32,
+          96
+        ]
+      },
+      "materials": [
+        "env/obj/vous/vous_display"
+      ]
+    },
+    {
+      "id": "env/decor/water_plants/water_plants",
+      "model": "env/decor/water_plants/water_plants",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/decor/water_plants/water_plants.mdl",
+      "meshUrl": "./models/meshes/env_decor_water_plants_water_plants_10d9a0f16f6f8af1e4.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 64,
+      "vertexCount": 72,
+      "subMeshCount": 1,
+      "byteEstimate": 2208,
+      "bounds": {
+        "min": [
+          -10.548301696777344,
+          -24.73554039001465,
+          0.05692699924111366
+        ],
+        "max": [
+          10.548300743103027,
+          24.73554039001465,
+          2.446471929550171
+        ]
+      },
+      "materials": [
+        "env/plant/plant_water_flowers"
+      ]
+    },
+    {
+      "id": "env/furniture/bed_andrea/bed_andrea_1st",
+      "model": "env/furniture/bed_andrea/bed_andrea_1st",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/furniture/bed_andrea/bed_andrea_1st.mdl",
+      "meshUrl": "./models/meshes/env_furniture_bed_andrea_bed_andrea_1st_6b02efea41f5404fd6.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 521,
+      "vertexCount": 481,
+      "subMeshCount": 1,
+      "byteEstimate": 15872,
+      "bounds": {
+        "min": [
+          -58,
+          -0.000002535260364311398,
+          -0.000002447837687213905
+        ],
+        "max": [
+          58.000003814697266,
+          100,
+          44.000003814697266
+        ]
+      },
+      "materials": [
+        "env/obj/furn_bed_andrea1st"
+      ]
+    },
+    {
+      "id": "env/furniture/bed_naronic/bed_naronic_1st",
+      "model": "env/furniture/bed_naronic/bed_naronic_1st",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/furniture/bed_naronic/bed_naronic_1st.mdl",
+      "meshUrl": "./models/meshes/env_furniture_bed_naronic_bed_naronic_1st_89e4b69941bcc116e7.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 655,
+      "vertexCount": 610,
+      "subMeshCount": 1,
+      "byteEstimate": 20060,
+      "bounds": {
+        "min": [
+          -64,
+          -0.000002797528622977552,
+          -0.08673210442066193
+        ],
+        "max": [
+          64.00000762939453,
+          108,
+          128
+        ]
+      },
+      "materials": [
+        "env/obj/furn_bed_naronic1st"
+      ]
+    },
+    {
+      "id": "env/furniture/bed_secondclass/beddouble_group",
+      "model": "env/furniture/bed_secondclass/beddouble_group",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/furniture/bed_secondclass/beddouble_group.mdl",
+      "meshUrl": "./models/meshes/env_furniture_bed_secondclass_beddouble_group_8fb3a169742403c3db.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 963,
+      "vertexCount": 1209,
+      "subMeshCount": 1,
+      "byteEstimate": 35736,
+      "bounds": {
+        "min": [
+          -110.00353240966797,
+          -48.00004196166992,
+          -0.000002710104809011682
+        ],
+        "max": [
+          61.99997329711914,
+          48,
+          124
+        ]
+      },
+      "materials": [
+        "env/obj/furn_doublebedgroup"
+      ]
+    },
+    {
+      "id": "env/furniture/bstoolred/bstoolred",
+      "model": "env/furniture/bstoolred/bstoolred",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/furniture/bstoolred/bstoolred.mdl",
+      "meshUrl": "./models/meshes/env_furniture_bstoolred_bstoolred_bfb7c743530bd886cf.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 242,
+      "vertexCount": 302,
+      "subMeshCount": 1,
+      "byteEstimate": 8944,
+      "bounds": {
+        "min": [
+          -6.241279125213623,
+          -6.653669834136963,
+          0.12037975341081619
+        ],
+        "max": [
+          5.932231903076172,
+          6.14631986618042,
+          37.556549072265625
+        ]
+      },
+      "materials": [
+        "env/obj/furn_barstool"
+      ]
+    },
+    {
+      "id": "env/furniture/decosofa_wood/decosofa_wood_dou",
+      "model": "env/furniture/decosofa_wood/decosofa_wood_dou",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/furniture/decosofa_wood/decosofa_wood_dou.mdl",
+      "meshUrl": "./models/meshes/env_furniture_decosofa_wood_decosofa_wood_dou_69d0abdd5f627a96b5.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 316,
+      "vertexCount": 373,
+      "subMeshCount": 1,
+      "byteEstimate": 11252,
+      "bounds": {
+        "min": [
+          -20.685152053833008,
+          -40.200199127197266,
+          -9.041766020345676e-7
+        ],
+        "max": [
+          20.68515396118164,
+          40.2003288269043,
+          35
+        ]
+      },
+      "materials": [
+        "env/obj/furn_deco_sofa_wood"
+      ]
+    },
+    {
+      "id": "env/furniture/ensuite1_bath/ensuite1_bath",
+      "model": "env/furniture/ensuite1_bath/ensuite1_bath",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/furniture/ensuite1_bath/ensuite1_bath.mdl",
+      "meshUrl": "./models/meshes/env_furniture_ensuite1_bath_ensuite1_bath_f239daf8094d577676.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 680,
+      "vertexCount": 561,
+      "subMeshCount": 1,
+      "byteEstimate": 19380,
+      "bounds": {
+        "min": [
+          -28.000001907348633,
+          -56,
+          5.6956400871276855
+        ],
+        "max": [
+          28.000003814697266,
+          56,
+          35.44839859008789
+        ]
+      },
+      "materials": [
+        "env/obj/bathroom/ensuite1_bath"
+      ]
+    },
+    {
+      "id": "env/furniture/ensuite1_sink/ensuite1_sink",
+      "model": "env/furniture/ensuite1_sink/ensuite1_sink",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/furniture/ensuite1_sink/ensuite1_sink.mdl",
+      "meshUrl": "./models/meshes/env_furniture_ensuite1_sink_ensuite1_sink_8a2f7900c4b655765c.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 710,
+      "vertexCount": 793,
+      "subMeshCount": 1,
+      "byteEstimate": 24380,
+      "bounds": {
+        "min": [
+          -0.000001748455588312936,
+          -40,
+          -0.0000010490732620382914
+        ],
+        "max": [
+          26.649511337280273,
+          40,
+          47.44839859008789
+        ]
+      },
+      "materials": [
+        "env/obj/bathroom/ensuite1_sink"
+      ]
+    },
+    {
+      "id": "env/furniture/ensuite1_toilet/ensuite1_toilet",
+      "model": "env/furniture/ensuite1_toilet/ensuite1_toilet",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/furniture/ensuite1_toilet/ensuite1_toilet.mdl",
+      "meshUrl": "./models/meshes/env_furniture_ensuite1_toilet_ensuite1_toilet_924692e45bf1e66fbd.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 605,
+      "vertexCount": 635,
+      "subMeshCount": 1,
+      "byteEstimate": 19960,
+      "bounds": {
+        "min": [
+          -8.000001907348633,
+          -34,
+          -0.0000013161499055058812
+        ],
+        "max": [
+          33.121219635009766,
+          34,
+          62
+        ]
+      },
+      "materials": [
+        "env/obj/bathroom/ensuite1_sink"
+      ]
+    },
+    {
+      "id": "env/furniture/ensuite1_toilet/ensuite1_toilet_b",
+      "model": "env/furniture/ensuite1_toilet/ensuite1_toilet_b",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/furniture/ensuite1_toilet/ensuite1_toilet_b.mdl",
+      "meshUrl": "./models/meshes/env_furniture_ensuite1_toilet_ensuite1_toilet_b_7850bc465f8c03d549.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 463,
+      "vertexCount": 358,
+      "subMeshCount": 1,
+      "byteEstimate": 12716,
+      "bounds": {
+        "min": [
+          2.0000298023223877,
+          -11.003548622131348,
+          -9.021029541145253e-7
+        ],
+        "max": [
+          27.121259689331055,
+          11.00355052947998,
+          50.1113395690918
+        ]
+      },
+      "materials": [
+        "env/obj/bathroom/ensuite1_toilet_b"
+      ]
+    },
+    {
+      "id": "env/furniture/fit_wardrobe/fit_wardr_shelf",
+      "model": "env/furniture/fit_wardrobe/fit_wardr_shelf",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/furniture/fit_wardrobe/fit_wardr_shelf.mdl",
+      "meshUrl": "./models/meshes/env_furniture_fit_wardrobe_fit_wardr_shelf_7750b6973a749b9427.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 24,
+      "vertexCount": 48,
+      "subMeshCount": 1,
+      "byteEstimate": 1248,
+      "bounds": {
+        "min": [
+          11.999999046325684,
+          -15.999999046325684,
+          -5.245366310191457e-7
+        ],
+        "max": [
+          26.0000057220459,
+          16.000001907348633,
+          128
+        ]
+      },
+      "materials": [
+        "env/obj/furn_fit_wardr"
+      ]
+    },
+    {
+      "id": "env/furniture/largedesk/largedesk",
+      "model": "env/furniture/largedesk/largedesk",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/furniture/largedesk/largedesk.mdl",
+      "meshUrl": "./models/meshes/env_furniture_largedesk_largedesk_038f11914f80ee1858.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 212,
+      "vertexCount": 296,
+      "subMeshCount": 1,
+      "byteEstimate": 8464,
+      "bounds": {
+        "min": [
+          -27.688852310180664,
+          -49.061100006103516,
+          -0.0000010244227723887889
+        ],
+        "max": [
+          23.78253936767578,
+          48.93888854980469,
+          32
+        ]
+      },
+      "materials": [
+        "env/obj/bank/largedesk"
+      ]
+    },
+    {
+      "id": "env/furniture/prison_toilet/toilet_prison",
+      "model": "env/furniture/prison_toilet/toilet_prison",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/furniture/prison_toilet/toilet_prison.mdl",
+      "meshUrl": "./models/meshes/env_furniture_prison_toilet_toilet_prison_00fa3fd3beb8dc6f28.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 212,
+      "vertexCount": 154,
+      "subMeshCount": 1,
+      "byteEstimate": 5624,
+      "bounds": {
+        "min": [
+          -11.873920440673828,
+          -11.545980453491211,
+          -3.455297914456423e-8
+        ],
+        "max": [
+          11.873921394348145,
+          11.545980453491211,
+          19.170259475708008
+        ]
+      },
+      "materials": [
+        "env/stone/porcelain_toilet"
+      ]
+    },
+    {
+      "id": "env/furniture/shower/shower",
+      "model": "env/furniture/shower/shower",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/furniture/shower/shower.mdl",
+      "meshUrl": "./models/meshes/env_furniture_shower_shower_0dd0aeb3ff65719f9a.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 264,
+      "vertexCount": 309,
+      "subMeshCount": 1,
+      "byteEstimate": 9348,
+      "bounds": {
+        "min": [
+          -16.539461135864258,
+          -6.4469804763793945,
+          -38.1585807800293
+        ],
+        "max": [
+          16.504650115966797,
+          6.442089557647705,
+          28.249469757080078
+        ]
+      },
+      "materials": [
+        "env/obj/bathroom/obj_shower"
+      ]
+    },
+    {
+      "id": "env/furniture/showerbase/showerbase",
+      "model": "env/furniture/showerbase/showerbase",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/furniture/showerbase/showerbase.mdl",
+      "meshUrl": "./models/meshes/env_furniture_showerbase_showerbase_7a6e90eb872634f19c.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 70,
+      "vertexCount": 61,
+      "subMeshCount": 1,
+      "byteEstimate": 2060,
+      "bounds": {
+        "min": [
+          -31.99999237060547,
+          -32,
+          -0.000001573609097249573
+        ],
+        "max": [
+          35.99998092651367,
+          32,
+          7.999998569488525
+        ]
+      },
+      "materials": [
+        "env/obj/furn_showerbase"
+      ]
+    },
+    {
+      "id": "env/furniture/square_sink/sink_double",
+      "model": "env/furniture/square_sink/sink_double",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/furniture/square_sink/sink_double.mdl",
+      "meshUrl": "./models/meshes/env_furniture_square_sink_sink_double_cd2cf8aa1a414ba2d1.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 674,
+      "vertexCount": 722,
+      "subMeshCount": 1,
+      "byteEstimate": 22528,
+      "bounds": {
+        "min": [
+          -11.000000953674316,
+          -32,
+          -4.808248377230484e-7
+        ],
+        "max": [
+          11.000001907348633,
+          32,
+          47.44839859008789
+        ]
+      },
+      "materials": [
+        "env/obj/bathroom/obj_squaresink"
+      ]
+    },
+    {
+      "id": "env/furniture/square_sink/sink_merged_b",
+      "model": "env/furniture/square_sink/sink_merged_b",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/furniture/square_sink/sink_merged_b.mdl",
+      "meshUrl": "./models/meshes/env_furniture_square_sink_sink_merged_b_565b9098602456795f.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 509,
+      "vertexCount": 522,
+      "subMeshCount": 1,
+      "byteEstimate": 16548,
+      "bounds": {
+        "min": [
+          -11.000000953674316,
+          -16,
+          -4.808248377230484e-7
+        ],
+        "max": [
+          11.000000953674316,
+          16,
+          47.44839859008789
+        ]
+      },
+      "materials": [
+        "env/obj/bathroom/obj_squaresink"
+      ]
+    },
+    {
+      "id": "env/furniture/wc_double_cupboard/wc_double_cupboard",
+      "model": "env/furniture/wc_double_cupboard/wc_double_cupboard",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/furniture/wc_double_cupboard/wc_double_cupboard.mdl",
+      "meshUrl": "./models/meshes/env_furniture_wc_double_cupboard_wc_double_cupbo_368fa4dbff3f31c477.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 107,
+      "vertexCount": 163,
+      "subMeshCount": 4,
+      "byteEstimate": 4544,
+      "bounds": {
+        "min": [
+          -11.00000286102295,
+          -31.99999237060547,
+          0
+        ],
+        "max": [
+          11.000004768371582,
+          31.9999942779541,
+          33
+        ]
+      },
+      "materials": [
+        "env/wood/wood_ash",
+        "env/wood/wood_chocolate",
+        "env/wood/wood_chocolate2",
+        "env/wood/wood_slate"
+      ]
+    },
+    {
+      "id": "env/lighting/corridor_ceil_lamp/corridor_ceil_lamp",
+      "model": "env/lighting/corridor_ceil_lamp/corridor_ceil_lamp",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/lighting/corridor_ceil_lamp/corridor_ceil_lamp.mdl",
+      "meshUrl": "./models/meshes/env_lighting_corridor_ceil_lamp_corridor_ceil_la_56114900e8caec9130.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 56,
+      "vertexCount": 78,
+      "subMeshCount": 1,
+      "byteEstimate": 2232,
+      "bounds": {
+        "min": [
+          -8.332281112670898,
+          -11.957409858703613,
+          -4.363279819488525
+        ],
+        "max": [
+          8.332281112670898,
+          11.957409858703613,
+          1.4450900554656982
+        ]
+      },
+      "materials": [
+        "env/obj/lighting/corridor_ceil_lamp"
+      ]
+    },
+    {
+      "id": "env/lighting/corridorlamp/corridorlamp",
+      "model": "env/lighting/corridorlamp/corridorlamp",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/lighting/corridorlamp/corridorlamp.mdl",
+      "meshUrl": "./models/meshes/env_lighting_corridorlamp_corridorlamp_58e67a4de0fb7f555d.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 46,
+      "vertexCount": 72,
+      "subMeshCount": 1,
+      "byteEstimate": 1992,
+      "bounds": {
+        "min": [
+          -7.430936079799721e-7,
+          -6,
+          -11
+        ],
+        "max": [
+          3.0000007152557373,
+          6,
+          11
+        ]
+      },
+      "materials": [
+        "env/obj/lighting/boutique_walllamp"
+      ]
+    },
+    {
+      "id": "env/lighting/jelly_lamp/jellylamp",
+      "model": "env/lighting/jelly_lamp/jellylamp",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/lighting/jelly_lamp/jellylamp.mdl",
+      "meshUrl": "./models/meshes/env_lighting_jelly_lamp_jellylamp_ca50279c5fae0c9591.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 158,
+      "vertexCount": 242,
+      "subMeshCount": 1,
+      "byteEstimate": 6736,
+      "bounds": {
+        "min": [
+          -17.679170608520508,
+          -17.679170608520508,
+          -5.96373987197876
+        ],
+        "max": [
+          17.679170608520508,
+          17.679170608520508,
+          8
+        ]
+      },
+      "materials": [
+        "env/obj/lighting/jelly_lamp"
+      ]
+    },
+    {
+      "id": "env/lighting/lamp_trumpet/lamp_trumpet_tall",
+      "model": "env/lighting/lamp_trumpet/lamp_trumpet_tall",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/env/lighting/lamp_trumpet/lamp_trumpet_tall.mdl",
+      "meshUrl": "./models/meshes/env_lighting_lamp_trumpet_lamp_trumpet_tall_256e4876c7d76568b3.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 459,
+      "vertexCount": 424,
+      "subMeshCount": 1,
+      "byteEstimate": 13988,
+      "bounds": {
+        "min": [
+          -14.018096923828125,
+          -14.018099784851074,
+          -11.94005012512207
+        ],
+        "max": [
+          14.018101692199707,
+          14.018099784851074,
+          67.03510284423828
+        ]
+      },
+      "materials": [
+        "env/obj/lighting/trumpet_lamp"
+      ]
+    },
+    {
+      "id": "foliage/bush100large",
+      "model": "foliage/bush100large",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/foliage/bush100large.mdl",
+      "meshUrl": "./models/meshes/foliage_bush100large_7002dfbb71d4a1a7e1.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 200,
+      "vertexCount": 240,
+      "subMeshCount": 1,
+      "byteEstimate": 7200,
+      "bounds": {
+        "min": [
+          -105.5154037475586,
+          -100.48320007324219,
+          -19.28459930419922
+        ],
+        "max": [
+          100.00969696044922,
+          89.31520080566406,
+          122.99310302734375
+        ]
+      },
+      "materials": [
+        "models/foliage/tree5_1"
+      ]
+    },
+    {
+      "id": "foliage/bush100small",
+      "model": "foliage/bush100small",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/foliage/bush100small.mdl",
+      "meshUrl": "./models/meshes/foliage_bush100small_7a9fb1f24825817776.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 200,
+      "vertexCount": 240,
+      "subMeshCount": 1,
+      "byteEstimate": 7200,
+      "bounds": {
+        "min": [
+          -57.761199951171875,
+          -56.38309860229492,
+          -9.873000144958496
+        ],
+        "max": [
+          52.25550079345703,
+          45.2150993347168,
+          66.28759765625
+        ]
+      },
+      "materials": [
+        "models/foliage/tree5_1"
+      ]
+    },
+    {
+      "id": "generic/roof_ac",
+      "model": "generic/roof_ac",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/generic/roof_ac.mdl",
+      "meshUrl": "./models/meshes/generic_roof_ac_058f06179575308c34.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 254,
+      "vertexCount": 402,
+      "subMeshCount": 1,
+      "byteEstimate": 11088,
+      "bounds": {
+        "min": [
+          -60.9015007019043,
+          -47.98899841308594,
+          0
+        ],
+        "max": [
+          51.49980163574219,
+          47.98889923095703,
+          55.749900817871094
+        ]
+      },
+      "materials": [
+        "models/generic/roof_ac"
+      ]
+    },
+    {
+      "id": "gm_forest/tree_alder",
+      "model": "gm_forest/tree_alder",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/gm_forest/tree_alder.mdl",
+      "meshUrl": "./models/meshes/gm_forest_tree_alder_1d332497ab92957b0c.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 632,
+      "vertexCount": 682,
+      "subMeshCount": 2,
+      "byteEstimate": 21224,
+      "bounds": {
+        "min": [
+          -284.464111328125,
+          -267.8526916503906,
+          -4.338600158691406
+        ],
+        "max": [
+          329.2893981933594,
+          332.3788146972656,
+          622.1917724609375
+        ]
+      },
+      "materials": [
+        "gm_forest/brg_alder_brk",
+        "gm_forest/brg_alder_brn"
+      ]
+    },
+    {
+      "id": "hall_suburbs/mailbox_pole",
+      "model": "hall_suburbs/mailbox_pole",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/hall_suburbs/mailbox_pole.mdl",
+      "meshUrl": "./models/meshes/hall_suburbs_mailbox_pole_2e93bd0933cd533e9f.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 10,
+      "vertexCount": 20,
+      "subMeshCount": 1,
+      "byteEstimate": 520,
+      "bounds": {
+        "min": [
+          -2,
+          -2,
+          0
+        ],
+        "max": [
+          2,
+          2,
+          40
+        ]
+      },
+      "materials": [
+        "models/hall_suburbs/mailbox"
+      ]
+    },
+    {
+      "id": "hall_suburbs/porch_railing01",
+      "model": "hall_suburbs/porch_railing01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/hall_suburbs/porch_railing01.mdl",
+      "meshUrl": "./models/meshes/hall_suburbs_porch_railing01_4db4586fecbc42883f.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 64,
+      "vertexCount": 128,
+      "subMeshCount": 1,
+      "byteEstimate": 3328,
+      "bounds": {
+        "min": [
+          -2.0000009536743164,
+          -22,
+          -16
+        ],
+        "max": [
+          2.0000009536743164,
+          22,
+          16
+        ]
+      },
+      "materials": [
+        "models/hall_suburbs/porch_railing"
+      ]
+    },
+    {
+      "id": "hall_suburbs/porch_railing01b",
+      "model": "hall_suburbs/porch_railing01b",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/hall_suburbs/porch_railing01b.mdl",
+      "meshUrl": "./models/meshes/hall_suburbs_porch_railing01b_6b1a62c88716099fdd.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 112,
+      "vertexCount": 224,
+      "subMeshCount": 1,
+      "byteEstimate": 5824,
+      "bounds": {
+        "min": [
+          -2.000001907348633,
+          -47,
+          -16
+        ],
+        "max": [
+          2.000002145767212,
+          45,
+          16
+        ]
+      },
+      "materials": [
+        "models/hall_suburbs/porch_railing"
+      ]
+    },
+    {
+      "id": "hall_suburbs/porch_railing01c",
+      "model": "hall_suburbs/porch_railing01c",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/hall_suburbs/porch_railing01c.mdl",
+      "meshUrl": "./models/meshes/hall_suburbs_porch_railing01c_18c505733e5711f41e.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 208,
+      "vertexCount": 416,
+      "subMeshCount": 1,
+      "byteEstimate": 10816,
+      "bounds": {
+        "min": [
+          -2.0000040531158447,
+          -94,
+          -16
+        ],
+        "max": [
+          2.0000040531158447,
+          94,
+          16
+        ]
+      },
+      "materials": [
+        "models/hall_suburbs/porch_railing"
+      ]
+    },
+    {
+      "id": "hall_suburbs/window_louver",
+      "model": "hall_suburbs/window_louver",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/hall_suburbs/window_louver.mdl",
+      "meshUrl": "./models/meshes/hall_suburbs_window_louver_05d586a7ec00da26b3.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 10,
+      "vertexCount": 20,
+      "subMeshCount": 1,
+      "byteEstimate": 520,
+      "bounds": {
+        "min": [
+          -1.0000003576278687,
+          -9.5,
+          -36
+        ],
+        "max": [
+          1.0000003576278687,
+          9.5,
+          36
+        ]
+      },
+      "materials": [
+        "models/hall_suburbs/window_louvers"
+      ]
+    },
+    {
+      "id": "highrise/handrailhorizontal_02_128",
+      "model": "highrise/handrailhorizontal_02_128",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/highrise/handrailhorizontal_02_128.mdl",
+      "meshUrl": "./models/meshes/highrise_handrailhorizontal_02_128_916ab1cc2012819e4b.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 264,
+      "vertexCount": 259,
+      "subMeshCount": 2,
+      "byteEstimate": 8348,
+      "bounds": {
+        "min": [
+          -2.767202138900757,
+          -64.006103515625,
+          -16.001100540161133
+        ],
+        "max": [
+          2.767202138900757,
+          64.006103515625,
+          19.24519920349121
+        ]
+      },
+      "materials": [
+        "models/highrise/handrail_02",
+        "models/highrise/handrail_02_center"
+      ]
+    },
+    {
+      "id": "highrise/handrailhorizontal_02_256",
+      "model": "highrise/handrailhorizontal_02_256",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/highrise/handrailhorizontal_02_256.mdl",
+      "meshUrl": "./models/meshes/highrise_handrailhorizontal_02_256_e9af18a1292ee76831.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 552,
+      "vertexCount": 524,
+      "subMeshCount": 2,
+      "byteEstimate": 17104,
+      "bounds": {
+        "min": [
+          -2.767204999923706,
+          -128.006103515625,
+          -16.001100540161133
+        ],
+        "max": [
+          2.767204999923706,
+          128.006103515625,
+          19.24519920349121
+        ]
+      },
+      "materials": [
+        "models/highrise/handrail_02",
+        "models/highrise/handrail_02_center"
+      ]
+    },
+    {
+      "id": "highrise/handrailhorizontal_02_32",
+      "model": "highrise/handrailhorizontal_02_32",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/highrise/handrailhorizontal_02_32.mdl",
+      "meshUrl": "./models/meshes/highrise_handrailhorizontal_02_32_d7fab943f93230dc11.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 78,
+      "vertexCount": 82,
+      "subMeshCount": 2,
+      "byteEstimate": 2576,
+      "bounds": {
+        "min": [
+          -2.767199993133545,
+          -16.006099700927734,
+          -16.001100540161133
+        ],
+        "max": [
+          2.767199993133545,
+          16.006099700927734,
+          19.24519920349121
+        ]
+      },
+      "materials": [
+        "models/highrise/handrail_02",
+        "models/highrise/handrail_02_center"
+      ]
+    },
+    {
+      "id": "highrise/handrailhorizontal_02_64",
+      "model": "highrise/handrailhorizontal_02_64",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/highrise/handrailhorizontal_02_64.mdl",
+      "meshUrl": "./models/meshes/highrise_handrailhorizontal_02_64_6b9d0f6250821624f7.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 156,
+      "vertexCount": 157,
+      "subMeshCount": 2,
+      "byteEstimate": 5012,
+      "bounds": {
+        "min": [
+          -2.7672007083892822,
+          -32.006099700927734,
+          -16.001100540161133
+        ],
+        "max": [
+          2.7672007083892822,
+          32.006099700927734,
+          19.24519920349121
+        ]
+      },
+      "materials": [
+        "models/highrise/handrail_02",
+        "models/highrise/handrail_02_center"
+      ]
+    },
+    {
+      "id": "highrise/handrailhorizontal_02_pole",
+      "model": "highrise/handrailhorizontal_02_pole",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/highrise/handrailhorizontal_02_pole.mdl",
+      "meshUrl": "./models/meshes/highrise_handrailhorizontal_02_pole_9e64dd96602e62c8dd.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 118,
+      "vertexCount": 96,
+      "subMeshCount": 1,
+      "byteEstimate": 3336,
+      "bounds": {
+        "min": [
+          -2.9791998863220215,
+          -3.4791998863220215,
+          -16.001100540161133
+        ],
+        "max": [
+          2.9791998863220215,
+          3.4814000129699707,
+          21.822999954223633
+        ]
+      },
+      "materials": [
+        "models/highrise/handrail_02"
+      ]
+    },
+    {
+      "id": "highrise/lightsmallround_02",
+      "model": "highrise/lightsmallround_02",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/highrise/lightsmallround_02.mdl",
+      "meshUrl": "./models/meshes/highrise_lightsmallround_02_85470f160147de14dc.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 106,
+      "vertexCount": 100,
+      "subMeshCount": 2,
+      "byteEstimate": 3272,
+      "bounds": {
+        "min": [
+          -8.19944953918457,
+          -8.19944953918457,
+          -1.201949954032898
+        ],
+        "max": [
+          8.19944953918457,
+          8.19944953918457,
+          1.201949954032898
+        ]
+      },
+      "materials": [
+        "models/highrise/cubicle_pc_02",
+        "models/highrise/lightbulb"
+      ]
+    },
+    {
+      "id": "highrise/lobby_chair_01",
+      "model": "highrise/lobby_chair_01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/highrise/lobby_chair_01.mdl",
+      "meshUrl": "./models/meshes/highrise_lobby_chair_01_26ed5187ae722216c9.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 268,
+      "vertexCount": 305,
+      "subMeshCount": 1,
+      "byteEstimate": 9316,
+      "bounds": {
+        "min": [
+          -20.0841007232666,
+          -28.67329978942871,
+          -24.15690040588379
+        ],
+        "max": [
+          19.872501373291016,
+          28.677099227905273,
+          24.141799926757812
+        ]
+      },
+      "materials": [
+        "models/highrise/lobby_chair_01"
+      ]
+    },
+    {
+      "id": "highrise/lobby_chair_02",
+      "model": "highrise/lobby_chair_02",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/highrise/lobby_chair_02.mdl",
+      "meshUrl": "./models/meshes/highrise_lobby_chair_02_3f59eb3d870fab4972.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 268,
+      "vertexCount": 305,
+      "subMeshCount": 1,
+      "byteEstimate": 9316,
+      "bounds": {
+        "min": [
+          -20.0841007232666,
+          -28.67329978942871,
+          -24.15690040588379
+        ],
+        "max": [
+          19.872501373291016,
+          56.29079818725586,
+          24.141799926757812
+        ]
+      },
+      "materials": [
+        "models/highrise/lobby_chair_01"
+      ]
+    },
+    {
+      "id": "highrise/potted_plant_05",
+      "model": "highrise/potted_plant_05",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/highrise/potted_plant_05.mdl",
+      "meshUrl": "./models/meshes/highrise_potted_plant_05_4a202d0d565dd872af.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 362,
+      "vertexCount": 366,
+      "subMeshCount": 4,
+      "byteEstimate": 11664,
+      "bounds": {
+        "min": [
+          -41.771549224853516,
+          -39.4286003112793,
+          -0.7905499935150146
+        ],
+        "max": [
+          41.788848876953125,
+          36.987300872802734,
+          71.6874008178711
+        ]
+      },
+      "materials": [
+        "models/highrise/plant_09",
+        "models/highrise/plant_pot_03",
+        "models/highrise/plant_pot_04",
+        "models/highrise/plantpotbase_01"
+      ]
+    },
+    {
+      "id": "highrise/sconce_01",
+      "model": "highrise/sconce_01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/highrise/sconce_01.mdl",
+      "meshUrl": "./models/meshes/highrise_sconce_01_d5aa2d06619b189375.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 222,
+      "vertexCount": 300,
+      "subMeshCount": 1,
+      "byteEstimate": 8664,
+      "bounds": {
+        "min": [
+          -7.955999851226807,
+          -7.304699897766113,
+          -15.123900413513184
+        ],
+        "max": [
+          7.829100131988525,
+          7.425300121307373,
+          15.098199844360352
+        ]
+      },
+      "materials": [
+        "models/highrise/sconce"
+      ]
+    },
+    {
+      "id": "highrise/tall_lamp_01",
+      "model": "highrise/tall_lamp_01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/highrise/tall_lamp_01.mdl",
+      "meshUrl": "./models/meshes/highrise_tall_lamp_01_7161ba0d6f1cfa7d27.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 450,
+      "vertexCount": 633,
+      "subMeshCount": 2,
+      "byteEstimate": 18060,
+      "bounds": {
+        "min": [
+          -7.024899959564209,
+          -7.536499977111816,
+          -51.21139907836914
+        ],
+        "max": [
+          7.0167999267578125,
+          7.535200119018555,
+          51.23749923706055
+        ]
+      },
+      "materials": [
+        "models/highrise/brass",
+        "models/highrise/sconce"
+      ]
+    },
+    {
+      "id": "highrise/trash_can_03",
+      "model": "highrise/trash_can_03",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/highrise/trash_can_03.mdl",
+      "meshUrl": "./models/meshes/highrise_trash_can_03_91ec658f5285d8ebab.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 413,
+      "vertexCount": 393,
+      "subMeshCount": 1,
+      "byteEstimate": 12816,
+      "bounds": {
+        "min": [
+          -17.141599655151367,
+          -17.141599655151367,
+          -23.930599212646484
+        ],
+        "max": [
+          17.141599655151367,
+          17.141599655151367,
+          23.930599212646484
+        ]
+      },
+      "materials": [
+        "models/highrise/trash_can_03"
+      ]
+    },
+    {
+      "id": "highrise/trashcanashtray_01",
+      "model": "highrise/trashcanashtray_01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/highrise/trashcanashtray_01.mdl",
+      "meshUrl": "./models/meshes/highrise_trashcanashtray_01_2f8b1f45ab29bcebaf.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 112,
+      "vertexCount": 120,
+      "subMeshCount": 1,
+      "byteEstimate": 3744,
+      "bounds": {
+        "min": [
+          -15.567550659179688,
+          -21.43549919128418,
+          -18.972150802612305
+        ],
+        "max": [
+          15.567550659179688,
+          21.43549919128418,
+          18.972150802612305
+        ]
+      },
+      "materials": [
+        "models/highrise/trashcanashtray_01"
+      ]
+    },
+    {
+      "id": "msc/e_bush2",
+      "model": "msc/e_bush2",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/msc/e_bush2.mdl",
+      "meshUrl": "./models/meshes/msc_e_bush2_6355e010a4844d7d35.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 82,
+      "vertexCount": 78,
+      "subMeshCount": 1,
+      "byteEstimate": 2544,
+      "bounds": {
+        "min": [
+          -108.48037719726562,
+          -40.56654357910156,
+          -0.33076998591423035
+        ],
+        "max": [
+          77.50125885009766,
+          31.611093521118164,
+          120
+        ]
+      },
+      "materials": [
+        "models/msc/e_bigbush"
+      ]
+    },
+    {
+      "id": "msc/e_tree_b",
+      "model": "msc/e_tree_b",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/msc/e_tree_b.mdl",
+      "meshUrl": "./models/meshes/msc_e_tree_b_bcc497c45d6e837ef6.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 232,
+      "vertexCount": 222,
+      "subMeshCount": 2,
+      "byteEstimate": 7224,
+      "bounds": {
+        "min": [
+          -144.4660186767578,
+          -156.5483856201172,
+          0
+        ],
+        "max": [
+          162.29208374023438,
+          149.85694885253906,
+          402.4200439453125
+        ]
+      },
+      "materials": [
+        "models/msc/e_bark2",
+        "models/msc/e_tree1"
+      ]
+    },
+    {
+      "id": "msc/e_tree1",
+      "model": "msc/e_tree1",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/msc/e_tree1.mdl",
+      "meshUrl": "./models/meshes/msc_e_tree1_9ab39fe84e34dab3d5.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 280,
+      "vertexCount": 342,
+      "subMeshCount": 2,
+      "byteEstimate": 10200,
+      "bounds": {
+        "min": [
+          -127.80725860595703,
+          -141.38441467285156,
+          0.5346069931983948
+        ],
+        "max": [
+          146.156982421875,
+          149.9105987548828,
+          303.9060363769531
+        ]
+      },
+      "materials": [
+        "models/msc/e_bark3",
+        "models/msc/e_leaves"
+      ]
+    },
+    {
+      "id": "msc/e_tree1b",
+      "model": "msc/e_tree1b",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/msc/e_tree1b.mdl",
+      "meshUrl": "./models/meshes/msc_e_tree1b_8ae9fc68a3c8b33fa2.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 280,
+      "vertexCount": 342,
+      "subMeshCount": 2,
+      "byteEstimate": 10200,
+      "bounds": {
+        "min": [
+          -127.80725860595703,
+          -141.38441467285156,
+          0.5346069931983948
+        ],
+        "max": [
+          146.156982421875,
+          149.9105987548828,
+          303.9060363769531
+        ]
+      },
+      "materials": [
+        "models/msc/e_bark2",
+        "models/msc/e_leaves"
+      ]
+    },
+    {
+      "id": "msc/e_tree2b",
+      "model": "msc/e_tree2b",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/msc/e_tree2b.mdl",
+      "meshUrl": "./models/meshes/msc_e_tree2b_f73147a13b3ff2d045.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 828,
+      "vertexCount": 836,
+      "subMeshCount": 2,
+      "byteEstimate": 26656,
+      "bounds": {
+        "min": [
+          -170.0353546142578,
+          -191.38067626953125,
+          0
+        ],
+        "max": [
+          188.4528350830078,
+          146.0988006591797,
+          424.5787353515625
+        ]
+      },
+      "materials": [
+        "models/msc/e_bark2",
+        "models/msc/e_tree1"
+      ]
+    },
+    {
+      "id": "msc/e_tree3",
+      "model": "msc/e_tree3",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/msc/e_tree3.mdl",
+      "meshUrl": "./models/meshes/msc_e_tree3_8a45bb5fbd47632f13.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 476,
+      "vertexCount": 558,
+      "subMeshCount": 2,
+      "byteEstimate": 16872,
+      "bounds": {
+        "min": [
+          -246.5236358642578,
+          -249.3988037109375,
+          -0.0009309999877586961
+        ],
+        "max": [
+          283.2674865722656,
+          314.55255126953125,
+          662.7119750976562
+        ]
+      },
+      "materials": [
+        "models/msc/e_bark3",
+        "models/msc/e_leaves"
+      ]
+    },
+    {
+      "id": "props_buildings/storefront_window_neutral",
+      "model": "props_buildings/storefront_window_neutral",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_buildings/storefront_window_neutral.mdl",
+      "meshUrl": "./models/meshes/props_buildings_storefront_window_neutral_17a66e5743bfddf43b.json",
+      "lodUsed": 0,
+      "mdlVersion": 49,
+      "triCount": 157,
+      "vertexCount": 271,
+      "subMeshCount": 1,
+      "byteEstimate": 7304,
+      "bounds": {
+        "min": [
+          -5.000002861022949,
+          -2.18556948539117e-7,
+          0
+        ],
+        "max": [
+          0.000004999999873689376,
+          60,
+          120.00003814697266
+        ]
+      },
+      "materials": [
+        "models/props_buildings/storefront"
+      ]
+    },
+    {
+      "id": "props_c17/awning002a",
+      "model": "props_c17/awning002a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_c17/awning002a.mdl",
+      "meshUrl": "./models/meshes/props_c17_awning002a_afddc49e24434a7019.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 314,
+      "vertexCount": 410,
+      "subMeshCount": 1,
+      "byteEstimate": 11968,
+      "bounds": {
+        "min": [
+          -14.37500286102295,
+          -33.49570083618164,
+          -20.75
+        ],
+        "max": [
+          14.375000953674316,
+          33.49581527709961,
+          20.75
+        ]
+      },
+      "materials": [
+        "models/props_c17/awning001a"
+      ]
+    },
+    {
+      "id": "props_c17/hospital_surgerytable01",
+      "model": "props_c17/hospital_surgerytable01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_c17/hospital_surgerytable01.mdl",
+      "meshUrl": "./models/meshes/props_c17_hospital_surgerytable01_fab42d2e119eff8880.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 676,
+      "vertexCount": 1007,
+      "subMeshCount": 1,
+      "byteEstimate": 28252,
+      "bounds": {
+        "min": [
+          -48.0001220703125,
+          -16.762109756469727,
+          -20.00000762939453
+        ],
+        "max": [
+          48.00083923339844,
+          17.63979148864746,
+          16.361330032348633
+        ]
+      },
+      "materials": [
+        "models/props_c17/hospital_surgerytable01"
+      ]
+    },
+    {
+      "id": "props_canal/rock_riverbed01b",
+      "model": "props_canal/rock_riverbed01b",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_canal/rock_riverbed01b.mdl",
+      "meshUrl": "./models/meshes/props_canal_rock_riverbed01b_87f916a36999c9f1c3.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 191,
+      "vertexCount": 212,
+      "subMeshCount": 1,
+      "byteEstimate": 6532,
+      "bounds": {
+        "min": [
+          -292.18414306640625,
+          -156.11822509765625,
+          -61.260433197021484
+        ],
+        "max": [
+          292.8397521972656,
+          156.11822509765625,
+          61.26044464111328
+        ]
+      },
+      "materials": [
+        "models/props_canal/rock_riverbed01a"
+      ]
+    },
+    {
+      "id": "props_combine/combine_interface001a",
+      "model": "props_combine/combine_interface001a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_combine/combine_interface001a.mdl",
+      "meshUrl": "./models/meshes/props_combine_combine_interface001a_c3d989ca6d633664d1.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 250,
+      "vertexCount": 318,
+      "subMeshCount": 2,
+      "byteEstimate": 9360,
+      "bounds": {
+        "min": [
+          -12.298995971679688,
+          -14.492358207702637,
+          31.81594467163086
+        ],
+        "max": [
+          10.813741683959961,
+          16.26406478881836,
+          49
+        ]
+      },
+      "materials": [
+        "models/props_combine/combine_interface001",
+        "models/props_combine/combine_interface_disp"
+      ]
+    },
+    {
+      "id": "props_equipment/elevator_buttons",
+      "model": "props_equipment/elevator_buttons",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_equipment/elevator_buttons.mdl",
+      "meshUrl": "./models/meshes/props_equipment_elevator_buttons_db5968a797ba20fb4e.json",
+      "lodUsed": 0,
+      "mdlVersion": 48,
+      "triCount": 132,
+      "vertexCount": 132,
+      "subMeshCount": 1,
+      "byteEstimate": 4224,
+      "bounds": {
+        "min": [
+          -0.0006741471006534994,
+          -3.4092350006103516,
+          -11.951964378356934
+        ],
+        "max": [
+          0.6150409579277039,
+          3.3648440837860107,
+          11.958707809448242
+        ]
+      },
+      "materials": [
+        "models/props_equipment/elevator_buttons"
+      ]
+    },
+    {
+      "id": "props_equipment/fountain_drinks",
+      "model": "props_equipment/fountain_drinks",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_equipment/fountain_drinks.mdl",
+      "meshUrl": "./models/meshes/props_equipment_fountain_drinks_f0c67886b4d08b9f62.json",
+      "lodUsed": 1,
+      "mdlVersion": 48,
+      "triCount": 485,
+      "vertexCount": 710,
+      "subMeshCount": 1,
+      "byteEstimate": 20020,
+      "bounds": {
+        "min": [
+          -15.6353178024292,
+          -18.7169132232666,
+          -0.0011569999624043703
+        ],
+        "max": [
+          17.658721923828125,
+          18.7169132232666,
+          64.95504760742188
+        ]
+      },
+      "materials": [
+        "models/props_equipment/fountain_drinks"
+      ]
+    },
+    {
+      "id": "props_equipment/phone_booth",
+      "model": "props_equipment/phone_booth",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_equipment/phone_booth.mdl",
+      "meshUrl": "./models/meshes/props_equipment_phone_booth_3b9a04e010c14d816a.json",
+      "lodUsed": 0,
+      "mdlVersion": 48,
+      "triCount": 475,
+      "vertexCount": 630,
+      "subMeshCount": 1,
+      "byteEstimate": 18300,
+      "bounds": {
+        "min": [
+          -6.009930610656738,
+          -10.351076126098633,
+          0.011061999946832657
+        ],
+        "max": [
+          16.87078285217285,
+          10.482954978942871,
+          81.93374633789062
+        ]
+      },
+      "materials": [
+        "models/props_equipment/phone_booth"
+      ]
+    },
+    {
+      "id": "props_exteriors/wood_railing004c",
+      "model": "props_exteriors/wood_railing004c",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_exteriors/wood_railing004c.mdl",
+      "meshUrl": "./models/meshes/props_exteriors_wood_railing004c_b7f51ac51395f92522.json",
+      "lodUsed": 0,
+      "mdlVersion": 49,
+      "triCount": 84,
+      "vertexCount": 168,
+      "subMeshCount": 1,
+      "byteEstimate": 4368,
+      "bounds": {
+        "min": [
+          -170,
+          -3.0000462532043457,
+          -2.000007390975952
+        ],
+        "max": [
+          169,
+          4.000002861022949,
+          24.00000762939453
+        ]
+      },
+      "materials": [
+        "models/props_exteriors/woodbeam001"
+      ]
+    },
+    {
+      "id": "props_foliage/tree_deciduous_01a",
+      "model": "props_foliage/tree_deciduous_01a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_foliage/tree_deciduous_01a.mdl",
+      "meshUrl": "./models/meshes/props_foliage_tree_deciduous_01a_aaf316f02eef074efe.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 984,
+      "vertexCount": 900,
+      "subMeshCount": 2,
+      "byteEstimate": 29808,
+      "bounds": {
+        "min": [
+          -189.37646484375,
+          -213.4932861328125,
+          -0.3825402855873108
+        ],
+        "max": [
+          164.78173828125,
+          164.5424041748047,
+          436.3396911621094
+        ]
+      },
+      "materials": [
+        "models/props_foliage/tree_deciduous_01a_branches",
+        "models/props_foliage/tree_deciduous_01a_trunk"
+      ]
+    },
+    {
+      "id": "props_foliage/tree_deciduous_02a",
+      "model": "props_foliage/tree_deciduous_02a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_foliage/tree_deciduous_02a.mdl",
+      "meshUrl": "./models/meshes/props_foliage_tree_deciduous_02a_a2518f19e35b7c7c80.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 783,
+      "vertexCount": 764,
+      "subMeshCount": 2,
+      "byteEstimate": 24676,
+      "bounds": {
+        "min": [
+          -284.28521728515625,
+          -77.12818145751953,
+          -0.7795529961585999
+        ],
+        "max": [
+          221.9480743408203,
+          392.9847717285156,
+          536.1886596679688
+        ]
+      },
+      "materials": [
+        "models/props_foliage/tree_deciduous_01a_branches",
+        "models/props_foliage/tree_deciduous_01a_trunk"
+      ]
+    },
+    {
+      "id": "props_foliage/tree_pine_01",
+      "model": "props_foliage/tree_pine_01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_foliage/tree_pine_01.mdl",
+      "meshUrl": "./models/meshes/props_foliage_tree_pine_01_70625275c2b12fbd4b.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 1300,
+      "vertexCount": 1212,
+      "subMeshCount": 2,
+      "byteEstimate": 39840,
+      "bounds": {
+        "min": [
+          -138.41378784179688,
+          -147.04971313476562,
+          -4.466493237487157e-7
+        ],
+        "max": [
+          159.34568786621094,
+          156.9095001220703,
+          430.55548095703125
+        ]
+      },
+      "materials": [
+        "models/props_foliage/tree_deciduous_01a_trunk",
+        "models/props_foliage/tree_pine_01_branches"
+      ]
+    },
+    {
+      "id": "props_foliage/tree_pine_02",
+      "model": "props_foliage/tree_pine_02",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_foliage/tree_pine_02.mdl",
+      "meshUrl": "./models/meshes/props_foliage_tree_pine_02_85dd1d684b6623d8b5.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 998,
+      "vertexCount": 1016,
+      "subMeshCount": 2,
+      "byteEstimate": 32296,
+      "bounds": {
+        "min": [
+          -145.99905395507812,
+          -65.90664672851562,
+          -4.947860361426137e-7
+        ],
+        "max": [
+          133.6195526123047,
+          150.39389038085938,
+          387.9323425292969
+        ]
+      },
+      "materials": [
+        "models/props_foliage/tree_deciduous_01a_trunk",
+        "models/props_foliage/tree_pine_01_branches"
+      ]
+    },
+    {
+      "id": "props_foliage/tree_pine_03",
+      "model": "props_foliage/tree_pine_03",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_foliage/tree_pine_03.mdl",
+      "meshUrl": "./models/meshes/props_foliage_tree_pine_03_07e99acb1cc19760e4.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 1032,
+      "vertexCount": 989,
+      "subMeshCount": 2,
+      "byteEstimate": 32164,
+      "bounds": {
+        "min": [
+          -94.3515625,
+          -98.21563720703125,
+          -11.276211738586426
+        ],
+        "max": [
+          110.99076080322266,
+          105.98193359375,
+          194.1411590576172
+        ]
+      },
+      "materials": [
+        "models/props_foliage/tree_deciduous_01a_trunk",
+        "models/props_foliage/tree_pine_01_branches"
+      ]
+    },
+    {
+      "id": "props_foliage/tree_pine_cluster_01",
+      "model": "props_foliage/tree_pine_cluster_01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_foliage/tree_pine_cluster_01.mdl",
+      "meshUrl": "./models/meshes/props_foliage_tree_pine_cluster_01_f9188bb4066e4b89ec.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 554,
+      "vertexCount": 600,
+      "subMeshCount": 2,
+      "byteEstimate": 18648,
+      "bounds": {
+        "min": [
+          -152.36807250976562,
+          -92.28072357177734,
+          -5.312720645633817e-7
+        ],
+        "max": [
+          57.53312683105469,
+          73.32866668701172,
+          226.21241760253906
+        ]
+      },
+      "materials": [
+        "models/props_foliage/tree_deciduous_01a_trunk",
+        "models/props_foliage/tree_pine_01_branches"
+      ]
+    },
+    {
+      "id": "props_foliage/tree_pine_tall_01",
+      "model": "props_foliage/tree_pine_tall_01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_foliage/tree_pine_tall_01.mdl",
+      "meshUrl": "./models/meshes/props_foliage_tree_pine_tall_01_270587177d7581d8a2.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 796,
+      "vertexCount": 720,
+      "subMeshCount": 2,
+      "byteEstimate": 23952,
+      "bounds": {
+        "min": [
+          -212.2802276611328,
+          -240.65550231933594,
+          0.08326109498739243
+        ],
+        "max": [
+          234.45651245117188,
+          242.9285888671875,
+          840.94580078125
+        ]
+      },
+      "materials": [
+        "models/props_foliage/tree_deciduous_01a_trunk",
+        "models/props_foliage/tree_pine_01_branches"
+      ]
+    },
+    {
+      "id": "props_foliage/tree_pine_tall_cluster_01",
+      "model": "props_foliage/tree_pine_tall_cluster_01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_foliage/tree_pine_tall_cluster_01.mdl",
+      "meshUrl": "./models/meshes/props_foliage_tree_pine_tall_cluster_01_d35268545917831014.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 10412,
+      "vertexCount": 9426,
+      "subMeshCount": 2,
+      "byteEstimate": 313464,
+      "bounds": {
+        "min": [
+          -752.2131958007812,
+          -685.9450073242188,
+          -3.8980445861816406
+        ],
+        "max": [
+          604.4967651367188,
+          890.2179565429688,
+          840.94580078125
+        ]
+      },
+      "materials": [
+        "models/props_foliage/tree_deciduous_01a_trunk",
+        "models/props_foliage/tree_pine_01_branches"
+      ]
+    },
+    {
+      "id": "props_forest/light_security",
+      "model": "props_forest/light_security",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_forest/light_security.mdl",
+      "meshUrl": "./models/meshes/props_forest_light_security_6655b09854a961b584.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 86,
+      "vertexCount": 134,
+      "subMeshCount": 2,
+      "byteEstimate": 3712,
+      "bounds": {
+        "min": [
+          -3.959640082484839e-7,
+          -8.941399574279785,
+          0
+        ],
+        "max": [
+          8.97700023651123,
+          9.065099716186523,
+          15
+        ]
+      },
+      "materials": [
+        "models/props_forest/light_security",
+        "models/props_forest/light_security2"
+      ]
+    },
+    {
+      "id": "props_forest/utilitypole01b",
+      "model": "props_forest/utilitypole01b",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_forest/utilitypole01b.mdl",
+      "meshUrl": "./models/meshes/props_forest_utilitypole01b_7b3413879461292d04.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 270,
+      "vertexCount": 474,
+      "subMeshCount": 1,
+      "byteEstimate": 12720,
+      "bounds": {
+        "min": [
+          -9.47249984741211,
+          -46.88180160522461,
+          1.3255000114440918
+        ],
+        "max": [
+          4.3484978675842285,
+          46.739898681640625,
+          483.2174987792969
+        ]
+      },
+      "materials": [
+        "models/props_forest/utility_poles001"
+      ]
+    },
+    {
+      "id": "props_furniture/lights_overhead",
+      "model": "props_furniture/lights_overhead",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_furniture/lights_overhead.mdl",
+      "meshUrl": "./models/meshes/props_furniture_lights_overhead_d529f79af17079ebdd.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 313,
+      "vertexCount": 331,
+      "subMeshCount": 1,
+      "byteEstimate": 10376,
+      "bounds": {
+        "min": [
+          -12.809776306152344,
+          -13.024211883544922,
+          -10.806770324707031
+        ],
+        "max": [
+          13.095952987670898,
+          13.024211883544922,
+          10.806770324707031
+        ]
+      },
+      "materials": [
+        "models/props_furniture/lights_overhead"
+      ]
+    },
+    {
+      "id": "props_interiors/bathtub01",
+      "model": "props_interiors/bathtub01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_interiors/bathtub01.mdl",
+      "meshUrl": "./models/meshes/props_interiors_bathtub01_5195ca00282689760a.json",
+      "lodUsed": 1,
+      "mdlVersion": 45,
+      "triCount": 364,
+      "vertexCount": 447,
+      "subMeshCount": 1,
+      "byteEstimate": 13308,
+      "bounds": {
+        "min": [
+          -26.989524841308594,
+          -45.30173873901367,
+          0.18126800656318665
+        ],
+        "max": [
+          26.989526748657227,
+          45.29999923706055,
+          52.204471588134766
+        ]
+      },
+      "materials": [
+        "models/props_interiors/bathtub01"
+      ]
+    },
+    {
+      "id": "props_interiors/bathtub01a",
+      "model": "props_interiors/bathtub01a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_interiors/bathtub01a.mdl",
+      "meshUrl": "./models/meshes/props_interiors_bathtub01a_38b34fb279cb77cfb3.json",
+      "lodUsed": 1,
+      "mdlVersion": 48,
+      "triCount": 645,
+      "vertexCount": 892,
+      "subMeshCount": 1,
+      "byteEstimate": 25580,
+      "bounds": {
+        "min": [
+          -51.08362579345703,
+          -13.283350944519043,
+          -9.968928337097168
+        ],
+        "max": [
+          47.44682312011719,
+          26.247968673706055,
+          28.602689743041992
+        ]
+      },
+      "materials": [
+        "models/props_interiors/tub01a"
+      ]
+    },
+    {
+      "id": "props_interiors/chairs_airport",
+      "model": "props_interiors/chairs_airport",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_interiors/chairs_airport.mdl",
+      "meshUrl": "./models/meshes/props_interiors_chairs_airport_ce8643ccc75822cc2f.json",
+      "lodUsed": 1,
+      "mdlVersion": 49,
+      "triCount": 790,
+      "vertexCount": 674,
+      "subMeshCount": 1,
+      "byteEstimate": 22960,
+      "bounds": {
+        "min": [
+          -56.69223403930664,
+          -16.895244598388672,
+          1.0906389951705933
+        ],
+        "max": [
+          48.556396484375,
+          22.860153198242188,
+          52.369049072265625
+        ]
+      },
+      "materials": [
+        "models/props_interiors/chairs_airport"
+      ]
+    },
+    {
+      "id": "props_interiors/elevator_arrows",
+      "model": "props_interiors/elevator_arrows",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_interiors/elevator_arrows.mdl",
+      "meshUrl": "./models/meshes/props_interiors_elevator_arrows_a3147c9b318a838c8f.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 24,
+      "vertexCount": 50,
+      "subMeshCount": 1,
+      "byteEstimate": 1288,
+      "bounds": {
+        "min": [
+          0.0004018470935989171,
+          -3.498155117034912,
+          -12
+        ],
+        "max": [
+          0.9086761474609375,
+          3.498155117034912,
+          12
+        ]
+      },
+      "materials": [
+        "models/props_interiors/elevator_arrows"
+      ]
+    },
+    {
+      "id": "props_interiors/lightsconce02",
+      "model": "props_interiors/lightsconce02",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_interiors/lightsconce02.mdl",
+      "meshUrl": "./models/meshes/props_interiors_lightsconce02_ec4c895db4b470649b.json",
+      "lodUsed": 0,
+      "mdlVersion": 49,
+      "triCount": 534,
+      "vertexCount": 604,
+      "subMeshCount": 1,
+      "byteEstimate": 18488,
+      "bounds": {
+        "min": [
+          -4,
+          -5.5,
+          -10
+        ],
+        "max": [
+          2.5,
+          5.5,
+          10
+        ]
+      },
+      "materials": [
+        "models/props_interiors/sconce02a"
+      ]
+    },
+    {
+      "id": "props_interiors/sink_kitchen",
+      "model": "props_interiors/sink_kitchen",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_interiors/sink_kitchen.mdl",
+      "meshUrl": "./models/meshes/props_interiors_sink_kitchen_2470bf27c27f734922.json",
+      "lodUsed": 1,
+      "mdlVersion": 48,
+      "triCount": 395,
+      "vertexCount": 361,
+      "subMeshCount": 1,
+      "byteEstimate": 11960,
+      "bounds": {
+        "min": [
+          -12.620599746704102,
+          -20.736656188964844,
+          -9.557202339172363
+        ],
+        "max": [
+          12.396897315979004,
+          20.72869300842285,
+          8.067026138305664
+        ]
+      },
+      "materials": [
+        "models/props_interiors/sink_kitchen"
+      ]
+    },
+    {
+      "id": "props_lighting/airportlight01",
+      "model": "props_lighting/airportlight01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_lighting/airportlight01.mdl",
+      "meshUrl": "./models/meshes/props_lighting_airportlight01_43b9f6d7646111114d.json",
+      "lodUsed": 0,
+      "mdlVersion": 49,
+      "triCount": 358,
+      "vertexCount": 351,
+      "subMeshCount": 1,
+      "byteEstimate": 11316,
+      "bounds": {
+        "min": [
+          -3.00000262260437,
+          -62.33560562133789,
+          -2.9888510704040527
+        ],
+        "max": [
+          3.00000262260437,
+          62.33560562133789,
+          21.566593170166016
+        ]
+      },
+      "materials": [
+        "models/props_lighting/airportlight01"
+      ]
+    },
+    {
+      "id": "props_lighting/corner_light_180",
+      "model": "props_lighting/corner_light_180",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_lighting/corner_light_180.mdl",
+      "meshUrl": "./models/meshes/props_lighting_corner_light_180_a67ca0ae8720e1d816.json",
+      "lodUsed": 0,
+      "mdlVersion": 49,
+      "triCount": 420,
+      "vertexCount": 520,
+      "subMeshCount": 1,
+      "byteEstimate": 15440,
+      "bounds": {
+        "min": [
+          -0.000009106848665396683,
+          -0.000003999999989900971,
+          -6.345606803894043
+        ],
+        "max": [
+          6.404428958892822,
+          180,
+          0
+        ]
+      },
+      "materials": [
+        "models/props_lighting/corner_light_off"
+      ]
+    },
+    {
+      "id": "props_lighting/lightfixture02",
+      "model": "props_lighting/lightfixture02",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_lighting/lightfixture02.mdl",
+      "meshUrl": "./models/meshes/props_lighting_lightfixture02_b29912763ae6cf487f.json",
+      "lodUsed": 1,
+      "mdlVersion": 49,
+      "triCount": 367,
+      "vertexCount": 416,
+      "subMeshCount": 1,
+      "byteEstimate": 12724,
+      "bounds": {
+        "min": [
+          -0.09157112240791321,
+          -9.664521217346191,
+          -18.300640106201172
+        ],
+        "max": [
+          55.970088958740234,
+          9.668597221374512,
+          24.754854202270508
+        ]
+      },
+      "materials": [
+        "models/props_lighting/lightfixture02off"
+      ]
+    },
+    {
+      "id": "props_mall/mall_display_04",
+      "model": "props_mall/mall_display_04",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_mall/mall_display_04.mdl",
+      "meshUrl": "./models/meshes/props_mall_mall_display_04_e68ff3e82ae11ee0d1.json",
+      "lodUsed": 0,
+      "mdlVersion": 49,
+      "triCount": 324,
+      "vertexCount": 416,
+      "subMeshCount": 1,
+      "byteEstimate": 12208,
+      "bounds": {
+        "min": [
+          -34.000003814697266,
+          -44,
+          -0.0000014861872159599443
+        ],
+        "max": [
+          34.000003814697266,
+          44,
+          48
+        ]
+      },
+      "materials": [
+        "models/props_mall/mall_display_04"
+      ]
+    },
+    {
+      "id": "props_mall/mall_display_06c",
+      "model": "props_mall/mall_display_06c",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_mall/mall_display_06c.mdl",
+      "meshUrl": "./models/meshes/props_mall_mall_display_06c_c31985b5affab4ee0f.json",
+      "lodUsed": 0,
+      "mdlVersion": 49,
+      "triCount": 294,
+      "vertexCount": 532,
+      "subMeshCount": 1,
+      "byteEstimate": 14168,
+      "bounds": {
+        "min": [
+          -18,
+          -18,
+          -7.868050033721374e-7
+        ],
+        "max": [
+          18,
+          18,
+          64.5
+        ]
+      },
+      "materials": [
+        "models/props_mall/mall_display_06"
+      ]
+    },
+    {
+      "id": "props_mall/mall_display_11",
+      "model": "props_mall/mall_display_11",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_mall/mall_display_11.mdl",
+      "meshUrl": "./models/meshes/props_mall_mall_display_11_7f1c34d6a425105133.json",
+      "lodUsed": 0,
+      "mdlVersion": 49,
+      "triCount": 326,
+      "vertexCount": 370,
+      "subMeshCount": 1,
+      "byteEstimate": 11312,
+      "bounds": {
+        "min": [
+          -35.000003814697266,
+          -82.5,
+          -0.0000010490732620382914
+        ],
+        "max": [
+          35.000003814697266,
+          82.5,
+          36
+        ]
+      },
+      "materials": [
+        "models/props_mall/mall_display_11"
+      ]
+    },
+    {
+      "id": "props_pipes/gutter_256_001a",
+      "model": "props_pipes/gutter_256_001a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_pipes/gutter_256_001a.mdl",
+      "meshUrl": "./models/meshes/props_pipes_gutter_256_001a_76eb75d0d0e4b21545.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 120,
+      "vertexCount": 187,
+      "subMeshCount": 1,
+      "byteEstimate": 5180,
+      "bounds": {
+        "min": [
+          -7.262599945068359,
+          -5.5706000328063965,
+          -127.99620056152344
+        ],
+        "max": [
+          7.262599945068359,
+          5.5706000328063965,
+          127.99620056152344
+        ]
+      },
+      "materials": [
+        "models/props_pipes/pipemetal004a"
+      ]
+    },
+    {
+      "id": "props_pipes/gutter_256_002a",
+      "model": "props_pipes/gutter_256_002a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_pipes/gutter_256_002a.mdl",
+      "meshUrl": "./models/meshes/props_pipes_gutter_256_002a_0a7676bbf5c1c332c8.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 123,
+      "vertexCount": 180,
+      "subMeshCount": 1,
+      "byteEstimate": 5076,
+      "bounds": {
+        "min": [
+          -7.927099704742432,
+          -13.008199691772461,
+          -128.0155029296875
+        ],
+        "max": [
+          7.904599666595459,
+          12.993300437927246,
+          128.01939392089844
+        ]
+      },
+      "materials": [
+        "models/props_pipes/pipemetal004a"
+      ]
+    },
+    {
+      "id": "props_plants/plantairport01",
+      "model": "props_plants/plantairport01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_plants/plantairport01.mdl",
+      "meshUrl": "./models/meshes/props_plants_plantairport01_8543bc86a95e671b05.json",
+      "lodUsed": 1,
+      "mdlVersion": 49,
+      "triCount": 680,
+      "vertexCount": 912,
+      "subMeshCount": 1,
+      "byteEstimate": 26400,
+      "bounds": {
+        "min": [
+          -25.39008903503418,
+          -29.81378936767578,
+          0.03292600065469742
+        ],
+        "max": [
+          29.721033096313477,
+          24.085758209228516,
+          89.96054077148438
+        ]
+      },
+      "materials": [
+        "models/props_plants/plantairport01_super"
+      ]
+    },
+    {
+      "id": "props_silo/camera",
+      "model": "props_silo/camera",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_silo/camera.mdl",
+      "meshUrl": "./models/meshes/props_silo_camera_ce188fcc4ccf3a596d.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 258,
+      "vertexCount": 390,
+      "subMeshCount": 1,
+      "byteEstimate": 10896,
+      "bounds": {
+        "min": [
+          -13.224800109863281,
+          -0.002174176275730133,
+          -14.568367004394531
+        ],
+        "max": [
+          19.529008865356445,
+          39.72099685668945,
+          8.796364784240723
+        ]
+      },
+      "materials": [
+        "models/props_silo/camera"
+      ]
+    },
+    {
+      "id": "props_street/awning_department_store",
+      "model": "props_street/awning_department_store",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_street/awning_department_store.mdl",
+      "meshUrl": "./models/meshes/props_street_awning_department_store_b44d3a28eb6b5bf913.json",
+      "lodUsed": 0,
+      "mdlVersion": 48,
+      "triCount": 298,
+      "vertexCount": 337,
+      "subMeshCount": 1,
+      "byteEstimate": 10316,
+      "bounds": {
+        "min": [
+          -105.63923645019531,
+          0.02299538254737854,
+          -13.516231536865234
+        ],
+        "max": [
+          105.68226623535156,
+          97.2659683227539,
+          86.34616088867188
+        ]
+      },
+      "materials": [
+        "models/props_street/awning_department_store"
+      ]
+    },
+    {
+      "id": "props_unique/atm01",
+      "model": "props_unique/atm01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_unique/atm01.mdl",
+      "meshUrl": "./models/meshes/props_unique_atm01_df3e40251acda280e5.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 428,
+      "vertexCount": 515,
+      "subMeshCount": 1,
+      "byteEstimate": 15436,
+      "bounds": {
+        "min": [
+          -14.735151290893555,
+          -16.40528106689453,
+          -0.04851999878883362
+        ],
+        "max": [
+          17.734704971313477,
+          16.40528106689453,
+          79.89542388916016
+        ]
+      },
+      "materials": [
+        "models/props_unique/atm"
+      ]
+    },
+    {
+      "id": "props_unique/hospital/exam_table",
+      "model": "props_unique/hospital/exam_table",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_unique/hospital/exam_table.mdl",
+      "meshUrl": "./models/meshes/props_unique_hospital_exam_table_0b444088b9618c6e57.json",
+      "lodUsed": 1,
+      "mdlVersion": 48,
+      "triCount": 614,
+      "vertexCount": 834,
+      "subMeshCount": 1,
+      "byteEstimate": 24048,
+      "bounds": {
+        "min": [
+          -16.24958610534668,
+          -34.9918212890625,
+          -0.01128700003027916
+        ],
+        "max": [
+          16.362138748168945,
+          34.05321502685547,
+          42.76816940307617
+        ]
+      },
+      "materials": [
+        "models/props_unique/hospital/exam_table"
+      ]
+    },
+    {
+      "id": "props_unique/hospital/hospital_bed",
+      "model": "props_unique/hospital/hospital_bed",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_unique/hospital/hospital_bed.mdl",
+      "meshUrl": "./models/meshes/props_unique_hospital_hospital_bed_7fe5f1f392f63440d0.json",
+      "lodUsed": 1,
+      "mdlVersion": 48,
+      "triCount": 618,
+      "vertexCount": 754,
+      "subMeshCount": 1,
+      "byteEstimate": 22496,
+      "bounds": {
+        "min": [
+          -23.718868255615234,
+          -48.54774475097656,
+          -9.999999974752427e-7
+        ],
+        "max": [
+          23.60161018371582,
+          48.54774475097656,
+          26.601613998413086
+        ]
+      },
+      "materials": [
+        "models/props_unique/hospital/hospital_bed"
+      ]
+    },
+    {
+      "id": "props_unique/hospital/surgery_lamp",
+      "model": "props_unique/hospital/surgery_lamp",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_unique/hospital/surgery_lamp.mdl",
+      "meshUrl": "./models/meshes/props_unique_hospital_surgery_lamp_3cdcdf07625523129e.json",
+      "lodUsed": 1,
+      "mdlVersion": 48,
+      "triCount": 517,
+      "vertexCount": 578,
+      "subMeshCount": 1,
+      "byteEstimate": 17764,
+      "bounds": {
+        "min": [
+          -22.343687057495117,
+          -22.951148986816406,
+          -34.08412170410156
+        ],
+        "max": [
+          32.11857223510742,
+          22.951148986816406,
+          -0.008465000428259373
+        ]
+      },
+      "materials": [
+        "models/props_unique/hospital/surgery_lamp"
+      ]
+    },
+    {
+      "id": "props_unique/hospitalcurtain02",
+      "model": "props_unique/hospitalcurtain02",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_unique/hospitalcurtain02.mdl",
+      "meshUrl": "./models/meshes/props_unique_hospitalcurtain02_d6ff5a7bbf87695168.json",
+      "lodUsed": 1,
+      "mdlVersion": 48,
+      "triCount": 656,
+      "vertexCount": 621,
+      "subMeshCount": 1,
+      "byteEstimate": 20292,
+      "bounds": {
+        "min": [
+          -50.484222412109375,
+          -57.883060455322266,
+          4.116330146789551
+        ],
+        "max": [
+          50.48561096191406,
+          58.074684143066406,
+          112.91374969482422
+        ]
+      },
+      "materials": [
+        "models/props_unique/hospitalcurtain01"
+      ]
+    },
+    {
+      "id": "props_urban/light_fixture01",
+      "model": "props_urban/light_fixture01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_urban/light_fixture01.mdl",
+      "meshUrl": "./models/meshes/props_urban_light_fixture01_9b6a175f582f3df053.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 327,
+      "vertexCount": 507,
+      "subMeshCount": 1,
+      "byteEstimate": 14064,
+      "bounds": {
+        "min": [
+          -16.013206481933594,
+          -5.7974348068237305,
+          -21.994598388671875
+        ],
+        "max": [
+          15.775335311889648,
+          5.797435283660889,
+          21.994596481323242
+        ]
+      },
+      "materials": [
+        "models/props_urban/light_fixture01"
+      ]
+    },
+    {
+      "id": "props_vehicles/truck003a",
+      "model": "props_vehicles/truck003a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_vehicles/truck003a.mdl",
+      "meshUrl": "./models/meshes/props_vehicles_truck003a_7acf74cea670c2129a.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 2000,
+      "vertexCount": 2971,
+      "subMeshCount": 1,
+      "byteEstimate": 83420,
+      "bounds": {
+        "min": [
+          -138.11618041992188,
+          -59.787437438964844,
+          -57.74946594238281
+        ],
+        "max": [
+          151.6995086669922,
+          57.778751373291016,
+          70.39456176757812
+        ]
+      },
+      "materials": [
+        "models/props_vehicles/truck003a_01"
+      ]
+    },
+    {
+      "id": "props_warehouse/office_furniture_coffee_table",
+      "model": "props_warehouse/office_furniture_coffee_table",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_warehouse/office_furniture_coffee_table.mdl",
+      "meshUrl": "./models/meshes/props_warehouse_office_furniture_coffee_table_167a9d61a109034a7d.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 196,
+      "vertexCount": 276,
+      "subMeshCount": 1,
+      "byteEstimate": 7872,
+      "bounds": {
+        "min": [
+          -16.618602752685547,
+          -46.17430114746094,
+          -8.766900062561035
+        ],
+        "max": [
+          16.618602752685547,
+          46.17430114746094,
+          8.766900062561035
+        ]
+      },
+      "materials": [
+        "models/props_warehouse/office_furniture/office_furniture"
+      ]
+    },
+    {
+      "id": "props_warehouse/office_furniture_couch",
+      "model": "props_warehouse/office_furniture_couch",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_warehouse/office_furniture_couch.mdl",
+      "meshUrl": "./models/meshes/props_warehouse_office_furniture_couch_46165bec328aa6b686.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 252,
+      "vertexCount": 392,
+      "subMeshCount": 1,
+      "byteEstimate": 10864,
+      "bounds": {
+        "min": [
+          -28.801002502441406,
+          -63.56629943847656,
+          -20.666900634765625
+        ],
+        "max": [
+          28.801002502441406,
+          63.605499267578125,
+          20.61680030822754
+        ]
+      },
+      "materials": [
+        "models/props_warehouse/office_furniture/couch"
+      ]
+    },
+    {
+      "id": "props_warehouse/office_furniture_desk",
+      "model": "props_warehouse/office_furniture_desk",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_warehouse/office_furniture_desk.mdl",
+      "meshUrl": "./models/meshes/props_warehouse_office_furniture_desk_2669583af136943030.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 176,
+      "vertexCount": 260,
+      "subMeshCount": 1,
+      "byteEstimate": 7312,
+      "bounds": {
+        "min": [
+          -32.019798278808594,
+          -16.00990104675293,
+          -14.741900444030762
+        ],
+        "max": [
+          32.019798278808594,
+          16.00990104675293,
+          14.741900444030762
+        ]
+      },
+      "materials": [
+        "models/props_warehouse/office_furniture/office_furniture"
+      ]
+    },
+    {
+      "id": "props_warehouse/office_furniture_desk_corner",
+      "model": "props_warehouse/office_furniture_desk_corner",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_warehouse/office_furniture_desk_corner.mdl",
+      "meshUrl": "./models/meshes/props_warehouse_office_furniture_desk_corner_9ba219817b944fe193.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 208,
+      "vertexCount": 308,
+      "subMeshCount": 1,
+      "byteEstimate": 8656,
+      "bounds": {
+        "min": [
+          -31.6903018951416,
+          -31.775297164916992,
+          -14.780500411987305
+        ],
+        "max": [
+          31.6903018951416,
+          31.775299072265625,
+          14.780500411987305
+        ]
+      },
+      "materials": [
+        "models/props_warehouse/office_furniture/office_furniture"
+      ]
+    },
+    {
+      "id": "props_warehouse/security_desk_monitor_02",
+      "model": "props_warehouse/security_desk_monitor_02",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_warehouse/security_desk_monitor_02.mdl",
+      "meshUrl": "./models/meshes/props_warehouse_security_desk_monitor_02_4042f1d6c467c43e13.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 848,
+      "vertexCount": 1256,
+      "subMeshCount": 2,
+      "byteEstimate": 35296,
+      "bounds": {
+        "min": [
+          -9.861700057983398,
+          -26.11639976501465,
+          -24.09079933166504
+        ],
+        "max": [
+          9.861700057983398,
+          26.11639976501465,
+          24.09079933166504
+        ]
+      },
+      "materials": [
+        "models/props_warehouse/security_desk/screens01",
+        "models/props_warehouse/security_desk/security_desk"
+      ]
+    },
+    {
+      "id": "props_warehouse/table_01",
+      "model": "props_warehouse/table_01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_warehouse/table_01.mdl",
+      "meshUrl": "./models/meshes/props_warehouse_table_01_aec5ffd1e43ed62135.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 528,
+      "vertexCount": 778,
+      "subMeshCount": 1,
+      "byteEstimate": 21896,
+      "bounds": {
+        "min": [
+          -69.66560363769531,
+          -55.64560317993164,
+          -0.0843999981880188
+        ],
+        "max": [
+          69.66560363769531,
+          55.64560317993164,
+          37.61109924316406
+        ]
+      },
+      "materials": [
+        "models/props_warehouse/furniture/table_01"
+      ]
+    },
+    {
+      "id": "props_wasteland/coolingtank02",
+      "model": "props_wasteland/coolingtank02",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_wasteland/coolingtank02.mdl",
+      "meshUrl": "./models/meshes/props_wasteland_coolingtank02_6f47f53a383cc9d977.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 249,
+      "vertexCount": 307,
+      "subMeshCount": 1,
+      "byteEstimate": 9128,
+      "bounds": {
+        "min": [
+          -58.71723937988281,
+          -46.714508056640625,
+          -200.01162719726562
+        ],
+        "max": [
+          54.03770065307617,
+          46.71009826660156,
+          205.33863830566406
+        ]
+      },
+      "materials": [
+        "models/props_wasteland/coolingtank02"
+      ]
+    },
+    {
+      "id": "props_wasteland/exterior_fence_notbarbed002d",
+      "model": "props_wasteland/exterior_fence_notbarbed002d",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_wasteland/exterior_fence_notbarbed002d.mdl",
+      "meshUrl": "./models/meshes/props_wasteland_exterior_fence_notbarbed002d_b4fb137e3e83a3b912.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 244,
+      "vertexCount": 390,
+      "subMeshCount": 2,
+      "byteEstimate": 10728,
+      "bounds": {
+        "min": [
+          -13.003049850463867,
+          -128.59310913085938,
+          -76.07405090332031
+        ],
+        "max": [
+          -7.972208499908447,
+          128.59310913085938,
+          55.74309539794922
+        ]
+      },
+      "materials": [
+        "models/props_wasteland/fence_alpha",
+        "models/props_wasteland/fence_sheet01"
+      ]
+    },
+    {
+      "id": "props_wasteland/exterior_fence_notbarbed002e",
+      "model": "props_wasteland/exterior_fence_notbarbed002e",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_wasteland/exterior_fence_notbarbed002e.mdl",
+      "meshUrl": "./models/meshes/props_wasteland_exterior_fence_notbarbed002e_29317cc20d01f3b77d.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 422,
+      "vertexCount": 662,
+      "subMeshCount": 2,
+      "byteEstimate": 18304,
+      "bounds": {
+        "min": [
+          -13.003055572509766,
+          -256.42840576171875,
+          -76.09072875976562
+        ],
+        "max": [
+          -7.972202777862549,
+          256.42840576171875,
+          55.74552917480469
+        ]
+      },
+      "materials": [
+        "models/props_wasteland/fence_alpha",
+        "models/props_wasteland/fence_sheet01"
+      ]
+    },
+    {
+      "id": "props_wasteland/rockcliff_cluster01b",
+      "model": "props_wasteland/rockcliff_cluster01b",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_wasteland/rockcliff_cluster01b.mdl",
+      "meshUrl": "./models/meshes/props_wasteland_rockcliff_cluster01b_b1eb355290849d2c5c.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 848,
+      "vertexCount": 1739,
+      "subMeshCount": 1,
+      "byteEstimate": 44956,
+      "bounds": {
+        "min": [
+          -449.46343994140625,
+          -218.53456115722656,
+          -267.1224670410156
+        ],
+        "max": [
+          438.0345764160156,
+          226.61575317382812,
+          259.6004638671875
+        ]
+      },
+      "materials": [
+        "models/props_wasteland/rockcliff02a"
+      ]
+    },
+    {
+      "id": "props_wasteland/rockcliff_cluster02a",
+      "model": "props_wasteland/rockcliff_cluster02a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_wasteland/rockcliff_cluster02a.mdl",
+      "meshUrl": "./models/meshes/props_wasteland_rockcliff_cluster02a_cd6e0e4a07a3645b5e.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 677,
+      "vertexCount": 981,
+      "subMeshCount": 1,
+      "byteEstimate": 27744,
+      "bounds": {
+        "min": [
+          -235.72158813476562,
+          -273.0164489746094,
+          -269.9656982421875
+        ],
+        "max": [
+          220.04776000976562,
+          302.78973388671875,
+          267.3423156738281
+        ]
+      },
+      "materials": [
+        "models/props_wasteland/rockcliff02a"
+      ]
+    },
+    {
+      "id": "props/cs_assault/billboard",
+      "model": "props/cs_assault/billboard",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/cs_assault/billboard.mdl",
+      "meshUrl": "./models/meshes/props_cs_assault_billboard_8468c5582427f442f8.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 779,
+      "vertexCount": 1369,
+      "subMeshCount": 1,
+      "byteEstimate": 36728,
+      "bounds": {
+        "min": [
+          -2.988154172897339,
+          -119.54045867919922,
+          -68.43548583984375
+        ],
+        "max": [
+          53.57966613769531,
+          119.54045867919922,
+          68.80009460449219
+        ]
+      },
+      "materials": [
+        "models/props/cs_assault/billboard"
+      ]
+    },
+    {
+      "id": "props/cs_assault/fireescape_bottom",
+      "model": "props/cs_assault/fireescape_bottom",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/cs_assault/fireescape_bottom.mdl",
+      "meshUrl": "./models/meshes/props_cs_assault_fireescape_bottom_ae4a5a8ea188a6bc8d.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 416,
+      "vertexCount": 824,
+      "subMeshCount": 3,
+      "byteEstimate": 21472,
+      "bounds": {
+        "min": [
+          -32.56325149536133,
+          -66.43721008300781,
+          -63.694671630859375
+        ],
+        "max": [
+          32.80363845825195,
+          66.43721008300781,
+          129.43270874023438
+        ]
+      },
+      "materials": [
+        "models/props/cs_assault/fireescapebars",
+        "models/props/cs_assault/fireescapefloor",
+        "models/props/cs_assault/fireescapemain"
+      ]
+    },
+    {
+      "id": "props/cs_assault/fireescape_repeatable",
+      "model": "props/cs_assault/fireescape_repeatable",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/cs_assault/fireescape_repeatable.mdl",
+      "meshUrl": "./models/meshes/props_cs_assault_fireescape_repeatable_26d05e326cc84e2149.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 360,
+      "vertexCount": 712,
+      "subMeshCount": 3,
+      "byteEstimate": 18560,
+      "bounds": {
+        "min": [
+          -32.56325149536133,
+          -66.43721008300781,
+          -25.569515228271484
+        ],
+        "max": [
+          32.80363845825195,
+          66.43721008300781,
+          129.43270874023438
+        ]
+      },
+      "materials": [
+        "models/props/cs_assault/fireescapebars",
+        "models/props/cs_assault/fireescapefloor",
+        "models/props/cs_assault/fireescapemain"
+      ]
+    },
+    {
+      "id": "props/cs_assault/fireescape_top",
+      "model": "props/cs_assault/fireescape_top",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/cs_assault/fireescape_top.mdl",
+      "meshUrl": "./models/meshes/props_cs_assault_fireescape_top_4ec6f57753618949a8.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 360,
+      "vertexCount": 712,
+      "subMeshCount": 3,
+      "byteEstimate": 18560,
+      "bounds": {
+        "min": [
+          -32.56325149536133,
+          -66.43721008300781,
+          -25.569515228271484
+        ],
+        "max": [
+          32.80363845825195,
+          66.43721008300781,
+          129.43270874023438
+        ]
+      },
+      "materials": [
+        "models/props/cs_assault/fireescapebars",
+        "models/props/cs_assault/fireescapefloor",
+        "models/props/cs_assault/fireescapemain"
+      ]
+    },
+    {
+      "id": "props/cs_assault/light_shop2",
+      "model": "props/cs_assault/light_shop2",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/cs_assault/light_shop2.mdl",
+      "meshUrl": "./models/meshes/props_cs_assault_light_shop2_780f229951376e43ab.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 312,
+      "vertexCount": 368,
+      "subMeshCount": 1,
+      "byteEstimate": 11104,
+      "bounds": {
+        "min": [
+          -32.925594329833984,
+          -7.636251449584961,
+          0.003092000028118491
+        ],
+        "max": [
+          32.319271087646484,
+          7.776431560516357,
+          43.0283203125
+        ]
+      },
+      "materials": [
+        "models/props/cs_assault/light_shop2"
+      ]
+    },
+    {
+      "id": "props/cs_assault/pylon",
+      "model": "props/cs_assault/pylon",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/cs_assault/pylon.mdl",
+      "meshUrl": "./models/meshes/props_cs_assault_pylon_eb5e89826973db0da4.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 180,
+      "vertexCount": 124,
+      "subMeshCount": 1,
+      "byteEstimate": 4640,
+      "bounds": {
+        "min": [
+          -4.802256107330322,
+          -4.802256107330322,
+          -0.005642999894917011
+        ],
+        "max": [
+          4.802258014678955,
+          4.802256107330322,
+          61.70790481567383
+        ]
+      },
+      "materials": [
+        "models/props/cs_assault/pylon"
+      ]
+    },
+    {
+      "id": "props/cs_assault/stoplight",
+      "model": "props/cs_assault/stoplight",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/cs_assault/stoplight.mdl",
+      "meshUrl": "./models/meshes/props_cs_assault_stoplight_c99c456de820f54f7b.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 416,
+      "vertexCount": 523,
+      "subMeshCount": 1,
+      "byteEstimate": 15452,
+      "bounds": {
+        "min": [
+          -11.591782569885254,
+          -9.77730941772461,
+          0.02131200022995472
+        ],
+        "max": [
+          6.023039817810059,
+          9.77730941772461,
+          134.93634033203125
+        ]
+      },
+      "materials": [
+        "models/props/cs_assault/stoplight"
+      ]
+    },
+    {
+      "id": "props/cs_assault/streetlight",
+      "model": "props/cs_assault/streetlight",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/cs_assault/streetlight.mdl",
+      "meshUrl": "./models/meshes/props_cs_assault_streetlight_d95eafda9e08822f0d.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 258,
+      "vertexCount": 294,
+      "subMeshCount": 1,
+      "byteEstimate": 8976,
+      "bounds": {
+        "min": [
+          -0.008965189568698406,
+          -6.656663417816162,
+          -15.36340045928955
+        ],
+        "max": [
+          70.0203628540039,
+          6.656666278839111,
+          53.21656799316406
+        ]
+      },
+      "materials": [
+        "models/props/cs_assault/streetlight"
+      ]
+    },
+    {
+      "id": "props/cs_havana/gazebo",
+      "model": "props/cs_havana/gazebo",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/cs_havana/gazebo.mdl",
+      "meshUrl": "./models/meshes/props_cs_havana_gazebo_59767b8a2ce5ed312f.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 216,
+      "vertexCount": 426,
+      "subMeshCount": 1,
+      "byteEstimate": 11112,
+      "bounds": {
+        "min": [
+          -90.62067413330078,
+          -104.59765625,
+          -12.800004005432129
+        ],
+        "max": [
+          90.65563201904297,
+          104.52760314941406,
+          178.96560668945312
+        ]
+      },
+      "materials": [
+        "models/cs_havana/gazebo"
+      ]
+    },
+    {
+      "id": "props/cs_italy/it_lampholder2",
+      "model": "props/cs_italy/it_lampholder2",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/cs_italy/it_lampholder2.mdl",
+      "meshUrl": "./models/meshes/props_cs_italy_it_lampholder2_72bd73a0e74de5f94a.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 89,
+      "vertexCount": 147,
+      "subMeshCount": 2,
+      "byteEstimate": 4008,
+      "bounds": {
+        "min": [
+          -4.371138828673793e-8,
+          -1,
+          -22
+        ],
+        "max": [
+          17,
+          1.0000007152557373,
+          -6
+        ]
+      },
+      "materials": [
+        "models/cs_italy/blkmetal",
+        "models/cs_italy/lampholder2a"
+      ]
+    },
+    {
+      "id": "props/cs_italy/it_lantern1",
+      "model": "props/cs_italy/it_lantern1",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/cs_italy/it_lantern1.mdl",
+      "meshUrl": "./models/meshes/props_cs_italy_it_lantern1_8035fe61988daed572.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 314,
+      "vertexCount": 486,
+      "subMeshCount": 2,
+      "byteEstimate": 13488,
+      "bounds": {
+        "min": [
+          -5,
+          -5,
+          -10.875
+        ],
+        "max": [
+          5,
+          5,
+          13
+        ]
+      },
+      "materials": [
+        "models/cs_italy/blkmetal",
+        "models/cs_italy/light_orange"
+      ]
+    },
+    {
+      "id": "props/cs_italy/it_lantern2",
+      "model": "props/cs_italy/it_lantern2",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/cs_italy/it_lantern2.mdl",
+      "meshUrl": "./models/meshes/props_cs_italy_it_lantern2_8e42ccf63904a47c9f.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 304,
+      "vertexCount": 447,
+      "subMeshCount": 3,
+      "byteEstimate": 12588,
+      "bounds": {
+        "min": [
+          -8.875,
+          -7.685699939727783,
+          -12.5
+        ],
+        "max": [
+          8.875,
+          7.685699939727783,
+          15
+        ]
+      },
+      "materials": [
+        "models/cs_italy/blkmetal",
+        "models/cs_italy/lantern2a",
+        "models/cs_italy/light_orange"
+      ]
+    },
+    {
+      "id": "props/cs_italy/it_wndx1",
+      "model": "props/cs_italy/it_wndx1",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/cs_italy/it_wndx1.mdl",
+      "meshUrl": "./models/meshes/props_cs_italy_it_wndx1_6d362216046bd65641.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 58,
+      "vertexCount": 98,
+      "subMeshCount": 2,
+      "byteEstimate": 2656,
+      "bounds": {
+        "min": [
+          -7.868050033721374e-7,
+          -18,
+          -24
+        ],
+        "max": [
+          5.000000953674316,
+          18,
+          24
+        ]
+      },
+      "materials": [
+        "models/cs_italy/plaster",
+        "models/cs_italy/wndx1"
+      ]
+    },
+    {
+      "id": "props/cs_militia/housefence",
+      "model": "props/cs_militia/housefence",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/cs_militia/housefence.mdl",
+      "meshUrl": "./models/meshes/props_cs_militia_housefence_e777c1d04930c64b71.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 383,
+      "vertexCount": 677,
+      "subMeshCount": 1,
+      "byteEstimate": 18136,
+      "bounds": {
+        "min": [
+          -7.29035758972168,
+          -171.97975158691406,
+          0.013596000149846077
+        ],
+        "max": [
+          1.8320063352584839,
+          172.32492065429688,
+          103.93098449707031
+        ]
+      },
+      "materials": [
+        "models/props/cs_militia/housefence"
+      ]
+    },
+    {
+      "id": "props/cs_militia/light_shop2",
+      "model": "props/cs_militia/light_shop2",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/cs_militia/light_shop2.mdl",
+      "meshUrl": "./models/meshes/props_cs_militia_light_shop2_997e534f7ae94321fb.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 300,
+      "vertexCount": 384,
+      "subMeshCount": 1,
+      "byteEstimate": 11280,
+      "bounds": {
+        "min": [
+          -32.925594329833984,
+          -7.636251449584961,
+          0.003100000089034438
+        ],
+        "max": [
+          32.34321975708008,
+          7.776431560516357,
+          23.016305923461914
+        ]
+      },
+      "materials": [
+        "models/props/cs_militia/light_shop2"
+      ]
+    },
+    {
+      "id": "props/cs_militia/mailbox01",
+      "model": "props/cs_militia/mailbox01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/cs_militia/mailbox01.mdl",
+      "meshUrl": "./models/meshes/props_cs_militia_mailbox01_b319743618293e77ec.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 561,
+      "vertexCount": 719,
+      "subMeshCount": 1,
+      "byteEstimate": 21112,
+      "bounds": {
+        "min": [
+          -21.369609832763672,
+          -3.9349136352539062,
+          0.03863700106739998
+        ],
+        "max": [
+          12.325804710388184,
+          4.173522472381592,
+          58.41642379760742
+        ]
+      },
+      "materials": [
+        "models/props/cs_militia/mailbox01"
+      ]
+    },
+    {
+      "id": "props/cs_militia/militiarock01",
+      "model": "props/cs_militia/militiarock01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/cs_militia/militiarock01.mdl",
+      "meshUrl": "./models/meshes/props_cs_militia_militiarock01_571f253159abbb1109.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 414,
+      "vertexCount": 313,
+      "subMeshCount": 1,
+      "byteEstimate": 11228,
+      "bounds": {
+        "min": [
+          -91.17277526855469,
+          -86.09034729003906,
+          1.1960899829864502
+        ],
+        "max": [
+          94.2552261352539,
+          87.99754333496094,
+          116.94060516357422
+        ]
+      },
+      "materials": [
+        "models/props/cs_militia/militiarock"
+      ]
+    },
+    {
+      "id": "props/cs_militia/militiarock02",
+      "model": "props/cs_militia/militiarock02",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/cs_militia/militiarock02.mdl",
+      "meshUrl": "./models/meshes/props_cs_militia_militiarock02_58ec28bc1c64cb9960.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 646,
+      "vertexCount": 479,
+      "subMeshCount": 1,
+      "byteEstimate": 17332,
+      "bounds": {
+        "min": [
+          -68.94611358642578,
+          -97.27871704101562,
+          -0.0057680001482367516
+        ],
+        "max": [
+          68.19267272949219,
+          94.73762512207031,
+          80.87387084960938
+        ]
+      },
+      "materials": [
+        "models/props/cs_militia/militiarockb"
+      ]
+    },
+    {
+      "id": "props/cs_militia/showers",
+      "model": "props/cs_militia/showers",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/cs_militia/showers.mdl",
+      "meshUrl": "./models/meshes/props_cs_militia_showers_79a267a78c9b950dcc.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 2395,
+      "vertexCount": 2617,
+      "subMeshCount": 1,
+      "byteEstimate": 81080,
+      "bounds": {
+        "min": [
+          -0.02902134135365486,
+          -45.991092681884766,
+          12.163034439086914
+        ],
+        "max": [
+          9.500393867492676,
+          46.57591247558594,
+          100.46247100830078
+        ]
+      },
+      "materials": [
+        "models/props/cs_militia/showers"
+      ]
+    },
+    {
+      "id": "props/cs_militia/toilet",
+      "model": "props/cs_militia/toilet",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/cs_militia/toilet.mdl",
+      "meshUrl": "./models/meshes/props_cs_militia_toilet_a97e7cd6fd9273af32.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 739,
+      "vertexCount": 728,
+      "subMeshCount": 2,
+      "byteEstimate": 23428,
+      "bounds": {
+        "min": [
+          -17.26207733154297,
+          -11.403797149658203,
+          -0.0017109999898821115
+        ],
+        "max": [
+          12.258025169372559,
+          11.113003730773926,
+          37.33405303955078
+        ]
+      },
+      "materials": [
+        "models/props/cs_militia/floater_juice",
+        "models/props/cs_militia/toilet"
+      ]
+    },
+    {
+      "id": "props/cs_militia/trees2",
+      "model": "props/cs_militia/trees2",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/cs_militia/trees2.mdl",
+      "meshUrl": "./models/meshes/props_cs_militia_trees2_cdefe80fc4ffc2c545.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 3522,
+      "vertexCount": 2825,
+      "subMeshCount": 4,
+      "byteEstimate": 98764,
+      "bounds": {
+        "min": [
+          -314.9972229003906,
+          -372.88287353515625,
+          -0.31423500180244446
+        ],
+        "max": [
+          141.96360778808594,
+          466.9040222167969,
+          646.8485107421875
+        ]
+      },
+      "materials": [
+        "models/props/cs_militia/trees1b",
+        "models/props/cs_militia/trees2",
+        "models/props/cs_militia/trees3",
+        "models/props/cs_militia/trees3b"
+      ]
+    },
+    {
+      "id": "props/cs_office/computer",
+      "model": "props/cs_office/computer",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/cs_office/computer.mdl",
+      "meshUrl": "./models/meshes/props_cs_office_computer_53549c4408b026fe93.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 1008,
+      "vertexCount": 931,
+      "subMeshCount": 2,
+      "byteEstimate": 30716,
+      "bounds": {
+        "min": [
+          -23.803199768066406,
+          -11.81190013885498,
+          -0.32409998774528503
+        ],
+        "max": [
+          14.067999839782715,
+          19.667200088500977,
+          25.482500076293945
+        ]
+      },
+      "materials": [
+        "models/props/cs_office/computer",
+        "models/props/cs_office/screen"
+      ]
+    },
+    {
+      "id": "props/cs_office/exit_ceiling",
+      "model": "props/cs_office/exit_ceiling",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/cs_office/exit_ceiling.mdl",
+      "meshUrl": "./models/meshes/props_cs_office_exit_ceiling_9113ae2070b7871104.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 362,
+      "vertexCount": 560,
+      "subMeshCount": 1,
+      "byteEstimate": 15544,
+      "bounds": {
+        "min": [
+          -2.6450002193450928,
+          -9.598099708557129,
+          -15.71560001373291
+        ],
+        "max": [
+          2.6430001258850098,
+          9.601900100708008,
+          0
+        ]
+      },
+      "materials": [
+        "models/props/cs_office/exit_ceiling"
+      ]
+    },
+    {
+      "id": "props/cs_office/light_inset",
+      "model": "props/cs_office/light_inset",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/cs_office/light_inset.mdl",
+      "meshUrl": "./models/meshes/props_cs_office_light_inset_336e075ede186f80a8.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 300,
+      "vertexCount": 301,
+      "subMeshCount": 1,
+      "byteEstimate": 9620,
+      "bounds": {
+        "min": [
+          -5.622200012207031,
+          -5.622300148010254,
+          -1.6176999807357788
+        ],
+        "max": [
+          5.597899913787842,
+          5.597899913787842,
+          -0.02459999918937683
+        ]
+      },
+      "materials": [
+        "models/props/cs_office/light_inset"
+      ]
+    },
+    {
+      "id": "props/cs_office/light_outsidewall",
+      "model": "props/cs_office/light_outsidewall",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/cs_office/light_outsidewall.mdl",
+      "meshUrl": "./models/meshes/props_cs_office_light_outsidewall_99338ee8a06d2407cd.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 376,
+      "vertexCount": 329,
+      "subMeshCount": 1,
+      "byteEstimate": 11092,
+      "bounds": {
+        "min": [
+          -16.798114776611328,
+          0.03509972244501114,
+          -45.708099365234375
+        ],
+        "max": [
+          16.798086166381836,
+          88.77580261230469,
+          42.62820053100586
+        ]
+      },
+      "materials": [
+        "models/props/cs_office/light_outsidewall"
+      ]
+    },
+    {
+      "id": "props/cs_office/light_security",
+      "model": "props/cs_office/light_security",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/cs_office/light_security.mdl",
+      "meshUrl": "./models/meshes/props_cs_office_light_security_ebb1b21c87ceaf21df.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 86,
+      "vertexCount": 134,
+      "subMeshCount": 2,
+      "byteEstimate": 3712,
+      "bounds": {
+        "min": [
+          -3.959640082484839e-7,
+          -8.941399574279785,
+          0
+        ],
+        "max": [
+          8.97700023651123,
+          9.065099716186523,
+          15
+        ]
+      },
+      "materials": [
+        "models/props/cs_office/light_security",
+        "models/props/cs_office/light_security2"
+      ]
+    },
+    {
+      "id": "props/cs_office/table_meeting",
+      "model": "props/cs_office/table_meeting",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/cs_office/table_meeting.mdl",
+      "meshUrl": "./models/meshes/props_cs_office_table_meeting_330f8910a4441e6a5e.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 308,
+      "vertexCount": 352,
+      "subMeshCount": 1,
+      "byteEstimate": 10736,
+      "bounds": {
+        "min": [
+          -147.989501953125,
+          -64.02730560302734,
+          0
+        ],
+        "max": [
+          157.345703125,
+          65.06830596923828,
+          30
+        ]
+      },
+      "materials": [
+        "models/props/cs_office/table_meeting"
+      ]
+    },
+    {
+      "id": "props/de_inferno/bell_large",
+      "model": "props/de_inferno/bell_large",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/de_inferno/bell_large.mdl",
+      "meshUrl": "./models/meshes/props_de_inferno_bell_large_ea86e6abf2db47ae1d.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 649,
+      "vertexCount": 555,
+      "subMeshCount": 1,
+      "byteEstimate": 18888,
+      "bounds": {
+        "min": [
+          -17.334701538085938,
+          -27.94943618774414,
+          -2.9981529712677
+        ],
+        "max": [
+          17.341161727905273,
+          27.929536819458008,
+          44.920650482177734
+        ]
+      },
+      "materials": [
+        "models/props/de_inferno/bell_large"
+      ]
+    },
+    {
+      "id": "props/de_inferno/bench_concrete",
+      "model": "props/de_inferno/bench_concrete",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/de_inferno/bench_concrete.mdl",
+      "meshUrl": "./models/meshes/props_de_inferno_bench_concrete_d8383e4d64737dc71a.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 433,
+      "vertexCount": 371,
+      "subMeshCount": 1,
+      "byteEstimate": 12616,
+      "bounds": {
+        "min": [
+          -15.881429672241211,
+          -60.02706527709961,
+          0.0674550011754036
+        ],
+        "max": [
+          17.437530517578125,
+          60.03945541381836,
+          53.444942474365234
+        ]
+      },
+      "materials": [
+        "models/props/de_inferno/bench_concrete"
+      ]
+    },
+    {
+      "id": "props/de_inferno/ceiling_light",
+      "model": "props/de_inferno/ceiling_light",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/de_inferno/ceiling_light.mdl",
+      "meshUrl": "./models/meshes/props_de_inferno_ceiling_light_bd4f04fa9fe65dc647.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 316,
+      "vertexCount": 289,
+      "subMeshCount": 3,
+      "byteEstimate": 9572,
+      "bounds": {
+        "min": [
+          -4.032590866088867,
+          -4.032590866088867,
+          -8.823077201843262
+        ],
+        "max": [
+          4.032590866088867,
+          4.032590866088867,
+          0.0021430000197142363
+        ]
+      },
+      "materials": [
+        "models/props/de_inferno/ceiling_light",
+        "models/props/de_inferno/wall_lamp",
+        "models/props/de_inferno/wall_lamp_bulb"
+      ]
+    },
+    {
+      "id": "props/de_inferno/fencewooden02",
+      "model": "props/de_inferno/fencewooden02",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/de_inferno/fencewooden02.mdl",
+      "meshUrl": "./models/meshes/props_de_inferno_fencewooden02_70553f3db415b50061.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 314,
+      "vertexCount": 452,
+      "subMeshCount": 1,
+      "byteEstimate": 12808,
+      "bounds": {
+        "min": [
+          -126.2440185546875,
+          -1.9848644733428955,
+          -12.000515937805176
+        ],
+        "max": [
+          126.99996948242188,
+          85.86996459960938,
+          31.731870651245117
+        ]
+      },
+      "materials": [
+        "models/props/de_inferno/wood_fence"
+      ]
+    },
+    {
+      "id": "props/de_inferno/fountain",
+      "model": "props/de_inferno/fountain",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/de_inferno/fountain.mdl",
+      "meshUrl": "./models/meshes/props_de_inferno_fountain_2df3d555a9f63046b3.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 506,
+      "vertexCount": 512,
+      "subMeshCount": 1,
+      "byteEstimate": 16312,
+      "bounds": {
+        "min": [
+          -55.20722579956055,
+          -55.20722579956055,
+          -0.0000019999999949504854
+        ],
+        "max": [
+          55.20722579956055,
+          55.20722579956055,
+          67.05432891845703
+        ]
+      },
+      "materials": [
+        "models/props/de_inferno/fountain"
+      ]
+    },
+    {
+      "id": "props/de_inferno/largebush04",
+      "model": "props/de_inferno/largebush04",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/de_inferno/largebush04.mdl",
+      "meshUrl": "./models/meshes/props_de_inferno_largebush04_6817b274b2a5e21820.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 462,
+      "vertexCount": 496,
+      "subMeshCount": 2,
+      "byteEstimate": 15464,
+      "bounds": {
+        "min": [
+          -43.927433013916016,
+          -51.89232635498047,
+          -1.4124239683151245
+        ],
+        "max": [
+          40.81367111206055,
+          53.81993103027344,
+          39.46084213256836
+        ]
+      },
+      "materials": [
+        "models/props/de_inferno/largebushf",
+        "models/props/de_inferno/largebushg"
+      ]
+    },
+    {
+      "id": "props/de_inferno/largebush05",
+      "model": "props/de_inferno/largebush05",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/de_inferno/largebush05.mdl",
+      "meshUrl": "./models/meshes/props_de_inferno_largebush05_1d73c3c4a5c303287d.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 455,
+      "vertexCount": 481,
+      "subMeshCount": 2,
+      "byteEstimate": 15080,
+      "bounds": {
+        "min": [
+          -58.08095932006836,
+          -69.18976593017578,
+          -1.8832319974899292
+        ],
+        "max": [
+          54.41822814941406,
+          71.7599105834961,
+          54.64320755004883
+        ]
+      },
+      "materials": [
+        "models/props/de_inferno/largebushh",
+        "models/props/de_inferno/largebushi"
+      ]
+    },
+    {
+      "id": "props/de_inferno/lattice",
+      "model": "props/de_inferno/lattice",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/de_inferno/lattice.mdl",
+      "meshUrl": "./models/meshes/props_de_inferno_lattice_b03d0d4d8078378895.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 3636,
+      "vertexCount": 3200,
+      "subMeshCount": 3,
+      "byteEstimate": 107632,
+      "bounds": {
+        "min": [
+          -83.54821014404297,
+          -224.23391723632812,
+          8.150876998901367
+        ],
+        "max": [
+          79.98783111572266,
+          224.23391723632812,
+          80.60367584228516
+        ]
+      },
+      "materials": [
+        "models/props/de_inferno/flower_barrel",
+        "models/props/de_inferno/fountain_bowl",
+        "models/props/de_inferno/lattice"
+      ]
+    },
+    {
+      "id": "props/de_inferno/light_streetlight",
+      "model": "props/de_inferno/light_streetlight",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/de_inferno/light_streetlight.mdl",
+      "meshUrl": "./models/meshes/props_de_inferno_light_streetlight_6430fdaee93cd70d51.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 755,
+      "vertexCount": 954,
+      "subMeshCount": 5,
+      "byteEstimate": 28140,
+      "bounds": {
+        "min": [
+          -11.900245666503906,
+          -18.404069900512695,
+          0.005669999867677689
+        ],
+        "max": [
+          11.73941421508789,
+          18.437841415405273,
+          169.14773559570312
+        ]
+      },
+      "materials": [
+        "models/props/de_inferno/light_fixture",
+        "models/props/de_inferno/light_streetlight",
+        "models/props/de_inferno/wall_lamp",
+        "models/props/de_inferno/wall_lamp_bulb",
+        "models/props/de_inferno/wall_lamp_glass"
+      ]
+    },
+    {
+      "id": "props/de_inferno/railing01",
+      "model": "props/de_inferno/railing01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/de_inferno/railing01.mdl",
+      "meshUrl": "./models/meshes/props_de_inferno_railing01_5f63f89117af49b4e5.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 300,
+      "vertexCount": 600,
+      "subMeshCount": 2,
+      "byteEstimate": 15600,
+      "bounds": {
+        "min": [
+          -1.2500028610229492,
+          -63.94582748413086,
+          -0.07671699672937393
+        ],
+        "max": [
+          1.250004768371582,
+          64.62193298339844,
+          42.25263977050781
+        ]
+      },
+      "materials": [
+        "models/props/de_inferno/railing01",
+        "models/props/de_inferno/railing01a"
+      ]
+    },
+    {
+      "id": "props/de_inferno/railing03",
+      "model": "props/de_inferno/railing03",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/de_inferno/railing03.mdl",
+      "meshUrl": "./models/meshes/props_de_inferno_railing03_9222f5c454f8223daa.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 162,
+      "vertexCount": 324,
+      "subMeshCount": 2,
+      "byteEstimate": 8424,
+      "bounds": {
+        "min": [
+          -1.2500014305114746,
+          -32.061431884765625,
+          -0.07671699672937393
+        ],
+        "max": [
+          1.250003457069397,
+          32.061431884765625,
+          42.25263977050781
+        ]
+      },
+      "materials": [
+        "models/props/de_inferno/railing01",
+        "models/props/de_inferno/railing01a"
+      ]
+    },
+    {
+      "id": "props/de_inferno/railing04",
+      "model": "props/de_inferno/railing04",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/de_inferno/railing04.mdl",
+      "meshUrl": "./models/meshes/props_de_inferno_railing04_0afcc4afb343cf476a.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 422,
+      "vertexCount": 446,
+      "subMeshCount": 1,
+      "byteEstimate": 13984,
+      "bounds": {
+        "min": [
+          -3.0967113971710205,
+          -67.09133911132812,
+          0
+        ],
+        "max": [
+          3.0967209339141846,
+          61.586891174316406,
+          40.95634078979492
+        ]
+      },
+      "materials": [
+        "models/props/de_inferno/railing04a"
+      ]
+    },
+    {
+      "id": "props/de_inferno/railing04long",
+      "model": "props/de_inferno/railing04long",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/de_inferno/railing04long.mdl",
+      "meshUrl": "./models/meshes/props_de_inferno_railing04long_b014cbfedfd915076c.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 918,
+      "vertexCount": 963,
+      "subMeshCount": 1,
+      "byteEstimate": 30276,
+      "bounds": {
+        "min": [
+          -2.9935758113861084,
+          -191.3378143310547,
+          0
+        ],
+        "max": [
+          2.9935853481292725,
+          192.3174591064453,
+          40.95634078979492
+        ]
+      },
+      "materials": [
+        "models/props/de_inferno/railing04a"
+      ]
+    },
+    {
+      "id": "props/de_inferno/wood_fence",
+      "model": "props/de_inferno/wood_fence",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/de_inferno/wood_fence.mdl",
+      "meshUrl": "./models/meshes/props_de_inferno_wood_fence_b570f5d059c10712d3.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 260,
+      "vertexCount": 328,
+      "subMeshCount": 1,
+      "byteEstimate": 9680,
+      "bounds": {
+        "min": [
+          -60.01018142700195,
+          -2.0617029666900635,
+          -0.021351000294089317
+        ],
+        "max": [
+          63.9896354675293,
+          2.0617058277130127,
+          43.71102523803711
+        ]
+      },
+      "materials": [
+        "models/props/de_inferno/wood_fence"
+      ]
+    },
+    {
+      "id": "props/de_inferno/wood_fence_corner",
+      "model": "props/de_inferno/wood_fence_corner",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/de_inferno/wood_fence_corner.mdl",
+      "meshUrl": "./models/meshes/props_de_inferno_wood_fence_corner_499addb567e0c833ec.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 242,
+      "vertexCount": 292,
+      "subMeshCount": 1,
+      "byteEstimate": 8744,
+      "bounds": {
+        "min": [
+          -2.0601959228515625,
+          -2.0617029666900635,
+          -0.021347999572753906
+        ],
+        "max": [
+          59.940582275390625,
+          60.05150604248047,
+          43.71102523803711
+        ]
+      },
+      "materials": [
+        "models/props/de_inferno/wood_fence"
+      ]
+    },
+    {
+      "id": "props/de_inferno/wood_fence_end",
+      "model": "props/de_inferno/wood_fence_end",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/de_inferno/wood_fence_end.mdl",
+      "meshUrl": "./models/meshes/props_de_inferno_wood_fence_end_91054d623dd2be47af.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 18,
+      "vertexCount": 36,
+      "subMeshCount": 1,
+      "byteEstimate": 936,
+      "bounds": {
+        "min": [
+          -2.0601959228515625,
+          -2.0617029666900635,
+          -0.021347999572753906
+        ],
+        "max": [
+          2.0632119178771973,
+          2.0617029666900635,
+          43.71102523803711
+        ]
+      },
+      "materials": [
+        "models/props/de_inferno/wood_fence"
+      ]
+    },
+    {
+      "id": "props/de_nuke/file_cabinet1_group",
+      "model": "props/de_nuke/file_cabinet1_group",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/de_nuke/file_cabinet1_group.mdl",
+      "meshUrl": "./models/meshes/props_de_nuke_file_cabinet1_group_08229965d2c0a89b30.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 1686,
+      "vertexCount": 2076,
+      "subMeshCount": 1,
+      "byteEstimate": 61752,
+      "bounds": {
+        "min": [
+          -13.692500114440918,
+          -31.966100692749023,
+          0
+        ],
+        "max": [
+          13.819400787353516,
+          32.046199798583984,
+          63
+        ]
+      },
+      "materials": [
+        "models/props/de_nuke/file_cabinet1"
+      ]
+    },
+    {
+      "id": "props/de_nuke/floodlight",
+      "model": "props/de_nuke/floodlight",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/de_nuke/floodlight.mdl",
+      "meshUrl": "./models/meshes/props_de_nuke_floodlight_c939363ac2880dc766.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 180,
+      "vertexCount": 238,
+      "subMeshCount": 1,
+      "byteEstimate": 6920,
+      "bounds": {
+        "min": [
+          -0.0011351112043485045,
+          -6.507787227630615,
+          -6.2704010009765625
+        ],
+        "max": [
+          10.37360954284668,
+          6.669069290161133,
+          2.441135883331299
+        ]
+      },
+      "materials": [
+        "models/props/de_nuke/floodlight"
+      ]
+    },
+    {
+      "id": "props/de_nuke/light_red2",
+      "model": "props/de_nuke/light_red2",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/de_nuke/light_red2.mdl",
+      "meshUrl": "./models/meshes/props_de_nuke_light_red2_89c8e3ff34931263c2.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 365,
+      "vertexCount": 419,
+      "subMeshCount": 2,
+      "byteEstimate": 12760,
+      "bounds": {
+        "min": [
+          -4.597774028778076,
+          -4.703929901123047,
+          -18.534536361694336
+        ],
+        "max": [
+          4.482007026672363,
+          4.497079849243164,
+          0.006773000117391348
+        ]
+      },
+      "materials": [
+        "models/props/de_nuke/light_red1",
+        "models/props/de_nuke/light_red1_glass"
+      ]
+    },
+    {
+      "id": "props/de_nuke/winch",
+      "model": "props/de_nuke/winch",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/de_nuke/winch.mdl",
+      "meshUrl": "./models/meshes/props_de_nuke_winch_4b9251fd86306b1158.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 1458,
+      "vertexCount": 1875,
+      "subMeshCount": 1,
+      "byteEstimate": 54996,
+      "bounds": {
+        "min": [
+          -63.455020904541016,
+          -18.324052810668945,
+          -32.206016540527344
+        ],
+        "max": [
+          63.35760498046875,
+          4.352240562438965,
+          63.960262298583984
+        ]
+      },
+      "materials": [
+        "models/props/de_nuke/winch"
+      ]
+    },
+    {
+      "id": "props/de_piranesi/pi_bench",
+      "model": "props/de_piranesi/pi_bench",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/de_piranesi/pi_bench.mdl",
+      "meshUrl": "./models/meshes/props_de_piranesi_pi_bench_96c6cd1f00d3552264.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 676,
+      "vertexCount": 604,
+      "subMeshCount": 2,
+      "byteEstimate": 20192,
+      "bounds": {
+        "min": [
+          -12.000001907348633,
+          -48,
+          0
+        ],
+        "max": [
+          12.000001907348633,
+          48,
+          24
+        ]
+      },
+      "materials": [
+        "models/cs_italy/blkmetal",
+        "models/cs_italy/pwtrim2"
+      ]
+    },
+    {
+      "id": "props/de_tides/lights_studio",
+      "model": "props/de_tides/lights_studio",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/de_tides/lights_studio.mdl",
+      "meshUrl": "./models/meshes/props_de_tides_lights_studio_0ae8f306df5426e58f.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 346,
+      "vertexCount": 285,
+      "subMeshCount": 1,
+      "byteEstimate": 9852,
+      "bounds": {
+        "min": [
+          -14.037162780761719,
+          -8.268044471740723,
+          -13.776923179626465
+        ],
+        "max": [
+          14.178532600402832,
+          13.581456184387207,
+          105.88558197021484
+        ]
+      },
+      "materials": [
+        "models/props/de_tides/lights_studio"
+      ]
+    },
+    {
+      "id": "props/de_tides/patio_table2",
+      "model": "props/de_tides/patio_table2",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/de_tides/patio_table2.mdl",
+      "meshUrl": "./models/meshes/props_de_tides_patio_table2_d3c77c1b814dbfdb55.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 1036,
+      "vertexCount": 936,
+      "subMeshCount": 2,
+      "byteEstimate": 31152,
+      "bounds": {
+        "min": [
+          -42.47530746459961,
+          -49.40379333496094,
+          -0.014569999650120735
+        ],
+        "max": [
+          42.47467803955078,
+          49.460899353027344,
+          116.50707244873047
+        ]
+      },
+      "materials": [
+        "models/props/de_tides/patio_table2",
+        "models/props/de_tides/patio_umbrella"
+      ]
+    },
+    {
+      "id": "props/de_tides/tides_flag_a",
+      "model": "props/de_tides/tides_flag_a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/de_tides/tides_flag_a.mdl",
+      "meshUrl": "./models/meshes/props_de_tides_tides_flag_a_02c8647cad378fe129.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 690,
+      "vertexCount": 889,
+      "subMeshCount": 1,
+      "byteEstimate": 26060,
+      "bounds": {
+        "min": [
+          -11.943107604980469,
+          -103.7448501586914,
+          -94.59386444091797
+        ],
+        "max": [
+          17.746150970458984,
+          49.24005889892578,
+          51.52891540527344
+        ]
+      },
+      "materials": [
+        "models/props/de_tides/tides_flag_a"
+      ]
+    },
+    {
+      "id": "props/de_tides/tides_woodenfences_b",
+      "model": "props/de_tides/tides_woodenfences_b",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/de_tides/tides_woodenfences_b.mdl",
+      "meshUrl": "./models/meshes/props_de_tides_tides_woodenfences_b_2ace8ef8f2c4cfb051.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 278,
+      "vertexCount": 407,
+      "subMeshCount": 1,
+      "byteEstimate": 11476,
+      "bounds": {
+        "min": [
+          -7.891172885894775,
+          -92.61772918701172,
+          -22.52179718017578
+        ],
+        "max": [
+          8.344487190246582,
+          91.30667877197266,
+          22.642101287841797
+        ]
+      },
+      "materials": [
+        "models/props/de_tides/tides_wooden_fences"
+      ]
+    },
+    {
+      "id": "props/de_train/acunit1",
+      "model": "props/de_train/acunit1",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/de_train/acunit1.mdl",
+      "meshUrl": "./models/meshes/props_de_train_acunit1_080a006554223e7cd8.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 1648,
+      "vertexCount": 2623,
+      "subMeshCount": 1,
+      "byteEstimate": 72236,
+      "bounds": {
+        "min": [
+          -56.36772918701172,
+          -18.80605125427246,
+          -0.026753000915050507
+        ],
+        "max": [
+          56.358943939208984,
+          18.87847900390625,
+          55.22856140136719
+        ]
+      },
+      "materials": [
+        "models/props/de_train/acunit1"
+      ]
+    },
+    {
+      "id": "props/pi_shrub",
+      "model": "props/pi_shrub",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props/pi_shrub.mdl",
+      "meshUrl": "./models/meshes/props_pi_shrub_6ca0cd13aa76bccf49.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 108,
+      "vertexCount": 72,
+      "subMeshCount": 1,
+      "byteEstimate": 2736,
+      "bounds": {
+        "min": [
+          -23.66469955444336,
+          -22.268199920654297,
+          -32.004798889160156
+        ],
+        "max": [
+          19.84000015258789,
+          21.09160041809082,
+          11.601799964904785
+        ]
+      },
+      "materials": [
+        "models/pi_shrub/pi_bush"
+      ]
+    },
+    {
+      "id": "sickness/bk_booth2",
+      "model": "sickness/bk_booth2",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/sickness/bk_booth2.mdl",
+      "meshUrl": "./models/meshes/sickness_bk_booth2_875569392fbce498a6.json",
+      "lodUsed": 0,
+      "mdlVersion": 48,
+      "triCount": 464,
+      "vertexCount": 484,
+      "subMeshCount": 1,
+      "byteEstimate": 15248,
+      "bounds": {
+        "min": [
+          -45.75639343261719,
+          -45.268795013427734,
+          -0.13654199242591858
+        ],
+        "max": [
+          50.62221908569336,
+          43.48052215576172,
+          48.361915588378906
+        ]
+      },
+      "materials": [
+        "models/sickness/bkbooth_01"
+      ]
+    },
+    {
+      "id": "sickness/bk_intmenu",
+      "model": "sickness/bk_intmenu",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/sickness/bk_intmenu.mdl",
+      "meshUrl": "./models/meshes/sickness_bk_intmenu_f6e84eb7b845ef433f.json",
+      "lodUsed": 0,
+      "mdlVersion": 48,
+      "triCount": 86,
+      "vertexCount": 170,
+      "subMeshCount": 1,
+      "byteEstimate": 4432,
+      "bounds": {
+        "min": [
+          -10.067354202270508,
+          -96.39776611328125,
+          0
+        ],
+        "max": [
+          5.93265438079834,
+          95.60223388671875,
+          48
+        ]
+      },
+      "materials": [
+        "models/sickness/bkmenu_01"
+      ]
+    },
+    {
+      "id": "sickness/bk_outmenu",
+      "model": "sickness/bk_outmenu",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/sickness/bk_outmenu.mdl",
+      "meshUrl": "./models/meshes/sickness_bk_outmenu_f015aa3db270c2be68.json",
+      "lodUsed": 0,
+      "mdlVersion": 48,
+      "triCount": 196,
+      "vertexCount": 308,
+      "subMeshCount": 1,
+      "byteEstimate": 8512,
+      "bounds": {
+        "min": [
+          -33.212364196777344,
+          -55.34622573852539,
+          -9.999999974752427e-7
+        ],
+        "max": [
+          9.245885848999023,
+          52.73232650756836,
+          89.99999237060547
+        ]
+      },
+      "materials": [
+        "models/sickness/bkdrivethru_01"
+      ]
+    },
+    {
+      "id": "sickness/bk_sign",
+      "model": "sickness/bk_sign",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/sickness/bk_sign.mdl",
+      "meshUrl": "./models/meshes/sickness_bk_sign_0b22c302943303b872.json",
+      "lodUsed": 0,
+      "mdlVersion": 48,
+      "triCount": 568,
+      "vertexCount": 608,
+      "subMeshCount": 1,
+      "byteEstimate": 18976,
+      "bounds": {
+        "min": [
+          -20.481109619140625,
+          -60.69997787475586,
+          0
+        ],
+        "max": [
+          21.009349822998047,
+          59.30002212524414,
+          397.0618896484375
+        ]
+      },
+      "materials": [
+        "models/sickness/bksign_01"
+      ]
+    },
+    {
+      "id": "sickness/boasign_01",
+      "model": "sickness/boasign_01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/sickness/boasign_01.mdl",
+      "meshUrl": "./models/meshes/sickness_boasign_01_a939e3407ba3a575c9.json",
+      "lodUsed": 0,
+      "mdlVersion": 48,
+      "triCount": 44,
+      "vertexCount": 64,
+      "subMeshCount": 1,
+      "byteEstimate": 1808,
+      "bounds": {
+        "min": [
+          -3.36286997795105,
+          -63.63099670410156,
+          1.3289179801940918
+        ],
+        "max": [
+          10.637133598327637,
+          64.36900329589844,
+          319.24224853515625
+        ]
+      },
+      "materials": [
+        "models/sickness/boasign"
+      ]
+    },
+    {
+      "id": "sickness/bpsign_01",
+      "model": "sickness/bpsign_01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/sickness/bpsign_01.mdl",
+      "meshUrl": "./models/meshes/sickness_bpsign_01_3e222b64ee84f671bc.json",
+      "lodUsed": 0,
+      "mdlVersion": 48,
+      "triCount": 2025,
+      "vertexCount": 2285,
+      "subMeshCount": 1,
+      "byteEstimate": 70000,
+      "bounds": {
+        "min": [
+          -14.805463790893555,
+          -63.86065673828125,
+          -0.032836999744176865
+        ],
+        "max": [
+          16.88408088684082,
+          64.13934326171875,
+          274.00347900390625
+        ]
+      },
+      "materials": [
+        "models/sickness/bpsiskin"
+      ]
+    },
+    {
+      "id": "sickness/busstop_01",
+      "model": "sickness/busstop_01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/sickness/busstop_01.mdl",
+      "meshUrl": "./models/meshes/sickness_busstop_01_d29c40422107e45a87.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 872,
+      "vertexCount": 1221,
+      "subMeshCount": 4,
+      "byteEstimate": 34884,
+      "bounds": {
+        "min": [
+          -25.893409729003906,
+          -69.88131713867188,
+          -0.008595000021159649
+        ],
+        "max": [
+          46.10660934448242,
+          89.72386169433594,
+          129.56138610839844
+        ]
+      },
+      "materials": [
+        "models/sickness/busbench",
+        "models/sickness/busfeet",
+        "models/sickness/busstopmain_01",
+        "models/sickness/glassntrimbus_01"
+      ]
+    },
+    {
+      "id": "sickness/cashregister_drawer",
+      "model": "sickness/cashregister_drawer",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/sickness/cashregister_drawer.mdl",
+      "meshUrl": "./models/meshes/sickness_cashregister_drawer_48038a4648c4642c05.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 232,
+      "vertexCount": 330,
+      "subMeshCount": 1,
+      "byteEstimate": 9384,
+      "bounds": {
+        "min": [
+          -9.574932098388672,
+          -8.826457977294922,
+          2.1583731174468994
+        ],
+        "max": [
+          4.733792304992676,
+          10.544837951660156,
+          6.684693813323975
+        ]
+      },
+      "materials": [
+        "models/sickness/cashdrawer_01"
+      ]
+    },
+    {
+      "id": "sickness/cashregister_pos",
+      "model": "sickness/cashregister_pos",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/sickness/cashregister_pos.mdl",
+      "meshUrl": "./models/meshes/sickness_cashregister_pos_440a181b2fbaa5bd05.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 350,
+      "vertexCount": 532,
+      "subMeshCount": 1,
+      "byteEstimate": 14840,
+      "bounds": {
+        "min": [
+          -13.959277153015137,
+          -8.149466514587402,
+          1.9393949508666992
+        ],
+        "max": [
+          6.040724754333496,
+          14.47346305847168,
+          21.130399703979492
+        ]
+      },
+      "materials": [
+        "models/sickness/cashregister_01"
+      ]
+    },
+    {
+      "id": "sickness/cubicle_full_01",
+      "model": "sickness/cubicle_full_01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/sickness/cubicle_full_01.mdl",
+      "meshUrl": "./models/meshes/sickness_cubicle_full_01_ed0e61231411aac291.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 964,
+      "vertexCount": 1616,
+      "subMeshCount": 4,
+      "byteEstimate": 43888,
+      "bounds": {
+        "min": [
+          -63.91865921020508,
+          -66.18333435058594,
+          -0.24243399500846863
+        ],
+        "max": [
+          70.95475769042969,
+          68.83953857421875,
+          69.03964233398438
+        ]
+      },
+      "materials": [
+        "models/sickness/cubicle128_wall",
+        "models/sickness/cubicle_overhead64",
+        "models/sickness/cubicle_pole_01",
+        "models/sickness/desktopforcubicle"
+      ]
+    },
+    {
+      "id": "sickness/dairyfreezer_01",
+      "model": "sickness/dairyfreezer_01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/sickness/dairyfreezer_01.mdl",
+      "meshUrl": "./models/meshes/sickness_dairyfreezer_01_94069d1027f168abc0.json",
+      "lodUsed": 0,
+      "mdlVersion": 48,
+      "triCount": 190,
+      "vertexCount": 274,
+      "subMeshCount": 1,
+      "byteEstimate": 7760,
+      "bounds": {
+        "min": [
+          -20.003986358642578,
+          -190.00474548339844,
+          0
+        ],
+        "max": [
+          21.313175201416016,
+          190,
+          88.04561614990234
+        ]
+      },
+      "materials": [
+        "models/sickness/dairyfreezer_01"
+      ]
+    },
+    {
+      "id": "sickness/dooframe_01",
+      "model": "sickness/dooframe_01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/sickness/dooframe_01.mdl",
+      "meshUrl": "./models/meshes/sickness_dooframe_01_486ad1235e05b35be6.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 28,
+      "vertexCount": 48,
+      "subMeshCount": 1,
+      "byteEstimate": 1296,
+      "bounds": {
+        "min": [
+          -25.853147506713867,
+          -4.803459167480469,
+          0.3142400085926056
+        ],
+        "max": [
+          30.146852493286133,
+          3.196542501449585,
+          112.31422424316406
+        ]
+      },
+      "materials": [
+        "models/sickness/doorframe_01"
+      ]
+    },
+    {
+      "id": "sickness/evolight_01",
+      "model": "sickness/evolight_01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/sickness/evolight_01.mdl",
+      "meshUrl": "./models/meshes/sickness_evolight_01_dbbc4e90071041fb65.json",
+      "lodUsed": 0,
+      "mdlVersion": 48,
+      "triCount": 1182,
+      "vertexCount": 1276,
+      "subMeshCount": 1,
+      "byteEstimate": 39704,
+      "bounds": {
+        "min": [
+          -13.4288911819458,
+          -89.23246765136719,
+          0
+        ],
+        "max": [
+          14.571110725402832,
+          14.259434700012207,
+          348.3535461425781
+        ]
+      },
+      "materials": [
+        "models/sickness/lampost_06"
+      ]
+    },
+    {
+      "id": "sickness/frame_01",
+      "model": "sickness/frame_01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/sickness/frame_01.mdl",
+      "meshUrl": "./models/meshes/sickness_frame_01_b3c1f0a2491f9f2858.json",
+      "lodUsed": 0,
+      "mdlVersion": 48,
+      "triCount": 226,
+      "vertexCount": 364,
+      "subMeshCount": 1,
+      "byteEstimate": 9992,
+      "bounds": {
+        "min": [
+          -5.119630336761475,
+          -141.619873046875,
+          1.5227739810943604
+        ],
+        "max": [
+          5.436830997467041,
+          134.37112426757812,
+          269.04522705078125
+        ]
+      },
+      "materials": [
+        "models/sickness/towerpic_01"
+      ]
+    },
+    {
+      "id": "sickness/fridge_01",
+      "model": "sickness/fridge_01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/sickness/fridge_01.mdl",
+      "meshUrl": "./models/meshes/sickness_fridge_01_874ba0302cb81012c9.json",
+      "lodUsed": 0,
+      "mdlVersion": 48,
+      "triCount": 476,
+      "vertexCount": 702,
+      "subMeshCount": 1,
+      "byteEstimate": 19752,
+      "bounds": {
+        "min": [
+          -24.924720764160156,
+          -30.000003814697266,
+          9.999999974752427e-7
+        ],
+        "max": [
+          16.830446243286133,
+          30.038127899169922,
+          90
+        ]
+      },
+      "materials": [
+        "models/sickness/fridge_01"
+      ]
+    },
+    {
+      "id": "sickness/gcfrontdesk_01",
+      "model": "sickness/gcfrontdesk_01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/sickness/gcfrontdesk_01.mdl",
+      "meshUrl": "./models/meshes/sickness_gcfrontdesk_01_17a375a48235a3a35d.json",
+      "lodUsed": 0,
+      "mdlVersion": 48,
+      "triCount": 296,
+      "vertexCount": 372,
+      "subMeshCount": 1,
+      "byteEstimate": 10992,
+      "bounds": {
+        "min": [
+          -48.132545471191406,
+          -154.22442626953125,
+          0
+        ],
+        "max": [
+          10.219886779785156,
+          156.14956665039062,
+          56.5184211730957
+        ]
+      },
+      "materials": [
+        "models/sickness/receptiondesk_01"
+      ]
+    },
+    {
+      "id": "sickness/genericsign_001",
+      "model": "sickness/genericsign_001",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/sickness/genericsign_001.mdl",
+      "meshUrl": "./models/meshes/sickness_genericsign_001_b744362cabdde56487.json",
+      "lodUsed": 0,
+      "mdlVersion": 48,
+      "triCount": 26,
+      "vertexCount": 36,
+      "subMeshCount": 1,
+      "byteEstimate": 1032,
+      "bounds": {
+        "min": [
+          0.21119751036167145,
+          -80.0809097290039,
+          0.7532839775085449
+        ],
+        "max": [
+          17.30127716064453,
+          79.9190902709961,
+          72.75328063964844
+        ]
+      },
+      "materials": [
+        "models/sickness/genericsign_01"
+      ]
+    },
+    {
+      "id": "sickness/newshop_windows",
+      "model": "sickness/newshop_windows",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/sickness/newshop_windows.mdl",
+      "meshUrl": "./models/meshes/sickness_newshop_windows_ce6f484e7a9773b668.json",
+      "lodUsed": 0,
+      "mdlVersion": 48,
+      "triCount": 764,
+      "vertexCount": 1528,
+      "subMeshCount": 1,
+      "byteEstimate": 39728,
+      "bounds": {
+        "min": [
+          -294.5,
+          -16.00001335144043,
+          0
+        ],
+        "max": [
+          294.5,
+          0.000012873003470303956,
+          316
+        ]
+      },
+      "materials": [
+        "models/sickness/newshopwindows_01"
+      ]
+    },
+    {
+      "id": "sickness/parkinglotlight",
+      "model": "sickness/parkinglotlight",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/sickness/parkinglotlight.mdl",
+      "meshUrl": "./models/meshes/sickness_parkinglotlight_5703c56451be88ea1f.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 248,
+      "vertexCount": 322,
+      "subMeshCount": 1,
+      "byteEstimate": 9416,
+      "bounds": {
+        "min": [
+          -14.276735305786133,
+          -43.7999267578125,
+          0
+        ],
+        "max": [
+          13.297883033752441,
+          40.151737213134766,
+          293.9627685546875
+        ]
+      },
+      "materials": [
+        "models/sickness/lampost1_01"
+      ]
+    },
+    {
+      "id": "sickness/parksign_01",
+      "model": "sickness/parksign_01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/sickness/parksign_01.mdl",
+      "meshUrl": "./models/meshes/sickness_parksign_01_aae38397edeb868c39.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 733,
+      "vertexCount": 1121,
+      "subMeshCount": 1,
+      "byteEstimate": 31216,
+      "bounds": {
+        "min": [
+          -3.2662692070007324,
+          -13.085824012756348,
+          -0.44679298996925354
+        ],
+        "max": [
+          1.8062474727630615,
+          5.953394889831543,
+          108.78321075439453
+        ]
+      },
+      "materials": [
+        "models/sickness/parkingsign_01"
+      ]
+    },
+    {
+      "id": "sickness/speedlimit_02",
+      "model": "sickness/speedlimit_02",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/sickness/speedlimit_02.mdl",
+      "meshUrl": "./models/meshes/sickness_speedlimit_02_9be0d6a7cc838db6d8.json",
+      "lodUsed": 0,
+      "mdlVersion": 48,
+      "triCount": 238,
+      "vertexCount": 406,
+      "subMeshCount": 2,
+      "byteEstimate": 10976,
+      "bounds": {
+        "min": [
+          -13.151115417480469,
+          -1.47291898727417,
+          0
+        ],
+        "max": [
+          13.422381401062012,
+          0.9905110001564026,
+          113.41893005371094
+        ]
+      },
+      "materials": [
+        "models/sickness/speedlimitsign_001",
+        "models/sickness/stopsign_01"
+      ]
+    },
+    {
+      "id": "sickness/splitway_02",
+      "model": "sickness/splitway_02",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/sickness/splitway_02.mdl",
+      "meshUrl": "./models/meshes/sickness_splitway_02_64c300776e662bb52d.json",
+      "lodUsed": 0,
+      "mdlVersion": 48,
+      "triCount": 416,
+      "vertexCount": 716,
+      "subMeshCount": 2,
+      "byteEstimate": 19312,
+      "bounds": {
+        "min": [
+          -32.94468688964844,
+          -1.2215608358383179,
+          -0.000014999999621068127
+        ],
+        "max": [
+          39.05531311035156,
+          1.179892897605896,
+          108.67186737060547
+        ]
+      },
+      "materials": [
+        "models/sickness/splitway_02",
+        "models/sickness/stopsign_01"
+      ]
+    },
+    {
+      "id": "sickness/stopsign_01",
+      "model": "sickness/stopsign_01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/sickness/stopsign_01.mdl",
+      "meshUrl": "./models/meshes/sickness_stopsign_01_186f6688e316b18e67.json",
+      "lodUsed": 0,
+      "mdlVersion": 48,
+      "triCount": 206,
+      "vertexCount": 358,
+      "subMeshCount": 1,
+      "byteEstimate": 9632,
+      "bounds": {
+        "min": [
+          -14.969825744628906,
+          -1.5080749988555908,
+          0
+        ],
+        "max": [
+          15.030174255371094,
+          0.9905110001564026,
+          110
+        ]
+      },
+      "materials": [
+        "models/sickness/stopsign_01"
+      ]
+    },
+    {
+      "id": "sickness/stove_01",
+      "model": "sickness/stove_01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/sickness/stove_01.mdl",
+      "meshUrl": "./models/meshes/sickness_stove_01_12c7f7c5c041795fda.json",
+      "lodUsed": 0,
+      "mdlVersion": 48,
+      "triCount": 304,
+      "vertexCount": 450,
+      "subMeshCount": 2,
+      "byteEstimate": 12648,
+      "bounds": {
+        "min": [
+          -21.42854118347168,
+          -18.85027313232422,
+          -0.000003999999989900971
+        ],
+        "max": [
+          21.154605865478516,
+          21.14972686767578,
+          51.11730194091797
+        ]
+      },
+      "materials": [
+        "models/sickness/murciglass",
+        "models/sickness/stove"
+      ]
+    },
+    {
+      "id": "sodadisp1",
+      "model": "sodadisp1",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/sodadisp1.mdl",
+      "meshUrl": "./models/meshes/sodadisp1_92bde40ad0541d479f.json",
+      "lodUsed": 0,
+      "mdlVersion": 48,
+      "triCount": 562,
+      "vertexCount": 850,
+      "subMeshCount": 1,
+      "byteEstimate": 23744,
+      "bounds": {
+        "min": [
+          -14.137694358825684,
+          -16.351484298706055,
+          -0.05230399966239929
+        ],
+        "max": [
+          14.249531745910645,
+          12.440713882446289,
+          22.848207473754883
+        ]
+      },
+      "materials": [
+        "models/sodadisp1/bm_fastfood_soda"
+      ]
+    },
+    {
+      "id": "toronto/burger/burgerking",
+      "model": "toronto/burger/burgerking",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/toronto/burger/burgerking.mdl",
+      "meshUrl": "./models/meshes/toronto_burger_burgerking_5a8f9a5b8f28660475.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 124,
+      "vertexCount": 92,
+      "subMeshCount": 1,
+      "byteEstimate": 3328,
+      "bounds": {
+        "min": [
+          -3.3060011863708496,
+          -28.134700775146484,
+          -26.619300842285156
+        ],
+        "max": [
+          6.412500381469727,
+          28.134700775146484,
+          26.619300842285156
+        ]
+      },
+      "materials": [
+        "models/toronto/burger/burgerking"
+      ]
+    },
+    {
+      "id": "trees/pi_tree1",
+      "model": "trees/pi_tree1",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/trees/pi_tree1.mdl",
+      "meshUrl": "./models/meshes/trees_pi_tree1_d424227dcf349a4de0.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 196,
+      "vertexCount": 344,
+      "subMeshCount": 5,
+      "byteEstimate": 9232,
+      "bounds": {
+        "min": [
+          -108.81600189208984,
+          -140.43060302734375,
+          0.1306000053882599
+        ],
+        "max": [
+          107.10800170898438,
+          146.33670043945312,
+          428.03839111328125
+        ]
+      },
+      "materials": [
+        "models/trees/g_branch01",
+        "models/trees/g_branch02",
+        "models/trees/g_branch03",
+        "models/trees/g_branch05",
+        "models/trees/trunk35"
+      ]
+    },
+    {
+      "id": "trees/pi_tree3",
+      "model": "trees/pi_tree3",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/trees/pi_tree3.mdl",
+      "meshUrl": "./models/meshes/trees_pi_tree3_c06f26ae011b68e815.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 108,
+      "vertexCount": 172,
+      "subMeshCount": 5,
+      "byteEstimate": 4736,
+      "bounds": {
+        "min": [
+          -238.82000732421875,
+          -175.8300018310547,
+          -0.625
+        ],
+        "max": [
+          139.1300048828125,
+          190.4199981689453,
+          494.760009765625
+        ]
+      },
+      "materials": [
+        "models/trees/japanese_tree_bark_02",
+        "models/trees/japanese_tree_round_02",
+        "models/trees/japanese_tree_round_03",
+        "models/trees/japanese_tree_round_04",
+        "models/trees/japanese_tree_round_05"
+      ]
+    },
+    {
+      "id": "trees/pi_tree4",
+      "model": "trees/pi_tree4",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/trees/pi_tree4.mdl",
+      "meshUrl": "./models/meshes/trees_pi_tree4_32c7b93759e02a653b.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 138,
+      "vertexCount": 209,
+      "subMeshCount": 5,
+      "byteEstimate": 5836,
+      "bounds": {
+        "min": [
+          -256.1099853515625,
+          -142.97999572753906,
+          0
+        ],
+        "max": [
+          134.49000549316406,
+          203.44996643066406,
+          440.260009765625
+        ]
+      },
+      "materials": [
+        "models/trees/japanese_tree_bark_02",
+        "models/trees/japanese_tree_round_02",
+        "models/trees/japanese_tree_round_03",
+        "models/trees/japanese_tree_round_04",
+        "models/trees/japanese_tree_round_05"
+      ]
+    },
+    {
+      "id": "trees/pi_tree5",
+      "model": "trees/pi_tree5",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/trees/pi_tree5.mdl",
+      "meshUrl": "./models/meshes/trees_pi_tree5_0333b43643e78ec6d0.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 114,
+      "vertexCount": 148,
+      "subMeshCount": 5,
+      "byteEstimate": 4328,
+      "bounds": {
+        "min": [
+          -143.92999267578125,
+          -112.95999908447266,
+          -0.009999999776482582
+        ],
+        "max": [
+          118.87000274658203,
+          129.27999877929688,
+          406.3299865722656
+        ]
+      },
+      "materials": [
+        "models/trees/japanese_tree_bark_02",
+        "models/trees/japanese_tree_round_02",
+        "models/trees/japanese_tree_round_03",
+        "models/trees/japanese_tree_round_04",
+        "models/trees/japanese_tree_round_05"
+      ]
+    },
+    {
+      "id": "u4lab/computer_keyboard_a",
+      "model": "u4lab/computer_keyboard_a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/u4lab/computer_keyboard_a.mdl",
+      "meshUrl": "./models/meshes/u4lab_computer_keyboard_a_c093dc58bdfb32e13e.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 394,
+      "vertexCount": 414,
+      "subMeshCount": 1,
+      "byteEstimate": 13008,
+      "bounds": {
+        "min": [
+          -8.029199600219727,
+          -10.264300346374512,
+          0
+        ],
+        "max": [
+          3.425299882888794,
+          12.6427001953125,
+          2.2827999591827393
+        ]
+      },
+      "materials": [
+        "models/u4lab/se1_computer_keyboard_01"
+      ]
+    },
+    {
+      "id": "u4lab/computer_monitor_a",
+      "model": "u4lab/computer_monitor_a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/u4lab/computer_monitor_a.mdl",
+      "meshUrl": "./models/meshes/u4lab_computer_monitor_a_f0e31c3175c56aa09d.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 128,
+      "vertexCount": 130,
+      "subMeshCount": 2,
+      "byteEstimate": 4136,
+      "bounds": {
+        "min": [
+          -8.401200294494629,
+          -15.65429973602295,
+          0
+        ],
+        "max": [
+          1.5128074437598116e-7,
+          15.65429973602295,
+          27.723400115966797
+        ]
+      },
+      "materials": [
+        "models/u4lab/se1_computer_monitor_01",
+        "models/u4lab/se1_computer_screen_a"
+      ]
+    },
+    {
+      "id": "u4lab/desk_office_a",
+      "model": "u4lab/desk_office_a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/u4lab/desk_office_a.mdl",
+      "meshUrl": "./models/meshes/u4lab_desk_office_a_529887e3ae66cd0669.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 580,
+      "vertexCount": 634,
+      "subMeshCount": 3,
+      "byteEstimate": 19640,
+      "bounds": {
+        "min": [
+          -64.20069885253906,
+          -64.20069885253906,
+          -14.774299621582031
+        ],
+        "max": [
+          64.20069885253906,
+          64.20069885253906,
+          14.774299621582031
+        ]
+      },
+      "materials": [
+        "models/u4lab/se1_desk_office_glass_01",
+        "models/u4lab/se1_desk_office_middle_01",
+        "models/u4lab/se1_desk_office_top_01"
+      ]
+    },
+    {
+      "id": "u4lab/duct_segments_32_128",
+      "model": "u4lab/duct_segments_32_128",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/u4lab/duct_segments_32_128.mdl",
+      "meshUrl": "./models/meshes/u4lab_duct_segments_32_128_7c6f7ab0e055722c87.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 88,
+      "vertexCount": 140,
+      "subMeshCount": 1,
+      "byteEstimate": 3856,
+      "bounds": {
+        "min": [
+          -17.90920639038086,
+          -1.2012007236480713,
+          -17.90920066833496
+        ],
+        "max": [
+          17.90920066833496,
+          128.9822998046875,
+          17.90920066833496
+        ]
+      },
+      "materials": [
+        "models/u4lab/se1_duct_metal_01"
+      ]
+    },
+    {
+      "id": "u4lab/duct_segments_32_256",
+      "model": "u4lab/duct_segments_32_256",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/u4lab/duct_segments_32_256.mdl",
+      "meshUrl": "./models/meshes/u4lab_duct_segments_32_256_32af975ea3ab68b4e4.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 152,
+      "vertexCount": 244,
+      "subMeshCount": 1,
+      "byteEstimate": 6704,
+      "bounds": {
+        "min": [
+          -17.909212112426758,
+          -1.1880006790161133,
+          -17.90920066833496
+        ],
+        "max": [
+          17.90920066833496,
+          257.01239013671875,
+          17.90920066833496
+        ]
+      },
+      "materials": [
+        "models/u4lab/se1_duct_metal_01"
+      ]
+    },
+    {
+      "id": "u4lab/duct_segments_32_vent",
+      "model": "u4lab/duct_segments_32_vent",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/u4lab/duct_segments_32_vent.mdl",
+      "meshUrl": "./models/meshes/u4lab_duct_segments_32_vent_d316fa403dc713bdf6.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 104,
+      "vertexCount": 172,
+      "subMeshCount": 2,
+      "byteEstimate": 4688,
+      "bounds": {
+        "min": [
+          -17.909202575683594,
+          -1.2702007293701172,
+          -32.36920166015625
+        ],
+        "max": [
+          17.90920066833496,
+          33.095298767089844,
+          17.90920066833496
+        ]
+      },
+      "materials": [
+        "models/u4lab/se1_duct_metal_01",
+        "models/u4lab/se1_duct_vent_01"
+      ]
+    },
+    {
+      "id": "u4lab/ladder_segment_256",
+      "model": "u4lab/ladder_segment_256",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/u4lab/ladder_segment_256.mdl",
+      "meshUrl": "./models/meshes/u4lab_ladder_segment_256_411d0c5c5ffc22611c.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 392,
+      "vertexCount": 492,
+      "subMeshCount": 1,
+      "byteEstimate": 14544,
+      "bounds": {
+        "min": [
+          -1.2990005016326904,
+          -12.00790023803711,
+          0
+        ],
+        "max": [
+          1.2990005016326904,
+          12.00790023803711,
+          257.3634033203125
+        ]
+      },
+      "materials": [
+        "models/u4lab/se1_ladder_parts_01"
+      ]
+    },
+    {
+      "id": "u4lab/track_lighting_a",
+      "model": "u4lab/track_lighting_a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/u4lab/track_lighting_a.mdl",
+      "meshUrl": "./models/meshes/u4lab_track_lighting_a_18c573b8e00fe974d0.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 1100,
+      "vertexCount": 1185,
+      "subMeshCount": 1,
+      "byteEstimate": 36900,
+      "bounds": {
+        "min": [
+          -8.918899536132812,
+          -64.2146987915039,
+          -12.151200294494629
+        ],
+        "max": [
+          8.918899536132812,
+          64.2146987915039,
+          12.151200294494629
+        ]
+      },
+      "materials": [
+        "models/u4lab/se1_track_lighting_01"
+      ]
+    },
+    {
+      "id": "u4lab/tv_monitor_plasma",
+      "model": "u4lab/tv_monitor_plasma",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/u4lab/tv_monitor_plasma.mdl",
+      "meshUrl": "./models/meshes/u4lab_tv_monitor_plasma_ece8bf2a13579d82b0.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 84,
+      "vertexCount": 68,
+      "subMeshCount": 1,
+      "byteEstimate": 2368,
+      "bounds": {
+        "min": [
+          -4.804401874542236,
+          -58.55759811401367,
+          0
+        ],
+        "max": [
+          4.8044023513793945,
+          58.55759811401367,
+          66.07990264892578
+        ]
+      },
+      "materials": [
+        "models/u4lab/se1_tv_monitor_plasma_01"
+      ]
+    }
+  ]
+}

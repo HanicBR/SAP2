@@ -39,7 +39,9 @@ type Options = {
   sourceioRoot: string;
   sourceioScript: string;
   sourceioMaterialScript: string;
+  sourceioModelScript: string;
   sourceioPython: string;
+  modelLod: number;
 };
 
 type BspLump = { offset: number; length: number; version: number; fourCC: number };
@@ -85,6 +87,22 @@ type MaterialExportRecord = {
   textureFile?: string;
   textureWidth?: number;
   textureHeight?: number;
+  error?: string;
+};
+
+type ModelExportRecord = {
+  model: string;
+  status: string;
+  sourcePath?: string;
+  meshFile?: string;
+  lodUsed?: number;
+  mdlVersion?: number;
+  triCount?: number;
+  vertexCount?: number;
+  subMeshCount?: number;
+  byteEstimate?: number;
+  bounds?: { min: [number, number, number]; max: [number, number, number] };
+  materials?: string[];
   error?: string;
 };
 
@@ -225,7 +243,11 @@ const parseArgs = (): Options => {
     sourceioMaterialScript: resolveWithParentFallback(
       String(map.get('--sourceio-material-script') || 'server/scripts/sourceio_export_materials.py'),
     ),
+    sourceioModelScript: resolveWithParentFallback(
+      String(map.get('--sourceio-model-script') || 'server/scripts/sourceio_export_models.py'),
+    ),
     sourceioPython: String(map.get('--sourceio-python') || process.env.PYTHON || 'python').trim(),
+    modelLod: Math.max(0, Math.floor(toNum(map.get('--model-lod'), 1))),
   };
 };
 
@@ -763,6 +785,130 @@ const runSourceIOMaterialExport = (
   return { records, warnings };
 };
 
+const runSourceIOModelExport = (
+  options: Options,
+  models: string[],
+  contentRoots: string[],
+  modelsOutDir: string,
+): { records: Map<string, ModelExportRecord>; warnings: string[] } => {
+  const records = new Map<string, ModelExportRecord>();
+  const warnings: string[] = [];
+  if (models.length === 0) return { records, warnings };
+
+  if (!fs.existsSync(options.sourceioModelScript) || !fs.existsSync(options.sourceioRoot)) {
+    warnings.push('sourceio_model_export_paths_missing');
+    return { records, warnings };
+  }
+
+  const modelListPath = path.join(os.tmpdir(), `sap2-model-list-${process.pid}-${Date.now()}.json`);
+  const outPath = path.join(os.tmpdir(), `sap2-model-export-${process.pid}-${Date.now()}.json`);
+  try {
+    fs.writeFileSync(modelListPath, `${JSON.stringify(models, null, 2)}\n`, 'utf8');
+  } catch (error: any) {
+    warnings.push(`sourceio_model_export_write_failed:${String(error?.message || error)}`);
+    return { records, warnings };
+  }
+
+  const uniqueRoots = Array.from(
+    new Set(
+      contentRoots
+        .map((item) => path.resolve(String(item || '').trim()))
+        .filter((item) => item.length > 0 && fs.existsSync(item)),
+    ),
+  ).sort((a, b) => a.localeCompare(b));
+  const args: string[] = [
+    options.sourceioModelScript,
+    '--sourceio-root',
+    options.sourceioRoot,
+    '--models-json',
+    modelListPath,
+    '--map-root',
+    options.mapRoot,
+    '--out',
+    outPath,
+    '--out-dir',
+    modelsOutDir,
+    '--lod',
+    String(options.modelLod),
+  ];
+  for (const root of uniqueRoots) {
+    args.push('--content-root', root);
+  }
+
+  const exec = spawnSync(options.sourceioPython, args, {
+    encoding: 'utf8',
+    timeout: 25 * 60 * 1000,
+    maxBuffer: 16 * 1024 * 1024,
+  });
+
+  try {
+    fs.unlinkSync(modelListPath);
+  } catch {
+    // no-op
+  }
+
+  if (exec.error || !fs.existsSync(outPath)) {
+    warnings.push(`sourceio_model_export_exec_failed:${String(exec.error?.message || 'no_output')}`);
+    return { records, warnings };
+  }
+
+  try {
+    const payload = JSON.parse(fs.readFileSync(outPath, 'utf8')) as any;
+    if (!payload?.ok) {
+      warnings.push(`sourceio_model_export_failed:${String(payload?.error || 'unknown')}`);
+      return { records, warnings };
+    }
+    const items = Array.isArray(payload.models) ? payload.models : [];
+    for (const item of items) {
+      const model = normalizeModelName(String(item?.model || ''));
+      if (!model) continue;
+      records.set(model, {
+        model,
+        status: String(item?.status || 'unknown'),
+        ...(item?.sourcePath ? { sourcePath: String(item.sourcePath) } : {}),
+        ...(item?.meshFile ? { meshFile: String(item.meshFile) } : {}),
+        ...(Number.isFinite(Number(item?.lodUsed)) ? { lodUsed: Number(item.lodUsed) } : {}),
+        ...(Number.isFinite(Number(item?.mdlVersion)) ? { mdlVersion: Number(item.mdlVersion) } : {}),
+        ...(Number.isFinite(Number(item?.triCount)) ? { triCount: Number(item.triCount) } : {}),
+        ...(Number.isFinite(Number(item?.vertexCount)) ? { vertexCount: Number(item.vertexCount) } : {}),
+        ...(Number.isFinite(Number(item?.subMeshCount)) ? { subMeshCount: Number(item.subMeshCount) } : {}),
+        ...(Number.isFinite(Number(item?.byteEstimate)) ? { byteEstimate: Number(item.byteEstimate) } : {}),
+        ...(item?.bounds &&
+        Number.isFinite(Number(item?.bounds?.min?.[0])) &&
+        Number.isFinite(Number(item?.bounds?.min?.[1])) &&
+        Number.isFinite(Number(item?.bounds?.min?.[2])) &&
+        Number.isFinite(Number(item?.bounds?.max?.[0])) &&
+        Number.isFinite(Number(item?.bounds?.max?.[1])) &&
+        Number.isFinite(Number(item?.bounds?.max?.[2]))
+          ? {
+            bounds: {
+              min: [Number(item.bounds.min[0]), Number(item.bounds.min[1]), Number(item.bounds.min[2])],
+              max: [Number(item.bounds.max[0]), Number(item.bounds.max[1]), Number(item.bounds.max[2])],
+            },
+          }
+          : {}),
+        ...(Array.isArray(item?.materials)
+          ? { materials: item.materials.map((mat: unknown) => normalizeMaterialName(String(mat || ''))) }
+          : {}),
+        ...(item?.error ? { error: String(item.error) } : {}),
+      });
+    }
+    if (Array.isArray(payload.warnings)) {
+      for (const warning of payload.warnings) warnings.push(`sourceio_model_export:${String(warning)}`);
+    }
+  } catch (error: any) {
+    warnings.push(`sourceio_model_export_parse_failed:${String(error?.message || error)}`);
+  } finally {
+    try {
+      fs.unlinkSync(outPath);
+    } catch {
+      // no-op
+    }
+  }
+
+  return { records, warnings };
+};
+
 const runFallback = (options: Options): ImportData => {
   const started = Date.now();
   const buffer = fs.readFileSync(options.mapBsp);
@@ -1016,30 +1162,25 @@ const run = () => {
   }
   chunks.sort((a, b) => a.id.localeCompare(b.id));
 
-  const batchMap = new Map<string, { model: string; placeholderModel: boolean; count: number }>();
-  for (const prop of props) {
-    const key = `${prop.model}|${prop.placeholderModel ? 'ph' : 'ok'}`;
-    const item = batchMap.get(key) || { model: prop.model, placeholderModel: prop.placeholderModel, count: 0 };
-    item.count += 1;
-    batchMap.set(key, item);
-  }
-  const batches = Array.from(batchMap.values()).sort((a, b) => b.count - a.count || a.model.localeCompare(b.model));
-
   const mapName = path.basename(options.mapBsp, path.extname(options.mapBsp));
   const baseDir = path.join(options.outDir, 'base');
   const chunkDir = path.join(options.outDir, 'chunks', 'lod0');
   const reportsDir = path.join(options.outDir, 'reports');
   const materialsDir = path.join(options.outDir, 'materials');
   const materialsTextureDir = path.join(materialsDir, 'basecolor');
+  const modelsDir = path.join(options.outDir, 'models');
+  const modelsMeshDir = path.join(modelsDir, 'meshes');
   fs.rmSync(path.join(options.outDir, 'pipeline'), { recursive: true, force: true });
   fs.rmSync(baseDir, { recursive: true, force: true });
   fs.rmSync(path.join(options.outDir, 'chunks'), { recursive: true, force: true });
   fs.rmSync(reportsDir, { recursive: true, force: true });
   fs.rmSync(materialsDir, { recursive: true, force: true });
+  fs.rmSync(modelsDir, { recursive: true, force: true });
   fs.mkdirSync(baseDir, { recursive: true });
   fs.mkdirSync(chunkDir, { recursive: true });
   fs.mkdirSync(reportsDir, { recursive: true });
   fs.mkdirSync(materialsTextureDir, { recursive: true });
+  fs.mkdirSync(modelsMeshDir, { recursive: true });
 
   const PROP_TRI_ESTIMATE = 12;
   const PROP_VERT_ESTIMATE = 8;
@@ -1055,8 +1196,19 @@ const run = () => {
   const auditMounts = Array.isArray((auditReport as any)?.mounts?.resolved)
     ? (auditReport as any).mounts.resolved as Array<{ rootPath?: string }>
     : [];
-  const contentRoots = [options.mapRoot]
-    .concat(auditMounts.map((item) => String(item?.rootPath || '').trim()).filter(Boolean));
+  const mapRootParents = [
+    options.mapRoot,
+    path.resolve(options.mapRoot, '..'),
+    path.resolve(options.mapRoot, '..', '..'),
+  ];
+  const contentRoots = Array.from(
+    new Set(
+      mapRootParents
+        .concat(auditMounts.map((item) => String(item?.rootPath || '').trim()).filter(Boolean))
+        .map((item) => path.resolve(String(item || '').trim()))
+        .filter((item) => item.length > 0 && fs.existsSync(item)),
+    ),
+  );
   const materialExport = runSourceIOMaterialExport(options, usedWorldMaterials, contentRoots, materialsTextureDir);
   warnings.push(...materialExport.warnings);
 
@@ -1083,6 +1235,72 @@ const run = () => {
     total: materialIndexEntries.length,
     materials: materialIndexEntries,
   });
+
+  const uniqueRuntimeModels = Array.from(
+    new Set(
+      props
+        .filter((item) => !item.placeholderModel && item.model !== '__placeholder_box__')
+        .map((item) => normalizeModelName(item.model))
+        .filter((item) => item.length > 0),
+    ),
+  ).sort((a, b) => a.localeCompare(b));
+  const modelExport = runSourceIOModelExport(options, uniqueRuntimeModels, contentRoots, modelsMeshDir);
+  warnings.push(...modelExport.warnings);
+
+  const modelIndexEntries = uniqueRuntimeModels.map((model) => {
+    const exported = modelExport.records.get(model);
+    const meshFile = String(exported?.meshFile || '').trim();
+    const meshPath = meshFile ? path.join(modelsMeshDir, meshFile) : '';
+    const hasMesh = !!meshPath && fs.existsSync(meshPath);
+    return {
+      id: model,
+      model,
+      placeholder: !hasMesh,
+      status: exported?.status || 'not_exported',
+      ...(exported?.sourcePath ? { sourcePath: exported.sourcePath } : {}),
+      ...(hasMesh ? { meshUrl: `./models/meshes/${meshFile}` } : {}),
+      ...(Number.isFinite(Number(exported?.lodUsed)) ? { lodUsed: Number(exported?.lodUsed) } : {}),
+      ...(Number.isFinite(Number(exported?.mdlVersion)) ? { mdlVersion: Number(exported?.mdlVersion) } : {}),
+      ...(Number.isFinite(Number(exported?.triCount)) ? { triCount: Number(exported?.triCount) } : {}),
+      ...(Number.isFinite(Number(exported?.vertexCount)) ? { vertexCount: Number(exported?.vertexCount) } : {}),
+      ...(Number.isFinite(Number(exported?.subMeshCount)) ? { subMeshCount: Number(exported?.subMeshCount) } : {}),
+      ...(Number.isFinite(Number(exported?.byteEstimate)) ? { byteEstimate: Number(exported?.byteEstimate) } : {}),
+      ...(exported?.bounds ? { bounds: exported.bounds } : {}),
+      ...(Array.isArray(exported?.materials)
+        ? { materials: exported.materials.map((item) => normalizeMaterialName(String(item || ''))) }
+        : {}),
+      ...(exported?.error ? { error: exported.error } : {}),
+    };
+  });
+  writeJson(path.join(modelsDir, 'index.json'), {
+    generatedAt: new Date().toISOString(),
+    total: modelIndexEntries.length,
+    models: modelIndexEntries,
+  });
+
+  const availableModelSet = new Set(modelIndexEntries.filter((item) => !item.placeholder).map((item) => item.id));
+  const modelSubMeshCountById = new Map<string, number>(
+    modelIndexEntries
+      .filter((item) => !item.placeholder)
+      .map((item) => [item.id, Math.max(1, Number(item.subMeshCount || 1))] as const),
+  );
+  for (const prop of props) {
+    if (prop.placeholderModel) continue;
+    const runtimeModel = normalizeModelName(prop.model);
+    if (!runtimeModel || !availableModelSet.has(runtimeModel)) {
+      prop.placeholderModel = true;
+      prop.model = '__placeholder_box__';
+    }
+  }
+
+  const batchMap = new Map<string, { model: string; placeholderModel: boolean; count: number }>();
+  for (const prop of props) {
+    const key = `${prop.model}|${prop.placeholderModel ? 'ph' : 'ok'}`;
+    const item = batchMap.get(key) || { model: prop.model, placeholderModel: prop.placeholderModel, count: 0 };
+    item.count += 1;
+    batchMap.set(key, item);
+  }
+  const batches = Array.from(batchMap.values()).sort((a, b) => b.count - a.count || a.model.localeCompare(b.model));
 
   let chunkedWorldFaces = 0;
   const budgetViolations: Array<{
@@ -1223,7 +1441,11 @@ const run = () => {
     const totalVerts = worldStats.verts + propsVerts;
     const totalBytes = worldStats.bytes + propsBytes;
     const drawCallsBeforeInstancing = worldFacesCount + propItems.length;
-    const drawCallsAfterInstancing = worldMaterialSet.size + propModelSet.size;
+    const propDrawCallsAfterInstancing = Array.from(propModelSet).reduce((acc, modelId) => {
+      const resolved = modelSubMeshCountById.get(modelId);
+      return acc + Math.max(1, Number(resolved || 1));
+    }, 0);
+    const drawCallsAfterInstancing = worldMaterialSet.size + propDrawCallsAfterInstancing;
 
     const splitReason = Array.isArray(chunk.splitReason) ? chunk.splitReason.filter(Boolean) : [];
     const chunkViolations: Array<{ type: 'tris' | 'verts' | 'bytes'; observed: number; budget: number }> = [];
@@ -1498,6 +1720,8 @@ const run = () => {
       assetResolutionMode: options.assetResolutionMode,
       sourceioMode: options.sourceioMode,
       sourceioMaterialScript: options.sourceioMaterialScript,
+      sourceioModelScript: options.sourceioModelScript,
+      modelLod: options.modelLod,
       chunkSize: options.chunkSize,
       maxWorldFacesPerChunk: options.maxWorldFacesPerChunk,
       maxInstancesPerChunk: options.maxInstancesPerChunk,
@@ -1534,6 +1758,12 @@ const run = () => {
       withTexture: materialIndexEntries.filter((item) => !!item.textureUrl).length,
       placeholder: materialIndexEntries.filter((item) => item.placeholder).length,
       indexPath: './materials/index.json',
+    },
+    models: {
+      total: modelIndexEntries.length,
+      exported: modelIndexEntries.filter((item) => !item.placeholder).length,
+      placeholder: modelIndexEntries.filter((item) => item.placeholder).length,
+      indexPath: './models/index.json',
     },
     staticProps: {
       totalInstances: props.length,
@@ -1621,6 +1851,10 @@ const run = () => {
       materials: {
         indexUrl: './materials/index.json',
       },
+      models: {
+        indexUrl: './models/index.json',
+        format: 'scene-json',
+      },
       chunks: {
         lod0IndexUrl: './chunks/lod0/index.json',
         format: 'scene-json',
@@ -1673,6 +1907,8 @@ const run = () => {
       sourceioRoot: options.sourceioRoot,
       sourceioScript: options.sourceioScript,
       sourceioMaterialScript: options.sourceioMaterialScript,
+      sourceioModelScript: options.sourceioModelScript,
+      modelLod: options.modelLod,
       chunkSize: options.chunkSize,
       maxWorldFacesPerChunk: options.maxWorldFacesPerChunk,
       maxInstancesPerChunk: options.maxInstancesPerChunk,
@@ -1755,6 +1991,11 @@ const run = () => {
         withTexture: materialIndexEntries.filter((item) => !!item.textureUrl).length,
         placeholder: materialIndexEntries.filter((item) => item.placeholder).length,
       },
+      models: {
+        total: modelIndexEntries.length,
+        exported: modelIndexEntries.filter((item) => !item.placeholder).length,
+        placeholder: modelIndexEntries.filter((item) => item.placeholder).length,
+      },
       topChunks: topHeaviestChunks,
     },
     budgets: {
@@ -1788,6 +2029,7 @@ const run = () => {
   console.log(`Manifest: ${path.join(options.outDir, 'manifest.json')}`);
   console.log(`Report: ${options.reportPath}`);
   console.log(`Coverage: ${worldCoveragePct.toFixed(2)}% | Chunks: ${chunks.length} | Static props: ${props.length}`);
+  console.log(`Models: exported=${modelIndexEntries.filter((item) => !item.placeholder).length}/${modelIndexEntries.length} (lod=${options.modelLod})`);
   console.log(`Budgets: ${budgetPass ? 'PASS' : 'FAIL'} | Violations: ${budgetViolationCount}`);
 };
 

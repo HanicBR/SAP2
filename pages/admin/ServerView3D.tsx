@@ -56,6 +56,10 @@ type Manifest = {
     materials?: {
       indexUrl: string;
     };
+    models?: {
+      indexUrl: string;
+      format?: string;
+    };
     chunks: {
       lod0IndexUrl: string;
       format: string;
@@ -72,6 +76,44 @@ type MaterialIndex = {
     placeholder: boolean;
     status: string;
     textureUrl?: string;
+  }>;
+};
+
+type ModelIndex = {
+  generatedAt: string;
+  total: number;
+  models: Array<{
+    id: string;
+    model: string;
+    placeholder: boolean;
+    status: string;
+    meshUrl?: string;
+    triCount?: number;
+    vertexCount?: number;
+    subMeshCount?: number;
+    byteEstimate?: number;
+  }>;
+};
+
+type ModelMeshPayload = {
+  id: string;
+  sourceModel: string;
+  lod: number;
+  stats?: {
+    triCount?: number;
+    vertexCount?: number;
+    subMeshCount?: number;
+    byteEstimate?: number;
+  };
+  subMeshes?: Array<{
+    material?: string;
+    materialId?: string;
+    placeholderMaterial?: boolean;
+    triCount?: number;
+    vertexCount?: number;
+    positions: number[];
+    uvs?: number[];
+    indices?: number[];
   }>;
 };
 
@@ -293,10 +335,10 @@ const disposeObject3D = (root: THREE.Object3D) => {
     const mesh = obj as THREE.Mesh;
     const points = obj as THREE.Points;
 
-    if (mesh.geometry) {
+    if (mesh.geometry && !(mesh.geometry as any)?.userData?.sharedFromCache) {
       mesh.geometry.dispose();
     }
-    if (points.geometry) {
+    if (points.geometry && !(points.geometry as any)?.userData?.sharedFromCache) {
       points.geometry.dispose();
     }
 
@@ -762,6 +804,31 @@ const ServerView3D: React.FC = () => {
     const textureLoading = new Set<string>();
     const pendingMaterialBindings = new Map<string, Set<THREE.MeshStandardMaterial>>();
     const materialDefs = new Map<string, { placeholder: boolean; textureUrl?: string }>();
+    const modelDefs = new Map<string, { id: string; placeholder: boolean; meshUrl?: string }>();
+    const modelCache = new Map<string, {
+      id: string;
+      triCount: number;
+      vertexCount: number;
+      byteEstimate: number;
+      subMeshes: Array<{
+        material: string;
+        materialId: string;
+        placeholderMaterial: boolean;
+        geometry: THREE.BufferGeometry;
+      }>;
+    } | null>();
+    const modelLoading = new Map<string, Promise<{
+      id: string;
+      triCount: number;
+      vertexCount: number;
+      byteEstimate: number;
+      subMeshes: Array<{
+        material: string;
+        materialId: string;
+        placeholderMaterial: boolean;
+        geometry: THREE.BufferGeometry;
+      }>;
+    } | null>>();
     const playerGeometry = new THREE.SphereGeometry(20, 14, 12);
     const playerMarkers = new Map<string, {
       steamId: string;
@@ -846,6 +913,115 @@ const ServerView3D: React.FC = () => {
       textureCache.clear();
       textureLoading.clear();
       pendingMaterialBindings.clear();
+    };
+
+    const disposeModelCache = () => {
+      for (const model of modelCache.values()) {
+        if (!model) continue;
+        for (const subMesh of model.subMeshes) {
+          subMesh.geometry.dispose();
+        }
+      }
+      modelCache.clear();
+      modelLoading.clear();
+    };
+
+    const loadModelMesh = async (modelIdRaw: string) => {
+      const modelId = String(modelIdRaw || '').trim().toLowerCase();
+      if (!modelId) return null;
+      if (modelCache.has(modelId)) return modelCache.get(modelId) || null;
+      const existing = modelLoading.get(modelId);
+      if (existing) return existing;
+
+      const def = modelDefs.get(modelId);
+      if (!def || def.placeholder || !def.meshUrl) {
+        modelCache.set(modelId, null);
+        return null;
+      }
+
+      const promise = (async () => {
+        try {
+          const payload = await readJson<ModelMeshPayload>(toAssetUrl(manifestUrl, def.meshUrl!));
+          if (cancelled) return null;
+          const subMeshesRaw = Array.isArray(payload.subMeshes) ? payload.subMeshes : [];
+          const subMeshes: Array<{
+            material: string;
+            materialId: string;
+            placeholderMaterial: boolean;
+            geometry: THREE.BufferGeometry;
+          }> = [];
+
+          for (const sub of subMeshesRaw) {
+            const rawPositions = Array.isArray(sub.positions) ? sub.positions : [];
+            if (rawPositions.length < 9) continue;
+            const positionArray = new Float32Array(rawPositions.length);
+            for (let i = 0; i < rawPositions.length; i += 3) {
+              const x = Number(rawPositions[i] || 0);
+              const y = Number(rawPositions[i + 1] || 0);
+              const z = Number(rawPositions[i + 2] || 0);
+              positionArray[i + 0] = x;
+              positionArray[i + 1] = z;
+              positionArray[i + 2] = y;
+            }
+
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.BufferAttribute(positionArray, 3));
+
+            const rawUvs = Array.isArray(sub.uvs) ? sub.uvs : [];
+            if (rawUvs.length === (rawPositions.length / 3) * 2) {
+              const uvArray = new Float32Array(rawUvs.length);
+              for (let i = 0; i < rawUvs.length; i += 2) {
+                uvArray[i + 0] = Number(rawUvs[i] || 0);
+                uvArray[i + 1] = 1 - Number(rawUvs[i + 1] || 0);
+              }
+              geometry.setAttribute('uv', new THREE.BufferAttribute(uvArray, 2));
+            }
+
+            const rawIndices = Array.isArray(sub.indices) ? sub.indices : [];
+            if (rawIndices.length >= 3) {
+              const indexArray = new Uint32Array(rawIndices.length);
+              for (let i = 0; i < rawIndices.length; i += 1) {
+                indexArray[i] = Math.max(0, Math.floor(Number(rawIndices[i] || 0)));
+              }
+              geometry.setIndex(new THREE.BufferAttribute(indexArray, 1));
+            }
+
+            geometry.computeVertexNormals();
+            geometry.computeBoundingSphere();
+            (geometry.userData as any).sharedFromCache = true;
+
+            subMeshes.push({
+              material: String(sub.material || '__missing_material'),
+              materialId: String(sub.materialId || sub.material || '__missing_material'),
+              placeholderMaterial: !!sub.placeholderMaterial,
+              geometry,
+            });
+          }
+
+          if (!subMeshes.length) {
+            modelCache.set(modelId, null);
+            return null;
+          }
+
+          const resolved = {
+            id: modelId,
+            triCount: Math.max(0, Number(payload.stats?.triCount || 0)),
+            vertexCount: Math.max(0, Number(payload.stats?.vertexCount || 0)),
+            byteEstimate: Math.max(0, Number(payload.stats?.byteEstimate || 0)),
+            subMeshes,
+          };
+          modelCache.set(modelId, resolved);
+          return resolved;
+        } catch {
+          modelCache.set(modelId, null);
+          return null;
+        } finally {
+          modelLoading.delete(modelId);
+        }
+      })();
+
+      modelLoading.set(modelId, promise);
+      return promise;
     };
 
     const clearPlayerMarkers = () => {
@@ -1071,41 +1247,66 @@ const ServerView3D: React.FC = () => {
             byModel.set(key, arr);
           }
 
+          const modelIdsToPrefetch = Array.from(byModel.keys())
+            .map((item) => String(item || '').trim().toLowerCase())
+            .filter((item) => item && item !== '__placeholder_box__');
+          if (modelIdsToPrefetch.length > 0) {
+            await Promise.all(modelIdsToPrefetch.map((modelId) => loadModelMesh(modelId)));
+          }
+
           for (const [model, instances] of byModel.entries()) {
-            const placeholder = instances.some((item) => item.placeholderModel);
-            const color = placeholder ? new THREE.Color(0xdc2626) : hashColor(model, 0.9);
-            const boxGeo = new THREE.BoxGeometry(34, 72, 34);
-            const boxMat = new THREE.MeshStandardMaterial({
-              color,
-              metalness: 0.08,
-              roughness: 0.9,
-              opacity: placeholder ? 0.72 : 0.85,
-              transparent: true,
-            });
-            const instanced = new THREE.InstancedMesh(boxGeo, boxMat, instances.length);
-            instanced.frustumCulled = true;
+            const normalizedModel = String(model || '').trim().toLowerCase();
+            const explicitPlaceholder = instances.some((item) => item.placeholderModel);
+            const loadedModel = !explicitPlaceholder && normalizedModel !== '__placeholder_box__'
+              ? (modelCache.get(normalizedModel) || null)
+              : null;
 
             const tmpPosition = new THREE.Vector3();
             const tmpQuaternion = new THREE.Quaternion();
             const tmpScale = new THREE.Vector3();
             const tmpMatrix = new THREE.Matrix4();
-            for (let i = 0; i < instances.length; i += 1) {
-              const instance = instances[i];
-              const pos = sourceToThree(instance.origin[0], instance.origin[1], instance.origin[2]);
-              tmpPosition.set(pos.x, pos.y + 36, pos.z);
-              const pitch = THREE.MathUtils.degToRad(Number(instance.angles[0] || 0));
-              const yaw = THREE.MathUtils.degToRad(Number(instance.angles[1] || 0));
-              const roll = THREE.MathUtils.degToRad(Number(instance.angles[2] || 0));
-              tmpQuaternion.setFromEuler(new THREE.Euler(pitch, yaw, roll, 'YXZ'));
-              tmpScale.set(
-                Math.max(0.25, Number(instance.scale[0] || 1)),
-                Math.max(0.25, Number(instance.scale[2] || 1)),
-                Math.max(0.25, Number(instance.scale[1] || 1)),
-              );
-              tmpMatrix.compose(tmpPosition, tmpQuaternion, tmpScale);
-              instanced.setMatrixAt(i, tmpMatrix);
+            const applyInstanceMatrices = (instanced: THREE.InstancedMesh) => {
+              for (let i = 0; i < instances.length; i += 1) {
+                const instance = instances[i];
+                const pos = sourceToThree(instance.origin[0], instance.origin[1], instance.origin[2]);
+                tmpPosition.set(pos.x, pos.y + 36, pos.z);
+                const pitch = THREE.MathUtils.degToRad(Number(instance.angles[0] || 0));
+                const yaw = THREE.MathUtils.degToRad(Number(instance.angles[1] || 0));
+                const roll = THREE.MathUtils.degToRad(Number(instance.angles[2] || 0));
+                tmpQuaternion.setFromEuler(new THREE.Euler(pitch, yaw, roll, 'YXZ'));
+                tmpScale.set(
+                  Math.max(0.25, Number(instance.scale[0] || 1)),
+                  Math.max(0.25, Number(instance.scale[2] || 1)),
+                  Math.max(0.25, Number(instance.scale[1] || 1)),
+                );
+                tmpMatrix.compose(tmpPosition, tmpQuaternion, tmpScale);
+                instanced.setMatrixAt(i, tmpMatrix);
+              }
+              instanced.instanceMatrix.needsUpdate = true;
+              instanced.frustumCulled = true;
+            };
+
+            if (loadedModel && loadedModel.subMeshes.length > 0) {
+              for (const sub of loadedModel.subMeshes) {
+                const modelMat = getWorldMaterial(sub.materialId || sub.material, !!sub.placeholderMaterial);
+                const instanced = new THREE.InstancedMesh(sub.geometry, modelMat, instances.length);
+                applyInstanceMatrices(instanced);
+                group.add(instanced);
+              }
+              continue;
             }
-            instanced.instanceMatrix.needsUpdate = true;
+
+            const color = explicitPlaceholder ? new THREE.Color(0xdc2626) : hashColor(model, 0.9);
+            const boxGeo = new THREE.BoxGeometry(34, 72, 34);
+            const boxMat = new THREE.MeshStandardMaterial({
+              color,
+              metalness: 0.08,
+              roughness: 0.9,
+              opacity: explicitPlaceholder ? 0.72 : 0.85,
+              transparent: true,
+            });
+            const instanced = new THREE.InstancedMesh(boxGeo, boxMat, instances.length);
+            applyInstanceMatrices(instanced);
             group.add(instanced);
           }
         }
@@ -1154,6 +1355,27 @@ const ServerView3D: React.FC = () => {
             }
           } catch (materialErr: any) {
             appendLog(`materials index indisponivel: ${String(materialErr?.message || materialErr)}`);
+          }
+        }
+
+        if (loadedManifest.assets.models?.indexUrl) {
+          try {
+            const modelIndexUrl = toAssetUrl(manifestUrl, loadedManifest.assets.models.indexUrl);
+            const modelIndex = await readJson<ModelIndex>(modelIndexUrl);
+            if (!cancelled) {
+              for (const model of modelIndex.models || []) {
+                const key = String(model.id || model.model || '').trim().toLowerCase();
+                if (!key) continue;
+                modelDefs.set(key, {
+                  id: key,
+                  placeholder: !!model.placeholder,
+                  ...(model.meshUrl ? { meshUrl: model.meshUrl } : {}),
+                });
+              }
+              appendLog(`models index carregado: total=${modelDefs.size}`);
+            }
+          } catch (modelErr: any) {
+            appendLog(`models index indisponivel: ${String(modelErr?.message || modelErr)}`);
           }
         }
 
@@ -1400,6 +1622,7 @@ const ServerView3D: React.FC = () => {
       clearPlayerMarkers();
       playerGeometry.dispose();
       disposeTextureCache();
+      disposeModelCache();
       renderer.dispose();
       host.innerHTML = '';
     };

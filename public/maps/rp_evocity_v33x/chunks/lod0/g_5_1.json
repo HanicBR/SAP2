@@ -31,7 +31,7 @@
     "totalVerts": 16,
     "totalBytes": 672,
     "drawCallsBeforeInstancing": 3,
-    "drawCallsAfterInstancing": 3
+    "drawCallsAfterInstancing": 4
   },
   "world": {
     "meshes": [

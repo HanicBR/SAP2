@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generatedAt": "2026-03-02T21:31:11.562Z",
+  "generatedAt": "2026-03-02T23:38:41.454Z",
   "map": {
     "name": "rp_evocity_v33x",
     "worldBounds": {
@@ -61,6 +61,10 @@
     ],
     "materials": {
       "indexUrl": "./materials/index.json"
+    },
+    "models": {
+      "indexUrl": "./models/index.json",
+      "format": "scene-json"
     },
     "chunks": {
       "lod0IndexUrl": "./chunks/lod0/index.json",

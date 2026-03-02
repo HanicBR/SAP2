@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-02T21:31:11.546Z",
+  "generatedAt": "2026-03-02T23:38:41.440Z",
   "lod": 0,
   "chunks": [
     {
@@ -35,7 +35,7 @@
         "totalVerts": 1356,
         "totalBytes": 58800,
         "drawCallsBeforeInstancing": 258,
-        "drawCallsAfterInstancing": 35
+        "drawCallsAfterInstancing": 38
       },
       "overBudget": false
     },
@@ -72,7 +72,7 @@
         "totalVerts": 1104,
         "totalBytes": 47616,
         "drawCallsBeforeInstancing": 215,
-        "drawCallsAfterInstancing": 31
+        "drawCallsAfterInstancing": 34
       },
       "overBudget": false
     },
@@ -109,7 +109,7 @@
         "totalVerts": 60,
         "totalBytes": 2352,
         "drawCallsBeforeInstancing": 13,
-        "drawCallsAfterInstancing": 6
+        "drawCallsAfterInstancing": 8
       },
       "overBudget": false
     },
@@ -146,7 +146,7 @@
         "totalVerts": 902,
         "totalBytes": 38688,
         "drawCallsBeforeInstancing": 175,
-        "drawCallsAfterInstancing": 41
+        "drawCallsAfterInstancing": 54
       },
       "overBudget": false
     },
@@ -183,7 +183,7 @@
         "totalVerts": 1753,
         "totalBytes": 74952,
         "drawCallsBeforeInstancing": 336,
-        "drawCallsAfterInstancing": 36
+        "drawCallsAfterInstancing": 42
       },
       "overBudget": false
     },
@@ -220,7 +220,7 @@
         "totalVerts": 505,
         "totalBytes": 20856,
         "drawCallsBeforeInstancing": 104,
-        "drawCallsAfterInstancing": 17
+        "drawCallsAfterInstancing": 23
       },
       "overBudget": false
     },
@@ -294,7 +294,7 @@
         "totalVerts": 68,
         "totalBytes": 2736,
         "drawCallsBeforeInstancing": 14,
-        "drawCallsAfterInstancing": 6
+        "drawCallsAfterInstancing": 7
       },
       "overBudget": false
     },
@@ -331,7 +331,7 @@
         "totalVerts": 10302,
         "totalBytes": 445152,
         "drawCallsBeforeInstancing": 1995,
-        "drawCallsAfterInstancing": 134
+        "drawCallsAfterInstancing": 139
       },
       "overBudget": false
     },
@@ -368,7 +368,7 @@
         "totalVerts": 170,
         "totalBytes": 6960,
         "drawCallsBeforeInstancing": 35,
-        "drawCallsAfterInstancing": 16
+        "drawCallsAfterInstancing": 21
       },
       "overBudget": false
     },
@@ -442,7 +442,7 @@
         "totalVerts": 69,
         "totalBytes": 2616,
         "drawCallsBeforeInstancing": 16,
-        "drawCallsAfterInstancing": 4
+        "drawCallsAfterInstancing": 5
       },
       "overBudget": false
     },
@@ -479,7 +479,7 @@
         "totalVerts": 48,
         "totalBytes": 1920,
         "drawCallsBeforeInstancing": 10,
-        "drawCallsAfterInstancing": 4
+        "drawCallsAfterInstancing": 5
       },
       "overBudget": false
     },
@@ -516,7 +516,7 @@
         "totalVerts": 36,
         "totalBytes": 1488,
         "drawCallsBeforeInstancing": 7,
-        "drawCallsAfterInstancing": 4
+        "drawCallsAfterInstancing": 6
       },
       "overBudget": false
     },
@@ -590,7 +590,7 @@
         "totalVerts": 648,
         "totalBytes": 28224,
         "drawCallsBeforeInstancing": 124,
-        "drawCallsAfterInstancing": 15
+        "drawCallsAfterInstancing": 20
       },
       "overBudget": false
     },
@@ -627,7 +627,7 @@
         "totalVerts": 242,
         "totalBytes": 10032,
         "drawCallsBeforeInstancing": 48,
-        "drawCallsAfterInstancing": 10
+        "drawCallsAfterInstancing": 12
       },
       "overBudget": false
     },
@@ -664,7 +664,7 @@
         "totalVerts": 240,
         "totalBytes": 9840,
         "drawCallsBeforeInstancing": 49,
-        "drawCallsAfterInstancing": 10
+        "drawCallsAfterInstancing": 12
       },
       "overBudget": false
     },
@@ -701,7 +701,7 @@
         "totalVerts": 97,
         "totalBytes": 4200,
         "drawCallsBeforeInstancing": 17,
-        "drawCallsAfterInstancing": 6
+        "drawCallsAfterInstancing": 12
       },
       "overBudget": false
     },
@@ -738,7 +738,7 @@
         "totalVerts": 100,
         "totalBytes": 4080,
         "drawCallsBeforeInstancing": 20,
-        "drawCallsAfterInstancing": 7
+        "drawCallsAfterInstancing": 12
       },
       "overBudget": false
     },
@@ -775,7 +775,7 @@
         "totalVerts": 75,
         "totalBytes": 3000,
         "drawCallsBeforeInstancing": 16,
-        "drawCallsAfterInstancing": 5
+        "drawCallsAfterInstancing": 10
       },
       "overBudget": false
     },
@@ -812,7 +812,7 @@
         "totalVerts": 1129,
         "totalBytes": 48552,
         "drawCallsBeforeInstancing": 224,
-        "drawCallsAfterInstancing": 17
+        "drawCallsAfterInstancing": 21
       },
       "overBudget": false
     },
@@ -886,7 +886,7 @@
         "totalVerts": 73,
         "totalBytes": 2856,
         "drawCallsBeforeInstancing": 16,
-        "drawCallsAfterInstancing": 4
+        "drawCallsAfterInstancing": 5
       },
       "overBudget": false
     },
@@ -923,7 +923,7 @@
         "totalVerts": 605,
         "totalBytes": 25224,
         "drawCallsBeforeInstancing": 126,
-        "drawCallsAfterInstancing": 18
+        "drawCallsAfterInstancing": 19
       },
       "overBudget": false
     },
@@ -960,7 +960,7 @@
         "totalVerts": 88,
         "totalBytes": 3696,
         "drawCallsBeforeInstancing": 18,
-        "drawCallsAfterInstancing": 5
+        "drawCallsAfterInstancing": 6
       },
       "overBudget": false
     },
@@ -1071,7 +1071,7 @@
         "totalVerts": 44,
         "totalBytes": 1680,
         "drawCallsBeforeInstancing": 10,
-        "drawCallsAfterInstancing": 4
+        "drawCallsAfterInstancing": 5
       },
       "overBudget": false
     },
@@ -1108,7 +1108,7 @@
         "totalVerts": 28,
         "totalBytes": 1104,
         "drawCallsBeforeInstancing": 6,
-        "drawCallsAfterInstancing": 3
+        "drawCallsAfterInstancing": 4
       },
       "overBudget": false
     },
@@ -1145,7 +1145,7 @@
         "totalVerts": 38,
         "totalBytes": 1536,
         "drawCallsBeforeInstancing": 8,
-        "drawCallsAfterInstancing": 3
+        "drawCallsAfterInstancing": 4
       },
       "overBudget": false
     },
@@ -1182,7 +1182,7 @@
         "totalVerts": 137,
         "totalBytes": 5928,
         "drawCallsBeforeInstancing": 24,
-        "drawCallsAfterInstancing": 7
+        "drawCallsAfterInstancing": 13
       },
       "overBudget": false
     },
@@ -1219,7 +1219,7 @@
         "totalVerts": 2184,
         "totalBytes": 93984,
         "drawCallsBeforeInstancing": 429,
-        "drawCallsAfterInstancing": 30
+        "drawCallsAfterInstancing": 40
       },
       "overBudget": false
     },
@@ -1256,7 +1256,7 @@
         "totalVerts": 1864,
         "totalBytes": 81168,
         "drawCallsBeforeInstancing": 361,
-        "drawCallsAfterInstancing": 30
+        "drawCallsAfterInstancing": 35
       },
       "overBudget": false
     },
@@ -1367,7 +1367,7 @@
         "totalVerts": 304,
         "totalBytes": 12624,
         "drawCallsBeforeInstancing": 64,
-        "drawCallsAfterInstancing": 11
+        "drawCallsAfterInstancing": 12
       },
       "overBudget": false
     },
@@ -1404,7 +1404,7 @@
         "totalVerts": 2146,
         "totalBytes": 89040,
         "drawCallsBeforeInstancing": 448,
-        "drawCallsAfterInstancing": 39
+        "drawCallsAfterInstancing": 44
       },
       "overBudget": false
     },
@@ -1441,7 +1441,7 @@
         "totalVerts": 167,
         "totalBytes": 6792,
         "drawCallsBeforeInstancing": 36,
-        "drawCallsAfterInstancing": 5
+        "drawCallsAfterInstancing": 6
       },
       "overBudget": false
     },
@@ -1515,7 +1515,7 @@
         "totalVerts": 72,
         "totalBytes": 2784,
         "drawCallsBeforeInstancing": 16,
-        "drawCallsAfterInstancing": 4
+        "drawCallsAfterInstancing": 5
       },
       "overBudget": false
     },
@@ -1552,7 +1552,7 @@
         "totalVerts": 102,
         "totalBytes": 4320,
         "drawCallsBeforeInstancing": 19,
-        "drawCallsAfterInstancing": 6
+        "drawCallsAfterInstancing": 8
       },
       "overBudget": false
     },
@@ -1589,7 +1589,7 @@
         "totalVerts": 180,
         "totalBytes": 7440,
         "drawCallsBeforeInstancing": 38,
-        "drawCallsAfterInstancing": 12
+        "drawCallsAfterInstancing": 13
       },
       "overBudget": false
     },
@@ -1959,7 +1959,7 @@
         "totalVerts": 1307,
         "totalBytes": 53592,
         "drawCallsBeforeInstancing": 277,
-        "drawCallsAfterInstancing": 35
+        "drawCallsAfterInstancing": 42
       },
       "overBudget": false
     },
@@ -1996,7 +1996,7 @@
         "totalVerts": 2603,
         "totalBytes": 113544,
         "drawCallsBeforeInstancing": 478,
-        "drawCallsAfterInstancing": 42
+        "drawCallsAfterInstancing": 46
       },
       "overBudget": false
     },
@@ -2033,7 +2033,7 @@
         "totalVerts": 1483,
         "totalBytes": 63624,
         "drawCallsBeforeInstancing": 288,
-        "drawCallsAfterInstancing": 54
+        "drawCallsAfterInstancing": 59
       },
       "overBudget": false
     },
@@ -2107,7 +2107,7 @@
         "totalVerts": 76,
         "totalBytes": 3120,
         "drawCallsBeforeInstancing": 15,
-        "drawCallsAfterInstancing": 7
+        "drawCallsAfterInstancing": 8
       },
       "overBudget": false
     },
@@ -2144,7 +2144,7 @@
         "totalVerts": 1170,
         "totalBytes": 47952,
         "drawCallsBeforeInstancing": 240,
-        "drawCallsAfterInstancing": 22
+        "drawCallsAfterInstancing": 29
       },
       "overBudget": false
     },
@@ -2181,7 +2181,7 @@
         "totalVerts": 704,
         "totalBytes": 29136,
         "drawCallsBeforeInstancing": 147,
-        "drawCallsAfterInstancing": 16
+        "drawCallsAfterInstancing": 18
       },
       "overBudget": false
     },
@@ -2218,7 +2218,7 @@
         "totalVerts": 218,
         "totalBytes": 9504,
         "drawCallsBeforeInstancing": 42,
-        "drawCallsAfterInstancing": 8
+        "drawCallsAfterInstancing": 9
       },
       "overBudget": false
     },
@@ -2255,7 +2255,7 @@
         "totalVerts": 48,
         "totalBytes": 2016,
         "drawCallsBeforeInstancing": 9,
-        "drawCallsAfterInstancing": 4
+        "drawCallsAfterInstancing": 5
       },
       "overBudget": false
     },
@@ -2292,7 +2292,7 @@
         "totalVerts": 7632,
         "totalBytes": 325584,
         "drawCallsBeforeInstancing": 1497,
-        "drawCallsAfterInstancing": 68
+        "drawCallsAfterInstancing": 72
       },
       "overBudget": false
     },
@@ -2366,7 +2366,7 @@
         "totalVerts": 280,
         "totalBytes": 12240,
         "drawCallsBeforeInstancing": 48,
-        "drawCallsAfterInstancing": 15
+        "drawCallsAfterInstancing": 20
       },
       "overBudget": false
     },
@@ -2403,7 +2403,7 @@
         "totalVerts": 1170,
         "totalBytes": 48864,
         "drawCallsBeforeInstancing": 242,
-        "drawCallsAfterInstancing": 22
+        "drawCallsAfterInstancing": 26
       },
       "overBudget": false
     },
@@ -2440,7 +2440,7 @@
         "totalVerts": 452,
         "totalBytes": 18960,
         "drawCallsBeforeInstancing": 91,
-        "drawCallsAfterInstancing": 9
+        "drawCallsAfterInstancing": 12
       },
       "overBudget": false
     },
@@ -2477,7 +2477,7 @@
         "totalVerts": 427,
         "totalBytes": 18072,
         "drawCallsBeforeInstancing": 85,
-        "drawCallsAfterInstancing": 28
+        "drawCallsAfterInstancing": 31
       },
       "overBudget": false
     },
@@ -2514,7 +2514,7 @@
         "totalVerts": 19828,
         "totalBytes": 847968,
         "drawCallsBeforeInstancing": 3906,
-        "drawCallsAfterInstancing": 216
+        "drawCallsAfterInstancing": 230
       },
       "overBudget": false
     },
@@ -2551,7 +2551,7 @@
         "totalVerts": 3114,
         "totalBytes": 132528,
         "drawCallsBeforeInstancing": 609,
-        "drawCallsAfterInstancing": 54
+        "drawCallsAfterInstancing": 60
       },
       "overBudget": false
     },
@@ -2588,7 +2588,7 @@
         "totalVerts": 3963,
         "totalBytes": 175512,
         "drawCallsBeforeInstancing": 735,
-        "drawCallsAfterInstancing": 77
+        "drawCallsAfterInstancing": 86
       },
       "overBudget": false
     },
@@ -2625,7 +2625,7 @@
         "totalVerts": 1974,
         "totalBytes": 87024,
         "drawCallsBeforeInstancing": 365,
-        "drawCallsAfterInstancing": 57
+        "drawCallsAfterInstancing": 67
       },
       "overBudget": false
     },
@@ -2662,7 +2662,7 @@
         "totalVerts": 139,
         "totalBytes": 5496,
         "drawCallsBeforeInstancing": 31,
-        "drawCallsAfterInstancing": 10
+        "drawCallsAfterInstancing": 11
       },
       "overBudget": false
     },
@@ -2736,7 +2736,7 @@
         "totalVerts": 631,
         "totalBytes": 26280,
         "drawCallsBeforeInstancing": 131,
-        "drawCallsAfterInstancing": 19
+        "drawCallsAfterInstancing": 20
       },
       "overBudget": false
     },
@@ -2773,7 +2773,7 @@
         "totalVerts": 152,
         "totalBytes": 6720,
         "drawCallsBeforeInstancing": 25,
-        "drawCallsAfterInstancing": 7
+        "drawCallsAfterInstancing": 10
       },
       "overBudget": false
     },
@@ -2810,7 +2810,7 @@
         "totalVerts": 387,
         "totalBytes": 15816,
         "drawCallsBeforeInstancing": 78,
-        "drawCallsAfterInstancing": 6
+        "drawCallsAfterInstancing": 9
       },
       "overBudget": false
     },
@@ -2847,7 +2847,7 @@
         "totalVerts": 771,
         "totalBytes": 32328,
         "drawCallsBeforeInstancing": 156,
-        "drawCallsAfterInstancing": 34
+        "drawCallsAfterInstancing": 38
       },
       "overBudget": false
     },
@@ -2884,7 +2884,7 @@
         "totalVerts": 2429,
         "totalBytes": 105288,
         "drawCallsBeforeInstancing": 465,
-        "drawCallsAfterInstancing": 59
+        "drawCallsAfterInstancing": 69
       },
       "overBudget": false
     },
@@ -2921,7 +2921,7 @@
         "totalVerts": 1728,
         "totalBytes": 74304,
         "drawCallsBeforeInstancing": 339,
-        "drawCallsAfterInstancing": 39
+        "drawCallsAfterInstancing": 40
       },
       "overBudget": false
     },
@@ -2958,7 +2958,7 @@
         "totalVerts": 7336,
         "totalBytes": 321456,
         "drawCallsBeforeInstancing": 1383,
-        "drawCallsAfterInstancing": 92
+        "drawCallsAfterInstancing": 96
       },
       "overBudget": false
     },
@@ -2995,7 +2995,7 @@
         "totalVerts": 2569,
         "totalBytes": 111048,
         "drawCallsBeforeInstancing": 496,
-        "drawCallsAfterInstancing": 41
+        "drawCallsAfterInstancing": 42
       },
       "overBudget": false
     },
@@ -3032,7 +3032,7 @@
         "totalVerts": 7455,
         "totalBytes": 324984,
         "drawCallsBeforeInstancing": 1417,
-        "drawCallsAfterInstancing": 88
+        "drawCallsAfterInstancing": 99
       },
       "overBudget": false
     },
@@ -3069,7 +3069,7 @@
         "totalVerts": 1937,
         "totalBytes": 83064,
         "drawCallsBeforeInstancing": 381,
-        "drawCallsAfterInstancing": 59
+        "drawCallsAfterInstancing": 66
       },
       "overBudget": false
     },
@@ -3106,7 +3106,7 @@
         "totalVerts": 276,
         "totalBytes": 11088,
         "drawCallsBeforeInstancing": 60,
-        "drawCallsAfterInstancing": 14
+        "drawCallsAfterInstancing": 18
       },
       "overBudget": false
     },
@@ -3143,7 +3143,7 @@
         "totalVerts": 527,
         "totalBytes": 22056,
         "drawCallsBeforeInstancing": 106,
-        "drawCallsAfterInstancing": 19
+        "drawCallsAfterInstancing": 25
       },
       "overBudget": false
     },
@@ -3217,7 +3217,7 @@
         "totalVerts": 399,
         "totalBytes": 16152,
         "drawCallsBeforeInstancing": 85,
-        "drawCallsAfterInstancing": 12
+        "drawCallsAfterInstancing": 14
       },
       "overBudget": false
     },
@@ -3254,7 +3254,7 @@
         "totalVerts": 16,
         "totalBytes": 672,
         "drawCallsBeforeInstancing": 3,
-        "drawCallsAfterInstancing": 3
+        "drawCallsAfterInstancing": 4
       },
       "overBudget": false
     },
@@ -3291,7 +3291,7 @@
         "totalVerts": 3582,
         "totalBytes": 164160,
         "drawCallsBeforeInstancing": 633,
-        "drawCallsAfterInstancing": 55
+        "drawCallsAfterInstancing": 60
       },
       "overBudget": false
     },
@@ -3328,7 +3328,7 @@
         "totalVerts": 1031,
         "totalBytes": 44952,
         "drawCallsBeforeInstancing": 196,
-        "drawCallsAfterInstancing": 34
+        "drawCallsAfterInstancing": 37
       },
       "overBudget": false
     },
@@ -3365,7 +3365,7 @@
         "totalVerts": 729,
         "totalBytes": 30456,
         "drawCallsBeforeInstancing": 149,
-        "drawCallsAfterInstancing": 33
+        "drawCallsAfterInstancing": 37
       },
       "overBudget": false
     },
@@ -3402,7 +3402,7 @@
         "totalVerts": 1269,
         "totalBytes": 55752,
         "drawCallsBeforeInstancing": 232,
-        "drawCallsAfterInstancing": 45
+        "drawCallsAfterInstancing": 54
       },
       "overBudget": false
     },
@@ -3439,7 +3439,7 @@
         "totalVerts": 807,
         "totalBytes": 34920,
         "drawCallsBeforeInstancing": 157,
-        "drawCallsAfterInstancing": 19
+        "drawCallsAfterInstancing": 25
       },
       "overBudget": false
     },
@@ -3476,7 +3476,7 @@
         "totalVerts": 526,
         "totalBytes": 22992,
         "drawCallsBeforeInstancing": 98,
-        "drawCallsAfterInstancing": 28
+        "drawCallsAfterInstancing": 29
       },
       "overBudget": false
     },
@@ -3550,7 +3550,7 @@
         "totalVerts": 3006,
         "totalBytes": 135072,
         "drawCallsBeforeInstancing": 533,
-        "drawCallsAfterInstancing": 42
+        "drawCallsAfterInstancing": 45
       },
       "overBudget": false
     },
@@ -3587,7 +3587,7 @@
         "totalVerts": 625,
         "totalBytes": 27672,
         "drawCallsBeforeInstancing": 111,
-        "drawCallsAfterInstancing": 20
+        "drawCallsAfterInstancing": 23
       },
       "overBudget": false
     },
@@ -3624,7 +3624,7 @@
         "totalVerts": 66,
         "totalBytes": 2736,
         "drawCallsBeforeInstancing": 13,
-        "drawCallsAfterInstancing": 5
+        "drawCallsAfterInstancing": 8
       },
       "overBudget": false
     },
@@ -3661,7 +3661,7 @@
         "totalVerts": 2290,
         "totalBytes": 96144,
         "drawCallsBeforeInstancing": 465,
-        "drawCallsAfterInstancing": 24
+        "drawCallsAfterInstancing": 26
       },
       "overBudget": false
     },
@@ -3698,7 +3698,7 @@
         "totalVerts": 1011,
         "totalBytes": 44856,
         "drawCallsBeforeInstancing": 185,
-        "drawCallsAfterInstancing": 41
+        "drawCallsAfterInstancing": 42
       },
       "overBudget": false
     },
@@ -3735,7 +3735,7 @@
         "totalVerts": 1854,
         "totalBytes": 83952,
         "drawCallsBeforeInstancing": 332,
-        "drawCallsAfterInstancing": 38
+        "drawCallsAfterInstancing": 41
       },
       "overBudget": false
     },
@@ -3772,7 +3772,7 @@
         "totalVerts": 1538,
         "totalBytes": 65904,
         "drawCallsBeforeInstancing": 301,
-        "drawCallsAfterInstancing": 34
+        "drawCallsAfterInstancing": 42
       },
       "overBudget": false
     },
@@ -3809,7 +3809,7 @@
         "totalVerts": 872,
         "totalBytes": 37296,
         "drawCallsBeforeInstancing": 169,
-        "drawCallsAfterInstancing": 31
+        "drawCallsAfterInstancing": 33
       },
       "overBudget": false
     },
@@ -3846,7 +3846,7 @@
         "totalVerts": 161,
         "totalBytes": 6504,
         "drawCallsBeforeInstancing": 33,
-        "drawCallsAfterInstancing": 7
+        "drawCallsAfterInstancing": 9
       },
       "overBudget": false
     },
@@ -3883,7 +3883,7 @@
         "totalVerts": 367,
         "totalBytes": 15000,
         "drawCallsBeforeInstancing": 76,
-        "drawCallsAfterInstancing": 8
+        "drawCallsAfterInstancing": 10
       },
       "overBudget": false
     },
@@ -3920,7 +3920,7 @@
         "totalVerts": 136,
         "totalBytes": 5232,
         "drawCallsBeforeInstancing": 31,
-        "drawCallsAfterInstancing": 7
+        "drawCallsAfterInstancing": 11
       },
       "overBudget": false
     },
@@ -3994,7 +3994,7 @@
         "totalVerts": 1188,
         "totalBytes": 50112,
         "drawCallsBeforeInstancing": 240,
-        "drawCallsAfterInstancing": 18
+        "drawCallsAfterInstancing": 25
       },
       "overBudget": false
     },
@@ -4031,7 +4031,7 @@
         "totalVerts": 313,
         "totalBytes": 12552,
         "drawCallsBeforeInstancing": 68,
-        "drawCallsAfterInstancing": 18
+        "drawCallsAfterInstancing": 21
       },
       "overBudget": false
     },
@@ -4105,7 +4105,7 @@
         "totalVerts": 368,
         "totalBytes": 15120,
         "drawCallsBeforeInstancing": 78,
-        "drawCallsAfterInstancing": 21
+        "drawCallsAfterInstancing": 25
       },
       "overBudget": false
     },
@@ -4142,7 +4142,7 @@
         "totalVerts": 401,
         "totalBytes": 17592,
         "drawCallsBeforeInstancing": 73,
-        "drawCallsAfterInstancing": 22
+        "drawCallsAfterInstancing": 30
       },
       "overBudget": false
     },
@@ -4179,7 +4179,7 @@
         "totalVerts": 1625,
         "totalBytes": 69672,
         "drawCallsBeforeInstancing": 315,
-        "drawCallsAfterInstancing": 43
+        "drawCallsAfterInstancing": 53
       },
       "overBudget": false
     },
@@ -4216,7 +4216,7 @@
         "totalVerts": 1986,
         "totalBytes": 89280,
         "drawCallsBeforeInstancing": 363,
-        "drawCallsAfterInstancing": 21
+        "drawCallsAfterInstancing": 26
       },
       "overBudget": false
     },
@@ -4253,7 +4253,7 @@
         "totalVerts": 2108,
         "totalBytes": 89856,
         "drawCallsBeforeInstancing": 415,
-        "drawCallsAfterInstancing": 48
+        "drawCallsAfterInstancing": 53
       },
       "overBudget": false
     },
@@ -4290,7 +4290,7 @@
         "totalVerts": 477,
         "totalBytes": 19560,
         "drawCallsBeforeInstancing": 100,
-        "drawCallsAfterInstancing": 13
+        "drawCallsAfterInstancing": 16
       },
       "overBudget": false
     },
@@ -4327,7 +4327,7 @@
         "totalVerts": 336,
         "totalBytes": 13296,
         "drawCallsBeforeInstancing": 74,
-        "drawCallsAfterInstancing": 10
+        "drawCallsAfterInstancing": 19
       },
       "overBudget": false
     },
@@ -4364,7 +4364,7 @@
         "totalVerts": 532,
         "totalBytes": 21600,
         "drawCallsBeforeInstancing": 114,
-        "drawCallsAfterInstancing": 13
+        "drawCallsAfterInstancing": 22
       },
       "overBudget": false
     },
@@ -4401,7 +4401,7 @@
         "totalVerts": 80,
         "totalBytes": 3072,
         "drawCallsBeforeInstancing": 18,
-        "drawCallsAfterInstancing": 6
+        "drawCallsAfterInstancing": 7
       },
       "overBudget": false
     },
@@ -4475,7 +4475,7 @@
         "totalVerts": 120,
         "totalBytes": 5280,
         "drawCallsBeforeInstancing": 20,
-        "drawCallsAfterInstancing": 7
+        "drawCallsAfterInstancing": 11
       },
       "overBudget": false
     },
@@ -4512,7 +4512,7 @@
         "totalVerts": 96,
         "totalBytes": 4032,
         "drawCallsBeforeInstancing": 18,
-        "drawCallsAfterInstancing": 5
+        "drawCallsAfterInstancing": 6
       },
       "overBudget": false
     },
@@ -4549,7 +4549,7 @@
         "totalVerts": 29,
         "totalBytes": 1176,
         "drawCallsBeforeInstancing": 6,
-        "drawCallsAfterInstancing": 2
+        "drawCallsAfterInstancing": 5
       },
       "overBudget": false
     },
@@ -4586,7 +4586,7 @@
         "totalVerts": 243,
         "totalBytes": 10104,
         "drawCallsBeforeInstancing": 49,
-        "drawCallsAfterInstancing": 14
+        "drawCallsAfterInstancing": 16
       },
       "overBudget": false
     },
@@ -4623,7 +4623,7 @@
         "totalVerts": 514,
         "totalBytes": 22272,
         "drawCallsBeforeInstancing": 96,
-        "drawCallsAfterInstancing": 22
+        "drawCallsAfterInstancing": 25
       },
       "overBudget": false
     },
@@ -4660,7 +4660,7 @@
         "totalVerts": 2288,
         "totalBytes": 100416,
         "drawCallsBeforeInstancing": 436,
-        "drawCallsAfterInstancing": 44
+        "drawCallsAfterInstancing": 48
       },
       "overBudget": false
     },
@@ -4697,7 +4697,7 @@
         "totalVerts": 2032,
         "totalBytes": 87456,
         "drawCallsBeforeInstancing": 381,
-        "drawCallsAfterInstancing": 39
+        "drawCallsAfterInstancing": 43
       },
       "overBudget": false
     },
@@ -4734,7 +4734,7 @@
         "totalVerts": 341,
         "totalBytes": 14616,
         "drawCallsBeforeInstancing": 65,
-        "drawCallsAfterInstancing": 15
+        "drawCallsAfterInstancing": 19
       },
       "overBudget": false
     },
@@ -4771,7 +4771,7 @@
         "totalVerts": 4367,
         "totalBytes": 193704,
         "drawCallsBeforeInstancing": 823,
-        "drawCallsAfterInstancing": 84
+        "drawCallsAfterInstancing": 98
       },
       "overBudget": false
     },
@@ -4808,7 +4808,7 @@
         "totalVerts": 2312,
         "totalBytes": 101808,
         "drawCallsBeforeInstancing": 434,
-        "drawCallsAfterInstancing": 48
+        "drawCallsAfterInstancing": 69
       },
       "overBudget": false
     },
@@ -4845,7 +4845,7 @@
         "totalVerts": 1960,
         "totalBytes": 87264,
         "drawCallsBeforeInstancing": 368,
-        "drawCallsAfterInstancing": 44
+        "drawCallsAfterInstancing": 47
       },
       "overBudget": false
     },
@@ -4919,7 +4919,7 @@
         "totalVerts": 1522,
         "totalBytes": 65472,
         "drawCallsBeforeInstancing": 299,
-        "drawCallsAfterInstancing": 18
+        "drawCallsAfterInstancing": 22
       },
       "overBudget": false
     },
@@ -4956,7 +4956,7 @@
         "totalVerts": 294,
         "totalBytes": 11904,
         "drawCallsBeforeInstancing": 63,
-        "drawCallsAfterInstancing": 18
+        "drawCallsAfterInstancing": 20
       },
       "overBudget": false
     },
@@ -4993,7 +4993,7 @@
         "totalVerts": 254,
         "totalBytes": 10272,
         "drawCallsBeforeInstancing": 55,
-        "drawCallsAfterInstancing": 12
+        "drawCallsAfterInstancing": 13
       },
       "overBudget": false
     },
@@ -5104,7 +5104,7 @@
         "totalVerts": 477,
         "totalBytes": 19656,
         "drawCallsBeforeInstancing": 100,
-        "drawCallsAfterInstancing": 27
+        "drawCallsAfterInstancing": 28
       },
       "overBudget": false
     },
@@ -5141,7 +5141,7 @@
         "totalVerts": 2746,
         "totalBytes": 118464,
         "drawCallsBeforeInstancing": 533,
-        "drawCallsAfterInstancing": 59
+        "drawCallsAfterInstancing": 60
       },
       "overBudget": false
     },
@@ -5178,7 +5178,7 @@
         "totalVerts": 3065,
         "totalBytes": 143400,
         "drawCallsBeforeInstancing": 530,
-        "drawCallsAfterInstancing": 42
+        "drawCallsAfterInstancing": 47
       },
       "overBudget": false
     },
@@ -5215,7 +5215,7 @@
         "totalVerts": 258,
         "totalBytes": 10032,
         "drawCallsBeforeInstancing": 57,
-        "drawCallsAfterInstancing": 14
+        "drawCallsAfterInstancing": 18
       },
       "overBudget": false
     },
@@ -5252,7 +5252,7 @@
         "totalVerts": 2425,
         "totalBytes": 105528,
         "drawCallsBeforeInstancing": 464,
-        "drawCallsAfterInstancing": 48
+        "drawCallsAfterInstancing": 56
       },
       "overBudget": false
     },
@@ -5289,7 +5289,7 @@
         "totalVerts": 3126,
         "totalBytes": 134736,
         "drawCallsBeforeInstancing": 608,
-        "drawCallsAfterInstancing": 72
+        "drawCallsAfterInstancing": 82
       },
       "overBudget": false
     },
@@ -5326,7 +5326,7 @@
         "totalVerts": 1937,
         "totalBytes": 82824,
         "drawCallsBeforeInstancing": 389,
-        "drawCallsAfterInstancing": 44
+        "drawCallsAfterInstancing": 45
       },
       "overBudget": false
     },
@@ -5400,7 +5400,7 @@
         "totalVerts": 2896,
         "totalBytes": 128400,
         "drawCallsBeforeInstancing": 546,
-        "drawCallsAfterInstancing": 19
+        "drawCallsAfterInstancing": 24
       },
       "overBudget": false
     },
@@ -5437,7 +5437,7 @@
         "totalVerts": 1275,
         "totalBytes": 57768,
         "drawCallsBeforeInstancing": 231,
-        "drawCallsAfterInstancing": 29
+        "drawCallsAfterInstancing": 31
       },
       "overBudget": false
     },
@@ -5474,7 +5474,7 @@
         "totalVerts": 2602,
         "totalBytes": 113808,
         "drawCallsBeforeInstancing": 492,
-        "drawCallsAfterInstancing": 31
+        "drawCallsAfterInstancing": 36
       },
       "overBudget": false
     },
@@ -5585,7 +5585,7 @@
         "totalVerts": 183,
         "totalBytes": 7416,
         "drawCallsBeforeInstancing": 38,
-        "drawCallsAfterInstancing": 14
+        "drawCallsAfterInstancing": 19
       },
       "overBudget": false
     },
@@ -5622,7 +5622,7 @@
         "totalVerts": 450,
         "totalBytes": 19632,
         "drawCallsBeforeInstancing": 84,
-        "drawCallsAfterInstancing": 21
+        "drawCallsAfterInstancing": 23
       },
       "overBudget": false
     }
