@@ -1,9 +1,15 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Icons } from '../../components/Icon';
-import { ServerViewerStatePlayer, ServerViewerStateSnapshot } from '../../types';
+import { ApiService } from '../../services/api';
+import {
+  ServerViewerActionStatusResponse,
+  ServerViewerActionType,
+  ServerViewerStatePlayer,
+  ServerViewerStateSnapshot,
+} from '../../types';
 
 type Bounds = {
   minX: number;
@@ -127,8 +133,15 @@ type ViewerWsStatus = 'idle' | 'connecting' | 'connected' | 'subscribed' | 'erro
 const VIEWER_STATE_STALE_SECONDS = 8;
 const VIEWER_RECONNECT_BASE_MS = 1000;
 const VIEWER_RECONNECT_MAX_MS = 15000;
+const VIEWER_ACTION_STATUS_POLL_INTERVAL_MS = 1200;
+const VIEWER_ACTION_STATUS_MAX_POLLS = 18;
+const VIEWER_ACTION_REASON_MAX_LENGTH = 160;
 const PLAYER_MARKER_HEIGHT = 30;
 const PLAYER_MARKER_SMOOTH_RATE = 10;
+const PLAYER_MARKER_SELECTED_SCALE = 1.45;
+const FOLLOW_CAMERA_DISTANCE = 520;
+const FOLLOW_CAMERA_HEIGHT = 220;
+const FOLLOW_CAMERA_SMOOTH_RATE = 6;
 const PLAYER_MARKER_COLORS = [
   0x22c55e,
   0x38bdf8,
@@ -250,6 +263,31 @@ const getViewerMarkerColorHex = (entry: ServerViewerStatePlayer): number => {
   return PLAYER_MARKER_COLORS[hashSteamId(entry.steamId) % PLAYER_MARKER_COLORS.length];
 };
 
+const formatCoord = (value: number | undefined): string => {
+  if (!Number.isFinite(Number(value))) return '0.0';
+  return Number(value || 0).toLocaleString('pt-BR', {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
+};
+
+const viewerActionStatusLabel = (status: string): string => {
+  const normalized = String(status || '').trim().toUpperCase();
+  if (normalized === 'ACK_OK') return 'Confirmada (ACK)';
+  if (normalized === 'ACK_FAILED') return 'Falhou no servidor';
+  if (normalized === 'HTTP_PULLED') return 'Fallback HTTP';
+  if (normalized === 'QUEUED') return 'Na fila';
+  return normalized || 'Desconhecido';
+};
+
+const viewerActionStatusClass = (status: string): string => {
+  const normalized = String(status || '').trim().toUpperCase();
+  if (normalized === 'ACK_OK') return 'bg-emerald-900/20 text-emerald-300 border-emerald-700';
+  if (normalized === 'ACK_FAILED') return 'bg-red-900/20 text-red-300 border-red-700';
+  if (normalized === 'HTTP_PULLED') return 'bg-yellow-900/20 text-yellow-300 border-yellow-700';
+  return 'bg-zinc-800 text-zinc-300 border-zinc-700';
+};
+
 const disposeObject3D = (root: THREE.Object3D) => {
   root.traverse((obj) => {
     const mesh = obj as THREE.Mesh;
@@ -294,6 +332,12 @@ const ServerView3D: React.FC = () => {
   const [viewerWsError, setViewerWsError] = useState<string | null>(null);
   const [viewerLastMessageAt, setViewerLastMessageAt] = useState<string | null>(null);
   const [viewerState, setViewerState] = useState<ServerViewerStateSnapshot | null>(null);
+  const [viewerSelectedSteamId, setViewerSelectedSteamId] = useState<string | null>(null);
+  const [viewerFollowSelected, setViewerFollowSelected] = useState<boolean>(false);
+  const [viewerActionReason, setViewerActionReason] = useState<string>('Acao via painel WebViewer 3D');
+  const [viewerActionBusy, setViewerActionBusy] = useState<boolean>(false);
+  const [viewerActionError, setViewerActionError] = useState<string | null>(null);
+  const [viewerActionStatus, setViewerActionStatus] = useState<ServerViewerActionStatusResponse | null>(null);
   const [runtimeStats, setRuntimeStats] = useState<RuntimeStats>({
     loadedChunks: 0,
     visibleChunks: 0,
@@ -304,6 +348,9 @@ const ServerView3D: React.FC = () => {
   });
   const [streamingLogs, setStreamingLogs] = useState<string[]>([]);
   const viewerStateRef = useRef<ServerViewerStateSnapshot | null>(null);
+  const viewerSelectedSteamIdRef = useRef<string | null>(null);
+  const viewerFollowSelectedRef = useRef<boolean>(false);
+  const viewerActionPollTokenRef = useRef<number>(0);
 
   const viewerPlayers = useMemo(
     () =>
@@ -313,6 +360,11 @@ const ServerView3D: React.FC = () => {
           .localeCompare(String(right.name || right.steamId || '').toLowerCase()),
       ),
     [viewerState],
+  );
+
+  const selectedViewerPlayer = useMemo(
+    () => viewerPlayers.find((entry) => entry.steamId === viewerSelectedSteamId) || null,
+    [viewerPlayers, viewerSelectedSteamId],
   );
 
   const viewerSnapshotAgeSeconds = useMemo(() => {
@@ -341,9 +393,142 @@ const ServerView3D: React.FC = () => {
     return { label: 'Live frame', className: 'bg-emerald-900/20 text-emerald-300 border-emerald-700' };
   }, [hasFreshViewerSnapshot, viewerState, viewerWsStatus]);
 
+  const pollViewerActionStatus = useCallback(
+    async (actionId: string, pollToken: number) => {
+      if (!serverId) return;
+
+      for (let attempt = 0; attempt < VIEWER_ACTION_STATUS_MAX_POLLS; attempt += 1) {
+        const status = await ApiService.getServerViewerActionStatus(serverId, actionId);
+        if (viewerActionPollTokenRef.current !== pollToken) return;
+        setViewerActionStatus(status);
+        if (status.status !== 'QUEUED') return;
+        await new Promise<void>((resolve) => {
+          window.setTimeout(resolve, VIEWER_ACTION_STATUS_POLL_INTERVAL_MS);
+        });
+      }
+    },
+    [serverId],
+  );
+
+  const dispatchViewerAction = useCallback(
+    async (action: ServerViewerActionType) => {
+      if (!serverId || viewerActionBusy) return;
+      if (!hasFreshViewerSnapshot || viewerWsStatus === 'connecting' || viewerWsStatus === 'error') {
+        setViewerActionError('Acoes bloqueadas: snapshot stale/desconectado.');
+        return;
+      }
+      if (!selectedViewerPlayer) {
+        setViewerActionError('Selecione um player no viewer 3D.');
+        return;
+      }
+
+      if (action === 'KICK' || action === 'MUTE_10M' || action === 'GAG_10M') {
+        const playerLabel = selectedViewerPlayer.name || selectedViewerPlayer.steamId;
+        const confirmOk = window.confirm(`Confirmar ${action} em ${playerLabel}?`);
+        if (!confirmOk) return;
+      }
+
+      setViewerActionBusy(true);
+      setViewerActionError(null);
+
+      try {
+        const parsedReason = String(viewerActionReason || '')
+          .replace(/[\r\n\t]+/g, ' ')
+          .trim()
+          .slice(0, VIEWER_ACTION_REASON_MAX_LENGTH);
+        const response = await ApiService.dispatchServerViewerAction(serverId, {
+          action,
+          steamId: selectedViewerPlayer.steamId,
+          ...(parsedReason ? { reason: parsedReason } : {}),
+        });
+
+        setViewerActionStatus({
+          ok: true,
+          actionId: response.actionId,
+          serverId: response.serverId,
+          command: '',
+          status: response.status,
+          createdAt: response.requestedAt,
+          updatedAt: response.requestedAt,
+          wsAttemptCount: 0,
+          metadata: { targetSteamId: selectedViewerPlayer.steamId },
+        });
+
+        const pollToken = Date.now();
+        viewerActionPollTokenRef.current = pollToken;
+        await pollViewerActionStatus(response.actionId, pollToken);
+      } catch (err: any) {
+        setViewerActionError(String(err?.message || 'Falha ao disparar acao do WebViewer.'));
+      } finally {
+        setViewerActionBusy(false);
+      }
+    },
+    [
+      hasFreshViewerSnapshot,
+      pollViewerActionStatus,
+      selectedViewerPlayer,
+      serverId,
+      viewerActionBusy,
+      viewerActionReason,
+      viewerWsStatus,
+    ],
+  );
+
+  const viewerActionForSelected = useMemo(() => {
+    if (!viewerActionStatus || !selectedViewerPlayer) return null;
+    const metadata = viewerActionStatus.metadata as { targetSteamId?: string } | undefined;
+    const targetSteamId = String(metadata?.targetSteamId || '').trim();
+    if (targetSteamId && targetSteamId !== selectedViewerPlayer.steamId) return null;
+    return viewerActionStatus;
+  }, [selectedViewerPlayer, viewerActionStatus]);
+
+  const viewerActionsDisabled =
+    viewerActionBusy ||
+    !selectedViewerPlayer ||
+    !hasFreshViewerSnapshot ||
+    viewerWsStatus === 'connecting' ||
+    viewerWsStatus === 'error' ||
+    viewerWsStatus === 'idle';
+
   useEffect(() => {
     viewerStateRef.current = viewerState;
   }, [viewerState]);
+
+  useEffect(() => {
+    viewerSelectedSteamIdRef.current = viewerSelectedSteamId;
+  }, [viewerSelectedSteamId]);
+
+  useEffect(() => {
+    viewerFollowSelectedRef.current = viewerFollowSelected;
+  }, [viewerFollowSelected]);
+
+  useEffect(() => {
+    if (!viewerPlayers.length) {
+      setViewerSelectedSteamId(null);
+      setViewerFollowSelected(false);
+      return;
+    }
+    if (viewerSelectedSteamId && !viewerPlayers.some((entry) => entry.steamId === viewerSelectedSteamId)) {
+      setViewerSelectedSteamId(viewerPlayers[0].steamId);
+      setViewerFollowSelected(false);
+    }
+  }, [viewerPlayers, viewerSelectedSteamId]);
+
+  useEffect(() => {
+    setViewerActionError(null);
+  }, [viewerSelectedSteamId]);
+
+  useEffect(() => {
+    if (!viewerSelectedSteamId && viewerFollowSelected) {
+      setViewerFollowSelected(false);
+    }
+  }, [viewerFollowSelected, viewerSelectedSteamId]);
+
+  useEffect(() => {
+    return () => {
+      viewerActionPollTokenRef.current += 1;
+    };
+  }, []);
 
   useEffect(() => {
     if (!serverId) return undefined;
@@ -579,10 +764,20 @@ const ServerView3D: React.FC = () => {
     const materialDefs = new Map<string, { placeholder: boolean; textureUrl?: string }>();
     const playerGeometry = new THREE.SphereGeometry(20, 14, 12);
     const playerMarkers = new Map<string, {
+      steamId: string;
       mesh: THREE.Mesh;
       targetPosition: THREE.Vector3;
       lastSeenAtMs: number;
+      yawRad: number;
     }>();
+    const raycaster = new THREE.Raycaster();
+    const pointerNdc = new THREE.Vector2();
+    const pointerDown = { x: 0, y: 0 };
+    let pointerDownAt = 0;
+    let lastSelectionVisualKey = '__none__';
+    const followForward = new THREE.Vector3();
+    const followFocus = new THREE.Vector3();
+    const followDesiredCamera = new THREE.Vector3();
     let lastPlayerSnapshotKey = '';
 
     const getWorldMaterial = (materialIdRaw: string, placeholderFlag: boolean): THREE.MeshStandardMaterial => {
@@ -666,6 +861,52 @@ const ServerView3D: React.FC = () => {
       playerMarkers.clear();
     };
 
+    const updateMarkerSelectionVisuals = () => {
+      const selectedSteamId = viewerSelectedSteamIdRef.current;
+      for (const marker of playerMarkers.values()) {
+        const isSelected = !!selectedSteamId && marker.steamId === selectedSteamId;
+        const mat = marker.mesh.material as THREE.MeshStandardMaterial;
+        mat.emissive.setHex(isSelected ? 0xffffff : 0x000000);
+        mat.emissiveIntensity = isSelected ? 0.28 : 0;
+        mat.needsUpdate = true;
+        marker.mesh.scale.setScalar(isSelected ? PLAYER_MARKER_SELECTED_SCALE : 1);
+      }
+    };
+
+    const pickPlayerSteamIdAtClientPoint = (clientX: number, clientY: number): string | null => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      const width = Math.max(1, rect.width);
+      const height = Math.max(1, rect.height);
+      pointerNdc.x = ((clientX - rect.left) / width) * 2 - 1;
+      pointerNdc.y = -(((clientY - rect.top) / height) * 2 - 1);
+      raycaster.setFromCamera(pointerNdc, camera);
+
+      const markerMeshes = Array.from(playerMarkers.values()).map((entry) => entry.mesh);
+      if (!markerMeshes.length) return null;
+      const hits = raycaster.intersectObjects(markerMeshes, false);
+      if (!hits.length) return null;
+      const first = hits[0].object as THREE.Object3D & { userData?: { steamId?: string } };
+      const steamId = String(first.userData?.steamId || '').trim();
+      return steamId || null;
+    };
+
+    const onCanvasPointerDown = (event: PointerEvent) => {
+      if (event.button !== 0) return;
+      pointerDown.x = event.clientX;
+      pointerDown.y = event.clientY;
+      pointerDownAt = performance.now();
+    };
+
+    const onCanvasPointerUp = (event: PointerEvent) => {
+      if (event.button !== 0) return;
+      const moved = Math.hypot(event.clientX - pointerDown.x, event.clientY - pointerDown.y);
+      const elapsed = performance.now() - pointerDownAt;
+      if (moved > 8 || elapsed > 450) return;
+      const pickedSteamId = pickPlayerSteamIdAtClientPoint(event.clientX, event.clientY);
+      if (!pickedSteamId) return;
+      setViewerSelectedSteamId(pickedSteamId);
+    };
+
     const upsertPlayersFromSnapshot = (snapshot: ServerViewerStateSnapshot | null) => {
       if (!snapshot) {
         clearPlayerMarkers();
@@ -698,18 +939,25 @@ const ServerView3D: React.FC = () => {
             depthWrite: player.alive !== false,
           });
           const markerMesh = new THREE.Mesh(playerGeometry, markerMaterial);
+          markerMesh.userData = {
+            ...markerMesh.userData,
+            steamId,
+          };
           markerMesh.position.copy(sourcePos);
           markerMesh.frustumCulled = true;
           playersRoot.add(markerMesh);
           marker = {
+            steamId,
             mesh: markerMesh,
             targetPosition: sourcePos.clone(),
             lastSeenAtMs: now,
+            yawRad: THREE.MathUtils.degToRad(Number(player.eyeAngles?.yaw || 0)),
           };
           playerMarkers.set(steamId, marker);
         } else {
           marker.targetPosition.copy(sourcePos);
           marker.lastSeenAtMs = now;
+          marker.yawRad = THREE.MathUtils.degToRad(Number(player.eyeAngles?.yaw || 0));
           const mat = marker.mesh.material as THREE.MeshStandardMaterial;
           mat.color.setHex(getViewerMarkerColorHex(player));
           mat.opacity = player.alive === false ? 0.35 : 0.95;
@@ -729,6 +977,8 @@ const ServerView3D: React.FC = () => {
         }
         playerMarkers.delete(steamId);
       }
+
+      updateMarkerSelectionVisuals();
     };
 
     const loadChunkGroup = async (entry: ChunkEntry): Promise<void> => {
@@ -1055,6 +1305,27 @@ const ServerView3D: React.FC = () => {
             }
           }
 
+          const selectedSteamId = viewerSelectedSteamIdRef.current || '';
+          if (selectedSteamId !== lastSelectionVisualKey) {
+            lastSelectionVisualKey = selectedSteamId;
+            updateMarkerSelectionVisuals();
+          }
+
+          if (viewerFollowSelectedRef.current && selectedSteamId) {
+            const selectedMarker = playerMarkers.get(selectedSteamId);
+            if (selectedMarker) {
+              followFocus.copy(selectedMarker.targetPosition);
+              followFocus.y += 40;
+              followForward.set(Math.cos(selectedMarker.yawRad), 0, Math.sin(selectedMarker.yawRad));
+              followDesiredCamera.copy(followFocus);
+              followDesiredCamera.addScaledVector(followForward, -FOLLOW_CAMERA_DISTANCE);
+              followDesiredCamera.y += FOLLOW_CAMERA_HEIGHT;
+              const followAlpha = 1 - Math.exp(-FOLLOW_CAMERA_SMOOTH_RATE * dtSec);
+              camera.position.lerp(followDesiredCamera, followAlpha);
+              controls.target.lerp(followFocus, followAlpha);
+            }
+          }
+
           controls.update();
           renderer.render(scene, camera);
           if (now - streamIntervalMs >= 300) {
@@ -1065,6 +1336,8 @@ const ServerView3D: React.FC = () => {
 
         onResize();
         window.addEventListener('resize', onResize);
+        renderer.domElement.addEventListener('pointerdown', onCanvasPointerDown);
+        renderer.domElement.addEventListener('pointerup', onCanvasPointerUp);
         if (typeof ResizeObserver !== 'undefined' && mountRef.current) {
           hostResizeObserver = new ResizeObserver(() => {
             onResize();
@@ -1088,6 +1361,8 @@ const ServerView3D: React.FC = () => {
 
         return () => {
           window.removeEventListener('resize', onResize);
+          renderer.domElement.removeEventListener('pointerdown', onCanvasPointerDown);
+          renderer.domElement.removeEventListener('pointerup', onCanvasPointerUp);
           if (hostResizeObserver) {
             hostResizeObserver.disconnect();
             hostResizeObserver = null;
@@ -1158,8 +1433,24 @@ const ServerView3D: React.FC = () => {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        <div className="lg:col-span-3 rounded border border-zinc-800 bg-zinc-950 overflow-hidden">
+        <div className="lg:col-span-3 rounded border border-zinc-800 bg-zinc-950 overflow-hidden relative">
           <div ref={mountRef} className="h-[62vh] w-full" />
+          {selectedViewerPlayer && (
+            <div className="absolute left-3 bottom-3 rounded border border-cyan-800 bg-zinc-950/90 px-3 py-2 text-[11px] text-zinc-200 font-mono backdrop-blur">
+              <p className="text-cyan-300 font-bold truncate max-w-[340px]">
+                {selectedViewerPlayer.name || selectedViewerPlayer.steamId}
+              </p>
+              <p className="text-zinc-400 truncate max-w-[340px]">{selectedViewerPlayer.steamId}</p>
+              <p className="text-zinc-400">
+                x:{formatCoord(selectedViewerPlayer.pos.x)} y:{formatCoord(selectedViewerPlayer.pos.y)} z:{formatCoord(selectedViewerPlayer.pos.z)}
+              </p>
+              <p className="text-zinc-500">
+                HP {Math.floor(Number(selectedViewerPlayer.health || 0))} | ARM {Math.floor(Number(selectedViewerPlayer.armor || 0))} |{' '}
+                {selectedViewerPlayer.alive === false ? 'Morto' : 'Vivo'}
+                {selectedViewerPlayer.teamName ? ` | ${selectedViewerPlayer.teamName}` : ''}
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="space-y-3">
@@ -1185,14 +1476,126 @@ const ServerView3D: React.FC = () => {
             <p>lastWsMsg: {viewerLastMessageAt ? new Date(viewerLastMessageAt).toLocaleTimeString('pt-BR') : 'n/a'}</p>
             <p>snapshotFresh: {hasFreshViewerSnapshot ? 'sim' : 'nao'}</p>
             {viewerWsError && <p className="text-red-300 break-words">wsError: {viewerWsError}</p>}
-            <div className="max-h-[160px] overflow-y-auto space-y-1 pt-1 border-t border-zinc-800">
+            <div className="max-h-[180px] overflow-y-auto space-y-2 pt-1 border-t border-zinc-800">
               {!viewerPlayers.length && <p className="text-zinc-500">Sem players no frame.</p>}
-              {viewerPlayers.slice(0, 20).map((player) => (
-                <p key={player.steamId} className="font-mono">
-                  {player.name || player.steamId} [{player.alive === false ? 'dead' : 'alive'}]
-                </p>
+              {viewerPlayers.map((player) => (
+                <button
+                  key={player.steamId}
+                  onClick={() => setViewerSelectedSteamId(player.steamId)}
+                  className={`w-full text-left rounded border px-2 py-1.5 transition-colors ${
+                    viewerSelectedSteamId === player.steamId
+                      ? 'border-cyan-700 bg-cyan-900/20'
+                      : 'border-zinc-800 bg-zinc-900/40 hover:bg-zinc-800/60'
+                  }`}
+                >
+                  <p className="text-[12px] text-white font-semibold truncate">{player.name || 'Sem nome'}</p>
+                  <p className="text-[10px] text-zinc-500 font-mono truncate">{player.steamId}</p>
+                  <p className="text-[10px] text-zinc-500 mt-0.5">{player.alive === false ? 'Morto' : 'Vivo'} {player.teamName ? `| ${player.teamName}` : ''}</p>
+                </button>
               ))}
             </div>
+
+            {selectedViewerPlayer && (
+              <div className="mt-2 border-t border-zinc-800 pt-2 space-y-2">
+                <button
+                  onClick={() => setViewerFollowSelected((current) => !current)}
+                  className={`w-full px-2 py-1.5 rounded border text-[11px] font-bold uppercase transition-colors ${
+                    viewerFollowSelected
+                      ? 'border-cyan-700 bg-cyan-900/25 text-cyan-300'
+                      : 'border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800'
+                  }`}
+                >
+                  {viewerFollowSelected ? 'Follow ON' : 'Follow OFF'}
+                </button>
+
+                <label className="block text-[10px] text-zinc-500 uppercase font-bold">
+                  Motivo da acao
+                </label>
+                <input
+                  type="text"
+                  value={viewerActionReason}
+                  maxLength={VIEWER_ACTION_REASON_MAX_LENGTH}
+                  onChange={(event) => setViewerActionReason(event.target.value)}
+                  placeholder="Acao via painel WebViewer 3D"
+                  className="w-full rounded border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-[11px] text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-700"
+                />
+
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => dispatchViewerAction('KICK')}
+                    disabled={viewerActionsDisabled}
+                    className="px-2 py-1.5 rounded border border-red-800 bg-red-900/20 text-red-300 text-[11px] font-bold uppercase disabled:opacity-50"
+                  >
+                    Kick
+                  </button>
+                  <button
+                    onClick={() => dispatchViewerAction('MUTE_10M')}
+                    disabled={viewerActionsDisabled}
+                    className="px-2 py-1.5 rounded border border-yellow-800 bg-yellow-900/20 text-yellow-300 text-[11px] font-bold uppercase disabled:opacity-50"
+                  >
+                    Mute 10m
+                  </button>
+                  <button
+                    onClick={() => dispatchViewerAction('GAG_10M')}
+                    disabled={viewerActionsDisabled}
+                    className="px-2 py-1.5 rounded border border-orange-800 bg-orange-900/20 text-orange-300 text-[11px] font-bold uppercase disabled:opacity-50"
+                  >
+                    Gag 10m
+                  </button>
+                  <button
+                    onClick={() => dispatchViewerAction('UNMUTE')}
+                    disabled={viewerActionsDisabled}
+                    className="px-2 py-1.5 rounded border border-emerald-800 bg-emerald-900/20 text-emerald-300 text-[11px] font-bold uppercase disabled:opacity-50"
+                  >
+                    Unmute
+                  </button>
+                  <button
+                    onClick={() => dispatchViewerAction('UNGAG')}
+                    disabled={viewerActionsDisabled}
+                    className="col-span-2 px-2 py-1.5 rounded border border-emerald-800 bg-emerald-900/20 text-emerald-300 text-[11px] font-bold uppercase disabled:opacity-50"
+                  >
+                    Ungag
+                  </button>
+                </div>
+
+                {!hasFreshViewerSnapshot && (
+                  <div className="rounded border border-yellow-900/50 bg-yellow-900/10 px-2 py-1.5 text-[10px] text-yellow-300">
+                    Acoes bloqueadas: snapshot stale/desconectado.
+                  </div>
+                )}
+
+                {viewerActionError && (
+                  <div className="rounded border border-red-900/50 bg-red-900/10 px-2 py-1.5 text-[10px] text-red-300">
+                    {viewerActionError}
+                  </div>
+                )}
+
+                {viewerActionForSelected && (
+                  <div className="rounded border border-zinc-700 bg-zinc-900/60 px-2 py-2 text-[10px] space-y-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-zinc-400 uppercase font-bold">Status da acao</span>
+                      <span
+                        className={`px-1.5 py-0.5 rounded border uppercase font-bold ${viewerActionStatusClass(
+                          viewerActionForSelected.status,
+                        )}`}
+                      >
+                        {viewerActionStatusLabel(viewerActionForSelected.status)}
+                      </span>
+                    </div>
+                    <div className="text-zinc-500 font-mono truncate">actionId: {viewerActionForSelected.actionId}</div>
+                    <div className="text-zinc-500">
+                      Tentativas WS: {viewerActionForSelected.wsAttemptCount}
+                      {viewerActionForSelected.wsLastAckAt
+                        ? ` | ack ${new Date(viewerActionForSelected.wsLastAckAt).toLocaleTimeString('pt-BR')}`
+                        : ''}
+                    </div>
+                    {viewerActionForSelected.error && (
+                      <div className="text-red-300">{viewerActionForSelected.error}</div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="rounded border border-zinc-800 bg-zinc-900 p-3">
