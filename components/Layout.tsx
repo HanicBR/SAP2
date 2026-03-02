@@ -18,7 +18,7 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-zinc-950 text-zinc-100 selection:bg-brand-dark selection:text-white">
+    <div className="ui-shell min-h-screen flex flex-col bg-zinc-950 text-zinc-100 selection:bg-brand-dark selection:text-white">
       <header className="border-b border-zinc-800 bg-zinc-950/95 sticky top-0 z-50 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
@@ -234,7 +234,7 @@ export const AdminLayout: React.FC<{ children: React.ReactNode; userOverride?: U
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex text-zinc-100">
+    <div className="ui-shell ui-admin min-h-screen bg-zinc-950 flex text-zinc-100">
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/80 z-40 md:hidden" onClick={() => setSidebarOpen(false)} />
       )}

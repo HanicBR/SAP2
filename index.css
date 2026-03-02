@@ -1,0 +1,217 @@
+:root {
+  --ui-radius-sm: 10px;
+  --ui-radius-md: 14px;
+  --ui-radius-lg: 18px;
+  --ui-surface-0: #09090b;
+  --ui-surface-1: #111116;
+  --ui-surface-2: #18181f;
+  --ui-surface-3: #24242d;
+  --ui-border: #333343;
+  --ui-border-soft: #2a2a35;
+  --ui-text-1: #f4f4f5;
+  --ui-text-2: #d4d4d8;
+  --ui-text-3: #a1a1aa;
+  --ui-focus: color-mix(in srgb, var(--brand-color) 60%, #22d3ee 40%);
+}
+
+@keyframes app-fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: app-fade-in-up 220ms ease-out both;
+}
+
+.ui-shell :where(button, a, input, select, textarea) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ui-shell :where(input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']), select, textarea) {
+  border: 1px solid var(--ui-border) !important;
+  background: linear-gradient(180deg, #12121a 0%, #0f0f16 100%) !important;
+  color: var(--ui-text-1) !important;
+  border-radius: var(--ui-radius-sm) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+}
+
+.ui-shell :where(input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']), select) {
+  min-height: 40px;
+}
+
+.ui-shell :where(textarea) {
+  min-height: 92px;
+}
+
+.ui-shell :where(input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']), select, textarea)::placeholder {
+  color: #787883 !important;
+}
+
+.ui-shell :where(input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']), select, textarea):focus-visible {
+  outline: none !important;
+  border-color: var(--ui-focus) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-focus) 22%, transparent) !important;
+}
+
+.ui-shell :where(input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']), select, textarea):disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ui-shell :where(input[type='checkbox'], input[type='radio']) {
+  accent-color: var(--brand-color);
+  width: 16px;
+  height: 16px;
+}
+
+.ui-shell button {
+  border-radius: var(--ui-radius-sm);
+  transition: transform 120ms ease, filter 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
+}
+
+.ui-shell button:not(:disabled):hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.ui-shell button:not(:disabled):active {
+  transform: translateY(0);
+  filter: brightness(0.98);
+}
+
+.ui-shell button:focus-visible,
+.ui-shell a:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-focus) 24%, transparent);
+}
+
+.ui-shell button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.ui-shell .ui-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-bottom: 2.5rem;
+}
+
+.ui-shell .ui-hero {
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-lg);
+  padding: 1.1rem 1.1rem;
+  background:
+    radial-gradient(1400px 220px at 0% -10%, color-mix(in srgb, var(--brand-color) 24%, transparent), transparent 40%),
+    linear-gradient(180deg, #12131a, #0d0e14);
+}
+
+.ui-shell .ui-card {
+  border: 1px solid var(--ui-border-soft);
+  border-radius: var(--ui-radius-md);
+  background: linear-gradient(180deg, #101118 0%, #0d0e14 100%);
+  padding: 0.9rem;
+}
+
+.ui-shell .ui-card-soft {
+  border: 1px solid var(--ui-border-soft);
+  border-radius: var(--ui-radius-sm);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.ui-shell .ui-chip {
+  border: 1px solid var(--ui-border);
+  background: #171720;
+  color: var(--ui-text-2);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+}
+
+.ui-shell .ui-chip-active {
+  border-color: color-mix(in srgb, var(--brand-color) 62%, #ffffff 38%);
+  background: color-mix(in srgb, var(--brand-color) 18%, #141419 82%);
+  color: #ffe8e8;
+}
+
+.ui-shell .ui-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border: 1px solid var(--ui-border);
+  background: linear-gradient(180deg, #1e202b, #171922);
+  color: var(--ui-text-2);
+  padding: 8px 10px;
+}
+
+.ui-shell .ui-btn-primary {
+  border-color: color-mix(in srgb, var(--brand-color) 52%, #ffffff 48%);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--brand-color) 35%, #1b1c24 65%),
+    color-mix(in srgb, var(--brand-color) 22%, #13141b 78%)
+  );
+  color: #ffecec;
+}
+
+.ui-shell .ui-btn-ghost {
+  background: linear-gradient(180deg, #191b24, #141621);
+}
+
+.ui-shell .ui-btn-danger {
+  border-color: #6a2525;
+  background: linear-gradient(180deg, #3a1515, #2a1111);
+  color: #fecaca;
+}
+
+.ui-shell .ui-kv {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 0.45rem;
+  align-items: baseline;
+  font-size: 12px;
+}
+
+.ui-shell .ui-kv > span:first-child {
+  color: var(--ui-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+}
+
+.ui-shell .ui-kv > span:last-child {
+  color: var(--ui-text-2);
+}
+
+.ui-shell table th {
+  color: #afafba;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ui-shell table td {
+  color: #dfdfe3;
+}
+
+@media (max-width: 768px) {
+  .ui-shell .ui-kv {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+  }
+}
