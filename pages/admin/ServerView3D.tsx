@@ -517,6 +517,8 @@ const ServerView3D: React.FC = () => {
     let streamIntervalMs = 0;
     let playerSyncIntervalMs = 0;
     let lastFrameAtMs = performance.now();
+    let hostResizeObserver: ResizeObserver | null = null;
+    let warmupResizeTimer: number | null = null;
     let startedAt = performance.now();
     let firstActiveLoadMs: number | null = null;
 
@@ -1061,7 +1063,23 @@ const ServerView3D: React.FC = () => {
           }
         };
 
+        onResize();
         window.addEventListener('resize', onResize);
+        if (typeof ResizeObserver !== 'undefined' && mountRef.current) {
+          hostResizeObserver = new ResizeObserver(() => {
+            onResize();
+          });
+          hostResizeObserver.observe(mountRef.current);
+        }
+        let warmupTick = 0;
+        warmupResizeTimer = window.setInterval(() => {
+          onResize();
+          warmupTick += 1;
+          if (warmupTick >= 12 && warmupResizeTimer !== null) {
+            window.clearInterval(warmupResizeTimer);
+            warmupResizeTimer = null;
+          }
+        }, 250);
         animate();
 
         setStatus(`Viewer online | map=${loadedManifest.map.name} | chunks=${entries.length}`);
@@ -1070,6 +1088,14 @@ const ServerView3D: React.FC = () => {
 
         return () => {
           window.removeEventListener('resize', onResize);
+          if (hostResizeObserver) {
+            hostResizeObserver.disconnect();
+            hostResizeObserver = null;
+          }
+          if (warmupResizeTimer !== null) {
+            window.clearInterval(warmupResizeTimer);
+            warmupResizeTimer = null;
+          }
         };
       } catch (setupErr: any) {
         const message = String(setupErr?.message || setupErr);
