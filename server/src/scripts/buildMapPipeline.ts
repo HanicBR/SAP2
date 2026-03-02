@@ -6,6 +6,14 @@ import { buildAudit, writeReport as writeAuditReport, type AssetResolutionMode, 
 
 type SourceIOMode = 'auto' | 'required' | 'off';
 
+type TexinfoMeta = {
+  material: string;
+  s: [number, number, number, number];
+  t: [number, number, number, number];
+  texWidth: number;
+  texHeight: number;
+};
+
 type Options = {
   mapBsp: string;
   mapRoot: string;
@@ -30,6 +38,7 @@ type Options = {
   sourceioMode: SourceIOMode;
   sourceioRoot: string;
   sourceioScript: string;
+  sourceioMaterialScript: string;
   sourceioPython: string;
 };
 
@@ -66,6 +75,17 @@ type ImportData = {
   worldFaces: WorldFace[];
   staticProps: PropInstance[];
   warnings: string[];
+};
+
+type MaterialExportRecord = {
+  material: string;
+  status: string;
+  sourcePath?: string;
+  resolvedBaseTexture?: string;
+  textureFile?: string;
+  textureWidth?: number;
+  textureHeight?: number;
+  error?: string;
 };
 
 type AuditMissing = {
@@ -202,6 +222,9 @@ const parseArgs = (): Options => {
     sourceioMode,
     sourceioRoot: resolveWithParentFallback(String(map.get('--sourceio-root') || 'sandbox/_techrefs/SourceIO')),
     sourceioScript: resolveWithParentFallback(String(map.get('--sourceio-script') || 'server/scripts/sourceio_extract_scene.py')),
+    sourceioMaterialScript: resolveWithParentFallback(
+      String(map.get('--sourceio-material-script') || 'server/scripts/sourceio_export_materials.py'),
+    ),
     sourceioPython: String(map.get('--sourceio-python') || process.env.PYTHON || 'python').trim(),
   };
 };
@@ -277,6 +300,19 @@ const parseTexdataNameIds = (buffer: Buffer, texdataLump: BspLump): number[] => 
   return out;
 };
 
+const parseTexdataDims = (buffer: Buffer, texdataLump: BspLump): Array<{ width: number; height: number }> => {
+  if (texdataLump.length <= 0 || texdataLump.offset + texdataLump.length > buffer.length) return [];
+  const count = Math.floor(texdataLump.length / 32);
+  const out: Array<{ width: number; height: number }> = [];
+  for (let i = 0; i < count; i += 1) {
+    const base = texdataLump.offset + i * 32;
+    const width = Math.max(1, buffer.readInt32LE(base + 16));
+    const height = Math.max(1, buffer.readInt32LE(base + 20));
+    out.push({ width, height });
+  }
+  return out;
+};
+
 const parseTexinfoTexdataIndices = (buffer: Buffer, texinfoLump: BspLump): number[] => {
   if (texinfoLump.length <= 0 || texinfoLump.offset + texinfoLump.length > buffer.length) return [];
   const count = Math.floor(texinfoLump.length / 72);
@@ -285,7 +321,7 @@ const parseTexinfoTexdataIndices = (buffer: Buffer, texinfoLump: BspLump): numbe
   return out;
 };
 
-const buildMaterialByTexInfo = (buffer: Buffer, lumps: BspLump[]): string[] => {
+const buildTexinfoMeta = (buffer: Buffer, lumps: BspLump[]): TexinfoMeta[] => {
   const texdata = lumps[2];
   const texinfo = lumps[6];
   const lump43 = lumps[43];
@@ -293,16 +329,60 @@ const buildMaterialByTexInfo = (buffer: Buffer, lumps: BspLump[]): string[] => {
   if (!texdata || !texinfo || !lump43 || !lump44) return [];
   const strings = parseTexdataNameStringTable(buffer, lump43, lump44);
   const texdataNameIds = parseTexdataNameIds(buffer, texdata);
+  const texdataDims = parseTexdataDims(buffer, texdata);
   const texinfoTexdata = parseTexinfoTexdataIndices(buffer, texinfo);
-  const out: string[] = new Array(texinfoTexdata.length).fill('');
+  const out: TexinfoMeta[] = new Array(texinfoTexdata.length).fill(null as unknown as TexinfoMeta);
   for (let i = 0; i < texinfoTexdata.length; i += 1) {
+    const base = texinfo.offset + i * 72;
+    if (base + 68 > buffer.length) {
+      out[i] = {
+        material: '__missing_material',
+        s: [1, 0, 0, 0],
+        t: [0, 1, 0, 0],
+        texWidth: 256,
+        texHeight: 256,
+      };
+      continue;
+    }
+    const s: [number, number, number, number] = [
+      buffer.readFloatLE(base + 0),
+      buffer.readFloatLE(base + 4),
+      buffer.readFloatLE(base + 8),
+      buffer.readFloatLE(base + 12),
+    ];
+    const t: [number, number, number, number] = [
+      buffer.readFloatLE(base + 16),
+      buffer.readFloatLE(base + 20),
+      buffer.readFloatLE(base + 24),
+      buffer.readFloatLE(base + 28),
+    ];
     const texdataIdx = texinfoTexdata[i];
+    let material = '__missing_material';
+    let texWidth = 256;
+    let texHeight = 256;
     if (texdataIdx === undefined) continue;
-    if (texdataIdx < 0 || texdataIdx >= texdataNameIds.length) continue;
-    const strIdx = texdataNameIds[texdataIdx];
-    if (strIdx === undefined) continue;
-    if (strIdx < 0 || strIdx >= strings.length) continue;
-    out[i] = normalizeMaterialName(strings[strIdx] || '');
+    if (texdataIdx >= 0 && texdataIdx < texdataNameIds.length) {
+      const strIdx = texdataNameIds[texdataIdx];
+      if (strIdx !== undefined && strIdx >= 0 && strIdx < strings.length) {
+        material = normalizeMaterialName(strings[strIdx] || '') || '__missing_material';
+      }
+      if (texdataIdx >= 0 && texdataIdx < texdataDims.length) {
+        const dims = texdataDims[texdataIdx];
+        texWidth = Math.max(1, Number(dims?.width || 256));
+        texHeight = Math.max(1, Number(dims?.height || 256));
+      }
+    }
+    out[i] = { material, s, t, texWidth, texHeight };
+  }
+  for (let i = 0; i < out.length; i += 1) {
+    if (out[i]) continue;
+    out[i] = {
+      material: '__missing_material',
+      s: [1, 0, 0, 0],
+      t: [0, 1, 0, 0],
+      texWidth: 256,
+      texHeight: 256,
+    };
   }
   return out;
 };
@@ -579,6 +659,110 @@ const runSourceIO = (options: Options): { data: ImportData | null; warnings: str
   return { data, warnings };
 };
 
+const runSourceIOMaterialExport = (
+  options: Options,
+  materials: string[],
+  contentRoots: string[],
+  texturesOutDir: string,
+): { records: Map<string, MaterialExportRecord>; warnings: string[] } => {
+  const records = new Map<string, MaterialExportRecord>();
+  const warnings: string[] = [];
+  if (materials.length === 0) return { records, warnings };
+
+  if (!fs.existsSync(options.sourceioMaterialScript) || !fs.existsSync(options.sourceioRoot)) {
+    warnings.push('sourceio_material_export_paths_missing');
+    return { records, warnings };
+  }
+
+  const materialListPath = path.join(os.tmpdir(), `sap2-material-list-${process.pid}-${Date.now()}.json`);
+  const outPath = path.join(os.tmpdir(), `sap2-material-export-${process.pid}-${Date.now()}.json`);
+  try {
+    fs.writeFileSync(materialListPath, `${JSON.stringify(materials, null, 2)}\n`, 'utf8');
+  } catch (error: any) {
+    warnings.push(`sourceio_material_export_write_failed:${String(error?.message || error)}`);
+    return { records, warnings };
+  }
+
+  const uniqueRoots = Array.from(
+    new Set(
+      contentRoots
+        .map((item) => path.resolve(String(item || '').trim()))
+        .filter((item) => item.length > 0 && fs.existsSync(item)),
+    ),
+  ).sort((a, b) => a.localeCompare(b));
+  const args: string[] = [
+    options.sourceioMaterialScript,
+    '--sourceio-root',
+    options.sourceioRoot,
+    '--materials-json',
+    materialListPath,
+    '--map-root',
+    options.mapRoot,
+    '--out',
+    outPath,
+    '--out-dir',
+    texturesOutDir,
+    '--max-size',
+    '1024',
+  ];
+  for (const root of uniqueRoots) {
+    args.push('--content-root', root);
+  }
+
+  const exec = spawnSync(options.sourceioPython, args, {
+    encoding: 'utf8',
+    timeout: 20 * 60 * 1000,
+    maxBuffer: 12 * 1024 * 1024,
+  });
+
+  try {
+    fs.unlinkSync(materialListPath);
+  } catch {
+    // no-op
+  }
+
+  if (exec.error || !fs.existsSync(outPath)) {
+    warnings.push(`sourceio_material_export_exec_failed:${String(exec.error?.message || 'no_output')}`);
+    return { records, warnings };
+  }
+
+  try {
+    const payload = JSON.parse(fs.readFileSync(outPath, 'utf8')) as any;
+    if (!payload?.ok) {
+      warnings.push(`sourceio_material_export_failed:${String(payload?.error || 'unknown')}`);
+      return { records, warnings };
+    }
+    const items = Array.isArray(payload.materials) ? payload.materials : [];
+    for (const item of items) {
+      const material = normalizeMaterialName(String(item?.material || ''));
+      if (!material) continue;
+      records.set(material, {
+        material,
+        status: String(item?.status || 'unknown'),
+        ...(item?.sourcePath ? { sourcePath: String(item.sourcePath) } : {}),
+        ...(item?.resolvedBaseTexture ? { resolvedBaseTexture: normalizeMaterialName(String(item.resolvedBaseTexture)) } : {}),
+        ...(item?.textureFile ? { textureFile: String(item.textureFile) } : {}),
+        ...(Number.isFinite(Number(item?.textureWidth)) ? { textureWidth: Number(item.textureWidth) } : {}),
+        ...(Number.isFinite(Number(item?.textureHeight)) ? { textureHeight: Number(item.textureHeight) } : {}),
+        ...(item?.error ? { error: String(item.error) } : {}),
+      });
+    }
+    if (Array.isArray(payload.warnings)) {
+      for (const warning of payload.warnings) warnings.push(`sourceio_material_export:${String(warning)}`);
+    }
+  } catch (error: any) {
+    warnings.push(`sourceio_material_export_parse_failed:${String(error?.message || error)}`);
+  } finally {
+    try {
+      fs.unlinkSync(outPath);
+    } catch {
+      // no-op
+    }
+  }
+
+  return { records, warnings };
+};
+
 const runFallback = (options: Options): ImportData => {
   const started = Date.now();
   const buffer = fs.readFileSync(options.mapBsp);
@@ -736,7 +920,7 @@ const run = () => {
 
   const bspBuffer = fs.readFileSync(options.mapBsp);
   const { lumps } = parseBspLumps(bspBuffer);
-  const materialByTexInfo = buildMaterialByTexInfo(bspBuffer, lumps);
+  const texinfoMetaById = buildTexinfoMeta(bspBuffer, lumps);
   const bspWorld = parseWorldFacesFallback(bspBuffer, lumps);
 
   const missingModels = new Set<string>();
@@ -754,8 +938,8 @@ const run = () => {
   }
 
   const faces: FaceAnnotated[] = bspWorld.faces.map((face) => {
-    const material = face.texInfoId >= 0 && face.texInfoId < materialByTexInfo.length
-      ? materialByTexInfo[face.texInfoId] || '__missing_material'
+    const material = face.texInfoId >= 0 && face.texInfoId < texinfoMetaById.length
+      ? texinfoMetaById[face.texInfoId]?.material || '__missing_material'
       : '__missing_material';
     return {
       ...face,
@@ -845,17 +1029,60 @@ const run = () => {
   const baseDir = path.join(options.outDir, 'base');
   const chunkDir = path.join(options.outDir, 'chunks', 'lod0');
   const reportsDir = path.join(options.outDir, 'reports');
+  const materialsDir = path.join(options.outDir, 'materials');
+  const materialsTextureDir = path.join(materialsDir, 'basecolor');
   fs.rmSync(path.join(options.outDir, 'pipeline'), { recursive: true, force: true });
   fs.rmSync(baseDir, { recursive: true, force: true });
   fs.rmSync(path.join(options.outDir, 'chunks'), { recursive: true, force: true });
   fs.rmSync(reportsDir, { recursive: true, force: true });
+  fs.rmSync(materialsDir, { recursive: true, force: true });
   fs.mkdirSync(baseDir, { recursive: true });
   fs.mkdirSync(chunkDir, { recursive: true });
   fs.mkdirSync(reportsDir, { recursive: true });
+  fs.mkdirSync(materialsTextureDir, { recursive: true });
 
   const PROP_TRI_ESTIMATE = 12;
   const PROP_VERT_ESTIMATE = 8;
   const PROP_BYTE_ESTIMATE = 384;
+
+  const usedWorldMaterials = Array.from(
+    new Set(
+      faces
+        .map((item) => normalizeMaterialName(item.material))
+        .filter((item) => item.length > 0 && item !== '__missing_material'),
+    ),
+  ).sort((a, b) => a.localeCompare(b));
+  const auditMounts = Array.isArray((auditReport as any)?.mounts?.resolved)
+    ? (auditReport as any).mounts.resolved as Array<{ rootPath?: string }>
+    : [];
+  const contentRoots = [options.mapRoot]
+    .concat(auditMounts.map((item) => String(item?.rootPath || '').trim()).filter(Boolean));
+  const materialExport = runSourceIOMaterialExport(options, usedWorldMaterials, contentRoots, materialsTextureDir);
+  warnings.push(...materialExport.warnings);
+
+  const materialIndexEntries = usedWorldMaterials.map((material) => {
+    const exported = materialExport.records.get(material);
+    const textureFile = String(exported?.textureFile || '').trim();
+    const texturePath = textureFile ? path.join(materialsTextureDir, textureFile) : '';
+    const hasTexture = !!texturePath && fs.existsSync(texturePath);
+    return {
+      id: material,
+      material,
+      placeholder: !hasTexture,
+      status: exported?.status || 'not_exported',
+      ...(exported?.sourcePath ? { sourcePath: exported.sourcePath } : {}),
+      ...(exported?.resolvedBaseTexture ? { resolvedBaseTexture: exported.resolvedBaseTexture } : {}),
+      ...(hasTexture ? { textureUrl: `./materials/basecolor/${textureFile}` } : {}),
+      ...(Number.isFinite(Number(exported?.textureWidth)) ? { textureWidth: Number(exported?.textureWidth) } : {}),
+      ...(Number.isFinite(Number(exported?.textureHeight)) ? { textureHeight: Number(exported?.textureHeight) } : {}),
+      ...(exported?.error ? { error: exported.error } : {}),
+    };
+  });
+  writeJson(path.join(materialsDir, 'index.json'), {
+    generatedAt: new Date().toISOString(),
+    total: materialIndexEntries.length,
+    materials: materialIndexEntries,
+  });
 
   let chunkedWorldFaces = 0;
   const budgetViolations: Array<{
@@ -904,6 +1131,7 @@ const run = () => {
       material: string;
       placeholderMaterial: boolean;
       positions: number[];
+      uvs: number[];
       triCount: number;
       faceCount: number;
     }>();
@@ -917,16 +1145,33 @@ const run = () => {
         material: face.material,
         placeholderMaterial: face.placeholderMaterial,
         positions: [],
+        uvs: [],
         triCount: 0,
         faceCount: 0,
       };
       const v0 = face.vertices[0];
       if (!v0) continue;
+      const texInfo = face.texInfoId >= 0 && face.texInfoId < texinfoMetaById.length
+        ? texinfoMetaById[face.texInfoId]
+        : null;
+      const s = texInfo?.s || [1, 0, 0, 0];
+      const t = texInfo?.t || [0, 1, 0, 0];
+      const texWidth = Math.max(1, Number(texInfo?.texWidth || 256));
+      const texHeight = Math.max(1, Number(texInfo?.texHeight || 256));
+      const getUv = (v: [number, number, number]): [number, number] => {
+        const uu = ((v[0] * s[0]) + (v[1] * s[1]) + (v[2] * s[2]) + s[3]) / texWidth;
+        const vv = ((v[0] * t[0]) + (v[1] * t[1]) + (v[2] * t[2]) + t[3]) / texHeight;
+        return [uu, vv];
+      };
       for (let i = 1; i < face.vertices.length - 1; i += 1) {
         const v1 = face.vertices[i];
         const v2 = face.vertices[i + 1];
         if (!v1 || !v2) continue;
         bucket.positions.push(v0[0], v0[1], v0[2], v1[0], v1[1], v1[2], v2[0], v2[1], v2[2]);
+        const uv0 = getUv(v0);
+        const uv1 = getUv(v1);
+        const uv2 = getUv(v2);
+        bucket.uvs.push(uv0[0], uv0[1], uv1[0], uv1[1], uv2[0], uv2[1]);
         bucket.triCount += 1;
       }
       bucket.faceCount += 1;
@@ -935,12 +1180,14 @@ const run = () => {
     const worldMeshes = Array.from(worldMeshBuckets.values())
       .filter((item) => item.positions.length >= 9)
       .map((item) => ({
+        materialId: item.material,
         material: item.material,
         placeholderMaterial: item.placeholderMaterial,
         faceCount: item.faceCount,
         triCount: item.triCount,
         vertexCount: Math.floor(item.positions.length / 3),
         positions: item.positions,
+        uvs: item.uvs,
       }));
     const worldFacesCount = chunk.worldFaceIndexes.length;
     const propItems = chunk.propIndexes.map((idx) => {
@@ -1250,6 +1497,7 @@ const run = () => {
     settings: {
       assetResolutionMode: options.assetResolutionMode,
       sourceioMode: options.sourceioMode,
+      sourceioMaterialScript: options.sourceioMaterialScript,
       chunkSize: options.chunkSize,
       maxWorldFacesPerChunk: options.maxWorldFacesPerChunk,
       maxInstancesPerChunk: options.maxInstancesPerChunk,
@@ -1280,6 +1528,12 @@ const run = () => {
       totalFaces: faces.length,
       placeholderFaces: faces.filter((item) => item.placeholderMaterial).length,
       materialsUsed: Array.from(new Set(faces.map((item) => item.material))).sort((a, b) => a.localeCompare(b)),
+    },
+    materials: {
+      total: materialIndexEntries.length,
+      withTexture: materialIndexEntries.filter((item) => !!item.textureUrl).length,
+      placeholder: materialIndexEntries.filter((item) => item.placeholder).length,
+      indexPath: './materials/index.json',
     },
     staticProps: {
       totalInstances: props.length,
@@ -1364,6 +1618,9 @@ const run = () => {
           url: './base/base.scene.json',
         },
       ],
+      materials: {
+        indexUrl: './materials/index.json',
+      },
       chunks: {
         lod0IndexUrl: './chunks/lod0/index.json',
         format: 'scene-json',
@@ -1415,6 +1672,7 @@ const run = () => {
       sourceioEngineUsed: importData.engine,
       sourceioRoot: options.sourceioRoot,
       sourceioScript: options.sourceioScript,
+      sourceioMaterialScript: options.sourceioMaterialScript,
       chunkSize: options.chunkSize,
       maxWorldFacesPerChunk: options.maxWorldFacesPerChunk,
       maxInstancesPerChunk: options.maxInstancesPerChunk,
@@ -1491,6 +1749,11 @@ const run = () => {
         staticProps: props.filter((item) => item.placeholderModel).length,
         missingWorldMaterialsCount: missingWorldMaterials.size,
         missingModelsCount: missingModels.size,
+      },
+      materials: {
+        total: materialIndexEntries.length,
+        withTexture: materialIndexEntries.filter((item) => !!item.textureUrl).length,
+        placeholder: materialIndexEntries.filter((item) => item.placeholder).length,
       },
       topChunks: topHeaviestChunks,
     },

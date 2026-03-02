@@ -46,11 +46,26 @@ type Manifest = {
   };
   assets: {
     base?: Array<{ id: string; url: string; format: string }>;
+    materials?: {
+      indexUrl: string;
+    };
     chunks: {
       lod0IndexUrl: string;
       format: string;
     };
   };
+};
+
+type MaterialIndex = {
+  generatedAt: string;
+  total: number;
+  materials: Array<{
+    id: string;
+    material: string;
+    placeholder: boolean;
+    status: string;
+    textureUrl?: string;
+  }>;
 };
 
 type ChunkPayload = {
@@ -69,12 +84,14 @@ type ChunkPayload = {
   };
   world?: {
     meshes?: Array<{
+      materialId?: string;
       material: string;
       placeholderMaterial: boolean;
       faceCount?: number;
       triCount?: number;
       vertexCount?: number;
       positions: number[];
+      uvs?: number[];
     }>;
     faces?: Array<{
       position: [number, number, number];
@@ -234,6 +251,79 @@ const ServerView3D: React.FC = () => {
       drawCalls: number;
     }>();
     const loadingChunkIds = new Set<string>();
+    const textureLoader = new THREE.TextureLoader();
+    const textureCache = new Map<string, THREE.Texture | null>();
+    const textureLoading = new Set<string>();
+    const pendingMaterialBindings = new Map<string, Set<THREE.MeshStandardMaterial>>();
+    const materialDefs = new Map<string, { placeholder: boolean; textureUrl?: string }>();
+
+    const getWorldMaterial = (materialIdRaw: string, placeholderFlag: boolean): THREE.MeshStandardMaterial => {
+      const materialId = String(materialIdRaw || '__missing_material');
+      const def = materialDefs.get(materialId);
+      const shouldPlaceholder = placeholderFlag || !def || def.placeholder || !def.textureUrl;
+      const baseColor = shouldPlaceholder ? new THREE.Color(0x6b7280) : hashColor(materialId, 0.92);
+      const material = new THREE.MeshStandardMaterial({
+        color: baseColor,
+        metalness: 0.04,
+        roughness: 0.94,
+        side: THREE.DoubleSide,
+      });
+
+      if (!shouldPlaceholder && def?.textureUrl) {
+        const textureUrl = toAssetUrl(manifestUrl, def.textureUrl);
+        const cachedTexture = textureCache.get(textureUrl);
+        if (cachedTexture) {
+          material.map = cachedTexture;
+          material.color.set(0xffffff);
+          material.needsUpdate = true;
+        } else if (cachedTexture !== null) {
+          const pending = pendingMaterialBindings.get(textureUrl) || new Set<THREE.MeshStandardMaterial>();
+          pending.add(material);
+          pendingMaterialBindings.set(textureUrl, pending);
+
+          if (!textureLoading.has(textureUrl)) {
+            textureLoading.add(textureUrl);
+            textureLoader.load(
+              textureUrl,
+              (texture) => {
+                texture.wrapS = THREE.RepeatWrapping;
+                texture.wrapT = THREE.RepeatWrapping;
+                texture.colorSpace = THREE.SRGBColorSpace;
+                texture.anisotropy = 4;
+                textureCache.set(textureUrl, texture);
+                textureLoading.delete(textureUrl);
+                const waiting = pendingMaterialBindings.get(textureUrl);
+                if (waiting) {
+                  for (const mat of waiting) {
+                    mat.map = texture;
+                    mat.color.set(0xffffff);
+                    mat.needsUpdate = true;
+                  }
+                }
+                pendingMaterialBindings.delete(textureUrl);
+              },
+              undefined,
+              () => {
+                textureCache.set(textureUrl, null);
+                textureLoading.delete(textureUrl);
+                pendingMaterialBindings.delete(textureUrl);
+              },
+            );
+          }
+        }
+      }
+
+      return material;
+    };
+
+    const disposeTextureCache = () => {
+      for (const texture of textureCache.values()) {
+        if (texture) texture.dispose();
+      }
+      textureCache.clear();
+      textureLoading.clear();
+      pendingMaterialBindings.clear();
+    };
 
     const loadChunkGroup = async (entry: ChunkEntry): Promise<void> => {
       if (chunkRecords.has(entry.id) || loadingChunkIds.has(entry.id)) return;
@@ -263,18 +353,20 @@ const ServerView3D: React.FC = () => {
 
             const worldGeo = new THREE.BufferGeometry();
             worldGeo.setAttribute('position', new THREE.BufferAttribute(positionArray, 3));
+            const rawUvs = Array.isArray(meshData.uvs) ? meshData.uvs : [];
+            if (rawUvs.length === (rawPositions.length / 3) * 2) {
+              const uvArray = new Float32Array(rawUvs.length);
+              for (let i = 0; i < rawUvs.length; i += 2) {
+                uvArray[i + 0] = Number(rawUvs[i] || 0);
+                uvArray[i + 1] = 1 - Number(rawUvs[i + 1] || 0);
+              }
+              worldGeo.setAttribute('uv', new THREE.BufferAttribute(uvArray, 2));
+            }
             worldGeo.computeVertexNormals();
             worldGeo.computeBoundingSphere();
 
-            const color = meshData.placeholderMaterial
-              ? new THREE.Color(0x6b7280)
-              : hashColor(meshData.material || 'world-material', 0.9);
-            const worldMat = new THREE.MeshStandardMaterial({
-              color,
-              metalness: 0.04,
-              roughness: 0.94,
-              side: THREE.DoubleSide,
-            });
+            const matId = String(meshData.materialId || meshData.material || '__missing_material');
+            const worldMat = getWorldMaterial(matId, !!meshData.placeholderMaterial);
             const worldMesh = new THREE.Mesh(worldGeo, worldMat);
             worldMesh.frustumCulled = true;
             group.add(worldMesh);
@@ -388,6 +480,26 @@ const ServerView3D: React.FC = () => {
         const loadedManifest = await readJson<Manifest>(manifestUrl);
         if (cancelled) return;
         setManifest(loadedManifest);
+
+        if (loadedManifest.assets.materials?.indexUrl) {
+          try {
+            const materialIndexUrl = toAssetUrl(manifestUrl, loadedManifest.assets.materials.indexUrl);
+            const materialIndex = await readJson<MaterialIndex>(materialIndexUrl);
+            if (!cancelled) {
+              for (const item of materialIndex.materials || []) {
+                const key = String(item.material || item.id || '').trim();
+                if (!key) continue;
+                materialDefs.set(key, {
+                  placeholder: !!item.placeholder,
+                  ...(item.textureUrl ? { textureUrl: item.textureUrl } : {}),
+                });
+              }
+              appendLog(`materials index carregado: total=${materialDefs.size}`);
+            }
+          } catch (materialErr: any) {
+            appendLog(`materials index indisponivel: ${String(materialErr?.message || materialErr)}`);
+          }
+        }
 
         const lod0IndexUrl = toAssetUrl(manifestUrl, loadedManifest.assets.chunks.lod0IndexUrl);
         setStatus('Carregando indice de chunks...');
@@ -559,6 +671,7 @@ const ServerView3D: React.FC = () => {
         disposeObject3D(record.group);
       }
       chunkRecords.clear();
+      disposeTextureCache();
       renderer.dispose();
       host.innerHTML = '';
     };

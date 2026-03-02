@@ -36,6 +36,7 @@
   "world": {
     "meshes": [
       {
+        "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
         "placeholderMaterial": true,
         "faceCount": 1,
@@ -60,6 +61,20 @@
           12576,
           -622,
           856
+        ],
+        "uvs": [
+          -384.6875,
+          -19.78125,
+          -384.6875,
+          -19.78125,
+          -393.6875,
+          -19.78125,
+          -384.6875,
+          -19.78125,
+          -393.6875,
+          -19.78125,
+          -393.6875,
+          -19.78125
         ]
       }
     ]

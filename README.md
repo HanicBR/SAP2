@@ -115,6 +115,19 @@ Comportamento atual:
 - O viewer passou de `Points` para `Mesh` no mundo (ainda com material placeholder, sem textura Source/PBR).
 - Resultado esperado: forma do mapa reconhecivel (ruas/prédios/terreno), mesmo sem fidelidade visual final.
 
+## PR-07 Materiais e texturas (MVP)
+
+- Pipeline exporta UV por triangulo de face BSP usando `texinfo`/`texdata`.
+- Novo passo offline de texturas com SourceIO:
+  - resolve `VMT -> $basetexture -> VTF`
+  - converte para `PNG` em `public/maps/<map>/materials/basecolor/`
+- Novo indice: `public/maps/<map>/materials/index.json`.
+- Viewer carrega `materials/index.json` e aplica `map` no `MeshStandardMaterial` quando houver textura.
+- Quando nao houver basetexture/textura, mantem fallback placeholder.
+
+Observacao:
+- O exportador usa Pillow no Python. Se Pillow nao estiver disponivel no host, o viewer continua funcional com placeholders.
+
 ## Mounts (template)
 
 Copie template:
