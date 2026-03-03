@@ -253,6 +253,11 @@ type RuntimeStats = {
   textureCacheBytesEstimate: number;
   modelCacheCount: number;
   modelCacheBytesEstimate: number;
+  playersTotalInFrame: number;
+  playersRendered: number;
+  playersCulled: number;
+  playersFilteredOut: number;
+  playerUpdateRateHz: number;
   cameraCell: { x: number; y: number };
   firstActiveLoadMs: number | null;
 };
@@ -282,6 +287,11 @@ const VIEWER_ACTION_REASON_MAX_LENGTH = 160;
 const PLAYER_MARKER_HEIGHT = 30;
 const PLAYER_MARKER_SMOOTH_RATE = 10;
 const PLAYER_MARKER_SELECTED_SCALE = 1.45;
+const PLAYER_MARKER_MAX_RENDER_DISTANCE = 9000;
+const PLAYER_MARKER_MAX_RENDER_DISTANCE_SQ = PLAYER_MARKER_MAX_RENDER_DISTANCE * PLAYER_MARKER_MAX_RENDER_DISTANCE;
+const PLAYER_MARKER_EXTRAPOLATION_MAX_MS = 250;
+const PLAYER_MARKER_ROTATION_SMOOTH_RATE = 14;
+const PLAYER_MARKER_LABEL_HEIGHT = 126;
 const FOLLOW_CAMERA_DISTANCE = 520;
 const FOLLOW_CAMERA_HEIGHT = 220;
 const FOLLOW_CAMERA_SMOOTH_RATE = 6;
@@ -529,6 +539,41 @@ const getViewerMarkerColorHex = (entry: ServerViewerStatePlayer): number => {
   return PLAYER_MARKER_COLORS[hashSteamId(entry.steamId) % PLAYER_MARKER_COLORS.length];
 };
 
+const getViewerPlayerTeamKey = (entry: Pick<ServerViewerStatePlayer, 'teamId' | 'teamName'>): string => {
+  const teamId = Number(entry.teamId);
+  if (Number.isFinite(teamId)) return `id:${Math.floor(teamId)}`;
+  const teamName = String(entry.teamName || '').trim();
+  if (teamName) return `name:${teamName.toLowerCase()}`;
+  return 'unknown';
+};
+
+const getViewerPlayerTeamLabel = (entry: Pick<ServerViewerStatePlayer, 'teamId' | 'teamName'>): string => {
+  const teamId = Number(entry.teamId);
+  const teamName = String(entry.teamName || '').trim();
+  if (teamName && Number.isFinite(teamId)) return `${teamName} (#${Math.floor(teamId)})`;
+  if (teamName) return teamName;
+  if (Number.isFinite(teamId)) return `Team #${Math.floor(teamId)}`;
+  return 'Sem time';
+};
+
+const matchViewerPlayerFilters = (
+  entry: Pick<ServerViewerStatePlayer, 'alive' | 'teamId' | 'teamName'>,
+  aliveFilter: 'all' | 'alive' | 'dead',
+  teamFilter: string,
+): boolean => {
+  if (aliveFilter === 'alive' && entry.alive === false) return false;
+  if (aliveFilter === 'dead' && entry.alive !== false) return false;
+  if (teamFilter !== 'all' && getViewerPlayerTeamKey(entry) !== teamFilter) return false;
+  return true;
+};
+
+const lerpAngleRad = (from: number, to: number, alpha: number): number => {
+  const normAlpha = Math.max(0, Math.min(1, alpha));
+  const rawDelta = to - from;
+  const delta = ((rawDelta + Math.PI) % (Math.PI * 2) + (Math.PI * 2)) % (Math.PI * 2) - Math.PI;
+  return from + delta * normAlpha;
+};
+
 const formatCoord = (value: number | undefined): string => {
   if (!Number.isFinite(Number(value))) return '0.0';
   return Number(value || 0).toLocaleString('pt-BR', {
@@ -626,15 +671,28 @@ const ServerView3D: React.FC = () => {
     textureCacheBytesEstimate: 0,
     modelCacheCount: 0,
     modelCacheBytesEstimate: 0,
+    playersTotalInFrame: 0,
+    playersRendered: 0,
+    playersCulled: 0,
+    playersFilteredOut: 0,
+    playerUpdateRateHz: 0,
     cameraCell: { x: 0, y: 0 },
     firstActiveLoadMs: null,
   });
   const [streamingLogs, setStreamingLogs] = useState<string[]>([]);
   const [diagnostics, setDiagnostics] = useState<ViewerDiagnostic[]>([]);
   const [renderProfile, setRenderProfile] = useState<ViewerRenderProfile>(() => readInitialRenderProfile());
+  const [playerAliveFilter, setPlayerAliveFilter] = useState<'all' | 'alive' | 'dead'>('all');
+  const [playerTeamFilter, setPlayerTeamFilter] = useState<string>('all');
+  const [showPlayerLabels, setShowPlayerLabels] = useState<boolean>(false);
+  const [showPlayerHealthInLabel, setShowPlayerHealthInLabel] = useState<boolean>(false);
   const viewerStateRef = useRef<ServerViewerStateSnapshot | null>(null);
   const viewerSelectedSteamIdRef = useRef<string | null>(null);
   const viewerFollowSelectedRef = useRef<boolean>(false);
+  const playerAliveFilterRef = useRef<'all' | 'alive' | 'dead'>('all');
+  const playerTeamFilterRef = useRef<string>('all');
+  const showPlayerLabelsRef = useRef<boolean>(false);
+  const showPlayerHealthInLabelRef = useRef<boolean>(false);
   const viewerActionPollTokenRef = useRef<number>(0);
 
   const viewerPlayers = useMemo(
@@ -647,9 +705,27 @@ const ServerView3D: React.FC = () => {
     [viewerState],
   );
 
+  const viewerTeamOptions = useMemo(() => {
+    const grouped = new Map<string, { value: string; label: string; count: number }>();
+    for (const player of viewerPlayers) {
+      const value = getViewerPlayerTeamKey(player);
+      const label = getViewerPlayerTeamLabel(player);
+      const current = grouped.get(value) || { value, label, count: 0 };
+      current.count += 1;
+      grouped.set(value, current);
+    }
+    return Array.from(grouped.values()).sort((a, b) => a.label.localeCompare(b.label));
+  }, [viewerPlayers]);
+
+  const filteredViewerPlayers = useMemo(
+    () =>
+      viewerPlayers.filter((entry) => matchViewerPlayerFilters(entry, playerAliveFilter, playerTeamFilter)),
+    [playerAliveFilter, playerTeamFilter, viewerPlayers],
+  );
+
   const selectedViewerPlayer = useMemo(
-    () => viewerPlayers.find((entry) => entry.steamId === viewerSelectedSteamId) || null,
-    [viewerPlayers, viewerSelectedSteamId],
+    () => filteredViewerPlayers.find((entry) => entry.steamId === viewerSelectedSteamId) || null,
+    [filteredViewerPlayers, viewerSelectedSteamId],
   );
 
   const viewerSnapshotAgeSeconds = useMemo(() => {
@@ -788,6 +864,22 @@ const ServerView3D: React.FC = () => {
   }, [renderProfile]);
 
   useEffect(() => {
+    playerAliveFilterRef.current = playerAliveFilter;
+  }, [playerAliveFilter]);
+
+  useEffect(() => {
+    playerTeamFilterRef.current = playerTeamFilter;
+  }, [playerTeamFilter]);
+
+  useEffect(() => {
+    showPlayerLabelsRef.current = showPlayerLabels;
+  }, [showPlayerLabels]);
+
+  useEffect(() => {
+    showPlayerHealthInLabelRef.current = showPlayerHealthInLabel;
+  }, [showPlayerHealthInLabel]);
+
+  useEffect(() => {
     viewerSelectedSteamIdRef.current = viewerSelectedSteamId;
   }, [viewerSelectedSteamId]);
 
@@ -796,16 +888,23 @@ const ServerView3D: React.FC = () => {
   }, [viewerFollowSelected]);
 
   useEffect(() => {
-    if (!viewerPlayers.length) {
+    if (!filteredViewerPlayers.length) {
       setViewerSelectedSteamId(null);
       setViewerFollowSelected(false);
       return;
     }
-    if (viewerSelectedSteamId && !viewerPlayers.some((entry) => entry.steamId === viewerSelectedSteamId)) {
-      setViewerSelectedSteamId(viewerPlayers[0].steamId);
+    if (viewerSelectedSteamId && !filteredViewerPlayers.some((entry) => entry.steamId === viewerSelectedSteamId)) {
+      setViewerSelectedSteamId(filteredViewerPlayers[0].steamId);
       setViewerFollowSelected(false);
     }
-  }, [viewerPlayers, viewerSelectedSteamId]);
+  }, [filteredViewerPlayers, viewerSelectedSteamId]);
+
+  useEffect(() => {
+    if (playerTeamFilter === 'all') return;
+    if (!viewerTeamOptions.some((entry) => entry.value === playerTeamFilter)) {
+      setPlayerTeamFilter('all');
+    }
+  }, [playerTeamFilter, viewerTeamOptions]);
 
   useEffect(() => {
     setViewerActionError(null);
@@ -1171,14 +1270,40 @@ const ServerView3D: React.FC = () => {
     const moveRight = new THREE.Vector3();
     const moveDelta = new THREE.Vector3();
     const moveUp = new THREE.Vector3(0, 1, 0);
-    const playerGeometry = new THREE.SphereGeometry(20, 14, 12);
+    const playerBodyGeometry = new THREE.CylinderGeometry(12, 12, 56, 12);
+    const playerHeadGeometry = new THREE.SphereGeometry(14, 12, 10);
+    const playerDirGeometry = new THREE.ConeGeometry(8, 24, 10);
     const playerMarkers = new Map<string, {
       steamId: string;
-      mesh: THREE.Mesh;
-      targetPosition: THREE.Vector3;
+      root: THREE.Group;
+      pickMeshes: THREE.Object3D[];
+      bodyMaterial: THREE.MeshStandardMaterial;
+      headMaterial: THREE.MeshStandardMaterial;
+      arrowMaterial: THREE.MeshStandardMaterial;
+      labelSprite: THREE.Sprite | null;
+      labelTexture: THREE.CanvasTexture | null;
+      labelSignature: string;
+      snapshotPosition: THREE.Vector3;
+      renderPosition: THREE.Vector3;
+      velocity: THREE.Vector3;
+      snapshotAtMs: number;
       lastSeenAtMs: number;
-      yawRad: number;
+      targetYawRad: number;
+      renderYawRad: number;
+      alive: boolean;
+      teamKey: string;
+      name: string;
+      health: number | null;
     }>();
+    const markerPredictedPosition = new THREE.Vector3();
+    let lastSnapshotAppliedAtMs = 0;
+    let playerUpdateRateHz = 0;
+    let playerRenderTelemetry = {
+      totalInFrame: 0,
+      rendered: 0,
+      culled: 0,
+      filteredOut: 0,
+    };
     const raycaster = new THREE.Raycaster();
     const pointerNdc = new THREE.Vector2();
     const pointerDown = { x: 0, y: 0 };
@@ -1756,15 +1881,116 @@ const ServerView3D: React.FC = () => {
       return promise;
     };
 
+    const disposePlayerLabel = (marker: {
+      labelSprite: THREE.Sprite | null;
+      labelTexture: THREE.CanvasTexture | null;
+      root: THREE.Group;
+    }) => {
+      if (marker.labelSprite) {
+        marker.root.remove(marker.labelSprite);
+        const spriteMaterial = marker.labelSprite.material as THREE.Material | undefined;
+        spriteMaterial?.dispose();
+      }
+      marker.labelSprite = null;
+      if (marker.labelTexture) marker.labelTexture.dispose();
+      marker.labelTexture = null;
+    };
+
+    const markerMatchesActiveFilters = (marker: {
+      alive: boolean;
+      teamKey: string;
+    }): boolean => {
+      const aliveFilter = playerAliveFilterRef.current;
+      if (aliveFilter === 'alive' && !marker.alive) return false;
+      if (aliveFilter === 'dead' && marker.alive) return false;
+      const teamFilter = playerTeamFilterRef.current;
+      if (teamFilter !== 'all' && marker.teamKey !== teamFilter) return false;
+      return true;
+    };
+
+    const updateMarkerLabel = (marker: {
+      steamId: string;
+      name: string;
+      alive: boolean;
+      health: number | null;
+      root: THREE.Group;
+      labelSignature: string;
+      labelSprite: THREE.Sprite | null;
+      labelTexture: THREE.CanvasTexture | null;
+    }) => {
+      if (!showPlayerLabelsRef.current) {
+        if (marker.labelSignature !== '__off__') {
+          marker.labelSignature = '__off__';
+          disposePlayerLabel(marker);
+        }
+        return;
+      }
+
+      const nameText = (marker.name || marker.steamId).slice(0, 24);
+      const hpText = showPlayerHealthInLabelRef.current
+        ? `HP ${marker.health !== null ? Math.max(0, Math.floor(marker.health)) : '-'}${marker.alive ? '' : ' | MORTO'}`
+        : '';
+      const signature = `${nameText}|${hpText}`;
+      if (signature === marker.labelSignature) return;
+
+      marker.labelSignature = signature;
+      disposePlayerLabel(marker);
+
+      const canvas = document.createElement('canvas');
+      const width = 320;
+      const height = hpText ? 84 : 56;
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = marker.alive ? 'rgba(10, 12, 20, 0.86)' : 'rgba(40, 18, 18, 0.9)';
+      ctx.strokeStyle = marker.alive ? 'rgba(0, 255, 220, 0.68)' : 'rgba(255, 110, 110, 0.68)';
+      ctx.lineWidth = 2;
+      ctx.fillRect(8, 8, width - 16, height - 16);
+      ctx.strokeRect(8, 8, width - 16, height - 16);
+
+      ctx.font = 'bold 22px sans-serif';
+      ctx.fillStyle = '#f4f8ff';
+      ctx.textBaseline = 'top';
+      ctx.fillText(nameText, 20, 18, width - 40);
+
+      if (hpText) {
+        ctx.font = 'bold 18px sans-serif';
+        ctx.fillStyle = marker.alive ? '#a7f3d0' : '#fecaca';
+        ctx.fillText(hpText, 20, 45, width - 40);
+      }
+
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.minFilter = THREE.LinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      texture.generateMipmaps = false;
+      texture.needsUpdate = true;
+
+      const spriteMaterial = new THREE.SpriteMaterial({
+        map: texture,
+        depthWrite: false,
+        transparent: true,
+      });
+      const sprite = new THREE.Sprite(spriteMaterial);
+      const scale = 0.8;
+      sprite.scale.set((width / 6) * scale, (height / 6) * scale, 1);
+      sprite.position.set(0, PLAYER_MARKER_LABEL_HEIGHT, 0);
+      sprite.renderOrder = 3;
+      marker.root.add(sprite);
+      marker.labelTexture = texture;
+      marker.labelSprite = sprite;
+    };
+
     const clearPlayerMarkers = () => {
       for (const marker of playerMarkers.values()) {
-        playersRoot.remove(marker.mesh);
-        const material = marker.mesh.material as THREE.Material | THREE.Material[] | undefined;
-        if (Array.isArray(material)) {
-          material.forEach((item) => item.dispose());
-        } else {
-          material?.dispose();
-        }
+        playersRoot.remove(marker.root);
+        disposePlayerLabel(marker);
+        marker.bodyMaterial.dispose();
+        marker.headMaterial.dispose();
+        marker.arrowMaterial.dispose();
       }
       playerMarkers.clear();
     };
@@ -1773,11 +1999,21 @@ const ServerView3D: React.FC = () => {
       const selectedSteamId = viewerSelectedSteamIdRef.current;
       for (const marker of playerMarkers.values()) {
         const isSelected = !!selectedSteamId && marker.steamId === selectedSteamId;
-        const mat = marker.mesh.material as THREE.MeshStandardMaterial;
-        mat.emissive.setHex(isSelected ? 0xffffff : 0x000000);
-        mat.emissiveIntensity = isSelected ? 0.28 : 0;
-        mat.needsUpdate = true;
-        marker.mesh.scale.setScalar(isSelected ? PLAYER_MARKER_SELECTED_SCALE : 1);
+        const emissive = isSelected ? 0xffffff : 0x000000;
+        const emissiveIntensity = isSelected ? 0.22 : 0;
+        marker.bodyMaterial.emissive.setHex(emissive);
+        marker.bodyMaterial.emissiveIntensity = emissiveIntensity;
+        marker.headMaterial.emissive.setHex(emissive);
+        marker.headMaterial.emissiveIntensity = emissiveIntensity;
+        marker.arrowMaterial.emissive.setHex(emissive);
+        marker.arrowMaterial.emissiveIntensity = emissiveIntensity * 0.7;
+        marker.bodyMaterial.opacity = marker.alive ? 0.96 : 0.42;
+        marker.headMaterial.opacity = marker.alive ? 0.98 : 0.45;
+        marker.arrowMaterial.opacity = marker.alive ? 0.94 : 0.4;
+        marker.root.scale.setScalar(isSelected ? PLAYER_MARKER_SELECTED_SCALE : 1);
+        marker.bodyMaterial.needsUpdate = true;
+        marker.headMaterial.needsUpdate = true;
+        marker.arrowMaterial.needsUpdate = true;
       }
     };
 
@@ -1789,9 +2025,13 @@ const ServerView3D: React.FC = () => {
       pointerNdc.y = -(((clientY - rect.top) / height) * 2 - 1);
       raycaster.setFromCamera(pointerNdc, camera);
 
-      const markerMeshes = Array.from(playerMarkers.values()).map((entry) => entry.mesh);
-      if (!markerMeshes.length) return null;
-      const hits = raycaster.intersectObjects(markerMeshes, false);
+      const pickTargets: THREE.Object3D[] = [];
+      for (const marker of playerMarkers.values()) {
+        if (!marker.root.visible) continue;
+        pickTargets.push(...marker.pickMeshes);
+      }
+      if (!pickTargets.length) return null;
+      const hits = raycaster.intersectObjects(pickTargets, false);
       if (!hits.length) return null;
       const first = hits[0].object as THREE.Object3D & { userData?: { steamId?: string } };
       const steamId = String(first.userData?.steamId || '').trim();
@@ -1880,10 +2120,16 @@ const ServerView3D: React.FC = () => {
     const upsertPlayersFromSnapshot = (snapshot: ServerViewerStateSnapshot | null) => {
       if (!snapshot) {
         clearPlayerMarkers();
+        playerUpdateRateHz = 0;
         return;
       }
 
       const now = performance.now();
+      if (lastSnapshotAppliedAtMs > 0) {
+        const deltaMs = Math.max(1, now - lastSnapshotAppliedAtMs);
+        playerUpdateRateHz = Math.min(64, 1000 / deltaMs);
+      }
+      lastSnapshotAppliedAtMs = now;
       const seen = new Set<string>();
 
       for (const player of snapshot.players || []) {
@@ -1897,54 +2143,114 @@ const ServerView3D: React.FC = () => {
           Number(player.pos?.z || 0),
         );
         sourcePos.y += PLAYER_MARKER_HEIGHT;
+        const targetYawRad = THREE.MathUtils.degToRad(Number(player.eyeAngles?.yaw || 0));
+        const alive = player.alive !== false;
+        const teamKey = getViewerPlayerTeamKey(player);
+        const playerName = String(player.name || '').trim();
+        const health = Number.isFinite(Number(player.health)) ? Number(player.health) : null;
+        const playerColor = new THREE.Color(getViewerMarkerColorHex(player));
 
         let marker = playerMarkers.get(steamId);
         if (!marker) {
-          const markerMaterial = new THREE.MeshStandardMaterial({
-            color: new THREE.Color(getViewerMarkerColorHex(player)),
+          const bodyMaterial = new THREE.MeshStandardMaterial({
+            color: playerColor.clone(),
             metalness: 0.02,
             roughness: 0.45,
             transparent: true,
-            opacity: player.alive === false ? 0.35 : 0.95,
-            depthWrite: player.alive !== false,
+            opacity: alive ? 0.96 : 0.42,
+            depthWrite: alive,
           });
-          const markerMesh = new THREE.Mesh(playerGeometry, markerMaterial);
-          markerMesh.userData = {
-            ...markerMesh.userData,
-            steamId,
-          };
-          markerMesh.position.copy(sourcePos);
-          markerMesh.frustumCulled = true;
-          playersRoot.add(markerMesh);
+          const headMaterial = new THREE.MeshStandardMaterial({
+            color: playerColor.clone().offsetHSL(0, -0.02, 0.08),
+            metalness: 0.02,
+            roughness: 0.36,
+            transparent: true,
+            opacity: alive ? 0.98 : 0.45,
+            depthWrite: alive,
+          });
+          const arrowMaterial = new THREE.MeshStandardMaterial({
+            color: playerColor.clone().offsetHSL(0, 0.04, 0.12),
+            metalness: 0.04,
+            roughness: 0.32,
+            transparent: true,
+            opacity: alive ? 0.94 : 0.4,
+            depthWrite: alive,
+          });
+
+          const root = new THREE.Group();
+          root.position.copy(sourcePos);
+          root.rotation.y = targetYawRad;
+          root.frustumCulled = true;
+
+          const bodyMesh = new THREE.Mesh(playerBodyGeometry, bodyMaterial);
+          bodyMesh.position.set(0, 32, 0);
+          bodyMesh.userData = { ...bodyMesh.userData, steamId };
+          const headMesh = new THREE.Mesh(playerHeadGeometry, headMaterial);
+          headMesh.position.set(0, 68, 0);
+          headMesh.userData = { ...headMesh.userData, steamId };
+          const dirMesh = new THREE.Mesh(playerDirGeometry, arrowMaterial);
+          dirMesh.position.set(0, 52, 24);
+          dirMesh.rotation.x = Math.PI / 2;
+          dirMesh.userData = { ...dirMesh.userData, steamId };
+
+          root.add(bodyMesh);
+          root.add(headMesh);
+          root.add(dirMesh);
+          playersRoot.add(root);
+
           marker = {
             steamId,
-            mesh: markerMesh,
-            targetPosition: sourcePos.clone(),
+            root,
+            pickMeshes: [bodyMesh, headMesh],
+            bodyMaterial,
+            headMaterial,
+            arrowMaterial,
+            labelSprite: null,
+            labelTexture: null,
+            labelSignature: '__init__',
+            snapshotPosition: sourcePos.clone(),
+            renderPosition: sourcePos.clone(),
+            velocity: new THREE.Vector3(),
+            snapshotAtMs: now,
             lastSeenAtMs: now,
-            yawRad: THREE.MathUtils.degToRad(Number(player.eyeAngles?.yaw || 0)),
+            targetYawRad,
+            renderYawRad: targetYawRad,
+            alive,
+            teamKey,
+            name: playerName,
+            health,
           };
           playerMarkers.set(steamId, marker);
         } else {
-          marker.targetPosition.copy(sourcePos);
+          const deltaSec = Math.max(0.001, (now - marker.snapshotAtMs) / 1000);
+          const nextVelocity = sourcePos.clone().sub(marker.snapshotPosition).multiplyScalar(1 / deltaSec);
+          marker.velocity.lerp(nextVelocity, 0.62);
+          marker.snapshotPosition.copy(sourcePos);
+          marker.snapshotAtMs = now;
           marker.lastSeenAtMs = now;
-          marker.yawRad = THREE.MathUtils.degToRad(Number(player.eyeAngles?.yaw || 0));
-          const mat = marker.mesh.material as THREE.MeshStandardMaterial;
-          mat.color.setHex(getViewerMarkerColorHex(player));
-          mat.opacity = player.alive === false ? 0.35 : 0.95;
-          mat.depthWrite = player.alive !== false;
-          mat.needsUpdate = true;
+          marker.targetYawRad = targetYawRad;
+          marker.alive = alive;
+          marker.teamKey = teamKey;
+          marker.name = playerName;
+          marker.health = health;
+          marker.bodyMaterial.color.copy(playerColor);
+          marker.headMaterial.color.copy(playerColor).offsetHSL(0, -0.02, 0.08);
+          marker.arrowMaterial.color.copy(playerColor).offsetHSL(0, 0.04, 0.12);
+          marker.bodyMaterial.depthWrite = alive;
+          marker.headMaterial.depthWrite = alive;
+          marker.arrowMaterial.depthWrite = alive;
         }
+
+        updateMarkerLabel(marker);
       }
 
       for (const [steamId, marker] of playerMarkers.entries()) {
         if (seen.has(steamId)) continue;
-        playersRoot.remove(marker.mesh);
-        const material = marker.mesh.material as THREE.Material | THREE.Material[] | undefined;
-        if (Array.isArray(material)) {
-          material.forEach((item) => item.dispose());
-        } else {
-          material?.dispose();
-        }
+        playersRoot.remove(marker.root);
+        disposePlayerLabel(marker);
+        marker.bodyMaterial.dispose();
+        marker.headMaterial.dispose();
+        marker.arrowMaterial.dispose();
         playerMarkers.delete(steamId);
       }
 
@@ -2477,6 +2783,11 @@ const ServerView3D: React.FC = () => {
             textureCacheBytesEstimate,
             modelCacheCount: Array.from(modelCache.values()).reduce((count, item) => (item ? count + 1 : count), 0),
             modelCacheBytesEstimate,
+            playersTotalInFrame: playerRenderTelemetry.totalInFrame,
+            playersRendered: playerRenderTelemetry.rendered,
+            playersCulled: playerRenderTelemetry.culled,
+            playersFilteredOut: playerRenderTelemetry.filteredOut,
+            playerUpdateRateHz: playerUpdateRateHz,
             cameraCell,
             firstActiveLoadMs,
           });
@@ -2508,8 +2819,42 @@ const ServerView3D: React.FC = () => {
           lastFrameAtMs = now;
 
           const smoothAlpha = 1 - Math.exp(-PLAYER_MARKER_SMOOTH_RATE * dtSec);
+          const rotationAlpha = 1 - Math.exp(-PLAYER_MARKER_ROTATION_SMOOTH_RATE * dtSec);
+          const selectedSteamId = viewerSelectedSteamIdRef.current || '';
+          playerRenderTelemetry = {
+            totalInFrame: viewerStateRef.current?.players?.length || playerMarkers.size,
+            rendered: 0,
+            culled: 0,
+            filteredOut: 0,
+          };
+
           for (const marker of playerMarkers.values()) {
-            marker.mesh.position.lerp(marker.targetPosition, smoothAlpha);
+            updateMarkerLabel(marker);
+            const extrapolationSec = Math.min(
+              PLAYER_MARKER_EXTRAPOLATION_MAX_MS / 1000,
+              Math.max(0, (now - marker.snapshotAtMs) / 1000),
+            );
+            markerPredictedPosition.copy(marker.snapshotPosition).addScaledVector(marker.velocity, extrapolationSec);
+            marker.renderPosition.lerp(markerPredictedPosition, smoothAlpha);
+            marker.root.position.copy(marker.renderPosition);
+            marker.renderYawRad = lerpAngleRad(marker.renderYawRad, marker.targetYawRad, rotationAlpha);
+            marker.root.rotation.y = marker.renderYawRad;
+
+            const passesFilter = markerMatchesActiveFilters(marker);
+            if (!passesFilter) {
+              marker.root.visible = false;
+              playerRenderTelemetry.filteredOut += 1;
+              continue;
+            }
+            const isSelected = !!selectedSteamId && marker.steamId === selectedSteamId;
+            const distanceSq = camera.position.distanceToSquared(marker.renderPosition);
+            if (!isSelected && distanceSq > PLAYER_MARKER_MAX_RENDER_DISTANCE_SQ) {
+              marker.root.visible = false;
+              playerRenderTelemetry.culled += 1;
+              continue;
+            }
+            marker.root.visible = true;
+            playerRenderTelemetry.rendered += 1;
           }
 
           if (now - playerSyncIntervalMs >= 120) {
@@ -2524,7 +2869,6 @@ const ServerView3D: React.FC = () => {
             }
           }
 
-          const selectedSteamId = viewerSelectedSteamIdRef.current || '';
           if (selectedSteamId !== lastSelectionVisualKey) {
             lastSelectionVisualKey = selectedSteamId;
             updateMarkerSelectionVisuals();
@@ -2533,9 +2877,9 @@ const ServerView3D: React.FC = () => {
           if (viewerFollowSelectedRef.current && selectedSteamId) {
             const selectedMarker = playerMarkers.get(selectedSteamId);
             if (selectedMarker) {
-              followFocus.copy(selectedMarker.targetPosition);
+              followFocus.copy(selectedMarker.renderPosition);
               followFocus.y += 40;
-              followForward.set(Math.cos(selectedMarker.yawRad), 0, Math.sin(selectedMarker.yawRad));
+              followForward.set(Math.cos(selectedMarker.renderYawRad), 0, Math.sin(selectedMarker.renderYawRad));
               followDesiredCamera.copy(followFocus);
               followDesiredCamera.addScaledVector(followForward, -FOLLOW_CAMERA_DISTANCE);
               followDesiredCamera.y += FOLLOW_CAMERA_HEIGHT;
@@ -2674,7 +3018,9 @@ const ServerView3D: React.FC = () => {
       }
       chunkRecords.clear();
       clearPlayerMarkers();
-      playerGeometry.dispose();
+      playerBodyGeometry.dispose();
+      playerHeadGeometry.dispose();
+      playerDirGeometry.dispose();
       disposeTextureCache();
       disposeModelCache();
       try {
@@ -2776,6 +3122,9 @@ const ServerView3D: React.FC = () => {
             <p>textureCacheBytes(est): {Math.round(runtimeStats.textureCacheBytesEstimate / (1024 * 1024)).toLocaleString('pt-BR')} MB</p>
             <p>modelCache: {runtimeStats.modelCacheCount} modelos</p>
             <p>modelCacheBytes(est): {Math.round(runtimeStats.modelCacheBytesEstimate / (1024 * 1024)).toLocaleString('pt-BR')} MB</p>
+            <p>playersRendered: {runtimeStats.playersRendered}/{runtimeStats.playersTotalInFrame}</p>
+            <p>playersCulled: {runtimeStats.playersCulled} | filtered: {runtimeStats.playersFilteredOut}</p>
+            <p>playerUpdateRate: {runtimeStats.playerUpdateRateHz.toFixed(1)} Hz</p>
             <p>firstActiveLoadMs: {runtimeStats.firstActiveLoadMs ?? 'pendente'}</p>
           </div>
 
@@ -2786,14 +3135,67 @@ const ServerView3D: React.FC = () => {
                 {viewerStatusBadge.label}
               </span>
             </div>
-            <p>framePlayers: {viewerState?.playerCount ?? 0}</p>
+            <p>framePlayers: {viewerState?.playerCount ?? 0} | lista: {filteredViewerPlayers.length}</p>
             <p>frameAge: {Number.isFinite(viewerSnapshotAgeSeconds) ? `${viewerSnapshotAgeSeconds}s` : 'sem frame'}</p>
             <p>lastWsMsg: {viewerLastMessageAt ? new Date(viewerLastMessageAt).toLocaleTimeString('pt-BR') : 'n/a'}</p>
             <p>snapshotFresh: {hasFreshViewerSnapshot ? 'sim' : 'nao'}</p>
             {viewerWsError && <p className="text-red-300 break-words">wsError: {viewerWsError}</p>}
+
+            <div className="grid grid-cols-2 gap-2 pt-1 border-t border-zinc-800">
+              <label className="text-[10px] text-zinc-500 uppercase font-bold">
+                Estado
+                <select
+                  value={playerAliveFilter}
+                  onChange={(event) => setPlayerAliveFilter(event.target.value as 'all' | 'alive' | 'dead')}
+                  className="mt-1 w-full rounded border border-zinc-700 bg-zinc-900 px-2 py-1 text-[11px] text-zinc-100"
+                >
+                  <option value="all">Todos</option>
+                  <option value="alive">Vivos</option>
+                  <option value="dead">Mortos</option>
+                </select>
+              </label>
+              <label className="text-[10px] text-zinc-500 uppercase font-bold">
+                Time
+                <select
+                  value={playerTeamFilter}
+                  onChange={(event) => setPlayerTeamFilter(event.target.value)}
+                  className="mt-1 w-full rounded border border-zinc-700 bg-zinc-900 px-2 py-1 text-[11px] text-zinc-100"
+                >
+                  <option value="all">Todos</option>
+                  {viewerTeamOptions.map((team) => (
+                    <option key={team.value} value={team.value}>
+                      {team.label} ({team.count})
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-[10px] text-zinc-400">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={showPlayerLabels}
+                  onChange={(event) => setShowPlayerLabels(event.target.checked)}
+                  className="rounded border-zinc-700 bg-zinc-900"
+                />
+                Labels 3D
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={showPlayerHealthInLabel}
+                  onChange={(event) => setShowPlayerHealthInLabel(event.target.checked)}
+                  disabled={!showPlayerLabels}
+                  className="rounded border-zinc-700 bg-zinc-900 disabled:opacity-40"
+                />
+                HP no label
+              </label>
+            </div>
+
             <div className="max-h-[180px] overflow-y-auto space-y-2 pt-1 border-t border-zinc-800">
-              {!viewerPlayers.length && <p className="text-zinc-500">Sem players no frame.</p>}
-              {viewerPlayers.map((player) => (
+              {!filteredViewerPlayers.length && <p className="text-zinc-500">Sem players no filtro/frame.</p>}
+              {filteredViewerPlayers.map((player) => (
                 <button
                   key={player.steamId}
                   onClick={() => setViewerSelectedSteamId(player.steamId)}
