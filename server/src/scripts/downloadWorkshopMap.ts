@@ -631,7 +631,21 @@ const run = () => {
 
     if (exec.status !== 0) {
       report.status = 'failed';
-      report.error = `steamcmd_exit_nonzero:${String(exec.status)}`;
+      const lowerOutput = output.toLowerCase();
+      if (exec.status === 127 && process.platform === 'linux') {
+        const arch = process.arch;
+        const hint = arch === 'x64'
+          ? 'hint:missing_linux_32bit_runtime;install=dpkg --add-architecture i386 && apt-get update && apt-get install -y libc6-i386 lib32gcc-s1 libstdc++6:i386'
+          : `hint:unsupported_arch_for_steamcmd:${arch};use_x86_64_host_or_container`;
+        const detail = lowerOutput.includes('required file not found')
+          ? 'required_file_not_found'
+          : lowerOutput.includes('no such file or directory')
+            ? 'no_such_file_or_directory'
+            : 'runtime_missing';
+        report.error = `steamcmd_exit_nonzero:127|${detail}|${hint}`;
+      } else {
+        report.error = `steamcmd_exit_nonzero:${String(exec.status)}`;
+      }
       failureReport = report;
       throw new Error(report.error);
     }
