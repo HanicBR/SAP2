@@ -271,6 +271,7 @@ type ViewerDiagnostic = {
 };
 
 type ViewerWsStatus = 'idle' | 'connecting' | 'connected' | 'subscribed' | 'error';
+type ViewerRenderProfile = 'simple' | 'polished';
 
 const VIEWER_STATE_STALE_SECONDS = 8;
 const VIEWER_RECONNECT_BASE_MS = 1000;
@@ -581,6 +582,19 @@ const normalizeMapName = (raw: string | null): string => {
   return value.replace(/\.bsp$/i, '');
 };
 
+const VIEWER_RENDER_PROFILE_STORAGE_KEY = 'backstabber_viewer3d_render_profile';
+
+const readInitialRenderProfile = (): ViewerRenderProfile => {
+  if (typeof window === 'undefined') return 'simple';
+  try {
+    const raw = String(window.localStorage.getItem(VIEWER_RENDER_PROFILE_STORAGE_KEY) || '').trim().toLowerCase();
+    if (raw === 'polished') return 'polished';
+  } catch {
+    // ignore storage errors
+  }
+  return 'simple';
+};
+
 const ServerView3D: React.FC = () => {
   const { serverId } = useParams<{ serverId: string }>();
   const [searchParams] = useSearchParams();
@@ -617,6 +631,7 @@ const ServerView3D: React.FC = () => {
   });
   const [streamingLogs, setStreamingLogs] = useState<string[]>([]);
   const [diagnostics, setDiagnostics] = useState<ViewerDiagnostic[]>([]);
+  const [renderProfile, setRenderProfile] = useState<ViewerRenderProfile>(() => readInitialRenderProfile());
   const viewerStateRef = useRef<ServerViewerStateSnapshot | null>(null);
   const viewerSelectedSteamIdRef = useRef<string | null>(null);
   const viewerFollowSelectedRef = useRef<boolean>(false);
@@ -763,6 +778,14 @@ const ServerView3D: React.FC = () => {
   useEffect(() => {
     viewerStateRef.current = viewerState;
   }, [viewerState]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(VIEWER_RENDER_PROFILE_STORAGE_KEY, renderProfile);
+    } catch {
+      // ignore storage errors
+    }
+  }, [renderProfile]);
 
   useEffect(() => {
     viewerSelectedSteamIdRef.current = viewerSelectedSteamId;
@@ -967,6 +990,7 @@ const ServerView3D: React.FC = () => {
     const host = mountRef.current;
     if (!host) return undefined;
     setDiagnostics([]);
+    const polishEnabled = renderProfile === 'polished';
 
     let cancelled = false;
     let animationFrameId = 0;
@@ -989,29 +1013,38 @@ const ServerView3D: React.FC = () => {
     renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
     renderer.setSize(host.clientWidth, host.clientHeight);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.08;
-    renderer.setClearColor(0x09090b, 1);
+    renderer.toneMapping = polishEnabled ? THREE.ACESFilmicToneMapping : THREE.NoToneMapping;
+    renderer.toneMappingExposure = polishEnabled ? 1.08 : 1;
+    renderer.setClearColor(polishEnabled ? 0x0d1a2d : 0x09090b, 1);
     host.innerHTML = '';
     host.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x90a5c5, VIEWER_FOG_DENSITY);
+    scene.fog = polishEnabled ? new THREE.FogExp2(0x90a5c5, VIEWER_FOG_DENSITY) : null;
     const camera = new THREE.PerspectiveCamera(65, host.clientWidth / Math.max(1, host.clientHeight), 1, 250000);
+    let skyTexture: THREE.CanvasTexture | null = null;
+    let pmrem: THREE.PMREMGenerator | null = null;
+    let skyEnvironment: THREE.WebGLRenderTarget | null = null;
+    if (polishEnabled) {
+      skyTexture = createSkyGradientTexture();
+      scene.background = skyTexture;
+      pmrem = new THREE.PMREMGenerator(renderer);
+      pmrem.compileEquirectangularShader();
+      skyEnvironment = pmrem.fromEquirectangular(skyTexture);
+      scene.environment = skyEnvironment.texture;
 
-    const skyTexture = createSkyGradientTexture();
-    scene.background = skyTexture;
-    const pmrem = new THREE.PMREMGenerator(renderer);
-    pmrem.compileEquirectangularShader();
-    const skyEnvironment = pmrem.fromEquirectangular(skyTexture);
-    scene.environment = skyEnvironment.texture;
-
-    const ambient = new THREE.HemisphereLight(0xa2c3f6, 0x1b1b1b, 0.82);
-    const sun = new THREE.DirectionalLight(0xfff5dc, 1.05);
-    sun.position.set(-0.42, 1.28, 0.31).multiplyScalar(6200);
-    const fill = new THREE.DirectionalLight(0x8db5f3, 0.24);
-    fill.position.set(0.64, 0.46, -0.52).multiplyScalar(4200);
-    scene.add(ambient, sun, fill);
+      const ambient = new THREE.HemisphereLight(0xb3d0ff, 0x252525, 1.12);
+      const sun = new THREE.DirectionalLight(0xfff5dc, 1.2);
+      sun.position.set(-0.42, 1.28, 0.31).multiplyScalar(6200);
+      const fill = new THREE.DirectionalLight(0x8db5f3, 0.35);
+      fill.position.set(0.64, 0.46, -0.52).multiplyScalar(4200);
+      scene.add(ambient, sun, fill);
+    } else {
+      const ambient = new THREE.HemisphereLight(0x8aa2ff, 0x101010, 0.95);
+      const dir = new THREE.DirectionalLight(0xffffff, 0.65);
+      dir.position.set(0.5, 1.2, 0.3).multiplyScalar(5000);
+      scene.add(ambient, dir);
+    }
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
@@ -1025,27 +1058,30 @@ const ServerView3D: React.FC = () => {
       RIGHT: THREE.MOUSE.PAN,
     };
 
-    const composer = new EffectComposer(renderer);
-    const renderPass = new RenderPass(scene, camera);
-    composer.addPass(renderPass);
+    let composer: EffectComposer | null = null;
     let saoPass: SAOPass | null = null;
-    try {
-      saoPass = new SAOPass(scene, camera, false, true);
-      saoPass.enabled = VIEWER_POLISH_SAO_ENABLED;
-      saoPass.params.output = SAOPass.OUTPUT.Default;
-      saoPass.params.saoBias = 0.4;
-      saoPass.params.saoIntensity = 0.008;
-      saoPass.params.saoScale = 1.2;
-      saoPass.params.saoKernelRadius = 26;
-      saoPass.params.saoMinResolution = 0;
-      saoPass.params.saoBlur = true;
-      saoPass.params.saoBlurRadius = 8;
-      saoPass.params.saoBlurStdDev = 4;
-      saoPass.params.saoBlurDepthCutoff = 0.01;
-      composer.addPass(saoPass);
-    } catch (saoErr: any) {
-      appendLog(`sao indisponivel: ${String(saoErr?.message || saoErr)}`);
-      saoPass = null;
+    if (polishEnabled) {
+      composer = new EffectComposer(renderer);
+      const renderPass = new RenderPass(scene, camera);
+      composer.addPass(renderPass);
+      try {
+        saoPass = new SAOPass(scene, camera, false, true);
+        saoPass.enabled = VIEWER_POLISH_SAO_ENABLED;
+        saoPass.params.output = SAOPass.OUTPUT.Default;
+        saoPass.params.saoBias = 0.35;
+        saoPass.params.saoIntensity = 0.006;
+        saoPass.params.saoScale = 1.0;
+        saoPass.params.saoKernelRadius = 22;
+        saoPass.params.saoMinResolution = 0;
+        saoPass.params.saoBlur = true;
+        saoPass.params.saoBlurRadius = 7;
+        saoPass.params.saoBlurStdDev = 3;
+        saoPass.params.saoBlurDepthCutoff = 0.01;
+        composer.addPass(saoPass);
+      } catch (saoErr: any) {
+        appendLog(`sao indisponivel: ${String(saoErr?.message || saoErr)}`);
+        saoPass = null;
+      }
     }
 
     const chunkRoot = new THREE.Group();
@@ -1102,7 +1138,7 @@ const ServerView3D: React.FC = () => {
       usage?: string[];
       error?: string;
     }>();
-    const waterNormalTexture = createWaterNormalTexture();
+    const waterNormalTexture = polishEnabled ? createWaterNormalTexture() : null;
     let waterNormalPhase = 0;
     let materialRootsScanned: string[] = [];
     const modelDefs = new Map<string, {
@@ -1358,7 +1394,8 @@ const ServerView3D: React.FC = () => {
           searchedIn,
         );
       }
-      if (materialKind === 'sky') {
+
+      if (polishEnabled && materialKind === 'sky') {
         return new THREE.MeshBasicMaterial({
           color: new THREE.Color(0x8aa9d7),
           side: THREE.BackSide,
@@ -1367,33 +1404,45 @@ const ServerView3D: React.FC = () => {
         });
       }
 
-      const baseColor = shouldPlaceholder
-        ? new THREE.Color(materialKind === 'water' ? 0x2a647f : 0x6b7280)
-        : hashColor(materialId, materialKind === 'water' ? 0.86 : 0.92);
-      const material: THREE.MeshStandardMaterial = materialKind === 'water'
-        ? new THREE.MeshPhysicalMaterial({
-          color: baseColor,
-          metalness: 0.02,
-          roughness: 0.24,
-          transmission: 0.14,
-          thickness: 0.7,
-          opacity: 0.84,
-          transparent: true,
-          depthWrite: false,
-          side: THREE.DoubleSide,
-          envMapIntensity: 0.9,
-          normalMap: waterNormalTexture,
-          normalScale: new THREE.Vector2(0.35, 0.35),
-          clearcoat: 0.28,
-          clearcoatRoughness: 0.22,
-        })
-        : new THREE.MeshStandardMaterial({
-          color: baseColor,
+      const material: THREE.MeshStandardMaterial = (() => {
+        if (!polishEnabled) {
+          const baseColorSimple = shouldPlaceholder ? new THREE.Color(0x6b7280) : hashColor(materialId, 0.92);
+          return new THREE.MeshStandardMaterial({
+            color: baseColorSimple,
+            metalness: 0.04,
+            roughness: 0.94,
+            side: THREE.DoubleSide,
+          });
+        }
+        const baseColorPolish = shouldPlaceholder
+          ? new THREE.Color(materialKind === 'water' ? 0x2a647f : 0x6b7280)
+          : hashColor(materialId, materialKind === 'water' ? 0.86 : 0.92);
+        if (materialKind === 'water') {
+          return new THREE.MeshPhysicalMaterial({
+            color: baseColorPolish,
+            metalness: 0.02,
+            roughness: 0.24,
+            transmission: 0.14,
+            thickness: 0.7,
+            opacity: 0.84,
+            transparent: true,
+            depthWrite: false,
+            side: THREE.DoubleSide,
+            envMapIntensity: 0.9,
+            ...(waterNormalTexture ? { normalMap: waterNormalTexture } : {}),
+            normalScale: new THREE.Vector2(0.35, 0.35),
+            clearcoat: 0.28,
+            clearcoatRoughness: 0.22,
+          });
+        }
+        return new THREE.MeshStandardMaterial({
+          color: baseColorPolish,
           metalness: 0.04,
           roughness: 0.94,
           side: THREE.DoubleSide,
           envMapIntensity: 0.34,
         });
+      })();
 
       if (!shouldPlaceholder && primaryTextureUrl) {
         const candidateUrls: string[] = [];
@@ -1951,7 +2000,7 @@ const ServerView3D: React.FC = () => {
             const matId = String(meshData.materialId || meshData.material || '__missing_material');
             const matDef = materialDefs.get(matId);
             const matKind = inferMaterialKind(matId, matDef?.materialKind);
-            if (matKind === 'sky' || matKind === 'tool') {
+            if (polishEnabled && (matKind === 'sky' || matKind === 'tool')) {
               continue;
             }
             const rawPositions = Array.isArray(meshData.positions) ? meshData.positions : [];
@@ -1993,7 +2042,7 @@ const ServerView3D: React.FC = () => {
             const colorList: number[] = [];
             for (let i = 0; i < worldFaces.length; i += 1) {
               const face = worldFaces[i];
-              if (isSkyMaterial(face.material) || isToolMaterial(face.material)) {
+              if (polishEnabled && (isSkyMaterial(face.material) || isToolMaterial(face.material))) {
                 continue;
               }
               const point = sourceToThree(face.position[0], face.position[1], face.position[2]);
@@ -2447,7 +2496,7 @@ const ServerView3D: React.FC = () => {
           camera.aspect = width / height;
           camera.updateProjectionMatrix();
           renderer.setSize(width, height);
-          composer.setSize(width, height);
+          composer?.setSize(width, height);
         };
 
         const animate = () => {
@@ -2525,12 +2574,18 @@ const ServerView3D: React.FC = () => {
           }
 
           controls.update();
-          waterNormalPhase += dtSec;
-          waterNormalTexture.offset.set(
-            (waterNormalPhase * WATER_NORMAL_SCROLL_X) % 1,
-            (waterNormalPhase * WATER_NORMAL_SCROLL_Y) % 1,
-          );
-          composer.render();
+          if (polishEnabled && waterNormalTexture) {
+            waterNormalPhase += dtSec;
+            waterNormalTexture.offset.set(
+              (waterNormalPhase * WATER_NORMAL_SCROLL_X) % 1,
+              (waterNormalPhase * WATER_NORMAL_SCROLL_Y) % 1,
+            );
+          }
+          if (composer) {
+            composer.render();
+          } else {
+            renderer.render(scene, camera);
+          }
           if (now - streamIntervalMs >= 300) {
             streamIntervalMs = now;
             updateStreaming();
@@ -2563,7 +2618,11 @@ const ServerView3D: React.FC = () => {
 
         setStatus(`Viewer online | map=${loadedManifest.map.name} | chunks=${entries.length}`);
         appendLog(`manifest carregado: ${loadedManifest.map.name}`);
-        appendLog(`visual polish: sky=on water=on sao=${saoPass?.enabled ? 'on' : 'off'} fog=on`);
+        appendLog(
+          polishEnabled
+            ? `visual profile=polished sky=on water=on sao=${saoPass?.enabled ? 'on' : 'off'} fog=on`
+            : 'visual profile=simple (legacy)',
+        );
         appendLog(
           `chunk_count=${entries.length} active=${activeRadius * 2 + 1}x${activeRadius * 2 + 1} render=${renderRadius * 2 + 1}x${renderRadius * 2 + 1} prefetch=${prefetchRadius * 2 + 1}x${prefetchRadius * 2 + 1}`,
         );
@@ -2623,15 +2682,15 @@ const ServerView3D: React.FC = () => {
       } catch {
         // no-op
       }
-      waterNormalTexture.dispose();
-      skyTexture.dispose();
-      skyEnvironment.dispose();
-      pmrem.dispose();
-      composer.dispose();
+      waterNormalTexture?.dispose();
+      skyTexture?.dispose();
+      skyEnvironment?.dispose();
+      pmrem?.dispose();
+      composer?.dispose();
       renderer.dispose();
       host.innerHTML = '';
     };
-  }, [manifestUrl]);
+  }, [manifestUrl, renderProfile]);
 
   return (
     <div className="space-y-4 pb-8">
@@ -2650,6 +2709,30 @@ const ServerView3D: React.FC = () => {
           <div>{status}</div>
           {manifest && <div>manifest v{manifest.version} | chunkSize={manifest.map.chunkSize}</div>}
           <div>viewerState: {viewerStatusBadge.label}</div>
+          <div className="mt-2 flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setRenderProfile('simple')}
+              className={`px-2 py-1 rounded border text-[10px] font-bold uppercase transition-colors ${
+                renderProfile === 'simple'
+                  ? 'border-emerald-700 bg-emerald-900/30 text-emerald-300'
+                  : 'border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+              }`}
+            >
+              Simples
+            </button>
+            <button
+              type="button"
+              onClick={() => setRenderProfile('polished')}
+              className={`px-2 py-1 rounded border text-[10px] font-bold uppercase transition-colors ${
+                renderProfile === 'polished'
+                  ? 'border-cyan-700 bg-cyan-900/30 text-cyan-300'
+                  : 'border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+              }`}
+            >
+              Polish
+            </button>
+          </div>
         </div>
       </div>
 
