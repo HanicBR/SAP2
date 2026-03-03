@@ -25,6 +25,10 @@ type WorkshopMapConfigFile = {
   successCooldownMs?: number;
   downloadTimeoutMs?: number;
   processTimeoutMs?: number;
+  workerConcurrency?: number;
+  queueStorePath?: string;
+  terminalRetentionDays?: number;
+  maxStoredJobs?: number;
 };
 
 type WorkshopMapConfigResolved = {
@@ -42,22 +46,47 @@ type WorkshopMapConfigResolved = {
   successCooldownMs: number;
   downloadTimeoutMs: number;
   processTimeoutMs: number;
+  workerConcurrency: number;
+  queueStorePath: string;
+  terminalRetentionDays: number;
+  maxStoredJobs: number;
+  rootDir: string;
   runtimeCachePath: string;
   reportsDir: string;
   configPath: string;
 };
 
-type DownloadJob = {
+type PersistedJobStatus = 'queued' | 'running' | 'retry_wait' | 'success' | 'failed' | 'dropped';
+
+type PersistedWorkshopJob = {
+  id: string;
   key: string;
   appId: number;
   workshopId: string;
   mapName: string;
   serverId: string;
   source: TriggerSource;
-  attempt: number;
-  nextRunAtMs: number;
-  enqueuedAtMs: number;
+  resolutionSource: string;
   refresh: boolean;
+  maxRetries: number;
+  retryCount: number;
+  runCount: number;
+  status: PersistedJobStatus;
+  createdAt: string;
+  updatedAt: string;
+  enqueuedAtMs: number;
+  nextRunAtMs: number;
+  lastStartedAt?: string;
+  lastFinishedAt?: string;
+  lastError?: string;
+  lastExitCode?: number;
+  lastSignal?: string;
+  downloadTimedOut?: boolean;
+  processTimedOut?: boolean;
+  outputTail?: string[];
+  downloadReportPath: string;
+  processReportPath: string;
+  extractReportPath: string;
 };
 
 type JobRunResult = {
@@ -78,6 +107,80 @@ type MapHint = {
   workshopId?: string;
 };
 
+type QueueStoreFile = {
+  version: 1;
+  updatedAt: string;
+  jobs: PersistedWorkshopJob[];
+};
+
+type WorkshopQueueSnapshot = {
+  now: string;
+  runtimeEnabled: boolean;
+  initialized: boolean;
+  config: {
+    enabled: boolean;
+    autoProcessEnabled: boolean;
+    appId: number;
+    workerConcurrency: number;
+    maxQueueSize: number;
+    maxRetries: number;
+    retryBaseMs: number;
+    retryMaxMs: number;
+    downloadTimeoutMs: number;
+    processTimeoutMs: number;
+    successCooldownMs: number;
+    queueStorePath: string;
+    reportsDir: string;
+    runtimeCachePath: string;
+    configPath: string;
+  };
+  worker: {
+    activeJobs: number;
+    wakeScheduled: boolean;
+  };
+  counts: {
+    total: number;
+    queued: number;
+    running: number;
+    retry_wait: number;
+    success: number;
+    failed: number;
+    dropped: number;
+    pending: number;
+  };
+  jobs: Array<{
+    id: string;
+    key: string;
+    status: PersistedJobStatus;
+    appId: number;
+    workshopId: string;
+    mapName: string;
+    serverId: string;
+    source: TriggerSource;
+    resolutionSource: string;
+    refresh: boolean;
+    retryCount: number;
+    maxRetries: number;
+    runCount: number;
+    enqueuedAt: string;
+    updatedAt: string;
+    nextRunAt: string;
+    nextRunInMs: number;
+    lastStartedAt?: string;
+    lastFinishedAt?: string;
+    lastError?: string;
+    lastExitCode?: number;
+    lastSignal?: string;
+    downloadTimedOut?: boolean;
+    processTimedOut?: boolean;
+    reports: {
+      download: string;
+      process: string;
+      extract: string;
+    };
+  }>;
+};
+
 const WORKSPACE_ROOT = path.resolve(__dirname, '..', '..', '..');
 const DEFAULT_CONFIG_PATH = path.resolve(WORKSPACE_ROOT, 'server', 'config', 'workshop-maps.json');
 const DEFAULT_RUNTIME_CACHE_PATH = path.resolve(WORKSPACE_ROOT, 'server', 'config', 'workshop-maps.runtime.json');
@@ -94,16 +197,19 @@ const DEFAULTS = {
   successCooldownMs: 10 * 60 * 1000,
   downloadTimeoutMs: 30 * 60 * 1000,
   processTimeoutMs: 180 * 60 * 1000,
+  workerConcurrency: 1,
+  terminalRetentionDays: 14,
+  maxStoredJobs: 2000,
 };
+
+const TERMINAL_STATUS = new Set<PersistedJobStatus>(['success', 'failed', 'dropped']);
+const ACTIVE_STATUS = new Set<PersistedJobStatus>(['queued', 'running', 'retry_wait']);
 
 let started = false;
 let runtimeEnabled = true;
-let queue: DownloadJob[] = [];
-let inflightKeys = new Set<string>();
 let serverLastMap = new Map<string, string>();
 let warnedMissingMap = new Set<string>();
 let recentSuccessByKey = new Map<string, number>();
-let processing = false;
 let wakeTimer: NodeJS.Timeout | null = null;
 let cachedConfig: WorkshopMapConfigResolved | null = null;
 let cachedConfigMtimeMs = -1;
@@ -111,6 +217,10 @@ let runtimeMapCache = new Map<string, string>();
 let runtimeMapCacheLoaded = false;
 let discoveredFromReports = new Map<string, string>();
 let discoveredFromReportsLoadedAtMs = 0;
+let queueStoreLoaded = false;
+let queueStorePathLoaded = '';
+let jobsById = new Map<string, PersistedWorkshopJob>();
+let activeJobIds = new Set<string>();
 
 const toInt = (value: unknown, fallback: number): number => {
   const parsed = Number(value);
@@ -206,6 +316,18 @@ const parseSourceioMode = (
   return fallback;
 };
 
+const nowIso = () => new Date().toISOString();
+
+const getRootDir = (): string =>
+  path.resolve(
+    String(
+      process.env.WORKSHOP_ROOT
+        || (process.platform === 'linux'
+          ? '/opt/backstabber/workshop'
+          : path.join(WORKSPACE_ROOT, 'sandbox', 'workshop')),
+    ),
+  );
+
 const getConfigPath = (): string =>
   path.resolve(String(process.env.WORKSHOP_MAPS_FILE || DEFAULT_CONFIG_PATH));
 
@@ -213,20 +335,24 @@ const getRuntimeCachePath = (): string =>
   path.resolve(String(process.env.WORKSHOP_RUNTIME_MAPS_FILE || DEFAULT_RUNTIME_CACHE_PATH));
 
 const getReportsDir = (): string => {
-  const rootDir = path.resolve(
-    String(process.env.WORKSHOP_ROOT || (process.platform === 'linux' ? '/opt/backstabber/workshop' : path.join(WORKSPACE_ROOT, 'sandbox', 'workshop'))),
-  );
+  const rootDir = getRootDir();
   return path.resolve(String(process.env.WORKSHOP_REPORTS_DIR || path.join(rootDir, 'reports')));
+};
+
+const writeJsonAtomic = (targetPath: string, value: unknown) => {
+  fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+  const tmpPath = `${targetPath}.${process.pid}.${Date.now()}.tmp`;
+  fs.writeFileSync(tmpPath, JSON.stringify(value, null, 2) + '\n', 'utf8');
+  fs.renameSync(tmpPath, targetPath);
 };
 
 const writeRuntimeCache = (targetPath: string) => {
   const payload: RuntimeMapCacheFile = {
     version: 1,
-    updatedAt: new Date().toISOString(),
+    updatedAt: nowIso(),
     mappings: Object.fromEntries(Array.from(runtimeMapCache.entries()).sort((a, b) => a[0].localeCompare(b[0]))),
   };
-  fs.mkdirSync(path.dirname(targetPath), { recursive: true });
-  fs.writeFileSync(targetPath, JSON.stringify(payload, null, 2) + '\n', 'utf8');
+  writeJsonAtomic(targetPath, payload);
 };
 
 const loadRuntimeCache = (targetPath: string) => {
@@ -321,6 +447,7 @@ const discoverFromProcessReports = (config: WorkshopMapConfigResolved): Map<stri
 
 const readConfig = (): WorkshopMapConfigResolved => {
   const configPath = getConfigPath();
+  const rootDir = getRootDir();
   const runtimeCachePath = getRuntimeCachePath();
   const reportsDir = getReportsDir();
   let fileMtimeMs = -1;
@@ -349,6 +476,9 @@ const readConfig = (): WorkshopMapConfigResolved => {
 
   const maps = parseMapTable(fileData.maps);
   const aliases = parseAliasTable(fileData.aliases);
+  const queueStorePath = path.resolve(
+    String(process.env.WORKSHOP_QUEUE_STORE_FILE || fileData.queueStorePath || path.join(rootDir, 'queue', 'workshop-jobs.json')),
+  );
   const resolved: WorkshopMapConfigResolved = {
     enabled: parseBool(process.env.WORKSHOP_AUTO_DOWNLOAD_ENABLED, parseBool(fileData.enabled, DEFAULTS.enabled)),
     autoProcessEnabled: parseBool(
@@ -382,6 +512,26 @@ const readConfig = (): WorkshopMapConfigResolved => {
       30_000,
       toPositiveInt(process.env.WORKSHOP_PROCESS_TIMEOUT_MS || fileData.processTimeoutMs, DEFAULTS.processTimeoutMs),
     ),
+    workerConcurrency: Math.max(
+      1,
+      Math.min(8, toPositiveInt(process.env.WORKSHOP_WORKER_CONCURRENCY || fileData.workerConcurrency, DEFAULTS.workerConcurrency)),
+    ),
+    queueStorePath,
+    terminalRetentionDays: Math.max(
+      1,
+      Math.min(
+        90,
+        toPositiveInt(
+          process.env.WORKSHOP_TERMINAL_RETENTION_DAYS || fileData.terminalRetentionDays,
+          DEFAULTS.terminalRetentionDays,
+        ),
+      ),
+    ),
+    maxStoredJobs: Math.max(
+      100,
+      Math.min(100_000, toPositiveInt(process.env.WORKSHOP_MAX_STORED_JOBS || fileData.maxStoredJobs, DEFAULTS.maxStoredJobs)),
+    ),
+    rootDir,
     runtimeCachePath,
     reportsDir,
     configPath,
@@ -507,7 +657,7 @@ const runCommandWithTimeout = (
     });
   });
 
-const runDownloadProcess = (job: DownloadJob, config: WorkshopMapConfigResolved): Promise<JobRunResult> => {
+const runDownloadProcess = (job: PersistedWorkshopJob, config: WorkshopMapConfigResolved): Promise<JobRunResult> => {
   const runner = resolveTsNodeRunner();
   const args = runner.argsPrefix.concat([
     path.join('server', 'src', 'scripts', 'downloadWorkshopMap.ts'),
@@ -521,7 +671,7 @@ const runDownloadProcess = (job: DownloadJob, config: WorkshopMapConfigResolved)
 };
 
 const runProcessMapPipeline = (
-  job: DownloadJob,
+  job: PersistedWorkshopJob,
   config: WorkshopMapConfigResolved,
 ): Promise<JobRunResult> => {
   const runner = resolveTsNodeRunner();
@@ -541,13 +691,239 @@ const runProcessMapPipeline = (
   return runCommandWithTimeout(runner.command, args, config.processTimeoutMs);
 };
 
+const parseStatus = (value: unknown): PersistedJobStatus | null => {
+  const raw = String(value || '').trim().toLowerCase();
+  if (raw === 'queued') return 'queued';
+  if (raw === 'running') return 'running';
+  if (raw === 'retry_wait') return 'retry_wait';
+  if (raw === 'success') return 'success';
+  if (raw === 'failed') return 'failed';
+  if (raw === 'dropped') return 'dropped';
+  return null;
+};
+
+const normalizeStoredJob = (raw: unknown): PersistedWorkshopJob | null => {
+  if (!raw || typeof raw !== 'object') return null;
+  const src = raw as Record<string, unknown>;
+
+  const id = String(src.id || '').trim();
+  const appId = toPositiveInt(src.appId, 0);
+  const workshopId = String(src.workshopId || '').trim();
+  const mapName = sanitizeMapName(String(src.mapName || ''));
+  const keyRaw = String(src.key || '').trim();
+  const status = parseStatus(src.status);
+
+  if (!id || !appId || !isWorkshopId(workshopId) || !mapName || !status) return null;
+
+  const key = keyRaw || `${appId}:${workshopId}:${mapName}`;
+  const createdAt = String(src.createdAt || '').trim() || nowIso();
+  const updatedAt = String(src.updatedAt || '').trim() || createdAt;
+  const enqueuedAtMs = Math.max(0, toInt(src.enqueuedAtMs, Date.now()));
+  const nextRunAtMs = Math.max(0, toInt(src.nextRunAtMs, enqueuedAtMs));
+  const retryCount = Math.max(0, Math.min(1000, toInt(src.retryCount, 0)));
+  const runCount = Math.max(0, Math.min(1000, toInt(src.runCount, 0)));
+  const maxRetries = Math.max(0, Math.min(10, toInt(src.maxRetries, DEFAULTS.maxRetries)));
+
+  return {
+    id,
+    key,
+    appId,
+    workshopId,
+    mapName,
+    serverId: String(src.serverId || '').trim() || 'unknown',
+    source: (String(src.source || '').trim() as TriggerSource) || 'manual',
+    resolutionSource: String(src.resolutionSource || '').trim() || 'unknown',
+    refresh: parseBool(src.refresh, false),
+    maxRetries,
+    retryCount,
+    runCount,
+    status,
+    createdAt,
+    updatedAt,
+    enqueuedAtMs,
+    nextRunAtMs,
+    ...(String(src.lastStartedAt || '').trim() ? { lastStartedAt: String(src.lastStartedAt) } : {}),
+    ...(String(src.lastFinishedAt || '').trim() ? { lastFinishedAt: String(src.lastFinishedAt) } : {}),
+    ...(String(src.lastError || '').trim() ? { lastError: String(src.lastError) } : {}),
+    ...(Number.isFinite(Number(src.lastExitCode)) ? { lastExitCode: Number(src.lastExitCode) } : {}),
+    ...(String(src.lastSignal || '').trim() ? { lastSignal: String(src.lastSignal) } : {}),
+    ...(typeof src.downloadTimedOut === 'boolean' ? { downloadTimedOut: src.downloadTimedOut } : {}),
+    ...(typeof src.processTimedOut === 'boolean' ? { processTimedOut: src.processTimedOut } : {}),
+    ...(Array.isArray(src.outputTail)
+      ? { outputTail: (src.outputTail as unknown[]).map((item) => String(item || '')).slice(-120) }
+      : {}),
+    downloadReportPath: String(src.downloadReportPath || '').trim() || '',
+    processReportPath: String(src.processReportPath || '').trim() || '',
+    extractReportPath: String(src.extractReportPath || '').trim() || '',
+  };
+};
+
+const serializeStore = (): QueueStoreFile => ({
+  version: 1,
+  updatedAt: nowIso(),
+  jobs: Array.from(jobsById.values()).sort((a, b) => a.enqueuedAtMs - b.enqueuedAtMs || a.id.localeCompare(b.id)),
+});
+
+const pruneStoredJobs = (config: WorkshopMapConfigResolved) => {
+  const retentionMs = config.terminalRetentionDays * 24 * 60 * 60 * 1000;
+  const now = Date.now();
+
+  for (const [id, job] of jobsById.entries()) {
+    if (!TERMINAL_STATUS.has(job.status)) continue;
+    const finishedTs = Date.parse(job.lastFinishedAt || job.updatedAt || job.createdAt);
+    const ageMs = Number.isFinite(finishedTs) ? now - finishedTs : Number.POSITIVE_INFINITY;
+    if (ageMs > retentionMs) {
+      jobsById.delete(id);
+    }
+  }
+
+  if (jobsById.size <= config.maxStoredJobs) return;
+
+  const terminal = Array.from(jobsById.values())
+    .filter((job) => TERMINAL_STATUS.has(job.status))
+    .sort((a, b) => {
+      const at = Date.parse(a.lastFinishedAt || a.updatedAt || a.createdAt);
+      const bt = Date.parse(b.lastFinishedAt || b.updatedAt || b.createdAt);
+      return at - bt || a.enqueuedAtMs - b.enqueuedAtMs;
+    });
+
+  for (const job of terminal) {
+    if (jobsById.size <= config.maxStoredJobs) break;
+    jobsById.delete(job.id);
+  }
+};
+
+const saveQueueStore = (config: WorkshopMapConfigResolved) => {
+  pruneStoredJobs(config);
+  try {
+    writeJsonAtomic(config.queueStorePath, serializeStore());
+  } catch (error: any) {
+    console.error('[workshop-auto] queue_store_save_failed', {
+      queueStorePath: config.queueStorePath,
+      error: String(error?.message || error),
+    });
+  }
+};
+
+const loadQueueStoreIfNeeded = (config: WorkshopMapConfigResolved) => {
+  if (queueStoreLoaded && queueStorePathLoaded === config.queueStorePath) return;
+
+  queueStoreLoaded = true;
+  queueStorePathLoaded = config.queueStorePath;
+  jobsById = new Map<string, PersistedWorkshopJob>();
+  activeJobIds.clear();
+  recentSuccessByKey.clear();
+
+  if (!fs.existsSync(config.queueStorePath)) {
+    saveQueueStore(config);
+    return;
+  }
+
+  let parsed: QueueStoreFile | null = null;
+  try {
+    parsed = JSON.parse(fs.readFileSync(config.queueStorePath, 'utf8')) as QueueStoreFile;
+  } catch (error: any) {
+    console.error('[workshop-auto] queue_store_load_failed', {
+      queueStorePath: config.queueStorePath,
+      error: String(error?.message || error),
+    });
+    parsed = null;
+  }
+
+  const jobs = Array.isArray(parsed?.jobs) ? parsed?.jobs : [];
+  const now = Date.now();
+  for (const rawJob of jobs) {
+    const job = normalizeStoredJob(rawJob);
+    if (!job) continue;
+
+    if (job.status === 'running') {
+      job.status = 'retry_wait';
+      job.nextRunAtMs = now + 1_000;
+      job.retryCount = Math.max(0, job.retryCount + 1);
+      job.lastError = 'recovered_after_process_restart';
+      job.updatedAt = nowIso();
+    }
+
+    if (!job.downloadReportPath) {
+      job.downloadReportPath = path.join(config.reportsDir, `${job.workshopId}.download.json`);
+    }
+    if (!job.processReportPath) {
+      job.processReportPath = path.join(config.reportsDir, `${job.workshopId}.${job.mapName}.process.json`);
+    }
+    if (!job.extractReportPath) {
+      job.extractReportPath = path.join(config.reportsDir, `${job.workshopId}.${job.mapName}.extract.json`);
+    }
+
+    if (job.status === 'success') {
+      const lastTs = Date.parse(job.lastFinishedAt || job.updatedAt || job.createdAt);
+      if (Number.isFinite(lastTs)) {
+        recentSuccessByKey.set(job.key, lastTs);
+      }
+    }
+
+    jobsById.set(job.id, job);
+  }
+
+  saveQueueStore(config);
+};
+
+const findActiveJobByKey = (key: string): PersistedWorkshopJob | undefined => {
+  for (const job of jobsById.values()) {
+    if (job.key !== key) continue;
+    if (!ACTIVE_STATUS.has(job.status)) continue;
+    return job;
+  }
+  return undefined;
+};
+
+const countPendingJobs = (): number => {
+  let total = 0;
+  for (const job of jobsById.values()) {
+    if (ACTIVE_STATUS.has(job.status)) total += 1;
+  }
+  return total;
+};
+
+const dropOldestPendingJob = (config: WorkshopMapConfigResolved): PersistedWorkshopJob | null => {
+  const candidates = Array.from(jobsById.values())
+    .filter((job) => job.status === 'queued' || job.status === 'retry_wait')
+    .sort((a, b) => a.enqueuedAtMs - b.enqueuedAtMs || a.id.localeCompare(b.id));
+  const oldest = candidates[0];
+  if (!oldest) return null;
+
+  oldest.status = 'dropped';
+  oldest.updatedAt = nowIso();
+  oldest.lastFinishedAt = nowIso();
+  oldest.lastError = `dropped_by_backpressure:maxQueueSize=${config.maxQueueSize}`;
+  jobsById.set(oldest.id, oldest);
+  saveQueueStore(config);
+  return oldest;
+};
+
+const pickReadyJobs = (): PersistedWorkshopJob[] => {
+  const now = Date.now();
+  return Array.from(jobsById.values())
+    .filter((job) => {
+      if (job.status !== 'queued' && job.status !== 'retry_wait') return false;
+      return job.nextRunAtMs <= now;
+    })
+    .sort((a, b) => a.nextRunAtMs - b.nextRunAtMs || a.enqueuedAtMs - b.enqueuedAtMs || a.id.localeCompare(b.id));
+};
+
 const scheduleWakeTimer = () => {
   if (wakeTimer) {
     clearTimeout(wakeTimer);
     wakeTimer = null;
   }
-  if (!queue.length) return;
-  const nextAt = queue.reduce((min, job) => Math.min(min, job.nextRunAtMs), Number.POSITIVE_INFINITY);
+
+  if (!started || !runtimeEnabled) return;
+
+  let nextAt = Number.POSITIVE_INFINITY;
+  for (const job of jobsById.values()) {
+    if (job.status !== 'queued' && job.status !== 'retry_wait') continue;
+    nextAt = Math.min(nextAt, job.nextRunAtMs);
+  }
+
   if (!Number.isFinite(nextAt)) return;
   const delay = Math.max(50, nextAt - Date.now());
   wakeTimer = setTimeout(() => {
@@ -557,166 +933,304 @@ const scheduleWakeTimer = () => {
   wakeTimer.unref?.();
 };
 
-const dequeueReadyJob = (): DownloadJob | null => {
-  const now = Date.now();
-  let bestIdx = -1;
-  let bestTime = Number.POSITIVE_INFINITY;
-  for (let i = 0; i < queue.length; i += 1) {
-    const candidate = queue[i];
-    if (!candidate) continue;
-    if (candidate.nextRunAtMs <= now && candidate.nextRunAtMs < bestTime) {
-      bestIdx = i;
-      bestTime = candidate.nextRunAtMs;
-    }
+const updateJob = (job: PersistedWorkshopJob) => {
+  job.updatedAt = nowIso();
+  jobsById.set(job.id, job);
+};
+
+const processOneJob = async (jobId: string, config: WorkshopMapConfigResolved) => {
+  const job = jobsById.get(jobId);
+  if (!job) {
+    activeJobIds.delete(jobId);
+    return;
   }
-  if (bestIdx < 0) return null;
-  const [job] = queue.splice(bestIdx, 1);
-  return job || null;
+
+  console.log('[workshop-auto] worker_job_start', JSON.stringify({
+    id: job.id,
+    key: job.key,
+    map: job.mapName,
+    workshopId: job.workshopId,
+    retryCount: job.retryCount,
+    maxRetries: job.maxRetries,
+    runCount: job.runCount,
+    source: job.source,
+    serverId: job.serverId,
+  }));
+
+  let downloadResult: JobRunResult | null = null;
+  let processResult: JobRunResult | null = null;
+  let downloadError: unknown = null;
+  let processError: unknown = null;
+
+  try {
+    try {
+      downloadResult = await runDownloadProcess(job, config);
+    } catch (error) {
+      downloadError = error;
+    }
+
+    if (!downloadError && downloadResult && downloadResult.exitCode === 0 && config.autoProcessEnabled) {
+      try {
+        processResult = await runProcessMapPipeline(job, config);
+      } catch (error) {
+        processError = error;
+      }
+    }
+
+    const failed =
+      downloadError !== null
+      || !downloadResult
+      || downloadResult.exitCode !== 0
+      || processError !== null
+      || (config.autoProcessEnabled && (!processResult || processResult.exitCode !== 0));
+
+    if (!failed) {
+      job.status = 'success';
+      job.lastFinishedAt = nowIso();
+      delete job.lastError;
+      job.lastExitCode = processResult ? processResult.exitCode : downloadResult!.exitCode;
+      const successSignal = processResult?.signal || downloadResult!.signal;
+      if (successSignal) job.lastSignal = successSignal;
+      else delete job.lastSignal;
+      if (typeof downloadResult?.timedOut === 'boolean') job.downloadTimedOut = downloadResult.timedOut;
+      else delete job.downloadTimedOut;
+      if (typeof processResult?.timedOut === 'boolean') job.processTimedOut = processResult.timedOut;
+      else delete job.processTimedOut;
+      job.outputTail = (processResult?.outputTail || downloadResult?.outputTail || []).slice(-20);
+      recentSuccessByKey.set(job.key, Date.now());
+      rememberRuntimeMapping(job.mapName, job.workshopId, 'successful_job', config.runtimeCachePath);
+      updateJob(job);
+      saveQueueStore(config);
+
+      console.log('[workshop-auto] worker_job_success', JSON.stringify({
+        id: job.id,
+        key: job.key,
+        map: job.mapName,
+        workshopId: job.workshopId,
+      }));
+      return;
+    }
+
+    const reason = processError
+      ? `process_error:${String((processError as any)?.message || processError)}`
+      : downloadError
+        ? `download_error:${String((downloadError as any)?.message || downloadError)}`
+        : config.autoProcessEnabled
+          ? `process_${processResult?.timedOut ? 'timeout' : 'exit'}_${processResult?.exitCode ?? 'unknown'}${processResult?.signal ? `_signal_${processResult.signal}` : ''}`
+          : `download_${downloadResult?.timedOut ? 'timeout' : 'exit'}_${downloadResult?.exitCode ?? 'unknown'}${downloadResult?.signal ? `_signal_${downloadResult.signal}` : ''}`;
+
+    const nextRetryCount = job.retryCount + 1;
+    const canRetry = nextRetryCount <= job.maxRetries;
+
+    job.retryCount = nextRetryCount;
+    job.lastError = reason;
+    const failedExitCode = processResult?.exitCode ?? downloadResult?.exitCode;
+    if (typeof failedExitCode === 'number') job.lastExitCode = failedExitCode;
+    else delete job.lastExitCode;
+    const failedSignal = processResult?.signal || downloadResult?.signal;
+    if (failedSignal) job.lastSignal = failedSignal;
+    else delete job.lastSignal;
+    if (typeof downloadResult?.timedOut === 'boolean') job.downloadTimedOut = downloadResult.timedOut;
+    else delete job.downloadTimedOut;
+    if (typeof processResult?.timedOut === 'boolean') job.processTimedOut = processResult.timedOut;
+    else delete job.processTimedOut;
+    job.outputTail = [
+      ...(downloadResult?.outputTail || []),
+      ...(processResult?.outputTail || []),
+    ].slice(-20);
+
+    if (canRetry) {
+      const delayMs = computeRetryDelayMs(nextRetryCount, config);
+      job.status = 'retry_wait';
+      job.nextRunAtMs = Date.now() + delayMs;
+      updateJob(job);
+      saveQueueStore(config);
+
+      console.warn('[workshop-auto] worker_job_retry_scheduled', JSON.stringify({
+        id: job.id,
+        key: job.key,
+        map: job.mapName,
+        workshopId: job.workshopId,
+        retryCount: job.retryCount,
+        maxRetries: job.maxRetries,
+        nextInMs: delayMs,
+        reason,
+        ...(downloadResult ? { downloadTimedOut: downloadResult.timedOut } : {}),
+        ...(processResult ? { processTimedOut: processResult.timedOut } : {}),
+      }));
+      return;
+    }
+
+    job.status = 'failed';
+    job.lastFinishedAt = nowIso();
+    updateJob(job);
+    saveQueueStore(config);
+
+    console.error('[workshop-auto] worker_job_failed', JSON.stringify({
+      id: job.id,
+      key: job.key,
+      map: job.mapName,
+      workshopId: job.workshopId,
+      retryCount: job.retryCount,
+      maxRetries: job.maxRetries,
+      reason,
+      ...(downloadResult ? { downloadTimedOut: downloadResult.timedOut } : {}),
+      ...(processResult ? { processTimedOut: processResult.timedOut } : {}),
+    }));
+  } finally {
+    activeJobIds.delete(jobId);
+    scheduleWakeTimer();
+    void processQueue();
+  }
 };
 
 const processQueue = async () => {
   if (!started || !runtimeEnabled) return;
-  if (processing) return;
-  processing = true;
-  try {
-    while (true) {
-      const job = dequeueReadyJob();
-      if (!job) break;
 
-      const config = readConfig();
-      const beginTs = new Date().toISOString();
-      console.log('[workshop-auto] download_start', JSON.stringify({
-        key: job.key,
-        map: job.mapName,
-        workshopId: job.workshopId,
-        attempt: job.attempt,
-        source: job.source,
-        serverId: job.serverId,
-        startedAt: beginTs,
-      }));
+  const config = readConfig();
+  loadQueueStoreIfNeeded(config);
 
-      let result: JobRunResult | null = null;
-      let runError: unknown = null;
-      try {
-        result = await runDownloadProcess(job, config);
-      } catch (error) {
-        runError = error;
-      }
-      let processResult: JobRunResult | null = null;
-      let processError: unknown = null;
-      if (!runError && result && result.exitCode === 0 && config.autoProcessEnabled) {
-        console.log('[workshop-auto] process_start', JSON.stringify({
-          key: job.key,
-          map: job.mapName,
-          workshopId: job.workshopId,
-          attempt: job.attempt,
-          assetResolutionMode: config.assetResolutionMode,
-          sourceioMode: config.sourceioMode,
-        }));
-        try {
-          processResult = await runProcessMapPipeline(job, config);
-        } catch (error) {
-          processError = error;
-        }
-      }
-
-      const failed =
-        runError !== null
-        || !result
-        || result.exitCode !== 0
-        || processError !== null
-        || (config.autoProcessEnabled && (!processResult || processResult.exitCode !== 0));
-      if (!failed) {
-        const okResult = result as JobRunResult;
-        recentSuccessByKey.set(job.key, Date.now());
-        rememberRuntimeMapping(job.mapName, job.workshopId, 'successful_job', config.runtimeCachePath);
-        inflightKeys.delete(job.key);
-        console.log('[workshop-auto] download_ok', JSON.stringify({
-          key: job.key,
-          map: job.mapName,
-          workshopId: job.workshopId,
-          attempt: job.attempt,
-          exitCode: okResult.exitCode,
-          logTail: okResult.outputTail.slice(-5),
-        }));
-        if (config.autoProcessEnabled && processResult) {
-          console.log('[workshop-auto] process_ok', JSON.stringify({
-            key: job.key,
-            map: job.mapName,
-            workshopId: job.workshopId,
-            attempt: job.attempt,
-            exitCode: processResult.exitCode,
-            logTail: processResult.outputTail.slice(-5),
-          }));
-        }
-        continue;
-      }
-
-      const attempt = job.attempt + 1;
-      const canRetry = attempt <= config.maxRetries;
-      const errMsg = processError
-        ? `process_error:${String((processError as any)?.message || processError)}`
-        : runError
-          ? `download_error:${String((runError as any)?.message || runError)}`
-          : config.autoProcessEnabled
-            ? `process_${processResult?.timedOut ? 'timeout' : 'exit'}_${processResult?.exitCode ?? 'unknown'}${processResult?.signal ? `_signal_${processResult.signal}` : ''}`
-            : `download_${result?.timedOut ? 'timeout' : 'exit'}_${result?.exitCode ?? 'unknown'}${result?.signal ? `_signal_${result.signal}` : ''}`;
-
-      if (canRetry) {
-        const delay = computeRetryDelayMs(attempt, config);
-        queue.push({
-          ...job,
-          attempt,
-          nextRunAtMs: Date.now() + delay,
-        });
-        console.warn('[workshop-auto] download_retry_scheduled', JSON.stringify({
-          key: job.key,
-          map: job.mapName,
-          workshopId: job.workshopId,
-          attempt,
-          nextInMs: delay,
-          reason: errMsg,
-          ...(result ? { downloadTimedOut: result.timedOut } : {}),
-          ...(processResult ? { processTimedOut: processResult.timedOut } : {}),
-          ...(result ? { downloadLogTail: result.outputTail.slice(-5) } : {}),
-          ...(processResult ? { processLogTail: processResult.outputTail.slice(-5) } : {}),
-        }));
-        continue;
-      }
-
-      inflightKeys.delete(job.key);
-      console.error('[workshop-auto] download_failed', JSON.stringify({
-        key: job.key,
-        map: job.mapName,
-        workshopId: job.workshopId,
-        attempts: attempt,
-        reason: errMsg,
-        ...(result ? { downloadTimedOut: result.timedOut } : {}),
-        ...(processResult ? { processTimedOut: processResult.timedOut } : {}),
-        ...(result ? { downloadLogTail: result.outputTail.slice(-10) } : {}),
-        ...(processResult ? { processLogTail: processResult.outputTail.slice(-10) } : {}),
-      }));
-    }
-  } finally {
-    processing = false;
+  if (!config.enabled) {
     scheduleWakeTimer();
+    return;
   }
+
+  while (activeJobIds.size < config.workerConcurrency) {
+    const ready = pickReadyJobs();
+    const nextJob = ready[0];
+    if (!nextJob) break;
+
+    nextJob.status = 'running';
+    nextJob.runCount += 1;
+    nextJob.lastStartedAt = nowIso();
+    nextJob.downloadTimedOut = false;
+    nextJob.processTimedOut = false;
+    updateJob(nextJob);
+    saveQueueStore(config);
+
+    activeJobIds.add(nextJob.id);
+    void processOneJob(nextJob.id, config);
+  }
+
+  scheduleWakeTimer();
 };
 
-const enqueueJob = (job: DownloadJob, config: WorkshopMapConfigResolved) => {
-  if (queue.length >= config.maxQueueSize) {
-    const dropped = queue.shift();
-    if (dropped) {
-      inflightKeys.delete(dropped.key);
-      console.warn('[workshop-auto] queue_drop_oldest', JSON.stringify({
-        droppedKey: dropped.key,
-        droppedMap: dropped.mapName,
-        queueSize: queue.length,
+const createJob = (
+  mapName: string,
+  workshopId: string,
+  appId: number,
+  serverId: string,
+  source: TriggerSource,
+  resolutionSource: string,
+  refresh: boolean,
+  config: WorkshopMapConfigResolved,
+): PersistedWorkshopJob => {
+  const id = `job_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+  const key = `${appId}:${workshopId}:${mapName}`;
+  const nowMs = Date.now();
+  const ts = nowIso();
+
+  return {
+    id,
+    key,
+    appId,
+    workshopId,
+    mapName,
+    serverId,
+    source,
+    resolutionSource,
+    refresh,
+    maxRetries: config.maxRetries,
+    retryCount: 0,
+    runCount: 0,
+    status: 'queued',
+    createdAt: ts,
+    updatedAt: ts,
+    enqueuedAtMs: nowMs,
+    nextRunAtMs: nowMs,
+    downloadReportPath: path.join(config.reportsDir, `${workshopId}.download.json`),
+    processReportPath: path.join(config.reportsDir, `${workshopId}.${mapName}.process.json`),
+    extractReportPath: path.join(config.reportsDir, `${workshopId}.${mapName}.extract.json`),
+  };
+};
+
+const enqueueJob = (
+  mapName: string,
+  workshopId: string,
+  serverId: string,
+  source: TriggerSource,
+  resolutionSource: string,
+  config: WorkshopMapConfigResolved,
+) => {
+  loadQueueStoreIfNeeded(config);
+
+  const key = `${config.appId}:${workshopId}:${mapName}`;
+  const active = findActiveJobByKey(key);
+  if (active) {
+    active.updatedAt = nowIso();
+    active.serverId = serverId;
+    active.source = source;
+    if (active.status === 'retry_wait') {
+      active.nextRunAtMs = Math.min(active.nextRunAtMs, Date.now());
+    }
+    jobsById.set(active.id, active);
+    saveQueueStore(config);
+
+    console.log('[workshop-auto] queue_dedupe_hit', JSON.stringify({
+      key,
+      activeJobId: active.id,
+      status: active.status,
+      map: mapName,
+      workshopId,
+    }));
+    return;
+  }
+
+  const pendingCount = countPendingJobs();
+  if (pendingCount >= config.maxQueueSize) {
+    const dropped = dropOldestPendingJob(config);
+    if (!dropped) {
+      console.warn('[workshop-auto] queue_full_reject', JSON.stringify({
+        map: mapName,
+        workshopId,
         maxQueueSize: config.maxQueueSize,
       }));
+      return;
     }
+    console.warn('[workshop-auto] queue_backpressure_drop', JSON.stringify({
+      droppedJobId: dropped.id,
+      droppedMap: dropped.mapName,
+      droppedWorkshopId: dropped.workshopId,
+      maxQueueSize: config.maxQueueSize,
+    }));
   }
-  queue.push(job);
+
+  const job = createJob(
+    mapName,
+    workshopId,
+    config.appId,
+    serverId,
+    source,
+    resolutionSource,
+    false,
+    config,
+  );
+
+  jobsById.set(job.id, job);
+  saveQueueStore(config);
+
+  console.log('[workshop-auto] queued', JSON.stringify({
+    id: job.id,
+    key: job.key,
+    map: job.mapName,
+    workshopId: job.workshopId,
+    resolutionSource,
+    source,
+    serverId,
+    pending: countPendingJobs(),
+    active: activeJobIds.size,
+  }));
+
   scheduleWakeTimer();
   void processQueue();
 };
@@ -737,6 +1251,7 @@ export const notifyMapObservedForWorkshop = (input: NotifyInput) => {
   serverLastMap.set(serverId, normalizedIncomingMap);
 
   const config = readConfig();
+  loadQueueStoreIfNeeded(config);
   if (!config.enabled) return;
 
   const resolved = resolveWorkshopId(mapHint, config);
@@ -757,8 +1272,7 @@ export const notifyMapObservedForWorkshop = (input: NotifyInput) => {
     rememberRuntimeMapping(resolved.normalizedMap, resolved.workshopId, resolved.resolutionSource, config.runtimeCachePath);
   }
 
-  const key = `${config.appId}:${resolved.workshopId}`;
-  if (inflightKeys.has(key)) return;
+  const key = `${config.appId}:${resolved.workshopId}:${resolved.normalizedMap}`;
 
   const recentSuccessTs = recentSuccessByKey.get(key);
   if (
@@ -769,32 +1283,113 @@ export const notifyMapObservedForWorkshop = (input: NotifyInput) => {
     return;
   }
 
-  inflightKeys.add(key);
   enqueueJob(
-    {
-      key,
-      appId: config.appId,
-      workshopId: resolved.workshopId,
-      mapName: resolved.normalizedMap,
-      serverId,
-      source: input.source,
-      attempt: 0,
-      nextRunAtMs: Date.now(),
-      enqueuedAtMs: Date.now(),
-      refresh: false,
-    },
+    resolved.normalizedMap,
+    resolved.workshopId,
+    serverId,
+    input.source,
+    resolved.resolutionSource,
     config,
   );
 
-  console.log('[workshop-auto] queued', JSON.stringify({
-    key,
-    map: resolved.normalizedMap,
-    workshopId: resolved.workshopId,
-    resolutionSource: resolved.resolutionSource,
-    source: input.source,
-    serverId,
-    queueSize: queue.length,
-  }));
+};
+
+export const getWorkshopAutoDownloadQueueSnapshot = (limitRaw?: number): WorkshopQueueSnapshot => {
+  const config = readConfig();
+  loadQueueStoreIfNeeded(config);
+
+  const limit = Math.max(1, Math.min(500, toInt(limitRaw, 100)));
+
+  const counts = {
+    total: jobsById.size,
+    queued: 0,
+    running: 0,
+    retry_wait: 0,
+    success: 0,
+    failed: 0,
+    dropped: 0,
+    pending: 0,
+  };
+
+  for (const job of jobsById.values()) {
+    if (job.status === 'queued') counts.queued += 1;
+    else if (job.status === 'running') counts.running += 1;
+    else if (job.status === 'retry_wait') counts.retry_wait += 1;
+    else if (job.status === 'success') counts.success += 1;
+    else if (job.status === 'failed') counts.failed += 1;
+    else if (job.status === 'dropped') counts.dropped += 1;
+
+    if (ACTIVE_STATUS.has(job.status)) counts.pending += 1;
+  }
+
+  const now = Date.now();
+  const jobs = Array.from(jobsById.values())
+    .sort((a, b) => {
+      const at = Date.parse(a.updatedAt || a.createdAt);
+      const bt = Date.parse(b.updatedAt || b.createdAt);
+      return bt - at || b.enqueuedAtMs - a.enqueuedAtMs;
+    })
+    .slice(0, limit)
+    .map((job) => ({
+      id: job.id,
+      key: job.key,
+      status: job.status,
+      appId: job.appId,
+      workshopId: job.workshopId,
+      mapName: job.mapName,
+      serverId: job.serverId,
+      source: job.source,
+      resolutionSource: job.resolutionSource,
+      refresh: job.refresh,
+      retryCount: job.retryCount,
+      maxRetries: job.maxRetries,
+      runCount: job.runCount,
+      enqueuedAt: new Date(job.enqueuedAtMs).toISOString(),
+      updatedAt: job.updatedAt,
+      nextRunAt: new Date(job.nextRunAtMs).toISOString(),
+      nextRunInMs: Math.max(0, job.nextRunAtMs - now),
+      ...(job.lastStartedAt ? { lastStartedAt: job.lastStartedAt } : {}),
+      ...(job.lastFinishedAt ? { lastFinishedAt: job.lastFinishedAt } : {}),
+      ...(job.lastError ? { lastError: job.lastError } : {}),
+      ...(Number.isFinite(job.lastExitCode) ? { lastExitCode: job.lastExitCode } : {}),
+      ...(job.lastSignal ? { lastSignal: job.lastSignal } : {}),
+      ...(typeof job.downloadTimedOut === 'boolean' ? { downloadTimedOut: job.downloadTimedOut } : {}),
+      ...(typeof job.processTimedOut === 'boolean' ? { processTimedOut: job.processTimedOut } : {}),
+      reports: {
+        download: job.downloadReportPath,
+        process: job.processReportPath,
+        extract: job.extractReportPath,
+      },
+    }));
+
+  return {
+    now: nowIso(),
+    runtimeEnabled,
+    initialized: started,
+    config: {
+      enabled: config.enabled,
+      autoProcessEnabled: config.autoProcessEnabled,
+      appId: config.appId,
+      workerConcurrency: config.workerConcurrency,
+      maxQueueSize: config.maxQueueSize,
+      maxRetries: config.maxRetries,
+      retryBaseMs: config.retryBaseMs,
+      retryMaxMs: config.retryMaxMs,
+      downloadTimeoutMs: config.downloadTimeoutMs,
+      processTimeoutMs: config.processTimeoutMs,
+      successCooldownMs: config.successCooldownMs,
+      queueStorePath: config.queueStorePath,
+      reportsDir: config.reportsDir,
+      runtimeCachePath: config.runtimeCachePath,
+      configPath: config.configPath,
+    },
+    worker: {
+      activeJobs: activeJobIds.size,
+      wakeScheduled: Boolean(wakeTimer),
+    },
+    counts,
+    jobs,
+  };
 };
 
 export const startWorkshopAutoDownloadJob = () => {
@@ -805,6 +1400,7 @@ export const startWorkshopAutoDownloadJob = () => {
   runtimeEnabled = parseBool(process.env.WORKSHOP_AUTO_DOWNLOAD_ENABLED, true);
 
   const config = readConfig();
+  loadQueueStoreIfNeeded(config);
   console.log('[workshop-auto] initialized', JSON.stringify({
     runtimeEnabled,
     configEnabled: config.enabled,
@@ -813,25 +1409,29 @@ export const startWorkshopAutoDownloadJob = () => {
     sourceioMode: config.sourceioMode,
     downloadTimeoutMs: config.downloadTimeoutMs,
     processTimeoutMs: config.processTimeoutMs,
+    workerConcurrency: config.workerConcurrency,
     appId: config.appId,
     mappedMaps: Object.keys(config.maps).length,
     runtimeMappedMaps: runtimeMapCache.size,
     aliases: Object.keys(config.aliases).length,
+    queueStorePath: config.queueStorePath,
     reportsDir: config.reportsDir,
     runtimeCachePath: config.runtimeCachePath,
     configPath: config.configPath,
+    pendingJobs: countPendingJobs(),
   }));
+
+  scheduleWakeTimer();
+  void processQueue();
 
   return () => {
     started = false;
-    queue = [];
-    inflightKeys.clear();
     serverLastMap.clear();
     warnedMissingMap.clear();
-    recentSuccessByKey.clear();
     if (wakeTimer) {
       clearTimeout(wakeTimer);
       wakeTimer = null;
     }
+    activeJobIds.clear();
   };
 };

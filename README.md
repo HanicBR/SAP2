@@ -118,6 +118,10 @@ Controle por env:
 - `WORKSHOP_DOWNLOAD_TIMEOUT_MS` (timeout hard do subprocesso download)
 - `WORKSHOP_PROCESS_TIMEOUT_MS` (timeout hard do subprocesso process-map)
 - `WORKSHOP_RUNTIME_MAPS_FILE` (default `server/config/workshop-maps.runtime.json`)
+- `WORKSHOP_QUEUE_STORE_FILE` (default `WORKSHOP_ROOT/queue/workshop-jobs.json`)
+- `WORKSHOP_WORKER_CONCURRENCY` (default `1`)
+- `WORKSHOP_TERMINAL_RETENTION_DAYS` (default `14`)
+- `WORKSHOP_MAX_STORED_JOBS` (default `2000`)
 
 Logs esperados:
 
@@ -126,6 +130,24 @@ Logs esperados:
 - `[workshop-auto] download_start`
 - `[workshop-auto] download_ok` / `download_failed`
 - `[workshop-auto] process_start` / `process_ok`
+
+## PR-14.5 Worker + fila persistente
+
+- Fila persistente em disco (sobrevive restart):
+  - `WORKSHOP_ROOT/queue/workshop-jobs.json` (ou `WORKSHOP_QUEUE_STORE_FILE`)
+- Jobs `running` no momento de restart sao recuperados para `retry_wait` automaticamente.
+- Dedupe/idempotencia:
+  - chave do job: `appId:workshopId:mapName`
+  - troca repetida para o mesmo mapa nao duplica job ativo.
+- Retry/backoff:
+  - falha/timeout atualiza status e reprograma com backoff exponencial ate `maxRetries`.
+  - ao exceder `maxRetries`, status final = `failed`.
+- Backpressure/concorrencia:
+  - limite de concorrencia configuravel (`workerConcurrency`, default `1`).
+  - quando fila ativa excede `maxQueueSize`, descarta pendente mais antigo com motivo no status.
+- Observabilidade:
+  - endpoint admin: `GET /api/servers/workshop/queue?limit=100`
+  - retorna estado da fila, contadores por status e paths de reports por job.
 
 ## PR-14.3 Processamento pos-download (extract + pipeline)
 

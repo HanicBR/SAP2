@@ -20,7 +20,10 @@ import {
 } from '../services/serverWs';
 import { getPlayerPulseSettings } from '../services/playtimePulse';
 import { ingestPlayerPulse, PlayerPulseIngestError } from '../services/playerPulseIngest';
-import { notifyMapObservedForWorkshop } from '../services/workshopAutoDownload';
+import {
+  getWorkshopAutoDownloadQueueSnapshot,
+  notifyMapObservedForWorkshop,
+} from '../services/workshopAutoDownload';
 
 const router = Router();
 
@@ -650,6 +653,13 @@ router.get('/ws/viewer-state', authMiddleware, requireRole(UserRole.ADMIN), asyn
     total: items.length,
     items,
   });
+});
+
+// Workshop auto-download worker queue snapshot (PR-14.5 worker persistence/ops)
+router.get('/workshop/queue', authMiddleware, requireRole(UserRole.ADMIN), async (req, res) => {
+  const limitRaw = parseInteger((req.query as any)?.limit);
+  const limit = limitRaw !== undefined ? limitRaw : 100;
+  return res.json(getWorkshopAutoDownloadQueueSnapshot(limit));
 });
 
 // Live state from WebSocket snapshots (PR-03 near-real-time players/activity)
