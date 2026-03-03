@@ -181,6 +181,30 @@ export interface WorkshopQueueJob {
   lastSignal?: string;
   downloadTimedOut?: boolean;
   processTimedOut?: boolean;
+  outputTail?: string[];
+  reportSummary: {
+    download: {
+      exists: boolean;
+      ok?: boolean;
+      status?: string;
+      error?: string;
+      finishedAt?: string;
+    };
+    process: {
+      exists: boolean;
+      ok?: boolean;
+      status?: string;
+      error?: string;
+      finishedAt?: string;
+    };
+    extract: {
+      exists: boolean;
+      ok?: boolean;
+      status?: string;
+      error?: string;
+      finishedAt?: string;
+    };
+  };
   reports: {
     download: string;
     process: string;

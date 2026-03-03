@@ -3577,6 +3577,32 @@ const ServerView3D: React.FC = () => {
                   <p className="text-zinc-500">
                     next={new Date(job.nextRunAt).toLocaleTimeString('pt-BR')} | update={new Date(job.updatedAt).toLocaleTimeString('pt-BR')}
                   </p>
+                  <p className="text-zinc-500 break-all">
+                    reports: dl={job.reportSummary.download.status || (job.reportSummary.download.exists ? 'exists' : 'missing')} | ex={job.reportSummary.extract.status || (job.reportSummary.extract.exists ? 'exists' : 'missing')} | pr={job.reportSummary.process.status || (job.reportSummary.process.exists ? 'exists' : 'missing')}
+                  </p>
+                  {(job.reportSummary.download.error || job.reportSummary.extract.error || job.reportSummary.process.error) && (
+                    <div className="rounded border border-red-900/40 bg-red-950/20 px-2 py-1 mt-1 space-y-0.5">
+                      {job.reportSummary.download.error && (
+                        <p className="text-red-300 break-words">download: {job.reportSummary.download.error}</p>
+                      )}
+                      {job.reportSummary.extract.error && (
+                        <p className="text-red-300 break-words">extract: {job.reportSummary.extract.error}</p>
+                      )}
+                      {job.reportSummary.process.error && (
+                        <p className="text-red-300 break-words">process: {job.reportSummary.process.error}</p>
+                      )}
+                    </div>
+                  )}
+                  {Array.isArray(job.outputTail) && job.outputTail.length > 0 && (
+                    <div className="mt-1 rounded border border-zinc-800 bg-zinc-950/80 px-2 py-1">
+                      <p className="text-zinc-500 uppercase font-bold text-[9px] mb-1">output tail</p>
+                      {job.outputTail.slice(-6).map((line, idx) => (
+                        <p key={`${job.id}_tail_${idx}`} className="text-zinc-400 break-all">
+                          {line}
+                        </p>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

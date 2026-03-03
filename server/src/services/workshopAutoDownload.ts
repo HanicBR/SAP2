@@ -173,6 +173,30 @@ type WorkshopQueueSnapshot = {
     lastSignal?: string;
     downloadTimedOut?: boolean;
     processTimedOut?: boolean;
+    outputTail?: string[];
+    reportSummary: {
+      download: {
+        exists: boolean;
+        ok?: boolean;
+        status?: string;
+        error?: string;
+        finishedAt?: string;
+      };
+      process: {
+        exists: boolean;
+        ok?: boolean;
+        status?: string;
+        error?: string;
+        finishedAt?: string;
+      };
+      extract: {
+        exists: boolean;
+        ok?: boolean;
+        status?: string;
+        error?: string;
+        finishedAt?: string;
+      };
+    };
     reports: {
       download: string;
       process: string;
@@ -600,6 +624,42 @@ const tailLines = (input: string, max = 80): string[] =>
     .filter((line) => line.length > 0)
     .slice(-max);
 
+const readReportSummary = (
+  reportPath: string,
+): {
+  exists: boolean;
+  ok?: boolean;
+  status?: string;
+  error?: string;
+  finishedAt?: string;
+} => {
+  const absolute = String(reportPath || '').trim();
+  if (!absolute || !fs.existsSync(absolute)) {
+    return { exists: false };
+  }
+
+  try {
+    const parsed = JSON.parse(fs.readFileSync(absolute, 'utf8')) as Record<string, unknown>;
+    const statusValue = String(parsed?.status || '').trim();
+    const errorValue = String(parsed?.error || '').trim();
+    const finishedAtValue = String(parsed?.finishedAt || '').trim();
+    const okRaw = parsed?.ok;
+
+    return {
+      exists: true,
+      ...(typeof okRaw === 'boolean' ? { ok: okRaw } : {}),
+      ...(statusValue ? { status: statusValue } : {}),
+      ...(errorValue ? { error: errorValue } : {}),
+      ...(finishedAtValue ? { finishedAt: finishedAtValue } : {}),
+    };
+  } catch (error: any) {
+    return {
+      exists: true,
+      error: `report_parse_failed:${String(error?.message || error)}`,
+    };
+  }
+};
+
 const resolveTsNodeRunner = (): { command: string; argsPrefix: string[] } => {
   const tsNodeJs = path.resolve(WORKSPACE_ROOT, 'server', 'node_modules', 'ts-node', 'dist', 'bin.js');
   if (fs.existsSync(tsNodeJs)) {
@@ -1019,13 +1079,33 @@ const processOneJob = async (jobId: string, config: WorkshopMapConfigResolved) =
       return;
     }
 
-    const reason = processError
-      ? `process_error:${String((processError as any)?.message || processError)}`
-      : downloadError
-        ? `download_error:${String((downloadError as any)?.message || downloadError)}`
-        : config.autoProcessEnabled
-          ? `process_${processResult?.timedOut ? 'timeout' : 'exit'}_${processResult?.exitCode ?? 'unknown'}${processResult?.signal ? `_signal_${processResult.signal}` : ''}`
-          : `download_${downloadResult?.timedOut ? 'timeout' : 'exit'}_${downloadResult?.exitCode ?? 'unknown'}${downloadResult?.signal ? `_signal_${downloadResult.signal}` : ''}`;
+    const reason = (() => {
+      if (downloadError) {
+        return `download_error:${String((downloadError as any)?.message || downloadError)}`;
+      }
+      if (!downloadResult) {
+        return 'download_result_missing';
+      }
+      if (downloadResult.timedOut) {
+        return `download_timeout_${downloadResult.exitCode}${downloadResult.signal ? `_signal_${downloadResult.signal}` : ''}`;
+      }
+      if (downloadResult.exitCode !== 0) {
+        return `download_exit_${downloadResult.exitCode}${downloadResult.signal ? `_signal_${downloadResult.signal}` : ''}`;
+      }
+      if (!config.autoProcessEnabled) {
+        return `download_exit_${downloadResult.exitCode}${downloadResult.signal ? `_signal_${downloadResult.signal}` : ''}`;
+      }
+      if (processError) {
+        return `process_error:${String((processError as any)?.message || processError)}`;
+      }
+      if (!processResult) {
+        return 'process_result_missing';
+      }
+      if (processResult.timedOut) {
+        return `process_timeout_${processResult.exitCode}${processResult.signal ? `_signal_${processResult.signal}` : ''}`;
+      }
+      return `process_exit_${processResult.exitCode}${processResult.signal ? `_signal_${processResult.signal}` : ''}`;
+    })();
 
     const nextRetryCount = job.retryCount + 1;
     const canRetry = nextRetryCount <= job.maxRetries;
@@ -1490,6 +1570,16 @@ export const getWorkshopAutoDownloadQueueSnapshot = (limitRaw?: number): Worksho
       ...(job.lastSignal ? { lastSignal: job.lastSignal } : {}),
       ...(typeof job.downloadTimedOut === 'boolean' ? { downloadTimedOut: job.downloadTimedOut } : {}),
       ...(typeof job.processTimedOut === 'boolean' ? { processTimedOut: job.processTimedOut } : {}),
+      ...(Array.isArray(job.outputTail) && job.outputTail.length
+        ? {
+            outputTail: job.outputTail.slice(-20),
+          }
+        : {}),
+      reportSummary: {
+        download: readReportSummary(job.downloadReportPath),
+        process: readReportSummary(job.processReportPath),
+        extract: readReportSummary(job.extractReportPath),
+      },
       reports: {
         download: job.downloadReportPath,
         process: job.processReportPath,
