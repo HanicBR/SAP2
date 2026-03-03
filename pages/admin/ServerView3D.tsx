@@ -117,6 +117,20 @@ type ModelMeshPayload = {
   }>;
 };
 
+type ModelCacheEntry = {
+  id: string;
+  triCount: number;
+  vertexCount: number;
+  byteEstimate: number;
+  lastUsedAtMs: number;
+  subMeshes: Array<{
+    material: string;
+    materialId: string;
+    placeholderMaterial: boolean;
+    geometry: THREE.BufferGeometry;
+  }>;
+};
+
 type ChunkPayload = {
   id: string;
   bounds: Bounds;
@@ -166,6 +180,8 @@ type RuntimeStats = {
   visibleChunks: number;
   loadedTrisEstimate: number;
   loadedBytesEstimate: number;
+  modelCacheCount: number;
+  modelCacheBytesEstimate: number;
   cameraCell: { x: number; y: number };
   firstActiveLoadMs: number | null;
 };
@@ -184,6 +200,12 @@ const PLAYER_MARKER_SELECTED_SCALE = 1.45;
 const FOLLOW_CAMERA_DISTANCE = 520;
 const FOLLOW_CAMERA_HEIGHT = 220;
 const FOLLOW_CAMERA_SMOOTH_RATE = 6;
+const CAMERA_MOVE_SPEED = 1800;
+const CAMERA_MOVE_FAST_MULTIPLIER = 2.25;
+const CAMERA_MOVE_SLOW_MULTIPLIER = 0.5;
+const MODEL_CACHE_MAX_BYTES = 220 * 1024 * 1024;
+const MODEL_CACHE_EVICT_GRACE_MS = 18000;
+const MODEL_CACHE_SWEEP_INTERVAL_MS = 1800;
 const PLAYER_MARKER_COLORS = [
   0x22c55e,
   0x38bdf8,
@@ -385,6 +407,8 @@ const ServerView3D: React.FC = () => {
     visibleChunks: 0,
     loadedTrisEstimate: 0,
     loadedBytesEstimate: 0,
+    modelCacheCount: 0,
+    modelCacheBytesEstimate: 0,
     cameraCell: { x: 0, y: 0 },
     firstActiveLoadMs: null,
   });
@@ -777,6 +801,11 @@ const ServerView3D: React.FC = () => {
     controls.rotateSpeed = 0.65;
     controls.zoomSpeed = 1;
     controls.panSpeed = 0.55;
+    controls.mouseButtons = {
+      LEFT: THREE.MOUSE.ROTATE,
+      MIDDLE: THREE.MOUSE.ROTATE,
+      RIGHT: THREE.MOUSE.PAN,
+    };
 
     const chunkRoot = new THREE.Group();
     chunkRoot.name = 'chunk-root';
@@ -797,6 +826,7 @@ const ServerView3D: React.FC = () => {
       tris: number;
       bytes: number;
       drawCalls: number;
+      usedModels: string[];
     }>();
     const loadingChunkIds = new Set<string>();
     const textureLoader = new THREE.TextureLoader();
@@ -805,30 +835,23 @@ const ServerView3D: React.FC = () => {
     const pendingMaterialBindings = new Map<string, Set<THREE.MeshStandardMaterial>>();
     const materialDefs = new Map<string, { placeholder: boolean; textureUrl?: string }>();
     const modelDefs = new Map<string, { id: string; placeholder: boolean; meshUrl?: string }>();
-    const modelCache = new Map<string, {
-      id: string;
-      triCount: number;
-      vertexCount: number;
-      byteEstimate: number;
-      subMeshes: Array<{
-        material: string;
-        materialId: string;
-        placeholderMaterial: boolean;
-        geometry: THREE.BufferGeometry;
-      }>;
-    } | null>();
-    const modelLoading = new Map<string, Promise<{
-      id: string;
-      triCount: number;
-      vertexCount: number;
-      byteEstimate: number;
-      subMeshes: Array<{
-        material: string;
-        materialId: string;
-        placeholderMaterial: boolean;
-        geometry: THREE.BufferGeometry;
-      }>;
-    } | null>>();
+    const modelCache = new Map<string, ModelCacheEntry | null>();
+    const modelLoading = new Map<string, Promise<ModelCacheEntry | null>>();
+    const modelUsageCount = new Map<string, number>();
+    let modelCacheBytesEstimate = 0;
+    let lastModelCacheSweepAtMs = 0;
+    const movementKeys = {
+      forward: false,
+      backward: false,
+      left: false,
+      right: false,
+      fast: false,
+      slow: false,
+    };
+    const moveForward = new THREE.Vector3();
+    const moveRight = new THREE.Vector3();
+    const moveDelta = new THREE.Vector3();
+    const moveUp = new THREE.Vector3(0, 1, 0);
     const playerGeometry = new THREE.SphereGeometry(20, 14, 12);
     const playerMarkers = new Map<string, {
       steamId: string;
@@ -924,12 +947,122 @@ const ServerView3D: React.FC = () => {
       }
       modelCache.clear();
       modelLoading.clear();
+      modelUsageCount.clear();
+      modelCacheBytesEstimate = 0;
+    };
+
+    const normalizeModelId = (modelIdRaw: string): string => String(modelIdRaw || '').trim().toLowerCase();
+
+    const estimateGeometryBytes = (geometry: THREE.BufferGeometry): number => {
+      let bytes = 0;
+      const position = geometry.getAttribute('position');
+      if (position?.array) bytes += (position.array as ArrayLike<number> & { byteLength?: number }).byteLength || 0;
+      const uv = geometry.getAttribute('uv');
+      if (uv?.array) bytes += (uv.array as ArrayLike<number> & { byteLength?: number }).byteLength || 0;
+      const normal = geometry.getAttribute('normal');
+      if (normal?.array) bytes += (normal.array as ArrayLike<number> & { byteLength?: number }).byteLength || 0;
+      const index = geometry.getIndex();
+      if (index?.array) bytes += (index.array as ArrayLike<number> & { byteLength?: number }).byteLength || 0;
+      return Math.max(0, bytes);
+    };
+
+    const modelBytes = (model: ModelCacheEntry): number => {
+      if (model.byteEstimate > 0) return model.byteEstimate;
+      let bytes = 0;
+      for (const sub of model.subMeshes) {
+        bytes += estimateGeometryBytes(sub.geometry);
+      }
+      return Math.max(0, bytes);
+    };
+
+    const touchModelUsage = (modelIdRaw: string, atMs = performance.now()) => {
+      const modelId = normalizeModelId(modelIdRaw);
+      if (!modelId || modelId === '__placeholder_box__') return;
+      const model = modelCache.get(modelId);
+      if (model) {
+        model.lastUsedAtMs = atMs;
+      }
+    };
+
+    const addModelUsage = (modelIds: Iterable<string>, atMs = performance.now()) => {
+      for (const modelIdRaw of modelIds) {
+        const modelId = normalizeModelId(modelIdRaw);
+        if (!modelId || modelId === '__placeholder_box__') continue;
+        const current = modelUsageCount.get(modelId) || 0;
+        modelUsageCount.set(modelId, current + 1);
+        touchModelUsage(modelId, atMs);
+      }
+    };
+
+    const releaseModelUsage = (modelIds: Iterable<string>) => {
+      for (const modelIdRaw of modelIds) {
+        const modelId = normalizeModelId(modelIdRaw);
+        if (!modelId || modelId === '__placeholder_box__') continue;
+        const current = modelUsageCount.get(modelId) || 0;
+        if (current <= 1) {
+          modelUsageCount.delete(modelId);
+        } else {
+          modelUsageCount.set(modelId, current - 1);
+        }
+      }
+    };
+
+    const sweepModelCache = (nowMs: number, force = false) => {
+      if (!force && nowMs - lastModelCacheSweepAtMs < MODEL_CACHE_SWEEP_INTERVAL_MS) return;
+      lastModelCacheSweepAtMs = nowMs;
+
+      const candidates: Array<{ id: string; bytes: number; idleMs: number }> = [];
+      for (const [modelId, model] of modelCache.entries()) {
+        if (!model) continue;
+        if ((modelUsageCount.get(modelId) || 0) > 0) continue;
+        const bytes = modelBytes(model);
+        const idleMs = Math.max(0, nowMs - model.lastUsedAtMs);
+        const oldEnough = idleMs >= MODEL_CACHE_EVICT_GRACE_MS;
+        const overBudget = modelCacheBytesEstimate > MODEL_CACHE_MAX_BYTES;
+        if (force || oldEnough || overBudget) {
+          candidates.push({ id: modelId, bytes, idleMs });
+        }
+      }
+
+      if (!candidates.length) return;
+      candidates.sort((a, b) => {
+        if (b.idleMs !== a.idleMs) return b.idleMs - a.idleMs;
+        return b.bytes - a.bytes;
+      });
+
+      let evictedModels = 0;
+      let evictedBytes = 0;
+      for (const candidate of candidates) {
+        if (!force && modelCacheBytesEstimate <= MODEL_CACHE_MAX_BYTES && candidate.idleMs < MODEL_CACHE_EVICT_GRACE_MS) {
+          continue;
+        }
+        const model = modelCache.get(candidate.id);
+        if (!model) continue;
+        for (const subMesh of model.subMeshes) {
+          subMesh.geometry.dispose();
+        }
+        modelCache.delete(candidate.id);
+        modelUsageCount.delete(candidate.id);
+        const bytes = modelBytes(model);
+        evictedBytes += bytes;
+        modelCacheBytesEstimate = Math.max(0, modelCacheBytesEstimate - bytes);
+        evictedModels += 1;
+      }
+
+      if (evictedModels > 0) {
+        appendLog(
+          `model cache evict: count=${evictedModels} freed=${Math.round(evictedBytes / (1024 * 1024))}MB remaining=${Math.round(modelCacheBytesEstimate / (1024 * 1024))}MB`,
+        );
+      }
     };
 
     const loadModelMesh = async (modelIdRaw: string) => {
-      const modelId = String(modelIdRaw || '').trim().toLowerCase();
+      const modelId = normalizeModelId(modelIdRaw);
       if (!modelId) return null;
-      if (modelCache.has(modelId)) return modelCache.get(modelId) || null;
+      if (modelCache.has(modelId)) {
+        touchModelUsage(modelId);
+        return modelCache.get(modelId) || null;
+      }
       const existing = modelLoading.get(modelId);
       if (existing) return existing;
 
@@ -1003,14 +1136,21 @@ const ServerView3D: React.FC = () => {
             return null;
           }
 
-          const resolved = {
+          const resolved: ModelCacheEntry = {
             id: modelId,
             triCount: Math.max(0, Number(payload.stats?.triCount || 0)),
             vertexCount: Math.max(0, Number(payload.stats?.vertexCount || 0)),
             byteEstimate: Math.max(0, Number(payload.stats?.byteEstimate || 0)),
+            lastUsedAtMs: performance.now(),
             subMeshes,
           };
+          const estimatedBytes = modelBytes(resolved);
+          resolved.byteEstimate = estimatedBytes;
           modelCache.set(modelId, resolved);
+          modelCacheBytesEstimate += estimatedBytes;
+          if (modelCacheBytesEstimate > MODEL_CACHE_MAX_BYTES) {
+            sweepModelCache(performance.now());
+          }
           return resolved;
         } catch {
           modelCache.set(modelId, null);
@@ -1081,6 +1221,68 @@ const ServerView3D: React.FC = () => {
       const pickedSteamId = pickPlayerSteamIdAtClientPoint(event.clientX, event.clientY);
       if (!pickedSteamId) return;
       setViewerSelectedSteamId(pickedSteamId);
+    };
+
+    const clearMovementKeys = () => {
+      movementKeys.forward = false;
+      movementKeys.backward = false;
+      movementKeys.left = false;
+      movementKeys.right = false;
+      movementKeys.fast = false;
+      movementKeys.slow = false;
+    };
+
+    const isTypingElement = (target: EventTarget | null): boolean => {
+      if (!target) return false;
+      const element = target as HTMLElement;
+      if (!element) return false;
+      const tag = String((element as any).tagName || '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return true;
+      return !!(element as any).isContentEditable;
+    };
+
+    const setMovementByCode = (code: string, active: boolean): boolean => {
+      switch (code) {
+        case 'KeyW':
+        case 'ArrowUp':
+          movementKeys.forward = active;
+          return true;
+        case 'KeyS':
+        case 'ArrowDown':
+          movementKeys.backward = active;
+          return true;
+        case 'KeyA':
+        case 'ArrowLeft':
+          movementKeys.left = active;
+          return true;
+        case 'KeyD':
+        case 'ArrowRight':
+          movementKeys.right = active;
+          return true;
+        case 'ShiftLeft':
+        case 'ShiftRight':
+          movementKeys.fast = active;
+          return true;
+        case 'ControlLeft':
+        case 'ControlRight':
+          movementKeys.slow = active;
+          return true;
+        default:
+          return false;
+      }
+    };
+
+    const onWindowKeyDown = (event: KeyboardEvent) => {
+      if (isTypingElement(event.target)) return;
+      if (setMovementByCode(event.code, true)) {
+        event.preventDefault();
+      }
+    };
+
+    const onWindowKeyUp = (event: KeyboardEvent) => {
+      if (setMovementByCode(event.code, false)) {
+        event.preventDefault();
+      }
     };
 
     const upsertPlayersFromSnapshot = (snapshot: ServerViewerStateSnapshot | null) => {
@@ -1237,6 +1439,7 @@ const ServerView3D: React.FC = () => {
           }
         }
 
+        const usedModelsInChunk = new Set<string>();
         const props = Array.isArray(payload.props?.instances) ? payload.props.instances : [];
         if (props.length > 0) {
           const byModel = new Map<string, typeof props>();
@@ -1248,14 +1451,14 @@ const ServerView3D: React.FC = () => {
           }
 
           const modelIdsToPrefetch = Array.from(byModel.keys())
-            .map((item) => String(item || '').trim().toLowerCase())
+            .map((item) => normalizeModelId(item))
             .filter((item) => item && item !== '__placeholder_box__');
           if (modelIdsToPrefetch.length > 0) {
             await Promise.all(modelIdsToPrefetch.map((modelId) => loadModelMesh(modelId)));
           }
 
           for (const [model, instances] of byModel.entries()) {
-            const normalizedModel = String(model || '').trim().toLowerCase();
+            const normalizedModel = normalizeModelId(model);
             const explicitPlaceholder = instances.some((item) => item.placeholderModel);
             const loadedModel = !explicitPlaceholder && normalizedModel !== '__placeholder_box__'
               ? (modelCache.get(normalizedModel) || null)
@@ -1287,6 +1490,8 @@ const ServerView3D: React.FC = () => {
             };
 
             if (loadedModel && loadedModel.subMeshes.length > 0) {
+              usedModelsInChunk.add(normalizedModel);
+              touchModelUsage(normalizedModel);
               for (const sub of loadedModel.subMeshes) {
                 const modelMat = getWorldMaterial(sub.materialId || sub.material, !!sub.placeholderMaterial);
                 const instanced = new THREE.InstancedMesh(sub.geometry, modelMat, instances.length);
@@ -1314,6 +1519,8 @@ const ServerView3D: React.FC = () => {
         group.visible = false;
         chunkRoot.add(group);
 
+        const usedModels = Array.from(usedModelsInChunk);
+        addModelUsage(usedModels);
         chunkRecords.set(entry.id, {
           entry,
           group,
@@ -1321,6 +1528,7 @@ const ServerView3D: React.FC = () => {
           tris: Math.max(0, Number(payload.stats?.totalTris || entry.stats?.totalTris || 0)),
           bytes: Math.max(0, Number(payload.stats?.totalBytes || entry.stats?.totalBytes || 0)),
           drawCalls: Math.max(0, Number(payload.stats?.drawCallsAfterInstancing || entry.stats?.drawCallsAfterInstancing || 0)),
+          usedModels,
         });
 
         appendLog(`chunk carregado: ${entry.id}`);
@@ -1465,9 +1673,11 @@ const ServerView3D: React.FC = () => {
 
             chunkRoot.remove(record.group);
             disposeObject3D(record.group);
+            releaseModelUsage(record.usedModels);
             chunkRecords.delete(chunkId);
             appendLog(`chunk descarregado: ${chunkId}`);
           }
+          sweepModelCache(now);
 
           if (firstActiveLoadMs === null && activeIds.size > 0 && Array.from(activeIds).every((id) => chunkRecords.has(id))) {
             firstActiveLoadMs = Math.round(performance.now() - startedAt);
@@ -1488,6 +1698,8 @@ const ServerView3D: React.FC = () => {
             visibleChunks,
             loadedTrisEstimate,
             loadedBytesEstimate,
+            modelCacheCount: Array.from(modelCache.values()).reduce((count, item) => (item ? count + 1 : count), 0),
+            modelCacheBytesEstimate,
             cameraCell,
             firstActiveLoadMs,
           });
@@ -1548,6 +1760,34 @@ const ServerView3D: React.FC = () => {
             }
           }
 
+          const shouldManualMove = !(viewerFollowSelectedRef.current && selectedSteamId);
+          if (shouldManualMove) {
+            const moveForwardBack = (movementKeys.forward ? 1 : 0) + (movementKeys.backward ? -1 : 0);
+            const moveLeftRight = (movementKeys.right ? 1 : 0) + (movementKeys.left ? -1 : 0);
+            if (moveForwardBack !== 0 || moveLeftRight !== 0) {
+              camera.getWorldDirection(moveForward);
+              moveForward.y = 0;
+              if (moveForward.lengthSq() < 1e-6) {
+                moveForward.set(0, 0, -1);
+              } else {
+                moveForward.normalize();
+              }
+              moveRight.crossVectors(moveForward, moveUp).normalize();
+              moveDelta.set(0, 0, 0);
+              if (moveForwardBack !== 0) moveDelta.addScaledVector(moveForward, moveForwardBack);
+              if (moveLeftRight !== 0) moveDelta.addScaledVector(moveRight, moveLeftRight);
+              if (moveDelta.lengthSq() > 1e-8) {
+                moveDelta.normalize();
+                let speed = CAMERA_MOVE_SPEED;
+                if (movementKeys.fast) speed *= CAMERA_MOVE_FAST_MULTIPLIER;
+                if (movementKeys.slow) speed *= CAMERA_MOVE_SLOW_MULTIPLIER;
+                const distance = speed * dtSec;
+                camera.position.addScaledVector(moveDelta, distance);
+                controls.target.addScaledVector(moveDelta, distance);
+              }
+            }
+          }
+
           controls.update();
           renderer.render(scene, camera);
           if (now - streamIntervalMs >= 300) {
@@ -1558,6 +1798,9 @@ const ServerView3D: React.FC = () => {
 
         onResize();
         window.addEventListener('resize', onResize);
+        window.addEventListener('keydown', onWindowKeyDown);
+        window.addEventListener('keyup', onWindowKeyUp);
+        window.addEventListener('blur', clearMovementKeys);
         renderer.domElement.addEventListener('pointerdown', onCanvasPointerDown);
         renderer.domElement.addEventListener('pointerup', onCanvasPointerUp);
         if (typeof ResizeObserver !== 'undefined' && mountRef.current) {
@@ -1580,9 +1823,14 @@ const ServerView3D: React.FC = () => {
         setStatus(`Viewer online | map=${loadedManifest.map.name} | chunks=${entries.length}`);
         appendLog(`manifest carregado: ${loadedManifest.map.name}`);
         appendLog(`chunk_count=${entries.length} active=${activeRadius * 2 + 1}x${activeRadius * 2 + 1} prefetch=${prefetchRadius * 2 + 1}x${prefetchRadius * 2 + 1}`);
+        appendLog('controles: WASD movimenta | Shift acelera | Ctrl reduz | botao do meio gira camera');
 
         return () => {
           window.removeEventListener('resize', onResize);
+          window.removeEventListener('keydown', onWindowKeyDown);
+          window.removeEventListener('keyup', onWindowKeyUp);
+          window.removeEventListener('blur', clearMovementKeys);
+          clearMovementKeys();
           renderer.domElement.removeEventListener('pointerdown', onCanvasPointerDown);
           renderer.domElement.removeEventListener('pointerup', onCanvasPointerUp);
           if (hostResizeObserver) {
@@ -1617,6 +1865,7 @@ const ServerView3D: React.FC = () => {
       for (const record of chunkRecords.values()) {
         chunkRoot.remove(record.group);
         disposeObject3D(record.group);
+        releaseModelUsage(record.usedModels);
       }
       chunkRecords.clear();
       clearPlayerMarkers();
@@ -1684,6 +1933,8 @@ const ServerView3D: React.FC = () => {
             <p>visibleChunks: {runtimeStats.visibleChunks}</p>
             <p>loadedTris(est): {runtimeStats.loadedTrisEstimate.toLocaleString('pt-BR')}</p>
             <p>loadedBytes(est): {Math.round(runtimeStats.loadedBytesEstimate / (1024 * 1024)).toLocaleString('pt-BR')} MB</p>
+            <p>modelCache: {runtimeStats.modelCacheCount} modelos</p>
+            <p>modelCacheBytes(est): {Math.round(runtimeStats.modelCacheBytesEstimate / (1024 * 1024)).toLocaleString('pt-BR')} MB</p>
             <p>firstActiveLoadMs: {runtimeStats.firstActiveLoadMs ?? 'pendente'}</p>
           </div>
 
