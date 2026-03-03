@@ -2,32 +2,42 @@
   "mounts": {
     "gmod": [
       "C:/Program Files (x86)/Steam/steamapps/common/GarrysMod/garrysmod",
+      "/opt/backstabber/content/gmod-base",
+      "/opt/backstabber/content/garrysmod",
       "/home/steam/.local/share/Steam/steamapps/common/GarrysMod/garrysmod"
     ],
     "css": [
       "C:/Program Files (x86)/Steam/steamapps/common/GarrysMod/garrysmod/addons/css-content-gmodcontent",
       "C:/Program Files (x86)/Steam/steamapps/common/Counter-Strike Source/cstrike",
+      "/opt/backstabber/content/css-content-gmodcontent",
       "/home/steam/.local/share/Steam/steamapps/common/GarrysMod/garrysmod/addons/css-content-gmodcontent",
       "/home/steam/.local/share/Steam/steamapps/common/Counter-Strike Source/cstrike"
     ],
     "hl2": [
       "C:/Program Files (x86)/Steam/steamapps/common/Half-Life 2/hl2",
+      "/opt/backstabber/content/hl2-content-gmodcontent",
+      "/opt/backstabber/content/hl2",
       "/home/steam/.local/share/Steam/steamapps/common/Half-Life 2/hl2"
     ],
     "hl2ep1": [
       "C:/Program Files (x86)/Steam/steamapps/common/GarrysMod/garrysmod/addons/hl2ep1-content-gmodcontent",
+      "/opt/backstabber/content/hl2ep1-content-gmodcontent",
       "/home/steam/.local/share/Steam/steamapps/common/GarrysMod/garrysmod/addons/hl2ep1-content-gmodcontent"
     ],
     "hl2ep2": [
       "C:/Program Files (x86)/Steam/steamapps/common/GarrysMod/garrysmod/addons/hl2ep2-content-gmodcontent",
+      "/opt/backstabber/content/hl2ep2-content-gmodcontent",
       "/home/steam/.local/share/Steam/steamapps/common/GarrysMod/garrysmod/addons/hl2ep2-content-gmodcontent"
     ],
     "tf2": [
       "C:/Program Files (x86)/Steam/steamapps/common/GarrysMod/garrysmod/addons/tf2-content-gmodcontent",
       "C:/Program Files (x86)/Steam/steamapps/common/Team Fortress 2/tf",
+      "/opt/backstabber/content/tf2-content-gmodcontent",
       "/home/steam/.local/share/Steam/steamapps/common/GarrysMod/garrysmod/addons/tf2-content-gmodcontent",
       "/home/steam/.local/share/Steam/steamapps/common/Team Fortress 2/tf"
     ],
-    "custom": []
+    "custom": [
+      "/opt/backstabber/content/hl1-gmodcontent"
+    ]
   }
 }

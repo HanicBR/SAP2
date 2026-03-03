@@ -903,6 +903,13 @@ const autoDetectMounts = (): {
     tf2: [],
     custom: [],
   };
+  const addCandidate = (mount: MountId, candidatePath: string) => {
+    if (!candidatePath) return;
+    attemptedCandidates[mount].push(candidatePath);
+    if (fs.existsSync(candidatePath) && fs.statSync(candidatePath).isDirectory()) {
+      detected[mount].push(candidatePath);
+    }
+  };
 
   const steamRoots = new Set<string>();
   if (process.platform === 'win32') {
@@ -971,10 +978,7 @@ const autoDetectMounts = (): {
 
     for (const item of addonDefaults) {
       const expectedPath = path.join(addonsDir, item.folder);
-      attemptedCandidates[item.mount].push(expectedPath);
-      if (fs.existsSync(expectedPath) && fs.statSync(expectedPath).isDirectory()) {
-        detected[item.mount].push(expectedPath);
-      }
+      addCandidate(item.mount, expectedPath);
     }
 
     let addonEntries: fs.Dirent[] = [];
@@ -988,8 +992,28 @@ const autoDetectMounts = (): {
       const guessed = guessMountFromAddonFolderName(entry.name);
       if (!guessed) continue;
       const candidate = path.join(addonsDir, entry.name);
-      attemptedCandidates[guessed].push(candidate);
-      detected[guessed].push(candidate);
+      addCandidate(guessed, candidate);
+    }
+  }
+
+  if (process.platform !== 'win32') {
+    const linuxContentRoots = dedupeSortedPaths(
+      [
+        process.env.MAP_AUDIT_CONTENT_ROOT || '',
+        '/opt/backstabber/content',
+      ].filter(Boolean),
+    );
+
+    for (const contentRoot of linuxContentRoots) {
+      addCandidate('gmod', path.join(contentRoot, 'gmod-base'));
+      addCandidate('gmod', path.join(contentRoot, 'garrysmod'));
+      addCandidate('css', path.join(contentRoot, 'css-content-gmodcontent'));
+      addCandidate('hl2', path.join(contentRoot, 'hl2-content-gmodcontent'));
+      addCandidate('hl2', path.join(contentRoot, 'hl2'));
+      addCandidate('hl2ep1', path.join(contentRoot, 'hl2ep1-content-gmodcontent'));
+      addCandidate('hl2ep2', path.join(contentRoot, 'hl2ep2-content-gmodcontent'));
+      addCandidate('tf2', path.join(contentRoot, 'tf2-content-gmodcontent'));
+      addCandidate('custom', path.join(contentRoot, 'hl1-gmodcontent'));
     }
   }
 

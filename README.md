@@ -135,3 +135,23 @@ Copie template:
 ```powershell
 Copy-Item server/config/mounts.template.json server/config/mounts.json
 ```
+
+Linux:
+
+```bash
+cp server/config/mounts.template.json server/config/mounts.json
+```
+
+No Linux (VPS), o autodiscovery agora tenta por padrao:
+
+- `/opt/backstabber/content/gmod-base`
+- `/opt/backstabber/content/css-content-gmodcontent`
+- `/opt/backstabber/content/hl2ep1-content-gmodcontent`
+- `/opt/backstabber/content/hl2ep2-content-gmodcontent`
+- `/opt/backstabber/content/tf2-content-gmodcontent`
+
+Se o seu root de content for outro, use:
+
+```bash
+export MAP_AUDIT_CONTENT_ROOT=/caminho/do/content
+```
