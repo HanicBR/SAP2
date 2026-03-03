@@ -18,7 +18,7 @@
     "worldFaces": 652,
     "staticProps": 83,
     "placeholderWorldFaces": 0,
-    "placeholderStaticProps": 2
+    "placeholderStaticProps": 0
   },
   "stats": {
     "worldTris": 1995,
@@ -31601,9 +31601,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/lamppost03a_off",
         "sourceModel": "props_c17/lamppost03a_off",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -7076,
           -5173,
@@ -32221,9 +32221,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/lamppost03a_off",
         "sourceModel": "props_c17/lamppost03a_off",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -7794,
           -5171,

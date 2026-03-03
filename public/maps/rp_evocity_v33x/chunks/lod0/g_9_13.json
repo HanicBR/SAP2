@@ -18,7 +18,7 @@
     "worldFaces": 550,
     "staticProps": 58,
     "placeholderWorldFaces": 6,
-    "placeholderStaticProps": 2
+    "placeholderStaticProps": 0
   },
   "stats": {
     "worldTris": 1562,
@@ -31,7 +31,7 @@
     "totalVerts": 3126,
     "totalBytes": 134736,
     "drawCallsBeforeInstancing": 608,
-    "drawCallsAfterInstancing": 82
+    "drawCallsAfterInstancing": 83
   },
   "world": {
     "meshes": [
@@ -24334,9 +24334,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_lab/handrail01_long_stairwell01",
         "sourceModel": "props_lab/handrail01_long_stairwell01",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           4264,
           12900,
@@ -24554,9 +24554,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_lab/freightelevatorbutton",
         "sourceModel": "props_lab/freightelevatorbutton",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           5282,
           13806,

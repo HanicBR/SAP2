@@ -18,7 +18,7 @@
     "worldFaces": 112,
     "staticProps": 12,
     "placeholderWorldFaces": 0,
-    "placeholderStaticProps": 4
+    "placeholderStaticProps": 0
   },
   "stats": {
     "worldTris": 328,
@@ -5112,9 +5112,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           6271,
           -7535,
@@ -5132,9 +5132,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           6271,
           -7324,
@@ -5152,9 +5152,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           6619,
           -7535,
@@ -5172,9 +5172,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           6619,
           -7324,

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-03-03T03:26:39.378Z",
-  "total": 210,
+  "generatedAt": "2026-03-03T03:57:37.558Z",
+  "total": 257,
   "rootsScanned": [
     "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
     "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod",
@@ -2053,6 +2053,38 @@
       ]
     },
     {
+      "id": "props_buildings/watertower_001c",
+      "model": "props_buildings/watertower_001c",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_buildings/watertower_001c.mdl",
+      "searchedMdl": "models/props_buildings/watertower_001c.mdl",
+      "searchedVtx": "models/props_buildings/watertower_001c.dx90.vtx",
+      "searchedVvd": "models/props_buildings/watertower_001c.vvd",
+      "meshUrl": "./models/meshes/props_buildings_watertower_001c_aa1fcec6559ef6051e.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 411,
+      "vertexCount": 664,
+      "subMeshCount": 1,
+      "byteEstimate": 18212,
+      "bounds": {
+        "min": [
+          -102.65225982666016,
+          -99.73406219482422,
+          -200.02279663085938
+        ],
+        "max": [
+          110.20350646972656,
+          99.73536682128906,
+          192.16636657714844
+        ]
+      },
+      "materials": [
+        "models/props_buildings/watertower_001c"
+      ]
+    },
+    {
       "id": "props_c17/awning002a",
       "model": "props_c17/awning002a",
       "placeholder": false,
@@ -2082,6 +2114,168 @@
       },
       "materials": [
         "models/props_c17/awning001a"
+      ]
+    },
+    {
+      "id": "props_c17/fence01a",
+      "model": "props_c17/fence01a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_c17/fence01a.mdl",
+      "searchedMdl": "models/props_c17/fence01a.mdl",
+      "searchedVtx": "models/props_c17/fence01a.dx90.vtx",
+      "searchedVvd": "models/props_c17/fence01a.vvd",
+      "meshUrl": "./models/meshes/props_c17_fence01a_58e3c2c8c5ec4474d5.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 180,
+      "vertexCount": 292,
+      "subMeshCount": 2,
+      "byteEstimate": 8000,
+      "bounds": {
+        "min": [
+          -2.217472791671753,
+          -67.25957489013672,
+          -54.36244201660156
+        ],
+        "max": [
+          2.217435121536255,
+          67.25957489013672,
+          54.36244201660156
+        ]
+      },
+      "materials": [
+        "models/props_c17/fence_alpha",
+        "models/props_c17/fence_composite01"
+      ]
+    },
+    {
+      "id": "props_c17/fence03a",
+      "model": "props_c17/fence03a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_c17/fence03a.mdl",
+      "searchedMdl": "models/props_c17/fence03a.mdl",
+      "searchedVtx": "models/props_c17/fence03a.dx90.vtx",
+      "searchedVvd": "models/props_c17/fence03a.vvd",
+      "meshUrl": "./models/meshes/props_c17_fence03a_ca779cef1e101d171c.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 264,
+      "vertexCount": 434,
+      "subMeshCount": 2,
+      "byteEstimate": 11848,
+      "bounds": {
+        "min": [
+          -2.217475414276123,
+          -130.41445922851562,
+          -54.36244201660156
+        ],
+        "max": [
+          2.2174324989318848,
+          130.44432067871094,
+          54.36244201660156
+        ]
+      },
+      "materials": [
+        "models/props_c17/fence_alpha",
+        "models/props_c17/fence_composite01"
+      ]
+    },
+    {
+      "id": "props_c17/gasmeter001a",
+      "model": "props_c17/gasmeter001a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_c17/gasmeter001a.mdl",
+      "searchedMdl": "models/props_c17/gasmeter001a.mdl",
+      "searchedVtx": "models/props_c17/gasmeter001a.dx90.vtx",
+      "searchedVvd": "models/props_c17/gasmeter001a.vvd",
+      "meshUrl": "./models/meshes/props_c17_gasmeter001a_357e80a1d9c8666942.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 724,
+      "vertexCount": 1303,
+      "subMeshCount": 1,
+      "byteEstimate": 34748,
+      "bounds": {
+        "min": [
+          -7.486105918884277,
+          -26.825824737548828,
+          -43.306480407714844
+        ],
+        "max": [
+          7.109593391418457,
+          26.825824737548828,
+          43.306480407714844
+        ]
+      },
+      "materials": [
+        "models/props_c17/gasmeters001a"
+      ]
+    },
+    {
+      "id": "props_c17/gasmeter003a",
+      "model": "props_c17/gasmeter003a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_c17/gasmeter003a.mdl",
+      "searchedMdl": "models/props_c17/gasmeter003a.mdl",
+      "searchedVtx": "models/props_c17/gasmeter003a.dx90.vtx",
+      "searchedVvd": "models/props_c17/gasmeter003a.vvd",
+      "meshUrl": "./models/meshes/props_c17_gasmeter003a_38fd61cd3b29eee04d.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 782,
+      "vertexCount": 1366,
+      "subMeshCount": 1,
+      "byteEstimate": 36704,
+      "bounds": {
+        "min": [
+          -7.622165679931641,
+          -33.62792205810547,
+          -43.306480407714844
+        ],
+        "max": [
+          7.2496185302734375,
+          19.102209091186523,
+          32.548343658447266
+        ]
+      },
+      "materials": [
+        "models/props_c17/gasmeters001a"
+      ]
+    },
+    {
+      "id": "props_c17/handrail04_medium",
+      "model": "props_c17/handrail04_medium",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_c17/handrail04_medium.mdl",
+      "searchedMdl": "models/props_c17/handrail04_medium.mdl",
+      "searchedVtx": "models/props_c17/handrail04_medium.dx90.vtx",
+      "searchedVvd": "models/props_c17/handrail04_medium.vvd",
+      "meshUrl": "./models/meshes/props_c17_handrail04_medium_32ad9fa5fccdffce65.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 144,
+      "vertexCount": 262,
+      "subMeshCount": 1,
+      "byteEstimate": 6968,
+      "bounds": {
+        "min": [
+          -1.0000014305114746,
+          -32.44419860839844,
+          -20.000099182128906
+        ],
+        "max": [
+          1.0000014305114746,
+          32.44419860839844,
+          19.999900817871094
+        ]
+      },
+      "materials": [
+        "models/props_c17/handrailmetal001a"
       ]
     },
     {
@@ -2117,6 +2311,263 @@
       ]
     },
     {
+      "id": "props_c17/lamppost03a_off",
+      "model": "props_c17/lamppost03a_off",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_c17/lamppost03a_off.mdl",
+      "searchedMdl": "models/props_c17/lamppost03a_off.mdl",
+      "searchedVtx": "models/props_c17/lamppost03a_off.dx90.vtx",
+      "searchedVvd": "models/props_c17/lamppost03a_off.vvd",
+      "meshUrl": "./models/meshes/props_c17_lamppost03a_off_d124bc5fab97bd0ff1.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 378,
+      "vertexCount": 424,
+      "subMeshCount": 1,
+      "byteEstimate": 13016,
+      "bounds": {
+        "min": [
+          -10,
+          -10,
+          0
+        ],
+        "max": [
+          10,
+          105.04774475097656,
+          450.04376220703125
+        ]
+      },
+      "materials": [
+        "models/props_c17/lamppost03a"
+      ]
+    },
+    {
+      "id": "props_c17/light_cagelight02_on",
+      "model": "props_c17/light_cagelight02_on",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_c17/light_cagelight02_on.mdl",
+      "searchedMdl": "models/props_c17/light_cagelight02_on.mdl",
+      "searchedVtx": "models/props_c17/light_cagelight02_on.dx90.vtx",
+      "searchedVvd": "models/props_c17/light_cagelight02_on.vvd",
+      "meshUrl": "./models/meshes/props_c17_light_cagelight02_on_53aed04a43adda96ec.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 195,
+      "vertexCount": 272,
+      "subMeshCount": 1,
+      "byteEstimate": 7780,
+      "bounds": {
+        "min": [
+          -0.027458999305963516,
+          -2.898101806640625,
+          -10.50309944152832
+        ],
+        "max": [
+          7.202445030212402,
+          2.898101329803467,
+          1.152143955230713
+        ]
+      },
+      "materials": [
+        "models/props_c17/cagebulb01"
+      ]
+    },
+    {
+      "id": "props_c17/light_domelight02_on",
+      "model": "props_c17/light_domelight02_on",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_c17/light_domelight02_on.mdl",
+      "searchedMdl": "models/props_c17/light_domelight02_on.mdl",
+      "searchedVtx": "models/props_c17/light_domelight02_on.dx90.vtx",
+      "searchedVvd": "models/props_c17/light_domelight02_on.vvd",
+      "meshUrl": "./models/meshes/props_c17_light_domelight02_on_1f6e64c6cae9c82396.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 190,
+      "vertexCount": 179,
+      "subMeshCount": 1,
+      "byteEstimate": 5860,
+      "bounds": {
+        "min": [
+          -8.69333267211914,
+          -8.693333625793457,
+          -7.025674819946289
+        ],
+        "max": [
+          8.69333267211914,
+          8.693333625793457,
+          0
+        ]
+      },
+      "materials": [
+        "models/props_c17/light_domelight02_on"
+      ]
+    },
+    {
+      "id": "props_c17/utilitypole01a",
+      "model": "props_c17/utilitypole01a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_c17/utilitypole01a.mdl",
+      "searchedMdl": "models/props_c17/utilitypole01a.mdl",
+      "searchedVtx": "models/props_c17/utilitypole01a.dx90.vtx",
+      "searchedVvd": "models/props_c17/utilitypole01a.vvd",
+      "meshUrl": "./models/meshes/props_c17_utilitypole01a_034544f021cbac8361.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 1022,
+      "vertexCount": 1549,
+      "subMeshCount": 1,
+      "byteEstimate": 43244,
+      "bounds": {
+        "min": [
+          -5.216000080108643,
+          -47.29280090332031,
+          1.5054899454116821
+        ],
+        "max": [
+          22.197500228881836,
+          46.32120132446289,
+          486.60589599609375
+        ]
+      },
+      "materials": [
+        "models/props_c17/utility_poles001"
+      ]
+    },
+    {
+      "id": "props_c17/utilitypole01b",
+      "model": "props_c17/utilitypole01b",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_c17/utilitypole01b.mdl",
+      "searchedMdl": "models/props_c17/utilitypole01b.mdl",
+      "searchedVtx": "models/props_c17/utilitypole01b.dx90.vtx",
+      "searchedVvd": "models/props_c17/utilitypole01b.vvd",
+      "meshUrl": "./models/meshes/props_c17_utilitypole01b_b4651f4793dcde91d6.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 367,
+      "vertexCount": 633,
+      "subMeshCount": 1,
+      "byteEstimate": 17064,
+      "bounds": {
+        "min": [
+          -22.818099975585938,
+          -46.88180160522461,
+          1.2466000318527222
+        ],
+        "max": [
+          5.2123003005981445,
+          46.742401123046875,
+          483.2174987792969
+        ]
+      },
+      "materials": [
+        "models/props_c17/utility_poles001"
+      ]
+    },
+    {
+      "id": "props_canal/generator01",
+      "model": "props_canal/generator01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_canal/generator01.mdl",
+      "searchedMdl": "models/props_canal/generator01.mdl",
+      "searchedVtx": "models/props_canal/generator01.dx90.vtx",
+      "searchedVvd": "models/props_canal/generator01.vvd",
+      "meshUrl": "./models/meshes/props_canal_generator01_e3dbe5c9fe4dddb00e.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 1340,
+      "vertexCount": 1650,
+      "subMeshCount": 1,
+      "byteEstimate": 49080,
+      "bounds": {
+        "min": [
+          -113.35479736328125,
+          -121.56350708007812,
+          -72.43409729003906
+        ],
+        "max": [
+          113.35480499267578,
+          121.5634994506836,
+          72.43409729003906
+        ]
+      },
+      "materials": [
+        "models/props_canal/generator01"
+      ]
+    },
+    {
+      "id": "props_canal/generator02",
+      "model": "props_canal/generator02",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_canal/generator02.mdl",
+      "searchedMdl": "models/props_canal/generator02.mdl",
+      "searchedVtx": "models/props_canal/generator02.dx90.vtx",
+      "searchedVvd": "models/props_canal/generator02.vvd",
+      "meshUrl": "./models/meshes/props_canal_generator02_17bda1bb02dc3b5991.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 1362,
+      "vertexCount": 2043,
+      "subMeshCount": 2,
+      "byteEstimate": 57204,
+      "bounds": {
+        "min": [
+          -134.88180541992188,
+          -149.5,
+          -112.49410247802734
+        ],
+        "max": [
+          134.88180541992188,
+          149.5,
+          112.49410247802734
+        ]
+      },
+      "materials": [
+        "models/props_canal/generator02",
+        "models/props_canal/generator02_handrails"
+      ]
+    },
+    {
+      "id": "props_canal/rock_riverbed01a",
+      "model": "props_canal/rock_riverbed01a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_canal/rock_riverbed01a.mdl",
+      "searchedMdl": "models/props_canal/rock_riverbed01a.mdl",
+      "searchedVtx": "models/props_canal/rock_riverbed01a.dx90.vtx",
+      "searchedVvd": "models/props_canal/rock_riverbed01a.vvd",
+      "meshUrl": "./models/meshes/props_canal_rock_riverbed01a_b12afe0e97af0f789f.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 362,
+      "vertexCount": 421,
+      "subMeshCount": 1,
+      "byteEstimate": 12764,
+      "bounds": {
+        "min": [
+          -318.27130126953125,
+          -155.43887329101562,
+          -55.82809829711914
+        ],
+        "max": [
+          318.27130126953125,
+          154.2627410888672,
+          53.22364044189453
+        ]
+      },
+      "materials": [
+        "models/props_canal/rock_riverbed01a"
+      ]
+    },
+    {
       "id": "props_canal/rock_riverbed01b",
       "model": "props_canal/rock_riverbed01b",
       "placeholder": false,
@@ -2142,6 +2593,38 @@
           292.8397521972656,
           156.11822509765625,
           61.26044464111328
+        ]
+      },
+      "materials": [
+        "models/props_canal/rock_riverbed01a"
+      ]
+    },
+    {
+      "id": "props_canal/rock_riverbed01d",
+      "model": "props_canal/rock_riverbed01d",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_canal/rock_riverbed01d.mdl",
+      "searchedMdl": "models/props_canal/rock_riverbed01d.mdl",
+      "searchedVtx": "models/props_canal/rock_riverbed01d.dx90.vtx",
+      "searchedVvd": "models/props_canal/rock_riverbed01d.vvd",
+      "meshUrl": "./models/meshes/props_canal_rock_riverbed01d_7548b180409e2c54cc.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 306,
+      "vertexCount": 265,
+      "subMeshCount": 1,
+      "byteEstimate": 8972,
+      "bounds": {
+        "min": [
+          -106.05726623535156,
+          -111.30546569824219,
+          -54.71214294433594
+        ],
+        "max": [
+          106.05726623535156,
+          111.30546569824219,
+          54.35499572753906
         ]
       },
       "materials": [
@@ -2310,6 +2793,38 @@
       ]
     },
     {
+      "id": "props_foliage/driftwood_01a",
+      "model": "props_foliage/driftwood_01a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_foliage/driftwood_01a.mdl",
+      "searchedMdl": "models/props_foliage/driftwood_01a.mdl",
+      "searchedVtx": "models/props_foliage/driftwood_01a.dx90.vtx",
+      "searchedVvd": "models/props_foliage/driftwood_01a.vvd",
+      "meshUrl": "./models/meshes/props_foliage_driftwood_01a_f1a0844a7e72e1ac26.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 132,
+      "vertexCount": 93,
+      "subMeshCount": 1,
+      "byteEstimate": 3444,
+      "bounds": {
+        "min": [
+          -189.62730407714844,
+          -16.186382293701172,
+          1.313785433769226
+        ],
+        "max": [
+          210.60609436035156,
+          20.0659122467041,
+          35.13142776489258
+        ]
+      },
+      "materials": [
+        "models/props_foliage/driftwood_01a"
+      ]
+    },
+    {
       "id": "props_foliage/tree_deciduous_01a",
       "model": "props_foliage/tree_deciduous_01a",
       "placeholder": false,
@@ -2368,6 +2883,39 @@
           221.9480743408203,
           392.9847717285156,
           536.1886596679688
+        ]
+      },
+      "materials": [
+        "models/props_foliage/tree_deciduous_01a_branches",
+        "models/props_foliage/tree_deciduous_01a_trunk"
+      ]
+    },
+    {
+      "id": "props_foliage/tree_deciduous_03a",
+      "model": "props_foliage/tree_deciduous_03a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_foliage/tree_deciduous_03a.mdl",
+      "searchedMdl": "models/props_foliage/tree_deciduous_03a.mdl",
+      "searchedVtx": "models/props_foliage/tree_deciduous_03a.dx90.vtx",
+      "searchedVvd": "models/props_foliage/tree_deciduous_03a.vvd",
+      "meshUrl": "./models/meshes/props_foliage_tree_deciduous_03a_f70f2774d95aa813a1.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 247,
+      "vertexCount": 303,
+      "subMeshCount": 2,
+      "byteEstimate": 9024,
+      "bounds": {
+        "min": [
+          -74.76071166992188,
+          -74.66938018798828,
+          -1.344369649887085
+        ],
+        "max": [
+          83.68729400634766,
+          126.43077087402344,
+          249.74534606933594
         ]
       },
       "materials": [
@@ -2799,6 +3347,70 @@
       ]
     },
     {
+      "id": "props_interiors/lightbulb01a",
+      "model": "props_interiors/lightbulb01a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_interiors/lightbulb01a.mdl",
+      "searchedMdl": "models/props_interiors/lightbulb01a.mdl",
+      "searchedVtx": "models/props_interiors/lightbulb01a.dx90.vtx",
+      "searchedVvd": "models/props_interiors/lightbulb01a.vvd",
+      "meshUrl": "./models/meshes/props_interiors_lightbulb01a_ae52f4903d78de4e3f.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 103,
+      "vertexCount": 110,
+      "subMeshCount": 1,
+      "byteEstimate": 3436,
+      "bounds": {
+        "min": [
+          -6.694977760314941,
+          -31.99997901916504,
+          35.85127258300781
+        ],
+        "max": [
+          6.694989204406738,
+          31.999980926513672,
+          49.17485046386719
+        ]
+      },
+      "materials": [
+        "models/props_interiors/lightbulb01a"
+      ]
+    },
+    {
+      "id": "props_interiors/lights_florescent01a",
+      "model": "props_interiors/lights_florescent01a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_interiors/lights_florescent01a.mdl",
+      "searchedMdl": "models/props_interiors/lights_florescent01a.mdl",
+      "searchedVtx": "models/props_interiors/lights_florescent01a.dx90.vtx",
+      "searchedVvd": "models/props_interiors/lights_florescent01a.vvd",
+      "meshUrl": "./models/meshes/props_interiors_lights_florescent01a_c80ecafa321e1a6a68.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 168,
+      "vertexCount": 196,
+      "subMeshCount": 1,
+      "byteEstimate": 5936,
+      "bounds": {
+        "min": [
+          -4.005101203918457,
+          -33.0807991027832,
+          -3.2981998920440674
+        ],
+        "max": [
+          4.005101203918457,
+          33.0807991027832,
+          3.2981998920440674
+        ]
+      },
+      "materials": [
+        "models/props_interiors/florescentlight01a"
+      ]
+    },
+    {
       "id": "props_interiors/lightsconce02",
       "model": "props_interiors/lightsconce02",
       "placeholder": false,
@@ -2860,6 +3472,166 @@
       },
       "materials": [
         "models/props_interiors/sink_kitchen"
+      ]
+    },
+    {
+      "id": "props_lab/freightelevatorbutton",
+      "model": "props_lab/freightelevatorbutton",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_lab/freightelevatorbutton.mdl",
+      "searchedMdl": "models/props_lab/freightelevatorbutton.mdl",
+      "searchedVtx": "models/props_lab/freightelevatorbutton.dx90.vtx",
+      "searchedVvd": "models/props_lab/freightelevatorbutton.vvd",
+      "meshUrl": "./models/meshes/props_lab_freightelevatorbutton_6cdc3775aef8ed9ec2.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 90,
+      "vertexCount": 140,
+      "subMeshCount": 1,
+      "byteEstimate": 3880,
+      "bounds": {
+        "min": [
+          -5.499996185302734,
+          -4,
+          0
+        ],
+        "max": [
+          -0.19752687215805054,
+          3.999999761581421,
+          90.61865234375
+        ]
+      },
+      "materials": [
+        "models/props_lab/elevatorbutton_sheet"
+      ]
+    },
+    {
+      "id": "props_lab/handrail01_long_stairwell01",
+      "model": "props_lab/handrail01_long_stairwell01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_lab/handrail01_long_stairwell01.mdl",
+      "searchedMdl": "models/props_lab/handrail01_long_stairwell01.mdl",
+      "searchedVtx": "models/props_lab/handrail01_long_stairwell01.dx90.vtx",
+      "searchedVvd": "models/props_lab/handrail01_long_stairwell01.vvd",
+      "meshUrl": "./models/meshes/props_lab_handrail01_long_stairwell01_48d21fe24f62b93eec.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 270,
+      "vertexCount": 215,
+      "subMeshCount": 1,
+      "byteEstimate": 7540,
+      "bounds": {
+        "min": [
+          -0.7234032154083252,
+          -73.79879760742188,
+          0
+        ],
+        "max": [
+          0.7234032154083252,
+          74.27369689941406,
+          25.767900466918945
+        ]
+      },
+      "materials": [
+        "models/props_lab/handrail01_exterior_system"
+      ]
+    },
+    {
+      "id": "props_lab/lab_flourescentlight001a",
+      "model": "props_lab/lab_flourescentlight001a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_lab/lab_flourescentlight001a.mdl",
+      "searchedMdl": "models/props_lab/lab_flourescentlight001a.mdl",
+      "searchedVtx": "models/props_lab/lab_flourescentlight001a.dx90.vtx",
+      "searchedVvd": "models/props_lab/lab_flourescentlight001a.vvd",
+      "meshUrl": "./models/meshes/props_lab_lab_flourescentlight001a_08f24adc5181a69b55.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 261,
+      "vertexCount": 371,
+      "subMeshCount": 1,
+      "byteEstimate": 10552,
+      "bounds": {
+        "min": [
+          -6.222500801086426,
+          -33.0807991027832,
+          -32.57820129394531
+        ],
+        "max": [
+          6.222500801086426,
+          33.0807991027832,
+          32.57820129394531
+        ]
+      },
+      "materials": [
+        "models/props_wasteland/prison_objects004_on"
+      ]
+    },
+    {
+      "id": "props_lab/powerbox01a",
+      "model": "props_lab/powerbox01a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_lab/powerbox01a.mdl",
+      "searchedMdl": "models/props_lab/powerbox01a.mdl",
+      "searchedVtx": "models/props_lab/powerbox01a.dx90.vtx",
+      "searchedVvd": "models/props_lab/powerbox01a.vvd",
+      "meshUrl": "./models/meshes/props_lab_powerbox01a_144aad3e59004797f2.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 74,
+      "vertexCount": 149,
+      "subMeshCount": 1,
+      "byteEstimate": 3868,
+      "bounds": {
+        "min": [
+          -12.942001342773438,
+          -15.465299606323242,
+          -25.109600067138672
+        ],
+        "max": [
+          12.942001342773438,
+          15.356000900268555,
+          25.109600067138672
+        ]
+      },
+      "materials": [
+        "models/props_lab/powerbox001"
+      ]
+    },
+    {
+      "id": "props_lab/powerbox02d",
+      "model": "props_lab/powerbox02d",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_lab/powerbox02d.mdl",
+      "searchedMdl": "models/props_lab/powerbox02d.mdl",
+      "searchedVtx": "models/props_lab/powerbox02d.dx90.vtx",
+      "searchedVvd": "models/props_lab/powerbox02d.vvd",
+      "meshUrl": "./models/meshes/props_lab_powerbox02d_0bd691335893b3e26b.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 258,
+      "vertexCount": 397,
+      "subMeshCount": 1,
+      "byteEstimate": 11036,
+      "bounds": {
+        "min": [
+          -4.79580020904541,
+          -4.5630998611450195,
+          -6.962800025939941
+        ],
+        "max": [
+          4.79580020904541,
+          4.5630998611450195,
+          7.096700191497803
+        ]
+      },
+      "materials": [
+        "models/props_lab/powerbox001"
       ]
     },
     {
@@ -3151,6 +3923,38 @@
       ]
     },
     {
+      "id": "props_rooftop/scaffolding01a",
+      "model": "props_rooftop/scaffolding01a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_rooftop/scaffolding01a.mdl",
+      "searchedMdl": "models/props_rooftop/scaffolding01a.mdl",
+      "searchedVtx": "models/props_rooftop/scaffolding01a.dx90.vtx",
+      "searchedVvd": "models/props_rooftop/scaffolding01a.vvd",
+      "meshUrl": "./models/meshes/props_rooftop_scaffolding01a_bf6dc8f1ded490fd17.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 132,
+      "vertexCount": 144,
+      "subMeshCount": 1,
+      "byteEstimate": 4464,
+      "bounds": {
+        "min": [
+          -42.40800476074219,
+          -128,
+          -70.75340270996094
+        ],
+        "max": [
+          42.40800476074219,
+          128,
+          70.75340270996094
+        ]
+      },
+      "materials": [
+        "models/props_rooftop/scaffolding01a"
+      ]
+    },
+    {
       "id": "props_silo/camera",
       "model": "props_silo/camera",
       "placeholder": false,
@@ -3212,6 +4016,38 @@
       },
       "materials": [
         "models/props_street/awning_department_store"
+      ]
+    },
+    {
+      "id": "props_trainstation/trashcan_indoor001b",
+      "model": "props_trainstation/trashcan_indoor001b",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_trainstation/trashcan_indoor001b.mdl",
+      "searchedMdl": "models/props_trainstation/trashcan_indoor001b.mdl",
+      "searchedVtx": "models/props_trainstation/trashcan_indoor001b.dx90.vtx",
+      "searchedVvd": "models/props_trainstation/trashcan_indoor001b.vvd",
+      "meshUrl": "./models/meshes/props_trainstation_trashcan_indoor001b_36f3693f4b21b9b2ae.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 483,
+      "vertexCount": 627,
+      "subMeshCount": 1,
+      "byteEstimate": 18336,
+      "bounds": {
+        "min": [
+          -16.82042121887207,
+          -17.07501983642578,
+          -20.030298233032227
+        ],
+        "max": [
+          16.820425033569336,
+          17.084789276123047,
+          24.3555850982666
+        ]
+      },
+      "materials": [
+        "models/props_trainstation/lobby_fixtures002a"
       ]
     },
     {
@@ -3632,6 +4468,134 @@
       ]
     },
     {
+      "id": "props_wasteland/chimneypipe01a",
+      "model": "props_wasteland/chimneypipe01a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_wasteland/chimneypipe01a.mdl",
+      "searchedMdl": "models/props_wasteland/chimneypipe01a.mdl",
+      "searchedVtx": "models/props_wasteland/chimneypipe01a.dx90.vtx",
+      "searchedVvd": "models/props_wasteland/chimneypipe01a.vvd",
+      "meshUrl": "./models/meshes/props_wasteland_chimneypipe01a_49884a43c0f487d3ba.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 164,
+      "vertexCount": 184,
+      "subMeshCount": 1,
+      "byteEstimate": 5648,
+      "bounds": {
+        "min": [
+          -57.167999267578125,
+          -44.67230224609375,
+          -109.2385025024414
+        ],
+        "max": [
+          56.9536018371582,
+          44.67229461669922,
+          109.2385025024414
+        ]
+      },
+      "materials": [
+        "models/props_wasteland/quarryobjects01"
+      ]
+    },
+    {
+      "id": "props_wasteland/chimneypipe01b",
+      "model": "props_wasteland/chimneypipe01b",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_wasteland/chimneypipe01b.mdl",
+      "searchedMdl": "models/props_wasteland/chimneypipe01b.mdl",
+      "searchedVtx": "models/props_wasteland/chimneypipe01b.dx90.vtx",
+      "searchedVvd": "models/props_wasteland/chimneypipe01b.vvd",
+      "meshUrl": "./models/meshes/props_wasteland_chimneypipe01b_651089187fad77ddca.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 169,
+      "vertexCount": 184,
+      "subMeshCount": 1,
+      "byteEstimate": 5708,
+      "bounds": {
+        "min": [
+          -49.67129898071289,
+          -44.67230224609375,
+          -54.25559997558594
+        ],
+        "max": [
+          49.67129898071289,
+          44.67229461669922,
+          54.25559997558594
+        ]
+      },
+      "materials": [
+        "models/props_wasteland/quarryobjects01"
+      ]
+    },
+    {
+      "id": "props_wasteland/chimneypipe02a",
+      "model": "props_wasteland/chimneypipe02a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_wasteland/chimneypipe02a.mdl",
+      "searchedMdl": "models/props_wasteland/chimneypipe02a.mdl",
+      "searchedVtx": "models/props_wasteland/chimneypipe02a.dx90.vtx",
+      "searchedVvd": "models/props_wasteland/chimneypipe02a.vvd",
+      "meshUrl": "./models/meshes/props_wasteland_chimneypipe02a_0ce7c100851827c010.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 115,
+      "vertexCount": 158,
+      "subMeshCount": 1,
+      "byteEstimate": 4540,
+      "bounds": {
+        "min": [
+          -27.736000061035156,
+          -30.768699645996094,
+          -83.89530181884766
+        ],
+        "max": [
+          27.59600067138672,
+          30.768699645996094,
+          83.89530181884766
+        ]
+      },
+      "materials": [
+        "models/props_wasteland/quarryobjects01"
+      ]
+    },
+    {
+      "id": "props_wasteland/coolingtank01",
+      "model": "props_wasteland/coolingtank01",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_wasteland/coolingtank01.mdl",
+      "searchedMdl": "models/props_wasteland/coolingtank01.mdl",
+      "searchedVtx": "models/props_wasteland/coolingtank01.dx90.vtx",
+      "searchedVvd": "models/props_wasteland/coolingtank01.vvd",
+      "meshUrl": "./models/meshes/props_wasteland_coolingtank01_c45bc3369f3cccc798.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 606,
+      "vertexCount": 730,
+      "subMeshCount": 1,
+      "byteEstimate": 21872,
+      "bounds": {
+        "min": [
+          -98.06185150146484,
+          -98.08341979980469,
+          -99.11492919921875
+        ],
+        "max": [
+          98.0618667602539,
+          103.40669250488281,
+          136.2821044921875
+        ]
+      },
+      "materials": [
+        "models/props_wasteland/coolingtank01"
+      ]
+    },
+    {
       "id": "props_wasteland/coolingtank02",
       "model": "props_wasteland/coolingtank02",
       "placeholder": false,
@@ -3727,6 +4691,557 @@
       "materials": [
         "models/props_wasteland/fence_alpha",
         "models/props_wasteland/fence_sheet01"
+      ]
+    },
+    {
+      "id": "props_wasteland/exterior_fence001b",
+      "model": "props_wasteland/exterior_fence001b",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_wasteland/exterior_fence001b.mdl",
+      "searchedMdl": "models/props_wasteland/exterior_fence001b.mdl",
+      "searchedVtx": "models/props_wasteland/exterior_fence001b.dx90.vtx",
+      "searchedVvd": "models/props_wasteland/exterior_fence001b.vvd",
+      "meshUrl": "./models/meshes/props_wasteland_exterior_fence001b_3baeaff4db291745d7.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 276,
+      "vertexCount": 465,
+      "subMeshCount": 2,
+      "byteEstimate": 12612,
+      "bounds": {
+        "min": [
+          -14.69861888885498,
+          -129.52603149414062,
+          -76.07403564453125
+        ],
+        "max": [
+          14.698627471923828,
+          129.52603149414062,
+          74.14665222167969
+        ]
+      },
+      "materials": [
+        "models/props_wasteland/fence_alpha",
+        "models/props_wasteland/fence_sheet02"
+      ]
+    },
+    {
+      "id": "props_wasteland/exterior_fence002a",
+      "model": "props_wasteland/exterior_fence002a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_wasteland/exterior_fence002a.mdl",
+      "searchedMdl": "models/props_wasteland/exterior_fence002a.mdl",
+      "searchedVtx": "models/props_wasteland/exterior_fence002a.dx90.vtx",
+      "searchedVvd": "models/props_wasteland/exterior_fence002a.vvd",
+      "meshUrl": "./models/meshes/props_wasteland_exterior_fence002a_5f3c69a88bca358e40.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 208,
+      "vertexCount": 356,
+      "subMeshCount": 2,
+      "byteEstimate": 9616,
+      "bounds": {
+        "min": [
+          -13.003050804138184,
+          -16.22863006591797,
+          -76.07888793945312
+        ],
+        "max": [
+          13.028045654296875,
+          16.228633880615234,
+          74.1514892578125
+        ]
+      },
+      "materials": [
+        "models/props_wasteland/fence_alpha",
+        "models/props_wasteland/fence_sheet01"
+      ]
+    },
+    {
+      "id": "props_wasteland/exterior_fence002b",
+      "model": "props_wasteland/exterior_fence002b",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_wasteland/exterior_fence002b.mdl",
+      "searchedMdl": "models/props_wasteland/exterior_fence002b.mdl",
+      "searchedVtx": "models/props_wasteland/exterior_fence002b.dx90.vtx",
+      "searchedVvd": "models/props_wasteland/exterior_fence002b.vvd",
+      "meshUrl": "./models/meshes/props_wasteland_exterior_fence002b_72043c2695478ca1b2.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 196,
+      "vertexCount": 328,
+      "subMeshCount": 2,
+      "byteEstimate": 8912,
+      "bounds": {
+        "min": [
+          -13.003052711486816,
+          -32.66293716430664,
+          -76.07404327392578
+        ],
+        "max": [
+          13.028047561645508,
+          32.66293716430664,
+          74.14662170410156
+        ]
+      },
+      "materials": [
+        "models/props_wasteland/fence_alpha",
+        "models/props_wasteland/fence_sheet01"
+      ]
+    },
+    {
+      "id": "props_wasteland/exterior_fence002c",
+      "model": "props_wasteland/exterior_fence002c",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_wasteland/exterior_fence002c.mdl",
+      "searchedMdl": "models/props_wasteland/exterior_fence002c.mdl",
+      "searchedVtx": "models/props_wasteland/exterior_fence002c.dx90.vtx",
+      "searchedVvd": "models/props_wasteland/exterior_fence002c.vvd",
+      "meshUrl": "./models/meshes/props_wasteland_exterior_fence002c_122dcc596877c9d5f1.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 198,
+      "vertexCount": 324,
+      "subMeshCount": 2,
+      "byteEstimate": 8856,
+      "bounds": {
+        "min": [
+          -13.0030517578125,
+          -64.5698471069336,
+          -76.07405090332031
+        ],
+        "max": [
+          13.028055191040039,
+          64.56985473632812,
+          74.14664459228516
+        ]
+      },
+      "materials": [
+        "models/props_wasteland/fence_alpha",
+        "models/props_wasteland/fence_sheet01"
+      ]
+    },
+    {
+      "id": "props_wasteland/exterior_fence002d",
+      "model": "props_wasteland/exterior_fence002d",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_wasteland/exterior_fence002d.mdl",
+      "searchedMdl": "models/props_wasteland/exterior_fence002d.mdl",
+      "searchedVtx": "models/props_wasteland/exterior_fence002d.dx90.vtx",
+      "searchedVvd": "models/props_wasteland/exterior_fence002d.vvd",
+      "meshUrl": "./models/meshes/props_wasteland_exterior_fence002d_621f23e877bf93bd53.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 246,
+      "vertexCount": 419,
+      "subMeshCount": 2,
+      "byteEstimate": 11332,
+      "bounds": {
+        "min": [
+          -12.43874740600586,
+          -128.59310913085938,
+          -76.07405090332031
+        ],
+        "max": [
+          13.028059959411621,
+          128.59310913085938,
+          74.14663696289062
+        ]
+      },
+      "materials": [
+        "models/props_wasteland/fence_alpha",
+        "models/props_wasteland/fence_sheet01"
+      ]
+    },
+    {
+      "id": "props_wasteland/exterior_fence002e",
+      "model": "props_wasteland/exterior_fence002e",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_wasteland/exterior_fence002e.mdl",
+      "searchedMdl": "models/props_wasteland/exterior_fence002e.mdl",
+      "searchedVtx": "models/props_wasteland/exterior_fence002e.dx90.vtx",
+      "searchedVvd": "models/props_wasteland/exterior_fence002e.vvd",
+      "meshUrl": "./models/meshes/props_wasteland_exterior_fence002e_c157fe903dea930c74.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 432,
+      "vertexCount": 747,
+      "subMeshCount": 2,
+      "byteEstimate": 20124,
+      "bounds": {
+        "min": [
+          -12.929399490356445,
+          -256.42840576171875,
+          -76.09072875976562
+        ],
+        "max": [
+          13.10171890258789,
+          256.42840576171875,
+          74.16331481933594
+        ]
+      },
+      "materials": [
+        "models/props_wasteland/fence_alpha",
+        "models/props_wasteland/fence_sheet01"
+      ]
+    },
+    {
+      "id": "props_wasteland/horizontalcoolingtank04",
+      "model": "props_wasteland/horizontalcoolingtank04",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_wasteland/horizontalcoolingtank04.mdl",
+      "searchedMdl": "models/props_wasteland/horizontalcoolingtank04.mdl",
+      "searchedVtx": "models/props_wasteland/horizontalcoolingtank04.dx90.vtx",
+      "searchedVvd": "models/props_wasteland/horizontalcoolingtank04.vvd",
+      "meshUrl": "./models/meshes/props_wasteland_horizontalcoolingtank04_8c7428c6626158a757.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 284,
+      "vertexCount": 290,
+      "subMeshCount": 1,
+      "byteEstimate": 9208,
+      "bounds": {
+        "min": [
+          -157.17835998535156,
+          -48.000003814697266,
+          -60.370399475097656
+        ],
+        "max": [
+          157.2630615234375,
+          48.000003814697266,
+          60.37041091918945
+        ]
+      },
+      "materials": [
+        "models/props_wasteland/horizontalcoolingtank04"
+      ]
+    },
+    {
+      "id": "props_wasteland/interior_fence002c",
+      "model": "props_wasteland/interior_fence002c",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_wasteland/interior_fence002c.mdl",
+      "searchedMdl": "models/props_wasteland/interior_fence002c.mdl",
+      "searchedVtx": "models/props_wasteland/interior_fence002c.dx90.vtx",
+      "searchedVvd": "models/props_wasteland/interior_fence002c.vvd",
+      "meshUrl": "./models/meshes/props_wasteland_interior_fence002c_ec97a4deef66e5cce6.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 252,
+      "vertexCount": 367,
+      "subMeshCount": 2,
+      "byteEstimate": 10364,
+      "bounds": {
+        "min": [
+          -2.6538026332855225,
+          -64.57569885253906,
+          -64.13610076904297
+        ],
+        "max": [
+          2.5148026943206787,
+          64.65080261230469,
+          64.42900085449219
+        ]
+      },
+      "materials": [
+        "models/props_wasteland/fence_alpha",
+        "models/props_wasteland/prison_yard001"
+      ]
+    },
+    {
+      "id": "props_wasteland/kitchen_fridge001a",
+      "model": "props_wasteland/kitchen_fridge001a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_wasteland/kitchen_fridge001a.mdl",
+      "searchedMdl": "models/props_wasteland/kitchen_fridge001a.mdl",
+      "searchedVtx": "models/props_wasteland/kitchen_fridge001a.dx90.vtx",
+      "searchedVvd": "models/props_wasteland/kitchen_fridge001a.vvd",
+      "meshUrl": "./models/meshes/props_wasteland_kitchen_fridge001a_a8ba675bdb32cf4cd6.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 245,
+      "vertexCount": 366,
+      "subMeshCount": 1,
+      "byteEstimate": 10260,
+      "bounds": {
+        "min": [
+          -24.036691665649414,
+          -33.15943908691406,
+          0
+        ],
+        "max": [
+          24.56233024597168,
+          33.1219596862793,
+          112
+        ]
+      },
+      "materials": [
+        "models/props_wasteland/prisonkitchen01"
+      ]
+    },
+    {
+      "id": "props_wasteland/kitchen_stove001a",
+      "model": "props_wasteland/kitchen_stove001a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_wasteland/kitchen_stove001a.mdl",
+      "searchedMdl": "models/props_wasteland/kitchen_stove001a.mdl",
+      "searchedVtx": "models/props_wasteland/kitchen_stove001a.dx90.vtx",
+      "searchedVvd": "models/props_wasteland/kitchen_stove001a.vvd",
+      "meshUrl": "./models/meshes/props_wasteland_kitchen_stove001a_3744540ef143acc59a.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 565,
+      "vertexCount": 737,
+      "subMeshCount": 1,
+      "byteEstimate": 21520,
+      "bounds": {
+        "min": [
+          -18.632400512695312,
+          -31.30590057373047,
+          0
+        ],
+        "max": [
+          17.734201431274414,
+          33.4922981262207,
+          46.945098876953125
+        ]
+      },
+      "materials": [
+        "models/props_wasteland/prisonkitchen02"
+      ]
+    },
+    {
+      "id": "props_wasteland/lights_industrialcluster01a",
+      "model": "props_wasteland/lights_industrialcluster01a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_wasteland/lights_industrialcluster01a.mdl",
+      "searchedMdl": "models/props_wasteland/lights_industrialcluster01a.mdl",
+      "searchedVtx": "models/props_wasteland/lights_industrialcluster01a.dx90.vtx",
+      "searchedVvd": "models/props_wasteland/lights_industrialcluster01a.vvd",
+      "meshUrl": "./models/meshes/props_wasteland_lights_industrialcluster01a_848922463d7b522bcf.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 585,
+      "vertexCount": 1027,
+      "subMeshCount": 1,
+      "byteEstimate": 27560,
+      "bounds": {
+        "min": [
+          -33.96009826660156,
+          -42.87770080566406,
+          -384.0138854980469
+        ],
+        "max": [
+          33.959999084472656,
+          42.87770080566406,
+          384.0140075683594
+        ]
+      },
+      "materials": [
+        "models/props_wasteland/light_industrialcluster01a"
+      ]
+    },
+    {
+      "id": "props_wasteland/prison_doortrack001a",
+      "model": "props_wasteland/prison_doortrack001a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_wasteland/prison_doortrack001a.mdl",
+      "searchedMdl": "models/props_wasteland/prison_doortrack001a.mdl",
+      "searchedVtx": "models/props_wasteland/prison_doortrack001a.dx90.vtx",
+      "searchedVvd": "models/props_wasteland/prison_doortrack001a.vvd",
+      "meshUrl": "./models/meshes/props_wasteland_prison_doortrack001a_e658aabcf8fdc9bacc.json",
+      "lodUsed": 0,
+      "mdlVersion": 44,
+      "triCount": 66,
+      "vertexCount": 128,
+      "subMeshCount": 1,
+      "byteEstimate": 3352,
+      "bounds": {
+        "min": [
+          -2.9090030193328857,
+          -69.50589752197266,
+          -2.6212000846862793
+        ],
+        "max": [
+          2.9090030193328857,
+          69.50589752197266,
+          2.6212000846862793
+        ]
+      },
+      "materials": [
+        "models/props_wasteland/prison_objects002"
+      ]
+    },
+    {
+      "id": "props_wasteland/prison_flourescentlight001a",
+      "model": "props_wasteland/prison_flourescentlight001a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_wasteland/prison_flourescentlight001a.mdl",
+      "searchedMdl": "models/props_wasteland/prison_flourescentlight001a.mdl",
+      "searchedVtx": "models/props_wasteland/prison_flourescentlight001a.dx90.vtx",
+      "searchedVvd": "models/props_wasteland/prison_flourescentlight001a.vvd",
+      "meshUrl": "./models/meshes/props_wasteland_prison_flourescentlight001a_5f958f157dca924661.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 261,
+      "vertexCount": 371,
+      "subMeshCount": 1,
+      "byteEstimate": 10552,
+      "bounds": {
+        "min": [
+          -6.222500801086426,
+          -33.0807991027832,
+          -32.57820129394531
+        ],
+        "max": [
+          6.222500801086426,
+          33.0807991027832,
+          32.57820129394531
+        ]
+      },
+      "materials": [
+        "models/props_wasteland/prison_objects004"
+      ]
+    },
+    {
+      "id": "props_wasteland/prison_gate001a",
+      "model": "props_wasteland/prison_gate001a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_wasteland/prison_gate001a.mdl",
+      "searchedMdl": "models/props_wasteland/prison_gate001a.mdl",
+      "searchedVtx": "models/props_wasteland/prison_gate001a.dx90.vtx",
+      "searchedVvd": "models/props_wasteland/prison_gate001a.vvd",
+      "meshUrl": "./models/meshes/props_wasteland_prison_gate001a_aec44aec084db0f1cc.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 338,
+      "vertexCount": 499,
+      "subMeshCount": 1,
+      "byteEstimate": 14036,
+      "bounds": {
+        "min": [
+          -7.021495819091797,
+          -96.16609954833984,
+          -62.04209899902344
+        ],
+        "max": [
+          1.8521978855133057,
+          96.16609954833984,
+          62.04209899902344
+        ]
+      },
+      "materials": [
+        "models/props_wasteland/prison_objects004"
+      ]
+    },
+    {
+      "id": "props_wasteland/prison_lamp001b",
+      "model": "props_wasteland/prison_lamp001b",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_wasteland/prison_lamp001b.mdl",
+      "searchedMdl": "models/props_wasteland/prison_lamp001b.mdl",
+      "searchedVtx": "models/props_wasteland/prison_lamp001b.dx90.vtx",
+      "searchedVvd": "models/props_wasteland/prison_lamp001b.vvd",
+      "meshUrl": "./models/meshes/props_wasteland_prison_lamp001b_09c9a360a3019e4143.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 140,
+      "vertexCount": 127,
+      "subMeshCount": 1,
+      "byteEstimate": 4220,
+      "bounds": {
+        "min": [
+          -9.873200416564941,
+          -9.873200416564941,
+          -31.17340087890625
+        ],
+        "max": [
+          9.873200416564941,
+          9.873200416564941,
+          31.173500061035156
+        ]
+      },
+      "materials": [
+        "models/props_wasteland/prison_lamp001a"
+      ]
+    },
+    {
+      "id": "props_wasteland/prison_metalbed001a",
+      "model": "props_wasteland/prison_metalbed001a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_wasteland/prison_metalbed001a.mdl",
+      "searchedMdl": "models/props_wasteland/prison_metalbed001a.mdl",
+      "searchedVtx": "models/props_wasteland/prison_metalbed001a.dx90.vtx",
+      "searchedVvd": "models/props_wasteland/prison_metalbed001a.vvd",
+      "meshUrl": "./models/meshes/props_wasteland_prison_metalbed001a_9df3b409927765c786.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 173,
+      "vertexCount": 350,
+      "subMeshCount": 1,
+      "byteEstimate": 9076,
+      "bounds": {
+        "min": [
+          -9.38489818572998,
+          -39.69620132446289,
+          -12.31410026550293
+        ],
+        "max": [
+          16.864398956298828,
+          39.67890167236328,
+          5.4791998863220215
+        ]
+      },
+      "materials": [
+        "models/props_wasteland/prison_objects002"
+      ]
+    },
+    {
+      "id": "props_wasteland/prison_switchbox001a",
+      "model": "props_wasteland/prison_switchbox001a",
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "models/props_wasteland/prison_switchbox001a.mdl",
+      "searchedMdl": "models/props_wasteland/prison_switchbox001a.mdl",
+      "searchedVtx": "models/props_wasteland/prison_switchbox001a.dx90.vtx",
+      "searchedVvd": "models/props_wasteland/prison_switchbox001a.vvd",
+      "meshUrl": "./models/meshes/props_wasteland_prison_switchbox001a_209b5fb4a36bb1a955.json",
+      "lodUsed": 1,
+      "mdlVersion": 44,
+      "triCount": 165,
+      "vertexCount": 216,
+      "subMeshCount": 1,
+      "byteEstimate": 6300,
+      "bounds": {
+        "min": [
+          -1.584900140762329,
+          -3.260699987411499,
+          -53.105899810791016
+        ],
+        "max": [
+          1.495500087738037,
+          3.260699987411499,
+          53.105899810791016
+        ]
+      },
+      "materials": [
+        "models/props_wasteland/prison_objects004"
       ]
     },
     {

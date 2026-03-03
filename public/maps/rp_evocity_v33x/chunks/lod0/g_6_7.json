@@ -18,7 +18,7 @@
     "worldFaces": 57,
     "staticProps": 16,
     "placeholderWorldFaces": 0,
-    "placeholderStaticProps": 3
+    "placeholderStaticProps": 0
   },
   "stats": {
     "worldTris": 159,
@@ -31,7 +31,7 @@
     "totalVerts": 401,
     "totalBytes": 17592,
     "drawCallsBeforeInstancing": 73,
-    "drawCallsAfterInstancing": 30
+    "drawCallsAfterInstancing": 32
   },
   "world": {
     "meshes": [
@@ -2653,9 +2653,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/exterior_fence002e",
         "sourceModel": "props_wasteland/exterior_fence002e",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -1816,
           -102,
@@ -2673,9 +2673,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/exterior_fence002e",
         "sourceModel": "props_wasteland/exterior_fence002e",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -1726,
           390,
@@ -2713,9 +2713,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/utilitypole01b",
         "sourceModel": "props_c17/utilitypole01b",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -652,
           -326,

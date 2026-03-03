@@ -182,6 +182,7 @@ type ChunkPayload = {
       model: string;
       sourceModel?: string;
       placeholderModel: boolean;
+      placeholderReason?: string;
       origin: [number, number, number];
       angles: [number, number, number];
       scale: [number, number, number];
@@ -1653,6 +1654,44 @@ const ServerView3D: React.FC = () => {
           for (const [model, instances] of byModel.entries()) {
             const normalizedModel = normalizeModelId(model);
             const explicitPlaceholder = instances.some((item) => item.placeholderModel);
+            if (explicitPlaceholder) {
+              const placeholderBySource = new Map<string, { count: number; reasons: Set<string> }>();
+              for (const instance of instances) {
+                if (!instance.placeholderModel) continue;
+                const sourceModelId = normalizeModelId(instance.sourceModel || model || '__missing_model');
+                const sourceId = sourceModelId && sourceModelId !== '__placeholder_box__' ? sourceModelId : '__missing_model';
+                const reason = String(instance.placeholderReason || '').trim().toLowerCase();
+                const current = placeholderBySource.get(sourceId) || { count: 0, reasons: new Set<string>() };
+                current.count += 1;
+                if (reason) current.reasons.add(reason);
+                placeholderBySource.set(sourceId, current);
+              }
+
+              for (const [sourceId, sourceMeta] of placeholderBySource.entries()) {
+                const def = modelDefs.get(sourceId);
+                const status = String(def?.status || '').trim().toLowerCase();
+                const code = status ? `model_${status}` : 'model_explicit_placeholder';
+                const reasonSuffix = sourceMeta.reasons.size > 0
+                  ? ` | reason=${Array.from(sourceMeta.reasons).sort((a, b) => a.localeCompare(b)).join(',')}`
+                  : '';
+                const message = def?.error
+                  ? `modelo em placeholder (${status || 'placeholder'}): ${def.error} | instances=${sourceMeta.count}${reasonSuffix}`
+                  : `modelo em placeholder (${status || 'placeholder'}) no chunk runtime | instances=${sourceMeta.count}${reasonSuffix}`;
+                pushDiagnostic(
+                  def?.error ? 'error' : 'warn',
+                  code,
+                  'model',
+                  sourceId,
+                  message,
+                  withRoots(modelRootsScanned, [
+                    def?.sourcePath || '',
+                    def?.searchedMdl || (sourceId && sourceId !== '__missing_model' ? `models/${sourceId}.mdl` : ''),
+                    def?.searchedVtx || '',
+                    def?.searchedVvd || '',
+                  ]),
+                );
+              }
+            }
             const loadedModel = !explicitPlaceholder && normalizedModel !== '__placeholder_box__'
               ? (modelCache.get(normalizedModel) || null)
               : null;

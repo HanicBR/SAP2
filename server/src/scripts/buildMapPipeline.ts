@@ -126,7 +126,18 @@ type AuditReport = {
 };
 
 type FaceAnnotated = WorldFace & { material: string; placeholderMaterial: boolean };
-type PropAnnotated = PropInstance & { sourceModel: string; placeholderModel: boolean; model: string };
+type PropPlaceholderReason =
+  | 'missing_source_model'
+  | 'missing_model_ref'
+  | 'strict_audit_missing_model'
+  | 'model_not_exported'
+  | 'missing_prop_entry';
+type PropAnnotated = PropInstance & {
+  sourceModel: string;
+  placeholderModel: boolean;
+  placeholderReason: PropPlaceholderReason | undefined;
+  model: string;
+};
 
 type Chunk = {
   id: string;
@@ -1114,11 +1125,21 @@ const run = () => {
 
   const props: PropAnnotated[] = importData.staticProps.map((item) => {
     const sourceModel = normalizeModelName(item.model);
-    const placeholderModel = !sourceModel || sourceModel.startsWith('__missing_model_ref_') || missingModels.has(sourceModel);
+    const strictAuditModelPlaceholder = options.assetResolutionMode === 'strict';
+    const missingByStrictAudit = strictAuditModelPlaceholder && missingModels.has(sourceModel);
+    const placeholderReason: PropPlaceholderReason | undefined = !sourceModel
+      ? 'missing_source_model'
+      : sourceModel.startsWith('__missing_model_ref_')
+        ? 'missing_model_ref'
+        : missingByStrictAudit
+          ? 'strict_audit_missing_model'
+          : undefined;
+    const placeholderModel = !!placeholderReason;
     return {
       ...item,
       sourceModel,
       placeholderModel,
+      placeholderReason,
       model: placeholderModel ? '__placeholder_box__' : sourceModel,
     };
   });
@@ -1355,6 +1376,7 @@ const run = () => {
     const runtimeModel = normalizeModelName(prop.model);
     if (!runtimeModel || !availableModelSet.has(runtimeModel)) {
       prop.placeholderModel = true;
+      prop.placeholderReason = 'model_not_exported';
       prop.model = '__placeholder_box__';
     }
   }
@@ -1481,6 +1503,7 @@ const run = () => {
           model: '__placeholder_box__',
           sourceModel: '__missing_model',
           placeholderModel: true,
+          placeholderReason: 'missing_prop_entry' as const,
           origin: [0, 0, 0] as [number, number, number],
           angles: [0, 0, 0] as [number, number, number],
           scale: [1, 1, 1] as [number, number, number],
@@ -1490,6 +1513,7 @@ const run = () => {
         model: prop.model,
         sourceModel: prop.sourceModel,
         placeholderModel: prop.placeholderModel,
+        placeholderReason: prop.placeholderReason,
         origin: prop.origin,
         angles: prop.angles,
         scale: prop.scale,
@@ -1835,6 +1859,31 @@ const run = () => {
       totalInstances: props.length,
       placeholderInstances: props.filter((item) => item.placeholderModel).length,
       uniqueModels: Array.from(new Set(props.map((item) => item.sourceModel))).length,
+      placeholderByReason: Array.from(
+        props
+          .filter((item) => item.placeholderModel)
+          .reduce((acc, item) => {
+            const reason = String(item.placeholderReason || 'unknown').trim() || 'unknown';
+            acc.set(reason, (acc.get(reason) || 0) + 1);
+            return acc;
+          }, new Map<string, number>())
+          .entries(),
+      )
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+        .map(([reason, count]) => ({ reason, count })),
+      topPlaceholderModels: Array.from(
+        props
+          .filter((item) => item.placeholderModel)
+          .reduce((acc, item) => {
+            const model = String(item.sourceModel || '__missing_model').trim() || '__missing_model';
+            acc.set(model, (acc.get(model) || 0) + 1);
+            return acc;
+          }, new Map<string, number>())
+          .entries(),
+      )
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+        .slice(0, 50)
+        .map(([model, count]) => ({ model, count })),
     },
     instancing: {
       batches,
@@ -2051,6 +2100,31 @@ const run = () => {
         staticProps: props.filter((item) => item.placeholderModel).length,
         missingWorldMaterialsCount: missingWorldMaterials.size,
         missingModelsCount: missingModels.size,
+        staticPropsByReason: Array.from(
+          props
+            .filter((item) => item.placeholderModel)
+            .reduce((acc, item) => {
+              const reason = String(item.placeholderReason || 'unknown').trim() || 'unknown';
+              acc.set(reason, (acc.get(reason) || 0) + 1);
+              return acc;
+            }, new Map<string, number>())
+            .entries(),
+        )
+          .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+          .map(([reason, count]) => ({ reason, count })),
+        topPlaceholderModels: Array.from(
+          props
+            .filter((item) => item.placeholderModel)
+            .reduce((acc, item) => {
+              const model = String(item.sourceModel || '__missing_model').trim() || '__missing_model';
+              acc.set(model, (acc.get(model) || 0) + 1);
+              return acc;
+            }, new Map<string, number>())
+            .entries(),
+        )
+          .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+          .slice(0, 50)
+          .map(([model, count]) => ({ model, count })),
       },
       materials: {
         total: materialIndexEntries.length,

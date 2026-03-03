@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-03-03T03:26:39.347Z",
-  "total": 1352,
+  "generatedAt": "2026-03-03T03:57:37.518Z",
+  "total": 1384,
   "rootsScanned": [
     "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
     "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GarrysMod\\garrysmod",
@@ -14766,6 +14766,22 @@
       "textureHeight": 512
     },
     {
+      "id": "models/props_buildings/watertower_001c",
+      "material": "models/props_buildings/watertower_001c",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_buildings/watertower_001c.vmt",
+      "resolvedBaseTexture": "models/props_buildings/watertower_001c",
+      "searchedVmt": "materials/models/props_buildings/watertower_001c.vmt",
+      "searchedVtf": "materials/models/props_buildings/watertower_001c.vtf",
+      "textureUrl": "./materials/basecolor/models_props_buildings_watertower_00_c1971159d1521e5fed.png",
+      "textureWidth": 512,
+      "textureHeight": 512
+    },
+    {
       "id": "models/props_c17/awning001a",
       "material": "models/props_c17/awning001a",
       "usage": [
@@ -14782,6 +14798,86 @@
       "textureHeight": 256
     },
     {
+      "id": "models/props_c17/cagebulb01",
+      "material": "models/props_c17/cagebulb01",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_c17/cagebulb01.vmt",
+      "resolvedBaseTexture": "models/props_c17/cagebulb01",
+      "searchedVmt": "materials/models/props_c17/cagebulb01.vmt",
+      "searchedVtf": "materials/models/props_c17/cagebulb01.vtf",
+      "textureUrl": "./materials/basecolor/models_props_c17_cagebulb01_8632eca45da2e37837.png",
+      "textureWidth": 128,
+      "textureHeight": 256
+    },
+    {
+      "id": "models/props_c17/fence_alpha",
+      "material": "models/props_c17/fence_alpha",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_c17/fence_alpha.vmt",
+      "resolvedBaseTexture": "models/props_c17/fence_alpha",
+      "searchedVmt": "materials/models/props_c17/fence_alpha.vmt",
+      "searchedVtf": "materials/models/props_c17/fence_alpha.vtf",
+      "textureUrl": "./materials/basecolor/models_props_c17_fence_alpha_f1856b1da38c82ed85.png",
+      "textureWidth": 512,
+      "textureHeight": 512
+    },
+    {
+      "id": "models/props_c17/fence_composite01",
+      "material": "models/props_c17/fence_composite01",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_c17/fence_composite01.vmt",
+      "resolvedBaseTexture": "models/props_c17/fence_composite01",
+      "searchedVmt": "materials/models/props_c17/fence_composite01.vmt",
+      "searchedVtf": "materials/models/props_c17/fence_composite01.vtf",
+      "textureUrl": "./materials/basecolor/models_props_c17_fence_composite01_383b7a85614ee18cf0.png",
+      "textureWidth": 512,
+      "textureHeight": 512
+    },
+    {
+      "id": "models/props_c17/gasmeters001a",
+      "material": "models/props_c17/gasmeters001a",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_c17/gasmeters001a.vmt",
+      "resolvedBaseTexture": "models/props_c17/gasmeters001a",
+      "searchedVmt": "materials/models/props_c17/gasmeters001a.vmt",
+      "searchedVtf": "materials/models/props_c17/gasmeters001a.vtf",
+      "textureUrl": "./materials/basecolor/models_props_c17_gasmeters001a_680204c781e896fc80.png",
+      "textureWidth": 256,
+      "textureHeight": 256
+    },
+    {
+      "id": "models/props_c17/handrailmetal001a",
+      "material": "models/props_c17/handrailmetal001a",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_c17/handrailmetal001a.vmt",
+      "resolvedBaseTexture": "models/props_c17/handrailmetal001a",
+      "searchedVmt": "materials/models/props_c17/handrailmetal001a.vmt",
+      "searchedVtf": "materials/models/props_c17/handrailmetal001a.vtf",
+      "textureUrl": "./materials/basecolor/models_props_c17_handrailmetal001a_a51ca75bd64adc9bfc.png",
+      "textureWidth": 128,
+      "textureHeight": 512
+    },
+    {
       "id": "models/props_c17/hospital_surgerytable01",
       "material": "models/props_c17/hospital_surgerytable01",
       "usage": [
@@ -14794,6 +14890,102 @@
       "searchedVmt": "materials/models/props_c17/hospital_surgerytable01.vmt",
       "searchedVtf": "materials/models/props_c17/hospital_surgerytable01.vtf",
       "textureUrl": "./materials/basecolor/models_props_c17_hospital_surgerytab_074551254e49ec7deb.png",
+      "textureWidth": 512,
+      "textureHeight": 512
+    },
+    {
+      "id": "models/props_c17/lamppost03a",
+      "material": "models/props_c17/lamppost03a",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_c17/lamppost03a.vmt",
+      "resolvedBaseTexture": "models/props_c17/lamppost03a",
+      "searchedVmt": "materials/models/props_c17/lamppost03a.vmt",
+      "searchedVtf": "materials/models/props_c17/lamppost03a.vtf",
+      "textureUrl": "./materials/basecolor/models_props_c17_lamppost03a_78c6f68bf41e299645.png",
+      "textureWidth": 512,
+      "textureHeight": 512
+    },
+    {
+      "id": "models/props_c17/light_domelight02_on",
+      "material": "models/props_c17/light_domelight02_on",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_c17/light_domelight02_on.vmt",
+      "resolvedBaseTexture": "models/props_c17/light_domelight02_on",
+      "searchedVmt": "materials/models/props_c17/light_domelight02_on.vmt",
+      "searchedVtf": "materials/models/props_c17/light_domelight02_on.vtf",
+      "textureUrl": "./materials/basecolor/models_props_c17_light_domelight02_o_76569435b1e18cc5d8.png",
+      "textureWidth": 256,
+      "textureHeight": 512
+    },
+    {
+      "id": "models/props_c17/utility_poles001",
+      "material": "models/props_c17/utility_poles001",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_c17/utility_poles001.vmt",
+      "resolvedBaseTexture": "models/props_c17/utility_poles001",
+      "searchedVmt": "materials/models/props_c17/utility_poles001.vmt",
+      "searchedVtf": "materials/models/props_c17/utility_poles001.vtf",
+      "textureUrl": "./materials/basecolor/models_props_c17_utility_poles001_1ece0ca0e4f636d550.png",
+      "textureWidth": 512,
+      "textureHeight": 512
+    },
+    {
+      "id": "models/props_canal/generator01",
+      "material": "models/props_canal/generator01",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_canal/generator01.vmt",
+      "resolvedBaseTexture": "models/props_canal/generator01",
+      "searchedVmt": "materials/models/props_canal/generator01.vmt",
+      "searchedVtf": "materials/models/props_canal/generator01.vtf",
+      "textureUrl": "./materials/basecolor/models_props_canal_generator01_ec8f3b2940900ed29b.png",
+      "textureWidth": 1024,
+      "textureHeight": 1024
+    },
+    {
+      "id": "models/props_canal/generator02",
+      "material": "models/props_canal/generator02",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_canal/generator02.vmt",
+      "resolvedBaseTexture": "models/props_canal/generator02",
+      "searchedVmt": "materials/models/props_canal/generator02.vmt",
+      "searchedVtf": "materials/models/props_canal/generator02.vtf",
+      "textureUrl": "./materials/basecolor/models_props_canal_generator02_d9936c620ca8131d0c.png",
+      "textureWidth": 1024,
+      "textureHeight": 1024
+    },
+    {
+      "id": "models/props_canal/generator02_handrails",
+      "material": "models/props_canal/generator02_handrails",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_canal/generator02_handrails.vmt",
+      "resolvedBaseTexture": "models/props_canal/generator02_handrails",
+      "searchedVmt": "materials/models/props_canal/generator02_handrails.vmt",
+      "searchedVtf": "materials/models/props_canal/generator02_handrails.vtf",
+      "textureUrl": "./materials/basecolor/models_props_canal_generator02_handr_23bc757f8714950f70.png",
       "textureWidth": 512,
       "textureHeight": 512
     },
@@ -14906,6 +15098,22 @@
       "searchedVmt": "materials/models/props_exteriors/woodbeam001.vmt",
       "searchedVtf": "materials/wood/woodbeam001.vtf",
       "textureUrl": "./materials/basecolor/wood_woodbeam001_9420a11be9c4499b9a.png",
+      "textureWidth": 512,
+      "textureHeight": 512
+    },
+    {
+      "id": "models/props_foliage/driftwood_01a",
+      "material": "models/props_foliage/driftwood_01a",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_foliage/driftwood_01a.vmt",
+      "resolvedBaseTexture": "models/props_foliage/driftwood_01a",
+      "searchedVmt": "materials/models/props_foliage/driftwood_01a.vmt",
+      "searchedVtf": "materials/models/props_foliage/driftwood_01a.vtf",
+      "textureUrl": "./materials/basecolor/models_props_foliage_driftwood_01a_d5531cdd390b9d0716.png",
       "textureWidth": 512,
       "textureHeight": 512
     },
@@ -15070,6 +15278,38 @@
       "textureHeight": 512
     },
     {
+      "id": "models/props_interiors/florescentlight01a",
+      "material": "models/props_interiors/florescentlight01a",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_interiors/florescentlight01a.vmt",
+      "resolvedBaseTexture": "models/props_interiors/florescentlight01a",
+      "searchedVmt": "materials/models/props_interiors/florescentlight01a.vmt",
+      "searchedVtf": "materials/models/props_interiors/florescentlight01a.vtf",
+      "textureUrl": "./materials/basecolor/models_props_interiors_florescentlig_43afd6b6a3c8ccb681.png",
+      "textureWidth": 128,
+      "textureHeight": 256
+    },
+    {
+      "id": "models/props_interiors/lightbulb01a",
+      "material": "models/props_interiors/lightbulb01a",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_interiors/lightbulb01a.vmt",
+      "resolvedBaseTexture": "models/props_interiors/lightbulb01a",
+      "searchedVmt": "materials/models/props_interiors/lightbulb01a.vmt",
+      "searchedVtf": "materials/models/props_interiors/lightbulb01a.vtf",
+      "textureUrl": "./materials/basecolor/models_props_interiors_lightbulb01a_075eda3f729fa7914d.png",
+      "textureWidth": 128,
+      "textureHeight": 128
+    },
+    {
       "id": "models/props_interiors/sconce02a",
       "material": "models/props_interiors/sconce02a",
       "usage": [
@@ -15114,6 +15354,54 @@
       "searchedVmt": "materials/models/props_interiors/tub01a.vmt",
       "searchedVtf": "materials/models/props_interiors/tub01a.vtf",
       "textureUrl": "./materials/basecolor/models_props_interiors_tub01a_a5aafdb9eb77551ea0.png",
+      "textureWidth": 512,
+      "textureHeight": 512
+    },
+    {
+      "id": "models/props_lab/elevatorbutton_sheet",
+      "material": "models/props_lab/elevatorbutton_sheet",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_lab/elevatorbutton_sheet.vmt",
+      "resolvedBaseTexture": "models/props_lab/elevatorbutton_sheet",
+      "searchedVmt": "materials/models/props_lab/elevatorbutton_sheet.vmt",
+      "searchedVtf": "materials/models/props_lab/elevatorbutton_sheet.vtf",
+      "textureUrl": "./materials/basecolor/models_props_lab_elevatorbutton_shee_d8eb22e8cdb8717373.png",
+      "textureWidth": 64,
+      "textureHeight": 512
+    },
+    {
+      "id": "models/props_lab/handrail01_exterior_system",
+      "material": "models/props_lab/handrail01_exterior_system",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_lab/handrail01_exterior_system.vmt",
+      "resolvedBaseTexture": "models/props_lab/handrail01_exterior_system",
+      "searchedVmt": "materials/models/props_lab/handrail01_exterior_system.vmt",
+      "searchedVtf": "materials/models/props_lab/handrail01_exterior_system.vtf",
+      "textureUrl": "./materials/basecolor/models_props_lab_handrail01_exterior_e87a7848b04e2bfcd9.png",
+      "textureWidth": 32,
+      "textureHeight": 512
+    },
+    {
+      "id": "models/props_lab/powerbox001",
+      "material": "models/props_lab/powerbox001",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_lab/powerbox001.vmt",
+      "resolvedBaseTexture": "models/props_lab/powerbox001",
+      "searchedVmt": "materials/models/props_lab/powerbox001.vmt",
+      "searchedVtf": "materials/models/props_lab/powerbox001.vtf",
+      "textureUrl": "./materials/basecolor/models_props_lab_powerbox001_421d7f969faa21ab08.png",
       "textureWidth": 512,
       "textureHeight": 512
     },
@@ -15228,6 +15516,22 @@
       "textureHeight": 512
     },
     {
+      "id": "models/props_rooftop/scaffolding01a",
+      "material": "models/props_rooftop/scaffolding01a",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_rooftop/scaffolding01a.vmt",
+      "resolvedBaseTexture": "models/props_rooftop/scaffolding01a",
+      "searchedVmt": "materials/models/props_rooftop/scaffolding01a.vmt",
+      "searchedVtf": "materials/models/props_rooftop/scaffolding01a.vtf",
+      "textureUrl": "./materials/basecolor/models_props_rooftop_scaffolding01a_ac7b29867dd6464268.png",
+      "textureWidth": 512,
+      "textureHeight": 64
+    },
+    {
       "id": "models/props_silo/camera",
       "material": "models/props_silo/camera",
       "usage": [
@@ -15258,6 +15562,22 @@
       "textureUrl": "./materials/basecolor/models_props_street_awning_departmen_821ed60160454ca24a.png",
       "textureWidth": 256,
       "textureHeight": 256
+    },
+    {
+      "id": "models/props_trainstation/lobby_fixtures002a",
+      "material": "models/props_trainstation/lobby_fixtures002a",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_trainstation/lobby_fixtures002a.vmt",
+      "resolvedBaseTexture": "models/props_trainstation/lobby_fixtures002a",
+      "searchedVmt": "materials/models/props_trainstation/lobby_fixtures002a.vmt",
+      "searchedVtf": "materials/models/props_trainstation/lobby_fixtures002a.vtf",
+      "textureUrl": "./materials/basecolor/models_props_trainstation_lobby_fixt_a4891fa929e5bdf5ad.png",
+      "textureWidth": 512,
+      "textureHeight": 512
     },
     {
       "id": "models/props_unique/atm",
@@ -15452,6 +15772,22 @@
       "textureHeight": 1024
     },
     {
+      "id": "models/props_wasteland/coolingtank01",
+      "material": "models/props_wasteland/coolingtank01",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_wasteland/coolingtank01.vmt",
+      "resolvedBaseTexture": "models/props_wasteland/coolingtank01",
+      "searchedVmt": "materials/models/props_wasteland/coolingtank01.vmt",
+      "searchedVtf": "materials/models/props_wasteland/coolingtank01.vtf",
+      "textureUrl": "./materials/basecolor/models_props_wasteland_coolingtank01_583132b1ce123cd9d3.png",
+      "textureWidth": 512,
+      "textureHeight": 512
+    },
+    {
       "id": "models/props_wasteland/coolingtank02",
       "material": "models/props_wasteland/coolingtank02",
       "usage": [
@@ -15478,10 +15814,7 @@
       "sourcePath": "materials/models/props_wasteland/fence_alpha.vmt",
       "resolvedBaseTexture": "models/props_c17/fence_alpha",
       "searchedVmt": "materials/models/props_wasteland/fence_alpha.vmt",
-      "searchedVtf": "materials/models/props_c17/fence_alpha.vtf",
-      "textureUrl": "./materials/basecolor/models_props_c17_fence_alpha_f1856b1da38c82ed85.png",
-      "textureWidth": 512,
-      "textureHeight": 512
+      "textureUrl": "./materials/basecolor/models_props_c17_fence_alpha_f1856b1da38c82ed85.png"
     },
     {
       "id": "models/props_wasteland/fence_sheet01",
@@ -15496,6 +15829,182 @@
       "searchedVmt": "materials/models/props_wasteland/fence_sheet01.vmt",
       "searchedVtf": "materials/models/props_wasteland/fence_sheet01.vtf",
       "textureUrl": "./materials/basecolor/models_props_wasteland_fence_sheet01_61ef9a63e8806c407b.png",
+      "textureWidth": 512,
+      "textureHeight": 512
+    },
+    {
+      "id": "models/props_wasteland/fence_sheet02",
+      "material": "models/props_wasteland/fence_sheet02",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_wasteland/fence_sheet02.vmt",
+      "resolvedBaseTexture": "models/props_wasteland/fence_sheet02",
+      "searchedVmt": "materials/models/props_wasteland/fence_sheet02.vmt",
+      "searchedVtf": "materials/models/props_wasteland/fence_sheet02.vtf",
+      "textureUrl": "./materials/basecolor/models_props_wasteland_fence_sheet02_c89d3dda369cd90d6c.png",
+      "textureWidth": 512,
+      "textureHeight": 512
+    },
+    {
+      "id": "models/props_wasteland/horizontalcoolingtank04",
+      "material": "models/props_wasteland/horizontalcoolingtank04",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_wasteland/horizontalcoolingtank04.vmt",
+      "resolvedBaseTexture": "models/props_wasteland/horizontalcoolingtank04",
+      "searchedVmt": "materials/models/props_wasteland/horizontalcoolingtank04.vmt",
+      "searchedVtf": "materials/models/props_wasteland/horizontalcoolingtank04.vtf",
+      "textureUrl": "./materials/basecolor/models_props_wasteland_horizontalcoo_a3bbcf1b35fd9ced47.png",
+      "textureWidth": 512,
+      "textureHeight": 512
+    },
+    {
+      "id": "models/props_wasteland/light_industrialcluster01a",
+      "material": "models/props_wasteland/light_industrialcluster01a",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_wasteland/light_industrialcluster01a.vmt",
+      "resolvedBaseTexture": "models/props_wasteland/light_industrialcluster01a",
+      "searchedVmt": "materials/models/props_wasteland/light_industrialcluster01a.vmt",
+      "searchedVtf": "materials/models/props_wasteland/light_industrialcluster01a.vtf",
+      "textureUrl": "./materials/basecolor/models_props_wasteland_light_industr_d6fe2781306f434d3d.png",
+      "textureWidth": 512,
+      "textureHeight": 512
+    },
+    {
+      "id": "models/props_wasteland/prison_lamp001a",
+      "material": "models/props_wasteland/prison_lamp001a",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_wasteland/prison_lamp001a.vmt",
+      "resolvedBaseTexture": "models/props_wasteland/prison_lamp001a",
+      "searchedVmt": "materials/models/props_wasteland/prison_lamp001a.vmt",
+      "searchedVtf": "materials/models/props_wasteland/prison_lamp001a.vtf",
+      "textureUrl": "./materials/basecolor/models_props_wasteland_prison_lamp00_c98dd358ae0f04125f.png",
+      "textureWidth": 128,
+      "textureHeight": 256
+    },
+    {
+      "id": "models/props_wasteland/prison_objects002",
+      "material": "models/props_wasteland/prison_objects002",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_wasteland/prison_objects002.vmt",
+      "resolvedBaseTexture": "models/props_wasteland/prison_objects002",
+      "searchedVmt": "materials/models/props_wasteland/prison_objects002.vmt",
+      "searchedVtf": "materials/models/props_wasteland/prison_objects002.vtf",
+      "textureUrl": "./materials/basecolor/models_props_wasteland_prison_object_6fd7bab100b05a0b34.png",
+      "textureWidth": 512,
+      "textureHeight": 512
+    },
+    {
+      "id": "models/props_wasteland/prison_objects004",
+      "material": "models/props_wasteland/prison_objects004",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_wasteland/prison_objects004.vmt",
+      "resolvedBaseTexture": "models/props_wasteland/prison_objects004",
+      "searchedVmt": "materials/models/props_wasteland/prison_objects004.vmt",
+      "searchedVtf": "materials/models/props_wasteland/prison_objects004.vtf",
+      "textureUrl": "./materials/basecolor/models_props_wasteland_prison_object_c1a7792095d381f819.png",
+      "textureWidth": 512,
+      "textureHeight": 512
+    },
+    {
+      "id": "models/props_wasteland/prison_objects004_on",
+      "material": "models/props_wasteland/prison_objects004_on",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_wasteland/prison_objects004_on.vmt",
+      "resolvedBaseTexture": "models/props_wasteland/prison_objects004_on",
+      "searchedVmt": "materials/models/props_wasteland/prison_objects004_on.vmt",
+      "searchedVtf": "materials/models/props_wasteland/prison_objects004_on.vtf",
+      "textureUrl": "./materials/basecolor/models_props_wasteland_prison_object_24e8216605f962ef40.png",
+      "textureWidth": 512,
+      "textureHeight": 512
+    },
+    {
+      "id": "models/props_wasteland/prison_yard001",
+      "material": "models/props_wasteland/prison_yard001",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_wasteland/prison_yard001.vmt",
+      "resolvedBaseTexture": "models/props_wasteland/prison_yard001",
+      "searchedVmt": "materials/models/props_wasteland/prison_yard001.vmt",
+      "searchedVtf": "materials/models/props_wasteland/prison_yard001.vtf",
+      "textureUrl": "./materials/basecolor/models_props_wasteland_prison_yard00_69d3323097aa796925.png",
+      "textureWidth": 512,
+      "textureHeight": 512
+    },
+    {
+      "id": "models/props_wasteland/prisonkitchen01",
+      "material": "models/props_wasteland/prisonkitchen01",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_wasteland/prisonkitchen01.vmt",
+      "resolvedBaseTexture": "models/props_wasteland/prisonkitchen01",
+      "searchedVmt": "materials/models/props_wasteland/prisonkitchen01.vmt",
+      "searchedVtf": "materials/models/props_wasteland/prisonkitchen01.vtf",
+      "textureUrl": "./materials/basecolor/models_props_wasteland_prisonkitchen_22e53d88d53abe9ddc.png",
+      "textureWidth": 512,
+      "textureHeight": 512
+    },
+    {
+      "id": "models/props_wasteland/prisonkitchen02",
+      "material": "models/props_wasteland/prisonkitchen02",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_wasteland/prisonkitchen02.vmt",
+      "resolvedBaseTexture": "models/props_wasteland/prisonkitchen02",
+      "searchedVmt": "materials/models/props_wasteland/prisonkitchen02.vmt",
+      "searchedVtf": "materials/models/props_wasteland/prisonkitchen02.vtf",
+      "textureUrl": "./materials/basecolor/models_props_wasteland_prisonkitchen_b7dc25e02c254a3a53.png",
+      "textureWidth": 512,
+      "textureHeight": 512
+    },
+    {
+      "id": "models/props_wasteland/quarryobjects01",
+      "material": "models/props_wasteland/quarryobjects01",
+      "usage": [
+        "model"
+      ],
+      "placeholder": false,
+      "status": "ok",
+      "sourcePath": "materials/models/props_wasteland/quarryobjects01.vmt",
+      "resolvedBaseTexture": "models/props_wasteland/quarryobjects01",
+      "searchedVmt": "materials/models/props_wasteland/quarryobjects01.vmt",
+      "searchedVtf": "materials/models/props_wasteland/quarryobjects01.vtf",
+      "textureUrl": "./materials/basecolor/models_props_wasteland_quarryobjects_a965f64bd5355779f0.png",
       "textureWidth": 512,
       "textureHeight": 512
     },

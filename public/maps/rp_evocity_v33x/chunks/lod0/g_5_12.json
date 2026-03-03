@@ -18,7 +18,7 @@
     "worldFaces": 137,
     "staticProps": 12,
     "placeholderWorldFaces": 0,
-    "placeholderStaticProps": 4
+    "placeholderStaticProps": 0
   },
   "stats": {
     "worldTris": 359,
@@ -5765,9 +5765,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/light_domelight02_on",
         "sourceModel": "props_c17/light_domelight02_on",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -3842,
           11585,
@@ -5785,9 +5785,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/light_domelight02_on",
         "sourceModel": "props_c17/light_domelight02_on",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -3844,
           11751,
@@ -5805,9 +5805,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/light_domelight02_on",
         "sourceModel": "props_c17/light_domelight02_on",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -3646,
           11613,
@@ -5825,9 +5825,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/light_domelight02_on",
         "sourceModel": "props_c17/light_domelight02_on",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -3648,
           11779,

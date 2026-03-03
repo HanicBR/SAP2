@@ -18,7 +18,7 @@
     "worldFaces": 274,
     "staticProps": 41,
     "placeholderWorldFaces": 0,
-    "placeholderStaticProps": 6
+    "placeholderStaticProps": 0
   },
   "stats": {
     "worldTris": 749,
@@ -31,7 +31,7 @@
     "totalVerts": 1625,
     "totalBytes": 69672,
     "drawCallsBeforeInstancing": 315,
-    "drawCallsAfterInstancing": 53
+    "drawCallsAfterInstancing": 55
   },
   "world": {
     "meshes": [
@@ -12087,9 +12087,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_lab/freightelevatorbutton",
         "sourceModel": "props_lab/freightelevatorbutton",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -1716,
           3482,
@@ -12107,9 +12107,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_lab/freightelevatorbutton",
         "sourceModel": "props_lab/freightelevatorbutton",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -1329,
           3482,
@@ -12127,9 +12127,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_lab/freightelevatorbutton",
         "sourceModel": "props_lab/freightelevatorbutton",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -952,
           3482,
@@ -12227,9 +12227,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_lab/freightelevatorbutton",
         "sourceModel": "props_lab/freightelevatorbutton",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -634,
           3482,
@@ -12247,9 +12247,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/exterior_fence002e",
         "sourceModel": "props_wasteland/exterior_fence002e",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -446,
           2957,
@@ -12267,9 +12267,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/exterior_fence002e",
         "sourceModel": "props_wasteland/exterior_fence002e",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -446,
           3466,

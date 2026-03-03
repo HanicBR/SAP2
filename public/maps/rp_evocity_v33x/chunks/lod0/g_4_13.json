@@ -18,7 +18,7 @@
     "worldFaces": 410,
     "staticProps": 55,
     "placeholderWorldFaces": 0,
-    "placeholderStaticProps": 10
+    "placeholderStaticProps": 0
   },
   "stats": {
     "worldTris": 1169,
@@ -31,7 +31,7 @@
     "totalVerts": 2429,
     "totalBytes": 105288,
     "drawCallsBeforeInstancing": 465,
-    "drawCallsAfterInstancing": 69
+    "drawCallsAfterInstancing": 70
   },
   "world": {
     "meshes": [
@@ -18087,9 +18087,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/light_domelight02_on",
         "sourceModel": "props_c17/light_domelight02_on",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -4556,
           13795,
@@ -18227,9 +18227,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/light_domelight02_on",
         "sourceModel": "props_c17/light_domelight02_on",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -5874.2001953125,
           13056,
@@ -18247,9 +18247,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/light_domelight02_on",
         "sourceModel": "props_c17/light_domelight02_on",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -5874.39990234375,
           12890,
@@ -18267,9 +18267,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/light_domelight02_on",
         "sourceModel": "props_c17/light_domelight02_on",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -6034,
           12564,
@@ -18287,9 +18287,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/light_domelight02_on",
         "sourceModel": "props_c17/light_domelight02_on",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -6036,
           12730,
@@ -18307,9 +18307,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/light_domelight02_on",
         "sourceModel": "props_c17/light_domelight02_on",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -5838,
           12592,
@@ -18327,9 +18327,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/light_domelight02_on",
         "sourceModel": "props_c17/light_domelight02_on",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -5840,
           12758,
@@ -18367,9 +18367,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/light_domelight02_on",
         "sourceModel": "props_c17/light_domelight02_on",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -4514.2001953125,
           12077,
@@ -18387,9 +18387,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/light_domelight02_on",
         "sourceModel": "props_c17/light_domelight02_on",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -4514.39990234375,
           11911,
@@ -18727,9 +18727,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_foliage/driftwood_01a",
         "sourceModel": "props_foliage/driftwood_01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -5267.1298828125,
           12762,

@@ -18,7 +18,7 @@
     "worldFaces": 70,
     "staticProps": 14,
     "placeholderWorldFaces": 0,
-    "placeholderStaticProps": 4
+    "placeholderStaticProps": 0
   },
   "stats": {
     "worldTris": 198,
@@ -31,7 +31,7 @@
     "totalVerts": 450,
     "totalBytes": 19632,
     "drawCallsBeforeInstancing": 84,
-    "drawCallsAfterInstancing": 23
+    "drawCallsAfterInstancing": 24
   },
   "world": {
     "meshes": [
@@ -3274,9 +3274,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/lamppost03a_off",
         "sourceModel": "props_c17/lamppost03a_off",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           4926.81982421875,
           4096.89013671875,
@@ -3294,9 +3294,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/prison_lamp001b",
         "sourceModel": "props_wasteland/prison_lamp001b",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           4177,
           5511.3798828125,
@@ -3314,9 +3314,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/prison_lamp001b",
         "sourceModel": "props_wasteland/prison_lamp001b",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           4177,
           5651.3798828125,
@@ -3334,9 +3334,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/lamppost03a_off",
         "sourceModel": "props_c17/lamppost03a_off",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           4394,
           5385,

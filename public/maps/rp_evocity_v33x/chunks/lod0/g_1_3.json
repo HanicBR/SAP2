@@ -18,7 +18,7 @@
     "worldFaces": 30,
     "staticProps": 5,
     "placeholderWorldFaces": 0,
-    "placeholderStaticProps": 1
+    "placeholderStaticProps": 0
   },
   "stats": {
     "worldTris": 70,
@@ -1254,9 +1254,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_rooftop/scaffolding01a",
         "sourceModel": "props_rooftop/scaffolding01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -11167.7998046875,
           -8507.669921875,

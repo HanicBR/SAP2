@@ -18,7 +18,7 @@
     "worldFaces": 270,
     "staticProps": 31,
     "placeholderWorldFaces": 0,
-    "placeholderStaticProps": 9
+    "placeholderStaticProps": 0
   },
   "stats": {
     "worldTris": 750,
@@ -31,7 +31,7 @@
     "totalVerts": 1538,
     "totalBytes": 65904,
     "drawCallsBeforeInstancing": 301,
-    "drawCallsAfterInstancing": 42
+    "drawCallsAfterInstancing": 45
   },
   "world": {
     "meshes": [
@@ -11642,9 +11642,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/lamppost03a_off",
         "sourceModel": "props_c17/lamppost03a_off",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -213.82000732421875,
           6525.31982421875,
@@ -11662,9 +11662,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/exterior_fence002e",
         "sourceModel": "props_wasteland/exterior_fence002e",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -440,
           5745,
@@ -11682,9 +11682,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/exterior_fence002e",
         "sourceModel": "props_wasteland/exterior_fence002e",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -440,
           6253,
@@ -11702,9 +11702,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/exterior_fence002e",
         "sourceModel": "props_wasteland/exterior_fence002e",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -440,
           6762,
@@ -11722,9 +11722,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/exterior_fence002e",
         "sourceModel": "props_wasteland/exterior_fence002e",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -440,
           7271,
@@ -12142,9 +12142,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_lab/freightelevatorbutton",
         "sourceModel": "props_lab/freightelevatorbutton",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -1780,
           6147,
@@ -12162,9 +12162,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_lab/freightelevatorbutton",
         "sourceModel": "props_lab/freightelevatorbutton",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -1702,
           6147,
@@ -12182,9 +12182,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_lab/freightelevatorbutton",
         "sourceModel": "props_lab/freightelevatorbutton",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -1783,
           7183,
@@ -12202,9 +12202,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_lab/freightelevatorbutton",
         "sourceModel": "props_lab/freightelevatorbutton",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -1705,
           7183,

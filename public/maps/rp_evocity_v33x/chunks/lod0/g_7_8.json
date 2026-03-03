@@ -18,7 +18,7 @@
     "worldFaces": 77,
     "staticProps": 19,
     "placeholderWorldFaces": 0,
-    "placeholderStaticProps": 8
+    "placeholderStaticProps": 0
   },
   "stats": {
     "worldTris": 208,
@@ -31,7 +31,7 @@
     "totalVerts": 514,
     "totalBytes": 22272,
     "drawCallsBeforeInstancing": 96,
-    "drawCallsAfterInstancing": 25
+    "drawCallsAfterInstancing": 30
   },
   "world": {
     "meshes": [
@@ -3352,9 +3352,9 @@
   "props": {
     "instances": [
       {
-        "model": "__placeholder_box__",
+        "model": "props_trainstation/trashcan_indoor001b",
         "sourceModel": "props_trainstation/trashcan_indoor001b",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           1997,
           3481,
@@ -3372,9 +3372,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/lamppost03a_off",
         "sourceModel": "props_c17/lamppost03a_off",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           1268.8900146484375,
           2933.110107421875,
@@ -3392,9 +3392,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/fence03a",
         "sourceModel": "props_c17/fence03a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           1969,
           3586,
@@ -3412,9 +3412,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/fence03a",
         "sourceModel": "props_c17/fence03a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           1708,
           3586,
@@ -3432,9 +3432,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/fence03a",
         "sourceModel": "props_c17/fence03a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           1448,
           3586,
@@ -3452,9 +3452,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/fence03a",
         "sourceModel": "props_c17/fence03a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           1188,
           3586,
@@ -3472,9 +3472,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/fence03a",
         "sourceModel": "props_c17/fence03a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           928,
           3586,
@@ -3492,9 +3492,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/fence01a",
         "sourceModel": "props_c17/fence01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           770,
           3647,

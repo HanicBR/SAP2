@@ -18,7 +18,7 @@
     "worldFaces": 66,
     "staticProps": 10,
     "placeholderWorldFaces": 0,
-    "placeholderStaticProps": 4
+    "placeholderStaticProps": 0
   },
   "stats": {
     "worldTris": 155,
@@ -31,7 +31,7 @@
     "totalVerts": 367,
     "totalBytes": 15000,
     "drawCallsBeforeInstancing": 76,
-    "drawCallsAfterInstancing": 10
+    "drawCallsAfterInstancing": 11
   },
   "world": {
     "meshes": [
@@ -2425,9 +2425,9 @@
   "props": {
     "instances": [
       {
-        "model": "__placeholder_box__",
+        "model": "props_canal/rock_riverbed01a",
         "sourceModel": "props_canal/rock_riverbed01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -1245,
           13314,
@@ -2445,9 +2445,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_canal/rock_riverbed01d",
         "sourceModel": "props_canal/rock_riverbed01d",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -910,
           12949,
@@ -2485,9 +2485,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_canal/rock_riverbed01a",
         "sourceModel": "props_canal/rock_riverbed01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -2041.989990234375,
           12454.5,
@@ -2565,9 +2565,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_canal/rock_riverbed01d",
         "sourceModel": "props_canal/rock_riverbed01d",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -499,
           12037,

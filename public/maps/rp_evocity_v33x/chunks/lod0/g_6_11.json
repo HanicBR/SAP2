@@ -18,7 +18,7 @@
     "worldFaces": 145,
     "staticProps": 24,
     "placeholderWorldFaces": 0,
-    "placeholderStaticProps": 7
+    "placeholderStaticProps": 0
   },
   "stats": {
     "worldTris": 390,
@@ -31,7 +31,7 @@
     "totalVerts": 872,
     "totalBytes": 37296,
     "drawCallsBeforeInstancing": 169,
-    "drawCallsAfterInstancing": 33
+    "drawCallsAfterInstancing": 40
   },
   "world": {
     "meshes": [
@@ -6210,9 +6210,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/exterior_fence002e",
         "sourceModel": "props_wasteland/exterior_fence002e",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -440,
           7780,
@@ -6230,9 +6230,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/exterior_fence002e",
         "sourceModel": "props_wasteland/exterior_fence002e",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -440,
           8289,
@@ -6530,9 +6530,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/gasmeter001a",
         "sourceModel": "props_c17/gasmeter001a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -1451.7099609375,
           8235.509765625,
@@ -6590,9 +6590,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_lab/freightelevatorbutton",
         "sourceModel": "props_lab/freightelevatorbutton",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -1879,
           8251,
@@ -6610,9 +6610,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/exterior_fence002e",
         "sourceModel": "props_wasteland/exterior_fence002e",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -440,
           8798,
@@ -6630,9 +6630,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/exterior_fence002c",
         "sourceModel": "props_wasteland/exterior_fence002c",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -440,
           9115,
@@ -6650,9 +6650,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/exterior_fence002a",
         "sourceModel": "props_wasteland/exterior_fence002a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -440,
           9196,

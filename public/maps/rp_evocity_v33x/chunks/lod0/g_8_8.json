@@ -18,7 +18,7 @@
     "worldFaces": 94,
     "staticProps": 6,
     "placeholderWorldFaces": 0,
-    "placeholderStaticProps": 2
+    "placeholderStaticProps": 0
   },
   "stats": {
     "worldTris": 241,
@@ -31,7 +31,7 @@
     "totalVerts": 477,
     "totalBytes": 19656,
     "drawCallsBeforeInstancing": 100,
-    "drawCallsAfterInstancing": 28
+    "drawCallsAfterInstancing": 29
   },
   "world": {
     "meshes": [
@@ -4003,9 +4003,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_trainstation/trashcan_indoor001b",
         "sourceModel": "props_trainstation/trashcan_indoor001b",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           3953.06005859375,
           3490.60009765625,
@@ -4023,9 +4023,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/lamppost03a_off",
         "sourceModel": "props_c17/lamppost03a_off",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           3572.110107421875,
           2933.110107421875,

@@ -18,7 +18,7 @@
     "worldFaces": 1801,
     "staticProps": 194,
     "placeholderWorldFaces": 0,
-    "placeholderStaticProps": 2
+    "placeholderStaticProps": 0
   },
   "stats": {
     "worldTris": 5148,
@@ -31,7 +31,7 @@
     "totalVerts": 10302,
     "totalBytes": 445152,
     "drawCallsBeforeInstancing": 1995,
-    "drawCallsAfterInstancing": 139
+    "drawCallsAfterInstancing": 140
   },
   "world": {
     "meshes": [
@@ -78568,9 +78568,9 @@
   "props": {
     "instances": [
       {
-        "model": "__placeholder_box__",
+        "model": "props_buildings/watertower_001c",
         "sourceModel": "props_buildings/watertower_001c",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -11292.2998046875,
           -10399.2998046875,
@@ -79328,9 +79328,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_rooftop/scaffolding01a",
         "sourceModel": "props_rooftop/scaffolding01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -10429.7001953125,
           -10597,

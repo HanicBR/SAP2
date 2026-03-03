@@ -18,7 +18,7 @@
     "worldFaces": 1225,
     "staticProps": 158,
     "placeholderWorldFaces": 12,
-    "placeholderStaticProps": 3
+    "placeholderStaticProps": 0
   },
   "stats": {
     "worldTris": 3622,
@@ -31,7 +31,7 @@
     "totalVerts": 7336,
     "totalBytes": 321456,
     "drawCallsBeforeInstancing": 1383,
-    "drawCallsAfterInstancing": 96
+    "drawCallsAfterInstancing": 97
   },
   "world": {
     "meshes": [
@@ -58346,9 +58346,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/lamppost03a_off",
         "sourceModel": "props_c17/lamppost03a_off",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -5730.10986328125,
           -9853.8896484375,
@@ -58366,9 +58366,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/lamppost03a_off",
         "sourceModel": "props_c17/lamppost03a_off",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -5730.10986328125,
           -8884.8896484375,
@@ -58406,9 +58406,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_rooftop/scaffolding01a",
         "sourceModel": "props_rooftop/scaffolding01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -5567.60009765625,
           -10435.5,

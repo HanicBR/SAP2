@@ -18,7 +18,7 @@
     "worldFaces": 93,
     "staticProps": 13,
     "placeholderWorldFaces": 0,
-    "placeholderStaticProps": 5
+    "placeholderStaticProps": 0
   },
   "stats": {
     "worldTris": 237,
@@ -31,7 +31,7 @@
     "totalVerts": 527,
     "totalBytes": 22056,
     "drawCallsBeforeInstancing": 106,
-    "drawCallsAfterInstancing": 25
+    "drawCallsAfterInstancing": 30
   },
   "world": {
     "meshes": [
@@ -3751,9 +3751,9 @@
   "props": {
     "instances": [
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/exterior_fence002e",
         "sourceModel": "props_wasteland/exterior_fence002e",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -4202,
           130,
@@ -3771,9 +3771,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/exterior_fence002d",
         "sourceModel": "props_wasteland/exterior_fence002d",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -4202,
           -256,
@@ -3891,9 +3891,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/utilitypole01a",
         "sourceModel": "props_c17/utilitypole01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -5486,
           -276.2229919433594,
@@ -3911,9 +3911,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/utilitypole01b",
         "sourceModel": "props_c17/utilitypole01b",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -4539,
           -372,
@@ -3951,9 +3951,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/exterior_fence002d",
         "sourceModel": "props_wasteland/exterior_fence002d",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -4201,
           515,

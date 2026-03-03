@@ -18,7 +18,7 @@
     "worldFaces": 428,
     "staticProps": 37,
     "placeholderWorldFaces": 0,
-    "placeholderStaticProps": 28
+    "placeholderStaticProps": 0
   },
   "stats": {
     "worldTris": 1138,
@@ -31,7 +31,7 @@
     "totalVerts": 2290,
     "totalBytes": 96144,
     "drawCallsBeforeInstancing": 465,
-    "drawCallsAfterInstancing": 26
+    "drawCallsAfterInstancing": 32
   },
   "world": {
     "meshes": [
@@ -17338,9 +17338,9 @@
   "props": {
     "instances": [
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/exterior_fence002e",
         "sourceModel": "props_wasteland/exterior_fence002e",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -3618,
           -371,
@@ -17358,9 +17358,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/exterior_fence002e",
         "sourceModel": "props_wasteland/exterior_fence002e",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -3106,
           -371,
@@ -17378,9 +17378,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/exterior_fence002e",
         "sourceModel": "props_wasteland/exterior_fence002e",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -2081,
           -371,
@@ -17398,9 +17398,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/exterior_fence002e",
         "sourceModel": "props_wasteland/exterior_fence002e",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -2593,
           -371,
@@ -17578,9 +17578,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/fence01a",
         "sourceModel": "props_c17/fence01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -3244,
           51.00170135498047,
@@ -17598,9 +17598,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/fence01a",
         "sourceModel": "props_c17/fence01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -3244,
           -182.9980010986328,
@@ -17638,9 +17638,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_lab/lab_flourescentlight001a",
         "sourceModel": "props_lab/lab_flourescentlight001a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -3504,
           -65.99829864501953,
@@ -17658,9 +17658,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_lab/lab_flourescentlight001a",
         "sourceModel": "props_lab/lab_flourescentlight001a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -3636,
           -65.99839782714844,
@@ -17678,9 +17678,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_lab/lab_flourescentlight001a",
         "sourceModel": "props_lab/lab_flourescentlight001a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -3372,
           -65.99829864501953,
@@ -17698,9 +17698,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_lab/lab_flourescentlight001a",
         "sourceModel": "props_lab/lab_flourescentlight001a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -2400,
           126.00199890136719,
@@ -17718,9 +17718,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_lab/lab_flourescentlight001a",
         "sourceModel": "props_lab/lab_flourescentlight001a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -2532,
           126.00199890136719,
@@ -17738,9 +17738,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_lab/lab_flourescentlight001a",
         "sourceModel": "props_lab/lab_flourescentlight001a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -2664,
           126.00199890136719,
@@ -17758,9 +17758,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_lab/lab_flourescentlight001a",
         "sourceModel": "props_lab/lab_flourescentlight001a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -2796,
           126.00199890136719,
@@ -17778,9 +17778,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_lab/lab_flourescentlight001a",
         "sourceModel": "props_lab/lab_flourescentlight001a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -2928,
           126.00199890136719,
@@ -17798,9 +17798,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_lab/lab_flourescentlight001a",
         "sourceModel": "props_lab/lab_flourescentlight001a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -3060,
           126.00199890136719,
@@ -17818,9 +17818,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -2873.10009765625,
           -63.99829864501953,
@@ -17838,9 +17838,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -3144,
           -63.99829864501953,
@@ -17858,9 +17858,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -2600,
           -63.998199462890625,
@@ -17878,9 +17878,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -2329.10009765625,
           -63.998199462890625,
@@ -17898,9 +17898,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -2872.800048828125,
           315.7919921875,
@@ -17918,9 +17918,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -3143.699951171875,
           315.7919921875,
@@ -17938,9 +17938,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -2599.699951171875,
           315.7919921875,
@@ -17958,9 +17958,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -2328.800048828125,
           315.7919921875,
@@ -17978,9 +17978,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -2149,
           318.00201416015625,
@@ -17998,9 +17998,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -2149,
           398.00201416015625,
@@ -18018,9 +18018,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -2149,
           238.0019989013672,
@@ -18038,9 +18038,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/utilitypole01b",
         "sourceModel": "props_c17/utilitypole01b",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -3465,
           -379,
@@ -18058,9 +18058,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/utilitypole01b",
         "sourceModel": "props_c17/utilitypole01b",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -2478,
           -292,

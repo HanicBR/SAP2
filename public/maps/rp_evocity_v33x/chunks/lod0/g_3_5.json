@@ -18,7 +18,7 @@
     "worldFaces": 312,
     "staticProps": 53,
     "placeholderWorldFaces": 0,
-    "placeholderStaticProps": 5
+    "placeholderStaticProps": 0
   },
   "stats": {
     "worldTris": 926,
@@ -31,7 +31,7 @@
     "totalVerts": 1974,
     "totalBytes": 87024,
     "drawCallsBeforeInstancing": 365,
-    "drawCallsAfterInstancing": 67
+    "drawCallsAfterInstancing": 68
   },
   "world": {
     "meshes": [
@@ -14682,9 +14682,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/kitchen_fridge001a",
         "sourceModel": "props_wasteland/kitchen_fridge001a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -7888,
           -4052,
@@ -14702,9 +14702,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/kitchen_fridge001a",
         "sourceModel": "props_wasteland/kitchen_fridge001a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -7887,
           -4120,
@@ -14722,9 +14722,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/kitchen_stove001a",
         "sourceModel": "props_wasteland/kitchen_stove001a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -7559,
           -4103,
@@ -14742,9 +14742,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/kitchen_stove001a",
         "sourceModel": "props_wasteland/kitchen_stove001a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -7559,
           -4168,
@@ -14762,9 +14762,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/kitchen_stove001a",
         "sourceModel": "props_wasteland/kitchen_stove001a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -7559,
           -4233,

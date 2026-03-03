@@ -18,7 +18,7 @@
     "worldFaces": 515,
     "staticProps": 31,
     "placeholderWorldFaces": 0,
-    "placeholderStaticProps": 18
+    "placeholderStaticProps": 0
   },
   "stats": {
     "worldTris": 1618,
@@ -24454,9 +24454,9 @@
   "props": {
     "instances": [
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           5312,
           -8021,
@@ -24474,9 +24474,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           5312,
           -7887,
@@ -24494,9 +24494,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           5312,
           -7686,
@@ -24514,9 +24514,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           5312,
           -7485,
@@ -24534,9 +24534,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           5312,
           -7351,
@@ -24554,9 +24554,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           4886,
           -8021,
@@ -24574,9 +24574,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           4886,
           -7887,
@@ -24594,9 +24594,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           4886,
           -7686,
@@ -24614,9 +24614,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           4886,
           -7485,
@@ -24634,9 +24634,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           4886,
           -7351,
@@ -24654,9 +24654,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           4460,
           -8021,
@@ -24674,9 +24674,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           4460,
           -7887,
@@ -24694,9 +24694,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           4460,
           -7686,
@@ -24714,9 +24714,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           4460,
           -7485,
@@ -24734,9 +24734,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           4460,
           -7351,
@@ -24954,9 +24954,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           5584,
           -7430,
@@ -24974,9 +24974,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           5923,
           -7324,
@@ -24994,9 +24994,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_interiors/lights_florescent01a",
         "sourceModel": "props_interiors/lights_florescent01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           5923,
           -7535,

@@ -18,7 +18,7 @@
     "worldFaces": 398,
     "staticProps": 31,
     "placeholderWorldFaces": 0,
-    "placeholderStaticProps": 10
+    "placeholderStaticProps": 0
   },
   "stats": {
     "worldTris": 1140,
@@ -31,7 +31,7 @@
     "totalVerts": 2184,
     "totalBytes": 93984,
     "drawCallsBeforeInstancing": 429,
-    "drawCallsAfterInstancing": 40
+    "drawCallsAfterInstancing": 42
   },
   "world": {
     "meshes": [
@@ -17416,9 +17416,9 @@
   "props": {
     "instances": [
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/light_domelight02_on",
         "sourceModel": "props_c17/light_domelight02_on",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           8302,
           3202,
@@ -17436,9 +17436,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/light_domelight02_on",
         "sourceModel": "props_c17/light_domelight02_on",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           8402,
           3202,
@@ -17456,9 +17456,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/light_domelight02_on",
         "sourceModel": "props_c17/light_domelight02_on",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           8402,
           3045,
@@ -17476,9 +17476,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/light_domelight02_on",
         "sourceModel": "props_c17/light_domelight02_on",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           8302,
           3045,
@@ -17556,9 +17556,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/gasmeter003a",
         "sourceModel": "props_c17/gasmeter003a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           9737,
           3123,
@@ -17856,9 +17856,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_foliage/driftwood_01a",
         "sourceModel": "props_foliage/driftwood_01a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           8581,
           2516,
@@ -17936,9 +17936,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/light_domelight02_on",
         "sourceModel": "props_c17/light_domelight02_on",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           10020,
           3270,
@@ -17956,9 +17956,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/light_domelight02_on",
         "sourceModel": "props_c17/light_domelight02_on",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           9823,
           3267,
@@ -17976,9 +17976,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/light_domelight02_on",
         "sourceModel": "props_c17/light_domelight02_on",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           10028,
           3058,
@@ -17996,9 +17996,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/light_domelight02_on",
         "sourceModel": "props_c17/light_domelight02_on",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           9831,
           3055,

@@ -18,7 +18,7 @@
     "worldFaces": 408,
     "staticProps": 47,
     "placeholderWorldFaces": 0,
-    "placeholderStaticProps": 5
+    "placeholderStaticProps": 0
   },
   "stats": {
     "worldTris": 1252,
@@ -31,7 +31,7 @@
     "totalVerts": 2444,
     "totalBytes": 108192,
     "drawCallsBeforeInstancing": 455,
-    "drawCallsAfterInstancing": 40
+    "drawCallsAfterInstancing": 41
   },
   "world": {
     "meshes": [
@@ -19316,9 +19316,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/lamppost03a_off",
         "sourceModel": "props_c17/lamppost03a_off",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -4049.110107421875,
           -7162.10986328125,
@@ -19336,9 +19336,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_c17/lamppost03a_off",
         "sourceModel": "props_c17/lamppost03a_off",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -4049,
           -8089,
@@ -20076,9 +20076,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/prison_switchbox001a",
         "sourceModel": "props_wasteland/prison_switchbox001a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -3906,
           -7743,
@@ -20096,9 +20096,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/prison_switchbox001a",
         "sourceModel": "props_wasteland/prison_switchbox001a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -3906,
           -7849,
@@ -20116,9 +20116,9 @@
         ]
       },
       {
-        "model": "__placeholder_box__",
+        "model": "props_wasteland/prison_switchbox001a",
         "sourceModel": "props_wasteland/prison_switchbox001a",
-        "placeholderModel": true,
+        "placeholderModel": false,
         "origin": [
           -3906,
           -8139,
