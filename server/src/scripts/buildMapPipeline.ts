@@ -1187,6 +1187,7 @@ const computeWorldMeshesStats = (worldMeshes: ChunkWorldMesh[]) => {
 };
 
 type TextureClass = 'diffuse' | 'normal' | 'alpha' | 'emissive';
+type MaterialKind = 'default' | 'tool' | 'sky' | 'water';
 type TextureCompressionMode = 'etc1s' | 'uastc';
 type TextureProfile = {
   className: TextureClass;
@@ -1203,6 +1204,16 @@ const classifyTextureClass = (materialRaw: string, resolvedBaseTextureRaw?: stri
   if (/(^|[\/_.-])(glow|emissive|selfillum|self_illum|light|neon)([\/_.-]|$)/.test(key)) return 'emissive';
   if (/(^|[\/_.-])(glass|window|grate|fence|chain|foliage|leaf|alpha|translucent|masked)([\/_.-]|$)/.test(key)) return 'alpha';
   return 'diffuse';
+};
+
+const classifyMaterialKind = (materialRaw: string, resolvedBaseTextureRaw?: string): MaterialKind => {
+  const material = normalizeMaterialName(materialRaw);
+  const base = normalizeMaterialName(String(resolvedBaseTextureRaw || ''));
+  const key = `${material}|${base}`.toLowerCase();
+  if (/(^|[\/_.-])(water|river|ocean|slime)([\/_.-]|$)/.test(key)) return 'water';
+  if (/(^|[\/_.-])(toolsskybox|skybox|sky)([\/_.-]|$)/.test(key)) return 'sky';
+  if (material.startsWith('tools/') || material.startsWith('editor/')) return 'tool';
+  return 'default';
 };
 
 const buildTextureProfiles = (options: Options): Record<TextureClass, TextureProfile> => ({
@@ -1691,6 +1702,7 @@ const run = () => {
     const texturePath = textureFile ? path.join(materialsTextureDir, textureFile) : '';
     const hasTexture = !!texturePath && fs.existsSync(texturePath);
     const textureClass = classifyTextureClass(material, exported?.resolvedBaseTexture);
+    const materialKind = classifyMaterialKind(material, exported?.resolvedBaseTexture);
     const profile = textureProfiles[textureClass];
     const sourceW = Math.max(1, Math.floor(Number(exported?.textureWidth || 1)));
     const sourceH = Math.max(1, Math.floor(Number(exported?.textureHeight || 1)));
@@ -1720,6 +1732,7 @@ const run = () => {
       usage: Array.from(materialUsage.get(material) || []).sort((a, b) => a.localeCompare(b)),
       placeholder: !hasTexture,
       status: exported?.status || 'not_exported',
+      materialKind,
       textureClass,
       textureProfile: {
         maxSize: profile.maxSize,

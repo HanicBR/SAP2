@@ -3,6 +3,9 @@ import { Link, useParams, useSearchParams } from 'react-router-dom';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { KTX2Loader } from 'three/examples/jsm/loaders/KTX2Loader.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { SAOPass } from 'three/examples/jsm/postprocessing/SAOPass.js';
 import { Icons } from '../../components/Icon';
 import { ApiService } from '../../services/api';
 import {
@@ -117,6 +120,7 @@ type MaterialIndex = {
     material: string;
     placeholder: boolean;
     status: string;
+    materialKind?: 'default' | 'tool' | 'sky' | 'water';
     textureUrl?: string;
     fallbackTextureUrl?: string;
     ktx2Url?: string;
@@ -286,6 +290,10 @@ const CAMERA_MOVE_SLOW_MULTIPLIER = 0.5;
 const MODEL_CACHE_MAX_BYTES = 220 * 1024 * 1024;
 const MODEL_CACHE_EVICT_GRACE_MS = 18000;
 const MODEL_CACHE_SWEEP_INTERVAL_MS = 1800;
+const VIEWER_POLISH_SAO_ENABLED = true;
+const VIEWER_FOG_DENSITY = 0.000022;
+const WATER_NORMAL_SCROLL_X = 0.012;
+const WATER_NORMAL_SCROLL_Y = 0.007;
 const PLAYER_MARKER_COLORS = [
   0x22c55e,
   0x38bdf8,
@@ -334,15 +342,23 @@ const normalizeMaterialKey = (raw: string): string => {
   return value;
 };
 
-const isSpecialMaterial = (raw: string): boolean => {
+const inferMaterialKind = (raw: string, kindHint?: string): 'default' | 'tool' | 'sky' | 'water' => {
+  const hinted = String(kindHint || '').trim().toLowerCase();
+  if (hinted === 'default' || hinted === 'tool' || hinted === 'sky' || hinted === 'water') {
+    return hinted;
+  }
   const key = normalizeMaterialKey(raw);
-  if (!key) return false;
-  if (key.startsWith('tools/') || key.startsWith('editor/')) return true;
-  if (key.includes('toolsskybox')) return true;
-  if (key.includes('skybox')) return true;
-  if (key.includes('water')) return true;
-  return false;
+  if (!key) return 'default';
+  if (key.startsWith('tools/') || key.startsWith('editor/')) return 'tool';
+  if (key.includes('toolsskybox') || key.includes('skybox') || key.includes('/sky') || key.startsWith('sky')) return 'sky';
+  if (key.includes('water') || key.includes('river') || key.includes('ocean') || key.includes('slime')) return 'water';
+  return 'default';
 };
+
+const isSpecialMaterial = (raw: string, kindHint?: string): boolean => inferMaterialKind(raw, kindHint) !== 'default';
+const isSkyMaterial = (raw: string, kindHint?: string): boolean => inferMaterialKind(raw, kindHint) === 'sky';
+const isWaterMaterial = (raw: string, kindHint?: string): boolean => inferMaterialKind(raw, kindHint) === 'water';
+const isToolMaterial = (raw: string, kindHint?: string): boolean => inferMaterialKind(raw, kindHint) === 'tool';
 
 const shouldSuppressMaterialDiagnostic = (materialId: string, statusRaw: string): boolean => {
   const status = String(statusRaw || '').trim().toLowerCase();
@@ -356,6 +372,75 @@ const shouldSuppressMaterialDiagnostic = (materialId: string, statusRaw: string)
     return true;
   }
   return false;
+};
+
+const createSkyGradientTexture = (): THREE.CanvasTexture => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1024;
+  canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    const fallback = new THREE.CanvasTexture(canvas);
+    fallback.colorSpace = THREE.SRGBColorSpace;
+    fallback.mapping = THREE.EquirectangularReflectionMapping;
+    return fallback;
+  }
+
+  const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  skyGrad.addColorStop(0.0, '#6f9fdb');
+  skyGrad.addColorStop(0.42, '#87b0e6');
+  skyGrad.addColorStop(0.68, '#a6c2e8');
+  skyGrad.addColorStop(1.0, '#d8d0bf');
+  ctx.fillStyle = skyGrad;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const sun = ctx.createRadialGradient(
+    Math.floor(canvas.width * 0.77),
+    Math.floor(canvas.height * 0.24),
+    14,
+    Math.floor(canvas.width * 0.77),
+    Math.floor(canvas.height * 0.24),
+    165,
+  );
+  sun.addColorStop(0.0, 'rgba(255, 250, 220, 0.95)');
+  sun.addColorStop(0.35, 'rgba(255, 243, 190, 0.42)');
+  sun.addColorStop(1.0, 'rgba(255, 243, 190, 0.0)');
+  ctx.fillStyle = sun;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.mapping = THREE.EquirectangularReflectionMapping;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.generateMipmaps = true;
+  texture.needsUpdate = true;
+  return texture;
+};
+
+const createWaterNormalTexture = (): THREE.DataTexture => {
+  const size = 128;
+  const data = new Uint8Array(size * size * 4);
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      const idx = (y * size + x) * 4;
+      const nx = 128 + Math.floor((Math.random() - 0.5) * 34);
+      const ny = 128 + Math.floor((Math.random() - 0.5) * 34);
+      data[idx + 0] = Math.max(0, Math.min(255, nx));
+      data[idx + 1] = Math.max(0, Math.min(255, ny));
+      data[idx + 2] = 255;
+      data[idx + 3] = 255;
+    }
+  }
+  const texture = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(6, 6);
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.generateMipmaps = true;
+  texture.needsUpdate = true;
+  return texture;
 };
 
 const sourceToThree = (x: number, y: number, z: number): THREE.Vector3 => new THREE.Vector3(x, z, y);
@@ -904,17 +989,29 @@ const ServerView3D: React.FC = () => {
     renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
     renderer.setSize(host.clientWidth, host.clientHeight);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.08;
     renderer.setClearColor(0x09090b, 1);
     host.innerHTML = '';
     host.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x90a5c5, VIEWER_FOG_DENSITY);
     const camera = new THREE.PerspectiveCamera(65, host.clientWidth / Math.max(1, host.clientHeight), 1, 250000);
 
-    const ambient = new THREE.HemisphereLight(0x8aa2ff, 0x101010, 0.95);
-    const dir = new THREE.DirectionalLight(0xffffff, 0.65);
-    dir.position.set(0.5, 1.2, 0.3).multiplyScalar(5000);
-    scene.add(ambient, dir);
+    const skyTexture = createSkyGradientTexture();
+    scene.background = skyTexture;
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    pmrem.compileEquirectangularShader();
+    const skyEnvironment = pmrem.fromEquirectangular(skyTexture);
+    scene.environment = skyEnvironment.texture;
+
+    const ambient = new THREE.HemisphereLight(0xa2c3f6, 0x1b1b1b, 0.82);
+    const sun = new THREE.DirectionalLight(0xfff5dc, 1.05);
+    sun.position.set(-0.42, 1.28, 0.31).multiplyScalar(6200);
+    const fill = new THREE.DirectionalLight(0x8db5f3, 0.24);
+    fill.position.set(0.64, 0.46, -0.52).multiplyScalar(4200);
+    scene.add(ambient, sun, fill);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
@@ -927,6 +1024,29 @@ const ServerView3D: React.FC = () => {
       MIDDLE: THREE.MOUSE.ROTATE,
       RIGHT: THREE.MOUSE.PAN,
     };
+
+    const composer = new EffectComposer(renderer);
+    const renderPass = new RenderPass(scene, camera);
+    composer.addPass(renderPass);
+    let saoPass: SAOPass | null = null;
+    try {
+      saoPass = new SAOPass(scene, camera, false, true);
+      saoPass.enabled = VIEWER_POLISH_SAO_ENABLED;
+      saoPass.params.output = SAOPass.OUTPUT.Default;
+      saoPass.params.saoBias = 0.4;
+      saoPass.params.saoIntensity = 0.008;
+      saoPass.params.saoScale = 1.2;
+      saoPass.params.saoKernelRadius = 26;
+      saoPass.params.saoMinResolution = 0;
+      saoPass.params.saoBlur = true;
+      saoPass.params.saoBlurRadius = 8;
+      saoPass.params.saoBlurStdDev = 4;
+      saoPass.params.saoBlurDepthCutoff = 0.01;
+      composer.addPass(saoPass);
+    } catch (saoErr: any) {
+      appendLog(`sao indisponivel: ${String(saoErr?.message || saoErr)}`);
+      saoPass = null;
+    }
 
     const chunkRoot = new THREE.Group();
     chunkRoot.name = 'chunk-root';
@@ -963,6 +1083,7 @@ const ServerView3D: React.FC = () => {
     let ktx2TranscoderPath = '/vendor/basis/';
     const materialDefs = new Map<string, {
       placeholder: boolean;
+      materialKind?: 'default' | 'tool' | 'sky' | 'water';
       textureUrl?: string;
       fallbackTextureUrl?: string;
       ktx2Url?: string;
@@ -981,6 +1102,8 @@ const ServerView3D: React.FC = () => {
       usage?: string[];
       error?: string;
     }>();
+    const waterNormalTexture = createWaterNormalTexture();
+    let waterNormalPhase = 0;
     let materialRootsScanned: string[] = [];
     const modelDefs = new Map<string, {
       id: string;
@@ -1193,9 +1316,10 @@ const ServerView3D: React.FC = () => {
       tryCandidate(0);
     };
 
-    const getWorldMaterial = (materialIdRaw: string, placeholderFlag: boolean): THREE.MeshStandardMaterial => {
+    const getWorldMaterial = (materialIdRaw: string, placeholderFlag: boolean): THREE.Material => {
       const materialId = String(materialIdRaw || '__missing_material');
       const def = materialDefs.get(materialId);
+      const materialKind = inferMaterialKind(materialId, def?.materialKind);
       const fallbackTextureUrl = def?.fallbackTextureUrl || def?.textureUrl;
       const primaryTextureUrl = ktx2RuntimeEnabled && def?.ktx2Url ? def.ktx2Url : fallbackTextureUrl;
       const shouldPlaceholder = placeholderFlag || !def || def.placeholder || !primaryTextureUrl;
@@ -1234,13 +1358,42 @@ const ServerView3D: React.FC = () => {
           searchedIn,
         );
       }
-      const baseColor = shouldPlaceholder ? new THREE.Color(0x6b7280) : hashColor(materialId, 0.92);
-      const material = new THREE.MeshStandardMaterial({
-        color: baseColor,
-        metalness: 0.04,
-        roughness: 0.94,
-        side: THREE.DoubleSide,
-      });
+      if (materialKind === 'sky') {
+        return new THREE.MeshBasicMaterial({
+          color: new THREE.Color(0x8aa9d7),
+          side: THREE.BackSide,
+          depthWrite: false,
+          fog: false,
+        });
+      }
+
+      const baseColor = shouldPlaceholder
+        ? new THREE.Color(materialKind === 'water' ? 0x2a647f : 0x6b7280)
+        : hashColor(materialId, materialKind === 'water' ? 0.86 : 0.92);
+      const material: THREE.MeshStandardMaterial = materialKind === 'water'
+        ? new THREE.MeshPhysicalMaterial({
+          color: baseColor,
+          metalness: 0.02,
+          roughness: 0.24,
+          transmission: 0.14,
+          thickness: 0.7,
+          opacity: 0.84,
+          transparent: true,
+          depthWrite: false,
+          side: THREE.DoubleSide,
+          envMapIntensity: 0.9,
+          normalMap: waterNormalTexture,
+          normalScale: new THREE.Vector2(0.35, 0.35),
+          clearcoat: 0.28,
+          clearcoatRoughness: 0.22,
+        })
+        : new THREE.MeshStandardMaterial({
+          color: baseColor,
+          metalness: 0.04,
+          roughness: 0.94,
+          side: THREE.DoubleSide,
+          envMapIntensity: 0.34,
+        });
 
       if (!shouldPlaceholder && primaryTextureUrl) {
         const candidateUrls: string[] = [];
@@ -1795,6 +1948,12 @@ const ServerView3D: React.FC = () => {
         const worldMeshes = Array.isArray(payload.world?.meshes) ? payload.world?.meshes : [];
         if (worldMeshes.length > 0) {
           for (const meshData of worldMeshes) {
+            const matId = String(meshData.materialId || meshData.material || '__missing_material');
+            const matDef = materialDefs.get(matId);
+            const matKind = inferMaterialKind(matId, matDef?.materialKind);
+            if (matKind === 'sky' || matKind === 'tool') {
+              continue;
+            }
             const rawPositions = Array.isArray(meshData.positions) ? meshData.positions : [];
             if (rawPositions.length < 9) continue;
             const positionArray = new Float32Array(rawPositions.length);
@@ -1822,7 +1981,6 @@ const ServerView3D: React.FC = () => {
             worldGeo.computeVertexNormals();
             worldGeo.computeBoundingSphere();
 
-            const matId = String(meshData.materialId || meshData.material || '__missing_material');
             const worldMat = getWorldMaterial(matId, !!meshData.placeholderMaterial);
             const worldMesh = new THREE.Mesh(worldGeo, worldMat);
             worldMesh.frustumCulled = true;
@@ -1831,34 +1989,35 @@ const ServerView3D: React.FC = () => {
         } else {
           const worldFaces = Array.isArray(payload.world?.faces) ? payload.world?.faces : [];
           if (worldFaces.length > 0) {
-            const positionArray = new Float32Array(worldFaces.length * 3);
-            const colorArray = new Float32Array(worldFaces.length * 3);
+            const positionList: number[] = [];
+            const colorList: number[] = [];
             for (let i = 0; i < worldFaces.length; i += 1) {
               const face = worldFaces[i];
+              if (isSkyMaterial(face.material) || isToolMaterial(face.material)) {
+                continue;
+              }
               const point = sourceToThree(face.position[0], face.position[1], face.position[2]);
-              positionArray[i * 3 + 0] = point.x;
-              positionArray[i * 3 + 1] = point.y;
-              positionArray[i * 3 + 2] = point.z;
+              positionList.push(point.x, point.y, point.z);
               const color = face.placeholderMaterial ? new THREE.Color(0x6b7280) : hashColor(face.material || 'world-material');
-              colorArray[i * 3 + 0] = color.r;
-              colorArray[i * 3 + 1] = color.g;
-              colorArray[i * 3 + 2] = color.b;
+              colorList.push(color.r, color.g, color.b);
             }
 
-            const worldGeo = new THREE.BufferGeometry();
-            worldGeo.setAttribute('position', new THREE.BufferAttribute(positionArray, 3));
-            worldGeo.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
-            const worldMat = new THREE.PointsMaterial({
-              size: 14,
-              sizeAttenuation: true,
-              vertexColors: true,
-              opacity: 0.92,
-              transparent: true,
-              depthWrite: false,
-            });
-            const points = new THREE.Points(worldGeo, worldMat);
-            points.frustumCulled = true;
-            group.add(points);
+            if (positionList.length >= 3) {
+              const worldGeo = new THREE.BufferGeometry();
+              worldGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positionList), 3));
+              worldGeo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(colorList), 3));
+              const worldMat = new THREE.PointsMaterial({
+                size: 14,
+                sizeAttenuation: true,
+                vertexColors: true,
+                opacity: 0.92,
+                transparent: true,
+                depthWrite: false,
+              });
+              const points = new THREE.Points(worldGeo, worldMat);
+              points.frustumCulled = true;
+              group.add(points);
+            }
           }
         }
 
@@ -2072,6 +2231,7 @@ const ServerView3D: React.FC = () => {
                 if (!key) continue;
                 materialDefs.set(key, {
                   placeholder: !!item.placeholder,
+                  ...(item.materialKind ? { materialKind: item.materialKind } : {}),
                   ...(item.textureUrl ? { textureUrl: item.textureUrl } : {}),
                   ...(item.fallbackTextureUrl ? { fallbackTextureUrl: item.fallbackTextureUrl } : {}),
                   ...(item.ktx2Url ? { ktx2Url: item.ktx2Url } : {}),
@@ -2287,6 +2447,7 @@ const ServerView3D: React.FC = () => {
           camera.aspect = width / height;
           camera.updateProjectionMatrix();
           renderer.setSize(width, height);
+          composer.setSize(width, height);
         };
 
         const animate = () => {
@@ -2364,7 +2525,12 @@ const ServerView3D: React.FC = () => {
           }
 
           controls.update();
-          renderer.render(scene, camera);
+          waterNormalPhase += dtSec;
+          waterNormalTexture.offset.set(
+            (waterNormalPhase * WATER_NORMAL_SCROLL_X) % 1,
+            (waterNormalPhase * WATER_NORMAL_SCROLL_Y) % 1,
+          );
+          composer.render();
           if (now - streamIntervalMs >= 300) {
             streamIntervalMs = now;
             updateStreaming();
@@ -2397,6 +2563,7 @@ const ServerView3D: React.FC = () => {
 
         setStatus(`Viewer online | map=${loadedManifest.map.name} | chunks=${entries.length}`);
         appendLog(`manifest carregado: ${loadedManifest.map.name}`);
+        appendLog(`visual polish: sky=on water=on sao=${saoPass?.enabled ? 'on' : 'off'} fog=on`);
         appendLog(
           `chunk_count=${entries.length} active=${activeRadius * 2 + 1}x${activeRadius * 2 + 1} render=${renderRadius * 2 + 1}x${renderRadius * 2 + 1} prefetch=${prefetchRadius * 2 + 1}x${prefetchRadius * 2 + 1}`,
         );
@@ -2456,6 +2623,11 @@ const ServerView3D: React.FC = () => {
       } catch {
         // no-op
       }
+      waterNormalTexture.dispose();
+      skyTexture.dispose();
+      skyEnvironment.dispose();
+      pmrem.dispose();
+      composer.dispose();
       renderer.dispose();
       host.innerHTML = '';
     };

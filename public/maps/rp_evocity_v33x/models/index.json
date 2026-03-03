@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-03T14:12:24.769Z",
+  "generatedAt": "2026-03-03T14:52:29.453Z",
   "total": 257,
   "rootsScanned": [
     "C:\\Users\\luisf\\OneDrive\\Documentos\\sitebackstabber\\sandbox\\rp_evocity_v33x_original\\rp_evocity_v33x_original\\maps",
@@ -3261,14 +3261,14 @@
       "searchedVvd": "models/props_interiors/bathtub01a.vvd",
       "meshUrl": "./models/meshes/props_interiors_bathtub01a_38b34fb279cb77cfb3.json",
       "lodUsed": 1,
-      "mdlVersion": 44,
+      "mdlVersion": 48,
       "triCount": 645,
-      "vertexCount": 776,
+      "vertexCount": 892,
       "subMeshCount": 1,
-      "byteEstimate": 23260,
+      "byteEstimate": 25580,
       "bounds": {
         "min": [
-          -51.08359909057617,
+          -51.08362579345703,
           -13.283350944519043,
           -9.968928337097168
         ],
