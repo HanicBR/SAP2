@@ -28,6 +28,8 @@ type ItemFilesSummary = {
   totalBytes: number;
   gmaFiles: string[];
   bspFiles: string[];
+  binFiles: string[];
+  extensionlessFiles: string[];
 };
 
 type DownloadReport = {
@@ -44,6 +46,8 @@ type DownloadReport = {
   totalBytes: number;
   gmaFiles: string[];
   bspFiles: string[];
+  binFiles: string[];
+  extensionlessFiles: string[];
   steamcmd: {
     bin: string;
     installDir: string;
@@ -56,6 +60,15 @@ type DownloadReport = {
     path: string;
     staleLockMs: number;
   };
+  contentCandidates?: Array<{
+    path: string;
+    filesCount: number;
+    totalBytes: number;
+    gmaCount: number;
+    bspCount: number;
+    binCount: number;
+    extensionlessCount: number;
+  }>;
   logTail: string[];
   error?: string;
 };
@@ -275,7 +288,7 @@ const writeJson = (target: string, data: unknown) => {
 
 const collectItemFiles = (itemPath: string): ItemFilesSummary => {
   if (!fs.existsSync(itemPath)) {
-    return { filesCount: 0, totalBytes: 0, gmaFiles: [], bspFiles: [] };
+    return { filesCount: 0, totalBytes: 0, gmaFiles: [], bspFiles: [], binFiles: [], extensionlessFiles: [] };
   }
 
   const files: string[] = [];
@@ -302,6 +315,8 @@ const collectItemFiles = (itemPath: string): ItemFilesSummary => {
   let totalBytes = 0;
   const gmaFiles: string[] = [];
   const bspFiles: string[] = [];
+  const binFiles: string[] = [];
+  const extensionlessFiles: string[] = [];
   for (const file of files) {
     try {
       totalBytes += fs.statSync(file).size;
@@ -312,20 +327,68 @@ const collectItemFiles = (itemPath: string): ItemFilesSummary => {
     const lower = rel.toLowerCase();
     if (lower.endsWith('.gma')) gmaFiles.push(rel);
     if (lower.endsWith('.bsp')) bspFiles.push(rel);
+    if (lower.endsWith('.bin')) binFiles.push(rel);
+    const base = path.posix.basename(rel);
+    if (base && !base.includes('.')) extensionlessFiles.push(rel);
   }
 
   gmaFiles.sort();
   bspFiles.sort();
+  binFiles.sort();
+  extensionlessFiles.sort();
   return {
     filesCount: files.length,
     totalBytes,
     gmaFiles,
     bspFiles,
+    binFiles,
+    extensionlessFiles,
   };
 };
 
 const hasUsableMapPayload = (summary: ItemFilesSummary): boolean =>
-  summary.gmaFiles.length > 0 || summary.bspFiles.length > 0;
+  summary.filesCount > 0;
+
+const buildItemPathCandidates = (options: Options): string[] => {
+  const app = String(options.appId);
+  const wid = options.workshopId;
+  const homeDir = os.homedir();
+  const candidates = [
+    path.join(options.steamcmdDir, 'steamapps', 'workshop', 'content', app, wid),
+    path.join(options.rootDir, 'steamapps', 'workshop', 'content', app, wid),
+    path.join(homeDir, 'Steam', 'steamapps', 'workshop', 'content', app, wid),
+    path.join(homeDir, '.steam', 'steam', 'steamapps', 'workshop', 'content', app, wid),
+    path.join(homeDir, '.local', 'share', 'Steam', 'steamapps', 'workshop', 'content', app, wid),
+    path.join(homeDir, '.steam', 'steamcmd', 'steamapps', 'workshop', 'content', app, wid),
+  ];
+  const unique = new Set<string>();
+  const out: string[] = [];
+  for (const candidate of candidates) {
+    const normalized = path.resolve(candidate);
+    if (unique.has(normalized)) continue;
+    unique.add(normalized);
+    out.push(normalized);
+  }
+  return out;
+};
+
+const summarizeCandidates = (paths: string[]): Array<{ path: string; summary: ItemFilesSummary }> =>
+  paths.map((entry) => ({ path: entry, summary: collectItemFiles(entry) }));
+
+const pickBestCandidate = (
+  entries: Array<{ path: string; summary: ItemFilesSummary }>,
+): { path: string; summary: ItemFilesSummary } | null => {
+  if (!entries.length) return null;
+  const sorted = entries.slice().sort((a, b) => {
+    const aUsable = hasUsableMapPayload(a.summary) ? 1 : 0;
+    const bUsable = hasUsableMapPayload(b.summary) ? 1 : 0;
+    if (aUsable !== bUsable) return bUsable - aUsable;
+    if (a.summary.filesCount !== b.summary.filesCount) return b.summary.filesCount - a.summary.filesCount;
+    if (a.summary.totalBytes !== b.summary.totalBytes) return b.summary.totalBytes - a.summary.totalBytes;
+    return a.path.localeCompare(b.path);
+  });
+  return sorted[0] || null;
+};
 
 const tailLines = (input: string, max = 120): string[] =>
   input
@@ -402,14 +465,10 @@ const run = () => {
   const startedAtIso = new Date(startedAtMs).toISOString();
   const lockPath = path.join(options.locksDir, `${options.appId}_${options.workshopId}.lock`);
   const reportPath = path.join(options.reportsDir, `${options.workshopId}.download.json`);
-  const itemPath = path.join(
-    options.steamcmdDir,
-    'steamapps',
-    'workshop',
-    'content',
-    String(options.appId),
-    options.workshopId,
-  );
+  const itemPathCandidates = buildItemPathCandidates(options);
+  let candidateSummaries = summarizeCandidates(itemPathCandidates);
+  let selectedCandidate = pickBestCandidate(candidateSummaries);
+  let itemPath = selectedCandidate?.path || itemPathCandidates[0] || path.join(options.steamcmdDir, 'steamapps', 'workshop', 'content', String(options.appId), options.workshopId);
   let effectiveSteamcmdBin = options.steamcmdBin;
   let bootstrapLogTail: string[] = [];
   let lockHeld = false;
@@ -437,6 +496,8 @@ const run = () => {
     totalBytes: 0,
     gmaFiles: [],
     bspFiles: [],
+    binFiles: [],
+    extensionlessFiles: [],
     steamcmd: {
       bin: effectiveSteamcmdBin,
       installDir: options.steamcmdDir,
@@ -447,6 +508,15 @@ const run = () => {
       path: lockPath,
       staleLockMs: options.staleLockMs,
     },
+    contentCandidates: candidateSummaries.map((entry) => ({
+      path: entry.path,
+      filesCount: entry.summary.filesCount,
+      totalBytes: entry.summary.totalBytes,
+      gmaCount: entry.summary.gmaFiles.length,
+      bspCount: entry.summary.bspFiles.length,
+      binCount: entry.summary.binFiles.length,
+      extensionlessCount: entry.summary.extensionlessFiles.length,
+    })),
     logTail: [],
   });
 
@@ -559,13 +629,19 @@ const run = () => {
     }
 
     if (!options.refresh) {
-      const existing = collectItemFiles(itemPath);
+      candidateSummaries = summarizeCandidates(itemPathCandidates);
+      selectedCandidate = pickBestCandidate(candidateSummaries);
+      if (selectedCandidate) itemPath = selectedCandidate.path;
+      const existing = selectedCandidate?.summary || collectItemFiles(itemPath);
       if (hasUsableMapPayload(existing)) {
         const report = createBaseReport('cached');
+        report.contentPath = itemPath;
         report.filesCount = existing.filesCount;
         report.totalBytes = existing.totalBytes;
         report.gmaFiles = existing.gmaFiles;
         report.bspFiles = existing.bspFiles;
+        report.binFiles = existing.binFiles;
+        report.extensionlessFiles = existing.extensionlessFiles;
         report.logTail = ['cache_hit: existing workshop payload found'];
         writeJson(reportPath, report);
         console.log(`Workshop item cached: ${options.workshopId}`);
@@ -598,12 +674,18 @@ const run = () => {
       maxBuffer: 1024 * 1024 * 32,
     });
     const output = `${String(exec.stdout || '')}\n${String(exec.stderr || '')}`;
-    const summary = collectItemFiles(itemPath);
+    candidateSummaries = summarizeCandidates(itemPathCandidates);
+    selectedCandidate = pickBestCandidate(candidateSummaries);
+    if (selectedCandidate) itemPath = selectedCandidate.path;
+    const summary = selectedCandidate?.summary || collectItemFiles(itemPath);
     const report = createBaseReport('success');
+    report.contentPath = itemPath;
     report.filesCount = summary.filesCount;
     report.totalBytes = summary.totalBytes;
     report.gmaFiles = summary.gmaFiles;
     report.bspFiles = summary.bspFiles;
+    report.binFiles = summary.binFiles;
+    report.extensionlessFiles = summary.extensionlessFiles;
     report.logTail = tailLines(output, 120);
     if (bootstrapLogTail.length) {
       report.logTail = report.logTail.concat(bootstrapLogTail).slice(-120);
@@ -652,7 +734,12 @@ const run = () => {
 
     if (!hasUsableMapPayload(summary)) {
       report.status = 'failed';
-      report.error = 'download_payload_empty:expected_gma_or_bsp';
+      report.error = 'download_payload_empty:expected_files_after_download';
+      report.logTail = report.logTail.concat(
+        report.contentCandidates?.map((entry) => (
+          `candidate path=${entry.path} files=${entry.filesCount} gma=${entry.gmaCount} bsp=${entry.bspCount} bin=${entry.binCount} extless=${entry.extensionlessCount}`
+        )) || [],
+      ).slice(-120);
       failureReport = report;
       throw new Error(report.error);
     }
