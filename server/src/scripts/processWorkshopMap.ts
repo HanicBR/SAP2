@@ -12,6 +12,7 @@ type Options = {
   appId: number;
   rootDir: string;
   contentDir: string;
+  contentCandidates: string[];
   extractDir: string;
   reportsDir: string;
   mountsPath: string;
@@ -186,6 +187,115 @@ const resolveFlexiblePath = (raw: string): string => {
   return fromProject;
 };
 
+type ContentPathSummary = {
+  path: string;
+  exists: boolean;
+  files: number;
+  totalBytes: number;
+};
+
+const summarizeContentPath = (target: string): ContentPathSummary => {
+  const absolute = path.resolve(target);
+  if (!fs.existsSync(absolute)) {
+    return { path: absolute, exists: false, files: 0, totalBytes: 0 };
+  }
+  const stack = [absolute];
+  let files = 0;
+  let totalBytes = 0;
+  while (stack.length) {
+    const current = stack.pop();
+    if (!current) continue;
+    let entries: fs.Dirent[] = [];
+    try {
+      entries = fs.readdirSync(current, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+    for (const entry of entries) {
+      const full = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(full);
+        continue;
+      }
+      if (entry.isFile()) {
+        files += 1;
+        try {
+          totalBytes += fs.statSync(full).size;
+        } catch {
+          // best effort
+        }
+      }
+    }
+  }
+  return { path: absolute, exists: true, files, totalBytes };
+};
+
+const readDownloadReportContentPath = (reportsDir: string, workshopId: string): string | null => {
+  const reportPath = path.join(reportsDir, `${workshopId}.download.json`);
+  if (!fs.existsSync(reportPath)) return null;
+  try {
+    const parsed = JSON.parse(fs.readFileSync(reportPath, 'utf8')) as Record<string, unknown>;
+    const contentPath = String(parsed?.contentPath || '').trim();
+    if (!contentPath) return null;
+    return path.resolve(contentPath);
+  } catch {
+    return null;
+  }
+};
+
+const buildContentCandidates = (
+  rootDir: string,
+  reportsDir: string,
+  appId: number,
+  workshopId: string,
+): string[] => {
+  const app = String(appId);
+  const wid = String(workshopId);
+  const homeDir = os.homedir();
+  const fromReport = readDownloadReportContentPath(reportsDir, wid);
+  const list = [
+    ...(fromReport ? [fromReport] : []),
+    path.join(rootDir, 'steamcmd', 'steamapps', 'workshop', 'content', app, wid),
+    path.join(rootDir, 'steamapps', 'workshop', 'content', app, wid),
+    path.join(homeDir, 'Steam', 'steamapps', 'workshop', 'content', app, wid),
+    path.join(homeDir, '.steam', 'steam', 'steamapps', 'workshop', 'content', app, wid),
+    path.join(homeDir, '.local', 'share', 'Steam', 'steamapps', 'workshop', 'content', app, wid),
+    path.join(homeDir, '.steam', 'steamcmd', 'steamapps', 'workshop', 'content', app, wid),
+  ];
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const candidate of list) {
+    const normalized = path.resolve(candidate);
+    if (seen.has(normalized)) continue;
+    seen.add(normalized);
+    out.push(normalized);
+  }
+  return out;
+};
+
+const resolveBestContentDir = (
+  rootDir: string,
+  reportsDir: string,
+  appId: number,
+  workshopId: string,
+): { contentDir: string; candidates: string[] } => {
+  const candidates = buildContentCandidates(rootDir, reportsDir, appId, workshopId);
+  const summaries = candidates.map(summarizeContentPath);
+  const sorted = summaries.slice().sort((a, b) => {
+    const aScore = (a.exists ? 1 : 0);
+    const bScore = (b.exists ? 1 : 0);
+    if (aScore !== bScore) return bScore - aScore;
+    if (a.files !== b.files) return b.files - a.files;
+    if (a.totalBytes !== b.totalBytes) return b.totalBytes - a.totalBytes;
+    return a.path.localeCompare(b.path);
+  });
+  const best = sorted[0];
+  return {
+    contentDir: best?.path || candidates[0] || path.resolve(rootDir),
+    candidates: summaries.map((entry) => `${entry.path}#exists=${entry.exists ? '1' : '0'}#files=${entry.files}`),
+  };
+};
+
 const parseOptions = (): Options => {
   const args = parseArgs();
   const workshopId = String(args.get('--id') || process.env.WORKSHOP_ID || '').trim();
@@ -209,11 +319,17 @@ const parseOptions = (): Options => {
 
   const appId = toNum(args.get('--app-id') || process.env.WORKSHOP_APP_ID, DEFAULTS.appId);
   const rootDir = resolveFlexiblePath(String(args.get('--root-dir') || process.env.WORKSHOP_ROOT || defaultRootDir));
-  const contentDir = resolveFlexiblePath(
-    String(args.get('--content-dir') || path.join(rootDir, 'steamcmd', 'steamapps', 'workshop', 'content', String(appId), workshopId)),
-  );
-  const extractDir = resolveFlexiblePath(String(args.get('--extract-dir') || path.join(rootDir, 'extracted', workshopId)));
   const reportsDir = resolveFlexiblePath(String(args.get('--reports-dir') || path.join(rootDir, 'reports')));
+  const explicitContentDirArg = String(args.get('--content-dir') || '').trim();
+  const contentResolved = explicitContentDirArg
+    ? {
+        contentDir: resolveFlexiblePath(explicitContentDirArg),
+        candidates: [resolveFlexiblePath(explicitContentDirArg)],
+      }
+    : resolveBestContentDir(rootDir, reportsDir, appId, workshopId);
+  const contentDir = contentResolved.contentDir;
+  const contentCandidates = contentResolved.candidates;
+  const extractDir = resolveFlexiblePath(String(args.get('--extract-dir') || path.join(rootDir, 'extracted', workshopId)));
   const mountsPath = resolveFlexiblePath(
     String(args.get('--mounts') || process.env.WORKSHOP_MOUNTS_FILE || 'server/config/mounts.json'),
   );
@@ -260,6 +376,7 @@ const parseOptions = (): Options => {
     appId,
     rootDir,
     contentDir,
+    contentCandidates,
     extractDir,
     reportsDir,
     mountsPath,
@@ -645,7 +762,7 @@ const run = () => {
   };
 
   if (!fs.existsSync(options.contentDir)) {
-    finish('failed', `workshop_content_dir_not_found:${options.contentDir}`);
+    finish('failed', `workshop_content_dir_not_found:${options.contentDir}|candidates:${options.contentCandidates.join(',')}`);
     return;
   }
   if (!fs.existsSync(options.extractScriptPath)) {
