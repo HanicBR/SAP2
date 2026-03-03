@@ -20,6 +20,7 @@ import {
 } from '../services/serverWs';
 import { getPlayerPulseSettings } from '../services/playtimePulse';
 import { ingestPlayerPulse, PlayerPulseIngestError } from '../services/playerPulseIngest';
+import { notifyMapObservedForWorkshop } from '../services/workshopAutoDownload';
 
 const router = Router();
 
@@ -921,6 +922,11 @@ router.post('/heartbeat', async (req, res) => {
     }
     if (map) {
       updateData.currentMap = map;
+      notifyMapObservedForWorkshop({
+        serverId: server.id,
+        mapName: map,
+        source: 'heartbeat',
+      });
     }
     if (serverName) {
       updateData.name = serverName;

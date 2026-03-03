@@ -24,6 +24,7 @@ import { siteAuditMutationMiddleware } from './middleware/siteAudit';
 import { bootstrap } from './bootstrap';
 import { startVipExpiryReconcilerJob } from './services/vipExpiryReconciler';
 import { initializeServerWebSocket } from './services/serverWs';
+import { startWorkshopAutoDownloadJob } from './services/workshopAutoDownload';
 
 dotenv.config();
 
@@ -128,9 +129,16 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 const start = async () => {
   await bootstrap();
   const stopVipExpiryReconciler = startVipExpiryReconcilerJob();
+  const stopWorkshopAutoDownload = startWorkshopAutoDownloadJob();
 
-  process.once('SIGTERM', () => stopVipExpiryReconciler());
-  process.once('SIGINT', () => stopVipExpiryReconciler());
+  process.once('SIGTERM', () => {
+    stopVipExpiryReconciler();
+    stopWorkshopAutoDownload();
+  });
+  process.once('SIGINT', () => {
+    stopVipExpiryReconciler();
+    stopWorkshopAutoDownload();
+  });
 
   const httpServer = http.createServer(app);
   initializeServerWebSocket(httpServer);

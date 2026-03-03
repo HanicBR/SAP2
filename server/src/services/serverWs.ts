@@ -16,6 +16,7 @@ import {
   setServerActionEnqueueListener,
   type ServerAction,
 } from './serverActions';
+import { notifyMapObservedForWorkshop } from './workshopAutoDownload';
 
 const WS_SERVERS_PATH = '/ws/servers';
 const WS_ADMIN_VIEWER_PATH = '/ws/admin/viewer';
@@ -275,6 +276,11 @@ const touchServerPresenceFromWs = (
   }
   if (nextMap) {
     data.currentMap = nextMap;
+    notifyMapObservedForWorkshop({
+      serverId,
+      mapName: nextMap,
+      source: 'viewer_state',
+    });
   }
 
   const nextRecord: WsPresenceRecord = {

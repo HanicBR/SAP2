@@ -36,4 +36,5 @@ sandbox
 GWSockets
 telasdeloading/
 server/config/mounts.json
+server/config/workshop-maps.json
 reports/

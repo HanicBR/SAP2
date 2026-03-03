@@ -69,6 +69,50 @@ Lock por item:
 - Se lock estiver ativo, o job falha com mensagem clara.
 - Lock stale e recuperado automaticamente conforme `WORKSHOP_STALE_LOCK_MS`.
 
+## PR-14.2 Auto-download por troca de mapa (fila + retry)
+
+Copie o mapeamento de mapas:
+
+```bash
+cp server/config/workshop-maps.template.json server/config/workshop-maps.json
+```
+
+No Windows:
+
+```powershell
+Copy-Item server/config/workshop-maps.template.json server/config/workshop-maps.json
+```
+
+Campos principais:
+
+- `maps.<mapName> = <workshopId>`
+- `aliases.<mapAlias> = <mapNameCanonico>`
+- `maxRetries`, `retryBaseMs`, `retryMaxMs`, `maxQueueSize`
+
+Trigger automatico:
+
+- `heartbeat` com `map` novo enfileira download do Workshop (quando houver mapping).
+- `viewer_state` WS com `map` novo tambem enfileira.
+- Dedupe por `appId:workshopId` evita downloads duplicados.
+- Retry com backoff exponencial ate `maxRetries`.
+
+Controle por env:
+
+- `WORKSHOP_AUTO_DOWNLOAD_ENABLED` (default `true`)
+- `WORKSHOP_MAPS_FILE` (default `server/config/workshop-maps.json`)
+- `WORKSHOP_MAX_RETRIES`
+- `WORKSHOP_RETRY_BASE_MS`
+- `WORKSHOP_RETRY_MAX_MS`
+- `WORKSHOP_MAX_QUEUE_SIZE`
+- `WORKSHOP_SUCCESS_COOLDOWN_MS`
+
+Logs esperados:
+
+- `[workshop-auto] initialized`
+- `[workshop-auto] queued`
+- `[workshop-auto] download_start`
+- `[workshop-auto] download_ok` ou `[workshop-auto] download_failed`
+
 ## Artefatos gerados
 
 Base path:

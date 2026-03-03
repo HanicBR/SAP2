@@ -1,0 +1,15 @@
+{
+  "enabled": true,
+  "appId": 4000,
+  "maxRetries": 3,
+  "retryBaseMs": 15000,
+  "retryMaxMs": 600000,
+  "maxQueueSize": 200,
+  "successCooldownMs": 600000,
+  "maps": {
+    "rp_evocity_v33x": "262714246040502603"
+  },
+  "aliases": {
+    "rp_evocity_v33x.bsp": "rp_evocity_v33x"
+  }
+}
