@@ -657,7 +657,7 @@ const ServerView3D: React.FC = () => {
   const { serverId } = useParams<{ serverId: string }>();
   const [searchParams] = useSearchParams();
   const mapName = useMemo(() => normalizeMapName(searchParams.get('map')), [searchParams]);
-  const manifestUrl = useMemo(() => `/maps/${mapName}/manifest.json`, [mapName]);
+  const manifestUrl = useMemo(() => `/api/maps/${encodeURIComponent(mapName)}/manifest.json`, [mapName]);
   const mountRef = useRef<HTMLDivElement | null>(null);
   const viewerSocketRef = useRef<WebSocket | null>(null);
   const viewerPingTimerRef = useRef<number | null>(null);

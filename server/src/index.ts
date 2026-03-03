@@ -30,6 +30,10 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 4000;
+const projectRoot = path.resolve(__dirname, '..', '..');
+const mapArtifactsDir = path.resolve(
+  String(process.env.MAP_ARTIFACTS_DIR || path.join(projectRoot, 'public', 'maps')),
+);
 
 // Trust only the first proxy hop (Nginx) so rate limiting sees correct client IPs
 app.set('trust proxy', 1);
@@ -90,6 +94,15 @@ app.get('/health', (_req, res) => {
 });
 
 app.use('/api', apiLimiter);
+app.use(
+  '/api/maps',
+  express.static(mapArtifactsDir, {
+    index: false,
+    maxAge: '30d',
+    immutable: true,
+    dotfiles: 'deny',
+  }),
+);
 app.use(
   '/api/uploads/proofs',
   express.static(proofUploadsDir, {
