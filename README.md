@@ -30,6 +30,45 @@ Pipeline em strict (missing critico volta a bloquear):
 npm --prefix server run map:pipeline:build:evocity -- --asset-resolution-mode strict
 ```
 
+Workshop download (PR-14.1 - etapa 1):
+
+```bash
+npm --prefix server run workshop:download -- --id 104607712
+```
+
+Forcar refresh:
+
+```bash
+npm --prefix server run workshop:download -- --id 104607712 --refresh
+```
+
+Defaults na VPS Linux:
+
+- `WORKSHOP_ROOT=/opt/backstabber/workshop`
+- `WORKSHOP_STEAMCMD_DIR=/opt/backstabber/workshop/steamcmd`
+- `WORKSHOP_REPORTS_DIR=/opt/backstabber/workshop/reports`
+- `WORKSHOP_LOCKS_DIR=/opt/backstabber/workshop/locks`
+
+Variaveis uteis:
+
+- `WORKSHOP_STEAMCMD_BIN` (path explicito do steamcmd/steamcmd.sh)
+- `WORKSHOP_APP_ID` (default: `4000` para GMod)
+- `WORKSHOP_STEAM_USER` (default: `anonymous`)
+- `WORKSHOP_STEAM_PASS` (obrigatoria se usuario nao for anonymous)
+- `WORKSHOP_TIMEOUT_MS` (default: `1800000`)
+- `WORKSHOP_STALE_LOCK_MS` (default: `7200000`)
+
+Relatorio gerado:
+
+- `/opt/backstabber/workshop/reports/<workshopId>.download.json` (Linux default)
+- `sandbox/workshop/reports/<workshopId>.download.json` (fallback local)
+
+Lock por item:
+
+- `<locksDir>/<appId>_<workshopId>.lock`
+- Se lock estiver ativo, o job falha com mensagem clara.
+- Lock stale e recuperado automaticamente conforme `WORKSHOP_STALE_LOCK_MS`.
+
 ## Artefatos gerados
 
 Base path:

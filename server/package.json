@@ -16,7 +16,8 @@
     "audit:map-assets:evocity": "ts-node src/scripts/auditMapAssets.ts --map-bsp=../sandbox/rp_evocity_v33x_original/rp_evocity_v33x_original/maps/rp_evocity_v33x.bsp --map-root=../sandbox/rp_evocity_v33x_original/rp_evocity_v33x_original/maps --mounts=./config/mounts.json --report=../reports/audit-report.json",
     "audit:map-assets:evocity:strict": "ts-node src/scripts/auditMapAssets.ts --map-bsp=../sandbox/rp_evocity_v33x_original/rp_evocity_v33x_original/maps/rp_evocity_v33x.bsp --map-root=../sandbox/rp_evocity_v33x_original/rp_evocity_v33x_original/maps --mounts=./config/mounts.json --report=../reports/audit-report.json --asset-resolution-mode=strict",
     "map:pipeline:build": "ts-node src/scripts/buildMapPipeline.ts",
-    "map:pipeline:build:evocity": "ts-node src/scripts/buildMapPipeline.ts --map-bsp=../sandbox/rp_evocity_v33x_original/rp_evocity_v33x_original/maps/rp_evocity_v33x.bsp --map-root=../sandbox/rp_evocity_v33x_original/rp_evocity_v33x_original/maps --mounts=./config/mounts.json --audit-report=../reports/audit-report.json --out-dir=../public/maps/rp_evocity_v33x --report=../public/maps/rp_evocity_v33x/reports/report.json --asset-resolution-mode=permissive --sourceio-mode=auto"
+    "map:pipeline:build:evocity": "ts-node src/scripts/buildMapPipeline.ts --map-bsp=../sandbox/rp_evocity_v33x_original/rp_evocity_v33x_original/maps/rp_evocity_v33x.bsp --map-root=../sandbox/rp_evocity_v33x_original/rp_evocity_v33x_original/maps --mounts=./config/mounts.json --audit-report=../reports/audit-report.json --out-dir=../public/maps/rp_evocity_v33x --report=../public/maps/rp_evocity_v33x/reports/report.json --asset-resolution-mode=permissive --sourceio-mode=auto",
+    "workshop:download": "ts-node src/scripts/downloadWorkshopMap.ts"
   },
   "keywords": [],
   "author": "",
