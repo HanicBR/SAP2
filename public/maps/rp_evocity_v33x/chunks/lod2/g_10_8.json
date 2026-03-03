@@ -1,0 +1,262 @@
+{
+  "id": "g_10_8",
+  "lod": 2,
+  "lodTriStride": 4,
+  "bounds": {
+    "minX": 6144,
+    "minY": 1625,
+    "maxX": 8192,
+    "maxY": 3673
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 10,
+    "y": 8
+  },
+  "counts": {
+    "worldFaces": 14,
+    "staticProps": 2,
+    "placeholderWorldFaces": 0,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 9,
+    "worldVerts": 27,
+    "worldBytes": 540,
+    "propsTris": 24,
+    "propsVerts": 16,
+    "propsBytes": 768,
+    "totalTris": 33,
+    "totalVerts": 43,
+    "totalBytes": 1308,
+    "drawCallsBeforeInstancing": 16,
+    "drawCallsAfterInstancing": 10
+  },
+  "world": {
+    "meshes": [
+      {
+        "materialId": "tools/toolsskybox",
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": false,
+        "faceCount": 2,
+        "triCount": 5,
+        "vertexCount": 15,
+        "positions": [
+          8152,
+          3072,
+          856,
+          8192,
+          3072,
+          856,
+          8192,
+          3290,
+          856,
+          7168,
+          4096,
+          856,
+          7168,
+          3072,
+          856,
+          8152,
+          3072,
+          856,
+          7168,
+          2048,
+          856,
+          8152,
+          3072,
+          856,
+          7168,
+          3072,
+          856,
+          7168,
+          3072,
+          856,
+          6432,
+          4096,
+          856,
+          6432,
+          3072,
+          856,
+          7168,
+          3072,
+          856,
+          6432,
+          2048,
+          856,
+          7168,
+          2048,
+          856
+        ],
+        "uvs": [
+          -255.4375,
+          95.65625,
+          -256.6875,
+          95.65625,
+          -256.6875,
+          102.46875,
+          -224.6875,
+          127.65625,
+          -224.6875,
+          95.65625,
+          -255.4375,
+          95.65625,
+          -224.6875,
+          63.65625,
+          -255.4375,
+          95.65625,
+          -224.6875,
+          95.65625,
+          -224.6875,
+          95.65625,
+          -201.6875,
+          127.65625,
+          -201.6875,
+          95.65625,
+          -224.6875,
+          95.65625,
+          -201.6875,
+          63.65625,
+          -224.6875,
+          63.65625
+        ]
+      },
+      {
+        "materialId": "nature/blendgrassgravel001a",
+        "material": "nature/blendgrassgravel001a",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 2,
+        "vertexCount": 6,
+        "positions": [
+          7476,
+          1426,
+          64,
+          7476,
+          2962,
+          64,
+          7988,
+          2962,
+          64,
+          7476,
+          2962,
+          64,
+          7476,
+          4230,
+          64,
+          7988,
+          4230,
+          64
+        ],
+        "uvs": [
+          -58.23046875,
+          10.828773438930511,
+          -58.23046875,
+          22.82877343893051,
+          -62.23046875,
+          22.82877343893051,
+          -58.23046875,
+          22.82877343893051,
+          -58.23046875,
+          32.73502343893051,
+          -62.23046875,
+          32.73502343893051
+        ]
+      },
+      {
+        "materialId": "nature/miltree005",
+        "material": "nature/miltree005",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 2,
+        "vertexCount": 6,
+        "positions": [
+          8049,
+          1845,
+          240,
+          8049,
+          1717,
+          240,
+          8049,
+          1717,
+          752,
+          8049,
+          1717,
+          240,
+          6432,
+          1717,
+          240,
+          6432,
+          1717,
+          752
+        ],
+        "uvs": [
+          3,
+          0,
+          2.75,
+          0,
+          2.75,
+          -1,
+          15,
+          0,
+          11.841796875,
+          0,
+          11.841796875,
+          -1
+        ]
+      }
+    ]
+  },
+  "props": {
+    "instances": [
+      {
+        "model": "props_foliage/tree_pine_tall_cluster_01",
+        "sourceModel": "props_foliage/tree_pine_tall_cluster_01",
+        "placeholderModel": false,
+        "origin": [
+          7224,
+          1754,
+          -2.1019299030303955
+        ],
+        "angles": [
+          0,
+          32.465999603271484,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "trees/pi_tree3",
+        "sourceModel": "trees/pi_tree3",
+        "placeholderModel": false,
+        "origin": [
+          7591,
+          3560,
+          -14
+        ],
+        "angles": [
+          0,
+          266.5,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    ]
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

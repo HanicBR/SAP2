@@ -1,0 +1,237 @@
+{
+  "id": "g_2_5",
+  "lod": 1,
+  "lodTriStride": 2,
+  "bounds": {
+    "minX": -10240,
+    "minY": -4519,
+    "maxX": -8192,
+    "maxY": -2471
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 2,
+    "y": 5
+  },
+  "counts": {
+    "worldFaces": 6,
+    "staticProps": 3,
+    "placeholderWorldFaces": 0,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 6,
+    "worldVerts": 18,
+    "worldBytes": 360,
+    "propsTris": 36,
+    "propsVerts": 24,
+    "propsBytes": 1152,
+    "totalTris": 42,
+    "totalVerts": 42,
+    "totalBytes": 1512,
+    "drawCallsBeforeInstancing": 9,
+    "drawCallsAfterInstancing": 5
+  },
+  "world": {
+    "meshes": [
+      {
+        "materialId": "tools/toolsskybox",
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": false,
+        "faceCount": 2,
+        "triCount": 3,
+        "vertexCount": 9,
+        "positions": [
+          -8512,
+          -3427,
+          672,
+          -8512,
+          -3427,
+          1098,
+          -8192,
+          -3427,
+          1098,
+          -8512,
+          -3427,
+          1098,
+          -8512,
+          -3427,
+          672,
+          -8512,
+          -4096,
+          672,
+          -8192,
+          -3427,
+          1098,
+          -8512,
+          -3427,
+          1098,
+          -8512,
+          -4096,
+          1098
+        ],
+        "uvs": [
+          265.3125,
+          -107.4375,
+          265.3125,
+          -107.4375,
+          255.3125,
+          -107.4375,
+          265.3125,
+          -107.4375,
+          265.3125,
+          -107.4375,
+          265.3125,
+          -128.34375,
+          255.3125,
+          -107.4375,
+          265.3125,
+          -107.4375,
+          265.3125,
+          -128.34375
+        ]
+      },
+      {
+        "materialId": "nature/cliffface001a",
+        "material": "nature/cliffface001a",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 2,
+        "vertexCount": 6,
+        "positions": [
+          -8327,
+          -3428,
+          64,
+          -8327,
+          -5476,
+          64,
+          -8327,
+          -5476,
+          368,
+          -8327,
+          -3428,
+          368,
+          -8327,
+          -5476,
+          368,
+          -8327,
+          -5476,
+          672
+        ],
+        "uvs": [
+          5.350913277361542,
+          -0.010416664183139801,
+          8.684246531222016,
+          -0.010416664183139801,
+          8.684246531222016,
+          -0.5052083190530539,
+          5.3492853553034365,
+          -0.5052083190530539,
+          8.68261860916391,
+          -0.5052083190530539,
+          8.68261860916391,
+          -0.9999999739229679
+        ]
+      },
+      {
+        "materialId": "ajacks/ajacks_grass01",
+        "material": "ajacks/ajacks_grass01",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 1,
+        "vertexCount": 3,
+        "positions": [
+          -8128,
+          -5120,
+          72,
+          -8351,
+          -5120,
+          72,
+          -8351,
+          -3428,
+          72
+        ],
+        "uvs": [
+          -40,
+          -63.4375,
+          -40,
+          -65.1796875,
+          -26.78125,
+          -65.1796875
+        ]
+      }
+    ]
+  },
+  "props": {
+    "instances": [
+      {
+        "model": "msc/e_tree1",
+        "sourceModel": "msc/e_tree1",
+        "placeholderModel": false,
+        "origin": [
+          -8221,
+          -3998,
+          72.25
+        ],
+        "angles": [
+          0,
+          288,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "msc/e_tree1",
+        "sourceModel": "msc/e_tree1",
+        "placeholderModel": false,
+        "origin": [
+          -8229,
+          -4465,
+          72.25
+        ],
+        "angles": [
+          0,
+          207.5,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "msc/e_tree1",
+        "sourceModel": "msc/e_tree1",
+        "placeholderModel": false,
+        "origin": [
+          -8210,
+          -3529,
+          72.25
+        ],
+        "angles": [
+          0,
+          244.5,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    ]
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

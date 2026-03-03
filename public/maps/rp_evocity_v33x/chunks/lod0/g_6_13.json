@@ -1,6 +1,7 @@
 {
   "id": "g_6_13",
   "lod": 0,
+  "lodTriStride": 1,
   "bounds": {
     "minX": -2048,
     "minY": 11865,
@@ -22,14 +23,14 @@
   },
   "stats": {
     "worldTris": 155,
-    "worldVerts": 287,
-    "worldBytes": 11160,
+    "worldVerts": 465,
+    "worldBytes": 9300,
     "propsTris": 120,
     "propsVerts": 80,
     "propsBytes": 3840,
     "totalTris": 275,
-    "totalVerts": 367,
-    "totalBytes": 15000,
+    "totalVerts": 545,
+    "totalBytes": 13140,
     "drawCallsBeforeInstancing": 76,
     "drawCallsAfterInstancing": 11
   },

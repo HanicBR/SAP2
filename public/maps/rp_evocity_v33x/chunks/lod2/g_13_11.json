@@ -1,0 +1,122 @@
+{
+  "id": "g_13_11",
+  "lod": 2,
+  "lodTriStride": 4,
+  "bounds": {
+    "minX": 12288,
+    "minY": 7769,
+    "maxX": 14336,
+    "maxY": 9817
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 13,
+    "y": 11
+  },
+  "counts": {
+    "worldFaces": 6,
+    "staticProps": 0,
+    "placeholderWorldFaces": 0,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 4,
+    "worldVerts": 12,
+    "worldBytes": 240,
+    "propsTris": 0,
+    "propsVerts": 0,
+    "propsBytes": 0,
+    "totalTris": 4,
+    "totalVerts": 12,
+    "totalBytes": 240,
+    "drawCallsBeforeInstancing": 6,
+    "drawCallsAfterInstancing": 1
+  },
+  "world": {
+    "meshes": [
+      {
+        "materialId": "maps/rp_evocity_v33x/bridge/se1_metal_wall_02_9811_4479_70",
+        "material": "maps/rp_evocity_v33x/bridge/se1_metal_wall_02_9811_4479_70",
+        "placeholderMaterial": false,
+        "faceCount": 2,
+        "triCount": 4,
+        "vertexCount": 12,
+        "positions": [
+          12288,
+          9744.0185546875,
+          320,
+          12288,
+          9248.0361328125,
+          320,
+          12288,
+          9248.0361328125,
+          64,
+          12288,
+          9216,
+          320,
+          12288,
+          9248.0361328125,
+          64,
+          12288,
+          9248.0361328125,
+          320,
+          12288,
+          8192,
+          320,
+          12288,
+          8192,
+          64,
+          12288,
+          8224.0322265625,
+          64,
+          12288,
+          9216,
+          320,
+          12288,
+          9184.0341796875,
+          64,
+          12288,
+          9216,
+          64
+        ],
+        "uvs": [
+          -43.23771212167594,
+          -1.111545205116272,
+          -41.08501053519467,
+          -1.111545205116272,
+          -41.08501053519467,
+          -0.00043404102325439453,
+          -40.94596481323242,
+          -1.111545205116272,
+          -41.08501053519467,
+          -0.00043404102325439453,
+          -41.08501053519467,
+          -1.111545205116272,
+          -36.50152015686035,
+          -1.111545205116272,
+          -36.50152015686035,
+          -0.00043404102325439453,
+          -36.64054892461172,
+          -0.00043404102325439453,
+          -40.94596481323242,
+          -1.111545205116272,
+          -40.807224267065976,
+          -0.00043404102325439453,
+          -40.94596481323242,
+          -0.00043404102325439453
+        ]
+      }
+    ]
+  },
+  "props": {
+    "instances": []
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

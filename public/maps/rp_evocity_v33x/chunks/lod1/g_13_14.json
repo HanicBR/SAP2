@@ -1,0 +1,134 @@
+{
+  "id": "g_13_14",
+  "lod": 1,
+  "lodTriStride": 2,
+  "bounds": {
+    "minX": 12288,
+    "minY": 13913,
+    "maxX": 14336,
+    "maxY": 15961
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 13,
+    "y": 14
+  },
+  "counts": {
+    "worldFaces": 4,
+    "staticProps": 0,
+    "placeholderWorldFaces": 0,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 4,
+    "worldVerts": 12,
+    "worldBytes": 240,
+    "propsTris": 0,
+    "propsVerts": 0,
+    "propsBytes": 0,
+    "totalTris": 4,
+    "totalVerts": 12,
+    "totalBytes": 240,
+    "drawCallsBeforeInstancing": 4,
+    "drawCallsAfterInstancing": 2
+  },
+  "world": {
+    "meshes": [
+      {
+        "materialId": "tools/toolsskybox",
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": false,
+        "faceCount": 2,
+        "triCount": 3,
+        "vertexCount": 9,
+        "positions": [
+          12920,
+          15352,
+          672,
+          12920,
+          15352,
+          949,
+          12920,
+          14336,
+          949,
+          12920,
+          15352,
+          949,
+          12920,
+          15352,
+          672,
+          12288,
+          15352,
+          672,
+          12288,
+          14336,
+          949,
+          12920,
+          14336,
+          949,
+          12920,
+          15352,
+          949
+        ],
+        "uvs": [
+          -404.4375,
+          479.40625,
+          -404.4375,
+          479.40625,
+          -404.4375,
+          447.65625,
+          -404.4375,
+          479.40625,
+          -404.4375,
+          479.40625,
+          -384.6875,
+          479.40625,
+          -384.6875,
+          447.65625,
+          -404.4375,
+          447.65625,
+          -404.4375,
+          479.40625
+        ]
+      },
+      {
+        "materialId": "nature/blendgrassgrass001a",
+        "material": "nature/blendgrassgrass001a",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 1,
+        "vertexCount": 3,
+        "positions": [
+          12320,
+          12792,
+          58,
+          12320,
+          15328,
+          58,
+          12920,
+          15328,
+          58
+        ],
+        "uvs": [
+          -95.3125,
+          99.1875,
+          -95.3125,
+          119,
+          -100,
+          119
+        ]
+      }
+    ]
+  },
+  "props": {
+    "instances": []
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

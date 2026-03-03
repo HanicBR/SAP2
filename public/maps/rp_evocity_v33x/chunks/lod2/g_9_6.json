@@ -1,0 +1,92 @@
+{
+  "id": "g_9_6",
+  "lod": 2,
+  "lodTriStride": 4,
+  "bounds": {
+    "minX": 4096,
+    "minY": -2471,
+    "maxX": 6144,
+    "maxY": -423
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 9,
+    "y": 6
+  },
+  "counts": {
+    "worldFaces": 4,
+    "staticProps": 0,
+    "placeholderWorldFaces": 0,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 2,
+    "worldVerts": 6,
+    "worldBytes": 120,
+    "propsTris": 0,
+    "propsVerts": 0,
+    "propsBytes": 0,
+    "totalTris": 2,
+    "totalVerts": 6,
+    "totalBytes": 120,
+    "drawCallsBeforeInstancing": 4,
+    "drawCallsAfterInstancing": 1
+  },
+  "world": {
+    "meshes": [
+      {
+        "materialId": "tools/toolsskybox",
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 2,
+        "vertexCount": 6,
+        "positions": [
+          4646.3701171875,
+          -861.4149780273438,
+          950.0479736328125,
+          4646.3701171875,
+          0,
+          950.0479736328125,
+          4096,
+          0,
+          950.0479736328125,
+          4646.3701171875,
+          0,
+          950.0479736328125,
+          4646.3701171875,
+          -861.4149780273438,
+          950.0479736328125,
+          4646.3701171875,
+          -861.4149780273438,
+          226.32699584960938
+        ],
+        "uvs": [
+          -145.88656616210938,
+          -27.262968063354492,
+          -145.88656616210938,
+          -0.34375,
+          -128.6875,
+          -0.34375,
+          -145.88656616210938,
+          -0.34375,
+          -145.88656616210938,
+          -27.262968063354492,
+          -145.88656616210938,
+          -27.262968063354492
+        ]
+      }
+    ]
+  },
+  "props": {
+    "instances": []
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

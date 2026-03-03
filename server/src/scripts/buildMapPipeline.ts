@@ -34,6 +34,13 @@ type Options = {
   active5x5MaxTris: number;
   active5x5MaxDrawCalls: number;
   active5x5MaxBytes: number;
+  chunkLod1TriStride: number;
+  chunkLod2TriStride: number;
+  streamingActiveRadiusChunks: number;
+  streamingRenderRadiusChunks: number;
+  streamingPrefetchRadiusChunks: number;
+  streamingDiscardRadiusChunks: number;
+  streamingGracePeriodMs: number;
   assetResolutionMode: AssetResolutionMode;
   sourceioMode: SourceIOMode;
   sourceioRoot: string;
@@ -163,6 +170,13 @@ const DEFAULTS = {
   active5x5MaxTris: 4200000,
   active5x5MaxDrawCalls: 4200,
   active5x5MaxBytes: 220 * 1024 * 1024,
+  chunkLod1TriStride: 2,
+  chunkLod2TriStride: 4,
+  streamingActiveRadiusChunks: 1,
+  streamingRenderRadiusChunks: 3,
+  streamingPrefetchRadiusChunks: 3,
+  streamingDiscardRadiusChunks: 4,
+  streamingGracePeriodMs: 5000,
   sourceioMode: 'auto' as SourceIOMode,
   assetResolutionMode: 'permissive' as AssetResolutionMode,
 };
@@ -252,6 +266,59 @@ const parseArgs = (): Options => {
       toNum(envOrArg('--active-5x5-max-drawcalls', 'MAP_PIPELINE_ACTIVE_5X5_MAX_DRAWCALLS'), DEFAULTS.active5x5MaxDrawCalls),
     ),
     active5x5MaxBytes: Math.floor(toNum(envOrArg('--active-5x5-max-bytes', 'MAP_PIPELINE_ACTIVE_5X5_MAX_BYTES'), DEFAULTS.active5x5MaxBytes)),
+    chunkLod1TriStride: Math.max(
+      1,
+      Math.floor(toNum(envOrArg('--chunk-lod1-tri-stride', 'MAP_PIPELINE_CHUNK_LOD1_TRI_STRIDE'), DEFAULTS.chunkLod1TriStride)),
+    ),
+    chunkLod2TriStride: Math.max(
+      1,
+      Math.floor(toNum(envOrArg('--chunk-lod2-tri-stride', 'MAP_PIPELINE_CHUNK_LOD2_TRI_STRIDE'), DEFAULTS.chunkLod2TriStride)),
+    ),
+    streamingActiveRadiusChunks: Math.max(
+      1,
+      Math.floor(
+        toNum(
+          envOrArg('--streaming-active-radius-chunks', 'MAP_PIPELINE_STREAMING_ACTIVE_RADIUS_CHUNKS'),
+          DEFAULTS.streamingActiveRadiusChunks,
+        ),
+      ),
+    ),
+    streamingRenderRadiusChunks: Math.max(
+      1,
+      Math.floor(
+        toNum(
+          envOrArg('--streaming-render-radius-chunks', 'MAP_PIPELINE_STREAMING_RENDER_RADIUS_CHUNKS'),
+          DEFAULTS.streamingRenderRadiusChunks,
+        ),
+      ),
+    ),
+    streamingPrefetchRadiusChunks: Math.max(
+      1,
+      Math.floor(
+        toNum(
+          envOrArg('--streaming-prefetch-radius-chunks', 'MAP_PIPELINE_STREAMING_PREFETCH_RADIUS_CHUNKS'),
+          DEFAULTS.streamingPrefetchRadiusChunks,
+        ),
+      ),
+    ),
+    streamingDiscardRadiusChunks: Math.max(
+      1,
+      Math.floor(
+        toNum(
+          envOrArg('--streaming-discard-radius-chunks', 'MAP_PIPELINE_STREAMING_DISCARD_RADIUS_CHUNKS'),
+          DEFAULTS.streamingDiscardRadiusChunks,
+        ),
+      ),
+    ),
+    streamingGracePeriodMs: Math.max(
+      1000,
+      Math.floor(
+        toNum(
+          envOrArg('--streaming-grace-period-ms', 'MAP_PIPELINE_STREAMING_GRACE_PERIOD_MS'),
+          DEFAULTS.streamingGracePeriodMs,
+        ),
+      ),
+    ),
     assetResolutionMode,
     sourceioMode,
     sourceioRoot: resolveWithParentFallback(String(map.get('--sourceio-root') || 'sandbox/_techrefs/SourceIO')),
@@ -982,6 +1049,73 @@ const computeChunkWorldStats = (chunk: Chunk, faces: FaceAnnotated[]) => {
   return { tris, verts, bytes };
 };
 
+type ChunkWorldMesh = {
+  materialId: string;
+  material: string;
+  placeholderMaterial: boolean;
+  faceCount: number;
+  triCount: number;
+  vertexCount: number;
+  positions: number[];
+  uvs: number[];
+};
+
+const downsampleWorldMeshes = (worldMeshes: ChunkWorldMesh[], triStride: number): ChunkWorldMesh[] => {
+  const stride = Math.max(1, Math.floor(triStride || 1));
+  if (stride <= 1) {
+    return worldMeshes.map((mesh) => ({
+      ...mesh,
+      positions: mesh.positions.slice(),
+      uvs: mesh.uvs.slice(),
+    }));
+  }
+
+  const reduced: ChunkWorldMesh[] = [];
+  for (const mesh of worldMeshes) {
+    const triTotal = Math.floor(mesh.positions.length / 9);
+    if (triTotal <= 0) continue;
+    const keepPositions: number[] = [];
+    const keepUvs: number[] = [];
+    let keptTris = 0;
+    for (let triIdx = 0; triIdx < triTotal; triIdx += 1) {
+      if (triIdx % stride !== 0 && !(keptTris === 0 && triIdx === triTotal - 1)) continue;
+      const posStart = triIdx * 9;
+      const uvStart = triIdx * 6;
+      for (let i = 0; i < 9; i += 1) keepPositions.push(Number(mesh.positions[posStart + i] || 0));
+      for (let i = 0; i < 6; i += 1) keepUvs.push(Number(mesh.uvs[uvStart + i] || 0));
+      keptTris += 1;
+    }
+    if (keepPositions.length < 9) continue;
+    reduced.push({
+      materialId: mesh.materialId,
+      material: mesh.material,
+      placeholderMaterial: mesh.placeholderMaterial,
+      faceCount: Math.max(1, Math.round((mesh.faceCount || triTotal) / stride)),
+      triCount: keptTris,
+      vertexCount: keptTris * 3,
+      positions: keepPositions,
+      uvs: keepUvs,
+    });
+  }
+  return reduced;
+};
+
+const computeWorldMeshesStats = (worldMeshes: ChunkWorldMesh[]) => {
+  let tris = 0;
+  let verts = 0;
+  let bytes = 0;
+  for (const mesh of worldMeshes) {
+    const triCount = Math.max(0, Number(mesh.triCount || Math.floor((mesh.positions?.length || 0) / 9)));
+    const vertexCount = Math.max(0, Number(mesh.vertexCount || triCount * 3));
+    const posCount = Math.max(0, Number(mesh.positions?.length || 0));
+    const uvCount = Math.max(0, Number(mesh.uvs?.length || 0));
+    tris += triCount;
+    verts += vertexCount;
+    bytes += (posCount + uvCount) * 4;
+  }
+  return { tris, verts, bytes };
+};
+
 const splitChunk = (
   chunk: Chunk,
   faces: FaceAnnotated[],
@@ -1077,6 +1211,13 @@ const run = () => {
   if (!fs.existsSync(options.mapRoot) || !fs.statSync(options.mapRoot).isDirectory()) {
     throw new Error(`map_root_not_found: ${options.mapRoot}`);
   }
+  const chunkLod1TriStride = Math.max(1, Math.floor(options.chunkLod1TriStride || 1));
+  const chunkLod2TriStride = Math.max(chunkLod1TriStride, Math.floor(options.chunkLod2TriStride || chunkLod1TriStride));
+  const streamingActiveRadiusChunks = Math.max(1, Math.floor(options.streamingActiveRadiusChunks || 1));
+  const streamingRenderRadiusChunks = Math.max(streamingActiveRadiusChunks, Math.floor(options.streamingRenderRadiusChunks || streamingActiveRadiusChunks));
+  const streamingPrefetchRadiusChunks = Math.max(streamingRenderRadiusChunks, Math.floor(options.streamingPrefetchRadiusChunks || streamingRenderRadiusChunks));
+  const streamingDiscardRadiusChunks = Math.max(streamingPrefetchRadiusChunks, Math.floor(options.streamingDiscardRadiusChunks || streamingPrefetchRadiusChunks));
+  const streamingGracePeriodMs = Math.max(1000, Math.floor(options.streamingGracePeriodMs || 5000));
 
   const auditOptions: AuditCliOptions = {
     mapBsp: options.mapBsp,
@@ -1203,7 +1344,10 @@ const run = () => {
 
   const mapName = path.basename(options.mapBsp, path.extname(options.mapBsp));
   const baseDir = path.join(options.outDir, 'base');
-  const chunkDir = path.join(options.outDir, 'chunks', 'lod0');
+  const chunksDir = path.join(options.outDir, 'chunks');
+  const chunkDirLod0 = path.join(chunksDir, 'lod0');
+  const chunkDirLod1 = path.join(chunksDir, 'lod1');
+  const chunkDirLod2 = path.join(chunksDir, 'lod2');
   const reportsDir = path.join(options.outDir, 'reports');
   const materialsDir = path.join(options.outDir, 'materials');
   const materialsTextureDir = path.join(materialsDir, 'basecolor');
@@ -1211,12 +1355,14 @@ const run = () => {
   const modelsMeshDir = path.join(modelsDir, 'meshes');
   fs.rmSync(path.join(options.outDir, 'pipeline'), { recursive: true, force: true });
   fs.rmSync(baseDir, { recursive: true, force: true });
-  fs.rmSync(path.join(options.outDir, 'chunks'), { recursive: true, force: true });
+  fs.rmSync(chunksDir, { recursive: true, force: true });
   fs.rmSync(reportsDir, { recursive: true, force: true });
   fs.rmSync(materialsDir, { recursive: true, force: true });
   fs.rmSync(modelsDir, { recursive: true, force: true });
   fs.mkdirSync(baseDir, { recursive: true });
-  fs.mkdirSync(chunkDir, { recursive: true });
+  fs.mkdirSync(chunkDirLod0, { recursive: true });
+  fs.mkdirSync(chunkDirLod1, { recursive: true });
+  fs.mkdirSync(chunkDirLod2, { recursive: true });
   fs.mkdirSync(reportsDir, { recursive: true });
   fs.mkdirSync(materialsTextureDir, { recursive: true });
   fs.mkdirSync(modelsMeshDir, { recursive: true });
@@ -1402,9 +1548,31 @@ const run = () => {
     message: string;
     splitReason?: string[];
   }> = [];
+  type ChunkStats = {
+    worldTris: number;
+    worldVerts: number;
+    worldBytes: number;
+    propsTris: number;
+    propsVerts: number;
+    propsBytes: number;
+    totalTris: number;
+    totalVerts: number;
+    totalBytes: number;
+    drawCallsBeforeInstancing: number;
+    drawCallsAfterInstancing: number;
+  };
+  const chunkIndexByLod: Record<0 | 1 | 2, any[]> = { 0: [], 1: [], 2: [] };
+  let totalLod0Tris = 0;
+  let totalLod1Tris = 0;
+  let totalLod2Tris = 0;
+  let totalLod0Bytes = 0;
+  let totalLod1Bytes = 0;
+  let totalLod2Bytes = 0;
   const chunkIndex: Array<{
     id: string;
     url: string;
+    lodUrls: { lod0: string; lod1: string; lod2: string };
+    lodStats: { lod0: ChunkStats; lod1: ChunkStats; lod2: ChunkStats };
     bounds: { minX: number; minY: number; maxX: number; maxY: number };
     size: number;
     splitDepth: number;
@@ -1433,27 +1601,22 @@ const run = () => {
   }> = [];
 
   for (const chunk of chunks) {
-    const worldMeshBuckets = new Map<string, {
-      material: string;
-      placeholderMaterial: boolean;
-      positions: number[];
-      uvs: number[];
-      triCount: number;
-      faceCount: number;
-    }>();
+    const worldMeshBuckets = new Map<string, ChunkWorldMesh>();
     let placeholderWorldFaces = 0;
     for (const idx of chunk.worldFaceIndexes) {
       const face = faces[idx];
       if (!face || face.vertices.length < 3) continue;
       if (face.placeholderMaterial) placeholderWorldFaces += 1;
       const key = `${face.material}|${face.placeholderMaterial ? 'ph' : 'ok'}`;
-      const bucket = worldMeshBuckets.get(key) || {
+      const bucket: ChunkWorldMesh = worldMeshBuckets.get(key) || {
+        materialId: face.material,
         material: face.material,
         placeholderMaterial: face.placeholderMaterial,
-        positions: [],
-        uvs: [],
+        positions: [] as number[],
+        uvs: [] as number[],
         triCount: 0,
         faceCount: 0,
+        vertexCount: 0,
       };
       const v0 = face.vertices[0];
       if (!v0) continue;
@@ -1481,12 +1644,13 @@ const run = () => {
         bucket.triCount += 1;
       }
       bucket.faceCount += 1;
+      bucket.vertexCount = Math.floor(bucket.positions.length / 3);
       worldMeshBuckets.set(key, bucket);
     }
     const worldMeshes = Array.from(worldMeshBuckets.values())
       .filter((item) => item.positions.length >= 9)
       .map((item) => ({
-        materialId: item.material,
+        materialId: item.materialId,
         material: item.material,
         placeholderMaterial: item.placeholderMaterial,
         faceCount: item.faceCount,
@@ -1494,7 +1658,10 @@ const run = () => {
         vertexCount: Math.floor(item.positions.length / 3),
         positions: item.positions,
         uvs: item.uvs,
-      }));
+      } satisfies ChunkWorldMesh));
+    const worldMeshesLod0 = worldMeshes;
+    const worldMeshesLod1 = downsampleWorldMeshes(worldMeshesLod0, chunkLod1TriStride);
+    const worldMeshesLod2 = downsampleWorldMeshes(worldMeshesLod0, chunkLod2TriStride);
     const worldFacesCount = chunk.worldFaceIndexes.length;
     const propItems = chunk.propIndexes.map((idx) => {
       const prop = props[idx];
@@ -1521,32 +1688,51 @@ const run = () => {
     });
 
     chunkedWorldFaces += worldFacesCount;
-    const worldStats = computeChunkWorldStats(chunk, faces);
     const propModelSet = new Set(propItems.map((item) => item.model));
-    const worldMaterialSet = new Set(worldMeshes.map((item) => item.material));
     const propsTris = propItems.length * PROP_TRI_ESTIMATE;
     const propsVerts = propItems.length * PROP_VERT_ESTIMATE;
     const propsBytes = propItems.length * PROP_BYTE_ESTIMATE;
-    const totalTris = worldStats.tris + propsTris;
-    const totalVerts = worldStats.verts + propsVerts;
-    const totalBytes = worldStats.bytes + propsBytes;
-    const drawCallsBeforeInstancing = worldFacesCount + propItems.length;
     const propDrawCallsAfterInstancing = Array.from(propModelSet).reduce((acc, modelId) => {
       const resolved = modelSubMeshCountById.get(modelId);
       return acc + Math.max(1, Number(resolved || 1));
     }, 0);
-    const drawCallsAfterInstancing = worldMaterialSet.size + propDrawCallsAfterInstancing;
+    const buildChunkStatsForLod = (lodWorldMeshes: ChunkWorldMesh[]): ChunkStats => {
+      const worldStats = computeWorldMeshesStats(lodWorldMeshes);
+      const worldDrawCallsAfter = new Set(lodWorldMeshes.map((item) => item.material)).size;
+      return {
+        worldTris: worldStats.tris,
+        worldVerts: worldStats.verts,
+        worldBytes: worldStats.bytes,
+        propsTris,
+        propsVerts,
+        propsBytes,
+        totalTris: worldStats.tris + propsTris,
+        totalVerts: worldStats.verts + propsVerts,
+        totalBytes: worldStats.bytes + propsBytes,
+        drawCallsBeforeInstancing: worldFacesCount + propItems.length,
+        drawCallsAfterInstancing: worldDrawCallsAfter + propDrawCallsAfterInstancing,
+      };
+    };
+    const statsLod0 = buildChunkStatsForLod(worldMeshesLod0);
+    const statsLod1 = buildChunkStatsForLod(worldMeshesLod1);
+    const statsLod2 = buildChunkStatsForLod(worldMeshesLod2);
+    totalLod0Tris += statsLod0.totalTris;
+    totalLod1Tris += statsLod1.totalTris;
+    totalLod2Tris += statsLod2.totalTris;
+    totalLod0Bytes += statsLod0.totalBytes;
+    totalLod1Bytes += statsLod1.totalBytes;
+    totalLod2Bytes += statsLod2.totalBytes;
 
     const splitReason = Array.isArray(chunk.splitReason) ? chunk.splitReason.filter(Boolean) : [];
     const chunkViolations: Array<{ type: 'tris' | 'verts' | 'bytes'; observed: number; budget: number }> = [];
-    if (totalTris > options.perChunkMaxTris) {
-      chunkViolations.push({ type: 'tris', observed: totalTris, budget: options.perChunkMaxTris });
+    if (statsLod0.totalTris > options.perChunkMaxTris) {
+      chunkViolations.push({ type: 'tris', observed: statsLod0.totalTris, budget: options.perChunkMaxTris });
     }
-    if (totalVerts > options.perChunkMaxVerts) {
-      chunkViolations.push({ type: 'verts', observed: totalVerts, budget: options.perChunkMaxVerts });
+    if (statsLod0.totalVerts > options.perChunkMaxVerts) {
+      chunkViolations.push({ type: 'verts', observed: statsLod0.totalVerts, budget: options.perChunkMaxVerts });
     }
-    if (totalBytes > options.perChunkMaxBytes) {
-      chunkViolations.push({ type: 'bytes', observed: totalBytes, budget: options.perChunkMaxBytes });
+    if (statsLod0.totalBytes > options.perChunkMaxBytes) {
+      chunkViolations.push({ type: 'bytes', observed: statsLod0.totalBytes, budget: options.perChunkMaxBytes });
     }
     const overBudget = chunkViolations.length > 0;
     for (const violation of chunkViolations) {
@@ -1568,46 +1754,52 @@ const run = () => {
     const baseCellY = Math.floor((centerY - minY) / options.chunkSize);
 
     const fileName = `${chunk.id}.json`;
-    writeJson(path.join(chunkDir, fileName), {
-      id: chunk.id,
-      lod: 0,
-      bounds: chunk.bounds,
-      size: chunk.size,
-      splitDepth: chunk.splitDepth,
-      splitReason,
-      baseCell: { x: baseCellX, y: baseCellY },
-      counts: {
-        worldFaces: worldFacesCount,
-        staticProps: propItems.length,
-        placeholderWorldFaces,
-        placeholderStaticProps: propItems.filter((item) => item.placeholderModel).length,
-      },
-      stats: {
-        worldTris: worldStats.tris,
-        worldVerts: worldStats.verts,
-        worldBytes: worldStats.bytes,
-        propsTris,
-        propsVerts,
-        propsBytes,
-        totalTris,
-        totalVerts,
-        totalBytes,
-        drawCallsBeforeInstancing,
-        drawCallsAfterInstancing,
-      },
-      world: { meshes: worldMeshes },
-      props: { instances: propItems },
-      budgets: {
-        perChunkMaxTris: options.perChunkMaxTris,
-        perChunkMaxVerts: options.perChunkMaxVerts,
-        perChunkMaxBytes: options.perChunkMaxBytes,
-        overBudget,
-      },
-    });
+    const lodUrls = {
+      lod0: `./chunks/lod0/${fileName}`,
+      lod1: `./chunks/lod1/${fileName}`,
+      lod2: `./chunks/lod2/${fileName}`,
+    };
+    const writeChunkLodPayload = (lod: 0 | 1 | 2, lodWorldMeshes: ChunkWorldMesh[], lodStats: ChunkStats) => {
+      const targetDir = lod === 0 ? chunkDirLod0 : lod === 1 ? chunkDirLod1 : chunkDirLod2;
+      writeJson(path.join(targetDir, fileName), {
+        id: chunk.id,
+        lod,
+        lodTriStride: lod === 0 ? 1 : lod === 1 ? chunkLod1TriStride : chunkLod2TriStride,
+        bounds: chunk.bounds,
+        size: chunk.size,
+        splitDepth: chunk.splitDepth,
+        splitReason,
+        baseCell: { x: baseCellX, y: baseCellY },
+        counts: {
+          worldFaces: worldFacesCount,
+          staticProps: propItems.length,
+          placeholderWorldFaces,
+          placeholderStaticProps: propItems.filter((item) => item.placeholderModel).length,
+        },
+        stats: lodStats,
+        world: { meshes: lodWorldMeshes },
+        props: { instances: propItems },
+        budgets: {
+          perChunkMaxTris: options.perChunkMaxTris,
+          perChunkMaxVerts: options.perChunkMaxVerts,
+          perChunkMaxBytes: options.perChunkMaxBytes,
+          overBudget,
+        },
+      });
+    };
+    writeChunkLodPayload(0, worldMeshesLod0, statsLod0);
+    writeChunkLodPayload(1, worldMeshesLod1, statsLod1);
+    writeChunkLodPayload(2, worldMeshesLod2, statsLod2);
 
     chunkIndex.push({
       id: chunk.id,
-      url: `./chunks/lod0/${fileName}`,
+      url: lodUrls.lod0,
+      lodUrls,
+      lodStats: {
+        lod0: statsLod0,
+        lod1: statsLod1,
+        lod2: statsLod2,
+      },
       bounds: chunk.bounds,
       size: chunk.size,
       splitDepth: chunk.splitDepth,
@@ -1619,24 +1811,41 @@ const run = () => {
         placeholderWorldFaces,
         placeholderStaticProps: propItems.filter((item) => item.placeholderModel).length,
       },
-      stats: {
-        worldTris: worldStats.tris,
-        worldVerts: worldStats.verts,
-        worldBytes: worldStats.bytes,
-        propsTris,
-        propsVerts,
-        propsBytes,
-        totalTris,
-        totalVerts,
-        totalBytes,
-        drawCallsBeforeInstancing,
-        drawCallsAfterInstancing,
-      },
+      stats: statsLod0,
       overBudget,
     });
+
+    const buildIndexEntryForLod = (lod: 0 | 1 | 2) => ({
+      id: chunk.id,
+      url: lod === 0 ? lodUrls.lod0 : lod === 1 ? lodUrls.lod1 : lodUrls.lod2,
+      lodUrls,
+      lodStats: {
+        lod0: statsLod0,
+        lod1: statsLod1,
+        lod2: statsLod2,
+      },
+      bounds: chunk.bounds,
+      size: chunk.size,
+      splitDepth: chunk.splitDepth,
+      splitReason,
+      baseCell: { x: baseCellX, y: baseCellY },
+      counts: {
+        worldFaces: worldFacesCount,
+        staticProps: propItems.length,
+        placeholderWorldFaces,
+        placeholderStaticProps: propItems.filter((item) => item.placeholderModel).length,
+      },
+      stats: lod === 0 ? statsLod0 : lod === 1 ? statsLod1 : statsLod2,
+      overBudget,
+    });
+    chunkIndexByLod[0].push(buildIndexEntryForLod(0));
+    chunkIndexByLod[1].push(buildIndexEntryForLod(1));
+    chunkIndexByLod[2].push(buildIndexEntryForLod(2));
   }
 
-  writeJson(path.join(chunkDir, 'index.json'), { generatedAt: new Date().toISOString(), lod: 0, chunks: chunkIndex });
+  writeJson(path.join(chunkDirLod0, 'index.json'), { generatedAt: new Date().toISOString(), lod: 0, chunks: chunkIndexByLod[0] });
+  writeJson(path.join(chunkDirLod1, 'index.json'), { generatedAt: new Date().toISOString(), lod: 1, chunks: chunkIndexByLod[1] });
+  writeJson(path.join(chunkDirLod2, 'index.json'), { generatedAt: new Date().toISOString(), lod: 2, chunks: chunkIndexByLod[2] });
 
   const evalActiveSet = (
     radius: number,
@@ -1812,10 +2021,19 @@ const run = () => {
       sourceioMaterialScript: options.sourceioMaterialScript,
       sourceioModelScript: options.sourceioModelScript,
       modelLod: options.modelLod,
+      chunkLod1TriStride,
+      chunkLod2TriStride,
       chunkSize: options.chunkSize,
       maxWorldFacesPerChunk: options.maxWorldFacesPerChunk,
       maxInstancesPerChunk: options.maxInstancesPerChunk,
       worldCoverageMinPct: options.worldCoverageMinPct,
+      streaming: {
+        activeRadiusChunks: streamingActiveRadiusChunks,
+        renderRadiusChunks: streamingRenderRadiusChunks,
+        prefetchRadiusChunks: streamingPrefetchRadiusChunks,
+        discardRadiusChunks: streamingDiscardRadiusChunks,
+        gracePeriodMs: streamingGracePeriodMs,
+      },
       budgets: {
         perChunkMaxTris: options.perChunkMaxTris,
         perChunkMaxVerts: options.perChunkMaxVerts,
@@ -1894,6 +2112,8 @@ const run = () => {
     chunks: {
       total: chunks.length,
       lod0IndexPath: './chunks/lod0/index.json',
+      lod1IndexPath: './chunks/lod1/index.json',
+      lod2IndexPath: './chunks/lod2/index.json',
       topHeaviestChunks,
     },
     activeSets: {
@@ -1931,12 +2151,22 @@ const run = () => {
       mapping: { x: 'x', y: 'z', z: 'y' },
     },
     streaming: {
-      activeWindow: '3x3',
-      prefetchWindow: '5x5',
-      activeRadiusChunks: 1,
-      prefetchRadiusChunks: 2,
-      discardRadiusChunks: 2,
-      gracePeriodMs: 4000,
+      activeWindow: `${streamingActiveRadiusChunks * 2 + 1}x${streamingActiveRadiusChunks * 2 + 1}`,
+      renderWindow: `${streamingRenderRadiusChunks * 2 + 1}x${streamingRenderRadiusChunks * 2 + 1}`,
+      prefetchWindow: `${streamingPrefetchRadiusChunks * 2 + 1}x${streamingPrefetchRadiusChunks * 2 + 1}`,
+      activeRadiusChunks: streamingActiveRadiusChunks,
+      renderRadiusChunks: streamingRenderRadiusChunks,
+      prefetchRadiusChunks: streamingPrefetchRadiusChunks,
+      discardRadiusChunks: streamingDiscardRadiusChunks,
+      gracePeriodMs: streamingGracePeriodMs,
+    },
+    lod: {
+      available: [0, 1, 2],
+      chunkTriStride: {
+        lod0: 1,
+        lod1: chunkLod1TriStride,
+        lod2: chunkLod2TriStride,
+      },
     },
     budgets: {
       perChunk: {
@@ -1972,6 +2202,8 @@ const run = () => {
       },
       chunks: {
         lod0IndexUrl: './chunks/lod0/index.json',
+        lod1IndexUrl: './chunks/lod1/index.json',
+        lod2IndexUrl: './chunks/lod2/index.json',
         format: 'scene-json',
       },
     },
@@ -1979,6 +2211,8 @@ const run = () => {
       id: item.id,
       lod: 0,
       url: item.url,
+      lodUrls: item.lodUrls,
+      lodStats: item.lodStats,
       bounds: item.bounds,
       size: item.size,
       splitDepth: item.splitDepth,
@@ -2024,10 +2258,19 @@ const run = () => {
       sourceioMaterialScript: options.sourceioMaterialScript,
       sourceioModelScript: options.sourceioModelScript,
       modelLod: options.modelLod,
+      chunkLod1TriStride,
+      chunkLod2TriStride,
       chunkSize: options.chunkSize,
       maxWorldFacesPerChunk: options.maxWorldFacesPerChunk,
       maxInstancesPerChunk: options.maxInstancesPerChunk,
       worldCoverageMinPct: options.worldCoverageMinPct,
+      streaming: {
+        activeRadiusChunks: streamingActiveRadiusChunks,
+        renderRadiusChunks: streamingRenderRadiusChunks,
+        prefetchRadiusChunks: streamingPrefetchRadiusChunks,
+        discardRadiusChunks: streamingDiscardRadiusChunks,
+        gracePeriodMs: streamingGracePeriodMs,
+      },
       budgets: {
         perChunkMaxTris: options.perChunkMaxTris,
         perChunkMaxVerts: options.perChunkMaxVerts,
@@ -2090,6 +2333,19 @@ const run = () => {
         beforeInstancing: drawCallsBeforeInstancing,
         afterInstancing: drawCallsAfterInstancing,
         reductionPct: drawCallsReductionPct,
+      },
+      lod: {
+        available: [0, 1, 2],
+        triStride: {
+          lod0: 1,
+          lod1: chunkLod1TriStride,
+          lod2: chunkLod2TriStride,
+        },
+        totals: {
+          lod0: { tris: totalLod0Tris, bytes: totalLod0Bytes },
+          lod1: { tris: totalLod1Tris, bytes: totalLod1Bytes },
+          lod2: { tris: totalLod2Tris, bytes: totalLod2Bytes },
+        },
       },
       activeSets: {
         set3x3: activeSet3x3,
@@ -2170,6 +2426,10 @@ const run = () => {
   console.log(`Report: ${options.reportPath}`);
   console.log(`Coverage: ${worldCoveragePct.toFixed(2)}% | Chunks: ${chunks.length} | Static props: ${props.length}`);
   console.log(`Models: exported=${modelIndexEntries.filter((item) => !item.placeholder).length}/${modelIndexEntries.length} (lod=${options.modelLod})`);
+  console.log(`Chunk LOD: tri_stride lod1=${chunkLod1TriStride} lod2=${chunkLod2TriStride}`);
+  console.log(
+    `Streaming defaults: active=${streamingActiveRadiusChunks} render=${streamingRenderRadiusChunks} prefetch=${streamingPrefetchRadiusChunks} discard=${streamingDiscardRadiusChunks} grace=${streamingGracePeriodMs}ms`,
+  );
   console.log(`Budgets: ${budgetPass ? 'PASS' : 'FAIL'} | Violations: ${budgetViolationCount}`);
 };
 

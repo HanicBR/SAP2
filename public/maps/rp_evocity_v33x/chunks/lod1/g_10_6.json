@@ -1,0 +1,392 @@
+{
+  "id": "g_10_6",
+  "lod": 1,
+  "lodTriStride": 2,
+  "bounds": {
+    "minX": 6144,
+    "minY": -2471,
+    "maxX": 8192,
+    "maxY": -423
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 10,
+    "y": 6
+  },
+  "counts": {
+    "worldFaces": 10,
+    "staticProps": 7,
+    "placeholderWorldFaces": 0,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 11,
+    "worldVerts": 33,
+    "worldBytes": 660,
+    "propsTris": 84,
+    "propsVerts": 56,
+    "propsBytes": 2688,
+    "totalTris": 95,
+    "totalVerts": 89,
+    "totalBytes": 3348,
+    "drawCallsBeforeInstancing": 17,
+    "drawCallsAfterInstancing": 12
+  },
+  "world": {
+    "meshes": [
+      {
+        "materialId": "tools/toolsskybox",
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": false,
+        "faceCount": 4,
+        "triCount": 8,
+        "vertexCount": 24,
+        "positions": [
+          8192,
+          0,
+          856,
+          7168,
+          0,
+          856,
+          7168,
+          -1024,
+          856,
+          8192,
+          -1024,
+          856,
+          7168,
+          -1024,
+          856,
+          7168,
+          -2048,
+          856,
+          6432,
+          0,
+          856,
+          6432,
+          0,
+          672,
+          6432,
+          -1024,
+          672,
+          7168,
+          0,
+          856,
+          6432,
+          0,
+          856,
+          6432,
+          -1024,
+          856,
+          6432,
+          -1024,
+          856,
+          6432,
+          -1024,
+          672,
+          6432,
+          -2048,
+          672,
+          7168,
+          -1024,
+          856,
+          6432,
+          -1024,
+          856,
+          6432,
+          -2048,
+          856,
+          6432,
+          -2694,
+          856,
+          6432,
+          -2048,
+          856,
+          6432,
+          -2048,
+          672,
+          6432,
+          -2694,
+          856,
+          6432,
+          -2670,
+          672,
+          6432,
+          -2694,
+          672
+        ],
+        "uvs": [
+          -256.6875,
+          -0.34375,
+          -224.6875,
+          -0.34375,
+          -224.6875,
+          -32.34375,
+          -256.6875,
+          -32.34375,
+          -224.6875,
+          -32.34375,
+          -224.6875,
+          -64.34375,
+          -201.6875,
+          -0.34375,
+          -201.6875,
+          -0.34375,
+          -201.6875,
+          -32.34375,
+          -224.6875,
+          -0.34375,
+          -201.6875,
+          -0.34375,
+          -201.6875,
+          -32.34375,
+          -201.6875,
+          -32.34375,
+          -201.6875,
+          -32.34375,
+          -201.6875,
+          -64.34375,
+          -224.6875,
+          -32.34375,
+          -201.6875,
+          -32.34375,
+          -201.6875,
+          -64.34375,
+          -201.6875,
+          -84.53125,
+          -201.6875,
+          -64.34375,
+          -201.6875,
+          -64.34375,
+          -201.6875,
+          -84.53125,
+          -201.6875,
+          -83.78125,
+          -201.6875,
+          -84.53125
+        ]
+      },
+      {
+        "materialId": "sgtsicktextures/gunroad_01",
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 2,
+        "vertexCount": 6,
+        "positions": [
+          7476,
+          -2694,
+          64,
+          7476,
+          -622,
+          64,
+          7988,
+          -622,
+          64,
+          7516,
+          -221.9999237060547,
+          64,
+          8018,
+          -321.9998779296875,
+          64,
+          7988,
+          -622,
+          64
+        ],
+        "uvs": [
+          -14,
+          -6.046875,
+          -14,
+          -2,
+          -15,
+          -2,
+          14.000006965639216,
+          0.4248168826250751,
+          14.995043976286707,
+          0.32851437184991994,
+          14.995044000883354,
+          -0.2574233659543097
+        ]
+      },
+      {
+        "materialId": "nature/blendgrassgravel001a",
+        "material": "nature/blendgrassgravel001a",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 1,
+        "vertexCount": 3,
+        "positions": [
+          7476,
+          -2694,
+          64,
+          6432,
+          -2694,
+          64,
+          6432,
+          -622,
+          64
+        ],
+        "uvs": [
+          -58.38671875,
+          -21.17122656106949,
+          -50.23046875,
+          -21.17122656106949,
+          -50.23046875,
+          -4.9837265610694885
+        ]
+      }
+    ]
+  },
+  "props": {
+    "instances": [
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          8186,
+          -2144,
+          43.27619934082031
+        ],
+        "angles": [
+          0,
+          54.5,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          7030,
+          -1421,
+          43.27619934082031
+        ],
+        "angles": [
+          0,
+          78.36219787597656,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          7030,
+          -2310,
+          43.27619934082031
+        ],
+        "angles": [
+          0,
+          78.36219787597656,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          7087,
+          -705,
+          43.27619934082031
+        ],
+        "angles": [
+          0,
+          78.36219787597656,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "trees/pi_tree1",
+        "sourceModel": "trees/pi_tree1",
+        "placeholderModel": false,
+        "origin": [
+          7374,
+          -730,
+          47
+        ],
+        "angles": [
+          0,
+          308,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "sickness/speedlimit_02",
+        "sourceModel": "sickness/speedlimit_02",
+        "placeholderModel": false,
+        "origin": [
+          7436.2998046875,
+          -810.1220092773438,
+          63
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "sickness/speedlimit_02",
+        "sourceModel": "sickness/speedlimit_02",
+        "placeholderModel": false,
+        "origin": [
+          8013,
+          -811,
+          63
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    ]
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

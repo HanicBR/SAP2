@@ -1,0 +1,261 @@
+{
+  "id": "g_1_14",
+  "lod": 2,
+  "lodTriStride": 4,
+  "bounds": {
+    "minX": -12288,
+    "minY": 13913,
+    "maxX": -10240,
+    "maxY": 15961
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 1,
+    "y": 14
+  },
+  "counts": {
+    "worldFaces": 11,
+    "staticProps": 3,
+    "placeholderWorldFaces": 4,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 6,
+    "worldVerts": 18,
+    "worldBytes": 360,
+    "propsTris": 36,
+    "propsVerts": 24,
+    "propsBytes": 1152,
+    "totalTris": 42,
+    "totalVerts": 42,
+    "totalBytes": 1512,
+    "drawCallsBeforeInstancing": 14,
+    "drawCallsAfterInstancing": 7
+  },
+  "world": {
+    "meshes": [
+      {
+        "materialId": "maps/rp_evocity_v33x/nature/water_pretty1_beneath_-13526_12206_292",
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_beneath_-13526_12206_292",
+        "placeholderMaterial": true,
+        "faceCount": 1,
+        "triCount": 1,
+        "vertexCount": 3,
+        "positions": [
+          -11264,
+          15134,
+          153,
+          -11264,
+          14336,
+          153,
+          -10240,
+          14336,
+          153
+        ],
+        "uvs": [
+          -43.75,
+          -58.41798049211502,
+          -43.75,
+          -55.30079299211502,
+          -39.75,
+          -55.30079299211502
+        ]
+      },
+      {
+        "materialId": "maps/rp_evocity_v33x/nature/water_pretty1_-13526_12206_292",
+        "material": "maps/rp_evocity_v33x/nature/water_pretty1_-13526_12206_292",
+        "placeholderMaterial": true,
+        "faceCount": 1,
+        "triCount": 1,
+        "vertexCount": 3,
+        "positions": [
+          -10240,
+          15134,
+          153,
+          -10240,
+          14336,
+          153,
+          -11264,
+          14336,
+          153
+        ],
+        "uvs": [
+          -39.75,
+          -58.41798049211502,
+          -39.75,
+          -55.30079299211502,
+          -43.75,
+          -55.30079299211502
+        ]
+      },
+      {
+        "materialId": "tools/toolsskybox",
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 2,
+        "vertexCount": 6,
+        "positions": [
+          -10240,
+          15352,
+          949,
+          -10240,
+          15352,
+          672,
+          -11264,
+          15352,
+          672,
+          -11264,
+          15352,
+          949,
+          -11264,
+          15352,
+          672,
+          -12288,
+          15352,
+          672
+        ],
+        "uvs": [
+          319.3125,
+          479.40625,
+          319.3125,
+          479.40625,
+          351.3125,
+          479.40625,
+          351.3125,
+          479.40625,
+          351.3125,
+          479.40625,
+          383.3125,
+          479.40625
+        ]
+      },
+      {
+        "materialId": "nature/cliffface001a",
+        "material": "nature/cliffface001a",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 1,
+        "vertexCount": 3,
+        "positions": [
+          -9608,
+          15328,
+          368,
+          -14304,
+          15328,
+          368,
+          -14304,
+          15328,
+          672
+        ],
+        "uvs": [
+          15.03418452013284,
+          -0.5052083190530539,
+          22.677413504570723,
+          -0.5052083190530539,
+          22.677413504570723,
+          -0.9999999739229679
+        ]
+      },
+      {
+        "materialId": "nature/blendgrassgrass001a",
+        "material": "nature/blendgrassgrass001a",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 1,
+        "vertexCount": 3,
+        "positions": [
+          -12032,
+          14060,
+          58,
+          -12032,
+          15328,
+          58,
+          -9584,
+          15328,
+          58
+        ],
+        "uvs": [
+          -93.125,
+          -109.90625,
+          -93.125,
+          -119.8125,
+          -74,
+          -119.8125
+        ]
+      }
+    ]
+  },
+  "props": {
+    "instances": [
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -10562,
+          14897,
+          122
+        ],
+        "angles": [
+          0.41574299335479736,
+          285.4930114746094,
+          -1.9563299417495728
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -11121,
+          14711,
+          122
+        ],
+        "angles": [
+          0.41574299335479736,
+          285.4930114746094,
+          -1.9563299417495728
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -11967,
+          14840,
+          122
+        ],
+        "angles": [
+          0.41574299335479736,
+          285.4930114746094,
+          -1.9563299417495728
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    ]
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

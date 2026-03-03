@@ -1,0 +1,324 @@
+{
+  "id": "g_5_6",
+  "lod": 1,
+  "lodTriStride": 2,
+  "bounds": {
+    "minX": -4096,
+    "minY": -2471,
+    "maxX": -2048,
+    "maxY": -423
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 5,
+    "y": 6
+  },
+  "counts": {
+    "worldFaces": 10,
+    "staticProps": 3,
+    "placeholderWorldFaces": 0,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 11,
+    "worldVerts": 33,
+    "worldBytes": 660,
+    "propsTris": 36,
+    "propsVerts": 24,
+    "propsBytes": 1152,
+    "totalTris": 47,
+    "totalVerts": 57,
+    "totalBytes": 1812,
+    "drawCallsBeforeInstancing": 13,
+    "drawCallsAfterInstancing": 8
+  },
+  "world": {
+    "meshes": [
+      {
+        "materialId": "tools/toolsskybox",
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": false,
+        "faceCount": 3,
+        "triCount": 7,
+        "vertexCount": 21,
+        "positions": [
+          -3072,
+          -1024,
+          720,
+          -2048,
+          -1024,
+          720,
+          -2048,
+          -258,
+          720,
+          -3072,
+          -1442,
+          720,
+          -3072,
+          -1442,
+          672,
+          -2048,
+          -1442,
+          672,
+          -2048,
+          -1024,
+          720,
+          -3072,
+          -1024,
+          720,
+          -3072,
+          -1442,
+          720,
+          -4096,
+          -1024,
+          720,
+          -3072,
+          -1024,
+          720,
+          -3072,
+          -258,
+          720,
+          -4096,
+          -1024,
+          720,
+          -3248,
+          -258,
+          720,
+          -3760,
+          -258,
+          720,
+          -4096,
+          -1442,
+          720,
+          -4096,
+          -1442,
+          672,
+          -3072,
+          -1442,
+          672,
+          -3072,
+          -1024,
+          720,
+          -4096,
+          -1024,
+          720,
+          -4096,
+          -1442,
+          720
+        ],
+        "uvs": [
+          95.3125,
+          -32.34375,
+          63.3125,
+          -32.34375,
+          63.3125,
+          -8.40625,
+          95.3125,
+          -45.40625,
+          95.3125,
+          -45.40625,
+          63.3125,
+          -45.40625,
+          63.3125,
+          -32.34375,
+          95.3125,
+          -32.34375,
+          95.3125,
+          -45.40625,
+          127.3125,
+          -32.34375,
+          95.3125,
+          -32.34375,
+          95.3125,
+          -8.40625,
+          127.3125,
+          -32.34375,
+          100.8125,
+          -8.40625,
+          116.8125,
+          -8.40625,
+          127.3125,
+          -45.40625,
+          127.3125,
+          -45.40625,
+          95.3125,
+          -45.40625,
+          95.3125,
+          -32.34375,
+          127.3125,
+          -32.34375,
+          127.3125,
+          -45.40625
+        ]
+      },
+      {
+        "materialId": "sgtsicktextures/sicknessroad_01",
+        "material": "sgtsicktextures/sicknessroad_01",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 1,
+        "vertexCount": 3,
+        "positions": [
+          -1228,
+          -897,
+          64,
+          -4724,
+          -897,
+          64,
+          -4724,
+          -385,
+          64
+        ],
+        "uvs": [
+          -1,
+          -2.0859375,
+          -1,
+          -8.9140625,
+          0,
+          -8.9140625
+        ]
+      },
+      {
+        "materialId": "nature/cliffface001a",
+        "material": "nature/cliffface001a",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 2,
+        "vertexCount": 6,
+        "positions": [
+          -5716,
+          -1404,
+          368,
+          -1255,
+          -1404,
+          368,
+          -1255,
+          -1404,
+          672,
+          -5716,
+          -1404,
+          64,
+          -1255,
+          -1404,
+          64,
+          -1255,
+          -1404,
+          368
+        ],
+        "uvs": [
+          -8.577474054414779,
+          -0.5052083190530539,
+          -1.3167320400243625,
+          -0.5052083190530539,
+          -1.3167320400243625,
+          -0.9999999739229679,
+          -8.577474054414779,
+          -0.010416664183139801,
+          -1.3167320400243625,
+          -0.010416664183139801,
+          -1.3167320400243625,
+          -0.5052083190530539
+        ]
+      },
+      {
+        "materialId": "nature/blendgrassdirt001a",
+        "material": "nature/blendgrassdirt001a",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 1,
+        "vertexCount": 3,
+        "positions": [
+          -1228,
+          -1409,
+          64,
+          -4724,
+          -1409,
+          64,
+          -4724,
+          -897,
+          64
+        ],
+        "uvs": [
+          -11,
+          -9,
+          -11,
+          -36.3125,
+          -7,
+          -36.3125
+        ]
+      }
+    ]
+  },
+  "props": {
+    "instances": [
+      {
+        "model": "props/cs_militia/trees2",
+        "sourceModel": "props/cs_militia/trees2",
+        "placeholderModel": false,
+        "origin": [
+          -2446,
+          -1180,
+          32
+        ],
+        "angles": [
+          0,
+          255.5,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/cs_militia/trees2",
+        "sourceModel": "props/cs_militia/trees2",
+        "placeholderModel": false,
+        "origin": [
+          -3172,
+          -1088,
+          32
+        ],
+        "angles": [
+          0,
+          71.5,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props/cs_militia/trees2",
+        "sourceModel": "props/cs_militia/trees2",
+        "placeholderModel": false,
+        "origin": [
+          -4024,
+          -1088,
+          32
+        ],
+        "angles": [
+          0,
+          71.5,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    ]
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

@@ -42,6 +42,10 @@ Estrutura:
 - `base/base.scene.json`
 - `chunks/lod0/index.json`
 - `chunks/lod0/<chunkId>.json`
+- `chunks/lod1/index.json`
+- `chunks/lod1/<chunkId>.json`
+- `chunks/lod2/index.json`
+- `chunks/lod2/<chunkId>.json`
 - `reports/report.json`
 - `reports/scene.intermediate.json`
 
@@ -76,6 +80,13 @@ CLI:
 --active-5x5-max-drawcalls <n>
 --active-5x5-max-bytes <n>
 --world-coverage-min-pct <n>
+--chunk-lod1-tri-stride <n>
+--chunk-lod2-tri-stride <n>
+--streaming-active-radius-chunks <n>
+--streaming-render-radius-chunks <n>
+--streaming-prefetch-radius-chunks <n>
+--streaming-discard-radius-chunks <n>
+--streaming-grace-period-ms <n>
 ```
 
 Env vars equivalentes:
@@ -89,6 +100,13 @@ Env vars equivalentes:
 - `MAP_PIPELINE_ACTIVE_5X5_MAX_TRIS`
 - `MAP_PIPELINE_ACTIVE_5X5_MAX_DRAWCALLS`
 - `MAP_PIPELINE_ACTIVE_5X5_MAX_BYTES`
+- `MAP_PIPELINE_CHUNK_LOD1_TRI_STRIDE`
+- `MAP_PIPELINE_CHUNK_LOD2_TRI_STRIDE`
+- `MAP_PIPELINE_STREAMING_ACTIVE_RADIUS_CHUNKS`
+- `MAP_PIPELINE_STREAMING_RENDER_RADIUS_CHUNKS`
+- `MAP_PIPELINE_STREAMING_PREFETCH_RADIUS_CHUNKS`
+- `MAP_PIPELINE_STREAMING_DISCARD_RADIUS_CHUNKS`
+- `MAP_PIPELINE_STREAMING_GRACE_PERIOD_MS`
 
 ## PR-05 Viewer minimo
 
@@ -103,9 +121,10 @@ Como abrir pelo painel:
 Comportamento atual:
 
 - Carrega `manifest.json`.
-- Carrega `base` e faz streaming de chunks `lod0`.
-- Janela ativa: 3x3.
-- Prefetch: 5x5.
+- Carrega `base` e faz streaming de chunks por LOD (`lod0/lod1/lod2`).
+- Janela ativa (default): 3x3 em `lod0`.
+- Janela visivel estendida (default): 7x7 com `lod1/lod2` para render mais longe.
+- Prefetch (default): 7x7.
 - Descarte por distancia com `gracePeriodMs`.
 - Materiais/modelos faltantes usam placeholder.
 

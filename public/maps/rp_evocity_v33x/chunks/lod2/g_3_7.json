@@ -1,0 +1,119 @@
+{
+  "id": "g_3_7",
+  "lod": 2,
+  "lodTriStride": 4,
+  "bounds": {
+    "minX": -8192,
+    "minY": -423,
+    "maxX": -6144,
+    "maxY": 1625
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 3,
+    "y": 7
+  },
+  "counts": {
+    "worldFaces": 5,
+    "staticProps": 0,
+    "placeholderWorldFaces": 0,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 3,
+    "worldVerts": 9,
+    "worldBytes": 180,
+    "propsTris": 0,
+    "propsVerts": 0,
+    "propsBytes": 0,
+    "totalTris": 3,
+    "totalVerts": 9,
+    "totalBytes": 180,
+    "drawCallsBeforeInstancing": 5,
+    "drawCallsAfterInstancing": 2
+  },
+  "world": {
+    "meshes": [
+      {
+        "materialId": "tools/toolsskybox",
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 2,
+        "vertexCount": 6,
+        "positions": [
+          -6590,
+          0,
+          720,
+          -6590,
+          645,
+          720,
+          -6590,
+          645,
+          672,
+          -6144,
+          645,
+          720,
+          -6590,
+          645,
+          672,
+          -6590,
+          645,
+          720
+        ],
+        "uvs": [
+          205.25,
+          -0.34375,
+          205.25,
+          19.8125,
+          205.25,
+          19.8125,
+          191.3125,
+          19.8125,
+          205.25,
+          19.8125,
+          205.25,
+          19.8125
+        ]
+      },
+      {
+        "materialId": "nature/cliffface001a",
+        "material": "nature/cliffface001a",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 1,
+        "vertexCount": 3,
+        "positions": [
+          -6566,
+          639,
+          64,
+          -6566,
+          -1428,
+          64,
+          -6566,
+          -1428,
+          368
+        ],
+        "uvs": [
+          -0.49186030530836433,
+          -0.010416664183139801,
+          2.872397426981479,
+          -0.010416664183139801,
+          2.872397426981479,
+          -0.5052083190530539
+        ]
+      }
+    ]
+  },
+  "props": {
+    "instances": []
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

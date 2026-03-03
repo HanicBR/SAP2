@@ -21,6 +21,28 @@ type Bounds = {
 type ChunkEntry = {
   id: string;
   url: string;
+  lodUrls?: {
+    lod0?: string;
+    lod1?: string;
+    lod2?: string;
+  };
+  lodStats?: {
+    lod0?: {
+      totalTris?: number;
+      totalBytes?: number;
+      drawCallsAfterInstancing?: number;
+    };
+    lod1?: {
+      totalTris?: number;
+      totalBytes?: number;
+      drawCallsAfterInstancing?: number;
+    };
+    lod2?: {
+      totalTris?: number;
+      totalBytes?: number;
+      drawCallsAfterInstancing?: number;
+    };
+  };
   bounds: Bounds;
   size: number;
   baseCell?: { x: number; y: number };
@@ -47,6 +69,7 @@ type Manifest = {
   };
   streaming?: {
     activeRadiusChunks?: number;
+    renderRadiusChunks?: number;
     prefetchRadiusChunks?: number;
     discardRadiusChunks?: number;
     gracePeriodMs?: number;
@@ -62,6 +85,8 @@ type Manifest = {
     };
     chunks: {
       lod0IndexUrl: string;
+      lod1IndexUrl?: string;
+      lod2IndexUrl?: string;
       format: string;
     };
   };
@@ -851,6 +876,7 @@ const ServerView3D: React.FC = () => {
 
     const chunkRecords = new Map<string, {
       entry: ChunkEntry;
+      lod: 0 | 1 | 2;
       group: THREE.Group;
       touchedAtMs: number;
       tris: number;
@@ -1553,15 +1579,48 @@ const ServerView3D: React.FC = () => {
       updateMarkerSelectionVisuals();
     };
 
-    const loadChunkGroup = async (entry: ChunkEntry): Promise<void> => {
-      if (chunkRecords.has(entry.id) || loadingChunkIds.has(entry.id)) return;
+    const resolveChunkLodUrl = (entry: ChunkEntry, lod: 0 | 1 | 2): string => {
+      const urls = entry.lodUrls || {};
+      if (lod === 0) return String(urls.lod0 || entry.url || '');
+      if (lod === 1) return String(urls.lod1 || urls.lod0 || entry.url || '');
+      return String(urls.lod2 || urls.lod1 || urls.lod0 || entry.url || '');
+    };
+
+    const resolveChunkLodStats = (
+      entry: ChunkEntry,
+      lod: 0 | 1 | 2,
+    ): { totalTris?: number; totalBytes?: number; drawCallsAfterInstancing?: number } | null => {
+      const lodStats = entry.lodStats || {};
+      if (lod === 0) return lodStats.lod0 || entry.stats || null;
+      if (lod === 1) return lodStats.lod1 || lodStats.lod0 || entry.stats || null;
+      return lodStats.lod2 || lodStats.lod1 || lodStats.lod0 || entry.stats || null;
+    };
+
+    const unloadChunkRecord = (chunkId: string, reason: string) => {
+      const record = chunkRecords.get(chunkId);
+      if (!record) return;
+      chunkRoot.remove(record.group);
+      disposeObject3D(record.group);
+      releaseModelUsage(record.usedModels);
+      chunkRecords.delete(chunkId);
+      appendLog(`chunk descarregado: ${chunkId} (lod${record.lod}, reason=${reason})`);
+    };
+
+    const loadChunkGroup = async (entry: ChunkEntry, lod: 0 | 1 | 2): Promise<void> => {
+      const existing = chunkRecords.get(entry.id);
+      if (existing && existing.lod === lod) return;
+      if (loadingChunkIds.has(entry.id)) return;
+      if (existing && existing.lod !== lod) {
+        unloadChunkRecord(entry.id, `lod_switch_${existing.lod}->${lod}`);
+      }
       loadingChunkIds.add(entry.id);
+      const chunkUrl = resolveChunkLodUrl(entry, lod);
       try {
-        const payload = await readJson<ChunkPayload>(toAssetUrl(manifestUrl, entry.url));
+        const payload = await readJson<ChunkPayload>(toAssetUrl(manifestUrl, chunkUrl));
         if (cancelled) return;
 
         const group = new THREE.Group();
-        group.name = `chunk_${entry.id}`;
+        group.name = `chunk_${entry.id}_lod${lod}`;
 
         const worldMeshes = Array.isArray(payload.world?.meshes) ? payload.world?.meshes : [];
         if (worldMeshes.length > 0) {
@@ -1771,26 +1830,28 @@ const ServerView3D: React.FC = () => {
 
         const usedModels = Array.from(usedModelsInChunk);
         addModelUsage(usedModels);
+        const statsFromEntry = resolveChunkLodStats(entry, lod);
         chunkRecords.set(entry.id, {
           entry,
+          lod,
           group,
           touchedAtMs: performance.now(),
-          tris: Math.max(0, Number(payload.stats?.totalTris || entry.stats?.totalTris || 0)),
-          bytes: Math.max(0, Number(payload.stats?.totalBytes || entry.stats?.totalBytes || 0)),
-          drawCalls: Math.max(0, Number(payload.stats?.drawCallsAfterInstancing || entry.stats?.drawCallsAfterInstancing || 0)),
+          tris: Math.max(0, Number(payload.stats?.totalTris || statsFromEntry?.totalTris || 0)),
+          bytes: Math.max(0, Number(payload.stats?.totalBytes || statsFromEntry?.totalBytes || 0)),
+          drawCalls: Math.max(0, Number(payload.stats?.drawCallsAfterInstancing || statsFromEntry?.drawCallsAfterInstancing || 0)),
           usedModels,
         });
 
-        appendLog(`chunk carregado: ${entry.id}`);
+        appendLog(`chunk carregado: ${entry.id} (lod${lod})`);
       } catch (loadErr: any) {
-        appendLog(`erro ao carregar chunk ${entry.id}: ${String(loadErr?.message || loadErr)}`);
+        appendLog(`erro ao carregar chunk ${entry.id} (lod${lod}): ${String(loadErr?.message || loadErr)}`);
         pushDiagnostic(
           'error',
           'chunk_load_failed',
           'chunk',
-          entry.id,
-          `erro ao carregar chunk ${entry.id}: ${String(loadErr?.message || loadErr)}`,
-          [entry.url || ''],
+          `${entry.id}@lod${lod}`,
+          `erro ao carregar chunk ${entry.id} (lod${lod}): ${String(loadErr?.message || loadErr)}`,
+          [chunkUrl || entry.url || ''],
         );
       } finally {
         loadingChunkIds.delete(entry.id);
@@ -1900,9 +1961,16 @@ const ServerView3D: React.FC = () => {
 
         const chunkSize = Math.max(256, Number(loadedManifest.map.chunkSize || 2048));
         const activeRadius = Math.max(1, Number(loadedManifest.streaming?.activeRadiusChunks || 1));
-        const prefetchRadius = Math.max(activeRadius, Number(loadedManifest.streaming?.prefetchRadiusChunks || 2));
-        const discardRadius = Math.max(prefetchRadius, Number(loadedManifest.streaming?.discardRadiusChunks || prefetchRadius));
-        const gracePeriodMs = Math.max(1000, Number(loadedManifest.streaming?.gracePeriodMs || 4000));
+        const renderRadius = Math.max(activeRadius, Number(loadedManifest.streaming?.renderRadiusChunks || activeRadius + 2));
+        const prefetchRadius = Math.max(renderRadius, Number(loadedManifest.streaming?.prefetchRadiusChunks || renderRadius));
+        const discardRadius = Math.max(prefetchRadius, Number(loadedManifest.streaming?.discardRadiusChunks || (prefetchRadius + 1)));
+        const gracePeriodMs = Math.max(1000, Number(loadedManifest.streaming?.gracePeriodMs || 5000));
+        const lod1Radius = Math.max(activeRadius + 1, Math.min(renderRadius - 1, prefetchRadius - 1));
+        const resolveDesiredLod = (ring: number): 0 | 1 | 2 => {
+          if (ring <= activeRadius) return 0;
+          if (ring <= lod1Radius) return 1;
+          return 2;
+        };
 
         const entries = chunkIndex.chunks || [];
         const byId = new Map(entries.map((entry) => [entry.id, entry] as const));
@@ -1930,32 +1998,42 @@ const ServerView3D: React.FC = () => {
           };
 
           const activeIds = new Set<string>();
-          const prefetchIds = new Set<string>();
+          const visibleIds = new Set<string>();
           const keepIds = new Set<string>();
+          const desiredLoadByChunk = new Map<string, 0 | 1 | 2>();
 
           for (const entry of entries) {
             const cell = chunkCells.get(entry.id) || { x: 0, y: 0 };
             const dx = Math.abs(cell.x - cameraCell.x);
             const dy = Math.abs(cell.y - cameraCell.y);
+            const ring = Math.max(dx, dy);
+            const desiredLod = resolveDesiredLod(ring);
             if (dx <= activeRadius && dy <= activeRadius) {
               activeIds.add(entry.id);
             }
-            if (dx <= prefetchRadius && dy <= prefetchRadius) {
-              prefetchIds.add(entry.id);
+            if (dx <= renderRadius && dy <= renderRadius) {
+              visibleIds.add(entry.id);
             }
+            if (dx <= prefetchRadius && dy <= prefetchRadius) desiredLoadByChunk.set(entry.id, desiredLod);
             if (dx <= discardRadius && dy <= discardRadius) {
               keepIds.add(entry.id);
             }
           }
 
-          for (const chunkId of prefetchIds) {
+          for (const [chunkId, desiredLod] of desiredLoadByChunk.entries()) {
             const entry = byId.get(chunkId);
             if (!entry) continue;
-            void loadChunkGroup(entry);
+            const current = chunkRecords.get(chunkId);
+            if (current) {
+              current.touchedAtMs = now;
+              // Avoid downgrade thrash: upgrade quality only when needed.
+              if (current.lod <= desiredLod) continue;
+            }
+            void loadChunkGroup(entry, desiredLod);
           }
 
           for (const [chunkId, record] of chunkRecords.entries()) {
-            if (activeIds.has(chunkId)) {
+            if (visibleIds.has(chunkId)) {
               record.group.visible = true;
               record.touchedAtMs = now;
             } else {
@@ -1964,12 +2042,7 @@ const ServerView3D: React.FC = () => {
 
             if (keepIds.has(chunkId)) continue;
             if (now - record.touchedAtMs < gracePeriodMs) continue;
-
-            chunkRoot.remove(record.group);
-            disposeObject3D(record.group);
-            releaseModelUsage(record.usedModels);
-            chunkRecords.delete(chunkId);
-            appendLog(`chunk descarregado: ${chunkId}`);
+            unloadChunkRecord(chunkId, 'out_of_discard_radius');
           }
           sweepModelCache(now);
 
@@ -2116,7 +2189,10 @@ const ServerView3D: React.FC = () => {
 
         setStatus(`Viewer online | map=${loadedManifest.map.name} | chunks=${entries.length}`);
         appendLog(`manifest carregado: ${loadedManifest.map.name}`);
-        appendLog(`chunk_count=${entries.length} active=${activeRadius * 2 + 1}x${activeRadius * 2 + 1} prefetch=${prefetchRadius * 2 + 1}x${prefetchRadius * 2 + 1}`);
+        appendLog(
+          `chunk_count=${entries.length} active=${activeRadius * 2 + 1}x${activeRadius * 2 + 1} render=${renderRadius * 2 + 1}x${renderRadius * 2 + 1} prefetch=${prefetchRadius * 2 + 1}x${prefetchRadius * 2 + 1}`,
+        );
+        appendLog(`chunk_lod_bands: ring<=${activeRadius}=lod0 | ring<=${lod1Radius}=lod1 | ring<=${renderRadius}=lod2`);
         appendLog('controles: WASD movimenta | Shift acelera | Ctrl reduz | botao do meio gira camera');
 
         return () => {

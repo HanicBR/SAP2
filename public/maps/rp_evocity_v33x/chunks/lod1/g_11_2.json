@@ -1,0 +1,161 @@
+{
+  "id": "g_11_2",
+  "lod": 1,
+  "lodTriStride": 2,
+  "bounds": {
+    "minX": 8192,
+    "minY": -10663,
+    "maxX": 10240,
+    "maxY": -8615
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 11,
+    "y": 2
+  },
+  "counts": {
+    "worldFaces": 4,
+    "staticProps": 0,
+    "placeholderWorldFaces": 0,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 5,
+    "worldVerts": 15,
+    "worldBytes": 300,
+    "propsTris": 0,
+    "propsVerts": 0,
+    "propsBytes": 0,
+    "totalTris": 5,
+    "totalVerts": 15,
+    "totalBytes": 300,
+    "drawCallsBeforeInstancing": 4,
+    "drawCallsAfterInstancing": 3
+  },
+  "world": {
+    "meshes": [
+      {
+        "materialId": "tools/toolsskybox",
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 1,
+        "vertexCount": 3,
+        "positions": [
+          8192,
+          -8838,
+          856,
+          8192,
+          -8838,
+          672,
+          8480,
+          -8838,
+          672
+        ],
+        "uvs": [
+          -256.6875,
+          -276.53125,
+          -256.6875,
+          -276.53125,
+          -265.6875,
+          -276.53125
+        ]
+      },
+      {
+        "materialId": "metal/metalwall030a",
+        "material": "metal/metalwall030a",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 2,
+        "vertexCount": 6,
+        "positions": [
+          8192,
+          -8680,
+          184,
+          8192,
+          -8672,
+          184,
+          8304,
+          -8672,
+          184,
+          8192,
+          -8680,
+          184,
+          8312,
+          -8672,
+          184,
+          8312,
+          -8680,
+          184
+        ],
+        "uvs": [
+          -63.59375,
+          -67,
+          -63.59375,
+          -66.9375,
+          -64.46875,
+          -66.9375,
+          -63.59375,
+          -67,
+          -64.53125,
+          -66.9375,
+          -64.53125,
+          -67
+        ]
+      },
+      {
+        "materialId": "concrete/concretewall022a",
+        "material": "concrete/concretewall022a",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 2,
+        "vertexCount": 6,
+        "positions": [
+          8192,
+          -8672,
+          64,
+          8304,
+          -8672,
+          64,
+          8304,
+          -8672,
+          184,
+          8192,
+          -8680,
+          184,
+          8312,
+          -8680,
+          184,
+          8312,
+          -8680,
+          64
+        ],
+        "uvs": [
+          63.75,
+          -0.0625,
+          64.625,
+          -0.0625,
+          64.625,
+          -1,
+          -63.0625,
+          -1,
+          -64,
+          -1,
+          -64,
+          -0.0625
+        ]
+      }
+    ]
+  },
+  "props": {
+    "instances": []
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

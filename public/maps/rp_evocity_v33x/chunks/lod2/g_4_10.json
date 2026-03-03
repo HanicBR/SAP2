@@ -1,0 +1,464 @@
+{
+  "id": "g_4_10",
+  "lod": 2,
+  "lodTriStride": 4,
+  "bounds": {
+    "minX": -6144,
+    "minY": 5721,
+    "maxX": -4096,
+    "maxY": 7769
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 4,
+    "y": 10
+  },
+  "counts": {
+    "worldFaces": 12,
+    "staticProps": 13,
+    "placeholderWorldFaces": 0,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 7,
+    "worldVerts": 21,
+    "worldBytes": 420,
+    "propsTris": 156,
+    "propsVerts": 104,
+    "propsBytes": 4992,
+    "totalTris": 163,
+    "totalVerts": 125,
+    "totalBytes": 5412,
+    "drawCallsBeforeInstancing": 25,
+    "drawCallsAfterInstancing": 10
+  },
+  "world": {
+    "meshes": [
+      {
+        "materialId": "tools/toolsskybox",
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": false,
+        "faceCount": 2,
+        "triCount": 3,
+        "vertexCount": 9,
+        "positions": [
+          -4096,
+          8192,
+          897,
+          -5120,
+          8192,
+          897,
+          -5120,
+          7168,
+          897,
+          -5120,
+          8192,
+          897,
+          -5998,
+          8192,
+          897,
+          -5998,
+          7168,
+          897,
+          -5998,
+          6144,
+          672,
+          -5998,
+          6144,
+          897,
+          -5998,
+          7168,
+          897
+        ],
+        "uvs": [
+          127.3125,
+          255.65625,
+          159.3125,
+          255.65625,
+          159.3125,
+          223.65625,
+          159.3125,
+          255.65625,
+          186.75,
+          255.65625,
+          186.75,
+          223.65625,
+          186.75,
+          191.65625,
+          186.75,
+          191.65625,
+          186.75,
+          223.65625
+        ]
+      },
+      {
+        "materialId": "nature/cliffface001a",
+        "material": "nature/cliffface001a",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 1,
+        "vertexCount": 3,
+        "positions": [
+          -5974,
+          8235,
+          368,
+          -5974,
+          4115,
+          368,
+          -5974,
+          4115,
+          672
+        ],
+        "uvs": [
+          -13.333331712405197,
+          -0.5052083190530539,
+          -6.627602705615573,
+          -0.5052083190530539,
+          -6.627602705615573,
+          -0.9999999739229679
+        ]
+      },
+      {
+        "materialId": "sgtsicktextures/gunroad_01",
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 1,
+        "vertexCount": 3,
+        "positions": [
+          -5236,
+          6151,
+          64,
+          -5236,
+          8211,
+          64,
+          -4724,
+          8211,
+          64
+        ],
+        "uvs": [
+          10,
+          12.765625,
+          10,
+          16.7890625,
+          9,
+          16.7890625
+        ]
+      },
+      {
+        "materialId": "nature/blendgrassdirt01",
+        "material": "nature/blendgrassdirt01",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 2,
+        "vertexCount": 6,
+        "positions": [
+          -5748,
+          6151,
+          64,
+          -5748,
+          8211,
+          64,
+          -5236,
+          8211,
+          64,
+          -5998,
+          6151,
+          64,
+          -5998,
+          8211,
+          64,
+          -5748,
+          8211,
+          64
+        ],
+        "uvs": [
+          -48.98046875,
+          45.406253933906555,
+          -65.07421875,
+          45.406253933906555,
+          -65.07421875,
+          41.406253933906555,
+          -48.98046875,
+          46.40625,
+          -65.07421875,
+          46.40625,
+          -65.07421875,
+          44.453125
+        ]
+      }
+    ]
+  },
+  "props": {
+    "instances": [
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -4672,
+          5863,
+          25
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -4353,
+          5822,
+          25
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -4660,
+          6519,
+          25
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_tall_01",
+        "sourceModel": "props_foliage/tree_pine_tall_01",
+        "placeholderModel": false,
+        "origin": [
+          -4313.4599609375,
+          6210,
+          63.05419921875
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -4367,
+          6819,
+          25
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_tall_01",
+        "sourceModel": "props_foliage/tree_pine_tall_01",
+        "placeholderModel": false,
+        "origin": [
+          -4363.4599609375,
+          7255,
+          63.05419921875
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -5600,
+          5831,
+          86
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -5488,
+          6321.08984375,
+          60.25
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_03",
+        "sourceModel": "props_foliage/tree_pine_03",
+        "placeholderModel": false,
+        "origin": [
+          -5419,
+          6699,
+          60
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -5512,
+          6969.08984375,
+          60.25
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_tall_01",
+        "sourceModel": "props_foliage/tree_pine_tall_01",
+        "placeholderModel": false,
+        "origin": [
+          -5707.4599609375,
+          6513,
+          63.05419921875
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -5464,
+          7487,
+          60.25
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_tall_01",
+        "sourceModel": "props_foliage/tree_pine_tall_01",
+        "placeholderModel": false,
+        "origin": [
+          -5773.4599609375,
+          7625,
+          63.05419921875
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    ]
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

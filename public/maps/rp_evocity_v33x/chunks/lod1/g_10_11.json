@@ -1,0 +1,191 @@
+{
+  "id": "g_10_11",
+  "lod": 1,
+  "lodTriStride": 2,
+  "bounds": {
+    "minX": 6144,
+    "minY": 7769,
+    "maxX": 8192,
+    "maxY": 9817
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 10,
+    "y": 11
+  },
+  "counts": {
+    "worldFaces": 7,
+    "staticProps": 0,
+    "placeholderWorldFaces": 0,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 7,
+    "worldVerts": 21,
+    "worldBytes": 420,
+    "propsTris": 0,
+    "propsVerts": 0,
+    "propsBytes": 0,
+    "totalTris": 7,
+    "totalVerts": 21,
+    "totalBytes": 420,
+    "drawCallsBeforeInstancing": 7,
+    "drawCallsAfterInstancing": 3
+  },
+  "world": {
+    "meshes": [
+      {
+        "materialId": "tools/toolsskybox",
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": false,
+        "faceCount": 2,
+        "triCount": 4,
+        "vertexCount": 12,
+        "positions": [
+          8192,
+          9368,
+          672,
+          8192,
+          9368,
+          949,
+          7168,
+          9368,
+          949,
+          8192,
+          10240,
+          949,
+          7168,
+          10240,
+          949,
+          7168,
+          9368,
+          949,
+          6144,
+          9368,
+          949,
+          6144,
+          9368,
+          672,
+          7168,
+          9368,
+          672,
+          7168,
+          10240,
+          949,
+          6144,
+          10240,
+          949,
+          6144,
+          9368,
+          949
+        ],
+        "uvs": [
+          -256.6875,
+          292.40625,
+          -256.6875,
+          292.40625,
+          -224.6875,
+          292.40625,
+          -256.6875,
+          319.65625,
+          -224.6875,
+          319.65625,
+          -224.6875,
+          292.40625,
+          -192.6875,
+          292.40625,
+          -192.6875,
+          292.40625,
+          -224.6875,
+          292.40625,
+          -224.6875,
+          319.65625,
+          -192.6875,
+          319.65625,
+          -192.6875,
+          292.40625
+        ]
+      },
+      {
+        "materialId": "nature/blendgrassgrass001a",
+        "material": "nature/blendgrassgrass001a",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 1,
+        "vertexCount": 3,
+        "positions": [
+          7200,
+          9368,
+          58,
+          5812,
+          9368,
+          58,
+          5812,
+          9624,
+          58
+        ],
+        "uvs": [
+          -55.3125,
+          73.4375,
+          -44.46875,
+          73.4375,
+          -44.46875,
+          75.4375
+        ]
+      },
+      {
+        "materialId": "nature/cliffface001a",
+        "material": "nature/cliffface001a",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 2,
+        "vertexCount": 6,
+        "positions": [
+          6688,
+          9392,
+          368,
+          9224,
+          9392,
+          368,
+          9224,
+          9392,
+          672,
+          6688,
+          9392,
+          64,
+          9224,
+          9392,
+          64,
+          9224,
+          9392,
+          368
+        ],
+        "uvs": [
+          11.523436922580004,
+          -0.5052083190530539,
+          15.651040990836918,
+          -0.5052083190530539,
+          15.651040990836918,
+          -0.9999999739229679,
+          11.523436922580004,
+          -0.010416664183139801,
+          15.651040990836918,
+          -0.010416664183139801,
+          15.651040990836918,
+          -0.5052083190530539
+        ]
+      }
+    ]
+  },
+  "props": {
+    "instances": []
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

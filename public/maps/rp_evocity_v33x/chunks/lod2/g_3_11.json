@@ -1,0 +1,807 @@
+{
+  "id": "g_3_11",
+  "lod": 2,
+  "lodTriStride": 4,
+  "bounds": {
+    "minX": -8192,
+    "minY": 7769,
+    "maxX": -6144,
+    "maxY": 9817
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 3,
+    "y": 11
+  },
+  "counts": {
+    "worldFaces": 27,
+    "staticProps": 21,
+    "placeholderWorldFaces": 0,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 16,
+    "worldVerts": 48,
+    "worldBytes": 960,
+    "propsTris": 252,
+    "propsVerts": 168,
+    "propsBytes": 8064,
+    "totalTris": 268,
+    "totalVerts": 216,
+    "totalBytes": 9024,
+    "drawCallsBeforeInstancing": 48,
+    "drawCallsAfterInstancing": 20
+  },
+  "world": {
+    "meshes": [
+      {
+        "materialId": "tools/toolsskybox",
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 3,
+        "vertexCount": 9,
+        "positions": [
+          -6144,
+          10240,
+          897,
+          -7168,
+          10240,
+          897,
+          -7168,
+          9216,
+          897,
+          -6144,
+          9216,
+          897,
+          -7168,
+          9216,
+          897,
+          -7168,
+          8211,
+          897,
+          -7168,
+          9216,
+          897,
+          -8192,
+          9216,
+          897,
+          -8192,
+          8723,
+          897
+        ],
+        "uvs": [
+          191.3125,
+          319.65625,
+          223.3125,
+          319.65625,
+          223.3125,
+          287.65625,
+          191.3125,
+          287.65625,
+          223.3125,
+          287.65625,
+          223.3125,
+          256.25,
+          223.3125,
+          287.65625,
+          255.3125,
+          287.65625,
+          255.3125,
+          272.25
+        ]
+      },
+      {
+        "materialId": "hall_concrete/hall_concrete11_wet",
+        "material": "hall_concrete/hall_concrete11_wet",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 1,
+        "vertexCount": 3,
+        "positions": [
+          -7932.01513671875,
+          8723,
+          64,
+          -7436,
+          8723,
+          64,
+          -7436,
+          8339,
+          64
+        ],
+        "uvs": [
+          -67.67186719179153,
+          61.750118255615234,
+          -67.67186719179153,
+          57.875,
+          -64.67186719179153,
+          57.875
+        ]
+      },
+      {
+        "materialId": "de_train/train_cementwear_01",
+        "material": "de_train/train_cementwear_01",
+        "placeholderMaterial": false,
+        "faceCount": 2,
+        "triCount": 6,
+        "vertexCount": 18,
+        "positions": [
+          -7924.01513671875,
+          8339,
+          72,
+          -7436,
+          8339,
+          72,
+          -7428,
+          8331,
+          72,
+          -8192,
+          8331,
+          72,
+          -7924.01513671875,
+          8339,
+          72,
+          -7924.01513671875,
+          8331,
+          72,
+          -7428,
+          8331,
+          72,
+          -7428,
+          8723,
+          64,
+          -7428,
+          8339,
+          64,
+          -7932.01513671875,
+          8339,
+          64,
+          -7924.01513671875,
+          8339,
+          72,
+          -7932.01513671875,
+          8339,
+          72,
+          -7436,
+          8723,
+          72,
+          -7436,
+          8339,
+          64,
+          -7436,
+          8723,
+          64,
+          -7428,
+          8331,
+          64,
+          -7428,
+          8211,
+          72,
+          -7428,
+          8331,
+          72
+        ],
+        "uvs": [
+          61.562633872032166,
+          520.4998781085014,
+          57.75001561641693,
+          520.4998781085014,
+          57.68751561641693,
+          519.9998781085014,
+          63.65626561641693,
+          519.9998781085014,
+          61.562633872032166,
+          520.4998781085014,
+          61.562633872032166,
+          519.9998781085014,
+          64.9375,
+          -4.5,
+          68,
+          -4,
+          65,
+          -4,
+          61.625133872032166,
+          -4,
+          61.562633872032166,
+          -4.5,
+          61.625133872032166,
+          -4.5,
+          69.0625,
+          -4.5,
+          66.0625,
+          -4,
+          69.0625,
+          -4,
+          -64.9375,
+          -4,
+          -64,
+          -4.5,
+          -64.9375,
+          -4.5
+        ]
+      },
+      {
+        "materialId": "ajacks/ajacks_grass01",
+        "material": "ajacks/ajacks_grass01",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 1,
+        "vertexCount": 3,
+        "positions": [
+          -7924.01513671875,
+          8331,
+          72,
+          -7428,
+          8331,
+          72,
+          -7428,
+          8331,
+          64
+        ],
+        "uvs": [
+          61.343883872032166,
+          -0.5625,
+          57.46876561641693,
+          -0.5625,
+          57.46876561641693,
+          -0.5
+        ]
+      },
+      {
+        "materialId": "sgtsicktextures/gunroad_01",
+        "material": "sgtsicktextures/gunroad_01",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 1,
+        "vertexCount": 3,
+        "positions": [
+          -7940,
+          9235,
+          64,
+          -7940,
+          10173,
+          186,
+          -7428,
+          10173,
+          186
+        ],
+        "uvs": [
+          -15,
+          -18.095699317753315,
+          -15,
+          -19.927730567753315,
+          -14,
+          -19.927730567753315
+        ]
+      },
+      {
+        "materialId": "sgtsicktextures/gunroad_03",
+        "material": "sgtsicktextures/gunroad_03",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 1,
+        "vertexCount": 3,
+        "positions": [
+          -7428,
+          8723,
+          64,
+          -7940,
+          8723,
+          64,
+          -7940,
+          9235,
+          64
+        ],
+        "uvs": [
+          14,
+          17,
+          15,
+          17,
+          15,
+          18
+        ]
+      },
+      {
+        "materialId": "nature/blendgrassdirt01",
+        "material": "nature/blendgrassdirt01",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 2,
+        "vertexCount": 6,
+        "positions": [
+          -8196,
+          9235,
+          64,
+          -8196,
+          10173,
+          186,
+          -7940,
+          10173,
+          186,
+          -5998,
+          8211,
+          64,
+          -7428,
+          8211,
+          64,
+          -7428,
+          8723,
+          64
+        ],
+        "uvs": [
+          -64,
+          -72,
+          -64,
+          -79.328125,
+          -62,
+          -79.328125,
+          -65.07421875,
+          46.40625,
+          -65.07421875,
+          57.578125,
+          -69.07421875,
+          57.578125
+        ]
+      },
+      {
+        "materialId": "nature/cliffface001a",
+        "material": "nature/cliffface001a",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 1,
+        "vertexCount": 3,
+        "positions": [
+          -9059,
+          8235,
+          368,
+          -5974,
+          8235,
+          368,
+          -5974,
+          8235,
+          672
+        ],
+        "uvs": [
+          -14.44368746492546,
+          -0.5052083190530539,
+          -9.42252873047255,
+          -0.5052083190530539,
+          -9.42252873047255,
+          -0.9999999739229679
+        ]
+      }
+    ]
+  },
+  "props": {
+    "instances": [
+      {
+        "model": "sickness/stopsign_01",
+        "sourceModel": "sickness/stopsign_01",
+        "placeholderModel": false,
+        "origin": [
+          -7970,
+          9275,
+          59.775699615478516
+        ],
+        "angles": [
+          0,
+          180,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "sickness/speedlimit_02",
+        "sourceModel": "sickness/speedlimit_02",
+        "placeholderModel": false,
+        "origin": [
+          -7144.669921875,
+          8698,
+          58
+        ],
+        "angles": [
+          0,
+          270,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "sickness/parkinglotlight",
+        "sourceModel": "sickness/parkinglotlight",
+        "placeholderModel": false,
+        "origin": [
+          -7496.509765625,
+          8293,
+          72
+        ],
+        "angles": [
+          0,
+          270,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_03",
+        "sourceModel": "props_foliage/tree_pine_03",
+        "placeholderModel": false,
+        "origin": [
+          -6300.009765625,
+          8499.16015625,
+          75.27619934082031
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -6747.9599609375,
+          8532.23046875,
+          64.25
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "sickness/stopsign_01",
+        "sourceModel": "sickness/stopsign_01",
+        "placeholderModel": false,
+        "origin": [
+          -7410.81982421875,
+          8707.75,
+          59.775699615478516
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "sickness/stopsign_01",
+        "sourceModel": "sickness/stopsign_01",
+        "placeholderModel": false,
+        "origin": [
+          -7410,
+          9256,
+          59.775699615478516
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_03",
+        "sourceModel": "props_foliage/tree_pine_03",
+        "placeholderModel": false,
+        "origin": [
+          -7307,
+          8598,
+          62
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_03",
+        "sourceModel": "props_foliage/tree_pine_03",
+        "placeholderModel": false,
+        "origin": [
+          -7309,
+          8372,
+          62
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "sickness/splitway_02",
+        "sourceModel": "sickness/splitway_02",
+        "placeholderModel": false,
+        "origin": [
+          -7958.990234375,
+          8972.2900390625,
+          64.25
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -8079,
+          9293,
+          46
+        ],
+        "angles": [
+          0,
+          65,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -8048,
+          9709,
+          86
+        ],
+        "angles": [
+          0,
+          98.5,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -8064,
+          8797,
+          46
+        ],
+        "angles": [
+          0,
+          332,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_tall_01",
+        "sourceModel": "props_foliage/tree_pine_tall_01",
+        "placeholderModel": false,
+        "origin": [
+          -6201.4599609375,
+          8468,
+          63.05419921875
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -6609,
+          8541,
+          25
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -6912,
+          8431,
+          25
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_tall_01",
+        "sourceModel": "props_foliage/tree_pine_tall_01",
+        "placeholderModel": false,
+        "origin": [
+          -6859,
+          8650,
+          63.05419921875
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          -6814,
+          9426,
+          25
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_tall_01",
+        "sourceModel": "props_foliage/tree_pine_tall_01",
+        "placeholderModel": false,
+        "origin": [
+          -7133,
+          9699,
+          63.05419921875
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_tall_01",
+        "sourceModel": "props_foliage/tree_pine_tall_01",
+        "placeholderModel": false,
+        "origin": [
+          -6600,
+          9706,
+          63.05419921875
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_tall_01",
+        "sourceModel": "props_foliage/tree_pine_tall_01",
+        "placeholderModel": false,
+        "origin": [
+          -6217,
+          9374,
+          63.05419921875
+        ],
+        "angles": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    ]
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

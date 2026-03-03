@@ -1,0 +1,286 @@
+{
+  "id": "g_7_14",
+  "lod": 2,
+  "lodTriStride": 4,
+  "bounds": {
+    "minX": 0,
+    "minY": 13913,
+    "maxX": 2048,
+    "maxY": 15961
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 7,
+    "y": 14
+  },
+  "counts": {
+    "worldFaces": 16,
+    "staticProps": 2,
+    "placeholderWorldFaces": 0,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 9,
+    "worldVerts": 27,
+    "worldBytes": 540,
+    "propsTris": 24,
+    "propsVerts": 16,
+    "propsBytes": 768,
+    "totalTris": 33,
+    "totalVerts": 43,
+    "totalBytes": 1308,
+    "drawCallsBeforeInstancing": 18,
+    "drawCallsAfterInstancing": 7
+  },
+  "world": {
+    "meshes": [
+      {
+        "materialId": "tools/toolsskybox",
+        "material": "tools/toolsskybox",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 2,
+        "vertexCount": 6,
+        "positions": [
+          1024,
+          15352,
+          672,
+          1024,
+          15352,
+          949,
+          2048,
+          15352,
+          949,
+          0,
+          15352,
+          672,
+          0,
+          15352,
+          949,
+          1024,
+          15352,
+          949
+        ],
+        "uvs": [
+          -32.6875,
+          479.40625,
+          -32.6875,
+          479.40625,
+          -64.6875,
+          479.40625,
+          -0.6875,
+          479.40625,
+          -0.6875,
+          479.40625,
+          -32.6875,
+          479.40625
+        ]
+      },
+      {
+        "materialId": "wood/inffence01",
+        "material": "wood/inffence01",
+        "placeholderMaterial": false,
+        "faceCount": 2,
+        "triCount": 4,
+        "vertexCount": 12,
+        "positions": [
+          1048,
+          15328,
+          167,
+          1048,
+          14832.0283203125,
+          167,
+          1048,
+          14832.0283203125,
+          58,
+          1056,
+          14832.0283203125,
+          58,
+          1056,
+          14336,
+          58,
+          1056,
+          14336,
+          167,
+          1048,
+          14336,
+          167,
+          1048,
+          13840.0263671875,
+          167,
+          1048,
+          13840.0263671875,
+          58,
+          1056,
+          14336,
+          58,
+          1056,
+          14304.0537109375,
+          58,
+          1056,
+          14304.0537109375,
+          167
+        ],
+        "uvs": [
+          -137.00000903010368,
+          -0.9676853818818927,
+          -132.59685140441525,
+          -0.9676853818818927,
+          -132.59685140441525,
+          -7.320195436477661e-7,
+          131.7786599655019,
+          -7.320195436477661e-7,
+          127.37499949336052,
+          -7.320195436477661e-7,
+          127.37499949336052,
+          -0.9676853818818927,
+          -128.19319093227386,
+          -0.9676853818818927,
+          -123.79001596705257,
+          -0.9676853818818927,
+          -123.79001596705257,
+          -7.320195436477661e-7,
+          127.37499949336052,
+          -7.320195436477661e-7,
+          127.09138542413257,
+          -7.320195436477661e-7,
+          127.09138542413257,
+          -0.9676853818818927
+        ]
+      },
+      {
+        "materialId": "nature/cliffface001a",
+        "material": "nature/cliffface001a",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 1,
+        "vertexCount": 3,
+        "positions": [
+          12896,
+          15328,
+          368,
+          -9608,
+          15328,
+          368,
+          -9608,
+          15328,
+          672
+        ],
+        "uvs": [
+          -20.534830894321203,
+          -0.5052083190530539,
+          16.09277239907533,
+          -0.5052083190530539,
+          16.09277239907533,
+          -0.9999999739229679
+        ]
+      },
+      {
+        "materialId": "nature/blendgrassgrass001a",
+        "material": "nature/blendgrassgrass001a",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 1,
+        "vertexCount": 3,
+        "positions": [
+          544,
+          15328,
+          58,
+          1056,
+          15328,
+          58,
+          1056,
+          14060,
+          58
+        ],
+        "uvs": [
+          5,
+          -119.5625,
+          9,
+          -119.5625,
+          9,
+          -109.65625
+        ]
+      },
+      {
+        "materialId": "ajacks/ajacks_grass01",
+        "material": "ajacks/ajacks_grass01",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 1,
+        "vertexCount": 3,
+        "positions": [
+          1056,
+          14304.0537109375,
+          58,
+          1056,
+          15328,
+          58,
+          2560,
+          15328,
+          58
+        ],
+        "uvs": [
+          9,
+          -112.12541961669922,
+          9,
+          -120.125,
+          20.75,
+          -120.125
+        ]
+      }
+    ]
+  },
+  "props": {
+    "instances": [
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          2022.3800048828125,
+          14999.400390625,
+          58.25
+        ],
+        "angles": [
+          0,
+          270,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "model": "props_foliage/tree_pine_01",
+        "sourceModel": "props_foliage/tree_pine_01",
+        "placeholderModel": false,
+        "origin": [
+          1504.7099609375,
+          14427,
+          58.25
+        ],
+        "angles": [
+          0,
+          270,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    ]
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}

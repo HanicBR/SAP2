@@ -1,0 +1,125 @@
+{
+  "id": "g_5_1",
+  "lod": 2,
+  "lodTriStride": 4,
+  "bounds": {
+    "minX": -4096,
+    "minY": -12711,
+    "maxX": -2048,
+    "maxY": -10663
+  },
+  "size": 2048,
+  "splitDepth": 0,
+  "splitReason": [],
+  "baseCell": {
+    "x": 5,
+    "y": 1
+  },
+  "counts": {
+    "worldFaces": 2,
+    "staticProps": 1,
+    "placeholderWorldFaces": 0,
+    "placeholderStaticProps": 0
+  },
+  "stats": {
+    "worldTris": 2,
+    "worldVerts": 6,
+    "worldBytes": 120,
+    "propsTris": 12,
+    "propsVerts": 8,
+    "propsBytes": 384,
+    "totalTris": 14,
+    "totalVerts": 14,
+    "totalBytes": 504,
+    "drawCallsBeforeInstancing": 3,
+    "drawCallsAfterInstancing": 4
+  },
+  "world": {
+    "meshes": [
+      {
+        "materialId": "maps/rp_evocity_v33x/highrise/se1_garage_concretewall_08_-5124_-9585_138",
+        "material": "maps/rp_evocity_v33x/highrise/se1_garage_concretewall_08_-5124_-9585_138",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 1,
+        "vertexCount": 3,
+        "positions": [
+          -3636,
+          -10733,
+          199,
+          -3636,
+          -10733,
+          263,
+          -4096,
+          -10733,
+          263
+        ],
+        "uvs": [
+          -28.0625,
+          -1.5,
+          -28.0625,
+          -2,
+          -31.65625,
+          -2
+        ]
+      },
+      {
+        "materialId": "maps/rp_evocity_v33x/highrise/se1_garage_concretewall_07_-5124_-9585_138",
+        "material": "maps/rp_evocity_v33x/highrise/se1_garage_concretewall_07_-5124_-9585_138",
+        "placeholderMaterial": false,
+        "faceCount": 1,
+        "triCount": 1,
+        "vertexCount": 3,
+        "positions": [
+          -4096,
+          -10733,
+          71,
+          -3636,
+          -10733,
+          71,
+          -3636,
+          -10733,
+          199
+        ],
+        "uvs": [
+          -31.90625,
+          0,
+          -28.3125,
+          0,
+          -28.3125,
+          -1
+        ]
+      }
+    ]
+  },
+  "props": {
+    "instances": [
+      {
+        "model": "props/cs_office/light_security",
+        "sourceModel": "props/cs_office/light_security",
+        "placeholderModel": false,
+        "origin": [
+          -3955.719970703125,
+          -10733,
+          208.63699340820312
+        ],
+        "angles": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    ]
+  },
+  "budgets": {
+    "perChunkMaxTris": 250000,
+    "perChunkMaxVerts": 190000,
+    "perChunkMaxBytes": 12582912,
+    "overBudget": false
+  }
+}
