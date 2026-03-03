@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generatedAt": "2026-03-03T13:00:56.936Z",
+  "generatedAt": "2026-03-03T13:36:52.203Z",
   "map": {
     "name": "rp_evocity_v33x",
     "worldBounds": {
@@ -28,12 +28,12 @@
   },
   "streaming": {
     "activeWindow": "3x3",
-    "renderWindow": "7x7",
-    "prefetchWindow": "7x7",
+    "renderWindow": "9x9",
+    "prefetchWindow": "9x9",
     "activeRadiusChunks": 1,
-    "renderRadiusChunks": 3,
-    "prefetchRadiusChunks": 3,
-    "discardRadiusChunks": 4,
+    "renderRadiusChunks": 4,
+    "prefetchRadiusChunks": 4,
+    "discardRadiusChunks": 5,
     "gracePeriodMs": 5000
   },
   "lod": {
@@ -46,6 +46,39 @@
       "lod0": 1,
       "lod1": 2,
       "lod2": 4
+    }
+  },
+  "textures": {
+    "primary": "png",
+    "fallback": "png",
+    "vramBudgetBytes": 1610612736,
+    "vramEstimateBytes": 1020674891,
+    "vramBudgetPass": true,
+    "profiles": {
+      "diffuse": {
+        "className": "diffuse",
+        "maxSize": 1024,
+        "compression": "etc1s",
+        "srgb": true
+      },
+      "normal": {
+        "className": "normal",
+        "maxSize": 1024,
+        "compression": "uastc",
+        "srgb": false
+      },
+      "alpha": {
+        "className": "alpha",
+        "maxSize": 1024,
+        "compression": "etc1s",
+        "srgb": true
+      },
+      "emissive": {
+        "className": "emissive",
+        "maxSize": 512,
+        "compression": "etc1s",
+        "srgb": true
+      }
     }
   },
   "budgets": {
@@ -74,7 +107,10 @@
       }
     ],
     "materials": {
-      "indexUrl": "./materials/index.json"
+      "indexUrl": "./materials/index.json",
+      "ktx2TranscoderPath": "../../vendor/basis/",
+      "primaryFormat": "png",
+      "fallbackFormat": "png"
     },
     "models": {
       "indexUrl": "./models/index.json",

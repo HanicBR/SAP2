@@ -41,6 +41,13 @@ type Options = {
   streamingPrefetchRadiusChunks: number;
   streamingDiscardRadiusChunks: number;
   streamingGracePeriodMs: number;
+  textureProfileDiffuseMax: number;
+  textureProfileNormalMax: number;
+  textureProfileAlphaMax: number;
+  textureProfileEmissiveMax: number;
+  textureVramBudgetMb: number;
+  textureKtx2Mode: 'auto' | 'on' | 'off';
+  textureToktxBinary: string;
   assetResolutionMode: AssetResolutionMode;
   sourceioMode: SourceIOMode;
   sourceioRoot: string;
@@ -173,10 +180,17 @@ const DEFAULTS = {
   chunkLod1TriStride: 2,
   chunkLod2TriStride: 4,
   streamingActiveRadiusChunks: 1,
-  streamingRenderRadiusChunks: 3,
-  streamingPrefetchRadiusChunks: 3,
-  streamingDiscardRadiusChunks: 4,
+  streamingRenderRadiusChunks: 4,
+  streamingPrefetchRadiusChunks: 4,
+  streamingDiscardRadiusChunks: 5,
   streamingGracePeriodMs: 5000,
+  textureProfileDiffuseMax: 1024,
+  textureProfileNormalMax: 1024,
+  textureProfileAlphaMax: 1024,
+  textureProfileEmissiveMax: 512,
+  textureVramBudgetMb: 1536,
+  textureKtx2Mode: 'auto' as const,
+  textureToktxBinary: 'toktx',
   sourceioMode: 'auto' as SourceIOMode,
   assetResolutionMode: 'permissive' as AssetResolutionMode,
 };
@@ -232,6 +246,17 @@ const parseArgs = (): Options => {
   const sourceioMode: SourceIOMode = sourceioModeRaw === 'required'
     ? 'required'
     : sourceioModeRaw === 'off'
+      ? 'off'
+      : 'auto';
+
+  const textureKtx2ModeRaw = String(
+    map.get('--texture-ktx2-mode') || process.env.MAP_PIPELINE_TEXTURE_KTX2_MODE || DEFAULTS.textureKtx2Mode,
+  )
+    .trim()
+    .toLowerCase();
+  const textureKtx2Mode: 'auto' | 'on' | 'off' = textureKtx2ModeRaw === 'on'
+    ? 'on'
+    : textureKtx2ModeRaw === 'off'
       ? 'off'
       : 'auto';
 
@@ -319,6 +344,50 @@ const parseArgs = (): Options => {
         ),
       ),
     ),
+    textureProfileDiffuseMax: Math.max(
+      256,
+      Math.floor(
+        toNum(
+          envOrArg('--texture-profile-diffuse-max', 'MAP_PIPELINE_TEXTURE_PROFILE_DIFFUSE_MAX'),
+          DEFAULTS.textureProfileDiffuseMax,
+        ),
+      ),
+    ),
+    textureProfileNormalMax: Math.max(
+      256,
+      Math.floor(
+        toNum(
+          envOrArg('--texture-profile-normal-max', 'MAP_PIPELINE_TEXTURE_PROFILE_NORMAL_MAX'),
+          DEFAULTS.textureProfileNormalMax,
+        ),
+      ),
+    ),
+    textureProfileAlphaMax: Math.max(
+      256,
+      Math.floor(
+        toNum(
+          envOrArg('--texture-profile-alpha-max', 'MAP_PIPELINE_TEXTURE_PROFILE_ALPHA_MAX'),
+          DEFAULTS.textureProfileAlphaMax,
+        ),
+      ),
+    ),
+    textureProfileEmissiveMax: Math.max(
+      256,
+      Math.floor(
+        toNum(
+          envOrArg('--texture-profile-emissive-max', 'MAP_PIPELINE_TEXTURE_PROFILE_EMISSIVE_MAX'),
+          DEFAULTS.textureProfileEmissiveMax,
+        ),
+      ),
+    ),
+    textureVramBudgetMb: Math.max(
+      256,
+      Math.floor(toNum(envOrArg('--texture-vram-budget-mb', 'MAP_PIPELINE_TEXTURE_VRAM_BUDGET_MB'), DEFAULTS.textureVramBudgetMb)),
+    ),
+    textureKtx2Mode,
+    textureToktxBinary: String(
+      envOrArg('--texture-toktx-binary', 'MAP_PIPELINE_TEXTURE_TOKTX_BINARY') || DEFAULTS.textureToktxBinary,
+    ).trim(),
     assetResolutionMode,
     sourceioMode,
     sourceioRoot: resolveWithParentFallback(String(map.get('--sourceio-root') || 'sandbox/_techrefs/SourceIO')),
@@ -769,6 +838,7 @@ const runSourceIOMaterialExport = (
   materials: string[],
   contentRoots: string[],
   texturesOutDir: string,
+  maxTextureSize: number,
 ): { records: Map<string, MaterialExportRecord>; warnings: string[]; rootsScanned: string[] } => {
   const records = new Map<string, MaterialExportRecord>();
   const warnings: string[] = [];
@@ -808,7 +878,7 @@ const runSourceIOMaterialExport = (
     '--out-dir',
     texturesOutDir,
     '--max-size',
-    '1024',
+    String(Math.max(256, Math.floor(maxTextureSize || 1024))),
   ];
   for (const root of uniqueRoots) {
     args.push('--content-root', root);
@@ -1116,6 +1186,168 @@ const computeWorldMeshesStats = (worldMeshes: ChunkWorldMesh[]) => {
   return { tris, verts, bytes };
 };
 
+type TextureClass = 'diffuse' | 'normal' | 'alpha' | 'emissive';
+type TextureCompressionMode = 'etc1s' | 'uastc';
+type TextureProfile = {
+  className: TextureClass;
+  maxSize: number;
+  compression: TextureCompressionMode;
+  srgb: boolean;
+};
+
+const classifyTextureClass = (materialRaw: string, resolvedBaseTextureRaw?: string): TextureClass => {
+  const material = normalizeMaterialName(materialRaw);
+  const base = normalizeMaterialName(String(resolvedBaseTextureRaw || ''));
+  const key = `${material}|${base}`.toLowerCase();
+  if (/(^|[\/_.-])(normal|norm|nrm|bump|_n)([\/_.-]|$)/.test(key)) return 'normal';
+  if (/(^|[\/_.-])(glow|emissive|selfillum|self_illum|light|neon)([\/_.-]|$)/.test(key)) return 'emissive';
+  if (/(^|[\/_.-])(glass|window|grate|fence|chain|foliage|leaf|alpha|translucent|masked)([\/_.-]|$)/.test(key)) return 'alpha';
+  return 'diffuse';
+};
+
+const buildTextureProfiles = (options: Options): Record<TextureClass, TextureProfile> => ({
+  diffuse: {
+    className: 'diffuse',
+    maxSize: Math.max(256, Math.floor(options.textureProfileDiffuseMax || 1024)),
+    compression: 'etc1s',
+    srgb: true,
+  },
+  normal: {
+    className: 'normal',
+    maxSize: Math.max(256, Math.floor(options.textureProfileNormalMax || 1024)),
+    compression: 'uastc',
+    srgb: false,
+  },
+  alpha: {
+    className: 'alpha',
+    maxSize: Math.max(256, Math.floor(options.textureProfileAlphaMax || 1024)),
+    compression: 'etc1s',
+    srgb: true,
+  },
+  emissive: {
+    className: 'emissive',
+    maxSize: Math.max(256, Math.floor(options.textureProfileEmissiveMax || 512)),
+    compression: 'etc1s',
+    srgb: true,
+  },
+});
+
+const calcResizedDims = (widthRaw: number, heightRaw: number, maxSizeRaw: number): { width: number; height: number } => {
+  const width = Math.max(1, Math.floor(widthRaw || 1));
+  const height = Math.max(1, Math.floor(heightRaw || 1));
+  const maxSize = Math.max(1, Math.floor(maxSizeRaw || 1));
+  if (Math.max(width, height) <= maxSize) return { width, height };
+  const scale = maxSize / Math.max(width, height);
+  const resizedW = Math.max(1, Math.floor(width * scale));
+  const resizedH = Math.max(1, Math.floor(height * scale));
+  return { width: resizedW, height: resizedH };
+};
+
+const estimateTextureVramBytes = (
+  widthRaw: number,
+  heightRaw: number,
+  profile: TextureProfile,
+  hasKtx2: boolean,
+): number => {
+  const width = Math.max(1, Math.floor(widthRaw || 1));
+  const height = Math.max(1, Math.floor(heightRaw || 1));
+  // Mip chain overhead ~33%.
+  const mipFactor = 1.3334;
+  if (!hasKtx2) return Math.max(1024, Math.floor(width * height * 4 * mipFactor));
+
+  // Conservative estimates for GPU compressed formats.
+  if (profile.compression === 'uastc') {
+    // BC7/ASTC-like target: ~8bpp.
+    return Math.max(1024, Math.floor(width * height * 1.0 * mipFactor));
+  }
+  // ETC1S target ~4-6bpp depending on alpha/content.
+  const bytesPerPixel = profile.className === 'alpha' ? 0.9 : 0.65;
+  return Math.max(1024, Math.floor(width * height * bytesPerPixel * mipFactor));
+};
+
+const resolveToktxAvailable = (options: Options): { available: boolean; binary: string; warning?: string } => {
+  const binary = String(options.textureToktxBinary || 'toktx').trim() || 'toktx';
+  const probe = spawnSync(binary, ['--version'], {
+    encoding: 'utf8',
+    timeout: 5_000,
+    maxBuffer: 512 * 1024,
+  });
+  if (!probe.error) return { available: true, binary };
+  const warning = `texture_ktx2_toktx_unavailable:${String(probe.error?.message || 'not_found')}`;
+  if (options.textureKtx2Mode === 'on') {
+    throw new Error(warning);
+  }
+  return { available: false, binary, warning };
+};
+
+const convertPngToKtx2 = (
+  toktxBinary: string,
+  pngPath: string,
+  outPath: string,
+  profile: TextureProfile,
+  resized: { width: number; height: number },
+): { ok: boolean; warning?: string } => {
+  const args = [
+    '--t2',
+    '--genmipmap',
+    '--threads',
+    '1',
+    '--resize',
+    `${resized.width}x${resized.height}`,
+    '--assign_oetf',
+    profile.srgb ? 'srgb' : 'linear',
+  ];
+  if (profile.compression === 'uastc') {
+    args.push('--encode', 'uastc', '--uastc_level', '2', '--zcmp', '18');
+  } else {
+    args.push('--encode', 'etc1s', '--clevel', '2', '--qlevel', '140');
+  }
+  args.push(outPath, pngPath);
+  const exec = spawnSync(toktxBinary, args, {
+    encoding: 'utf8',
+    timeout: 60_000,
+    maxBuffer: 1024 * 1024,
+  });
+  if (exec.error || exec.status !== 0 || !fs.existsSync(outPath)) {
+    return {
+      ok: false,
+      warning: `texture_ktx2_convert_failed:${path.basename(pngPath)}:${String(exec.error?.message || exec.stderr || exec.status || 'unknown')}`,
+    };
+  }
+  return { ok: true };
+};
+
+const ensureBasisTranscoderAssets = (publicRoot: string): { copied: number; warning?: string } => {
+  const sourceCandidates = [
+    path.resolve(process.cwd(), 'node_modules', 'three', 'examples', 'jsm', 'libs', 'basis'),
+    path.resolve(process.cwd(), '..', 'node_modules', 'three', 'examples', 'jsm', 'libs', 'basis'),
+  ];
+  const sourceDir = sourceCandidates.find((item) => fs.existsSync(item) && fs.statSync(item).isDirectory());
+  if (!sourceDir) {
+    return { copied: 0, warning: 'basis_transcoder_source_not_found' };
+  }
+
+  const targetDir = path.resolve(publicRoot, 'vendor', 'basis');
+  fs.mkdirSync(targetDir, { recursive: true });
+  const requiredFiles = [
+    'basis_transcoder.js',
+    'basis_transcoder.wasm',
+    'basis_transcoder.worker.js',
+  ];
+  let copied = 0;
+  for (const fileName of requiredFiles) {
+    const src = path.join(sourceDir, fileName);
+    if (!fs.existsSync(src)) continue;
+    const dst = path.join(targetDir, fileName);
+    fs.copyFileSync(src, dst);
+    copied += 1;
+  }
+  if (copied === 0) {
+    return { copied, warning: 'basis_transcoder_files_missing' };
+  }
+  return { copied };
+};
+
 const splitChunk = (
   chunk: Chunk,
   faces: FaceAnnotated[],
@@ -1351,6 +1583,7 @@ const run = () => {
   const reportsDir = path.join(options.outDir, 'reports');
   const materialsDir = path.join(options.outDir, 'materials');
   const materialsTextureDir = path.join(materialsDir, 'basecolor');
+  const materialsTextureKtx2Dir = path.join(materialsDir, 'basecolor_ktx2');
   const modelsDir = path.join(options.outDir, 'models');
   const modelsMeshDir = path.join(modelsDir, 'meshes');
   fs.rmSync(path.join(options.outDir, 'pipeline'), { recursive: true, force: true });
@@ -1365,7 +1598,12 @@ const run = () => {
   fs.mkdirSync(chunkDirLod2, { recursive: true });
   fs.mkdirSync(reportsDir, { recursive: true });
   fs.mkdirSync(materialsTextureDir, { recursive: true });
+  fs.mkdirSync(materialsTextureKtx2Dir, { recursive: true });
   fs.mkdirSync(modelsMeshDir, { recursive: true });
+
+  const publicRoot = path.resolve(options.outDir, '..', '..');
+  const basisEnsure = ensureBasisTranscoderAssets(publicRoot);
+  if (basisEnsure.warning) warnings.push(basisEnsure.warning);
 
   const PROP_TRI_ESTIMATE = 12;
   const PROP_VERT_ESTIMATE = 8;
@@ -1426,34 +1664,112 @@ const run = () => {
   for (const material of usedWorldMaterials) addMaterialUsage(material, 'world');
   for (const material of usedModelMaterials) addMaterialUsage(material, 'model');
   const requestedMaterials = Array.from(materialUsage.keys()).sort((a, b) => a.localeCompare(b));
+  const textureProfiles = buildTextureProfiles(options);
+  const maxMaterialTextureSize = Math.max(
+    textureProfiles.diffuse.maxSize,
+    textureProfiles.normal.maxSize,
+    textureProfiles.alpha.maxSize,
+    textureProfiles.emissive.maxSize,
+  );
 
-  const materialExport = runSourceIOMaterialExport(options, requestedMaterials, contentRoots, materialsTextureDir);
+  const materialExport = runSourceIOMaterialExport(
+    options,
+    requestedMaterials,
+    contentRoots,
+    materialsTextureDir,
+    maxMaterialTextureSize,
+  );
   warnings.push(...materialExport.warnings);
+  const toktxProbe = options.textureKtx2Mode === 'off' ? { available: false, binary: options.textureToktxBinary } : resolveToktxAvailable(options);
+  if (toktxProbe.warning) warnings.push(toktxProbe.warning);
+  let ktx2Converted = 0;
+  let ktx2Failed = 0;
 
   const materialIndexEntries = requestedMaterials.map((material) => {
     const exported = materialExport.records.get(material);
     const textureFile = String(exported?.textureFile || '').trim();
     const texturePath = textureFile ? path.join(materialsTextureDir, textureFile) : '';
     const hasTexture = !!texturePath && fs.existsSync(texturePath);
+    const textureClass = classifyTextureClass(material, exported?.resolvedBaseTexture);
+    const profile = textureProfiles[textureClass];
+    const sourceW = Math.max(1, Math.floor(Number(exported?.textureWidth || 1)));
+    const sourceH = Math.max(1, Math.floor(Number(exported?.textureHeight || 1)));
+    const resized = calcResizedDims(sourceW, sourceH, profile.maxSize);
+    let ktx2Url: string | undefined;
+    let ktx2File: string | undefined;
+    if (hasTexture && toktxProbe.available) {
+      const ktx2OutFile = `${path.basename(textureFile, path.extname(textureFile))}.ktx2`;
+      const ktx2OutPath = path.join(materialsTextureKtx2Dir, ktx2OutFile);
+      const converted = convertPngToKtx2(toktxProbe.binary, texturePath, ktx2OutPath, profile, resized);
+      if (converted.ok) {
+        ktx2File = ktx2OutFile;
+        ktx2Url = `./materials/basecolor_ktx2/${ktx2OutFile}`;
+        ktx2Converted += 1;
+      } else if (converted.warning) {
+        warnings.push(converted.warning);
+        ktx2Failed += 1;
+      }
+    }
+    const textureUrl = hasTexture ? `./materials/basecolor/${textureFile}` : undefined;
+    const vramEstimateBytes = hasTexture
+      ? estimateTextureVramBytes(resized.width, resized.height, profile, !!ktx2Url)
+      : undefined;
     return {
       id: material,
       material,
       usage: Array.from(materialUsage.get(material) || []).sort((a, b) => a.localeCompare(b)),
       placeholder: !hasTexture,
       status: exported?.status || 'not_exported',
+      textureClass,
+      textureProfile: {
+        maxSize: profile.maxSize,
+        compression: profile.compression,
+        srgb: profile.srgb,
+      },
       ...(exported?.sourcePath ? { sourcePath: exported.sourcePath } : {}),
       ...(exported?.resolvedBaseTexture ? { resolvedBaseTexture: exported.resolvedBaseTexture } : {}),
       ...(exported?.searchedVmt ? { searchedVmt: exported.searchedVmt } : {}),
       ...(exported?.searchedVtf ? { searchedVtf: exported.searchedVtf } : {}),
-      ...(hasTexture ? { textureUrl: `./materials/basecolor/${textureFile}` } : {}),
-      ...(Number.isFinite(Number(exported?.textureWidth)) ? { textureWidth: Number(exported?.textureWidth) } : {}),
-      ...(Number.isFinite(Number(exported?.textureHeight)) ? { textureHeight: Number(exported?.textureHeight) } : {}),
+      ...(textureUrl ? { textureUrl } : {}),
+      ...(textureUrl ? { fallbackTextureUrl: textureUrl } : {}),
+      ...(ktx2Url ? { ktx2Url } : {}),
+      ...(ktx2File ? { ktx2File } : {}),
+      ...(Number.isFinite(Number(exported?.textureWidth)) ? { sourceTextureWidth: Number(exported?.textureWidth) } : {}),
+      ...(Number.isFinite(Number(exported?.textureHeight)) ? { sourceTextureHeight: Number(exported?.textureHeight) } : {}),
+      ...(hasTexture ? { textureWidth: resized.width } : {}),
+      ...(hasTexture ? { textureHeight: resized.height } : {}),
+      ...(Number.isFinite(Number(vramEstimateBytes)) ? { vramEstimateBytes: Number(vramEstimateBytes) } : {}),
       ...(exported?.error ? { error: exported.error } : {}),
     };
   });
+  if (!toktxProbe.available && options.textureKtx2Mode !== 'off') {
+    warnings.push('texture_ktx2_disabled_runtime_fallback_png');
+  }
+  const textureVramEstimateTotal = materialIndexEntries
+    .map((item) => Number((item as any).vramEstimateBytes || 0))
+    .reduce((acc, value) => acc + Math.max(0, value), 0);
+  const textureVramBudgetBytes = Math.max(64 * 1024 * 1024, Math.floor(options.textureVramBudgetMb * 1024 * 1024));
+  const textureVramBudgetPass = textureVramEstimateTotal <= textureVramBudgetBytes;
+  if (!textureVramBudgetPass) {
+    warnings.push(
+      `texture_vram_budget_exceeded:observed=${textureVramEstimateTotal}:budget=${textureVramBudgetBytes}`,
+    );
+  }
   writeJson(path.join(materialsDir, 'index.json'), {
     generatedAt: new Date().toISOString(),
     total: materialIndexEntries.length,
+    primaryFormat: toktxProbe.available ? 'ktx2' : 'png',
+    fallbackFormat: 'png',
+    ktx2Enabled: toktxProbe.available,
+    ktx2Mode: options.textureKtx2Mode,
+    ktx2Stats: {
+      converted: ktx2Converted,
+      failed: ktx2Failed,
+    },
+    textureProfiles,
+    textureVramBudgetBytes,
+    textureVramEstimateTotal,
+    textureVramBudgetPass,
     rootsScanned: materialExport.rootsScanned,
     materials: materialIndexEntries,
   });
@@ -2034,6 +2350,12 @@ const run = () => {
         discardRadiusChunks: streamingDiscardRadiusChunks,
         gracePeriodMs: streamingGracePeriodMs,
       },
+      textures: {
+        ktx2Mode: options.textureKtx2Mode,
+        toktxBinary: options.textureToktxBinary,
+        vramBudgetMb: options.textureVramBudgetMb,
+        profiles: textureProfiles,
+      },
       budgets: {
         perChunkMaxTris: options.perChunkMaxTris,
         perChunkMaxVerts: options.perChunkMaxVerts,
@@ -2065,6 +2387,11 @@ const run = () => {
       total: materialIndexEntries.length,
       withTexture: materialIndexEntries.filter((item) => !!item.textureUrl).length,
       placeholder: materialIndexEntries.filter((item) => item.placeholder).length,
+      withKtx2: materialIndexEntries.filter((item) => !!(item as any).ktx2Url).length,
+      ktx2Enabled: toktxProbe.available,
+      textureVramEstimateBytes: textureVramEstimateTotal,
+      textureVramBudgetBytes,
+      textureVramBudgetPass,
       indexPath: './materials/index.json',
     },
     models: {
@@ -2168,6 +2495,14 @@ const run = () => {
         lod2: chunkLod2TriStride,
       },
     },
+    textures: {
+      primary: toktxProbe.available ? 'ktx2' : 'png',
+      fallback: 'png',
+      vramBudgetBytes: textureVramBudgetBytes,
+      vramEstimateBytes: textureVramEstimateTotal,
+      vramBudgetPass: textureVramBudgetPass,
+      profiles: textureProfiles,
+    },
     budgets: {
       perChunk: {
         tris: options.perChunkMaxTris,
@@ -2195,6 +2530,9 @@ const run = () => {
       ],
       materials: {
         indexUrl: './materials/index.json',
+        ktx2TranscoderPath: '../../vendor/basis/',
+        primaryFormat: toktxProbe.available ? 'ktx2' : 'png',
+        fallbackFormat: 'png',
       },
       models: {
         indexUrl: './models/index.json',
@@ -2271,6 +2609,12 @@ const run = () => {
         discardRadiusChunks: streamingDiscardRadiusChunks,
         gracePeriodMs: streamingGracePeriodMs,
       },
+      textures: {
+        ktx2Mode: options.textureKtx2Mode,
+        toktxBinary: options.textureToktxBinary,
+        vramBudgetMb: options.textureVramBudgetMb,
+        profiles: textureProfiles,
+      },
       budgets: {
         perChunkMaxTris: options.perChunkMaxTris,
         perChunkMaxVerts: options.perChunkMaxVerts,
@@ -2294,6 +2638,12 @@ const run = () => {
         enabled: options.assetResolutionMode === 'strict',
         passed: !strictMissingViolation,
         criticalMissing: Number(auditReport.missingAssetsSummary?.critical || 0),
+      },
+      textureVramBudget: {
+        enabled: true,
+        passed: textureVramBudgetPass,
+        observedBytes: textureVramEstimateTotal,
+        budgetBytes: textureVramBudgetBytes,
       },
       budgetGate: {
         passed: budgetPass,
@@ -2386,6 +2736,22 @@ const run = () => {
         total: materialIndexEntries.length,
         withTexture: materialIndexEntries.filter((item) => !!item.textureUrl).length,
         placeholder: materialIndexEntries.filter((item) => item.placeholder).length,
+        withKtx2: materialIndexEntries.filter((item) => !!(item as any).ktx2Url).length,
+      },
+      textures: {
+        primaryFormat: toktxProbe.available ? 'ktx2' : 'png',
+        fallbackFormat: 'png',
+        profileCaps: textureProfiles,
+        ktx2: {
+          enabled: toktxProbe.available,
+          converted: ktx2Converted,
+          failed: ktx2Failed,
+        },
+        vram: {
+          budgetBytes: textureVramBudgetBytes,
+          estimateBytes: textureVramEstimateTotal,
+          budgetPass: textureVramBudgetPass,
+        },
       },
       models: {
         total: modelIndexEntries.length,
@@ -2429,6 +2795,9 @@ const run = () => {
   console.log(`Chunk LOD: tri_stride lod1=${chunkLod1TriStride} lod2=${chunkLod2TriStride}`);
   console.log(
     `Streaming defaults: active=${streamingActiveRadiusChunks} render=${streamingRenderRadiusChunks} prefetch=${streamingPrefetchRadiusChunks} discard=${streamingDiscardRadiusChunks} grace=${streamingGracePeriodMs}ms`,
+  );
+  console.log(
+    `Textures: primary=${toktxProbe.available ? 'ktx2' : 'png'} ktx2_converted=${ktx2Converted} ktx2_failed=${ktx2Failed} vram_est=${Math.round(textureVramEstimateTotal / (1024 * 1024))}MB budget=${options.textureVramBudgetMb}MB`,
   );
   console.log(`Budgets: ${budgetPass ? 'PASS' : 'FAIL'} | Violations: ${budgetViolationCount}`);
 };

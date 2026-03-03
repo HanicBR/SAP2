@@ -87,6 +87,13 @@ CLI:
 --streaming-prefetch-radius-chunks <n>
 --streaming-discard-radius-chunks <n>
 --streaming-grace-period-ms <n>
+--texture-ktx2-mode <auto|on|off>
+--texture-toktx-binary <path_or_name>
+--texture-profile-diffuse-max <n>
+--texture-profile-normal-max <n>
+--texture-profile-alpha-max <n>
+--texture-profile-emissive-max <n>
+--texture-vram-budget-mb <n>
 ```
 
 Env vars equivalentes:
@@ -107,6 +114,13 @@ Env vars equivalentes:
 - `MAP_PIPELINE_STREAMING_PREFETCH_RADIUS_CHUNKS`
 - `MAP_PIPELINE_STREAMING_DISCARD_RADIUS_CHUNKS`
 - `MAP_PIPELINE_STREAMING_GRACE_PERIOD_MS`
+- `MAP_PIPELINE_TEXTURE_KTX2_MODE`
+- `MAP_PIPELINE_TEXTURE_TOKTX_BINARY`
+- `MAP_PIPELINE_TEXTURE_PROFILE_DIFFUSE_MAX`
+- `MAP_PIPELINE_TEXTURE_PROFILE_NORMAL_MAX`
+- `MAP_PIPELINE_TEXTURE_PROFILE_ALPHA_MAX`
+- `MAP_PIPELINE_TEXTURE_PROFILE_EMISSIVE_MAX`
+- `MAP_PIPELINE_TEXTURE_VRAM_BUDGET_MB`
 
 ## PR-05 Viewer minimo
 
@@ -123,10 +137,36 @@ Comportamento atual:
 - Carrega `manifest.json`.
 - Carrega `base` e faz streaming de chunks por LOD (`lod0/lod1/lod2`).
 - Janela ativa (default): 3x3 em `lod0`.
-- Janela visivel estendida (default): 7x7 com `lod1/lod2` para render mais longe.
-- Prefetch (default): 7x7.
+- Janela visivel estendida (default): 9x9 com `lod1/lod2` para render mais longe.
+- Prefetch (default): 9x9.
 - Descarte por distancia com `gracePeriodMs`.
 - Materiais/modelos faltantes usam placeholder.
+
+## PR-11 KTX2/Basis + VRAM budget
+
+- Export de texturas continua gerando fallback `PNG` em `materials/basecolor/`.
+- Quando `toktx` esta disponivel, o pipeline gera `KTX2` em `materials/basecolor_ktx2/`.
+- `materials/index.json` agora inclui:
+  - `primaryFormat` / `fallbackFormat`
+  - `ktx2Url` + `fallbackTextureUrl`
+  - `textureClass` (`diffuse|normal|alpha|emissive`)
+  - `textureProfile` (cap/compression/srgb)
+  - `vramEstimateBytes`
+- Viewer usa cadeia `KTX2 -> PNG` automaticamente.
+- Pipeline publica budget de VRAM estimado para texturas no `report.json` e no `manifest.json`.
+
+Perfis default:
+
+- `diffuse`: max `1024`, `ETC1S`
+- `normal`: max `1024`, `UASTC`
+- `alpha`: max `1024`, `ETC1S`
+- `emissive`: max `512`, `ETC1S`
+- VRAM budget default: `1536 MB`
+
+Requisitos para KTX2:
+
+- `toktx` instalado no host onde roda o pipeline.
+- Transcoder Basis em `public/vendor/basis` (o pipeline tenta copiar automaticamente de `node_modules/three/.../basis`).
 
 ## PR-06 Geometria real por chunk
 

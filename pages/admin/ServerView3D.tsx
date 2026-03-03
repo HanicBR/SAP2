@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { KTX2Loader } from 'three/examples/jsm/loaders/KTX2Loader.js';
 import { Icons } from '../../components/Icon';
 import { ApiService } from '../../services/api';
 import {
@@ -78,6 +79,9 @@ type Manifest = {
     base?: Array<{ id: string; url: string; format: string }>;
     materials?: {
       indexUrl: string;
+      ktx2TranscoderPath?: string;
+      primaryFormat?: string;
+      fallbackFormat?: string;
     };
     models?: {
       indexUrl: string;
@@ -90,11 +94,23 @@ type Manifest = {
       format: string;
     };
   };
+  textures?: {
+    primary?: string;
+    fallback?: string;
+    vramBudgetBytes?: number;
+  };
 };
 
 type MaterialIndex = {
   generatedAt: string;
   total: number;
+  primaryFormat?: string;
+  fallbackFormat?: string;
+  ktx2Enabled?: boolean;
+  ktx2Mode?: string;
+  textureVramBudgetBytes?: number;
+  textureVramEstimateTotal?: number;
+  textureVramBudgetPass?: boolean;
   rootsScanned?: string[];
   materials: Array<{
     id: string;
@@ -102,6 +118,15 @@ type MaterialIndex = {
     placeholder: boolean;
     status: string;
     textureUrl?: string;
+    fallbackTextureUrl?: string;
+    ktx2Url?: string;
+    textureClass?: string;
+    textureProfile?: {
+      maxSize?: number;
+      compression?: string;
+      srgb?: boolean;
+    };
+    vramEstimateBytes?: number;
     usage?: string[];
     sourcePath?: string;
     resolvedBaseTexture?: string;
@@ -220,6 +245,8 @@ type RuntimeStats = {
   visibleChunks: number;
   loadedTrisEstimate: number;
   loadedBytesEstimate: number;
+  textureCacheCount: number;
+  textureCacheBytesEstimate: number;
   modelCacheCount: number;
   modelCacheBytesEstimate: number;
   cameraCell: { x: number; y: number };
@@ -460,6 +487,8 @@ const ServerView3D: React.FC = () => {
     visibleChunks: 0,
     loadedTrisEstimate: 0,
     loadedBytesEstimate: 0,
+    textureCacheCount: 0,
+    textureCacheBytesEstimate: 0,
     modelCacheCount: 0,
     modelCacheBytesEstimate: 0,
     cameraCell: { x: 0, y: 0 },
@@ -827,6 +856,7 @@ const ServerView3D: React.FC = () => {
     let warmupResizeTimer: number | null = null;
     let startedAt = performance.now();
     let firstActiveLoadMs: number | null = null;
+    let lastTextureBudgetWarnAt = 0;
 
     const appendLog = (line: string) => {
       const msg = `[${new Date().toLocaleTimeString('pt-BR')}] ${line}`;
@@ -886,12 +916,27 @@ const ServerView3D: React.FC = () => {
     }>();
     const loadingChunkIds = new Set<string>();
     const textureLoader = new THREE.TextureLoader();
+    const ktx2Loader = new KTX2Loader();
     const textureCache = new Map<string, THREE.Texture | null>();
-    const textureLoading = new Set<string>();
-    const pendingMaterialBindings = new Map<string, Set<THREE.MeshStandardMaterial>>();
+    const textureLoading = new Set<string>(); // chain keys
+    const pendingMaterialBindings = new Map<string, Set<THREE.MeshStandardMaterial>>(); // chain keys
+    const textureCacheBytesByUrl = new Map<string, number>();
+    let textureCacheBytesEstimate = 0;
+    let textureVramBudgetBytes = Math.max(256, 1536) * 1024 * 1024;
+    let ktx2RuntimeEnabled = false;
+    let ktx2TranscoderPath = '/vendor/basis/';
     const materialDefs = new Map<string, {
       placeholder: boolean;
       textureUrl?: string;
+      fallbackTextureUrl?: string;
+      ktx2Url?: string;
+      textureClass?: string;
+      textureProfile?: {
+        maxSize?: number;
+        compression?: string;
+        srgb?: boolean;
+      };
+      vramEstimateBytes?: number;
       status?: string;
       sourcePath?: string;
       resolvedBaseTexture?: string;
@@ -1019,10 +1064,103 @@ const ServerView3D: React.FC = () => {
       return Array.from(new Set(out));
     };
 
+    const estimateTextureBytes = (
+      texture: THREE.Texture,
+      hintBytes?: number,
+    ): number => {
+      const hinted = Number(hintBytes || 0);
+      if (Number.isFinite(hinted) && hinted > 0) return Math.floor(hinted);
+      const image: any = (texture as any).image;
+      const width = Math.max(1, Number(image?.width || 1));
+      const height = Math.max(1, Number(image?.height || 1));
+      return Math.floor(width * height * 4 * 1.3334);
+    };
+
+    const applyTextureToMaterial = (material: THREE.MeshStandardMaterial, texture: THREE.Texture) => {
+      material.map = texture;
+      material.color.set(0xffffff);
+      material.needsUpdate = true;
+    };
+
+    const loadTextureChain = (
+      chainKey: string,
+      materialId: string,
+      candidates: string[],
+      vramHintBytes?: number,
+    ) => {
+      if (textureLoading.has(chainKey)) return;
+      textureLoading.add(chainKey);
+
+      const tryCandidate = (index: number) => {
+        if (index >= candidates.length) {
+          textureLoading.delete(chainKey);
+          pendingMaterialBindings.delete(chainKey);
+          pushDiagnostic(
+            'error',
+            'texture_chain_failed',
+            'texture',
+            chainKey,
+            `falha ao carregar textura para material=${materialId} em todos os formatos`,
+            withRoots(materialRootsScanned, candidates),
+          );
+          return;
+        }
+
+        const url = candidates[index];
+        const cached = textureCache.get(url);
+        if (cached) {
+          const waiting = pendingMaterialBindings.get(chainKey);
+          if (waiting) {
+            for (const mat of waiting) applyTextureToMaterial(mat, cached);
+          }
+          pendingMaterialBindings.delete(chainKey);
+          textureLoading.delete(chainKey);
+          return;
+        }
+        if (cached === null) {
+          tryCandidate(index + 1);
+          return;
+        }
+
+        const isKtx2 = url.toLowerCase().endsWith('.ktx2');
+        const loader = isKtx2 ? ktx2Loader : textureLoader;
+        loader.load(
+          url,
+          (texture) => {
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            texture.colorSpace = THREE.SRGBColorSpace;
+            texture.anisotropy = 4;
+            textureCache.set(url, texture);
+            if (!textureCacheBytesByUrl.has(url)) {
+              const bytes = estimateTextureBytes(texture, vramHintBytes);
+              textureCacheBytesByUrl.set(url, bytes);
+              textureCacheBytesEstimate += bytes;
+            }
+            const waiting = pendingMaterialBindings.get(chainKey);
+            if (waiting) {
+              for (const mat of waiting) applyTextureToMaterial(mat, texture);
+            }
+            pendingMaterialBindings.delete(chainKey);
+            textureLoading.delete(chainKey);
+          },
+          undefined,
+          () => {
+            textureCache.set(url, null);
+            tryCandidate(index + 1);
+          },
+        );
+      };
+
+      tryCandidate(0);
+    };
+
     const getWorldMaterial = (materialIdRaw: string, placeholderFlag: boolean): THREE.MeshStandardMaterial => {
       const materialId = String(materialIdRaw || '__missing_material');
       const def = materialDefs.get(materialId);
-      const shouldPlaceholder = placeholderFlag || !def || def.placeholder || !def.textureUrl;
+      const fallbackTextureUrl = def?.fallbackTextureUrl || def?.textureUrl;
+      const primaryTextureUrl = ktx2RuntimeEnabled && def?.ktx2Url ? def.ktx2Url : fallbackTextureUrl;
+      const shouldPlaceholder = placeholderFlag || !def || def.placeholder || !primaryTextureUrl;
       const isToolMaterial = materialId.startsWith('tools/') || materialId.startsWith('editor/');
       if (shouldPlaceholder && !isToolMaterial) {
         const searchedIn = withRoots(materialRootsScanned, [
@@ -1058,58 +1196,40 @@ const ServerView3D: React.FC = () => {
         side: THREE.DoubleSide,
       });
 
-      if (!shouldPlaceholder && def?.textureUrl) {
-        const textureUrl = toAssetUrl(manifestUrl, def.textureUrl);
-        const cachedTexture = textureCache.get(textureUrl);
-        if (cachedTexture) {
-          material.map = cachedTexture;
-          material.color.set(0xffffff);
-          material.needsUpdate = true;
-        } else if (cachedTexture !== null) {
-          const pending = pendingMaterialBindings.get(textureUrl) || new Set<THREE.MeshStandardMaterial>();
-          pending.add(material);
-          pendingMaterialBindings.set(textureUrl, pending);
+      if (!shouldPlaceholder && primaryTextureUrl) {
+        const candidateUrls: string[] = [];
+        const primary = toAssetUrl(manifestUrl, primaryTextureUrl);
+        candidateUrls.push(primary);
+        if (fallbackTextureUrl) {
+          const fallback = toAssetUrl(manifestUrl, fallbackTextureUrl);
+          if (fallback !== primary) candidateUrls.push(fallback);
+        }
 
-          if (!textureLoading.has(textureUrl)) {
-            textureLoading.add(textureUrl);
-            textureLoader.load(
-              textureUrl,
-              (texture) => {
-                texture.wrapS = THREE.RepeatWrapping;
-                texture.wrapT = THREE.RepeatWrapping;
-                texture.colorSpace = THREE.SRGBColorSpace;
-                texture.anisotropy = 4;
-                textureCache.set(textureUrl, texture);
-                textureLoading.delete(textureUrl);
-                const waiting = pendingMaterialBindings.get(textureUrl);
-                if (waiting) {
-                  for (const mat of waiting) {
-                    mat.map = texture;
-                    mat.color.set(0xffffff);
-                    mat.needsUpdate = true;
-                  }
-                }
-                pendingMaterialBindings.delete(textureUrl);
-              },
-              undefined,
-              () => {
-                textureCache.set(textureUrl, null);
-                textureLoading.delete(textureUrl);
-                pendingMaterialBindings.delete(textureUrl);
-                pushDiagnostic(
-                  'error',
-                  'texture_fetch_failed',
-                  'texture',
-                  textureUrl,
-                  `falha ao carregar textura no browser: ${textureUrl}`,
-                  withRoots(materialRootsScanned, [
-                    textureUrl,
-                    materialId ? `materials/${materialId}.vmt` : '',
-                    def?.searchedVtf || '',
-                    def?.sourcePath || '',
-                  ]),
-                );
-              },
+        const cachedReady = candidateUrls.find((url) => textureCache.has(url) && !!textureCache.get(url));
+        if (cachedReady) {
+          const texture = textureCache.get(cachedReady);
+          if (texture) applyTextureToMaterial(material, texture);
+        } else {
+          const allFailed = candidateUrls.every((url) => textureCache.get(url) === null);
+          if (!allFailed) {
+            const chainKey = `${materialId}|${candidateUrls.join('||')}`;
+            const pending = pendingMaterialBindings.get(chainKey) || new Set<THREE.MeshStandardMaterial>();
+            pending.add(material);
+            pendingMaterialBindings.set(chainKey, pending);
+            loadTextureChain(chainKey, materialId, candidateUrls, def?.vramEstimateBytes);
+          } else {
+            pushDiagnostic(
+              'error',
+              'texture_fetch_failed',
+              'texture',
+              materialId,
+              `falha ao carregar textura no browser: ${candidateUrls[0] || 'n/a'}`,
+              withRoots(materialRootsScanned, [
+                ...candidateUrls,
+                materialId ? `materials/${materialId}.vmt` : '',
+                def?.searchedVtf || '',
+                def?.sourcePath || '',
+              ]),
             );
           }
         }
@@ -1123,6 +1243,8 @@ const ServerView3D: React.FC = () => {
         if (texture) texture.dispose();
       }
       textureCache.clear();
+      textureCacheBytesByUrl.clear();
+      textureCacheBytesEstimate = 0;
       textureLoading.clear();
       pendingMaterialBindings.clear();
     };
@@ -1864,12 +1986,36 @@ const ServerView3D: React.FC = () => {
         const loadedManifest = await readJson<Manifest>(manifestUrl);
         if (cancelled) return;
         setManifest(loadedManifest);
+        textureVramBudgetBytes = Math.max(
+          256 * 1024 * 1024,
+          Number(loadedManifest.textures?.vramBudgetBytes || textureVramBudgetBytes),
+        );
+        ktx2TranscoderPath = String(
+          loadedManifest.assets.materials?.ktx2TranscoderPath
+          || '/vendor/basis/',
+        );
+        try {
+          const resolvedTranscoder = toAssetUrl(manifestUrl, ktx2TranscoderPath);
+          ktx2Loader.setTranscoderPath(resolvedTranscoder.endsWith('/') ? resolvedTranscoder : `${resolvedTranscoder}/`);
+          ktx2Loader.detectSupport(renderer);
+          ktx2RuntimeEnabled = true;
+          appendLog(`ktx2 runtime: enabled path=${resolvedTranscoder}`);
+        } catch (ktxErr: any) {
+          ktx2RuntimeEnabled = false;
+          appendLog(`ktx2 runtime indisponivel: ${String(ktxErr?.message || ktxErr)}`);
+        }
 
         if (loadedManifest.assets.materials?.indexUrl) {
           try {
             const materialIndexUrl = toAssetUrl(manifestUrl, loadedManifest.assets.materials.indexUrl);
             const materialIndex = await readJson<MaterialIndex>(materialIndexUrl);
             if (!cancelled) {
+              if (Number.isFinite(Number(materialIndex.textureVramBudgetBytes || 0)) && Number(materialIndex.textureVramBudgetBytes) > 0) {
+                textureVramBudgetBytes = Number(materialIndex.textureVramBudgetBytes);
+              }
+              if (materialIndex.ktx2Enabled === false) {
+                ktx2RuntimeEnabled = false;
+              }
               materialRootsScanned = Array.isArray(materialIndex.rootsScanned)
                 ? materialIndex.rootsScanned.map((item) => String(item || '')).filter(Boolean)
                 : [];
@@ -1879,6 +2025,11 @@ const ServerView3D: React.FC = () => {
                 materialDefs.set(key, {
                   placeholder: !!item.placeholder,
                   ...(item.textureUrl ? { textureUrl: item.textureUrl } : {}),
+                  ...(item.fallbackTextureUrl ? { fallbackTextureUrl: item.fallbackTextureUrl } : {}),
+                  ...(item.ktx2Url ? { ktx2Url: item.ktx2Url } : {}),
+                  ...(item.textureClass ? { textureClass: String(item.textureClass) } : {}),
+                  ...(item.textureProfile ? { textureProfile: item.textureProfile } : {}),
+                  ...(Number.isFinite(Number(item.vramEstimateBytes || 0)) ? { vramEstimateBytes: Number(item.vramEstimateBytes) } : {}),
                   ...(item.status ? { status: String(item.status) } : {}),
                   ...(item.sourcePath ? { sourcePath: String(item.sourcePath) } : {}),
                   ...(item.resolvedBaseTexture ? { resolvedBaseTexture: String(item.resolvedBaseTexture) } : {}),
@@ -1888,7 +2039,7 @@ const ServerView3D: React.FC = () => {
                   ...(item.error ? { error: String(item.error) } : {}),
                 });
               }
-              appendLog(`materials index carregado: total=${materialDefs.size}`);
+              appendLog(`materials index carregado: total=${materialDefs.size} primary=${materialIndex.primaryFormat || 'png'} ktx2=${materialIndex.ktx2Enabled ? 'on' : 'off'}`);
             }
           } catch (materialErr: any) {
             appendLog(`materials index indisponivel: ${String(materialErr?.message || materialErr)}`);
@@ -2065,11 +2216,20 @@ const ServerView3D: React.FC = () => {
             visibleChunks,
             loadedTrisEstimate,
             loadedBytesEstimate,
+            textureCacheCount: Array.from(textureCache.values()).reduce((count, item) => (item ? count + 1 : count), 0),
+            textureCacheBytesEstimate,
             modelCacheCount: Array.from(modelCache.values()).reduce((count, item) => (item ? count + 1 : count), 0),
             modelCacheBytesEstimate,
             cameraCell,
             firstActiveLoadMs,
           });
+
+          if (textureCacheBytesEstimate > textureVramBudgetBytes && (now - lastTextureBudgetWarnAt) > 10_000) {
+            lastTextureBudgetWarnAt = now;
+            appendLog(
+              `texture cache above budget: ${Math.round(textureCacheBytesEstimate / (1024 * 1024))}MB > ${Math.round(textureVramBudgetBytes / (1024 * 1024))}MB`,
+            );
+          }
         };
 
         const onResize = () => {
@@ -2243,6 +2403,11 @@ const ServerView3D: React.FC = () => {
       playerGeometry.dispose();
       disposeTextureCache();
       disposeModelCache();
+      try {
+        ktx2Loader.dispose();
+      } catch {
+        // no-op
+      }
       renderer.dispose();
       host.innerHTML = '';
     };
@@ -2304,6 +2469,8 @@ const ServerView3D: React.FC = () => {
             <p>visibleChunks: {runtimeStats.visibleChunks}</p>
             <p>loadedTris(est): {runtimeStats.loadedTrisEstimate.toLocaleString('pt-BR')}</p>
             <p>loadedBytes(est): {Math.round(runtimeStats.loadedBytesEstimate / (1024 * 1024)).toLocaleString('pt-BR')} MB</p>
+            <p>textureCache: {runtimeStats.textureCacheCount} texturas</p>
+            <p>textureCacheBytes(est): {Math.round(runtimeStats.textureCacheBytesEstimate / (1024 * 1024)).toLocaleString('pt-BR')} MB</p>
             <p>modelCache: {runtimeStats.modelCacheCount} modelos</p>
             <p>modelCacheBytes(est): {Math.round(runtimeStats.modelCacheBytesEstimate / (1024 * 1024)).toLocaleString('pt-BR')} MB</p>
             <p>firstActiveLoadMs: {runtimeStats.firstActiveLoadMs ?? 'pendente'}</p>
