@@ -154,6 +154,110 @@ export interface ServerViewerActionStatusResponse {
   metadata?: Record<string, unknown>;
 }
 
+export type WorkshopJobStatus = 'queued' | 'running' | 'retry_wait' | 'success' | 'failed' | 'dropped';
+
+export interface WorkshopQueueJob {
+  id: string;
+  key: string;
+  status: WorkshopJobStatus;
+  appId: number;
+  workshopId: string;
+  mapName: string;
+  serverId: string;
+  source: 'heartbeat' | 'viewer_state' | 'manual';
+  resolutionSource: string;
+  refresh: boolean;
+  retryCount: number;
+  maxRetries: number;
+  runCount: number;
+  enqueuedAt: string;
+  updatedAt: string;
+  nextRunAt: string;
+  nextRunInMs: number;
+  lastStartedAt?: string;
+  lastFinishedAt?: string;
+  lastError?: string;
+  lastExitCode?: number;
+  lastSignal?: string;
+  downloadTimedOut?: boolean;
+  processTimedOut?: boolean;
+  reports: {
+    download: string;
+    process: string;
+    extract: string;
+  };
+}
+
+export interface WorkshopQueueSnapshotResponse {
+  now: string;
+  runtimeEnabled: boolean;
+  initialized: boolean;
+  config: {
+    enabled: boolean;
+    autoProcessEnabled: boolean;
+    appId: number;
+    workerConcurrency: number;
+    maxQueueSize: number;
+    maxRetries: number;
+    retryBaseMs: number;
+    retryMaxMs: number;
+    downloadTimeoutMs: number;
+    processTimeoutMs: number;
+    successCooldownMs: number;
+    queueStorePath: string;
+    reportsDir: string;
+    runtimeCachePath: string;
+    configPath: string;
+  };
+  worker: {
+    activeJobs: number;
+    wakeScheduled: boolean;
+  };
+  counts: {
+    total: number;
+    queued: number;
+    running: number;
+    retry_wait: number;
+    success: number;
+    failed: number;
+    dropped: number;
+    pending: number;
+  };
+  jobs: WorkshopQueueJob[];
+}
+
+export interface WorkshopManualEnqueueRequest {
+  mapName: string;
+  workshopId?: string;
+  refresh?: boolean;
+  serverId?: string;
+}
+
+export interface WorkshopManualEnqueueResponse {
+  ok: boolean;
+  queued: boolean;
+  deduped: boolean;
+  reason: string;
+  mapName?: string;
+  workshopId?: string;
+  refresh?: boolean;
+  resolutionSource?: string;
+  droppedOldestJobId?: string;
+  job?: {
+    id: string;
+    key: string;
+    status: WorkshopJobStatus;
+    retryCount: number;
+    maxRetries: number;
+    reports: {
+      download: string;
+      process: string;
+      extract: string;
+    };
+  };
+  error?: string;
+}
+
 export interface ServerWsLiveStateItem {
   serverId: string;
   transport: 'websocket';

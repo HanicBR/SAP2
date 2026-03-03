@@ -181,6 +181,14 @@ type WorkshopQueueSnapshot = {
   }>;
 };
 
+type EnqueueResult = {
+  queued: boolean;
+  deduped: boolean;
+  reason: string;
+  droppedOldestJobId?: string;
+  job?: PersistedWorkshopJob;
+};
+
 const WORKSPACE_ROOT = path.resolve(__dirname, '..', '..', '..');
 const DEFAULT_CONFIG_PATH = path.resolve(WORKSPACE_ROOT, 'server', 'config', 'workshop-maps.json');
 const DEFAULT_RUNTIME_CACHE_PATH = path.resolve(WORKSPACE_ROOT, 'server', 'config', 'workshop-maps.runtime.json');
@@ -1160,8 +1168,9 @@ const enqueueJob = (
   serverId: string,
   source: TriggerSource,
   resolutionSource: string,
+  refresh: boolean,
   config: WorkshopMapConfigResolved,
-) => {
+) : EnqueueResult => {
   loadQueueStoreIfNeeded(config);
 
   const key = `${config.appId}:${workshopId}:${mapName}`;
@@ -1183,9 +1192,15 @@ const enqueueJob = (
       map: mapName,
       workshopId,
     }));
-    return;
+    return {
+      queued: false,
+      deduped: true,
+      reason: 'active_job_already_exists',
+      job: active,
+    };
   }
 
+  let droppedOldestJobId: string | undefined;
   const pendingCount = countPendingJobs();
   if (pendingCount >= config.maxQueueSize) {
     const dropped = dropOldestPendingJob(config);
@@ -1195,8 +1210,13 @@ const enqueueJob = (
         workshopId,
         maxQueueSize: config.maxQueueSize,
       }));
-      return;
+      return {
+        queued: false,
+        deduped: false,
+        reason: 'queue_full_no_droppable_job',
+      };
     }
+    droppedOldestJobId = dropped.id;
     console.warn('[workshop-auto] queue_backpressure_drop', JSON.stringify({
       droppedJobId: dropped.id,
       droppedMap: dropped.mapName,
@@ -1212,7 +1232,7 @@ const enqueueJob = (
     serverId,
     source,
     resolutionSource,
-    false,
+    refresh,
     config,
   );
 
@@ -1233,6 +1253,14 @@ const enqueueJob = (
 
   scheduleWakeTimer();
   void processQueue();
+
+  return {
+    queued: true,
+    deduped: false,
+    reason: 'queued',
+    ...(droppedOldestJobId ? { droppedOldestJobId } : {}),
+    job,
+  };
 };
 
 export const notifyMapObservedForWorkshop = (input: NotifyInput) => {
@@ -1289,9 +1317,116 @@ export const notifyMapObservedForWorkshop = (input: NotifyInput) => {
     serverId,
     input.source,
     resolved.resolutionSource,
+    false,
     config,
   );
 
+};
+
+export const enqueueWorkshopAutoDownloadManual = (input: {
+  serverId?: string;
+  mapName: string;
+  workshopId?: string;
+  refresh?: boolean;
+}) => {
+  const serverId = String(input.serverId || 'admin').trim() || 'admin';
+  const rawMap = String(input.mapName || '').trim();
+  const rawWorkshopId = String(input.workshopId || '').trim();
+  const refresh = parseBool(input.refresh, false);
+
+  if (!started || !runtimeEnabled) {
+    return {
+      ok: false,
+      queued: false,
+      deduped: false,
+      reason: 'worker_not_running',
+    };
+  }
+
+  const mapName = sanitizeMapName(rawMap);
+  if (!mapName) {
+    return {
+      ok: false,
+      queued: false,
+      deduped: false,
+      reason: 'invalid_map_name',
+    };
+  }
+
+  const config = readConfig();
+  loadQueueStoreIfNeeded(config);
+  if (!config.enabled) {
+    return {
+      ok: false,
+      queued: false,
+      deduped: false,
+      reason: 'worker_disabled_by_config',
+    };
+  }
+
+  let workshopId = '';
+  let resolutionSource = 'manual_input';
+  if (rawWorkshopId) {
+    if (!isWorkshopId(rawWorkshopId)) {
+      return {
+        ok: false,
+        queued: false,
+        deduped: false,
+        reason: 'invalid_workshop_id',
+      };
+    }
+    workshopId = rawWorkshopId;
+  } else {
+    const resolved = resolveWorkshopId({ mapName }, config);
+    if (!resolved.workshopId) {
+      return {
+        ok: false,
+        queued: false,
+        deduped: false,
+        reason: 'workshop_id_not_resolved_for_map',
+      };
+    }
+    workshopId = resolved.workshopId;
+    resolutionSource = resolved.resolutionSource;
+  }
+
+  const enqueue = enqueueJob(
+    mapName,
+    workshopId,
+    serverId,
+    'manual',
+    resolutionSource,
+    refresh,
+    config,
+  );
+
+  return {
+    ok: true,
+    queued: enqueue.queued,
+    deduped: enqueue.deduped,
+    reason: enqueue.reason,
+    mapName,
+    workshopId,
+    refresh,
+    resolutionSource,
+    ...(enqueue.droppedOldestJobId ? { droppedOldestJobId: enqueue.droppedOldestJobId } : {}),
+    ...(enqueue.job
+      ? {
+          job: {
+            id: enqueue.job.id,
+            key: enqueue.job.key,
+            status: enqueue.job.status,
+            retryCount: enqueue.job.retryCount,
+            maxRetries: enqueue.job.maxRetries,
+            reports: {
+              download: enqueue.job.downloadReportPath,
+              process: enqueue.job.processReportPath,
+              extract: enqueue.job.extractReportPath,
+            },
+          },
+        }
+      : {}),
+  };
 };
 
 export const getWorkshopAutoDownloadQueueSnapshot = (limitRaw?: number): WorkshopQueueSnapshot => {

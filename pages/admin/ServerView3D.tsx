@@ -13,6 +13,9 @@ import {
   ServerViewerActionType,
   ServerViewerStatePlayer,
   ServerViewerStateSnapshot,
+  WorkshopManualEnqueueResponse,
+  WorkshopQueueJob,
+  WorkshopQueueSnapshotResponse,
 } from '../../types';
 
 type Bounds = {
@@ -273,6 +276,16 @@ type ViewerDiagnostic = {
   firstSeenAt: string;
   lastSeenAt: string;
   count: number;
+};
+
+type ManifestProbe = {
+  url: string;
+  checkedAt: string;
+  ok: boolean;
+  httpStatus?: number;
+  contentType?: string;
+  preview?: string;
+  error?: string;
 };
 
 type ViewerWsStatus = 'idle' | 'connecting' | 'connected' | 'subscribed' | 'error';
@@ -681,6 +694,13 @@ const ServerView3D: React.FC = () => {
   });
   const [streamingLogs, setStreamingLogs] = useState<string[]>([]);
   const [diagnostics, setDiagnostics] = useState<ViewerDiagnostic[]>([]);
+  const [queueSnapshot, setQueueSnapshot] = useState<WorkshopQueueSnapshotResponse | null>(null);
+  const [queueError, setQueueError] = useState<string | null>(null);
+  const [queueLoading, setQueueLoading] = useState<boolean>(false);
+  const [manualWorkshopId, setManualWorkshopId] = useState<string>('');
+  const [manualEnqueueBusy, setManualEnqueueBusy] = useState<boolean>(false);
+  const [manualEnqueueResult, setManualEnqueueResult] = useState<WorkshopManualEnqueueResponse | null>(null);
+  const [manifestProbe, setManifestProbe] = useState<ManifestProbe | null>(null);
   const [renderProfile, setRenderProfile] = useState<ViewerRenderProfile>(() => readInitialRenderProfile());
   const [playerAliveFilter, setPlayerAliveFilter] = useState<'all' | 'alive' | 'dead'>('all');
   const [playerTeamFilter, setPlayerTeamFilter] = useState<string>('all');
@@ -753,6 +773,130 @@ const ServerView3D: React.FC = () => {
     }
     return { label: 'Live frame', className: 'bg-emerald-900/20 text-emerald-300 border-emerald-700' };
   }, [hasFreshViewerSnapshot, viewerState, viewerWsStatus]);
+
+  const mapQueueJobs = useMemo<WorkshopQueueJob[]>(
+    () =>
+      (queueSnapshot?.jobs || [])
+        .filter((job) => String(job.mapName || '').trim().toLowerCase() === mapName.toLowerCase())
+        .slice(0, 12),
+    [mapName, queueSnapshot],
+  );
+
+  const loadQueueSnapshot = useCallback(
+    async (silent = true) => {
+      if (silent) {
+        // keep UX smooth during background polling
+      } else {
+        setQueueLoading(true);
+      }
+      try {
+        const snapshot = await ApiService.getWorkshopQueueSnapshot(240);
+        setQueueSnapshot(snapshot);
+        setQueueError(null);
+      } catch (err: any) {
+        setQueueError(String(err?.message || err));
+      } finally {
+        if (!silent) setQueueLoading(false);
+      }
+    },
+    [],
+  );
+
+  const probeManifestWithDetails = useCallback(async (): Promise<Manifest> => {
+    const checkedAt = new Date().toISOString();
+    try {
+      const response = await fetch(manifestUrl, { cache: 'no-store' });
+      const contentType = String(response.headers.get('content-type') || '').trim();
+      const text = await response.text();
+      const compactPreview = String(text || '').replace(/\s+/g, ' ').slice(0, 220).trim();
+
+      if (!response.ok) {
+        const message = `manifest_http_${response.status}: ${manifestUrl}`;
+        setManifestProbe({
+          url: manifestUrl,
+          checkedAt,
+          ok: false,
+          httpStatus: response.status,
+          contentType,
+          preview: compactPreview,
+          error: message,
+        });
+        throw new Error(message);
+      }
+
+      try {
+        const parsed = JSON.parse(text) as Manifest;
+        setManifestProbe({
+          url: manifestUrl,
+          checkedAt,
+          ok: true,
+          httpStatus: response.status,
+          contentType,
+          preview: compactPreview,
+        });
+        return parsed;
+      } catch (parseErr: any) {
+        const message = `manifest_invalid_json: ${String(parseErr?.message || parseErr)}`;
+        setManifestProbe({
+          url: manifestUrl,
+          checkedAt,
+          ok: false,
+          httpStatus: response.status,
+          contentType,
+          preview: compactPreview,
+          error: message,
+        });
+        throw new Error(message);
+      }
+    } catch (err: any) {
+      const message = String(err?.message || err);
+      setManifestProbe((current) =>
+        current && current.checkedAt === checkedAt
+          ? current
+          : {
+              url: manifestUrl,
+              checkedAt,
+              ok: false,
+              error: message,
+            },
+      );
+      throw err;
+    }
+  }, [manifestUrl]);
+
+  const enqueueManualWorkshopJob = useCallback(async () => {
+    if (!mapName) return;
+    setManualEnqueueBusy(true);
+    setManualEnqueueResult(null);
+    try {
+      const payload = {
+        mapName,
+        ...(String(manualWorkshopId || '').trim() ? { workshopId: String(manualWorkshopId).trim() } : {}),
+        ...(serverId ? { serverId } : {}),
+      };
+      const response = await ApiService.enqueueWorkshopJobManual(payload);
+      setManualEnqueueResult(response);
+      await loadQueueSnapshot(true);
+    } catch (err: any) {
+      setManualEnqueueResult({
+        ok: false,
+        queued: false,
+        deduped: false,
+        reason: 'request_failed',
+        error: String(err?.message || err),
+      });
+    } finally {
+      setManualEnqueueBusy(false);
+    }
+  }, [loadQueueSnapshot, manualWorkshopId, mapName, serverId]);
+
+  useEffect(() => {
+    void loadQueueSnapshot(false);
+    const interval = window.setInterval(() => {
+      void loadQueueSnapshot(true);
+    }, 8000);
+    return () => window.clearInterval(interval);
+  }, [loadQueueSnapshot]);
 
   const pollViewerActionStatus = useCallback(
     async (actionId: string, pollToken: number) => {
@@ -2545,7 +2689,7 @@ const ServerView3D: React.FC = () => {
     const setup = async () => {
       try {
         setStatus('Carregando manifest...');
-        const loadedManifest = await readJson<Manifest>(manifestUrl);
+        const loadedManifest = await probeManifestWithDetails();
         if (cancelled) return;
         setManifest(loadedManifest);
         textureVramBudgetBytes = Math.max(
@@ -3036,7 +3180,7 @@ const ServerView3D: React.FC = () => {
       renderer.dispose();
       host.innerHTML = '';
     };
-  }, [manifestUrl, renderProfile]);
+  }, [manifestUrl, probeManifestWithDetails, renderProfile]);
 
   return (
     <div className="space-y-4 pb-8">
@@ -3321,6 +3465,119 @@ const ServerView3D: React.FC = () => {
               {!streamingLogs.length && <p className="text-zinc-500">Sem logs ainda...</p>}
               {streamingLogs.map((line, idx) => (
                 <p key={`${line}_${idx}`}>{line}</p>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded border border-zinc-800 bg-zinc-900 p-3 text-xs text-zinc-300 space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-zinc-500 uppercase font-bold text-[11px]">Pipeline / Workshop</p>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    void loadQueueSnapshot(false);
+                  }}
+                  className="px-2 py-1 rounded border border-zinc-700 bg-zinc-800 text-[10px] uppercase font-bold hover:bg-zinc-700"
+                >
+                  {queueLoading ? 'Atualizando...' : 'Atualizar'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void probeManifestWithDetails().catch(() => undefined);
+                  }}
+                  className="px-2 py-1 rounded border border-zinc-700 bg-zinc-800 text-[10px] uppercase font-bold hover:bg-zinc-700"
+                >
+                  Testar manifest
+                </button>
+              </div>
+            </div>
+
+            <p>map atual: <span className="font-mono">{mapName}</span></p>
+            {queueSnapshot && (
+              <>
+                <p>worker: {queueSnapshot.config.enabled ? 'on' : 'off'} | conc={queueSnapshot.config.workerConcurrency} | active={queueSnapshot.worker.activeJobs}</p>
+                <p>fila: pending={queueSnapshot.counts.pending} queued={queueSnapshot.counts.queued} running={queueSnapshot.counts.running} retry={queueSnapshot.counts.retry_wait}</p>
+                <p>final: success={queueSnapshot.counts.success} failed={queueSnapshot.counts.failed} dropped={queueSnapshot.counts.dropped}</p>
+              </>
+            )}
+            {queueError && <p className="text-red-300 break-words">queueError: {queueError}</p>}
+
+            <div className="rounded border border-zinc-800 bg-zinc-950/60 px-2 py-2 space-y-1">
+              <p className="text-zinc-500 uppercase font-bold text-[10px]">Manifest probe</p>
+              {!manifestProbe && <p className="text-zinc-500">Sem probe ainda.</p>}
+              {manifestProbe && (
+                <>
+                  <p>ok: {manifestProbe.ok ? 'sim' : 'nao'}</p>
+                  {manifestProbe.httpStatus !== undefined && <p>http: {manifestProbe.httpStatus}</p>}
+                  {manifestProbe.contentType && <p className="break-all">content-type: {manifestProbe.contentType}</p>}
+                  {manifestProbe.error && <p className="text-red-300 break-words">{manifestProbe.error}</p>}
+                  {manifestProbe.preview && <p className="text-zinc-500 break-words">preview: {manifestProbe.preview}</p>}
+                  {manifestProbe.checkedAt && (
+                    <p className="text-zinc-500">
+                      checked: {new Date(manifestProbe.checkedAt).toLocaleTimeString('pt-BR')}
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+
+            <div className="rounded border border-zinc-800 bg-zinc-950/60 px-2 py-2 space-y-2">
+              <p className="text-zinc-500 uppercase font-bold text-[10px]">Teste enqueue manual</p>
+              <label className="block text-[10px] text-zinc-500 uppercase font-bold">
+                workshopId (opcional)
+              </label>
+              <input
+                type="text"
+                value={manualWorkshopId}
+                onChange={(event) => setManualWorkshopId(event.target.value)}
+                placeholder="ex: 262714246040502603"
+                className="w-full rounded border border-zinc-700 bg-zinc-900 px-2 py-1 text-[11px] text-zinc-100 font-mono"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  void enqueueManualWorkshopJob();
+                }}
+                disabled={manualEnqueueBusy}
+                className="w-full px-2 py-1.5 rounded border border-cyan-800 bg-cyan-900/20 text-cyan-300 text-[11px] font-bold uppercase disabled:opacity-50"
+              >
+                {manualEnqueueBusy ? 'Enfileirando...' : 'Enfileirar job de teste'}
+              </button>
+              {manualEnqueueResult && (
+                <div className="rounded border border-zinc-800 bg-zinc-900/70 px-2 py-1.5 text-[10px] font-mono space-y-0.5">
+                  <p>ok={manualEnqueueResult.ok ? 'true' : 'false'} | queued={manualEnqueueResult.queued ? 'true' : 'false'} | deduped={manualEnqueueResult.deduped ? 'true' : 'false'}</p>
+                  <p className="break-all">reason={manualEnqueueResult.reason}</p>
+                  {manualEnqueueResult.error && <p className="text-red-300 break-words">{manualEnqueueResult.error}</p>}
+                  {manualEnqueueResult.job && (
+                    <p className="text-zinc-500 break-all">job={manualEnqueueResult.job.id} status={manualEnqueueResult.job.status}</p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="rounded border border-zinc-800 bg-zinc-950/60 px-2 py-2 space-y-1">
+              <p className="text-zinc-500 uppercase font-bold text-[10px]">
+                Jobs do mapa atual ({mapQueueJobs.length})
+              </p>
+              {!mapQueueJobs.length && (
+                <p className="text-zinc-500">
+                  Nenhum job deste mapa na fila. Se o mapa trocou e nao existe manifest, enfileire manualmente.
+                </p>
+              )}
+              {mapQueueJobs.map((job) => (
+                <div key={job.id} className="rounded border border-zinc-800 bg-zinc-900/60 px-2 py-1.5">
+                  <p className="font-mono break-all">{job.id}</p>
+                  <p>
+                    status={job.status} retry={job.retryCount}/{job.maxRetries}
+                  </p>
+                  <p className="text-zinc-500 break-all">wid={job.workshopId} source={job.source}/{job.resolutionSource}</p>
+                  {job.lastError && <p className="text-red-300 break-words">err={job.lastError}</p>}
+                  <p className="text-zinc-500">
+                    next={new Date(job.nextRunAt).toLocaleTimeString('pt-BR')} | update={new Date(job.updatedAt).toLocaleTimeString('pt-BR')}
+                  </p>
+                </div>
               ))}
             </div>
           </div>

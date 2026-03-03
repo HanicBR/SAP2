@@ -1,7 +1,7 @@
 
 
 import { MOCK_SERVERS, MOCK_EVENTS, MOCK_STATS, VIP_PLANS, MOCK_SUSPICIOUS_GROUPS, MOCK_PLAYERS, MOCK_USERS, MOCK_TRANSACTIONS, generateServerAnalytics, DEFAULT_SITE_CONFIG } from '../constants';
-import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionProofUploadResult, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, SiteAuditLogsQueryParams, SiteAuditLogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel, ServerLiveStateResponse, ServerViewerActionDispatchResponse, ServerViewerActionRequest, ServerViewerActionStatusResponse, ServerViewerMapOverlayResponse, ServerViewerStateResponse, ServerWsLiveStateListResponse, ServerWsViewerStateListResponse, PlayerAliasHistoryResponse, PlayerAvatarHistoryResponse, LoadingScreenProfile, LoadingScreensResponse, LoadingMediaUploadResult, LoadingTelemetryRange, LoadingTelemetrySlugsResponse, LoadingTelemetrySummaryResponse, AuthRegisterResponse } from '../types';
+import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionProofUploadResult, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, SiteAuditLogsQueryParams, SiteAuditLogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel, ServerLiveStateResponse, ServerViewerActionDispatchResponse, ServerViewerActionRequest, ServerViewerActionStatusResponse, ServerViewerMapOverlayResponse, ServerViewerStateResponse, ServerWsLiveStateListResponse, ServerWsViewerStateListResponse, PlayerAliasHistoryResponse, PlayerAvatarHistoryResponse, LoadingScreenProfile, LoadingScreensResponse, LoadingMediaUploadResult, LoadingTelemetryRange, LoadingTelemetrySlugsResponse, LoadingTelemetrySummaryResponse, AuthRegisterResponse, WorkshopManualEnqueueRequest, WorkshopManualEnqueueResponse, WorkshopQueueSnapshotResponse } from '../types';
 
 // Utility to simulate network delay (used as fallback)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -453,6 +453,72 @@ export const ApiService = {
       wsAttemptCount: 1,
       wsLastSentAt: now,
       wsLastAckAt: now,
+    };
+  },
+
+  getWorkshopQueueSnapshot: async (limit = 100): Promise<WorkshopQueueSnapshotResponse> => {
+    const clampedLimit = Math.max(1, Math.min(500, Number.isFinite(Number(limit)) ? Math.floor(Number(limit)) : 100));
+    if (hasApi) {
+      return apiFetch<WorkshopQueueSnapshotResponse>(`/servers/workshop/queue?limit=${clampedLimit}`);
+    }
+
+    await delay(80);
+    return {
+      now: new Date().toISOString(),
+      runtimeEnabled: false,
+      initialized: false,
+      config: {
+        enabled: false,
+        autoProcessEnabled: false,
+        appId: 4000,
+        workerConcurrency: 1,
+        maxQueueSize: 200,
+        maxRetries: 3,
+        retryBaseMs: 15000,
+        retryMaxMs: 600000,
+        downloadTimeoutMs: 1800000,
+        processTimeoutMs: 10800000,
+        successCooldownMs: 600000,
+        queueStorePath: '',
+        reportsDir: '',
+        runtimeCachePath: '',
+        configPath: '',
+      },
+      worker: {
+        activeJobs: 0,
+        wakeScheduled: false,
+      },
+      counts: {
+        total: 0,
+        queued: 0,
+        running: 0,
+        retry_wait: 0,
+        success: 0,
+        failed: 0,
+        dropped: 0,
+        pending: 0,
+      },
+      jobs: [],
+    };
+  },
+
+  enqueueWorkshopJobManual: async (
+    payload: WorkshopManualEnqueueRequest,
+  ): Promise<WorkshopManualEnqueueResponse> => {
+    if (hasApi) {
+      return apiFetch<WorkshopManualEnqueueResponse>('/servers/workshop/queue/enqueue', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    }
+
+    await delay(120);
+    return {
+      ok: false,
+      queued: false,
+      deduped: false,
+      reason: 'api_unavailable',
+      error: 'API indisponivel no modo mock',
     };
   },
 

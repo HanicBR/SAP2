@@ -21,6 +21,7 @@ import {
 import { getPlayerPulseSettings } from '../services/playtimePulse';
 import { ingestPlayerPulse, PlayerPulseIngestError } from '../services/playerPulseIngest';
 import {
+  enqueueWorkshopAutoDownloadManual,
   getWorkshopAutoDownloadQueueSnapshot,
   notifyMapObservedForWorkshop,
 } from '../services/workshopAutoDownload';
@@ -660,6 +661,35 @@ router.get('/workshop/queue', authMiddleware, requireRole(UserRole.ADMIN), async
   const limitRaw = parseInteger((req.query as any)?.limit);
   const limit = limitRaw !== undefined ? limitRaw : 100;
   return res.json(getWorkshopAutoDownloadQueueSnapshot(limit));
+});
+
+// Manual enqueue for workshop worker diagnostics/testing (PR-14.5.1 UI ops)
+router.post('/workshop/queue/enqueue', authMiddleware, requireRole(UserRole.ADMIN), async (req, res) => {
+  const body = ((req as any).body && typeof (req as any).body === 'object') ? (req as any).body : {};
+  const mapName = String(body?.mapName || '').trim();
+  const workshopId = String(body?.workshopId || '').trim();
+  const refreshRaw = body?.refresh;
+  const refresh = refreshRaw === true || String(refreshRaw || '').trim().toLowerCase() === 'true' || String(refreshRaw || '') === '1';
+  const serverId = String(body?.serverId || 'admin').trim() || 'admin';
+
+  if (!mapName) {
+    return res.status(400).json({ ok: false, error: 'mapName is required' });
+  }
+
+  const result = enqueueWorkshopAutoDownloadManual({
+    serverId,
+    mapName,
+    ...(workshopId ? { workshopId } : {}),
+    refresh,
+  });
+
+  if (!result.ok) {
+    return res.status(400).json({
+      ...result,
+      error: result.reason,
+    });
+  }
+  return res.json(result);
 });
 
 // Live state from WebSocket snapshots (PR-03 near-real-time players/activity)
