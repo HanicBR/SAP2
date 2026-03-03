@@ -2,10 +2,12 @@
 import argparse
 import hashlib
 import json
+import re
 import sys
 import time
 import traceback
 from pathlib import Path
+from typing import Optional, Set, Tuple
 
 import numpy as np
 
@@ -90,6 +92,129 @@ def sanitize_filename(base_texture: str) -> str:
     return f"{safe_tail}_{digest}.png"
 
 
+def is_special_material(material: str) -> bool:
+    key = normalize_material_name(material)
+    if key.startswith("tools/") or key.startswith("editor/"):
+        return True
+    if "toolsskybox" in key:
+        return True
+    if "skybox" in key:
+        return True
+    if "water" in key:
+        return True
+    return False
+
+
+def find_fs_file(roots: list[Path], rel_path: str) -> Optional[Path]:
+    normalized = rel_path.replace("\\", "/").strip().lstrip("/")
+    if not normalized:
+        return None
+    for root in roots:
+        candidate = (root / normalized).resolve()
+        if candidate.exists() and candidate.is_file():
+            return candidate
+    return None
+
+
+def _extract_vmt_pairs(vmt_text: str) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for raw_line in (vmt_text or "").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("//"):
+            continue
+        if "//" in line:
+            line = line.split("//", 1)[0].strip()
+        if not line:
+            continue
+        # "key" "value" or key value
+        m = re.match(r'^"?([a-zA-Z0-9_$/.-]+)"?\s+"?([^"]+?)"?$', line)
+        if not m:
+            continue
+        key = str(m.group(1) or "").strip().lower()
+        value = str(m.group(2) or "").strip()
+        if not key or not value:
+            continue
+        out[key] = value
+    return out
+
+
+def _normalize_include_material(raw: str) -> str:
+    value = normalize_material_name(raw)
+    return value
+
+
+def resolve_basetexture_from_vmt_text(vmt_text: str) -> Tuple[Optional[str], Optional[str]]:
+    pairs = _extract_vmt_pairs(vmt_text)
+    for base_key in ("$basetexture", "$hdrbasetexture", "$hdrcompressedtexture"):
+        raw = pairs.get(base_key)
+        if raw:
+            normalized = normalize_material_name(raw)
+            if normalized:
+                return normalized, None
+
+    # Light fallback for patch-style replacement blocks.
+    replace_match = re.search(
+        r'\$basetexture\s*"?\s*"?([^"\s]+)',
+        vmt_text or "",
+        flags=re.IGNORECASE,
+    )
+    if replace_match:
+        normalized = normalize_material_name(str(replace_match.group(1) or ""))
+        if normalized:
+            return normalized, None
+
+    return None, "no_basetexture_in_text"
+
+
+def resolve_basetexture_from_vmt_fs(
+    roots: list[Path],
+    material: str,
+    visited: Optional[Set[str]] = None,
+    max_depth: int = 8,
+) -> Tuple[Optional[str], Optional[str]]:
+    if visited is None:
+        visited = set()
+    key = normalize_material_name(material)
+    if not key:
+        return None, "empty_material_key"
+    if key in visited:
+        return None, "include_cycle"
+    if len(visited) >= max_depth:
+        return None, "include_depth_limit"
+    visited.add(key)
+
+    rel_vmt = f"materials/{key}.vmt"
+    fs_vmt = find_fs_file(roots, rel_vmt)
+    if fs_vmt is None:
+        return None, "vmt_not_found_on_fs"
+
+    try:
+        text = fs_vmt.read_text(encoding="latin1", errors="ignore")
+    except Exception:
+        return None, "vmt_read_failed"
+
+    resolved, parse_err = resolve_basetexture_from_vmt_text(text)
+    if resolved:
+        return resolved, None
+
+    pairs = _extract_vmt_pairs(text)
+    include_raw = pairs.get("include") or pairs.get("$include")
+    if include_raw:
+        include_mat = _normalize_include_material(include_raw)
+        if include_mat:
+            resolved, include_err = resolve_basetexture_from_vmt_fs(
+                roots=roots,
+                material=include_mat,
+                visited=visited,
+                max_depth=max_depth,
+            )
+            if resolved:
+                return resolved, None
+            return None, include_err or "include_without_basetexture"
+
+    return None, parse_err or "no_basetexture_in_text"
+
+
 def main() -> int:
     args = parse_args()
     out_json = Path(args.out).resolve()
@@ -153,23 +278,71 @@ def main() -> int:
                 vmt_rel = f"materials/{material}.vmt"
                 entry["searchedVmt"] = vmt_rel
                 vmt_file = cm.find_file(TinyPath(vmt_rel))
-                if vmt_file is None:
-                    entry["status"] = "missing_vmt"
+                vmt_fs_path = find_fs_file(roots, vmt_rel)
+                if vmt_file is None and vmt_fs_path is None:
+                    if is_special_material(material):
+                        entry["status"] = "missing_vmt_special"
+                    else:
+                        entry["status"] = "missing_vmt"
                     results.append(entry)
                     continue
 
-                vmt = VMT(vmt_file, material, cm)
-                base = (
-                    vmt.get_string("$basetexture", None)
-                    or vmt.get_string("$hdrbasetexture", None)
-                    or vmt.get_string("$hdrcompressedtexture", None)
-                )
-                if not base:
-                    entry["status"] = "no_basetexture"
+                base_texture: Optional[str] = None
+                parse_error: Optional[str] = None
+
+                if vmt_file is not None:
+                    try:
+                        vmt = VMT(vmt_file, material, cm)
+                        base = (
+                            vmt.get_string("$basetexture", None)
+                            or vmt.get_string("$hdrbasetexture", None)
+                            or vmt.get_string("$hdrcompressedtexture", None)
+                        )
+                        if base:
+                            base_texture = normalize_material_name(str(base))
+                    except Exception as parse_err:
+                        parse_error = f"{type(parse_err).__name__}: {parse_err}"
+
+                if not base_texture:
+                    inline_fallback_err: Optional[str] = None
+                    if vmt_file is not None:
+                        try:
+                            raw_inline = vmt_file.read()
+                            if isinstance(raw_inline, bytes):
+                                inline_text = raw_inline.decode("latin1", errors="ignore")
+                            else:
+                                inline_text = str(raw_inline or "")
+                            fallback_inline, inline_fallback_err = resolve_basetexture_from_vmt_text(inline_text)
+                            if fallback_inline:
+                                base_texture = normalize_material_name(fallback_inline)
+                                entry["parseFallback"] = "vmt_text_inline"
+                        except Exception as inline_err:
+                            inline_fallback_err = f"inline_vmt_read_failed:{type(inline_err).__name__}"
+
+                if not base_texture:
+                    fallback_base, fallback_err = resolve_basetexture_from_vmt_fs(
+                        roots=roots,
+                        material=material,
+                    )
+                    if fallback_base:
+                        base_texture = normalize_material_name(fallback_base)
+                        entry["parseFallback"] = "vmt_text"
+                    elif fallback_err:
+                        entry["parseFallbackError"] = fallback_err
+                    elif inline_fallback_err:
+                        entry["parseFallbackError"] = inline_fallback_err
+
+                if not base_texture:
+                    if is_special_material(material):
+                        entry["status"] = "no_basetexture_special"
+                    elif parse_error:
+                        entry["status"] = "vmt_parse_error"
+                        entry["error"] = parse_error
+                    else:
+                        entry["status"] = "no_basetexture"
                     results.append(entry)
                     continue
 
-                base_texture = normalize_material_name(str(base))
                 entry["resolvedBaseTexture"] = base_texture
                 entry["sourcePath"] = vmt_rel
 
@@ -189,7 +362,13 @@ def main() -> int:
                 entry["searchedVtf"] = vtf_rel
                 vtf_file = cm.find_file(TinyPath(vtf_rel))
                 if vtf_file is None:
-                    entry["status"] = "missing_vtf"
+                    vtf_fs = find_fs_file(roots, vtf_rel)
+                    if vtf_fs is not None:
+                        entry["sourcePath"] = str(vtf_fs)
+                    if is_special_material(material):
+                        entry["status"] = "missing_vtf_special"
+                    else:
+                        entry["status"] = "missing_vtf"
                     results.append(entry)
                     continue
 
@@ -218,8 +397,13 @@ def main() -> int:
                 entry["textureHeight"] = int(image.size[1])
                 results.append(entry)
             except Exception as mat_err:
-                entry["status"] = "error"
-                entry["error"] = f"{type(mat_err).__name__}: {mat_err}"
+                error_msg = f"{type(mat_err).__name__}: {mat_err}"
+                if is_special_material(material):
+                    entry["status"] = "special_error"
+                    entry["error"] = error_msg
+                else:
+                    entry["status"] = "error"
+                    entry["error"] = error_msg
                 results.append(entry)
 
         payload = {

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-03T13:36:51.729Z",
+  "generatedAt": "2026-03-03T14:12:24.659Z",
   "total": 1384,
   "primaryFormat": "png",
   "fallbackFormat": "png",
@@ -5776,7 +5776,7 @@
         "world"
       ],
       "placeholder": true,
-      "status": "no_basetexture",
+      "status": "no_basetexture_special",
       "textureClass": "diffuse",
       "textureProfile": {
         "maxSize": 1024,
@@ -6514,7 +6514,7 @@
         "world"
       ],
       "placeholder": true,
-      "status": "no_basetexture",
+      "status": "no_basetexture_special",
       "textureClass": "diffuse",
       "textureProfile": {
         "maxSize": 1024,
@@ -15167,7 +15167,7 @@
         "world"
       ],
       "placeholder": true,
-      "status": "no_basetexture",
+      "status": "no_basetexture_special",
       "textureClass": "diffuse",
       "textureProfile": {
         "maxSize": 1024,
@@ -16708,7 +16708,7 @@
         "world"
       ],
       "placeholder": true,
-      "status": "no_basetexture",
+      "status": "no_basetexture_special",
       "textureClass": "diffuse",
       "textureProfile": {
         "maxSize": 1024,
@@ -16724,7 +16724,7 @@
         "world"
       ],
       "placeholder": true,
-      "status": "no_basetexture",
+      "status": "no_basetexture_special",
       "textureClass": "diffuse",
       "textureProfile": {
         "maxSize": 1024,
@@ -16740,7 +16740,7 @@
         "world"
       ],
       "placeholder": true,
-      "status": "no_basetexture",
+      "status": "no_basetexture_special",
       "textureClass": "diffuse",
       "textureProfile": {
         "maxSize": 1024,
@@ -16756,7 +16756,7 @@
         "world"
       ],
       "placeholder": true,
-      "status": "no_basetexture",
+      "status": "no_basetexture_special",
       "textureClass": "diffuse",
       "textureProfile": {
         "maxSize": 1024,
@@ -16772,7 +16772,7 @@
         "world"
       ],
       "placeholder": true,
-      "status": "no_basetexture",
+      "status": "no_basetexture_special",
       "textureClass": "diffuse",
       "textureProfile": {
         "maxSize": 1024,
@@ -16788,7 +16788,7 @@
         "world"
       ],
       "placeholder": true,
-      "status": "no_basetexture",
+      "status": "no_basetexture_special",
       "textureClass": "diffuse",
       "textureProfile": {
         "maxSize": 1024,
@@ -16804,7 +16804,7 @@
         "world"
       ],
       "placeholder": true,
-      "status": "no_basetexture",
+      "status": "no_basetexture_special",
       "textureClass": "diffuse",
       "textureProfile": {
         "maxSize": 1024,
@@ -16820,7 +16820,7 @@
         "world"
       ],
       "placeholder": true,
-      "status": "no_basetexture",
+      "status": "no_basetexture_special",
       "textureClass": "diffuse",
       "textureProfile": {
         "maxSize": 1024,
@@ -16836,7 +16836,7 @@
         "world"
       ],
       "placeholder": true,
-      "status": "no_basetexture",
+      "status": "no_basetexture_special",
       "textureClass": "diffuse",
       "textureProfile": {
         "maxSize": 1024,
@@ -16852,7 +16852,7 @@
         "world"
       ],
       "placeholder": true,
-      "status": "no_basetexture",
+      "status": "no_basetexture_special",
       "textureClass": "diffuse",
       "textureProfile": {
         "maxSize": 1024,
@@ -16868,7 +16868,7 @@
         "world"
       ],
       "placeholder": true,
-      "status": "no_basetexture",
+      "status": "no_basetexture_special",
       "textureClass": "diffuse",
       "textureProfile": {
         "maxSize": 1024,
@@ -21885,7 +21885,7 @@
         "world"
       ],
       "placeholder": true,
-      "status": "no_basetexture",
+      "status": "no_basetexture_special",
       "textureClass": "normal",
       "textureProfile": {
         "maxSize": 1024,
@@ -21901,7 +21901,7 @@
         "world"
       ],
       "placeholder": true,
-      "status": "no_basetexture",
+      "status": "no_basetexture_special",
       "textureClass": "normal",
       "textureProfile": {
         "maxSize": 1024,
@@ -21917,7 +21917,7 @@
         "world"
       ],
       "placeholder": true,
-      "status": "no_basetexture",
+      "status": "no_basetexture_special",
       "textureClass": "normal",
       "textureProfile": {
         "maxSize": 1024,
@@ -21933,7 +21933,7 @@
         "world"
       ],
       "placeholder": true,
-      "status": "no_basetexture",
+      "status": "no_basetexture_special",
       "textureClass": "normal",
       "textureProfile": {
         "maxSize": 1024,
@@ -24554,15 +24554,17 @@
         "model"
       ],
       "placeholder": true,
-      "status": "error",
+      "status": "missing_vtf",
       "textureClass": "diffuse",
       "textureProfile": {
         "maxSize": 1024,
         "compression": "etc1s",
         "srgb": true
       },
+      "sourcePath": "materials/models/hall_suburbs/mailbox.vmt",
+      "resolvedBaseTexture": "models/hall_suburbs/mailbox",
       "searchedVmt": "materials/models/hall_suburbs/mailbox.vmt",
-      "error": "StopIteration: "
+      "searchedVtf": "materials/models/hall_suburbs/mailbox.vtf"
     },
     {
       "id": "models/hall_suburbs/porch_railing",
@@ -24571,15 +24573,17 @@
         "model"
       ],
       "placeholder": true,
-      "status": "error",
+      "status": "missing_vtf",
       "textureClass": "diffuse",
       "textureProfile": {
         "maxSize": 1024,
         "compression": "etc1s",
         "srgb": true
       },
+      "sourcePath": "materials/models/hall_suburbs/porch_railing.vmt",
+      "resolvedBaseTexture": "models/hall_suburbs/porch_railing",
       "searchedVmt": "materials/models/hall_suburbs/porch_railing.vmt",
-      "error": "StopIteration: "
+      "searchedVtf": "materials/models/hall_suburbs/porch_railing.vtf"
     },
     {
       "id": "models/hall_suburbs/window_louvers",
@@ -24588,15 +24592,17 @@
         "model"
       ],
       "placeholder": true,
-      "status": "error",
+      "status": "missing_vtf",
       "textureClass": "alpha",
       "textureProfile": {
         "maxSize": 1024,
         "compression": "etc1s",
         "srgb": true
       },
+      "sourcePath": "materials/models/hall_suburbs/window_louvers.vmt",
+      "resolvedBaseTexture": "models/hall_suburbs/window_louvers",
       "searchedVmt": "materials/models/hall_suburbs/window_louvers.vmt",
-      "error": "StopIteration: "
+      "searchedVtf": "materials/models/hall_suburbs/window_louvers.vtf"
     },
     {
       "id": "models/highrise/brass",
@@ -27596,11 +27602,11 @@
         "srgb": true
       },
       "sourcePath": "materials/models/props/cs_militia/trees1b.vmt",
-      "resolvedBaseTexture": "models/props/cs_militia/trees1b",
+      "resolvedBaseTexture": "models/props/cs_militia/trees1b_mip0",
       "searchedVmt": "materials/models/props/cs_militia/trees1b.vmt",
-      "searchedVtf": "materials/models/props/cs_militia/trees1b.vtf",
-      "textureUrl": "./materials/basecolor/models_props_cs_militia_trees1b_6ed772e5edd63179af.png",
-      "fallbackTextureUrl": "./materials/basecolor/models_props_cs_militia_trees1b_6ed772e5edd63179af.png",
+      "searchedVtf": "materials/models/props/cs_militia/trees1b_mip0.vtf",
+      "textureUrl": "./materials/basecolor/models_props_cs_militia_trees1b_mip0_c6e4a567ce611a70c8.png",
+      "fallbackTextureUrl": "./materials/basecolor/models_props_cs_militia_trees1b_mip0_c6e4a567ce611a70c8.png",
       "sourceTextureWidth": 1024,
       "sourceTextureHeight": 1024,
       "textureWidth": 1024,
@@ -27622,11 +27628,11 @@
         "srgb": true
       },
       "sourcePath": "materials/models/props/cs_militia/trees2.vmt",
-      "resolvedBaseTexture": "models/props/cs_militia/trees2",
+      "resolvedBaseTexture": "models/props/cs_militia/trees2_mip0",
       "searchedVmt": "materials/models/props/cs_militia/trees2.vmt",
-      "searchedVtf": "materials/models/props/cs_militia/trees2.vtf",
-      "textureUrl": "./materials/basecolor/models_props_cs_militia_trees2_94123f39af86d4043a.png",
-      "fallbackTextureUrl": "./materials/basecolor/models_props_cs_militia_trees2_94123f39af86d4043a.png",
+      "searchedVtf": "materials/models/props/cs_militia/trees2_mip0.vtf",
+      "textureUrl": "./materials/basecolor/models_props_cs_militia_trees2_mip0_de71802dba7acd70d1.png",
+      "fallbackTextureUrl": "./materials/basecolor/models_props_cs_militia_trees2_mip0_de71802dba7acd70d1.png",
       "sourceTextureWidth": 512,
       "sourceTextureHeight": 512,
       "textureWidth": 512,
@@ -27648,11 +27654,11 @@
         "srgb": true
       },
       "sourcePath": "materials/models/props/cs_militia/trees3.vmt",
-      "resolvedBaseTexture": "models/props/cs_militia/trees3",
+      "resolvedBaseTexture": "models/props/cs_militia/trees3_mip0",
       "searchedVmt": "materials/models/props/cs_militia/trees3.vmt",
-      "searchedVtf": "materials/models/props/cs_militia/trees3.vtf",
-      "textureUrl": "./materials/basecolor/models_props_cs_militia_trees3_8e332f6c2fde6b100e.png",
-      "fallbackTextureUrl": "./materials/basecolor/models_props_cs_militia_trees3_8e332f6c2fde6b100e.png",
+      "searchedVtf": "materials/models/props/cs_militia/trees3_mip0.vtf",
+      "textureUrl": "./materials/basecolor/models_props_cs_militia_trees3_mip0_80800e7c67fc8014e2.png",
+      "fallbackTextureUrl": "./materials/basecolor/models_props_cs_militia_trees3_mip0_80800e7c67fc8014e2.png",
       "sourceTextureWidth": 1024,
       "sourceTextureHeight": 1024,
       "textureWidth": 1024,
@@ -27674,11 +27680,11 @@
         "srgb": true
       },
       "sourcePath": "materials/models/props/cs_militia/trees3b.vmt",
-      "resolvedBaseTexture": "models/props/cs_militia/trees3b",
+      "resolvedBaseTexture": "models/props/cs_militia/trees3b_mip0",
       "searchedVmt": "materials/models/props/cs_militia/trees3b.vmt",
-      "searchedVtf": "materials/models/props/cs_militia/trees3b.vtf",
-      "textureUrl": "./materials/basecolor/models_props_cs_militia_trees3b_e5c1e2b27e4207c0ba.png",
-      "fallbackTextureUrl": "./materials/basecolor/models_props_cs_militia_trees3b_e5c1e2b27e4207c0ba.png",
+      "searchedVtf": "materials/models/props/cs_militia/trees3b_mip0.vtf",
+      "textureUrl": "./materials/basecolor/models_props_cs_militia_trees3b_mip0_f8d578f4904a44fb20.png",
+      "fallbackTextureUrl": "./materials/basecolor/models_props_cs_militia_trees3b_mip0_f8d578f4904a44fb20.png",
       "sourceTextureWidth": 512,
       "sourceTextureHeight": 512,
       "textureWidth": 512,
@@ -30629,7 +30635,7 @@
         "world"
       ],
       "placeholder": true,
-      "status": "no_basetexture",
+      "status": "no_basetexture_special",
       "textureClass": "diffuse",
       "textureProfile": {
         "maxSize": 1024,

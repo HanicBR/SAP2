@@ -322,6 +322,42 @@ const hashColor = (input: string, alpha = 1): THREE.Color => {
   return color;
 };
 
+const normalizeMaterialKey = (raw: string): string => {
+  const value = String(raw || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\\/g, '/')
+    .replace(/^\//, '')
+    .replace(/^materials\//, '');
+  if (value.endsWith('.vmt')) return value.slice(0, -4);
+  if (value.endsWith('.vtf')) return value.slice(0, -4);
+  return value;
+};
+
+const isSpecialMaterial = (raw: string): boolean => {
+  const key = normalizeMaterialKey(raw);
+  if (!key) return false;
+  if (key.startsWith('tools/') || key.startsWith('editor/')) return true;
+  if (key.includes('toolsskybox')) return true;
+  if (key.includes('skybox')) return true;
+  if (key.includes('water')) return true;
+  return false;
+};
+
+const shouldSuppressMaterialDiagnostic = (materialId: string, statusRaw: string): boolean => {
+  const status = String(statusRaw || '').trim().toLowerCase();
+  if (!status) return false;
+  if (status.endsWith('_special')) return true;
+  if (status === 'special_error' && isSpecialMaterial(materialId)) return true;
+  if (
+    isSpecialMaterial(materialId)
+    && (status === 'missing_vmt' || status === 'missing_vtf' || status === 'no_basetexture')
+  ) {
+    return true;
+  }
+  return false;
+};
+
 const sourceToThree = (x: number, y: number, z: number): THREE.Vector3 => new THREE.Vector3(x, z, y);
 
 const toViewerWsUrl = (): string | null => {
@@ -1095,14 +1131,16 @@ const ServerView3D: React.FC = () => {
         if (index >= candidates.length) {
           textureLoading.delete(chainKey);
           pendingMaterialBindings.delete(chainKey);
-          pushDiagnostic(
-            'error',
-            'texture_chain_failed',
-            'texture',
-            chainKey,
-            `falha ao carregar textura para material=${materialId} em todos os formatos`,
-            withRoots(materialRootsScanned, candidates),
-          );
+          if (!isSpecialMaterial(materialId)) {
+            pushDiagnostic(
+              'error',
+              'texture_chain_failed',
+              'texture',
+              chainKey,
+              `falha ao carregar textura para material=${materialId} em todos os formatos`,
+              withRoots(materialRootsScanned, candidates),
+            );
+          }
           return;
         }
 
@@ -1161,14 +1199,14 @@ const ServerView3D: React.FC = () => {
       const fallbackTextureUrl = def?.fallbackTextureUrl || def?.textureUrl;
       const primaryTextureUrl = ktx2RuntimeEnabled && def?.ktx2Url ? def.ktx2Url : fallbackTextureUrl;
       const shouldPlaceholder = placeholderFlag || !def || def.placeholder || !primaryTextureUrl;
-      const isToolMaterial = materialId.startsWith('tools/') || materialId.startsWith('editor/');
-      if (shouldPlaceholder && !isToolMaterial) {
+      const status = String(def?.status || '').trim().toLowerCase();
+      const suppressDiagnostic = shouldSuppressMaterialDiagnostic(materialId, status);
+      if (shouldPlaceholder && !suppressDiagnostic) {
         const searchedIn = withRoots(materialRootsScanned, [
           def?.searchedVmt || (materialId ? `materials/${materialId}.vmt` : ''),
           def?.searchedVtf || (def?.resolvedBaseTexture ? `materials/${def.resolvedBaseTexture}.vtf` : ''),
           def?.sourcePath || '',
         ]);
-        const status = String(def?.status || '').trim().toLowerCase();
         const code = status === 'ok'
           ? 'material_runtime_placeholder'
           : status
@@ -1179,8 +1217,16 @@ const ServerView3D: React.FC = () => {
           : def?.error
             ? `material sem textura (${def.status || 'placeholder'}): ${def.error}`
             : `material sem textura (${def?.status || 'not_in_index'})`;
+        const hardErrorStatus = (
+          status === 'missing_vmt'
+          || status === 'missing_vtf'
+          || status === 'vmt_parse_error'
+          || status === 'vtf_decode_failed'
+          || status === 'error'
+        );
+        const level = (!isSpecialMaterial(materialId) && (hardErrorStatus || !!def?.error)) ? 'error' : 'warn';
         pushDiagnostic(
-          def?.error ? 'error' : 'warn',
+          level,
           code,
           'material',
           materialId,
@@ -1218,19 +1264,21 @@ const ServerView3D: React.FC = () => {
             pendingMaterialBindings.set(chainKey, pending);
             loadTextureChain(chainKey, materialId, candidateUrls, def?.vramEstimateBytes);
           } else {
-            pushDiagnostic(
-              'error',
-              'texture_fetch_failed',
-              'texture',
-              materialId,
-              `falha ao carregar textura no browser: ${candidateUrls[0] || 'n/a'}`,
-              withRoots(materialRootsScanned, [
-                ...candidateUrls,
-                materialId ? `materials/${materialId}.vmt` : '',
-                def?.searchedVtf || '',
-                def?.sourcePath || '',
-              ]),
-            );
+            if (!isSpecialMaterial(materialId)) {
+              pushDiagnostic(
+                'error',
+                'texture_fetch_failed',
+                'texture',
+                materialId,
+                `falha ao carregar textura no browser: ${candidateUrls[0] || 'n/a'}`,
+                withRoots(materialRootsScanned, [
+                  ...candidateUrls,
+                  materialId ? `materials/${materialId}.vmt` : '',
+                  def?.searchedVtf || '',
+                  def?.sourcePath || '',
+                ]),
+              );
+            }
           }
         }
       }
