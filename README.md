@@ -52,11 +52,21 @@ Defaults na VPS Linux:
 Variaveis uteis:
 
 - `WORKSHOP_STEAMCMD_BIN` (path explicito do steamcmd/steamcmd.sh)
+- `WORKSHOP_STEAMCMD_AUTO_INSTALL` (default Linux: `true`; tenta bootstrap automatico)
+- `WORKSHOP_STEAMCMD_BOOTSTRAP_URL` (default oficial Valve `steamcmd_linux.tar.gz`)
+- `WORKSHOP_STEAMCMD_BOOTSTRAP_TIMEOUT_MS` (default `600000`)
 - `WORKSHOP_APP_ID` (default: `4000` para GMod)
 - `WORKSHOP_STEAM_USER` (default: `anonymous`)
 - `WORKSHOP_STEAM_PASS` (obrigatoria se usuario nao for anonymous)
 - `WORKSHOP_TIMEOUT_MS` (default: `1800000`)
 - `WORKSHOP_STALE_LOCK_MS` (default: `7200000`)
+
+Observacao (Linux VPS):
+
+- Se `steamcmd` nao existir no PATH e nem em `WORKSHOP_STEAMCMD_DIR`,
+  o downloader tenta instalar automaticamente em `WORKSHOP_STEAMCMD_DIR`.
+- Se falhar bootstrap, o report retorna hint:
+  `install_steamcmd_or_set_WORKSHOP_STEAMCMD_BIN`.
 
 Relatorio gerado:
 

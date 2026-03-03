@@ -16,6 +16,9 @@ type Options = {
   steamcmdBin: string;
   steamUser: string;
   steamPass?: string;
+  steamcmdAutoInstall: boolean;
+  steamcmdBootstrapUrl: string;
+  steamcmdBootstrapTimeoutMs: number;
   timeoutMs: number;
   staleLockMs: number;
 };
@@ -70,6 +73,7 @@ const DEFAULTS = {
   appId: 4000,
   timeoutMs: 30 * 60 * 1000,
   staleLockMs: 2 * 60 * 60 * 1000,
+  steamcmdBootstrapTimeoutMs: 10 * 60 * 1000,
 };
 
 const envOr = (name: string, fallback: string): string => {
@@ -119,10 +123,45 @@ const resolveSteamcmdBin = (preferred: string, steamcmdDir: string): string => {
 
   const localLinux = path.join(steamcmdDir, 'steamcmd.sh');
   const localWin = path.join(steamcmdDir, 'steamcmd.exe');
+  const localLinuxAlt = path.join(steamcmdDir, 'steamcmd');
   if (fs.existsSync(localLinux)) return localLinux;
   if (fs.existsSync(localWin)) return localWin;
+  if (fs.existsSync(localLinuxAlt)) return localLinuxAlt;
+
+  if (process.platform === 'linux') {
+    const linuxCandidates = [
+      '/usr/games/steamcmd',
+      '/usr/games/steamcmd.sh',
+      '/usr/bin/steamcmd',
+      '/usr/bin/steamcmd.sh',
+      '/usr/local/bin/steamcmd',
+      '/usr/local/bin/steamcmd.sh',
+    ];
+    for (const candidate of linuxCandidates) {
+      if (fs.existsSync(candidate)) return candidate;
+    }
+  }
 
   return 'steamcmd';
+};
+
+const isPathLikeExecutable = (value: string): boolean => /[\\/]/.test(value) || value.startsWith('.');
+
+const resolveExecutableOnPath = (name: string): string | null => {
+  const target = String(name || '').trim();
+  if (!target) return null;
+  const cmd = process.platform === 'win32' ? 'where' : 'which';
+  const probe = spawnSync(cmd, [target], {
+    encoding: 'utf8',
+    timeout: 15_000,
+    maxBuffer: 1024 * 1024,
+  });
+  if (probe.error || probe.status !== 0) return null;
+  const first = String(probe.stdout || '')
+    .split(/\r?\n/g)
+    .map((line) => line.trim())
+    .find(Boolean);
+  return first || null;
 };
 
 const parseOptions = (): Options => {
@@ -169,6 +208,21 @@ const parseOptions = (): Options => {
   const steamUser = String(args.get('--steam-user') || process.env.WORKSHOP_STEAM_USER || 'anonymous').trim();
   if (!steamUser) throw new Error('invalid_steam_user');
   const steamPassRaw = String(args.get('--steam-pass') || process.env.WORKSHOP_STEAM_PASS || '').trim();
+  const steamcmdAutoInstallRaw = String(
+    args.get('--steamcmd-auto-install')
+      || process.env.WORKSHOP_STEAMCMD_AUTO_INSTALL
+      || (process.platform === 'linux' ? '1' : '0'),
+  ).trim().toLowerCase();
+  const steamcmdAutoInstall = ['1', 'true', 'yes', 'on'].includes(steamcmdAutoInstallRaw);
+  const steamcmdBootstrapUrl = String(
+    args.get('--steamcmd-bootstrap-url')
+      || process.env.WORKSHOP_STEAMCMD_BOOTSTRAP_URL
+      || 'https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz',
+  ).trim();
+  const steamcmdBootstrapTimeoutMs = parsePositiveInt(
+    args.get('--steamcmd-bootstrap-timeout-ms') || process.env.WORKSHOP_STEAMCMD_BOOTSTRAP_TIMEOUT_MS,
+    DEFAULTS.steamcmdBootstrapTimeoutMs,
+  );
   const timeoutMs = parsePositiveInt(
     args.get('--timeout-ms') || process.env.WORKSHOP_TIMEOUT_MS,
     DEFAULTS.timeoutMs,
@@ -189,6 +243,9 @@ const parseOptions = (): Options => {
     steamcmdBin,
     steamUser,
     ...(steamPassRaw ? { steamPass: steamPassRaw } : {}),
+    steamcmdAutoInstall,
+    steamcmdBootstrapUrl,
+    steamcmdBootstrapTimeoutMs,
     timeoutMs,
     staleLockMs,
   };
@@ -353,6 +410,8 @@ const run = () => {
     String(options.appId),
     options.workshopId,
   );
+  let effectiveSteamcmdBin = options.steamcmdBin;
+  let bootstrapLogTail: string[] = [];
   let lockHeld = false;
   const releaseLock = () => {
     if (!lockHeld) return;
@@ -379,7 +438,7 @@ const run = () => {
     gmaFiles: [],
     bspFiles: [],
     steamcmd: {
-      bin: options.steamcmdBin,
+      bin: effectiveSteamcmdBin,
       installDir: options.steamcmdDir,
       timedOut: false,
       args: [],
@@ -408,6 +467,96 @@ const run = () => {
       throw new Error(fail.error);
     }
     lockHeld = true;
+
+    const ensureSteamcmdAvailable = (): { ok: boolean; error?: string } => {
+      if (isPathLikeExecutable(effectiveSteamcmdBin)) {
+        if (fs.existsSync(effectiveSteamcmdBin)) {
+          return { ok: true };
+        }
+      } else {
+        const resolvedPath = resolveExecutableOnPath(effectiveSteamcmdBin);
+        if (resolvedPath) {
+          effectiveSteamcmdBin = resolvedPath;
+          bootstrapLogTail.push(`steamcmd_in_path:${resolvedPath}`);
+          return { ok: true };
+        }
+      }
+
+      if (process.platform !== 'linux' || !options.steamcmdAutoInstall) {
+        return { ok: false, error: `steamcmd_not_found:${effectiveSteamcmdBin}` };
+      }
+
+      const archivePath = path.join(options.steamcmdDir, 'steamcmd_linux.tar.gz');
+      const installScript = [
+        'set -euo pipefail',
+        'mkdir -p "$STEAMCMD_DIR"',
+        'if command -v curl >/dev/null 2>&1; then',
+        '  curl -fsSL "$STEAMCMD_URL" -o "$STEAMCMD_ARCHIVE"',
+        'elif command -v wget >/dev/null 2>&1; then',
+        '  wget -qO "$STEAMCMD_ARCHIVE" "$STEAMCMD_URL"',
+        'else',
+        '  echo "missing_downloader:curl_or_wget" >&2',
+        '  exit 127',
+        'fi',
+        'tar -xzf "$STEAMCMD_ARCHIVE" -C "$STEAMCMD_DIR"',
+        'chmod +x "$STEAMCMD_DIR/steamcmd.sh" 2>/dev/null || true',
+        'rm -f "$STEAMCMD_ARCHIVE"',
+      ].join('; ');
+
+      const bootstrapExec = spawnSync('bash', ['-lc', installScript], {
+        encoding: 'utf8',
+        timeout: options.steamcmdBootstrapTimeoutMs,
+        maxBuffer: 1024 * 1024 * 16,
+        env: {
+          ...process.env,
+          STEAMCMD_DIR: options.steamcmdDir,
+          STEAMCMD_URL: options.steamcmdBootstrapUrl,
+          STEAMCMD_ARCHIVE: archivePath,
+        },
+      });
+      const bootstrapOutput = `${String(bootstrapExec.stdout || '')}\n${String(bootstrapExec.stderr || '')}`;
+      bootstrapLogTail = tailLines(bootstrapOutput, 40);
+
+      if (bootstrapExec.error) {
+        return {
+          ok: false,
+          error: `steamcmd_bootstrap_exec_error:${String(bootstrapExec.error.message || bootstrapExec.error)}`,
+        };
+      }
+      if (bootstrapExec.status !== 0) {
+        return {
+          ok: false,
+          error: `steamcmd_bootstrap_exit_nonzero:${String(bootstrapExec.status)}`,
+        };
+      }
+
+      const localResolved = resolveSteamcmdBin('', options.steamcmdDir);
+      if (fs.existsSync(localResolved)) {
+        effectiveSteamcmdBin = localResolved;
+        return { ok: true };
+      }
+
+      const pathResolved = resolveExecutableOnPath('steamcmd');
+      if (pathResolved) {
+        effectiveSteamcmdBin = pathResolved;
+        return { ok: true };
+      }
+
+      return { ok: false, error: 'steamcmd_bootstrap_completed_but_binary_not_found' };
+    };
+
+    const steamcmdAvailability = ensureSteamcmdAvailable();
+    if (!steamcmdAvailability.ok) {
+      const fail = createBaseReport('failed');
+      fail.error = `${steamcmdAvailability.error || 'steamcmd_unavailable'}|hint:install_steamcmd_or_set_WORKSHOP_STEAMCMD_BIN`;
+      fail.logTail = [
+        `steamcmd_bin=${effectiveSteamcmdBin}`,
+        `steamcmd_dir=${options.steamcmdDir}`,
+        ...(bootstrapLogTail.length ? bootstrapLogTail : []),
+      ].slice(-120);
+      failureReport = fail;
+      throw new Error(fail.error);
+    }
 
     if (!options.refresh) {
       const existing = collectItemFiles(itemPath);
@@ -443,7 +592,7 @@ const run = () => {
       throw new Error('steam_password_required_for_non_anonymous_login');
     }
 
-    const exec = spawnSync(options.steamcmdBin, args, {
+    const exec = spawnSync(effectiveSteamcmdBin, args, {
       encoding: 'utf8',
       timeout: options.timeoutMs,
       maxBuffer: 1024 * 1024 * 32,
@@ -456,6 +605,9 @@ const run = () => {
     report.gmaFiles = summary.gmaFiles;
     report.bspFiles = summary.bspFiles;
     report.logTail = tailLines(output, 120);
+    if (bootstrapLogTail.length) {
+      report.logTail = report.logTail.concat(bootstrapLogTail).slice(-120);
+    }
     if (typeof exec.status === 'number') {
       report.steamcmd.exitCode = exec.status;
     }
@@ -466,8 +618,13 @@ const run = () => {
     report.steamcmd.args = sanitizeSteamcmdArgs(args, options.steamPass);
 
     if (exec.error) {
+      const rawError = String(exec.error.message || exec.error);
       report.status = 'failed';
-      report.error = `steamcmd_exec_error:${String(exec.error.message || exec.error)}`;
+      if (/enoent/i.test(rawError)) {
+        report.error = `steamcmd_exec_error:${rawError}|hint:install_steamcmd_or_set_WORKSHOP_STEAMCMD_BIN`;
+      } else {
+        report.error = `steamcmd_exec_error:${rawError}`;
+      }
       failureReport = report;
       throw new Error(report.error);
     }
