@@ -23,6 +23,8 @@ type WorkshopMapConfigFile = {
   retryMaxMs?: number;
   maxQueueSize?: number;
   successCooldownMs?: number;
+  downloadTimeoutMs?: number;
+  processTimeoutMs?: number;
 };
 
 type WorkshopMapConfigResolved = {
@@ -38,6 +40,10 @@ type WorkshopMapConfigResolved = {
   retryMaxMs: number;
   maxQueueSize: number;
   successCooldownMs: number;
+  downloadTimeoutMs: number;
+  processTimeoutMs: number;
+  runtimeCachePath: string;
+  reportsDir: string;
   configPath: string;
 };
 
@@ -57,11 +63,24 @@ type DownloadJob = {
 type JobRunResult = {
   exitCode: number;
   signal?: string;
+  timedOut: boolean;
   outputTail: string[];
+};
+
+type RuntimeMapCacheFile = {
+  version: 1;
+  updatedAt: string;
+  mappings: Record<string, string>;
+};
+
+type MapHint = {
+  mapName: string;
+  workshopId?: string;
 };
 
 const WORKSPACE_ROOT = path.resolve(__dirname, '..', '..', '..');
 const DEFAULT_CONFIG_PATH = path.resolve(WORKSPACE_ROOT, 'server', 'config', 'workshop-maps.json');
+const DEFAULT_RUNTIME_CACHE_PATH = path.resolve(WORKSPACE_ROOT, 'server', 'config', 'workshop-maps.runtime.json');
 const DEFAULTS = {
   enabled: true,
   autoProcessEnabled: true,
@@ -73,6 +92,8 @@ const DEFAULTS = {
   retryMaxMs: 10 * 60 * 1000,
   maxQueueSize: 200,
   successCooldownMs: 10 * 60 * 1000,
+  downloadTimeoutMs: 30 * 60 * 1000,
+  processTimeoutMs: 180 * 60 * 1000,
 };
 
 let started = false;
@@ -86,6 +107,10 @@ let processing = false;
 let wakeTimer: NodeJS.Timeout | null = null;
 let cachedConfig: WorkshopMapConfigResolved | null = null;
 let cachedConfigMtimeMs = -1;
+let runtimeMapCache = new Map<string, string>();
+let runtimeMapCacheLoaded = false;
+let discoveredFromReports = new Map<string, string>();
+let discoveredFromReportsLoadedAtMs = 0;
 
 const toInt = (value: unknown, fallback: number): number => {
   const parsed = Number(value);
@@ -107,19 +132,46 @@ const parseBool = (value: unknown, fallback: boolean): boolean => {
   return fallback;
 };
 
-const normalizeMap = (raw: string): string => {
-  const trimmed = String(raw || '').trim().toLowerCase();
-  if (!trimmed) return '';
-  return trimmed.endsWith('.bsp') ? trimmed.slice(0, -4) : trimmed;
+const sanitizeMapName = (raw: string): string => {
+  const value = String(raw || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\\/g, '/');
+  if (!value) return '';
+  const base = value.includes('/') ? value.slice(value.lastIndexOf('/') + 1) : value;
+  const noExt = base.endsWith('.bsp') ? base.slice(0, -4) : base;
+  if (!noExt) return '';
+  if (noExt.includes('..') || noExt.includes('/') || noExt.includes('\\')) return '';
+  if (!/^[a-z0-9][a-z0-9_-]{1,127}$/.test(noExt)) return '';
+  return noExt;
 };
 
 const isWorkshopId = (raw: unknown): raw is string => /^\d+$/.test(String(raw || '').trim());
+
+const parseMapHint = (raw: string): MapHint => {
+  const normalizedRaw = String(raw || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\\/g, '/');
+  const workshopMatch = /(?:^|\/)workshop\/(\d+)\/([^/?#]+)/.exec(normalizedRaw);
+  if (workshopMatch && workshopMatch[1] && workshopMatch[2]) {
+    const mapName = sanitizeMapName(workshopMatch[2]);
+    if (mapName) {
+      const workshopId = workshopMatch[1];
+      return {
+        mapName,
+        ...(isWorkshopId(workshopId) ? { workshopId } : {}),
+      };
+    }
+  }
+  return { mapName: sanitizeMapName(normalizedRaw) };
+};
 
 const parseMapTable = (input: unknown): Record<string, string> => {
   if (!input || typeof input !== 'object') return {};
   const out: Record<string, string> = {};
   for (const [rawKey, rawValue] of Object.entries(input as Record<string, unknown>)) {
-    const mapName = normalizeMap(rawKey);
+    const mapName = sanitizeMapName(rawKey);
     const workshopId = String(rawValue || '').trim();
     if (!mapName || !isWorkshopId(workshopId)) continue;
     out[mapName] = workshopId;
@@ -131,8 +183,8 @@ const parseAliasTable = (input: unknown): Record<string, string> => {
   if (!input || typeof input !== 'object') return {};
   const out: Record<string, string> = {};
   for (const [rawKey, rawValue] of Object.entries(input as Record<string, unknown>)) {
-    const alias = normalizeMap(rawKey);
-    const target = normalizeMap(String(rawValue || ''));
+    const alias = sanitizeMapName(rawKey);
+    const target = sanitizeMapName(String(rawValue || ''));
     if (!alias || !target) continue;
     out[alias] = target;
   }
@@ -157,8 +209,120 @@ const parseSourceioMode = (
 const getConfigPath = (): string =>
   path.resolve(String(process.env.WORKSHOP_MAPS_FILE || DEFAULT_CONFIG_PATH));
 
+const getRuntimeCachePath = (): string =>
+  path.resolve(String(process.env.WORKSHOP_RUNTIME_MAPS_FILE || DEFAULT_RUNTIME_CACHE_PATH));
+
+const getReportsDir = (): string => {
+  const rootDir = path.resolve(
+    String(process.env.WORKSHOP_ROOT || (process.platform === 'linux' ? '/opt/backstabber/workshop' : path.join(WORKSPACE_ROOT, 'sandbox', 'workshop'))),
+  );
+  return path.resolve(String(process.env.WORKSHOP_REPORTS_DIR || path.join(rootDir, 'reports')));
+};
+
+const writeRuntimeCache = (targetPath: string) => {
+  const payload: RuntimeMapCacheFile = {
+    version: 1,
+    updatedAt: new Date().toISOString(),
+    mappings: Object.fromEntries(Array.from(runtimeMapCache.entries()).sort((a, b) => a[0].localeCompare(b[0]))),
+  };
+  fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+  fs.writeFileSync(targetPath, JSON.stringify(payload, null, 2) + '\n', 'utf8');
+};
+
+const loadRuntimeCache = (targetPath: string) => {
+  if (runtimeMapCacheLoaded) return;
+  runtimeMapCacheLoaded = true;
+  if (!fs.existsSync(targetPath)) return;
+  try {
+    const parsed = JSON.parse(fs.readFileSync(targetPath, 'utf8')) as RuntimeMapCacheFile;
+    const mappings = parsed?.mappings && typeof parsed.mappings === 'object' ? parsed.mappings : {};
+    for (const [rawMap, rawId] of Object.entries(mappings)) {
+      const mapName = sanitizeMapName(rawMap);
+      const workshopId = String(rawId || '').trim();
+      if (!mapName || !isWorkshopId(workshopId)) continue;
+      runtimeMapCache.set(mapName, workshopId);
+    }
+  } catch (error: any) {
+    console.warn('[workshop-auto] runtime_cache_load_failed', {
+      targetPath,
+      error: String(error?.message || error),
+    });
+  }
+};
+
+const rememberRuntimeMapping = (
+  mapName: string,
+  workshopId: string,
+  source: string,
+  runtimeCachePath: string,
+) => {
+  const safeMap = sanitizeMapName(mapName);
+  if (!safeMap || !isWorkshopId(workshopId)) return;
+  const existing = runtimeMapCache.get(safeMap);
+  if (existing === workshopId) return;
+  runtimeMapCache.set(safeMap, workshopId);
+  try {
+    writeRuntimeCache(runtimeCachePath);
+    console.log('[workshop-auto] runtime_mapping_saved', {
+      map: safeMap,
+      workshopId,
+      source,
+      runtimeCachePath,
+    });
+  } catch (error: any) {
+    console.warn('[workshop-auto] runtime_cache_write_failed', {
+      map: safeMap,
+      workshopId,
+      source,
+      error: String(error?.message || error),
+      runtimeCachePath,
+    });
+  }
+};
+
+const discoverFromProcessReports = (config: WorkshopMapConfigResolved): Map<string, string> => {
+  const now = Date.now();
+  if (now - discoveredFromReportsLoadedAtMs < 60_000 && discoveredFromReports.size > 0) {
+    return discoveredFromReports;
+  }
+  discoveredFromReportsLoadedAtMs = now;
+  const discovered = new Map<string, string>();
+  if (!fs.existsSync(config.reportsDir)) {
+    discoveredFromReports = discovered;
+    return discovered;
+  }
+  let entries: fs.Dirent[] = [];
+  try {
+    entries = fs.readdirSync(config.reportsDir, { withFileTypes: true });
+  } catch {
+    discoveredFromReports = discovered;
+    return discovered;
+  }
+  for (const entry of entries) {
+    if (!entry.isFile()) continue;
+    const name = entry.name.toLowerCase();
+    if (!name.endsWith('.process.json')) continue;
+    const fullPath = path.join(config.reportsDir, entry.name);
+    try {
+      const parsed = JSON.parse(fs.readFileSync(fullPath, 'utf8')) as any;
+      if (String(parsed?.status || '').toLowerCase() !== 'success') continue;
+      const mapName = sanitizeMapName(String(parsed?.mapName || ''));
+      const workshopId = String(parsed?.workshopId || '').trim();
+      const appId = Number(parsed?.appId || 0);
+      if (!mapName || !isWorkshopId(workshopId) || appId !== config.appId) continue;
+      discovered.set(mapName, workshopId);
+    } catch {
+      // ignore malformed report files
+    }
+  }
+  discoveredFromReports = discovered;
+  return discovered;
+};
+
 const readConfig = (): WorkshopMapConfigResolved => {
   const configPath = getConfigPath();
+  const runtimeCachePath = getRuntimeCachePath();
+  const reportsDir = getReportsDir();
   let fileMtimeMs = -1;
   if (fs.existsSync(configPath)) {
     fileMtimeMs = fs.statSync(configPath).mtimeMs;
@@ -210,26 +374,56 @@ const readConfig = (): WorkshopMapConfigResolved => {
       0,
       toPositiveInt(process.env.WORKSHOP_SUCCESS_COOLDOWN_MS || fileData.successCooldownMs, DEFAULTS.successCooldownMs),
     ),
+    downloadTimeoutMs: Math.max(
+      5_000,
+      toPositiveInt(process.env.WORKSHOP_DOWNLOAD_TIMEOUT_MS || fileData.downloadTimeoutMs, DEFAULTS.downloadTimeoutMs),
+    ),
+    processTimeoutMs: Math.max(
+      30_000,
+      toPositiveInt(process.env.WORKSHOP_PROCESS_TIMEOUT_MS || fileData.processTimeoutMs, DEFAULTS.processTimeoutMs),
+    ),
+    runtimeCachePath,
+    reportsDir,
     configPath,
   };
 
   cachedConfig = resolved;
   cachedConfigMtimeMs = fileMtimeMs;
+  loadRuntimeCache(resolved.runtimeCachePath);
+  discoverFromProcessReports(resolved);
   return resolved;
 };
 
 const resolveWorkshopId = (
-  mapName: string,
+  mapHint: MapHint,
   config: WorkshopMapConfigResolved,
-): { normalizedMap: string; workshopId?: string } => {
-  const normalizedMap = normalizeMap(mapName);
-  if (!normalizedMap) return { normalizedMap: '' };
+): { normalizedMap: string; workshopId?: string; resolutionSource: string } => {
+  const normalizedMap = sanitizeMapName(mapHint.mapName);
+  if (!normalizedMap) return { normalizedMap: '', resolutionSource: 'invalid_map' };
+
+  if (mapHint.workshopId && isWorkshopId(mapHint.workshopId)) {
+    return { normalizedMap, workshopId: mapHint.workshopId, resolutionSource: 'map_hint' };
+  }
 
   const aliasTarget = config.aliases[normalizedMap];
   const mapKey = aliasTarget || normalizedMap;
   const workshopId = config.maps[mapKey];
-  if (!workshopId) return { normalizedMap: mapKey };
-  return { normalizedMap: mapKey, workshopId };
+  if (workshopId) {
+    return { normalizedMap: mapKey, workshopId, resolutionSource: aliasTarget ? 'static_alias' : 'static_map' };
+  }
+
+  const runtimeId = runtimeMapCache.get(mapKey);
+  if (runtimeId && isWorkshopId(runtimeId)) {
+    return { normalizedMap: mapKey, workshopId: runtimeId, resolutionSource: 'runtime_cache' };
+  }
+
+  const discovered = discoverFromProcessReports(config).get(mapKey);
+  if (discovered && isWorkshopId(discovered)) {
+    rememberRuntimeMapping(mapKey, discovered, 'report_discovery', config.runtimeCachePath);
+    return { normalizedMap: mapKey, workshopId: discovered, resolutionSource: 'process_report' };
+  }
+
+  return { normalizedMap: mapKey, resolutionSource: 'unmapped' };
 };
 
 const computeRetryDelayMs = (
@@ -248,29 +442,45 @@ const tailLines = (input: string, max = 80): string[] =>
     .filter((line) => line.length > 0)
     .slice(-max);
 
-const runDownloadProcess = (job: DownloadJob): Promise<JobRunResult> =>
-  new Promise((resolve, reject) => {
-    const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-    const args = [
-      '--prefix',
-      'server',
-      'run',
-      'workshop:download',
-      '--',
-      '--id',
-      job.workshopId,
-      '--app-id',
-      String(job.appId),
-    ];
-    if (job.refresh) args.push('--refresh');
+const resolveTsNodeRunner = (): { command: string; argsPrefix: string[] } => {
+  const tsNodeJs = path.resolve(WORKSPACE_ROOT, 'server', 'node_modules', 'ts-node', 'dist', 'bin.js');
+  if (fs.existsSync(tsNodeJs)) {
+    return {
+      command: process.execPath,
+      argsPrefix: [tsNodeJs],
+    };
+  }
+  const npxCmd = process.platform === 'win32' ? 'npx.cmd' : 'npx';
+  return {
+    command: npxCmd,
+    argsPrefix: ['ts-node'],
+  };
+};
 
-    const child = spawn(npmCmd, args, {
+const runCommandWithTimeout = (
+  command: string,
+  args: string[],
+  timeoutMs: number,
+): Promise<JobRunResult> =>
+  new Promise((resolve, reject) => {
+    const child = spawn(command, args, {
       cwd: WORKSPACE_ROOT,
       env: process.env,
       stdio: ['ignore', 'pipe', 'pipe'],
     });
 
     let output = '';
+    let timedOut = false;
+    const killTimer = setTimeout(() => {
+      timedOut = true;
+      try {
+        child.kill('SIGKILL');
+      } catch {
+        // best effort kill
+      }
+    }, timeoutMs);
+    killTimer.unref?.();
+
     const append = (chunk: unknown) => {
       const text = String(chunk || '');
       if (!text) return;
@@ -282,64 +492,54 @@ const runDownloadProcess = (job: DownloadJob): Promise<JobRunResult> =>
 
     child.stdout.on('data', append);
     child.stderr.on('data', append);
-    child.on('error', (error) => reject(error));
+    child.on('error', (error) => {
+      clearTimeout(killTimer);
+      reject(error);
+    });
     child.on('close', (code, signal) => {
+      clearTimeout(killTimer);
       resolve({
         exitCode: typeof code === 'number' ? code : -1,
         ...(signal ? { signal: String(signal) } : {}),
+        timedOut,
         outputTail: tailLines(output, 120),
       });
     });
   });
+
+const runDownloadProcess = (job: DownloadJob, config: WorkshopMapConfigResolved): Promise<JobRunResult> => {
+  const runner = resolveTsNodeRunner();
+  const args = runner.argsPrefix.concat([
+    path.join('server', 'src', 'scripts', 'downloadWorkshopMap.ts'),
+    '--id',
+    job.workshopId,
+    '--app-id',
+    String(job.appId),
+  ]);
+  if (job.refresh) args.push('--refresh');
+  return runCommandWithTimeout(runner.command, args, config.downloadTimeoutMs);
+};
 
 const runProcessMapPipeline = (
   job: DownloadJob,
   config: WorkshopMapConfigResolved,
-): Promise<JobRunResult> =>
-  new Promise((resolve, reject) => {
-    const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-    const args = [
-      '--prefix',
-      'server',
-      'run',
-      'workshop:process-map',
-      '--',
-      '--id',
-      job.workshopId,
-      '--map',
-      job.mapName,
-      '--app-id',
-      String(job.appId),
-      '--asset-resolution-mode',
-      config.assetResolutionMode,
-      '--sourceio-mode',
-      config.sourceioMode,
-    ];
-    const child = spawn(npmCmd, args, {
-      cwd: WORKSPACE_ROOT,
-      env: process.env,
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
-    let output = '';
-    const append = (chunk: unknown) => {
-      const text = String(chunk || '');
-      if (!text) return;
-      output += text;
-      if (output.length > 1024 * 1024) {
-        output = output.slice(output.length - 1024 * 1024);
-      }
-    };
-    child.stdout.on('data', append);
-    child.stderr.on('data', append);
-    child.on('error', (error) => reject(error));
-    child.on('close', (code, signal) => {
-      resolve({
-        exitCode: typeof code === 'number' ? code : -1,
-        ...(signal ? { signal: String(signal) } : {}),
-        outputTail: tailLines(output, 120),
-      });
-    });
-  });
+): Promise<JobRunResult> => {
+  const runner = resolveTsNodeRunner();
+  const args = runner.argsPrefix.concat([
+    path.join('server', 'src', 'scripts', 'processWorkshopMap.ts'),
+    '--id',
+    job.workshopId,
+    '--map',
+    job.mapName,
+    '--app-id',
+    String(job.appId),
+    '--asset-resolution-mode',
+    config.assetResolutionMode,
+    '--sourceio-mode',
+    config.sourceioMode,
+  ]);
+  return runCommandWithTimeout(runner.command, args, config.processTimeoutMs);
+};
 
 const scheduleWakeTimer = () => {
   if (wakeTimer) {
@@ -398,7 +598,7 @@ const processQueue = async () => {
       let result: JobRunResult | null = null;
       let runError: unknown = null;
       try {
-        result = await runDownloadProcess(job);
+        result = await runDownloadProcess(job, config);
       } catch (error) {
         runError = error;
       }
@@ -429,6 +629,7 @@ const processQueue = async () => {
       if (!failed) {
         const okResult = result as JobRunResult;
         recentSuccessByKey.set(job.key, Date.now());
+        rememberRuntimeMapping(job.mapName, job.workshopId, 'successful_job', config.runtimeCachePath);
         inflightKeys.delete(job.key);
         console.log('[workshop-auto] download_ok', JSON.stringify({
           key: job.key,
@@ -458,8 +659,8 @@ const processQueue = async () => {
         : runError
           ? `download_error:${String((runError as any)?.message || runError)}`
           : config.autoProcessEnabled
-            ? `process_exit_code_${processResult?.exitCode ?? 'unknown'}${processResult?.signal ? `_signal_${processResult.signal}` : ''}`
-            : `download_exit_code_${result?.exitCode ?? 'unknown'}${result?.signal ? `_signal_${result.signal}` : ''}`;
+            ? `process_${processResult?.timedOut ? 'timeout' : 'exit'}_${processResult?.exitCode ?? 'unknown'}${processResult?.signal ? `_signal_${processResult.signal}` : ''}`
+            : `download_${result?.timedOut ? 'timeout' : 'exit'}_${result?.exitCode ?? 'unknown'}${result?.signal ? `_signal_${result.signal}` : ''}`;
 
       if (canRetry) {
         const delay = computeRetryDelayMs(attempt, config);
@@ -475,6 +676,8 @@ const processQueue = async () => {
           attempt,
           nextInMs: delay,
           reason: errMsg,
+          ...(result ? { downloadTimedOut: result.timedOut } : {}),
+          ...(processResult ? { processTimedOut: processResult.timedOut } : {}),
           ...(result ? { downloadLogTail: result.outputTail.slice(-5) } : {}),
           ...(processResult ? { processLogTail: processResult.outputTail.slice(-5) } : {}),
         }));
@@ -488,6 +691,8 @@ const processQueue = async () => {
         workshopId: job.workshopId,
         attempts: attempt,
         reason: errMsg,
+        ...(result ? { downloadTimedOut: result.timedOut } : {}),
+        ...(processResult ? { processTimedOut: processResult.timedOut } : {}),
         ...(result ? { downloadLogTail: result.outputTail.slice(-10) } : {}),
         ...(processResult ? { processLogTail: processResult.outputTail.slice(-10) } : {}),
       }));
@@ -523,7 +728,8 @@ export const notifyMapObservedForWorkshop = (input: NotifyInput) => {
   const rawMap = String(input.mapName || '').trim();
   if (!serverId || !rawMap) return;
 
-  const normalizedIncomingMap = normalizeMap(rawMap);
+  const mapHint = parseMapHint(rawMap);
+  const normalizedIncomingMap = sanitizeMapName(mapHint.mapName);
   if (!normalizedIncomingMap) return;
 
   const previousMap = serverLastMap.get(serverId);
@@ -533,7 +739,7 @@ export const notifyMapObservedForWorkshop = (input: NotifyInput) => {
   const config = readConfig();
   if (!config.enabled) return;
 
-  const resolved = resolveWorkshopId(normalizedIncomingMap, config);
+  const resolved = resolveWorkshopId(mapHint, config);
   if (!resolved.workshopId) {
     if (!warnedMissingMap.has(resolved.normalizedMap)) {
       warnedMissingMap.add(resolved.normalizedMap);
@@ -545,6 +751,10 @@ export const notifyMapObservedForWorkshop = (input: NotifyInput) => {
       }));
     }
     return;
+  }
+
+  if (resolved.resolutionSource === 'map_hint' || resolved.resolutionSource === 'process_report') {
+    rememberRuntimeMapping(resolved.normalizedMap, resolved.workshopId, resolved.resolutionSource, config.runtimeCachePath);
   }
 
   const key = `${config.appId}:${resolved.workshopId}`;
@@ -580,6 +790,7 @@ export const notifyMapObservedForWorkshop = (input: NotifyInput) => {
     key,
     map: resolved.normalizedMap,
     workshopId: resolved.workshopId,
+    resolutionSource: resolved.resolutionSource,
     source: input.source,
     serverId,
     queueSize: queue.length,
@@ -600,9 +811,14 @@ export const startWorkshopAutoDownloadJob = () => {
     autoProcessEnabled: config.autoProcessEnabled,
     assetResolutionMode: config.assetResolutionMode,
     sourceioMode: config.sourceioMode,
+    downloadTimeoutMs: config.downloadTimeoutMs,
+    processTimeoutMs: config.processTimeoutMs,
     appId: config.appId,
     mappedMaps: Object.keys(config.maps).length,
+    runtimeMappedMaps: runtimeMapCache.size,
     aliases: Object.keys(config.aliases).length,
+    reportsDir: config.reportsDir,
+    runtimeCachePath: config.runtimeCachePath,
     configPath: config.configPath,
   }));
 

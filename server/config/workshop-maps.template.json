@@ -4,6 +4,8 @@
   "assetResolutionMode": "permissive",
   "sourceioMode": "auto",
   "appId": 4000,
+  "downloadTimeoutMs": 1800000,
+  "processTimeoutMs": 10800000,
   "maxRetries": 3,
   "retryBaseMs": 15000,
   "retryMaxMs": 600000,

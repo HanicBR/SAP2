@@ -1,6 +1,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import crypto from 'crypto';
 import { spawnSync } from 'child_process';
 
 type Status = 'success' | 'failed';
@@ -30,14 +31,18 @@ type Options = {
   timeoutPipelineMs: number;
   staleLockMs: number;
   lockPath: string;
+  cacheFilePath: string;
+  cleanupEnabled: boolean;
+  cleanupRetentionDays: number;
 };
 
 type StepResult = {
-  name: 'extract' | 'pipeline';
+  name: 'cache' | 'extract' | 'pipeline';
   ok: boolean;
   durationMs: number;
   exitCode?: number;
   signal?: string;
+  timedOut?: boolean;
   command: string[];
   logTail: string[];
   error?: string;
@@ -77,8 +82,38 @@ type ProcessReport = {
     strategy: string;
   };
   steps: StepResult[];
+  cache: {
+    key: string;
+    signature: string;
+    hit: boolean;
+    reason: string;
+  };
+  cleanup: {
+    enabled: boolean;
+    retentionDays: number;
+    removedExtractDirs: number;
+    removedReportFiles: number;
+    removedLockFiles: number;
+    errors: string[];
+  };
   warnings: string[];
   error?: string;
+};
+
+type ProcessCacheEntry = {
+  signature: string;
+  processedAt: string;
+  workshopId: string;
+  mapName: string;
+  selectedBsp?: string;
+  derivedMapRoot?: string;
+  outDir: string;
+  pipelineReportPath: string;
+};
+
+type ProcessCacheFile = {
+  version: 1;
+  entries: Record<string, ProcessCacheEntry>;
 };
 
 const PROJECT_SERVER_ROOT = path.resolve(__dirname, '..', '..');
@@ -93,6 +128,7 @@ const DEFAULTS = {
   timeoutExtractMs: 30 * 60 * 1000,
   timeoutPipelineMs: 120 * 60 * 1000,
   staleLockMs: 2 * 60 * 60 * 1000,
+  cleanupRetentionDays: 14,
 };
 
 const toNum = (raw: string | undefined, fallback: number): number => {
@@ -102,9 +138,13 @@ const toNum = (raw: string | undefined, fallback: number): number => {
 };
 
 const normalizeMapName = (raw: string): string => {
-  const value = String(raw || '').trim().toLowerCase();
+  const value = String(raw || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\\/g, '/');
   if (!value) return '';
-  return value.endsWith('.bsp') ? value.slice(0, -4) : value;
+  const base = value.includes('/') ? value.slice(value.lastIndexOf('/') + 1) : value;
+  return base.endsWith('.bsp') ? base.slice(0, -4) : base;
 };
 
 const parseArgs = (): Map<string, string> => {
@@ -120,6 +160,10 @@ const parseArgs = (): Map<string, string> => {
     }
     if (arg === '--clean-extract-dir') {
       map.set('--clean-extract-dir', '1');
+      continue;
+    }
+    if (arg === '--no-clean-extract-dir') {
+      map.set('--clean-extract-dir', '0');
       continue;
     }
     const next = String(args[i + 1] || '').trim();
@@ -145,12 +189,22 @@ const resolveFlexiblePath = (raw: string): string => {
 const parseOptions = (): Options => {
   const args = parseArgs();
   const workshopId = String(args.get('--id') || process.env.WORKSHOP_ID || '').trim();
-  const mapName = normalizeMapName(String(args.get('--map') || process.env.WORKSHOP_MAP_NAME || ''));
+  const mapRawInput = String(args.get('--map') || process.env.WORKSHOP_MAP_NAME || '').trim();
+  if (mapRawInput.includes('..') || mapRawInput.includes('/') || mapRawInput.includes('\\')) {
+    throw new Error(`invalid_map_name_path_traversal:${mapRawInput}`);
+  }
+  const mapName = normalizeMapName(mapRawInput);
   if (!/^\d+$/.test(workshopId)) {
     throw new Error(`invalid_or_missing_workshop_id:${workshopId || '<empty>'}`);
   }
   if (!mapName) {
     throw new Error('missing_required_arg: --map=<map_name>');
+  }
+  if (mapName.includes('..') || mapName.includes('/') || mapName.includes('\\')) {
+    throw new Error(`invalid_map_name_path_traversal:${mapName}`);
+  }
+  if (!/^[a-z0-9][a-z0-9_-]{1,127}$/.test(mapName)) {
+    throw new Error(`invalid_map_name_format:${mapName}`);
   }
 
   const appId = toNum(args.get('--app-id') || process.env.WORKSHOP_APP_ID, DEFAULTS.appId);
@@ -182,11 +236,23 @@ const parseOptions = (): Options => {
   );
   const assetResolutionModeRaw = String(args.get('--asset-resolution-mode') || 'permissive').trim().toLowerCase();
   const sourceioModeRaw = String(args.get('--sourceio-mode') || 'auto').trim().toLowerCase();
-  const cleanExtractDir = String(args.get('--clean-extract-dir') || '').trim() === '1';
+  const cleanExtractDirRaw = String(
+    args.get('--clean-extract-dir') || process.env.WORKSHOP_PROCESS_CLEAN_EXTRACT_DIR || '1',
+  ).trim().toLowerCase();
+  const cleanExtractDir = ['1', 'true', 'yes', 'on'].includes(cleanExtractDirRaw);
   const timeoutExtractMs = toNum(args.get('--timeout-extract-ms') || process.env.WORKSHOP_PROCESS_TIMEOUT_EXTRACT_MS, DEFAULTS.timeoutExtractMs);
   const timeoutPipelineMs = toNum(args.get('--timeout-pipeline-ms') || process.env.WORKSHOP_PROCESS_TIMEOUT_PIPELINE_MS, DEFAULTS.timeoutPipelineMs);
   const staleLockMs = toNum(args.get('--stale-lock-ms') || process.env.WORKSHOP_STALE_LOCK_MS, DEFAULTS.staleLockMs);
+  const cleanupEnabledRaw = String(
+    args.get('--cleanup-enabled') || process.env.WORKSHOP_PROCESS_CLEANUP_ENABLED || '1',
+  ).trim().toLowerCase();
+  const cleanupEnabled = ['1', 'true', 'yes', 'on'].includes(cleanupEnabledRaw);
+  const cleanupRetentionDays = Math.max(
+    1,
+    toNum(args.get('--cleanup-retention-days') || process.env.WORKSHOP_CLEANUP_RETENTION_DAYS, DEFAULTS.cleanupRetentionDays),
+  );
   const lockPath = path.join(rootDir, 'locks', `process_${appId}_${workshopId}_${mapName}.lock`);
+  const cacheFilePath = path.join(reportsDir, 'process-cache.json');
 
   return {
     workshopId,
@@ -213,6 +279,9 @@ const parseOptions = (): Options => {
     timeoutPipelineMs,
     staleLockMs,
     lockPath,
+    cacheFilePath,
+    cleanupEnabled,
+    cleanupRetentionDays,
   };
 };
 
@@ -229,6 +298,18 @@ const safeReadJson = (target: string): any | null => {
   } catch {
     return null;
   }
+};
+
+const readProcessCache = (cachePath: string): ProcessCacheFile => {
+  const parsed = safeReadJson(cachePath);
+  if (!parsed || typeof parsed !== 'object') return { version: 1, entries: {} };
+  const entries = (parsed as any).entries;
+  if (!entries || typeof entries !== 'object') return { version: 1, entries: {} };
+  return { version: 1, entries: entries as Record<string, ProcessCacheEntry> };
+};
+
+const writeProcessCache = (cachePath: string, cache: ProcessCacheFile) => {
+  writeJson(cachePath, cache);
 };
 
 const tailLines = (raw: string, max = 120): string[] =>
@@ -306,7 +387,16 @@ const runStep = (
   };
   if (typeof exec.status === 'number') step.exitCode = exec.status;
   if (exec.signal) step.signal = exec.signal;
-  if (exec.error) step.error = String(exec.error.message || exec.error);
+  if (exec.error) {
+    const errorMessage = String(exec.error.message || exec.error);
+    const timedOut = /timed out|timeout|etimedout/i.test(errorMessage);
+    if (timedOut) {
+      step.timedOut = true;
+      step.error = `timeout_after_ms:${timeoutMs}`;
+    } else {
+      step.error = errorMessage;
+    }
+  }
   if (!step.ok && !step.error) step.error = `exit_code_${String(exec.status)}`;
   return step;
 };
@@ -349,6 +439,117 @@ const pickBspForMap = (bspCandidates: string[], mapName: string): string | null 
   return scored[0]?.candidate || null;
 };
 
+const computeContentSignature = (contentDir: string): string => {
+  const files: string[] = [];
+  const stack = [contentDir];
+  while (stack.length) {
+    const current = stack.pop();
+    if (!current) continue;
+    let entries: fs.Dirent[] = [];
+    try {
+      entries = fs.readdirSync(current, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+    for (const entry of entries) {
+      const absolute = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(absolute);
+      } else if (entry.isFile()) {
+        files.push(absolute);
+      }
+    }
+  }
+  files.sort((a, b) => a.localeCompare(b));
+  const hash = crypto.createHash('sha1');
+  hash.update('content-signature-v1\n');
+  for (const file of files) {
+    let size = 0;
+    let mtimeMs = 0;
+    try {
+      const stat = fs.statSync(file);
+      size = stat.size;
+      mtimeMs = Math.floor(stat.mtimeMs);
+    } catch {
+      // ignore stat failures for signature; still deterministic over available files
+    }
+    const rel = path.relative(contentDir, file).replace(/\\/g, '/');
+    hash.update(`${rel}|${size}|${mtimeMs}\n`);
+  }
+  return hash.digest('hex');
+};
+
+const pruneOldFiles = (
+  baseDir: string,
+  predicate: (absolutePath: string) => boolean,
+  maxAgeMs: number,
+): { removed: number; errors: string[] } => {
+  const out = { removed: 0, errors: [] as string[] };
+  if (!fs.existsSync(baseDir)) return out;
+  const now = Date.now();
+  const stack = [baseDir];
+  while (stack.length) {
+    const current = stack.pop();
+    if (!current) continue;
+    let entries: fs.Dirent[] = [];
+    try {
+      entries = fs.readdirSync(current, { withFileTypes: true });
+    } catch (error: any) {
+      out.errors.push(`scan_failed:${current}:${String(error?.message || error)}`);
+      continue;
+    }
+    for (const entry of entries) {
+      const absolute = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(absolute);
+        continue;
+      }
+      if (!entry.isFile()) continue;
+      if (!predicate(absolute)) continue;
+      try {
+        const stat = fs.statSync(absolute);
+        if (now - stat.mtimeMs < maxAgeMs) continue;
+        fs.rmSync(absolute, { force: true });
+        out.removed += 1;
+      } catch (error: any) {
+        out.errors.push(`remove_failed:${absolute}:${String(error?.message || error)}`);
+      }
+    }
+  }
+  return out;
+};
+
+const pruneOldExtractDirs = (
+  extractedRoot: string,
+  keepWorkshopId: string,
+  maxAgeMs: number,
+): { removed: number; errors: string[] } => {
+  const out = { removed: 0, errors: [] as string[] };
+  if (!fs.existsSync(extractedRoot)) return out;
+  let entries: fs.Dirent[] = [];
+  try {
+    entries = fs.readdirSync(extractedRoot, { withFileTypes: true });
+  } catch (error: any) {
+    out.errors.push(`scan_failed:${extractedRoot}:${String(error?.message || error)}`);
+    return out;
+  }
+  const now = Date.now();
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    if (entry.name === keepWorkshopId) continue;
+    const absolute = path.join(extractedRoot, entry.name);
+    try {
+      const stat = fs.statSync(absolute);
+      if (now - stat.mtimeMs < maxAgeMs) continue;
+      fs.rmSync(absolute, { recursive: true, force: true });
+      out.removed += 1;
+    } catch (error: any) {
+      out.errors.push(`remove_failed:${absolute}:${String(error?.message || error)}`);
+    }
+  }
+  return out;
+};
+
 const run = () => {
   const options = parseOptions();
   const startedAtMs = Date.now();
@@ -358,6 +559,51 @@ const run = () => {
   const selection: ProcessReport['selection'] = {
     candidates: [],
     strategy: 'exact_basename_then_maps_path_then_contains',
+  };
+  const cacheKey = `${options.appId}:${options.workshopId}:${options.mapName}`;
+  const signature = computeContentSignature(options.contentDir);
+  const cacheState: ProcessReport['cache'] = {
+    key: cacheKey,
+    signature,
+    hit: false,
+    reason: 'cache_miss_default',
+  };
+  const cleanupState: ProcessReport['cleanup'] = {
+    enabled: options.cleanupEnabled,
+    retentionDays: options.cleanupRetentionDays,
+    removedExtractDirs: 0,
+    removedReportFiles: 0,
+    removedLockFiles: 0,
+    errors: [],
+  };
+  let cleanupExecuted = false;
+
+  const runCleanup = () => {
+    if (cleanupExecuted) return;
+    cleanupExecuted = true;
+    if (!options.cleanupEnabled) return;
+    const retentionMs = options.cleanupRetentionDays * 24 * 60 * 60 * 1000;
+    const extractedRoot = path.join(options.rootDir, 'extracted');
+    const pruneDirs = pruneOldExtractDirs(extractedRoot, options.workshopId, retentionMs);
+    cleanupState.removedExtractDirs += pruneDirs.removed;
+    cleanupState.errors.push(...pruneDirs.errors);
+
+    const reportPrune = pruneOldFiles(
+      options.reportsDir,
+      (absolutePath) => /\.(extract|process|download)\.json$/i.test(path.basename(absolutePath)),
+      retentionMs,
+    );
+    cleanupState.removedReportFiles += reportPrune.removed;
+    cleanupState.errors.push(...reportPrune.errors);
+
+    const locksDir = path.join(options.rootDir, 'locks');
+    const lockPrune = pruneOldFiles(
+      locksDir,
+      (absolutePath) => absolutePath.toLowerCase().endsWith('.lock'),
+      retentionMs,
+    );
+    cleanupState.removedLockFiles += lockPrune.removed;
+    cleanupState.errors.push(...lockPrune.errors);
   };
 
   const reportBase: Omit<ProcessReport, 'status' | 'finishedAt' | 'durationMs'> = {
@@ -378,10 +624,13 @@ const run = () => {
     },
     selection,
     steps,
+    cache: cacheState,
+    cleanup: cleanupState,
     warnings,
   };
 
   const finish = (status: Status, error?: string) => {
+    runCleanup();
     const report: ProcessReport = {
       ...reportBase,
       status,
@@ -418,6 +667,45 @@ const run = () => {
     ensureDir(options.extractDir);
     ensureDir(path.dirname(options.pipelineReportPath));
     ensureDir(path.dirname(options.auditReportPath));
+
+    const cacheFile = readProcessCache(options.cacheFilePath);
+    const cachedEntry = cacheFile.entries[cacheKey];
+    const manifestPath = path.join(options.outDir, 'manifest.json');
+    if (
+      cachedEntry
+      && cachedEntry.signature === signature
+      && fs.existsSync(options.pipelineReportPath)
+      && fs.existsSync(manifestPath)
+    ) {
+      cacheState.hit = true;
+      cacheState.reason = 'signature_match_and_outputs_present';
+      if (cachedEntry.selectedBsp) selection.selectedBsp = cachedEntry.selectedBsp;
+      if (cachedEntry.derivedMapRoot) selection.derivedMapRoot = cachedEntry.derivedMapRoot;
+      steps.push({
+        name: 'cache',
+        ok: true,
+        durationMs: 0,
+        command: [],
+        logTail: ['cache_hit: pipeline skipped'],
+      });
+      finish('success');
+      return;
+    }
+    if (cachedEntry && cachedEntry.signature !== signature) {
+      cacheState.reason = 'signature_changed';
+    } else if (cachedEntry) {
+      cacheState.reason = 'outputs_missing_rebuild';
+    } else {
+      cacheState.reason = 'entry_not_found';
+    }
+
+    steps.push({
+      name: 'cache',
+      ok: true,
+      durationMs: 0,
+      command: [],
+      logTail: [cacheState.reason],
+    });
 
     const extractArgs = [
       options.extractScriptPath,
@@ -489,8 +777,21 @@ const run = () => {
       return;
     }
 
+    cacheFile.entries[cacheKey] = {
+      signature,
+      processedAt: new Date().toISOString(),
+      workshopId: options.workshopId,
+      mapName: options.mapName,
+      ...(selection.selectedBsp ? { selectedBsp: selection.selectedBsp } : {}),
+      ...(selection.derivedMapRoot ? { derivedMapRoot: selection.derivedMapRoot } : {}),
+      outDir: options.outDir,
+      pipelineReportPath: options.pipelineReportPath,
+    };
+    writeProcessCache(options.cacheFilePath, cacheFile);
+
     finish('success');
   } finally {
+    runCleanup();
     releaseLock(options.lockPath);
   }
 };

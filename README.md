@@ -98,6 +98,10 @@ Trigger automatico:
 - `viewer_state` WS com `map` novo tambem enfileira.
 - Dedupe por `appId:workshopId` evita downloads duplicados.
 - Retry com backoff exponencial ate `maxRetries`.
+- Detecao automatica (PR-14.4):
+  - se map vier como `workshop/<id>/<map>`, o `id` e aprendido automaticamente.
+  - mapeamento aprendido e salvo em `server/config/workshop-maps.runtime.json`.
+  - fallback adicional: reaproveita `*.process.json` de execucoes anteriores.
 
 Controle por env:
 
@@ -111,6 +115,9 @@ Controle por env:
 - `WORKSHOP_RETRY_MAX_MS`
 - `WORKSHOP_MAX_QUEUE_SIZE`
 - `WORKSHOP_SUCCESS_COOLDOWN_MS`
+- `WORKSHOP_DOWNLOAD_TIMEOUT_MS` (timeout hard do subprocesso download)
+- `WORKSHOP_PROCESS_TIMEOUT_MS` (timeout hard do subprocesso process-map)
+- `WORKSHOP_RUNTIME_MAPS_FILE` (default `server/config/workshop-maps.runtime.json`)
 
 Logs esperados:
 
@@ -134,6 +141,30 @@ Fluxo:
 2. Extrai payload para `WORKSHOP_ROOT/extracted/<workshopId>/payload_*`.
 3. Encontra `*.bsp` e seleciona o BSP do mapa alvo.
 4. Roda `map:pipeline:build` automaticamente.
+
+Garantias de seguranca/robustez:
+
+- `workshopId` sempre validado como numerico.
+- `map` sanitizado: sem `../`, sem barras, regex restrita (`[a-z0-9_-]`).
+- timeouts hard por subprocesso:
+  - `steamcmd` (download)
+  - `python` (extract)
+  - `buildMapPipeline` (pipeline)
+- erros sempre registrados em report com `step`, `exitCode/signal`, `logTail`.
+
+Cache/dedupe de processamento:
+
+- `process-cache.json` (em `WORKSHOP_REPORTS_DIR`) guarda assinatura do payload.
+- se assinatura nao mudou e artefatos existem, `workshop:process-map` retorna `cache_hit` e pula extract/pipeline.
+- report marca `cache.hit=true` e `reason`.
+
+Limpeza automatica (anti-acumulo):
+
+- por padrao, limpa extracoes antigas em `WORKSHOP_ROOT/extracted` (retencao configuravel).
+- remove reports/locks antigos de workshop.
+- controle:
+  - `WORKSHOP_PROCESS_CLEANUP_ENABLED` (default `1`)
+  - `WORKSHOP_CLEANUP_RETENTION_DAYS` (default `14`)
 
 Relatorios:
 
