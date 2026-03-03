@@ -12,6 +12,9 @@ type NotifyInput = {
 
 type WorkshopMapConfigFile = {
   enabled?: boolean;
+  autoProcessEnabled?: boolean;
+  assetResolutionMode?: 'permissive' | 'strict';
+  sourceioMode?: 'auto' | 'required' | 'off';
   appId?: number;
   maps?: Record<string, string>;
   aliases?: Record<string, string>;
@@ -24,6 +27,9 @@ type WorkshopMapConfigFile = {
 
 type WorkshopMapConfigResolved = {
   enabled: boolean;
+  autoProcessEnabled: boolean;
+  assetResolutionMode: 'permissive' | 'strict';
+  sourceioMode: 'auto' | 'required' | 'off';
   appId: number;
   maps: Record<string, string>;
   aliases: Record<string, string>;
@@ -58,6 +64,9 @@ const WORKSPACE_ROOT = path.resolve(__dirname, '..', '..', '..');
 const DEFAULT_CONFIG_PATH = path.resolve(WORKSPACE_ROOT, 'server', 'config', 'workshop-maps.json');
 const DEFAULTS = {
   enabled: true,
+  autoProcessEnabled: true,
+  assetResolutionMode: 'permissive' as const,
+  sourceioMode: 'auto' as const,
   appId: 4000,
   maxRetries: 3,
   retryBaseMs: 15_000,
@@ -130,6 +139,21 @@ const parseAliasTable = (input: unknown): Record<string, string> => {
   return out;
 };
 
+const parseAssetResolutionMode = (value: unknown, fallback: 'permissive' | 'strict'): 'permissive' | 'strict' => {
+  const raw = String(value ?? '').trim().toLowerCase();
+  return raw === 'strict' ? 'strict' : fallback;
+};
+
+const parseSourceioMode = (
+  value: unknown,
+  fallback: 'auto' | 'required' | 'off',
+): 'auto' | 'required' | 'off' => {
+  const raw = String(value ?? '').trim().toLowerCase();
+  if (raw === 'required') return 'required';
+  if (raw === 'off') return 'off';
+  return fallback;
+};
+
 const getConfigPath = (): string =>
   path.resolve(String(process.env.WORKSHOP_MAPS_FILE || DEFAULT_CONFIG_PATH));
 
@@ -163,6 +187,18 @@ const readConfig = (): WorkshopMapConfigResolved => {
   const aliases = parseAliasTable(fileData.aliases);
   const resolved: WorkshopMapConfigResolved = {
     enabled: parseBool(process.env.WORKSHOP_AUTO_DOWNLOAD_ENABLED, parseBool(fileData.enabled, DEFAULTS.enabled)),
+    autoProcessEnabled: parseBool(
+      process.env.WORKSHOP_AUTO_PROCESS_ENABLED,
+      parseBool(fileData.autoProcessEnabled, DEFAULTS.autoProcessEnabled),
+    ),
+    assetResolutionMode: parseAssetResolutionMode(
+      process.env.WORKSHOP_ASSET_RESOLUTION_MODE || fileData.assetResolutionMode,
+      DEFAULTS.assetResolutionMode,
+    ),
+    sourceioMode: parseSourceioMode(
+      process.env.WORKSHOP_SOURCEIO_MODE || fileData.sourceioMode,
+      DEFAULTS.sourceioMode,
+    ),
     appId: toPositiveInt(process.env.WORKSHOP_APP_ID || fileData.appId, DEFAULTS.appId),
     maps,
     aliases,
@@ -256,6 +292,55 @@ const runDownloadProcess = (job: DownloadJob): Promise<JobRunResult> =>
     });
   });
 
+const runProcessMapPipeline = (
+  job: DownloadJob,
+  config: WorkshopMapConfigResolved,
+): Promise<JobRunResult> =>
+  new Promise((resolve, reject) => {
+    const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+    const args = [
+      '--prefix',
+      'server',
+      'run',
+      'workshop:process-map',
+      '--',
+      '--id',
+      job.workshopId,
+      '--map',
+      job.mapName,
+      '--app-id',
+      String(job.appId),
+      '--asset-resolution-mode',
+      config.assetResolutionMode,
+      '--sourceio-mode',
+      config.sourceioMode,
+    ];
+    const child = spawn(npmCmd, args, {
+      cwd: WORKSPACE_ROOT,
+      env: process.env,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    let output = '';
+    const append = (chunk: unknown) => {
+      const text = String(chunk || '');
+      if (!text) return;
+      output += text;
+      if (output.length > 1024 * 1024) {
+        output = output.slice(output.length - 1024 * 1024);
+      }
+    };
+    child.stdout.on('data', append);
+    child.stderr.on('data', append);
+    child.on('error', (error) => reject(error));
+    child.on('close', (code, signal) => {
+      resolve({
+        exitCode: typeof code === 'number' ? code : -1,
+        ...(signal ? { signal: String(signal) } : {}),
+        outputTail: tailLines(output, 120),
+      });
+    });
+  });
+
 const scheduleWakeTimer = () => {
   if (wakeTimer) {
     clearTimeout(wakeTimer);
@@ -317,8 +402,30 @@ const processQueue = async () => {
       } catch (error) {
         runError = error;
       }
+      let processResult: JobRunResult | null = null;
+      let processError: unknown = null;
+      if (!runError && result && result.exitCode === 0 && config.autoProcessEnabled) {
+        console.log('[workshop-auto] process_start', JSON.stringify({
+          key: job.key,
+          map: job.mapName,
+          workshopId: job.workshopId,
+          attempt: job.attempt,
+          assetResolutionMode: config.assetResolutionMode,
+          sourceioMode: config.sourceioMode,
+        }));
+        try {
+          processResult = await runProcessMapPipeline(job, config);
+        } catch (error) {
+          processError = error;
+        }
+      }
 
-      const failed = runError !== null || !result || result.exitCode !== 0;
+      const failed =
+        runError !== null
+        || !result
+        || result.exitCode !== 0
+        || processError !== null
+        || (config.autoProcessEnabled && (!processResult || processResult.exitCode !== 0));
       if (!failed) {
         const okResult = result as JobRunResult;
         recentSuccessByKey.set(job.key, Date.now());
@@ -331,14 +438,28 @@ const processQueue = async () => {
           exitCode: okResult.exitCode,
           logTail: okResult.outputTail.slice(-5),
         }));
+        if (config.autoProcessEnabled && processResult) {
+          console.log('[workshop-auto] process_ok', JSON.stringify({
+            key: job.key,
+            map: job.mapName,
+            workshopId: job.workshopId,
+            attempt: job.attempt,
+            exitCode: processResult.exitCode,
+            logTail: processResult.outputTail.slice(-5),
+          }));
+        }
         continue;
       }
 
       const attempt = job.attempt + 1;
       const canRetry = attempt <= config.maxRetries;
-      const errMsg = runError
-        ? String((runError as any)?.message || runError)
-        : `exit_code_${result?.exitCode ?? 'unknown'}${result?.signal ? `_signal_${result.signal}` : ''}`;
+      const errMsg = processError
+        ? `process_error:${String((processError as any)?.message || processError)}`
+        : runError
+          ? `download_error:${String((runError as any)?.message || runError)}`
+          : config.autoProcessEnabled
+            ? `process_exit_code_${processResult?.exitCode ?? 'unknown'}${processResult?.signal ? `_signal_${processResult.signal}` : ''}`
+            : `download_exit_code_${result?.exitCode ?? 'unknown'}${result?.signal ? `_signal_${result.signal}` : ''}`;
 
       if (canRetry) {
         const delay = computeRetryDelayMs(attempt, config);
@@ -354,7 +475,8 @@ const processQueue = async () => {
           attempt,
           nextInMs: delay,
           reason: errMsg,
-          ...(result ? { logTail: result.outputTail.slice(-5) } : {}),
+          ...(result ? { downloadLogTail: result.outputTail.slice(-5) } : {}),
+          ...(processResult ? { processLogTail: processResult.outputTail.slice(-5) } : {}),
         }));
         continue;
       }
@@ -366,7 +488,8 @@ const processQueue = async () => {
         workshopId: job.workshopId,
         attempts: attempt,
         reason: errMsg,
-        ...(result ? { logTail: result.outputTail.slice(-10) } : {}),
+        ...(result ? { downloadLogTail: result.outputTail.slice(-10) } : {}),
+        ...(processResult ? { processLogTail: processResult.outputTail.slice(-10) } : {}),
       }));
     }
   } finally {
@@ -474,6 +597,9 @@ export const startWorkshopAutoDownloadJob = () => {
   console.log('[workshop-auto] initialized', JSON.stringify({
     runtimeEnabled,
     configEnabled: config.enabled,
+    autoProcessEnabled: config.autoProcessEnabled,
+    assetResolutionMode: config.assetResolutionMode,
+    sourceioMode: config.sourceioMode,
     appId: config.appId,
     mappedMaps: Object.keys(config.maps).length,
     aliases: Object.keys(config.aliases).length,

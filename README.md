@@ -87,6 +87,9 @@ Campos principais:
 
 - `maps.<mapName> = <workshopId>`
 - `aliases.<mapAlias> = <mapNameCanonico>`
+- `autoProcessEnabled` (pos-download: extrair + pipeline)
+- `assetResolutionMode` (`permissive|strict`)
+- `sourceioMode` (`auto|required|off`)
 - `maxRetries`, `retryBaseMs`, `retryMaxMs`, `maxQueueSize`
 
 Trigger automatico:
@@ -99,7 +102,10 @@ Trigger automatico:
 Controle por env:
 
 - `WORKSHOP_AUTO_DOWNLOAD_ENABLED` (default `true`)
+- `WORKSHOP_AUTO_PROCESS_ENABLED` (default `true`)
 - `WORKSHOP_MAPS_FILE` (default `server/config/workshop-maps.json`)
+- `WORKSHOP_ASSET_RESOLUTION_MODE` (`permissive|strict`)
+- `WORKSHOP_SOURCEIO_MODE` (`auto|required|off`)
 - `WORKSHOP_MAX_RETRIES`
 - `WORKSHOP_RETRY_BASE_MS`
 - `WORKSHOP_RETRY_MAX_MS`
@@ -111,7 +117,33 @@ Logs esperados:
 - `[workshop-auto] initialized`
 - `[workshop-auto] queued`
 - `[workshop-auto] download_start`
-- `[workshop-auto] download_ok` ou `[workshop-auto] download_failed`
+- `[workshop-auto] download_ok` / `download_failed`
+- `[workshop-auto] process_start` / `process_ok`
+
+## PR-14.3 Processamento pos-download (extract + pipeline)
+
+Comando manual (id + mapa):
+
+```bash
+npm --prefix server run workshop:process-map -- --id 262714246040502603 --map rp_evocity_v33x
+```
+
+Fluxo:
+
+1. Detecta payload Workshop no item baixado (`.gma`, legado `.bin` LZMA, fallback zip-wrapped).
+2. Extrai payload para `WORKSHOP_ROOT/extracted/<workshopId>/payload_*`.
+3. Encontra `*.bsp` e seleciona o BSP do mapa alvo.
+4. Roda `map:pipeline:build` automaticamente.
+
+Relatorios:
+
+- `.../reports/<workshopId>.<map>.extract.json`
+- `.../reports/<workshopId>.<map>.process.json`
+
+Scripts novos:
+
+- `server/scripts/extract_workshop_payload.py`
+- `server/src/scripts/processWorkshopMap.ts`
 
 ## Artefatos gerados
 

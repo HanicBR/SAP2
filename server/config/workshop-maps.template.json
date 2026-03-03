@@ -1,5 +1,8 @@
 {
   "enabled": true,
+  "autoProcessEnabled": true,
+  "assetResolutionMode": "permissive",
+  "sourceioMode": "auto",
   "appId": 4000,
   "maxRetries": 3,
   "retryBaseMs": 15000,
