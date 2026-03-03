@@ -70,28 +70,42 @@ type Manifest = {
 type MaterialIndex = {
   generatedAt: string;
   total: number;
+  rootsScanned?: string[];
   materials: Array<{
     id: string;
     material: string;
     placeholder: boolean;
     status: string;
     textureUrl?: string;
+    usage?: string[];
+    sourcePath?: string;
+    resolvedBaseTexture?: string;
+    searchedVmt?: string;
+    searchedVtf?: string;
+    error?: string;
   }>;
 };
 
 type ModelIndex = {
   generatedAt: string;
   total: number;
+  rootsScanned?: string[];
   models: Array<{
     id: string;
     model: string;
     placeholder: boolean;
     status: string;
     meshUrl?: string;
+    sourcePath?: string;
+    searchedMdl?: string;
+    searchedVtx?: string;
+    searchedVvd?: string;
     triCount?: number;
     vertexCount?: number;
     subMeshCount?: number;
     byteEstimate?: number;
+    materials?: string[];
+    error?: string;
   }>;
 };
 
@@ -184,6 +198,19 @@ type RuntimeStats = {
   modelCacheBytesEstimate: number;
   cameraCell: { x: number; y: number };
   firstActiveLoadMs: number | null;
+};
+
+type ViewerDiagnostic = {
+  id: string;
+  level: 'warn' | 'error';
+  code: string;
+  assetType: 'material' | 'texture' | 'model' | 'chunk' | 'runtime';
+  assetId: string;
+  message: string;
+  searchedIn: string[];
+  firstSeenAt: string;
+  lastSeenAt: string;
+  count: number;
 };
 
 type ViewerWsStatus = 'idle' | 'connecting' | 'connected' | 'subscribed' | 'error';
@@ -413,6 +440,7 @@ const ServerView3D: React.FC = () => {
     firstActiveLoadMs: null,
   });
   const [streamingLogs, setStreamingLogs] = useState<string[]>([]);
+  const [diagnostics, setDiagnostics] = useState<ViewerDiagnostic[]>([]);
   const viewerStateRef = useRef<ServerViewerStateSnapshot | null>(null);
   const viewerSelectedSteamIdRef = useRef<string | null>(null);
   const viewerFollowSelectedRef = useRef<boolean>(false);
@@ -762,6 +790,7 @@ const ServerView3D: React.FC = () => {
   useEffect(() => {
     const host = mountRef.current;
     if (!host) return undefined;
+    setDiagnostics([]);
 
     let cancelled = false;
     let animationFrameId = 0;
@@ -833,8 +862,31 @@ const ServerView3D: React.FC = () => {
     const textureCache = new Map<string, THREE.Texture | null>();
     const textureLoading = new Set<string>();
     const pendingMaterialBindings = new Map<string, Set<THREE.MeshStandardMaterial>>();
-    const materialDefs = new Map<string, { placeholder: boolean; textureUrl?: string }>();
-    const modelDefs = new Map<string, { id: string; placeholder: boolean; meshUrl?: string }>();
+    const materialDefs = new Map<string, {
+      placeholder: boolean;
+      textureUrl?: string;
+      status?: string;
+      sourcePath?: string;
+      resolvedBaseTexture?: string;
+      searchedVmt?: string;
+      searchedVtf?: string;
+      usage?: string[];
+      error?: string;
+    }>();
+    let materialRootsScanned: string[] = [];
+    const modelDefs = new Map<string, {
+      id: string;
+      placeholder: boolean;
+      meshUrl?: string;
+      status?: string;
+      sourcePath?: string;
+      searchedMdl?: string;
+      searchedVtx?: string;
+      searchedVvd?: string;
+      materials?: string[];
+      error?: string;
+    }>();
+    let modelRootsScanned: string[] = [];
     const modelCache = new Map<string, ModelCacheEntry | null>();
     const modelLoading = new Map<string, Promise<ModelCacheEntry | null>>();
     const modelUsageCount = new Map<string, number>();
@@ -869,11 +921,98 @@ const ServerView3D: React.FC = () => {
     const followFocus = new THREE.Vector3();
     const followDesiredCamera = new THREE.Vector3();
     let lastPlayerSnapshotKey = '';
+    const diagnosticsMap = new Map<string, ViewerDiagnostic>();
+
+    const pushDiagnostic = (
+      level: 'warn' | 'error',
+      code: string,
+      assetType: ViewerDiagnostic['assetType'],
+      assetIdRaw: string,
+      message: string,
+      searchedIn: string[] = [],
+    ) => {
+      const assetId = String(assetIdRaw || '__unknown__').trim() || '__unknown__';
+      const key = `${code}|${assetType}|${assetId}`;
+      const nowIso = new Date().toISOString();
+      const cleanSearched = Array.from(
+        new Set(
+          searchedIn
+            .map((item) => String(item || '').trim())
+            .filter((item) => item.length > 0),
+        ),
+      );
+      const current = diagnosticsMap.get(key);
+      if (current) {
+        current.count += 1;
+        current.lastSeenAt = nowIso;
+        if (!current.message && message) current.message = message;
+        if (cleanSearched.length > 0) {
+          current.searchedIn = Array.from(new Set(current.searchedIn.concat(cleanSearched))).slice(0, 10);
+        }
+      } else {
+        diagnosticsMap.set(key, {
+          id: key,
+          level,
+          code,
+          assetType,
+          assetId,
+          message,
+          searchedIn: cleanSearched.slice(0, 10),
+          firstSeenAt: nowIso,
+          lastSeenAt: nowIso,
+          count: 1,
+        });
+      }
+
+      const sorted = Array.from(diagnosticsMap.values()).sort((a, b) => {
+        const levelScore = (item: ViewerDiagnostic) => (item.level === 'error' ? 2 : 1);
+        const diffLevel = levelScore(b) - levelScore(a);
+        if (diffLevel !== 0) return diffLevel;
+        if (b.count !== a.count) return b.count - a.count;
+        return b.lastSeenAt.localeCompare(a.lastSeenAt);
+      });
+      setDiagnostics(sorted.slice(0, 120));
+    };
+
+    const withRoots = (roots: string[], relPaths: string[]): string[] => {
+      const cleaned = relPaths
+        .map((item) => String(item || '').trim())
+        .filter((item) => item.length > 0);
+      if (!cleaned.length) return [];
+      const out: string[] = [];
+      for (const rel of cleaned) {
+        out.push(rel);
+        for (const rootRaw of roots.slice(0, 3)) {
+          const root = String(rootRaw || '').trim().replace(/\\/g, '/').replace(/\/$/, '');
+          const relNorm = rel.replace(/\\/g, '/').replace(/^\//, '');
+          if (!root) continue;
+          out.push(`${root}/${relNorm}`);
+        }
+      }
+      return Array.from(new Set(out));
+    };
 
     const getWorldMaterial = (materialIdRaw: string, placeholderFlag: boolean): THREE.MeshStandardMaterial => {
       const materialId = String(materialIdRaw || '__missing_material');
       const def = materialDefs.get(materialId);
       const shouldPlaceholder = placeholderFlag || !def || def.placeholder || !def.textureUrl;
+      if (shouldPlaceholder) {
+        const searchedIn = withRoots(materialRootsScanned, [
+          def?.searchedVmt || (materialId ? `materials/${materialId}.vmt` : ''),
+          def?.searchedVtf || (def?.resolvedBaseTexture ? `materials/${def.resolvedBaseTexture}.vtf` : ''),
+          def?.sourcePath || '',
+        ]);
+        pushDiagnostic(
+          def?.error ? 'error' : 'warn',
+          def?.status ? `material_${def.status}` : 'material_placeholder',
+          'material',
+          materialId,
+          def?.error
+            ? `material sem textura (${def.status || 'placeholder'}): ${def.error}`
+            : `material sem textura (${def?.status || 'not_in_index'})`,
+          searchedIn,
+        );
+      }
       const baseColor = shouldPlaceholder ? new THREE.Color(0x6b7280) : hashColor(materialId, 0.92);
       const material = new THREE.MeshStandardMaterial({
         color: baseColor,
@@ -920,6 +1059,19 @@ const ServerView3D: React.FC = () => {
                 textureCache.set(textureUrl, null);
                 textureLoading.delete(textureUrl);
                 pendingMaterialBindings.delete(textureUrl);
+                pushDiagnostic(
+                  'error',
+                  'texture_fetch_failed',
+                  'texture',
+                  textureUrl,
+                  `falha ao carregar textura no browser: ${textureUrl}`,
+                  withRoots(materialRootsScanned, [
+                    textureUrl,
+                    materialId ? `materials/${materialId}.vmt` : '',
+                    def?.searchedVtf || '',
+                    def?.sourcePath || '',
+                  ]),
+                );
               },
             );
           }
@@ -1069,6 +1221,21 @@ const ServerView3D: React.FC = () => {
       const def = modelDefs.get(modelId);
       if (!def || def.placeholder || !def.meshUrl) {
         modelCache.set(modelId, null);
+        pushDiagnostic(
+          def?.error ? 'error' : 'warn',
+          def?.status ? `model_${def.status}` : 'model_not_in_index',
+          'model',
+          modelId,
+          def?.error
+            ? `modelo sem malha exportada (${def.status || 'placeholder'}): ${def.error}`
+            : `modelo sem malha exportada (${def?.status || 'missing_index'})`,
+          withRoots(modelRootsScanned, [
+            def?.sourcePath || '',
+            def?.searchedMdl || (modelId ? `models/${modelId}.mdl` : ''),
+            def?.searchedVtx || '',
+            def?.searchedVvd || '',
+          ]),
+        );
         return null;
       }
 
@@ -1133,6 +1300,14 @@ const ServerView3D: React.FC = () => {
 
           if (!subMeshes.length) {
             modelCache.set(modelId, null);
+            pushDiagnostic(
+              'warn',
+              'model_no_submeshes',
+              'model',
+              modelId,
+              'modelo carregado sem submeshes utilizaveis',
+              withRoots(modelRootsScanned, [def.sourcePath || '', def.meshUrl || '', def.searchedMdl || '']),
+            );
             return null;
           }
 
@@ -1152,8 +1327,16 @@ const ServerView3D: React.FC = () => {
             sweepModelCache(performance.now());
           }
           return resolved;
-        } catch {
+        } catch (error: any) {
           modelCache.set(modelId, null);
+          pushDiagnostic(
+            'error',
+            'model_mesh_fetch_failed',
+            'model',
+            modelId,
+            `falha ao carregar malha do modelo: ${String(error?.message || error || 'unknown')}`,
+            withRoots(modelRootsScanned, [def.meshUrl || '', def.sourcePath || '', def.searchedMdl || '']),
+          );
           return null;
         } finally {
           modelLoading.delete(modelId);
@@ -1501,6 +1684,24 @@ const ServerView3D: React.FC = () => {
               continue;
             }
 
+            if (!explicitPlaceholder && normalizedModel !== '__placeholder_box__') {
+              const def = modelDefs.get(normalizedModel);
+              pushDiagnostic(
+                'warn',
+                'model_runtime_placeholder',
+                'model',
+                normalizedModel,
+                'modelo renderizado como placeholder (caixa) por falta de mesh no runtime',
+                withRoots(modelRootsScanned, [
+                  def?.meshUrl || '',
+                  def?.sourcePath || '',
+                  def?.searchedMdl || '',
+                  def?.searchedVtx || '',
+                  def?.searchedVvd || '',
+                ]),
+              );
+            }
+
             const color = explicitPlaceholder ? new THREE.Color(0xdc2626) : hashColor(model, 0.9);
             const boxGeo = new THREE.BoxGeometry(34, 72, 34);
             const boxMat = new THREE.MeshStandardMaterial({
@@ -1534,6 +1735,14 @@ const ServerView3D: React.FC = () => {
         appendLog(`chunk carregado: ${entry.id}`);
       } catch (loadErr: any) {
         appendLog(`erro ao carregar chunk ${entry.id}: ${String(loadErr?.message || loadErr)}`);
+        pushDiagnostic(
+          'error',
+          'chunk_load_failed',
+          'chunk',
+          entry.id,
+          `erro ao carregar chunk ${entry.id}: ${String(loadErr?.message || loadErr)}`,
+          [entry.url || ''],
+        );
       } finally {
         loadingChunkIds.delete(entry.id);
       }
@@ -1551,18 +1760,36 @@ const ServerView3D: React.FC = () => {
             const materialIndexUrl = toAssetUrl(manifestUrl, loadedManifest.assets.materials.indexUrl);
             const materialIndex = await readJson<MaterialIndex>(materialIndexUrl);
             if (!cancelled) {
+              materialRootsScanned = Array.isArray(materialIndex.rootsScanned)
+                ? materialIndex.rootsScanned.map((item) => String(item || '')).filter(Boolean)
+                : [];
               for (const item of materialIndex.materials || []) {
                 const key = String(item.material || item.id || '').trim();
                 if (!key) continue;
                 materialDefs.set(key, {
                   placeholder: !!item.placeholder,
                   ...(item.textureUrl ? { textureUrl: item.textureUrl } : {}),
+                  ...(item.status ? { status: String(item.status) } : {}),
+                  ...(item.sourcePath ? { sourcePath: String(item.sourcePath) } : {}),
+                  ...(item.resolvedBaseTexture ? { resolvedBaseTexture: String(item.resolvedBaseTexture) } : {}),
+                  ...(item.searchedVmt ? { searchedVmt: String(item.searchedVmt) } : {}),
+                  ...(item.searchedVtf ? { searchedVtf: String(item.searchedVtf) } : {}),
+                  ...(Array.isArray(item.usage) ? { usage: item.usage.map((entry) => String(entry || '')) } : {}),
+                  ...(item.error ? { error: String(item.error) } : {}),
                 });
               }
               appendLog(`materials index carregado: total=${materialDefs.size}`);
             }
           } catch (materialErr: any) {
             appendLog(`materials index indisponivel: ${String(materialErr?.message || materialErr)}`);
+            pushDiagnostic(
+              'error',
+              'materials_index_unavailable',
+              'runtime',
+              'materials_index',
+              `falha ao carregar materials/index: ${String(materialErr?.message || materialErr)}`,
+              [loadedManifest.assets.materials.indexUrl],
+            );
           }
         }
 
@@ -1571,6 +1798,9 @@ const ServerView3D: React.FC = () => {
             const modelIndexUrl = toAssetUrl(manifestUrl, loadedManifest.assets.models.indexUrl);
             const modelIndex = await readJson<ModelIndex>(modelIndexUrl);
             if (!cancelled) {
+              modelRootsScanned = Array.isArray(modelIndex.rootsScanned)
+                ? modelIndex.rootsScanned.map((item) => String(item || '')).filter(Boolean)
+                : [];
               for (const model of modelIndex.models || []) {
                 const key = String(model.id || model.model || '').trim().toLowerCase();
                 if (!key) continue;
@@ -1578,12 +1808,27 @@ const ServerView3D: React.FC = () => {
                   id: key,
                   placeholder: !!model.placeholder,
                   ...(model.meshUrl ? { meshUrl: model.meshUrl } : {}),
+                  ...(model.status ? { status: String(model.status) } : {}),
+                  ...(model.sourcePath ? { sourcePath: String(model.sourcePath) } : {}),
+                  ...(model.searchedMdl ? { searchedMdl: String(model.searchedMdl) } : {}),
+                  ...(model.searchedVtx ? { searchedVtx: String(model.searchedVtx) } : {}),
+                  ...(model.searchedVvd ? { searchedVvd: String(model.searchedVvd) } : {}),
+                  ...(Array.isArray(model.materials) ? { materials: model.materials.map((item) => String(item || '')) } : {}),
+                  ...(model.error ? { error: String(model.error) } : {}),
                 });
               }
               appendLog(`models index carregado: total=${modelDefs.size}`);
             }
           } catch (modelErr: any) {
             appendLog(`models index indisponivel: ${String(modelErr?.message || modelErr)}`);
+            pushDiagnostic(
+              'error',
+              'models_index_unavailable',
+              'runtime',
+              'models_index',
+              `falha ao carregar models/index: ${String(modelErr?.message || modelErr)}`,
+              [loadedManifest.assets.models.indexUrl],
+            );
           }
         }
 
@@ -1846,6 +2091,7 @@ const ServerView3D: React.FC = () => {
         const message = String(setupErr?.message || setupErr);
         setError(message);
         setStatus('Falha ao inicializar viewer');
+        pushDiagnostic('error', 'viewer_setup_failed', 'runtime', 'viewer_setup', message, [manifestUrl]);
       }
       return undefined;
     };
@@ -2081,6 +2327,42 @@ const ServerView3D: React.FC = () => {
               ))}
             </div>
           </div>
+        </div>
+      </div>
+
+      <div className="rounded border border-zinc-800 bg-zinc-950 p-3">
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <p className="text-zinc-500 uppercase font-bold text-[11px]">Diagnostico de assets (missing/errors)</p>
+          <span className="text-[10px] text-zinc-400 font-mono">entries={diagnostics.length}</span>
+        </div>
+        <div className="max-h-[280px] overflow-y-auto space-y-2 text-[11px] font-mono">
+          {!diagnostics.length && <p className="text-zinc-500">Sem diagnosticos ainda.</p>}
+          {diagnostics.map((item) => (
+            <div
+              key={item.id}
+              className={`rounded border px-2 py-1.5 ${
+                item.level === 'error'
+                  ? 'border-red-900/70 bg-red-950/20 text-red-200'
+                  : 'border-yellow-900/60 bg-yellow-950/20 text-yellow-200'
+              }`}
+            >
+              <p>
+                [{item.level.toUpperCase()}] {item.code} x{item.count}
+              </p>
+              <p className="break-all">
+                {item.assetType}:{item.assetId}
+              </p>
+              <p className="text-zinc-300 break-words">{item.message}</p>
+              {item.searchedIn.length > 0 && (
+                <p className="text-zinc-400 break-all">
+                  searchedIn: {item.searchedIn.join(' | ')}
+                </p>
+              )}
+              <p className="text-zinc-500">
+                first={new Date(item.firstSeenAt).toLocaleTimeString('pt-BR')} last={new Date(item.lastSeenAt).toLocaleTimeString('pt-BR')}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
     </div>

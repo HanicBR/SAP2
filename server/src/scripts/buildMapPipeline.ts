@@ -84,6 +84,8 @@ type MaterialExportRecord = {
   status: string;
   sourcePath?: string;
   resolvedBaseTexture?: string;
+  searchedVmt?: string;
+  searchedVtf?: string;
   textureFile?: string;
   textureWidth?: number;
   textureHeight?: number;
@@ -94,6 +96,9 @@ type ModelExportRecord = {
   model: string;
   status: string;
   sourcePath?: string;
+  searchedMdl?: string;
+  searchedVtx?: string;
+  searchedVvd?: string;
   meshFile?: string;
   lodUsed?: number;
   mdlVersion?: number;
@@ -686,14 +691,14 @@ const runSourceIOMaterialExport = (
   materials: string[],
   contentRoots: string[],
   texturesOutDir: string,
-): { records: Map<string, MaterialExportRecord>; warnings: string[] } => {
+): { records: Map<string, MaterialExportRecord>; warnings: string[]; rootsScanned: string[] } => {
   const records = new Map<string, MaterialExportRecord>();
   const warnings: string[] = [];
-  if (materials.length === 0) return { records, warnings };
+  if (materials.length === 0) return { records, warnings, rootsScanned: [] };
 
   if (!fs.existsSync(options.sourceioMaterialScript) || !fs.existsSync(options.sourceioRoot)) {
     warnings.push('sourceio_material_export_paths_missing');
-    return { records, warnings };
+    return { records, warnings, rootsScanned: [] };
   }
 
   const materialListPath = path.join(os.tmpdir(), `sap2-material-list-${process.pid}-${Date.now()}.json`);
@@ -702,7 +707,7 @@ const runSourceIOMaterialExport = (
     fs.writeFileSync(materialListPath, `${JSON.stringify(materials, null, 2)}\n`, 'utf8');
   } catch (error: any) {
     warnings.push(`sourceio_material_export_write_failed:${String(error?.message || error)}`);
-    return { records, warnings };
+    return { records, warnings, rootsScanned: [] };
   }
 
   const uniqueRoots = Array.from(
@@ -745,15 +750,19 @@ const runSourceIOMaterialExport = (
 
   if (exec.error || !fs.existsSync(outPath)) {
     warnings.push(`sourceio_material_export_exec_failed:${String(exec.error?.message || 'no_output')}`);
-    return { records, warnings };
+    return { records, warnings, rootsScanned: [] };
   }
 
+  let rootsScanned: string[] = [];
   try {
     const payload = JSON.parse(fs.readFileSync(outPath, 'utf8')) as any;
     if (!payload?.ok) {
       warnings.push(`sourceio_material_export_failed:${String(payload?.error || 'unknown')}`);
-      return { records, warnings };
+      return { records, warnings, rootsScanned };
     }
+    rootsScanned = Array.isArray(payload.rootsScanned)
+      ? payload.rootsScanned.map((item: unknown) => String(item || '')).filter(Boolean)
+      : [];
     const items = Array.isArray(payload.materials) ? payload.materials : [];
     for (const item of items) {
       const material = normalizeMaterialName(String(item?.material || ''));
@@ -763,6 +772,8 @@ const runSourceIOMaterialExport = (
         status: String(item?.status || 'unknown'),
         ...(item?.sourcePath ? { sourcePath: String(item.sourcePath) } : {}),
         ...(item?.resolvedBaseTexture ? { resolvedBaseTexture: normalizeMaterialName(String(item.resolvedBaseTexture)) } : {}),
+        ...(item?.searchedVmt ? { searchedVmt: normalizeAssetPath(String(item.searchedVmt)) } : {}),
+        ...(item?.searchedVtf ? { searchedVtf: normalizeAssetPath(String(item.searchedVtf)) } : {}),
         ...(item?.textureFile ? { textureFile: String(item.textureFile) } : {}),
         ...(Number.isFinite(Number(item?.textureWidth)) ? { textureWidth: Number(item.textureWidth) } : {}),
         ...(Number.isFinite(Number(item?.textureHeight)) ? { textureHeight: Number(item.textureHeight) } : {}),
@@ -782,7 +793,7 @@ const runSourceIOMaterialExport = (
     }
   }
 
-  return { records, warnings };
+  return { records, warnings, rootsScanned };
 };
 
 const runSourceIOModelExport = (
@@ -790,14 +801,14 @@ const runSourceIOModelExport = (
   models: string[],
   contentRoots: string[],
   modelsOutDir: string,
-): { records: Map<string, ModelExportRecord>; warnings: string[] } => {
+): { records: Map<string, ModelExportRecord>; warnings: string[]; rootsScanned: string[] } => {
   const records = new Map<string, ModelExportRecord>();
   const warnings: string[] = [];
-  if (models.length === 0) return { records, warnings };
+  if (models.length === 0) return { records, warnings, rootsScanned: [] };
 
   if (!fs.existsSync(options.sourceioModelScript) || !fs.existsSync(options.sourceioRoot)) {
     warnings.push('sourceio_model_export_paths_missing');
-    return { records, warnings };
+    return { records, warnings, rootsScanned: [] };
   }
 
   const modelListPath = path.join(os.tmpdir(), `sap2-model-list-${process.pid}-${Date.now()}.json`);
@@ -806,7 +817,7 @@ const runSourceIOModelExport = (
     fs.writeFileSync(modelListPath, `${JSON.stringify(models, null, 2)}\n`, 'utf8');
   } catch (error: any) {
     warnings.push(`sourceio_model_export_write_failed:${String(error?.message || error)}`);
-    return { records, warnings };
+    return { records, warnings, rootsScanned: [] };
   }
 
   const uniqueRoots = Array.from(
@@ -849,15 +860,19 @@ const runSourceIOModelExport = (
 
   if (exec.error || !fs.existsSync(outPath)) {
     warnings.push(`sourceio_model_export_exec_failed:${String(exec.error?.message || 'no_output')}`);
-    return { records, warnings };
+    return { records, warnings, rootsScanned: [] };
   }
 
+  let rootsScanned: string[] = [];
   try {
     const payload = JSON.parse(fs.readFileSync(outPath, 'utf8')) as any;
     if (!payload?.ok) {
       warnings.push(`sourceio_model_export_failed:${String(payload?.error || 'unknown')}`);
-      return { records, warnings };
+      return { records, warnings, rootsScanned };
     }
+    rootsScanned = Array.isArray(payload.rootsScanned)
+      ? payload.rootsScanned.map((item: unknown) => String(item || '')).filter(Boolean)
+      : [];
     const items = Array.isArray(payload.models) ? payload.models : [];
     for (const item of items) {
       const model = normalizeModelName(String(item?.model || ''));
@@ -866,6 +881,9 @@ const runSourceIOModelExport = (
         model,
         status: String(item?.status || 'unknown'),
         ...(item?.sourcePath ? { sourcePath: String(item.sourcePath) } : {}),
+        ...(item?.searchedMdl ? { searchedMdl: normalizeAssetPath(String(item.searchedMdl)) } : {}),
+        ...(item?.searchedVtx ? { searchedVtx: normalizeAssetPath(String(item.searchedVtx)) } : {}),
+        ...(item?.searchedVvd ? { searchedVvd: normalizeAssetPath(String(item.searchedVvd)) } : {}),
         ...(item?.meshFile ? { meshFile: String(item.meshFile) } : {}),
         ...(Number.isFinite(Number(item?.lodUsed)) ? { lodUsed: Number(item.lodUsed) } : {}),
         ...(Number.isFinite(Number(item?.mdlVersion)) ? { mdlVersion: Number(item.mdlVersion) } : {}),
@@ -906,7 +924,7 @@ const runSourceIOModelExport = (
     }
   }
 
-  return { records, warnings };
+  return { records, warnings, rootsScanned };
 };
 
 const runFallback = (options: Options): ImportData => {
@@ -1193,6 +1211,14 @@ const run = () => {
         .filter((item) => item.length > 0 && item !== '__missing_material'),
     ),
   ).sort((a, b) => a.localeCompare(b));
+  const uniqueRuntimeModels = Array.from(
+    new Set(
+      props
+        .filter((item) => !item.placeholderModel && item.model !== '__placeholder_box__')
+        .map((item) => normalizeModelName(item.model))
+        .filter((item) => item.length > 0),
+    ),
+  ).sort((a, b) => a.localeCompare(b));
   const auditMounts = Array.isArray((auditReport as any)?.mounts?.resolved)
     ? (auditReport as any).mounts.resolved as Array<{ rootPath?: string }>
     : [];
@@ -1209,10 +1235,35 @@ const run = () => {
         .filter((item) => item.length > 0 && fs.existsSync(item)),
     ),
   );
-  const materialExport = runSourceIOMaterialExport(options, usedWorldMaterials, contentRoots, materialsTextureDir);
+  const modelExport = runSourceIOModelExport(options, uniqueRuntimeModels, contentRoots, modelsMeshDir);
+  warnings.push(...modelExport.warnings);
+
+  const usedModelMaterials = Array.from(
+    new Set(
+      Array.from(modelExport.records.values())
+        .filter((item) => item.status === 'ok')
+        .flatMap((item) => (Array.isArray(item.materials) ? item.materials : []))
+        .map((item) => normalizeMaterialName(String(item || '')))
+        .filter((item) => item.length > 0 && item !== '__missing_material'),
+    ),
+  ).sort((a, b) => a.localeCompare(b));
+
+  const materialUsage = new Map<string, Set<'world' | 'model'>>();
+  const addMaterialUsage = (materialRaw: string, usage: 'world' | 'model') => {
+    const material = normalizeMaterialName(materialRaw);
+    if (!material || material === '__missing_material') return;
+    const current = materialUsage.get(material) || new Set<'world' | 'model'>();
+    current.add(usage);
+    materialUsage.set(material, current);
+  };
+  for (const material of usedWorldMaterials) addMaterialUsage(material, 'world');
+  for (const material of usedModelMaterials) addMaterialUsage(material, 'model');
+  const requestedMaterials = Array.from(materialUsage.keys()).sort((a, b) => a.localeCompare(b));
+
+  const materialExport = runSourceIOMaterialExport(options, requestedMaterials, contentRoots, materialsTextureDir);
   warnings.push(...materialExport.warnings);
 
-  const materialIndexEntries = usedWorldMaterials.map((material) => {
+  const materialIndexEntries = requestedMaterials.map((material) => {
     const exported = materialExport.records.get(material);
     const textureFile = String(exported?.textureFile || '').trim();
     const texturePath = textureFile ? path.join(materialsTextureDir, textureFile) : '';
@@ -1220,10 +1271,13 @@ const run = () => {
     return {
       id: material,
       material,
+      usage: Array.from(materialUsage.get(material) || []).sort((a, b) => a.localeCompare(b)),
       placeholder: !hasTexture,
       status: exported?.status || 'not_exported',
       ...(exported?.sourcePath ? { sourcePath: exported.sourcePath } : {}),
       ...(exported?.resolvedBaseTexture ? { resolvedBaseTexture: exported.resolvedBaseTexture } : {}),
+      ...(exported?.searchedVmt ? { searchedVmt: exported.searchedVmt } : {}),
+      ...(exported?.searchedVtf ? { searchedVtf: exported.searchedVtf } : {}),
       ...(hasTexture ? { textureUrl: `./materials/basecolor/${textureFile}` } : {}),
       ...(Number.isFinite(Number(exported?.textureWidth)) ? { textureWidth: Number(exported?.textureWidth) } : {}),
       ...(Number.isFinite(Number(exported?.textureHeight)) ? { textureHeight: Number(exported?.textureHeight) } : {}),
@@ -1233,19 +1287,9 @@ const run = () => {
   writeJson(path.join(materialsDir, 'index.json'), {
     generatedAt: new Date().toISOString(),
     total: materialIndexEntries.length,
+    rootsScanned: materialExport.rootsScanned,
     materials: materialIndexEntries,
   });
-
-  const uniqueRuntimeModels = Array.from(
-    new Set(
-      props
-        .filter((item) => !item.placeholderModel && item.model !== '__placeholder_box__')
-        .map((item) => normalizeModelName(item.model))
-        .filter((item) => item.length > 0),
-    ),
-  ).sort((a, b) => a.localeCompare(b));
-  const modelExport = runSourceIOModelExport(options, uniqueRuntimeModels, contentRoots, modelsMeshDir);
-  warnings.push(...modelExport.warnings);
 
   const modelIndexEntries = uniqueRuntimeModels.map((model) => {
     const exported = modelExport.records.get(model);
@@ -1258,6 +1302,9 @@ const run = () => {
       placeholder: !hasMesh,
       status: exported?.status || 'not_exported',
       ...(exported?.sourcePath ? { sourcePath: exported.sourcePath } : {}),
+      ...(exported?.searchedMdl ? { searchedMdl: exported.searchedMdl } : {}),
+      ...(exported?.searchedVtx ? { searchedVtx: exported.searchedVtx } : {}),
+      ...(exported?.searchedVvd ? { searchedVvd: exported.searchedVvd } : {}),
       ...(hasMesh ? { meshUrl: `./models/meshes/${meshFile}` } : {}),
       ...(Number.isFinite(Number(exported?.lodUsed)) ? { lodUsed: Number(exported?.lodUsed) } : {}),
       ...(Number.isFinite(Number(exported?.mdlVersion)) ? { mdlVersion: Number(exported?.mdlVersion) } : {}),
@@ -1275,6 +1322,7 @@ const run = () => {
   writeJson(path.join(modelsDir, 'index.json'), {
     generatedAt: new Date().toISOString(),
     total: modelIndexEntries.length,
+    rootsScanned: modelExport.rootsScanned,
     models: modelIndexEntries,
   });
 

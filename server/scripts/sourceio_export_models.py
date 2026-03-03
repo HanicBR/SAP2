@@ -192,24 +192,44 @@ def export_model_mesh(model: str, cm, requested_lod: int):
 
     model_rel = TinyPath(f"models/{model}.mdl")
     mdl_buffer = cm.find_file(model_rel)
+    searched_mdl = f"models/{model}.mdl"
+    searched_vtx = f"models/{model}.dx90.vtx"
+    searched_vvd = f"models/{model}.vvd"
     if mdl_buffer is None:
-        return {"status": "missing_mdl"}
+        return {"status": "missing_mdl", "searchedMdl": searched_mdl}
 
     vtx_buffer = find_vtx_cm(model_rel, cm)
     vvd_buffer = cm.find_file(model_rel.with_suffix(".vvd"))
     if vtx_buffer is None or vvd_buffer is None:
-        return {"status": "missing_vtx_or_vvd"}
+        return {
+            "status": "missing_vtx_or_vvd",
+            "searchedMdl": searched_mdl,
+            "searchedVtx": searched_vtx,
+            "searchedVvd": searched_vvd,
+        }
 
     mdl, mdl_version = load_mdl_from_buffer(mdl_buffer)
     vtx = open_vtx(vtx_buffer)
     vvd = Vvd.from_buffer(vvd_buffer)
 
     if not getattr(vvd, "lod_data", None):
-        return {"status": "vvd_lod_missing", "mdlVersion": mdl_version}
+        return {
+            "status": "vvd_lod_missing",
+            "mdlVersion": mdl_version,
+            "searchedMdl": searched_mdl,
+            "searchedVtx": searched_vtx,
+            "searchedVvd": searched_vvd,
+        }
 
     all_vertices = vvd.lod_data[0]
     if all_vertices is None or len(all_vertices) == 0:
-        return {"status": "vvd_vertices_missing", "mdlVersion": mdl_version}
+        return {
+            "status": "vvd_vertices_missing",
+            "mdlVersion": mdl_version,
+            "searchedMdl": searched_mdl,
+            "searchedVtx": searched_vtx,
+            "searchedVvd": searched_vvd,
+        }
 
     materials = [str(getattr(mat, "name", "") or "") for mat in getattr(mdl, "materials", [])]
     mat_paths = [str(item) for item in getattr(mdl, "materials_paths", [])]
@@ -301,7 +321,12 @@ def export_model_mesh(model: str, cm, requested_lod: int):
                 bounds_max = np.maximum(bounds_max, np.max(sub_positions, axis=0))
 
     if not buckets:
-        return {"status": "no_mesh_data", "mdlVersion": mdl_version}
+        return {
+            "status": "no_mesh_data",
+            "mdlVersion": mdl_version,
+            "searchedMdl": searched_mdl,
+            "searchedVtx": searched_vtx,
+        }
 
     sub_meshes = []
     byte_estimate = 0
@@ -332,7 +357,12 @@ def export_model_mesh(model: str, cm, requested_lod: int):
         )
 
     if not sub_meshes:
-        return {"status": "no_sub_meshes", "mdlVersion": mdl_version}
+        return {
+            "status": "no_sub_meshes",
+            "mdlVersion": mdl_version,
+            "searchedMdl": searched_mdl,
+            "searchedVtx": searched_vtx,
+        }
 
     if not np.isfinite(bounds_min).all() or not np.isfinite(bounds_max).all():
         bounds_min = np.array([0.0, 0.0, 0.0], dtype=np.float64)
@@ -340,6 +370,9 @@ def export_model_mesh(model: str, cm, requested_lod: int):
 
     return {
         "status": "ok",
+        "searchedMdl": searched_mdl,
+        "searchedVtx": searched_vtx,
+        "searchedVvd": searched_vvd,
         "mdlVersion": mdl_version,
         "lodUsed": int(lod_used) if lod_used is not None else int(max(0, requested_lod)),
         "triCount": int(total_triangles),
@@ -442,9 +475,21 @@ def main() -> int:
                     entry["byteEstimate"] = mesh_payload["stats"]["byteEstimate"]
                     entry["bounds"] = mesh_payload["bounds"]
                     entry["materials"] = [item.get("material", "__missing_material") for item in mesh_payload["subMeshes"]]
+                    if "searchedMdl" in exported:
+                        entry["searchedMdl"] = str(exported["searchedMdl"])
+                    if "searchedVtx" in exported:
+                        entry["searchedVtx"] = str(exported["searchedVtx"])
+                    if "searchedVvd" in exported:
+                        entry["searchedVvd"] = str(exported["searchedVvd"])
                 else:
                     if "mdlVersion" in exported:
                         entry["mdlVersion"] = int(exported["mdlVersion"])
+                    if "searchedMdl" in exported:
+                        entry["searchedMdl"] = str(exported["searchedMdl"])
+                    if "searchedVtx" in exported:
+                        entry["searchedVtx"] = str(exported["searchedVtx"])
+                    if "searchedVvd" in exported:
+                        entry["searchedVvd"] = str(exported["searchedVvd"])
                     if "error" in exported:
                         entry["error"] = str(exported["error"])
             except Exception as model_err:

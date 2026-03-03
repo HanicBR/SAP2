@@ -151,6 +151,7 @@ def main() -> int:
             }
             try:
                 vmt_rel = f"materials/{material}.vmt"
+                entry["searchedVmt"] = vmt_rel
                 vmt_file = cm.find_file(TinyPath(vmt_rel))
                 if vmt_file is None:
                     entry["status"] = "missing_vmt"
@@ -185,6 +186,7 @@ def main() -> int:
                     continue
 
                 vtf_rel = f"materials/{base_texture}.vtf"
+                entry["searchedVtf"] = vtf_rel
                 vtf_file = cm.find_file(TinyPath(vtf_rel))
                 if vtf_file is None:
                     entry["status"] = "missing_vtf"
