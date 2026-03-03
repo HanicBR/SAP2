@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 78,
     "staticProps": 7,
-    "placeholderWorldFaces": 32,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 0
   },
   "stats": {
@@ -665,7 +665,7 @@
       {
         "materialId": "metal/citadel_metalwall074a",
         "material": "metal/citadel_metalwall074a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 6,
         "triCount": 14,
         "vertexCount": 42,
@@ -1469,7 +1469,7 @@
       {
         "materialId": "concrete/concretewall070a",
         "material": "concrete/concretewall070a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 6,
         "triCount": 12,
         "vertexCount": 36,
@@ -1661,7 +1661,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 15,
         "triCount": 32,
         "vertexCount": 96,
@@ -2699,7 +2699,7 @@
       {
         "materialId": "nature/cliffface001a",
         "material": "nature/cliffface001a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 5,
         "triCount": 10,
         "vertexCount": 30,

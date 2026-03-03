@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 83,
     "staticProps": 28,
-    "placeholderWorldFaces": 16,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 0
   },
   "stats": {
@@ -38,7 +38,7 @@
       {
         "materialId": "de_chateau/woodm",
         "material": "de_chateau/woodm",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 12,
         "triCount": 24,
         "vertexCount": 72,
@@ -3080,7 +3080,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 5,
         "vertexCount": 15,
@@ -3167,7 +3167,7 @@
       {
         "materialId": "de_nuke/nukroofa",
         "material": "de_nuke/nukroofa",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 5,
         "vertexCount": 15,

@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 277,
     "staticProps": 22,
-    "placeholderWorldFaces": 208,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 7
   },
   "stats": {
@@ -38,7 +38,7 @@
       {
         "materialId": "concrete/concretefloor023a",
         "material": "concrete/concretefloor023a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 5,
         "triCount": 10,
         "vertexCount": 30,
@@ -200,7 +200,7 @@
       {
         "materialId": "concrete/concretewall022a",
         "material": "concrete/concretewall022a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 36,
         "triCount": 102,
         "vertexCount": 306,
@@ -1742,7 +1742,7 @@
       {
         "materialId": "wood/milflr002",
         "material": "wood/milflr002",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 17,
         "triCount": 70,
         "vertexCount": 210,
@@ -4691,7 +4691,7 @@
       {
         "materialId": "wood/woodwall011a",
         "material": "wood/woodwall011a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 70,
         "triCount": 169,
         "vertexCount": 507,
@@ -7238,7 +7238,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 14,
         "triCount": 33,
         "vertexCount": 99,
@@ -7745,7 +7745,7 @@
       {
         "materialId": "wood/siding05",
         "material": "wood/siding05",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 42,
         "triCount": 134,
         "vertexCount": 402,
@@ -9767,7 +9767,7 @@
       {
         "materialId": "props/rubberroof002a",
         "material": "props/rubberroof002a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 13,
         "triCount": 41,
         "vertexCount": 123,
@@ -11693,7 +11693,7 @@
       {
         "materialId": "metal/metalwall030a",
         "material": "metal/metalwall030a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 5,
         "vertexCount": 15,
@@ -11780,7 +11780,7 @@
       {
         "materialId": "nature/blenddirtlawn01",
         "material": "nature/blenddirtlawn01",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 9,
         "triCount": 18,
         "vertexCount": 54,

@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 2,
     "staticProps": 0,
-    "placeholderWorldFaces": 2,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 0
   },
   "stats": {
@@ -38,7 +38,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 4,
         "vertexCount": 12,

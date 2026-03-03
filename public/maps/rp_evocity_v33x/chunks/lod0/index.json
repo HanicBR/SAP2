@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-03T00:33:52.772Z",
+  "generatedAt": "2026-03-03T03:26:39.596Z",
   "lod": 0,
   "chunks": [
     {
@@ -21,7 +21,7 @@
       "counts": {
         "worldFaces": 223,
         "staticProps": 35,
-        "placeholderWorldFaces": 84,
+        "placeholderWorldFaces": 8,
         "placeholderStaticProps": 6
       },
       "stats": {
@@ -58,7 +58,7 @@
       "counts": {
         "worldFaces": 196,
         "staticProps": 19,
-        "placeholderWorldFaces": 75,
+        "placeholderWorldFaces": 8,
         "placeholderStaticProps": 6
       },
       "stats": {
@@ -95,7 +95,7 @@
       "counts": {
         "worldFaces": 11,
         "staticProps": 2,
-        "placeholderWorldFaces": 9,
+        "placeholderWorldFaces": 4,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -132,7 +132,7 @@
       "counts": {
         "worldFaces": 153,
         "staticProps": 22,
-        "placeholderWorldFaces": 85,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 1
       },
       "stats": {
@@ -169,7 +169,7 @@
       "counts": {
         "worldFaces": 276,
         "staticProps": 60,
-        "placeholderWorldFaces": 123,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -206,7 +206,7 @@
       "counts": {
         "worldFaces": 93,
         "staticProps": 11,
-        "placeholderWorldFaces": 27,
+        "placeholderWorldFaces": 8,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -243,7 +243,7 @@
       "counts": {
         "worldFaces": 27,
         "staticProps": 0,
-        "placeholderWorldFaces": 12,
+        "placeholderWorldFaces": 8,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -280,7 +280,7 @@
       "counts": {
         "worldFaces": 11,
         "staticProps": 3,
-        "placeholderWorldFaces": 10,
+        "placeholderWorldFaces": 4,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -317,7 +317,7 @@
       "counts": {
         "worldFaces": 1801,
         "staticProps": 194,
-        "placeholderWorldFaces": 732,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 2
       },
       "stats": {
@@ -354,7 +354,7 @@
       "counts": {
         "worldFaces": 30,
         "staticProps": 5,
-        "placeholderWorldFaces": 14,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 1
       },
       "stats": {
@@ -391,7 +391,7 @@
       "counts": {
         "worldFaces": 7,
         "staticProps": 0,
-        "placeholderWorldFaces": 6,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -428,7 +428,7 @@
       "counts": {
         "worldFaces": 15,
         "staticProps": 1,
-        "placeholderWorldFaces": 4,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -465,7 +465,7 @@
       "counts": {
         "worldFaces": 8,
         "staticProps": 2,
-        "placeholderWorldFaces": 4,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -502,7 +502,7 @@
       "counts": {
         "worldFaces": 5,
         "staticProps": 2,
-        "placeholderWorldFaces": 4,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -539,7 +539,7 @@
       "counts": {
         "worldFaces": 20,
         "staticProps": 0,
-        "placeholderWorldFaces": 18,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -576,7 +576,7 @@
       "counts": {
         "worldFaces": 112,
         "staticProps": 12,
-        "placeholderWorldFaces": 94,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 4
       },
       "stats": {
@@ -613,7 +613,7 @@
       "counts": {
         "worldFaces": 38,
         "staticProps": 10,
-        "placeholderWorldFaces": 4,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -650,7 +650,7 @@
       "counts": {
         "worldFaces": 41,
         "staticProps": 8,
-        "placeholderWorldFaces": 19,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -687,7 +687,7 @@
       "counts": {
         "worldFaces": 10,
         "staticProps": 7,
-        "placeholderWorldFaces": 7,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -724,7 +724,7 @@
       "counts": {
         "worldFaces": 15,
         "staticProps": 5,
-        "placeholderWorldFaces": 8,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -761,7 +761,7 @@
       "counts": {
         "worldFaces": 14,
         "staticProps": 2,
-        "placeholderWorldFaces": 7,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -798,7 +798,7 @@
       "counts": {
         "worldFaces": 214,
         "staticProps": 10,
-        "placeholderWorldFaces": 101,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 4
       },
       "stats": {
@@ -835,7 +835,7 @@
       "counts": {
         "worldFaces": 6,
         "staticProps": 0,
-        "placeholderWorldFaces": 5,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -872,7 +872,7 @@
       "counts": {
         "worldFaces": 14,
         "staticProps": 2,
-        "placeholderWorldFaces": 10,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -909,7 +909,7 @@
       "counts": {
         "worldFaces": 122,
         "staticProps": 4,
-        "placeholderWorldFaces": 12,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -946,7 +946,7 @@
       "counts": {
         "worldFaces": 17,
         "staticProps": 1,
-        "placeholderWorldFaces": 5,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -983,7 +983,7 @@
       "counts": {
         "worldFaces": 4,
         "staticProps": 0,
-        "placeholderWorldFaces": 4,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -1020,7 +1020,7 @@
       "counts": {
         "worldFaces": 20,
         "staticProps": 0,
-        "placeholderWorldFaces": 20,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -1057,7 +1057,7 @@
       "counts": {
         "worldFaces": 9,
         "staticProps": 1,
-        "placeholderWorldFaces": 6,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -1094,7 +1094,7 @@
       "counts": {
         "worldFaces": 5,
         "staticProps": 1,
-        "placeholderWorldFaces": 4,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -1131,7 +1131,7 @@
       "counts": {
         "worldFaces": 7,
         "staticProps": 1,
-        "placeholderWorldFaces": 6,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -1168,7 +1168,7 @@
       "counts": {
         "worldFaces": 14,
         "staticProps": 10,
-        "placeholderWorldFaces": 4,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -1205,7 +1205,7 @@
       "counts": {
         "worldFaces": 398,
         "staticProps": 31,
-        "placeholderWorldFaces": 264,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 10
       },
       "stats": {
@@ -1242,7 +1242,7 @@
       "counts": {
         "worldFaces": 339,
         "staticProps": 22,
-        "placeholderWorldFaces": 232,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 4
       },
       "stats": {
@@ -1353,7 +1353,7 @@
       "counts": {
         "worldFaces": 63,
         "staticProps": 1,
-        "placeholderWorldFaces": 9,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -1390,7 +1390,7 @@
       "counts": {
         "worldFaces": 428,
         "staticProps": 20,
-        "placeholderWorldFaces": 25,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -1427,7 +1427,7 @@
       "counts": {
         "worldFaces": 35,
         "staticProps": 1,
-        "placeholderWorldFaces": 4,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -1464,7 +1464,7 @@
       "counts": {
         "worldFaces": 4,
         "staticProps": 0,
-        "placeholderWorldFaces": 4,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -1501,7 +1501,7 @@
       "counts": {
         "worldFaces": 14,
         "staticProps": 2,
-        "placeholderWorldFaces": 6,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -1538,7 +1538,7 @@
       "counts": {
         "worldFaces": 13,
         "staticProps": 6,
-        "placeholderWorldFaces": 4,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -1575,7 +1575,7 @@
       "counts": {
         "worldFaces": 37,
         "staticProps": 1,
-        "placeholderWorldFaces": 10,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -1686,7 +1686,7 @@
       "counts": {
         "worldFaces": 19,
         "staticProps": 0,
-        "placeholderWorldFaces": 8,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -1723,7 +1723,7 @@
       "counts": {
         "worldFaces": 8,
         "staticProps": 0,
-        "placeholderWorldFaces": 6,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -1760,7 +1760,7 @@
       "counts": {
         "worldFaces": 4,
         "staticProps": 0,
-        "placeholderWorldFaces": 3,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -1797,7 +1797,7 @@
       "counts": {
         "worldFaces": 1,
         "staticProps": 0,
-        "placeholderWorldFaces": 1,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -1834,7 +1834,7 @@
       "counts": {
         "worldFaces": 8,
         "staticProps": 0,
-        "placeholderWorldFaces": 6,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -1871,7 +1871,7 @@
       "counts": {
         "worldFaces": 8,
         "staticProps": 0,
-        "placeholderWorldFaces": 6,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -1908,7 +1908,7 @@
       "counts": {
         "worldFaces": 15,
         "staticProps": 0,
-        "placeholderWorldFaces": 7,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -1945,7 +1945,7 @@
       "counts": {
         "worldFaces": 264,
         "staticProps": 13,
-        "placeholderWorldFaces": 166,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 2
       },
       "stats": {
@@ -1982,7 +1982,7 @@
       "counts": {
         "worldFaces": 373,
         "staticProps": 105,
-        "placeholderWorldFaces": 142,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -2019,7 +2019,7 @@
       "counts": {
         "worldFaces": 253,
         "staticProps": 35,
-        "placeholderWorldFaces": 68,
+        "placeholderWorldFaces": 12,
         "placeholderStaticProps": 6
       },
       "stats": {
@@ -2056,7 +2056,7 @@
       "counts": {
         "worldFaces": 18,
         "staticProps": 0,
-        "placeholderWorldFaces": 16,
+        "placeholderWorldFaces": 12,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -2093,7 +2093,7 @@
       "counts": {
         "worldFaces": 11,
         "staticProps": 4,
-        "placeholderWorldFaces": 10,
+        "placeholderWorldFaces": 6,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -2130,7 +2130,7 @@
       "counts": {
         "worldFaces": 204,
         "staticProps": 36,
-        "placeholderWorldFaces": 148,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 2
       },
       "stats": {
@@ -2167,7 +2167,7 @@
       "counts": {
         "worldFaces": 139,
         "staticProps": 8,
-        "placeholderWorldFaces": 72,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 3
       },
       "stats": {
@@ -2204,7 +2204,7 @@
       "counts": {
         "worldFaces": 39,
         "staticProps": 3,
-        "placeholderWorldFaces": 24,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 2
       },
       "stats": {
@@ -2241,7 +2241,7 @@
       "counts": {
         "worldFaces": 6,
         "staticProps": 3,
-        "placeholderWorldFaces": 5,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -2278,7 +2278,7 @@
       "counts": {
         "worldFaces": 1323,
         "staticProps": 174,
-        "placeholderWorldFaces": 564,
+        "placeholderWorldFaces": 22,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -2315,7 +2315,7 @@
       "counts": {
         "worldFaces": 625,
         "staticProps": 10,
-        "placeholderWorldFaces": 260,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 2
       },
       "stats": {
@@ -2352,7 +2352,7 @@
       "counts": {
         "worldFaces": 27,
         "staticProps": 21,
-        "placeholderWorldFaces": 7,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -2389,7 +2389,7 @@
       "counts": {
         "worldFaces": 231,
         "staticProps": 11,
-        "placeholderWorldFaces": 47,
+        "placeholderWorldFaces": 26,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -2426,7 +2426,7 @@
       "counts": {
         "worldFaces": 81,
         "staticProps": 10,
-        "placeholderWorldFaces": 18,
+        "placeholderWorldFaces": 14,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -2463,7 +2463,7 @@
       "counts": {
         "worldFaces": 76,
         "staticProps": 9,
-        "placeholderWorldFaces": 37,
+        "placeholderWorldFaces": 4,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -2500,7 +2500,7 @@
       "counts": {
         "worldFaces": 3548,
         "staticProps": 358,
-        "placeholderWorldFaces": 852,
+        "placeholderWorldFaces": 8,
         "placeholderStaticProps": 94
       },
       "stats": {
@@ -2537,7 +2537,7 @@
       "counts": {
         "worldFaces": 526,
         "staticProps": 83,
-        "placeholderWorldFaces": 120,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 1
       },
       "stats": {
@@ -2574,7 +2574,7 @@
       "counts": {
         "worldFaces": 652,
         "staticProps": 83,
-        "placeholderWorldFaces": 61,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 2
       },
       "stats": {
@@ -2611,7 +2611,7 @@
       "counts": {
         "worldFaces": 312,
         "staticProps": 53,
-        "placeholderWorldFaces": 26,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 5
       },
       "stats": {
@@ -2648,7 +2648,7 @@
       "counts": {
         "worldFaces": 30,
         "staticProps": 1,
-        "placeholderWorldFaces": 13,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -2685,7 +2685,7 @@
       "counts": {
         "worldFaces": 5,
         "staticProps": 0,
-        "placeholderWorldFaces": 5,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -2722,7 +2722,7 @@
       "counts": {
         "worldFaces": 125,
         "staticProps": 6,
-        "placeholderWorldFaces": 69,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 1
       },
       "stats": {
@@ -2759,7 +2759,7 @@
       "counts": {
         "worldFaces": 12,
         "staticProps": 13,
-        "placeholderWorldFaces": 8,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -2796,7 +2796,7 @@
       "counts": {
         "worldFaces": 61,
         "staticProps": 17,
-        "placeholderWorldFaces": 8,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -2833,7 +2833,7 @@
       "counts": {
         "worldFaces": 141,
         "staticProps": 15,
-        "placeholderWorldFaces": 63,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 4
       },
       "stats": {
@@ -2870,7 +2870,7 @@
       "counts": {
         "worldFaces": 410,
         "staticProps": 55,
-        "placeholderWorldFaces": 118,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 10
       },
       "stats": {
@@ -2907,7 +2907,7 @@
       "counts": {
         "worldFaces": 312,
         "staticProps": 27,
-        "placeholderWorldFaces": 80,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 11
       },
       "stats": {
@@ -2944,7 +2944,7 @@
       "counts": {
         "worldFaces": 1225,
         "staticProps": 158,
-        "placeholderWorldFaces": 539,
+        "placeholderWorldFaces": 12,
         "placeholderStaticProps": 3
       },
       "stats": {
@@ -2981,7 +2981,7 @@
       "counts": {
         "worldFaces": 444,
         "staticProps": 52,
-        "placeholderWorldFaces": 42,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -3018,7 +3018,7 @@
       "counts": {
         "worldFaces": 1256,
         "staticProps": 161,
-        "placeholderWorldFaces": 164,
+        "placeholderWorldFaces": 10,
         "placeholderStaticProps": 1
       },
       "stats": {
@@ -3055,7 +3055,7 @@
       "counts": {
         "worldFaces": 349,
         "staticProps": 32,
-        "placeholderWorldFaces": 65,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 1
       },
       "stats": {
@@ -3092,7 +3092,7 @@
       "counts": {
         "worldFaces": 57,
         "staticProps": 3,
-        "placeholderWorldFaces": 18,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -3129,7 +3129,7 @@
       "counts": {
         "worldFaces": 93,
         "staticProps": 13,
-        "placeholderWorldFaces": 54,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 5
       },
       "stats": {
@@ -3166,7 +3166,7 @@
       "counts": {
         "worldFaces": 72,
         "staticProps": 0,
-        "placeholderWorldFaces": 28,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -3203,7 +3203,7 @@
       "counts": {
         "worldFaces": 78,
         "staticProps": 7,
-        "placeholderWorldFaces": 32,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -3277,7 +3277,7 @@
       "counts": {
         "worldFaces": 579,
         "staticProps": 54,
-        "placeholderWorldFaces": 131,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -3314,7 +3314,7 @@
       "counts": {
         "worldFaces": 174,
         "staticProps": 22,
-        "placeholderWorldFaces": 28,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 1
       },
       "stats": {
@@ -3351,7 +3351,7 @@
       "counts": {
         "worldFaces": 137,
         "staticProps": 12,
-        "placeholderWorldFaces": 69,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 4
       },
       "stats": {
@@ -3388,7 +3388,7 @@
       "counts": {
         "worldFaces": 186,
         "staticProps": 46,
-        "placeholderWorldFaces": 64,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 3
       },
       "stats": {
@@ -3425,7 +3425,7 @@
       "counts": {
         "worldFaces": 145,
         "staticProps": 12,
-        "placeholderWorldFaces": 42,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 5
       },
       "stats": {
@@ -3462,7 +3462,7 @@
       "counts": {
         "worldFaces": 82,
         "staticProps": 16,
-        "placeholderWorldFaces": 35,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -3499,7 +3499,7 @@
       "counts": {
         "worldFaces": 408,
         "staticProps": 47,
-        "placeholderWorldFaces": 58,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 5
       },
       "stats": {
@@ -3536,7 +3536,7 @@
       "counts": {
         "worldFaces": 437,
         "staticProps": 96,
-        "placeholderWorldFaces": 127,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 1
       },
       "stats": {
@@ -3573,7 +3573,7 @@
       "counts": {
         "worldFaces": 83,
         "staticProps": 28,
-        "placeholderWorldFaces": 16,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -3610,7 +3610,7 @@
       "counts": {
         "worldFaces": 10,
         "staticProps": 3,
-        "placeholderWorldFaces": 8,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -3647,7 +3647,7 @@
       "counts": {
         "worldFaces": 428,
         "staticProps": 37,
-        "placeholderWorldFaces": 215,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 28
       },
       "stats": {
@@ -3684,7 +3684,7 @@
       "counts": {
         "worldFaces": 158,
         "staticProps": 27,
-        "placeholderWorldFaces": 22,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 2
       },
       "stats": {
@@ -3721,7 +3721,7 @@
       "counts": {
         "worldFaces": 296,
         "staticProps": 36,
-        "placeholderWorldFaces": 42,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -3758,7 +3758,7 @@
       "counts": {
         "worldFaces": 270,
         "staticProps": 31,
-        "placeholderWorldFaces": 65,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 9
       },
       "stats": {
@@ -3795,7 +3795,7 @@
       "counts": {
         "worldFaces": 145,
         "staticProps": 24,
-        "placeholderWorldFaces": 40,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 7
       },
       "stats": {
@@ -3832,7 +3832,7 @@
       "counts": {
         "worldFaces": 26,
         "staticProps": 7,
-        "placeholderWorldFaces": 13,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 1
       },
       "stats": {
@@ -3869,7 +3869,7 @@
       "counts": {
         "worldFaces": 66,
         "staticProps": 10,
-        "placeholderWorldFaces": 6,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 4
       },
       "stats": {
@@ -3906,7 +3906,7 @@
       "counts": {
         "worldFaces": 29,
         "staticProps": 2,
-        "placeholderWorldFaces": 5,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -3943,7 +3943,7 @@
       "counts": {
         "worldFaces": 2,
         "staticProps": 0,
-        "placeholderWorldFaces": 2,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -3980,7 +3980,7 @@
       "counts": {
         "worldFaces": 222,
         "staticProps": 18,
-        "placeholderWorldFaces": 70,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -4017,7 +4017,7 @@
       "counts": {
         "worldFaces": 64,
         "staticProps": 4,
-        "placeholderWorldFaces": 13,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -4091,7 +4091,7 @@
       "counts": {
         "worldFaces": 75,
         "staticProps": 3,
-        "placeholderWorldFaces": 9,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -4128,7 +4128,7 @@
       "counts": {
         "worldFaces": 57,
         "staticProps": 16,
-        "placeholderWorldFaces": 16,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 3
       },
       "stats": {
@@ -4165,7 +4165,7 @@
       "counts": {
         "worldFaces": 274,
         "staticProps": 41,
-        "placeholderWorldFaces": 83,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 6
       },
       "stats": {
@@ -4202,7 +4202,7 @@
       "counts": {
         "worldFaces": 333,
         "staticProps": 30,
-        "placeholderWorldFaces": 42,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 17
       },
       "stats": {
@@ -4239,7 +4239,7 @@
       "counts": {
         "worldFaces": 370,
         "staticProps": 45,
-        "placeholderWorldFaces": 317,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 28
       },
       "stats": {
@@ -4276,7 +4276,7 @@
       "counts": {
         "worldFaces": 92,
         "staticProps": 8,
-        "placeholderWorldFaces": 17,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -4313,7 +4313,7 @@
       "counts": {
         "worldFaces": 69,
         "staticProps": 5,
-        "placeholderWorldFaces": 15,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -4350,7 +4350,7 @@
       "counts": {
         "worldFaces": 108,
         "staticProps": 6,
-        "placeholderWorldFaces": 24,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -4387,7 +4387,7 @@
       "counts": {
         "worldFaces": 16,
         "staticProps": 2,
-        "placeholderWorldFaces": 13,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -4424,7 +4424,7 @@
       "counts": {
         "worldFaces": 2,
         "staticProps": 0,
-        "placeholderWorldFaces": 2,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -4461,7 +4461,7 @@
       "counts": {
         "worldFaces": 10,
         "staticProps": 10,
-        "placeholderWorldFaces": 6,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -4498,7 +4498,7 @@
       "counts": {
         "worldFaces": 12,
         "staticProps": 6,
-        "placeholderWorldFaces": 8,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -4535,7 +4535,7 @@
       "counts": {
         "worldFaces": 5,
         "staticProps": 1,
-        "placeholderWorldFaces": 5,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -4572,7 +4572,7 @@
       "counts": {
         "worldFaces": 42,
         "staticProps": 7,
-        "placeholderWorldFaces": 8,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -4609,7 +4609,7 @@
       "counts": {
         "worldFaces": 77,
         "staticProps": 19,
-        "placeholderWorldFaces": 18,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 8
       },
       "stats": {
@@ -4646,7 +4646,7 @@
       "counts": {
         "worldFaces": 404,
         "staticProps": 32,
-        "placeholderWorldFaces": 360,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 21
       },
       "stats": {
@@ -4683,7 +4683,7 @@
       "counts": {
         "worldFaces": 298,
         "staticProps": 83,
-        "placeholderWorldFaces": 207,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 55
       },
       "stats": {
@@ -4720,7 +4720,7 @@
       "counts": {
         "worldFaces": 53,
         "staticProps": 12,
-        "placeholderWorldFaces": 26,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 1
       },
       "stats": {
@@ -4757,7 +4757,7 @@
       "counts": {
         "worldFaces": 777,
         "staticProps": 46,
-        "placeholderWorldFaces": 293,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 1
       },
       "stats": {
@@ -4794,7 +4794,7 @@
       "counts": {
         "worldFaces": 389,
         "staticProps": 45,
-        "placeholderWorldFaces": 171,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 1
       },
       "stats": {
@@ -4831,7 +4831,7 @@
       "counts": {
         "worldFaces": 350,
         "staticProps": 18,
-        "placeholderWorldFaces": 132,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -4868,7 +4868,7 @@
       "counts": {
         "worldFaces": 22,
         "staticProps": 0,
-        "placeholderWorldFaces": 19,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -4905,7 +4905,7 @@
       "counts": {
         "worldFaces": 277,
         "staticProps": 22,
-        "placeholderWorldFaces": 208,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 7
       },
       "stats": {
@@ -4942,7 +4942,7 @@
       "counts": {
         "worldFaces": 59,
         "staticProps": 4,
-        "placeholderWorldFaces": 15,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -4979,7 +4979,7 @@
       "counts": {
         "worldFaces": 53,
         "staticProps": 2,
-        "placeholderWorldFaces": 25,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -5016,7 +5016,7 @@
       "counts": {
         "worldFaces": 7,
         "staticProps": 0,
-        "placeholderWorldFaces": 7,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -5053,7 +5053,7 @@
       "counts": {
         "worldFaces": 12,
         "staticProps": 0,
-        "placeholderWorldFaces": 12,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -5090,7 +5090,7 @@
       "counts": {
         "worldFaces": 94,
         "staticProps": 6,
-        "placeholderWorldFaces": 68,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 2
       },
       "stats": {
@@ -5127,7 +5127,7 @@
       "counts": {
         "worldFaces": 481,
         "staticProps": 52,
-        "placeholderWorldFaces": 369,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 41
       },
       "stats": {
@@ -5164,7 +5164,7 @@
       "counts": {
         "worldFaces": 510,
         "staticProps": 20,
-        "placeholderWorldFaces": 410,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 13
       },
       "stats": {
@@ -5201,7 +5201,7 @@
       "counts": {
         "worldFaces": 50,
         "staticProps": 7,
-        "placeholderWorldFaces": 30,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -5238,7 +5238,7 @@
       "counts": {
         "worldFaces": 417,
         "staticProps": 47,
-        "placeholderWorldFaces": 211,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 10
       },
       "stats": {
@@ -5275,7 +5275,7 @@
       "counts": {
         "worldFaces": 550,
         "staticProps": 58,
-        "placeholderWorldFaces": 186,
+        "placeholderWorldFaces": 6,
         "placeholderStaticProps": 2
       },
       "stats": {
@@ -5312,7 +5312,7 @@
       "counts": {
         "worldFaces": 376,
         "staticProps": 13,
-        "placeholderWorldFaces": 135,
+        "placeholderWorldFaces": 2,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -5349,7 +5349,7 @@
       "counts": {
         "worldFaces": 19,
         "staticProps": 0,
-        "placeholderWorldFaces": 18,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -5386,7 +5386,7 @@
       "counts": {
         "worldFaces": 515,
         "staticProps": 31,
-        "placeholderWorldFaces": 409,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 18
       },
       "stats": {
@@ -5423,7 +5423,7 @@
       "counts": {
         "worldFaces": 215,
         "staticProps": 16,
-        "placeholderWorldFaces": 7,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 1
       },
       "stats": {
@@ -5460,7 +5460,7 @@
       "counts": {
         "worldFaces": 436,
         "staticProps": 56,
-        "placeholderWorldFaces": 170,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 2
       },
       "stats": {
@@ -5497,7 +5497,7 @@
       "counts": {
         "worldFaces": 4,
         "staticProps": 0,
-        "placeholderWorldFaces": 4,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -5534,7 +5534,7 @@
       "counts": {
         "worldFaces": 7,
         "staticProps": 0,
-        "placeholderWorldFaces": 7,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -5571,7 +5571,7 @@
       "counts": {
         "worldFaces": 32,
         "staticProps": 6,
-        "placeholderWorldFaces": 20,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 0
       },
       "stats": {
@@ -5608,7 +5608,7 @@
       "counts": {
         "worldFaces": 70,
         "staticProps": 14,
-        "placeholderWorldFaces": 47,
+        "placeholderWorldFaces": 0,
         "placeholderStaticProps": 4
       },
       "stats": {

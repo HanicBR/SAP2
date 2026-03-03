@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 16,
     "staticProps": 2,
-    "placeholderWorldFaces": 13,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 0
   },
   "stats": {
@@ -38,7 +38,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 8,
         "vertexCount": 24,
@@ -170,7 +170,7 @@
       {
         "materialId": "wood/inffence01",
         "material": "wood/inffence01",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 7,
         "triCount": 14,
         "vertexCount": 42,
@@ -392,7 +392,7 @@
       {
         "materialId": "nature/cliffface001a",
         "material": "nature/cliffface001a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 4,
         "vertexCount": 12,

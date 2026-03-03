@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 408,
     "staticProps": 47,
-    "placeholderWorldFaces": 58,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 5
   },
   "stats": {
@@ -38,7 +38,7 @@
       {
         "materialId": "de_train/train_cement_floor_01",
         "material": "de_train/train_cement_floor_01",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 10,
         "triCount": 36,
         "vertexCount": 108,
@@ -8396,7 +8396,7 @@
       {
         "materialId": "de_nuke/nukroofa",
         "material": "de_nuke/nukroofa",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 11,
         "triCount": 36,
         "vertexCount": 108,
@@ -10289,7 +10289,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 6,
         "triCount": 17,
         "vertexCount": 51,
@@ -10556,7 +10556,7 @@
       {
         "materialId": "brick/wall06",
         "material": "brick/wall06",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 22,
         "triCount": 84,
         "vertexCount": 252,
@@ -18713,7 +18713,7 @@
       {
         "materialId": "de_nuke/nukibeama",
         "material": "de_nuke/nukibeama",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 9,
         "triCount": 18,
         "vertexCount": 54,

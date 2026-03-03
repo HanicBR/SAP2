@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 579,
     "staticProps": 54,
-    "placeholderWorldFaces": 131,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 0
   },
   "stats": {
@@ -13493,7 +13493,7 @@
       {
         "materialId": "wood/door_white01",
         "material": "wood/door_white01",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 9,
         "triCount": 18,
         "vertexCount": 54,
@@ -13775,7 +13775,7 @@
       {
         "materialId": "metal/metaltruss025a",
         "material": "metal/metaltruss025a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 8,
         "vertexCount": 24,
@@ -14075,7 +14075,7 @@
       {
         "materialId": "metal/metalwall030a",
         "material": "metal/metalwall030a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 12,
         "triCount": 36,
         "vertexCount": 108,
@@ -14627,7 +14627,7 @@
       {
         "materialId": "metal/metaltruss026a",
         "material": "metal/metaltruss026a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 8,
         "triCount": 16,
         "vertexCount": 48,
@@ -22043,7 +22043,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 18,
         "triCount": 41,
         "vertexCount": 123,
@@ -22670,7 +22670,7 @@
       {
         "materialId": "de_nuke/nukroofa",
         "material": "de_nuke/nukroofa",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 29,
         "triCount": 64,
         "vertexCount": 192,
@@ -27278,7 +27278,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/tile/tilefloor016a_-2904_6665_137",
         "material": "maps/rp_evocity_v33x/tile/tilefloor016a_-2904_6665_137",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 18,
         "triCount": 47,
         "vertexCount": 141,
@@ -27995,7 +27995,7 @@
       {
         "materialId": "stone/stonewall037e",
         "material": "stone/stonewall037e",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 19,
         "triCount": 45,
         "vertexCount": 135,
@@ -28682,7 +28682,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/tile/tilefloor016a_-2762_6212_137",
         "material": "maps/rp_evocity_v33x/tile/tilefloor016a_-2762_6212_137",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 9,
         "triCount": 20,
         "vertexCount": 60,
@@ -28994,7 +28994,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/tile/tilefloor016a_-3483_6569_137",
         "material": "maps/rp_evocity_v33x/tile/tilefloor016a_-3483_6569_137",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 2,
         "vertexCount": 6,
@@ -30188,7 +30188,7 @@
       {
         "materialId": "nature/cliffface001a",
         "material": "nature/cliffface001a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 8,
         "vertexCount": 24,

@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 139,
     "staticProps": 8,
-    "placeholderWorldFaces": 72,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 3
   },
   "stats": {
@@ -38,7 +38,7 @@
       {
         "materialId": "de_train/train_cement_floor_01",
         "material": "de_train/train_cement_floor_01",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 38,
         "triCount": 130,
         "vertexCount": 390,
@@ -3962,7 +3962,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 12,
         "triCount": 29,
         "vertexCount": 87,
@@ -4409,7 +4409,7 @@
       {
         "materialId": "stone/stonewall050d",
         "material": "stone/stonewall050d",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 16,
         "triCount": 36,
         "vertexCount": 108,
@@ -5150,7 +5150,7 @@
       {
         "materialId": "nature/cliffface001a",
         "material": "nature/cliffface001a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 8,
         "vertexCount": 24,
@@ -5540,7 +5540,7 @@
       {
         "materialId": "stone/stonewall015a",
         "material": "stone/stonewall015a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 4,
         "vertexCount": 12,

@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 137,
     "staticProps": 12,
-    "placeholderWorldFaces": 69,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 4
   },
   "stats": {
@@ -38,7 +38,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/tile/urban_countertop01b_-3604_13969_241",
         "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_-3604_13969_241",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 6,
         "vertexCount": 18,
@@ -140,7 +140,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/tile/urban_countertop01b_-3840_11837_290",
         "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_-3840_11837_290",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 7,
         "triCount": 18,
         "vertexCount": 54,
@@ -422,7 +422,7 @@
       {
         "materialId": "wood/fence03top",
         "material": "wood/fence03top",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 13,
         "triCount": 30,
         "vertexCount": 90,
@@ -884,7 +884,7 @@
       {
         "materialId": "wood/fence03",
         "material": "wood/fence03",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 13,
         "triCount": 30,
         "vertexCount": 90,
@@ -1346,7 +1346,7 @@
       {
         "materialId": "wood/cabinets01a",
         "material": "wood/cabinets01a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 6,
         "vertexCount": 18,
@@ -1490,7 +1490,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/tile/urban_countertop01b_-3404_13969_241",
         "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_-3404_13969_241",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 4,
         "vertexCount": 12,
@@ -1604,7 +1604,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 12,
         "triCount": 26,
         "vertexCount": 78,
@@ -2006,7 +2006,7 @@
       {
         "materialId": "carpet/blue04",
         "material": "carpet/blue04",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 10,
         "vertexCount": 30,
@@ -2876,7 +2876,7 @@
       {
         "materialId": "wood/siding05",
         "material": "wood/siding05",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 13,
         "triCount": 42,
         "vertexCount": 126,
@@ -5609,7 +5609,7 @@
       {
         "materialId": "nature/cliffface001a",
         "material": "nature/cliffface001a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 4,
         "vertexCount": 12,

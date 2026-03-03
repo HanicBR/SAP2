@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 436,
     "staticProps": 56,
-    "placeholderWorldFaces": 170,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 2
   },
   "stats": {
@@ -38,7 +38,7 @@
       {
         "materialId": "cs_havana/woodm",
         "material": "cs_havana/woodm",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 130,
         "triCount": 348,
         "vertexCount": 1044,
@@ -12635,7 +12635,7 @@
       {
         "materialId": "building_template/roof_template001a",
         "material": "building_template/roof_template001a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 24,
         "triCount": 61,
         "vertexCount": 183,
@@ -13562,7 +13562,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 11,
         "triCount": 28,
         "vertexCount": 84,
@@ -16037,7 +16037,7 @@
       {
         "materialId": "wood/fence04",
         "material": "wood/fence04",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 7,
         "vertexCount": 21,
@@ -19286,7 +19286,7 @@
       {
         "materialId": "nature/cliffface001a",
         "material": "nature/cliffface001a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 4,
         "vertexCount": 12,

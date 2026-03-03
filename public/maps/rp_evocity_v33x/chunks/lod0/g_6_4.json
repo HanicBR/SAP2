@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 64,
     "staticProps": 4,
-    "placeholderWorldFaces": 13,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 0
   },
   "stats": {
@@ -1619,7 +1619,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 10,
         "triCount": 22,
         "vertexCount": 66,
@@ -2219,7 +2219,7 @@
       {
         "materialId": "nature/cliffface001a",
         "material": "nature/cliffface001a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 6,
         "vertexCount": 18,

@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 437,
     "staticProps": 96,
-    "placeholderWorldFaces": 127,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 1
   },
   "stats": {
@@ -38,7 +38,7 @@
       {
         "materialId": "de_train/train_cement_floor_01",
         "material": "de_train/train_cement_floor_01",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 14,
         "triCount": 57,
         "vertexCount": 171,
@@ -905,7 +905,7 @@
       {
         "materialId": "de_chateau/woodm",
         "material": "de_chateau/woodm",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 89,
         "triCount": 202,
         "vertexCount": 606,
@@ -10667,7 +10667,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 11,
         "triCount": 37,
         "vertexCount": 111,
@@ -14177,7 +14177,7 @@
       {
         "materialId": "de_nuke/nukroofa",
         "material": "de_nuke/nukroofa",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 13,
         "triCount": 46,
         "vertexCount": 138,

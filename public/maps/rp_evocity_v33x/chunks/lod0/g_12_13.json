@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 428,
     "staticProps": 20,
-    "placeholderWorldFaces": 25,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 0
   },
   "stats": {
@@ -410,7 +410,7 @@
       {
         "materialId": "de_train/train_cement_floor_01",
         "material": "de_train/train_cement_floor_01",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 4,
         "vertexCount": 12,
@@ -10991,7 +10991,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/wood/desk02_10392_13430_120",
         "material": "maps/rp_evocity_v33x/wood/desk02_10392_13430_120",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 7,
         "triCount": 14,
         "vertexCount": 42,
@@ -11213,7 +11213,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/wood/desk02_9928_13424_120",
         "material": "maps/rp_evocity_v33x/wood/desk02_9928_13424_120",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 2,
         "vertexCount": 6,
@@ -11255,7 +11255,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/wood/desk02_10272_12536_120",
         "material": "maps/rp_evocity_v33x/wood/desk02_10272_12536_120",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 2,
         "vertexCount": 6,
@@ -11564,7 +11564,7 @@
       {
         "materialId": "de_nuke/nukroofa",
         "material": "de_nuke/nukroofa",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 8,
         "vertexCount": 24,
@@ -12143,7 +12143,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 6,
         "triCount": 14,
         "vertexCount": 42,
@@ -16418,7 +16418,7 @@
       {
         "materialId": "de_train/train_cement_floor_02",
         "material": "de_train/train_cement_floor_02",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 14,
         "vertexCount": 42,

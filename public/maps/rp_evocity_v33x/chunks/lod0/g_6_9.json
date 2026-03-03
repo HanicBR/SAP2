@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 333,
     "staticProps": 30,
-    "placeholderWorldFaces": 42,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 17
   },
   "stats": {
@@ -9857,7 +9857,7 @@
       {
         "materialId": "props/metalpanel016b",
         "material": "props/metalpanel016b",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 10,
         "triCount": 20,
         "vertexCount": 60,
@@ -11798,7 +11798,7 @@
       {
         "materialId": "de_train/train_cement_floor_01",
         "material": "de_train/train_cement_floor_01",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 7,
         "triCount": 27,
         "vertexCount": 81,
@@ -12215,7 +12215,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 5,
         "triCount": 11,
         "vertexCount": 33,
@@ -12599,7 +12599,7 @@
       {
         "materialId": "de_nuke/nukroofa",
         "material": "de_nuke/nukroofa",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 6,
         "triCount": 14,
         "vertexCount": 42,
@@ -12821,7 +12821,7 @@
       {
         "materialId": "wood/woodceiling003a",
         "material": "wood/woodceiling003a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 14,
         "triCount": 36,
         "vertexCount": 108,

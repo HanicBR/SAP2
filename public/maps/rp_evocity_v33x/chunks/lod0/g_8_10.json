@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 298,
     "staticProps": 83,
-    "placeholderWorldFaces": 207,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 55
   },
   "stats": {
@@ -38,7 +38,7 @@
       {
         "materialId": "brick/brickwall040c",
         "material": "brick/brickwall040c",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 15,
         "triCount": 56,
         "vertexCount": 168,
@@ -890,7 +890,7 @@
       {
         "materialId": "metal/metalwall030a",
         "material": "metal/metalwall030a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 27,
         "triCount": 54,
         "vertexCount": 162,
@@ -2489,7 +2489,7 @@
       {
         "materialId": "cs_havana/woodm",
         "material": "cs_havana/woodm",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 18,
         "triCount": 36,
         "vertexCount": 108,
@@ -3041,7 +3041,7 @@
       {
         "materialId": "plaster/plasterceiling006a",
         "material": "plaster/plasterceiling006a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 14,
         "vertexCount": 42,
@@ -3425,7 +3425,7 @@
       {
         "materialId": "brick/brickwall045d",
         "material": "brick/brickwall045d",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 9,
         "vertexCount": 27,
@@ -3572,7 +3572,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 6,
         "triCount": 13,
         "vertexCount": 39,
@@ -3779,7 +3779,7 @@
       {
         "materialId": "buildings/roof08",
         "material": "buildings/roof08",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 3,
         "vertexCount": 9,
@@ -3836,7 +3836,7 @@
       {
         "materialId": "brick/wall05",
         "material": "brick/wall05",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 20,
         "triCount": 52,
         "vertexCount": 156,
@@ -4628,7 +4628,7 @@
       {
         "materialId": "buildings/roof07",
         "material": "buildings/roof07",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 10,
         "triCount": 23,
         "vertexCount": 69,
@@ -4985,7 +4985,7 @@
       {
         "materialId": "wood/woodfloor002",
         "material": "wood/woodfloor002",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 5,
         "triCount": 23,
         "vertexCount": 69,
@@ -5639,7 +5639,7 @@
       {
         "materialId": "brick/brickwall045f",
         "material": "brick/brickwall045f",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 6,
         "triCount": 12,
         "vertexCount": 36,
@@ -6233,7 +6233,7 @@
       {
         "materialId": "brick/wall13",
         "material": "brick/wall13",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 20,
         "triCount": 45,
         "vertexCount": 135,
@@ -6920,7 +6920,7 @@
       {
         "materialId": "de_nuke/nukconcretewallb",
         "material": "de_nuke/nukconcretewallb",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 17,
         "triCount": 48,
         "vertexCount": 144,
@@ -8978,7 +8978,7 @@
       {
         "materialId": "de_nuke/nuke_wall_cntrlroom_01",
         "material": "de_nuke/nuke_wall_cntrlroom_01",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 36,
         "triCount": 97,
         "vertexCount": 291,
@@ -10652,7 +10652,7 @@
       {
         "materialId": "metal/metaltruss024a",
         "material": "metal/metaltruss024a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 8,
         "triCount": 16,
         "vertexCount": 48,
@@ -11168,7 +11168,7 @@
       {
         "materialId": "concrete/concretewall004b",
         "material": "concrete/concretewall004b",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 7,
         "triCount": 14,
         "vertexCount": 42,
@@ -11390,7 +11390,7 @@
       {
         "materialId": "concrete/concretefloor038a",
         "material": "concrete/concretefloor038a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 7,
         "vertexCount": 21,

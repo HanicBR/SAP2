@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 145,
     "staticProps": 24,
-    "placeholderWorldFaces": 40,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 7
   },
   "stats": {
@@ -824,7 +824,7 @@
       {
         "materialId": "metal/metalwall030a",
         "material": "metal/metalwall030a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 8,
         "triCount": 24,
         "vertexCount": 72,
@@ -1364,7 +1364,7 @@
       {
         "materialId": "metal/metaltruss026a",
         "material": "metal/metaltruss026a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 10,
         "triCount": 22,
         "vertexCount": 66,
@@ -2168,7 +2168,7 @@
       {
         "materialId": "metal/metaltruss025a",
         "material": "metal/metaltruss025a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 6,
         "triCount": 14,
         "vertexCount": 42,
@@ -2390,7 +2390,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 10,
         "triCount": 21,
         "vertexCount": 63,
@@ -5573,7 +5573,7 @@
       {
         "materialId": "de_nuke/nukroofa",
         "material": "de_nuke/nukroofa",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 8,
         "vertexCount": 24,
@@ -6116,7 +6116,7 @@
       {
         "materialId": "nature/cliffface001a",
         "material": "nature/cliffface001a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 4,
         "vertexCount": 12,

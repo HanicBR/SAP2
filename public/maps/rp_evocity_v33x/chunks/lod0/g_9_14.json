@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 376,
     "staticProps": 13,
-    "placeholderWorldFaces": 135,
+    "placeholderWorldFaces": 2,
     "placeholderStaticProps": 0
   },
   "stats": {
@@ -38,7 +38,7 @@
       {
         "materialId": "concrete/concretewall060c",
         "material": "concrete/concretewall060c",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 31,
         "triCount": 107,
         "vertexCount": 321,
@@ -2876,7 +2876,7 @@
       {
         "materialId": "concrete/concretewall060f",
         "material": "concrete/concretewall060f",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 6,
         "triCount": 18,
         "vertexCount": 54,
@@ -3158,7 +3158,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 11,
         "vertexCount": 33,
@@ -3479,7 +3479,7 @@
       {
         "materialId": "wood/inffence01",
         "material": "wood/inffence01",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 10,
         "triCount": 24,
         "vertexCount": 72,
@@ -3851,7 +3851,7 @@
       {
         "materialId": "tools/toolsblack",
         "material": "tools/toolsblack",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 12,
         "vertexCount": 36,
@@ -9824,7 +9824,7 @@
       {
         "materialId": "cs_havana/woodm",
         "material": "cs_havana/woodm",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 64,
         "triCount": 132,
         "vertexCount": 396,
@@ -14819,7 +14819,7 @@
       {
         "materialId": "wood/cabinets01a",
         "material": "wood/cabinets01a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 7,
         "triCount": 18,
         "vertexCount": 54,
@@ -15425,7 +15425,7 @@
       {
         "materialId": "brick/brickwall045f",
         "material": "brick/brickwall045f",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 9,
         "triCount": 28,
         "vertexCount": 84,

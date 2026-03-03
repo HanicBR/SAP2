@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 222,
     "staticProps": 18,
-    "placeholderWorldFaces": 70,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 0
   },
   "stats": {
@@ -1250,7 +1250,7 @@
       {
         "materialId": "plaster/milwall001",
         "material": "plaster/milwall001",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 30,
         "triCount": 90,
         "vertexCount": 270,
@@ -2612,7 +2612,7 @@
       {
         "materialId": "props/rubberroof002a",
         "material": "props/rubberroof002a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 9,
         "vertexCount": 27,
@@ -3206,7 +3206,7 @@
       {
         "materialId": "concrete/concreteceiling003a",
         "material": "concrete/concreteceiling003a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 5,
         "triCount": 18,
         "vertexCount": 54,
@@ -3488,7 +3488,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 9,
         "triCount": 18,
         "vertexCount": 54,
@@ -5717,7 +5717,7 @@
       {
         "materialId": "wood/woodfloor002a",
         "material": "wood/woodfloor002a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 21,
         "triCount": 96,
         "vertexCount": 288,
@@ -8936,7 +8936,7 @@
       {
         "materialId": "nature/cliffface001a",
         "material": "nature/cliffface001a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 4,
         "vertexCount": 12,

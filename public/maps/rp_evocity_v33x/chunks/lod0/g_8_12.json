@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 777,
     "staticProps": 46,
-    "placeholderWorldFaces": 293,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 1
   },
   "stats": {
@@ -3635,7 +3635,7 @@
       {
         "materialId": "cs_havana/woodm",
         "material": "cs_havana/woodm",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 165,
         "triCount": 673,
         "vertexCount": 2019,
@@ -17315,7 +17315,7 @@
       {
         "materialId": "wood/milwall010",
         "material": "wood/milwall010",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 71,
         "triCount": 240,
         "vertexCount": 720,
@@ -26141,7 +26141,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 5,
         "triCount": 11,
         "vertexCount": 33,
@@ -29894,7 +29894,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/glass/glasswindow037a_2498_11728_250",
         "material": "maps/rp_evocity_v33x/glass/glasswindow037a_2498_11728_250",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 2,
         "vertexCount": 6,
@@ -31415,7 +31415,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/glass/glasswindow037a_2728_11284_250",
         "material": "maps/rp_evocity_v33x/glass/glasswindow037a_2728_11284_250",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 2,
         "vertexCount": 6,
@@ -31964,7 +31964,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/tile/urban_countertop01b_1716_6143_148",
         "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_1716_6143_148",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 3,
         "vertexCount": 9,
@@ -32021,7 +32021,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/tile/urban_countertop01b_-1680_7717_137",
         "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_-1680_7717_137",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 9,
         "vertexCount": 27,
@@ -32168,7 +32168,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/tile/urban_countertop01b_2336_11284_123",
         "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_2336_11284_123",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 6,
         "triCount": 19,
         "vertexCount": 57,
@@ -32465,7 +32465,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/tile/urban_countertop01b_2336_11728_123",
         "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_2336_11728_123",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 2,
         "vertexCount": 6,
@@ -32507,7 +32507,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/tile/urban_countertop01b_2336_11284_250",
         "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_2336_11284_250",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 14,
         "triCount": 42,
         "vertexCount": 126,
@@ -33149,7 +33149,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/tile/urban_countertop01b_2336_11728_250",
         "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_2336_11728_250",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 5,
         "triCount": 15,
         "vertexCount": 45,
@@ -33386,7 +33386,7 @@
       {
         "materialId": "wood/cabinets01a",
         "material": "wood/cabinets01a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 10,
         "vertexCount": 30,
@@ -35324,7 +35324,7 @@
       {
         "materialId": "plaster/offwllb",
         "material": "plaster/offwllb",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 9,
         "triCount": 24,
         "vertexCount": 72,
@@ -36599,7 +36599,7 @@
       {
         "materialId": "tools/toolsblack",
         "material": "tools/toolsblack",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 2,
         "vertexCount": 6,
@@ -36641,7 +36641,7 @@
       {
         "materialId": "wood/inffence01",
         "material": "wood/inffence01",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 7,
         "triCount": 16,
         "vertexCount": 48,

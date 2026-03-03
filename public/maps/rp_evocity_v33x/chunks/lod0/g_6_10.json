@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 270,
     "staticProps": 31,
-    "placeholderWorldFaces": 65,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 9
   },
   "stats": {
@@ -1922,7 +1922,7 @@
       {
         "materialId": "metal/metaltruss025a",
         "material": "metal/metaltruss025a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 8,
         "vertexCount": 24,
@@ -2054,7 +2054,7 @@
       {
         "materialId": "metal/metalwall030a",
         "material": "metal/metalwall030a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 12,
         "triCount": 36,
         "vertexCount": 108,
@@ -2606,7 +2606,7 @@
       {
         "materialId": "metal/metaltruss026a",
         "material": "metal/metaltruss026a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 8,
         "triCount": 16,
         "vertexCount": 48,
@@ -3110,7 +3110,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 7,
         "triCount": 17,
         "vertexCount": 51,
@@ -5651,7 +5651,7 @@
       {
         "materialId": "dev/dev_hazzardstripe01a",
         "material": "dev/dev_hazzardstripe01a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 24,
         "triCount": 80,
         "vertexCount": 240,
@@ -7367,7 +7367,7 @@
       {
         "materialId": "de_nuke/nukroofa",
         "material": "de_nuke/nukroofa",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 10,
         "triCount": 21,
         "vertexCount": 63,

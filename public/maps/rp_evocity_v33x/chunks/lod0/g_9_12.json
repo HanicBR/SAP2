@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 417,
     "staticProps": 47,
-    "placeholderWorldFaces": 211,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 10
   },
   "stats": {
@@ -38,7 +38,7 @@
       {
         "materialId": "cs_havana/woodm",
         "material": "cs_havana/woodm",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 61,
         "triCount": 165,
         "vertexCount": 495,
@@ -3479,7 +3479,7 @@
       {
         "materialId": "wood/woodshelf001a",
         "material": "wood/woodshelf001a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 12,
         "triCount": 24,
         "vertexCount": 72,
@@ -4073,7 +4073,7 @@
       {
         "materialId": "wood/woodwall037a",
         "material": "wood/woodwall037a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 5,
         "triCount": 46,
         "vertexCount": 138,
@@ -5237,7 +5237,7 @@
       {
         "materialId": "wood/woodwall030a",
         "material": "wood/woodwall030a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 18,
         "triCount": 40,
         "vertexCount": 120,
@@ -5849,7 +5849,7 @@
       {
         "materialId": "wood/woodwall030b",
         "material": "wood/woodwall030b",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 33,
         "triCount": 88,
         "vertexCount": 264,
@@ -7553,7 +7553,7 @@
       {
         "materialId": "wood/woodwall024a",
         "material": "wood/woodwall024a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 41,
         "triCount": 148,
         "vertexCount": 444,
@@ -10592,7 +10592,7 @@
       {
         "materialId": "brick/brickwall049a",
         "material": "brick/brickwall049a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 14,
         "triCount": 44,
         "vertexCount": 132,
@@ -11264,7 +11264,7 @@
       {
         "materialId": "wood/woodshelf002a",
         "material": "wood/woodshelf002a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 6,
         "triCount": 12,
         "vertexCount": 36,
@@ -13025,7 +13025,7 @@
       {
         "materialId": "concrete/concretefloor024a",
         "material": "concrete/concretefloor024a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 7,
         "triCount": 18,
         "vertexCount": 54,
@@ -13307,7 +13307,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 6,
         "triCount": 14,
         "vertexCount": 42,
@@ -13529,7 +13529,7 @@
       {
         "materialId": "concrete/concretewall055b",
         "material": "concrete/concretewall055b",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 8,
         "triCount": 24,
         "vertexCount": 72,

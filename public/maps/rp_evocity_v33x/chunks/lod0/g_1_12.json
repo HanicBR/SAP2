@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 93,
     "staticProps": 11,
-    "placeholderWorldFaces": 27,
+    "placeholderWorldFaces": 8,
     "placeholderStaticProps": 0
   },
   "stats": {
@@ -2024,7 +2024,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 13,
         "triCount": 27,
         "vertexCount": 81,
@@ -2954,7 +2954,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-10133_9690_119",
         "material": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-10133_9690_119",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 14,
         "vertexCount": 42,
@@ -3527,7 +3527,7 @@
       {
         "materialId": "nature/cliffface001a",
         "material": "nature/cliffface001a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 4,
         "vertexCount": 12,

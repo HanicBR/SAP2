@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 72,
     "staticProps": 0,
-    "placeholderWorldFaces": 28,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 0
   },
   "stats": {
@@ -1130,7 +1130,7 @@
       {
         "materialId": "metal/citadel_metalwall074a",
         "material": "metal/citadel_metalwall074a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 12,
         "triCount": 24,
         "vertexCount": 72,
@@ -1502,7 +1502,7 @@
       {
         "materialId": "concrete/concretewall070a",
         "material": "concrete/concretewall070a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 16,
         "triCount": 32,
         "vertexCount": 96,

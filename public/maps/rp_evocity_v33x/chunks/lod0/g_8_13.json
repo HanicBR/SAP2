@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 389,
     "staticProps": 45,
-    "placeholderWorldFaces": 171,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 1
   },
   "stats": {
@@ -38,7 +38,7 @@
       {
         "materialId": "de_chateau/woodm",
         "material": "de_chateau/woodm",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 90,
         "triCount": 320,
         "vertexCount": 960,
@@ -8435,7 +8435,7 @@
       {
         "materialId": "wood/inffence01",
         "material": "wood/inffence01",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 17,
         "triCount": 35,
         "vertexCount": 105,
@@ -12122,7 +12122,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 9,
         "vertexCount": 27,
@@ -12269,7 +12269,7 @@
       {
         "materialId": "wood/milwall010",
         "material": "wood/milwall010",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 36,
         "triCount": 122,
         "vertexCount": 366,
@@ -14375,7 +14375,7 @@
       {
         "materialId": "de_train/train_cement_floor_01",
         "material": "de_train/train_cement_floor_01",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 9,
         "triCount": 38,
         "vertexCount": 114,
@@ -15626,7 +15626,7 @@
       {
         "materialId": "plaster/milwall002",
         "material": "plaster/milwall002",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 13,
         "triCount": 30,
         "vertexCount": 90,
@@ -17324,7 +17324,7 @@
       {
         "materialId": "concrete/concretefloor009a",
         "material": "concrete/concretefloor009a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 12,
         "vertexCount": 36,

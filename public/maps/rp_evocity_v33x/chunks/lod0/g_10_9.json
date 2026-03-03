@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 214,
     "staticProps": 10,
-    "placeholderWorldFaces": 101,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 4
   },
   "stats": {
@@ -38,7 +38,7 @@
       {
         "materialId": "wood/woodwall011a",
         "material": "wood/woodwall011a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 30,
         "triCount": 92,
         "vertexCount": 276,
@@ -1430,7 +1430,7 @@
       {
         "materialId": "de_chateau/woodm",
         "material": "de_chateau/woodm",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 34,
         "triCount": 87,
         "vertexCount": 261,
@@ -2747,7 +2747,7 @@
       {
         "materialId": "wood/shingles006",
         "material": "wood/shingles006",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 10,
         "triCount": 32,
         "vertexCount": 96,
@@ -3239,7 +3239,7 @@
       {
         "materialId": "wood/woodceiling003a",
         "material": "wood/woodceiling003a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 8,
         "triCount": 40,
         "vertexCount": 120,
@@ -3851,7 +3851,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 8,
         "triCount": 17,
         "vertexCount": 51,
@@ -6311,7 +6311,7 @@
       {
         "materialId": "wood/woodfloor002",
         "material": "wood/woodfloor002",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 11,
         "triCount": 38,
         "vertexCount": 114,

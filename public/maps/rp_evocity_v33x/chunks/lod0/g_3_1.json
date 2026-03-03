@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 625,
     "staticProps": 10,
-    "placeholderWorldFaces": 260,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 2
   },
   "stats": {
@@ -8555,7 +8555,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-7041_-12249_125",
         "material": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-7041_-12249_125",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 28,
         "triCount": 66,
         "vertexCount": 198,
@@ -9557,7 +9557,7 @@
       {
         "materialId": "building_template/building_template014a",
         "material": "building_template/building_template014a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 8,
         "vertexCount": 24,
@@ -9689,7 +9689,7 @@
       {
         "materialId": "building_template/building_template013a",
         "material": "building_template/building_template013a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 5,
         "vertexCount": 15,
@@ -9776,7 +9776,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-7028_-12895_125",
         "material": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-7028_-12895_125",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 13,
         "triCount": 47,
         "vertexCount": 141,
@@ -10697,7 +10697,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-5995_-11284_125",
         "material": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-5995_-11284_125",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 8,
         "vertexCount": 24,
@@ -11282,7 +11282,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/glass/offwndwb_-7041_-12249_125",
         "material": "maps/rp_evocity_v33x/glass/offwndwb_-7041_-12249_125",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 8,
         "triCount": 16,
         "vertexCount": 48,
@@ -11606,7 +11606,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/glass/offwndwb_-7481_-10510_-374",
         "material": "maps/rp_evocity_v33x/glass/offwndwb_-7481_-10510_-374",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 8,
         "triCount": 16,
         "vertexCount": 48,
@@ -11900,7 +11900,7 @@
       {
         "materialId": "de_nuke/nukroofa",
         "material": "de_nuke/nukroofa",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 19,
         "triCount": 42,
         "vertexCount": 126,
@@ -14531,7 +14531,7 @@
       {
         "materialId": "de_train/train_cement_floor_01",
         "material": "de_train/train_cement_floor_01",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 16,
         "triCount": 49,
         "vertexCount": 147,
@@ -19157,7 +19157,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 33,
         "triCount": 81,
         "vertexCount": 243,
@@ -20384,7 +20384,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/building_template/building_template006b_-5995_-11284_125",
         "material": "maps/rp_evocity_v33x/building_template/building_template006b_-5995_-11284_125",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 9,
         "triCount": 26,
         "vertexCount": 78,
@@ -20786,7 +20786,7 @@
       {
         "materialId": "metal/metalvent001a",
         "material": "metal/metalvent001a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 12,
         "triCount": 26,
         "vertexCount": 78,
@@ -21188,7 +21188,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/building_template/building_template006b_-6716_-10233_129",
         "material": "maps/rp_evocity_v33x/building_template/building_template006b_-6716_-10233_129",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 7,
         "triCount": 22,
         "vertexCount": 66,
@@ -21530,7 +21530,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/building_template/building_template006b_-7481_-10510_-374",
         "material": "maps/rp_evocity_v33x/building_template/building_template006b_-7481_-10510_-374",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 4,
         "vertexCount": 12,
@@ -21602,7 +21602,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/tile/grey01_-7041_-12249_125",
         "material": "maps/rp_evocity_v33x/tile/grey01_-7041_-12249_125",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 5,
         "vertexCount": 15,
@@ -21881,7 +21881,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/tile/grey04_-7041_-12249_125",
         "material": "maps/rp_evocity_v33x/tile/grey04_-7041_-12249_125",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 20,
         "vertexCount": 60,
@@ -22193,7 +22193,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/building_template/building_template006b_-7041_-12249_125",
         "material": "maps/rp_evocity_v33x/building_template/building_template006b_-7041_-12249_125",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 6,
         "triCount": 16,
         "vertexCount": 48,
@@ -25961,7 +25961,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/building_template/building_template006b_-8019_-10242_-374",
         "material": "maps/rp_evocity_v33x/building_template/building_template006b_-8019_-10242_-374",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 8,
         "vertexCount": 24,
@@ -26093,7 +26093,7 @@
       {
         "materialId": "tools/toolsblack",
         "material": "tools/toolsblack",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 9,
         "triCount": 68,
         "vertexCount": 204,
@@ -27125,7 +27125,7 @@
       {
         "materialId": "props/metalstainless01",
         "material": "props/metalstainless01",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 76,
         "triCount": 184,
         "vertexCount": 552,

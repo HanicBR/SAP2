@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 70,
     "staticProps": 14,
-    "placeholderWorldFaces": 47,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 4
   },
   "stats": {
@@ -38,7 +38,7 @@
       {
         "materialId": "brick/brickwall040c",
         "material": "brick/brickwall040c",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 7,
         "triCount": 26,
         "vertexCount": 78,
@@ -440,7 +440,7 @@
       {
         "materialId": "concrete/concretewall032b",
         "material": "concrete/concretewall032b",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 8,
         "triCount": 23,
         "vertexCount": 69,
@@ -797,7 +797,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 6,
         "triCount": 16,
         "vertexCount": 48,
@@ -1049,7 +1049,7 @@
       {
         "materialId": "de_train/train_cement_floor_01",
         "material": "de_train/train_cement_floor_01",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 14,
         "triCount": 40,
         "vertexCount": 120,
@@ -1895,7 +1895,7 @@
       {
         "materialId": "buildings/roof07",
         "material": "buildings/roof07",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 2,
         "vertexCount": 6,
@@ -1937,7 +1937,7 @@
       {
         "materialId": "de_nuke/nuke_wall_cntrlroom_01",
         "material": "de_nuke/nuke_wall_cntrlroom_01",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 5,
         "triCount": 15,
         "vertexCount": 45,
@@ -2174,7 +2174,7 @@
       {
         "materialId": "glass/glasswindow015a",
         "material": "glass/glasswindow015a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 4,
         "vertexCount": 12,
@@ -2912,7 +2912,7 @@
       {
         "materialId": "de_train/train_cement_floor_02",
         "material": "de_train/train_cement_floor_02",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 6,
         "vertexCount": 18,
@@ -3056,7 +3056,7 @@
       {
         "materialId": "nature/cliffface001a",
         "material": "nature/cliffface001a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 4,
         "vertexCount": 12,

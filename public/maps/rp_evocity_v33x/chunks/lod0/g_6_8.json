@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 274,
     "staticProps": 41,
-    "placeholderWorldFaces": 83,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 6
   },
   "stats": {
@@ -302,7 +302,7 @@
       {
         "materialId": "metal/metaltruss025a",
         "material": "metal/metaltruss025a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 10,
         "triCount": 24,
         "vertexCount": 72,
@@ -896,7 +896,7 @@
       {
         "materialId": "concrete/concretewall022a",
         "material": "concrete/concretewall022a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 16,
         "triCount": 39,
         "vertexCount": 117,
@@ -1493,7 +1493,7 @@
       {
         "materialId": "metal/metalwall030a",
         "material": "metal/metalwall030a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 16,
         "triCount": 48,
         "vertexCount": 144,
@@ -3800,7 +3800,7 @@
       {
         "materialId": "metal/metaltruss026a",
         "material": "metal/metaltruss026a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 20,
         "triCount": 44,
         "vertexCount": 132,
@@ -5450,7 +5450,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 8,
         "triCount": 19,
         "vertexCount": 57,
@@ -7259,7 +7259,7 @@
       {
         "materialId": "de_nuke/nukroofa",
         "material": "de_nuke/nukroofa",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 10,
         "triCount": 23,
         "vertexCount": 69,
@@ -11543,7 +11543,7 @@
       {
         "materialId": "nature/cliffface001a",
         "material": "nature/cliffface001a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 6,
         "vertexCount": 18,

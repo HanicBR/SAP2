@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 253,
     "staticProps": 35,
-    "placeholderWorldFaces": 68,
+    "placeholderWorldFaces": 12,
     "placeholderStaticProps": 6
   },
   "stats": {
@@ -38,7 +38,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/tile/urban_countertop01b_-9986_9690_119",
         "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_-9986_9690_119",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 10,
         "triCount": 32,
         "vertexCount": 96,
@@ -530,7 +530,7 @@
       {
         "materialId": "de_train/train_cement_floor_02",
         "material": "de_train/train_cement_floor_02",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 11,
         "vertexCount": 33,
@@ -2519,7 +2519,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/tile/urban_countertop01b_-9644_11438_292",
         "material": "maps/rp_evocity_v33x/tile/urban_countertop01b_-9644_11438_292",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 10,
         "triCount": 26,
         "vertexCount": 78,
@@ -3833,7 +3833,7 @@
       {
         "materialId": "wood/cabinets01a",
         "material": "wood/cabinets01a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 11,
         "vertexCount": 33,
@@ -4700,7 +4700,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 10,
         "triCount": 23,
         "vertexCount": 69,
@@ -5348,7 +5348,7 @@
       {
         "materialId": "carpet/blue04",
         "material": "carpet/blue04",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 6,
         "triCount": 28,
         "vertexCount": 84,
@@ -10253,7 +10253,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-10133_9690_119",
         "material": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-10133_9690_119",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 7,
         "triCount": 18,
         "vertexCount": 54,
@@ -10535,7 +10535,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-9648_9565_119",
         "material": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-9648_9565_119",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 2,
         "vertexCount": 6,
@@ -10691,7 +10691,7 @@
       {
         "materialId": "nature/cliffface001a",
         "material": "nature/cliffface001a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 8,
         "vertexCount": 24,

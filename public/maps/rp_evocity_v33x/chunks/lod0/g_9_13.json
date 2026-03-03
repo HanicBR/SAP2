@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 550,
     "staticProps": 58,
-    "placeholderWorldFaces": 186,
+    "placeholderWorldFaces": 6,
     "placeholderStaticProps": 2
   },
   "stats": {
@@ -740,7 +740,7 @@
       {
         "materialId": "concrete/concretewall060c",
         "material": "concrete/concretewall060c",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 25,
         "triCount": 99,
         "vertexCount": 297,
@@ -4100,7 +4100,7 @@
       {
         "materialId": "concrete/concretewall060f",
         "material": "concrete/concretewall060f",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 10,
         "vertexCount": 30,
@@ -8882,7 +8882,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 7,
         "triCount": 18,
         "vertexCount": 54,
@@ -10247,7 +10247,7 @@
       {
         "materialId": "cs_havana/woodm",
         "material": "cs_havana/woodm",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 89,
         "triCount": 183,
         "vertexCount": 549,
@@ -15218,7 +15218,7 @@
       {
         "materialId": "concrete/prodwllh",
         "material": "concrete/prodwllh",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 20,
         "triCount": 55,
         "vertexCount": 165,
@@ -17384,7 +17384,7 @@
       {
         "materialId": "concrete/concretefloor009a",
         "material": "concrete/concretefloor009a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 19,
         "vertexCount": 57,
@@ -17681,7 +17681,7 @@
       {
         "materialId": "concrete/concretefloor026a",
         "material": "concrete/concretefloor026a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 18,
         "triCount": 42,
         "vertexCount": 126,
@@ -18557,7 +18557,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/concrete/concretefloor011a_c17_5340_14006_146",
         "material": "maps/rp_evocity_v33x/concrete/concretefloor011a_c17_5340_14006_146",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 4,
         "vertexCount": 12,
@@ -18629,7 +18629,7 @@
       {
         "materialId": "brick/brickwall045f",
         "material": "brick/brickwall045f",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 7,
         "triCount": 22,
         "vertexCount": 66,
@@ -23294,7 +23294,7 @@
       {
         "materialId": "tools/toolsblack",
         "material": "tools/toolsblack",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 24,
         "vertexCount": 72,

@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 398,
     "staticProps": 31,
-    "placeholderWorldFaces": 264,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 10
   },
   "stats": {
@@ -38,7 +38,7 @@
       {
         "materialId": "wood/woodwall011a",
         "material": "wood/woodwall011a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 38,
         "triCount": 104,
         "vertexCount": 312,
@@ -1610,7 +1610,7 @@
       {
         "materialId": "de_chateau/woodm",
         "material": "de_chateau/woodm",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 21,
         "triCount": 54,
         "vertexCount": 162,
@@ -2432,7 +2432,7 @@
       {
         "materialId": "wood/wooddoor015a",
         "material": "wood/wooddoor015a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 9,
         "triCount": 20,
         "vertexCount": 60,
@@ -2744,7 +2744,7 @@
       {
         "materialId": "wood/shingles006",
         "material": "wood/shingles006",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 7,
         "triCount": 18,
         "vertexCount": 54,
@@ -3026,7 +3026,7 @@
       {
         "materialId": "wood/woodceiling003a",
         "material": "wood/woodceiling003a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 14,
         "triCount": 69,
         "vertexCount": 207,
@@ -4820,7 +4820,7 @@
       {
         "materialId": "wood/mainstreet_woodsiding05c",
         "material": "wood/mainstreet_woodsiding05c",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 31,
         "triCount": 93,
         "vertexCount": 279,
@@ -6719,7 +6719,7 @@
       {
         "materialId": "cs_havana/woodm",
         "material": "cs_havana/woodm",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 40,
         "triCount": 105,
         "vertexCount": 315,
@@ -8306,7 +8306,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 16,
         "triCount": 46,
         "vertexCount": 138,
@@ -9008,7 +9008,7 @@
       {
         "materialId": "metal/milroof002",
         "material": "metal/milroof002",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 24,
         "triCount": 64,
         "vertexCount": 192,
@@ -9980,7 +9980,7 @@
       {
         "materialId": "wood/woodfloor002",
         "material": "wood/woodfloor002",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 20,
         "triCount": 88,
         "vertexCount": 264,
@@ -11312,7 +11312,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/plaster/plasterwallpaper005a_9811_4479_70",
         "material": "maps/rp_evocity_v33x/plaster/plasterwallpaper005a_9811_4479_70",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 7,
         "triCount": 19,
         "vertexCount": 57,
@@ -11609,7 +11609,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/plaster/plasterwallpaper005a_9906_3234_74",
         "material": "maps/rp_evocity_v33x/plaster/plasterwallpaper005a_9906_3234_74",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 29,
         "triCount": 84,
         "vertexCount": 252,
@@ -13853,7 +13853,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/plaster/plasterwallpaper005a_5234_-4057_160",
         "material": "maps/rp_evocity_v33x/plaster/plasterwallpaper005a_5234_-4057_160",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 10,
         "vertexCount": 30,
@@ -14015,7 +14015,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/plaster/plasterwallpaper005a_10272_12536_120",
         "material": "maps/rp_evocity_v33x/plaster/plasterwallpaper005a_10272_12536_120",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 8,
         "vertexCount": 24,

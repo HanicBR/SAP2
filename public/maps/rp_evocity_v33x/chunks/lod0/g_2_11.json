@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 373,
     "staticProps": 105,
-    "placeholderWorldFaces": 142,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 0
   },
   "stats": {
@@ -4592,7 +4592,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-10400_9333_119",
         "material": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-10400_9333_119",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 5,
         "triCount": 17,
         "vertexCount": 51,
@@ -4859,7 +4859,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-10056_9031_119",
         "material": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-10056_9031_119",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 12,
         "triCount": 35,
         "vertexCount": 105,
@@ -5396,7 +5396,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-9636_9120_119",
         "material": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-9636_9120_119",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 21,
         "triCount": 69,
         "vertexCount": 207,
@@ -6443,7 +6443,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-9986_9690_119",
         "material": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-9986_9690_119",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 8,
         "triCount": 29,
         "vertexCount": 87,
@@ -6890,7 +6890,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-10133_9690_119",
         "material": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-10133_9690_119",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 5,
         "triCount": 20,
         "vertexCount": 60,
@@ -9698,7 +9698,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 9,
         "triCount": 22,
         "vertexCount": 66,
@@ -10754,7 +10754,7 @@
       {
         "materialId": "buildings/roof07",
         "material": "buildings/roof07",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 8,
         "triCount": 19,
         "vertexCount": 57,
@@ -11528,7 +11528,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/tile/yellow04_-10400_9333_119",
         "material": "maps/rp_evocity_v33x/tile/yellow04_-10400_9333_119",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 22,
         "triCount": 94,
         "vertexCount": 282,
@@ -12950,7 +12950,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/tile/yellow04_-9636_9120_119",
         "material": "maps/rp_evocity_v33x/tile/yellow04_-9636_9120_119",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 5,
         "triCount": 15,
         "vertexCount": 45,
@@ -13187,7 +13187,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/tile/yellow04_-9648_9565_119",
         "material": "maps/rp_evocity_v33x/tile/yellow04_-9648_9565_119",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 2,
         "vertexCount": 6,
@@ -13229,7 +13229,7 @@
       {
         "materialId": "tile/tile_ceiling_01",
         "material": "tile/tile_ceiling_01",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 23,
         "triCount": 73,
         "vertexCount": 219,
@@ -14336,7 +14336,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-9648_9565_119",
         "material": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-9648_9565_119",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 7,
         "triCount": 20,
         "vertexCount": 60,
@@ -15089,7 +15089,7 @@
       {
         "materialId": "wood/cabinets04",
         "material": "wood/cabinets04",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 4,
         "vertexCount": 12,
@@ -15161,7 +15161,7 @@
       {
         "materialId": "wood/cabinets03",
         "material": "wood/cabinets03",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 8,
         "vertexCount": 24,
@@ -15293,7 +15293,7 @@
       {
         "materialId": "wood/urban_woodcabinets02b",
         "material": "wood/urban_woodcabinets02b",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 10,
         "triCount": 20,
         "vertexCount": 60,

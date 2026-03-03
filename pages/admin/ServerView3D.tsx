@@ -982,7 +982,7 @@ const ServerView3D: React.FC = () => {
       const out: string[] = [];
       for (const rel of cleaned) {
         out.push(rel);
-        for (const rootRaw of roots.slice(0, 3)) {
+        for (const rootRaw of roots) {
           const root = String(rootRaw || '').trim().replace(/\\/g, '/').replace(/\/$/, '');
           const relNorm = rel.replace(/\\/g, '/').replace(/^\//, '');
           if (!root) continue;
@@ -996,20 +996,30 @@ const ServerView3D: React.FC = () => {
       const materialId = String(materialIdRaw || '__missing_material');
       const def = materialDefs.get(materialId);
       const shouldPlaceholder = placeholderFlag || !def || def.placeholder || !def.textureUrl;
-      if (shouldPlaceholder) {
+      const isToolMaterial = materialId.startsWith('tools/') || materialId.startsWith('editor/');
+      if (shouldPlaceholder && !isToolMaterial) {
         const searchedIn = withRoots(materialRootsScanned, [
           def?.searchedVmt || (materialId ? `materials/${materialId}.vmt` : ''),
           def?.searchedVtf || (def?.resolvedBaseTexture ? `materials/${def.resolvedBaseTexture}.vtf` : ''),
           def?.sourcePath || '',
         ]);
+        const status = String(def?.status || '').trim().toLowerCase();
+        const code = status === 'ok'
+          ? 'material_runtime_placeholder'
+          : status
+            ? `material_${status}`
+            : 'material_placeholder';
+        const message = status === 'ok'
+          ? 'material marcado como placeholder no chunk runtime'
+          : def?.error
+            ? `material sem textura (${def.status || 'placeholder'}): ${def.error}`
+            : `material sem textura (${def?.status || 'not_in_index'})`;
         pushDiagnostic(
           def?.error ? 'error' : 'warn',
-          def?.status ? `material_${def.status}` : 'material_placeholder',
+          code,
           'material',
           materialId,
-          def?.error
-            ? `material sem textura (${def.status || 'placeholder'}): ${def.error}`
-            : `material sem textura (${def?.status || 'not_in_index'})`,
+          message,
           searchedIn,
         );
       }

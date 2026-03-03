@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 481,
     "staticProps": 52,
-    "placeholderWorldFaces": 369,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 41
   },
   "stats": {
@@ -38,7 +38,7 @@
       {
         "materialId": "concrete/concretewall032b",
         "material": "concrete/concretewall032b",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 9,
         "vertexCount": 27,
@@ -185,7 +185,7 @@
       {
         "materialId": "metal/metaltruss024a",
         "material": "metal/metaltruss024a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 35,
         "triCount": 70,
         "vertexCount": 210,
@@ -1247,7 +1247,7 @@
       {
         "materialId": "metal/metalfloor005a",
         "material": "metal/metalfloor005a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 16,
         "triCount": 44,
         "vertexCount": 132,
@@ -1919,7 +1919,7 @@
       {
         "materialId": "metal/metalwall030a",
         "material": "metal/metalwall030a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 26,
         "triCount": 58,
         "vertexCount": 174,
@@ -2801,7 +2801,7 @@
       {
         "materialId": "brick/brickwall014l",
         "material": "brick/brickwall014l",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 16,
         "triCount": 43,
         "vertexCount": 129,
@@ -3458,7 +3458,7 @@
       {
         "materialId": "props/rubberbumper001a",
         "material": "props/rubberbumper001a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 10,
         "triCount": 20,
         "vertexCount": 60,
@@ -5072,7 +5072,7 @@
       {
         "materialId": "brick/brickwall040c",
         "material": "brick/brickwall040c",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 10,
         "triCount": 40,
         "vertexCount": 120,
@@ -6176,7 +6176,7 @@
       {
         "materialId": "concrete/prodflra",
         "material": "concrete/prodflra",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 2,
         "vertexCount": 6,
@@ -6500,7 +6500,7 @@
       {
         "materialId": "de_train/train_cement_floor_01",
         "material": "de_train/train_cement_floor_01",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 35,
         "triCount": 103,
         "vertexCount": 309,
@@ -8966,7 +8966,7 @@
       {
         "materialId": "glass/glasswindow041c",
         "material": "glass/glasswindow041c",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 6,
         "triCount": 12,
         "vertexCount": 36,
@@ -9158,7 +9158,7 @@
       {
         "materialId": "de_nuke/nuke_wall_cntrlroom_01",
         "material": "de_nuke/nuke_wall_cntrlroom_01",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 28,
         "triCount": 87,
         "vertexCount": 261,
@@ -10475,7 +10475,7 @@
       {
         "materialId": "glass/glasswindow015a",
         "material": "glass/glasswindow015a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 4,
         "vertexCount": 12,
@@ -11789,7 +11789,7 @@
       {
         "materialId": "buildings/roof07",
         "material": "buildings/roof07",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 5,
         "triCount": 16,
         "vertexCount": 48,
@@ -12323,7 +12323,7 @@
       {
         "materialId": "brick/wall05",
         "material": "brick/wall05",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 20,
         "triCount": 56,
         "vertexCount": 168,
@@ -13622,7 +13622,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 8,
         "triCount": 21,
         "vertexCount": 63,
@@ -13949,7 +13949,7 @@
       {
         "materialId": "de_nuke/nukconcretewallb",
         "material": "de_nuke/nukconcretewallb",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 5,
         "vertexCount": 15,
@@ -14036,7 +14036,7 @@
       {
         "materialId": "concrete/concretefloor008a",
         "material": "concrete/concretefloor008a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 14,
         "triCount": 63,
         "vertexCount": 189,
@@ -14993,7 +14993,7 @@
       {
         "materialId": "de_train/train_cement_floor_02",
         "material": "de_train/train_cement_floor_02",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 23,
         "vertexCount": 69,
@@ -15350,7 +15350,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/brick/brickwall014c_3498_4227_126",
         "material": "maps/rp_evocity_v33x/brick/brickwall014c_3498_4227_126",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 7,
         "triCount": 38,
         "vertexCount": 114,
@@ -15932,7 +15932,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/brick/brickwall014e_3498_4227_126",
         "material": "maps/rp_evocity_v33x/brick/brickwall014e_3498_4227_126",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 9,
         "triCount": 38,
         "vertexCount": 114,
@@ -16514,7 +16514,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/brick/brickwall014b_3498_4227_126",
         "material": "maps/rp_evocity_v33x/brick/brickwall014b_3498_4227_126",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 6,
         "triCount": 17,
         "vertexCount": 51,
@@ -16781,7 +16781,7 @@
       {
         "materialId": "de_nuke/nukroofa",
         "material": "de_nuke/nukroofa",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 27,
         "triCount": 66,
         "vertexCount": 198,
@@ -17783,7 +17783,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/brick/brickwall014f_2484_4991_137",
         "material": "maps/rp_evocity_v33x/brick/brickwall014f_2484_4991_137",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 8,
         "triCount": 17,
         "vertexCount": 51,
@@ -18050,7 +18050,7 @@
       {
         "materialId": "brick/brickwall014a",
         "material": "brick/brickwall014a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 19,
         "triCount": 43,
         "vertexCount": 129,
@@ -18707,7 +18707,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/brick/brickwall014f_3250_4088_126",
         "material": "maps/rp_evocity_v33x/brick/brickwall014f_3250_4088_126",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 11,
         "triCount": 24,
         "vertexCount": 72,
@@ -19079,7 +19079,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/brick/brickwall014e_2484_4991_137",
         "material": "maps/rp_evocity_v33x/brick/brickwall014e_2484_4991_137",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 6,
         "vertexCount": 18,
@@ -19181,7 +19181,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/brick/brickwall014c_2484_4991_137",
         "material": "maps/rp_evocity_v33x/brick/brickwall014c_2484_4991_137",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 7,
         "vertexCount": 21,
@@ -19298,7 +19298,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/brick/brickwall014c_4660_4991_137",
         "material": "maps/rp_evocity_v33x/brick/brickwall014c_4660_4991_137",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 8,
         "vertexCount": 24,
@@ -19430,7 +19430,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/brick/brickwall014e_4660_4991_137",
         "material": "maps/rp_evocity_v33x/brick/brickwall014e_4660_4991_137",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 8,
         "vertexCount": 24,
@@ -19562,7 +19562,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/brick/brickwall014b_4660_4991_137",
         "material": "maps/rp_evocity_v33x/brick/brickwall014b_4660_4991_137",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 6,
         "triCount": 15,
         "vertexCount": 45,
@@ -19799,7 +19799,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/brick/brickwall014c_3250_4088_126",
         "material": "maps/rp_evocity_v33x/brick/brickwall014c_3250_4088_126",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 8,
         "vertexCount": 24,
@@ -19931,7 +19931,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/brick/brickwall014e_3250_4088_126",
         "material": "maps/rp_evocity_v33x/brick/brickwall014e_3250_4088_126",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 9,
         "vertexCount": 27,
@@ -20078,7 +20078,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/brick/brickwall014b_3250_4088_126",
         "material": "maps/rp_evocity_v33x/brick/brickwall014b_3250_4088_126",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 6,
         "vertexCount": 18,
@@ -20180,7 +20180,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/brick/brickwall014e_2484_3199_137",
         "material": "maps/rp_evocity_v33x/brick/brickwall014e_2484_3199_137",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 4,
         "vertexCount": 12,
@@ -20252,7 +20252,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/brick/brickwall014c_2484_3199_137",
         "material": "maps/rp_evocity_v33x/brick/brickwall014c_2484_3199_137",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 5,
         "vertexCount": 15,
@@ -20339,7 +20339,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/brick/brickwall014c_3637_3853_126",
         "material": "maps/rp_evocity_v33x/brick/brickwall014c_3637_3853_126",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 4,
         "vertexCount": 12,
@@ -20411,7 +20411,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/brick/brickwall014e_3637_3853_126",
         "material": "maps/rp_evocity_v33x/brick/brickwall014e_3637_3853_126",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 11,
         "vertexCount": 33,
@@ -20588,7 +20588,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/brick/brickwall014b_3637_3853_126",
         "material": "maps/rp_evocity_v33x/brick/brickwall014b_3637_3853_126",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 8,
         "vertexCount": 24,

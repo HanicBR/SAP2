@@ -1108,7 +1108,7 @@ const run = () => {
     return {
       ...face,
       material,
-      placeholderMaterial: material === '__missing_material' || missingWorldMaterials.has(material),
+      placeholderMaterial: material === '__missing_material',
     };
   });
 
@@ -1290,6 +1290,24 @@ const run = () => {
     rootsScanned: materialExport.rootsScanned,
     materials: materialIndexEntries,
   });
+
+  const materialsWithoutTexture = new Set(
+    materialIndexEntries
+      .filter((item) => item.placeholder)
+      .map((item) => normalizeMaterialName(item.material))
+      .filter((item) => item.length > 0),
+  );
+  const strictAuditMaterialPlaceholder = options.assetResolutionMode === 'strict';
+  for (const face of faces) {
+    const material = normalizeMaterialName(face.material);
+    if (!material || material === '__missing_material') {
+      face.placeholderMaterial = true;
+      continue;
+    }
+    const missingTexture = materialsWithoutTexture.has(material);
+    const missingByStrictAudit = strictAuditMaterialPlaceholder && missingWorldMaterials.has(material);
+    face.placeholderMaterial = missingTexture || missingByStrictAudit;
+  }
 
   const modelIndexEntries = uniqueRuntimeModels.map((model) => {
     const exported = modelExport.records.get(model);

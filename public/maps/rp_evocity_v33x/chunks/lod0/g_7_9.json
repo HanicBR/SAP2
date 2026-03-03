@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 404,
     "staticProps": 32,
-    "placeholderWorldFaces": 360,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 21
   },
   "stats": {
@@ -38,7 +38,7 @@
       {
         "materialId": "wood/woodfloor002a",
         "material": "wood/woodfloor002a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 6,
         "triCount": 16,
         "vertexCount": 48,
@@ -290,7 +290,7 @@
       {
         "materialId": "wood/woodbeam002a",
         "material": "wood/woodbeam002a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 24,
         "triCount": 68,
         "vertexCount": 204,
@@ -1322,7 +1322,7 @@
       {
         "materialId": "metal/metalwall017a",
         "material": "metal/metalwall017a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 24,
         "triCount": 64,
         "vertexCount": 192,
@@ -2294,7 +2294,7 @@
       {
         "materialId": "wood/wooddoor019a",
         "material": "wood/wooddoor019a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 36,
         "triCount": 88,
         "vertexCount": 264,
@@ -3626,7 +3626,7 @@
       {
         "materialId": "metal/metalwall018a",
         "material": "metal/metalwall018a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 16,
         "triCount": 50,
         "vertexCount": 150,
@@ -4388,7 +4388,7 @@
       {
         "materialId": "metal/metalwall030a",
         "material": "metal/metalwall030a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 47,
         "triCount": 99,
         "vertexCount": 297,
@@ -5885,7 +5885,7 @@
       {
         "materialId": "metal/metalwall018b",
         "material": "metal/metalwall018b",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 8,
         "vertexCount": 24,
@@ -6017,7 +6017,7 @@
       {
         "materialId": "wood/woodfloor001a",
         "material": "wood/woodfloor001a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 12,
         "vertexCount": 36,
@@ -6209,7 +6209,7 @@
       {
         "materialId": "concrete/concretefloor008a",
         "material": "concrete/concretefloor008a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 6,
         "triCount": 46,
         "vertexCount": 138,
@@ -6911,7 +6911,7 @@
       {
         "materialId": "wood/woodwall028a",
         "material": "wood/woodwall028a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 17,
         "triCount": 66,
         "vertexCount": 198,
@@ -7913,7 +7913,7 @@
       {
         "materialId": "metal/metalwall005b",
         "material": "metal/metalwall005b",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 14,
         "vertexCount": 42,
@@ -8135,7 +8135,7 @@
       {
         "materialId": "props/plasticceiling002a",
         "material": "props/plasticceiling002a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 14,
         "vertexCount": 42,
@@ -8357,7 +8357,7 @@
       {
         "materialId": "wood/woodwall003a",
         "material": "wood/woodwall003a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 5,
         "triCount": 17,
         "vertexCount": 51,
@@ -9596,7 +9596,7 @@
       {
         "materialId": "wood/woodshelf001a",
         "material": "wood/woodshelf001a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 7,
         "triCount": 14,
         "vertexCount": 42,
@@ -9818,7 +9818,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/metal/metalwall018e_776_4475_126",
         "material": "maps/rp_evocity_v33x/metal/metalwall018e_776_4475_126",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 10,
         "triCount": 42,
         "vertexCount": 126,
@@ -10460,7 +10460,7 @@
       {
         "materialId": "metal/metalwall065f",
         "material": "metal/metalwall065f",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 16,
         "triCount": 75,
         "vertexCount": 225,
@@ -11597,7 +11597,7 @@
       {
         "materialId": "metal/metalwall062a",
         "material": "metal/metalwall062a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 10,
         "triCount": 20,
         "vertexCount": 60,
@@ -11909,7 +11909,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/metal/metalwall018e_1548_4080_126",
         "material": "maps/rp_evocity_v33x/metal/metalwall018e_1548_4080_126",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 5,
         "triCount": 18,
         "vertexCount": 54,
@@ -12191,7 +12191,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 11,
         "triCount": 31,
         "vertexCount": 93,
@@ -12668,7 +12668,7 @@
       {
         "materialId": "de_train/train_cement_floor_01",
         "material": "de_train/train_cement_floor_01",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 37,
         "triCount": 90,
         "vertexCount": 270,
@@ -14387,7 +14387,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/metal/metalwall018e_52_4991_137",
         "material": "maps/rp_evocity_v33x/metal/metalwall018e_52_4991_137",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 8,
         "vertexCount": 24,
@@ -14519,7 +14519,7 @@
       {
         "materialId": "metal/metalwall018f",
         "material": "metal/metalwall018f",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 52,
         "triCount": 169,
         "vertexCount": 507,
@@ -17183,7 +17183,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/metal/metalwall031a_776_4475_126",
         "material": "maps/rp_evocity_v33x/metal/metalwall031a_776_4475_126",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 4,
         "vertexCount": 12,
@@ -17255,7 +17255,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/metal/metalwall018e_847_3906_126",
         "material": "maps/rp_evocity_v33x/metal/metalwall018e_847_3906_126",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 9,
         "triCount": 36,
         "vertexCount": 108,
@@ -17807,7 +17807,7 @@
       {
         "materialId": "concrete/concretefloor002a",
         "material": "concrete/concretefloor002a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 23,
         "vertexCount": 69,
@@ -18164,7 +18164,7 @@
       {
         "materialId": "glass/glasswindow005c",
         "material": "glass/glasswindow005c",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 5,
         "vertexCount": 15,
@@ -18251,7 +18251,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/metal/metalwall018e_53_4095_137",
         "material": "maps/rp_evocity_v33x/metal/metalwall018e_53_4095_137",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 15,
         "vertexCount": 45,
@@ -18488,7 +18488,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/metal/metalwall018e_52_3199_137",
         "material": "maps/rp_evocity_v33x/metal/metalwall018e_52_3199_137",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 6,
         "vertexCount": 18,

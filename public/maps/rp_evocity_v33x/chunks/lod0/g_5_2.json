@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 82,
     "staticProps": 16,
-    "placeholderWorldFaces": 35,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 0
   },
   "stats": {
@@ -38,7 +38,7 @@
       {
         "materialId": "stone/stonewall037e",
         "material": "stone/stonewall037e",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 6,
         "triCount": 17,
         "vertexCount": 51,
@@ -305,7 +305,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 16,
         "triCount": 54,
         "vertexCount": 162,
@@ -1751,7 +1751,7 @@
       {
         "materialId": "de_nuke/nukroofa",
         "material": "de_nuke/nukroofa",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 2,
         "vertexCount": 6,
@@ -1952,7 +1952,7 @@
       {
         "materialId": "brick/wall06",
         "material": "brick/wall06",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 3,
         "vertexCount": 9,
@@ -2009,7 +2009,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-4868_-9285_138",
         "material": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-4868_-9285_138",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 7,
         "vertexCount": 21,
@@ -2702,7 +2702,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-4159_-9295_1524",
         "material": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-4159_-9295_1524",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 13,
         "vertexCount": 39,
@@ -2909,7 +2909,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-4977_-9016_1672",
         "material": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-4977_-9016_1672",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 7,
         "vertexCount": 21,
@@ -3098,7 +3098,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-4915_-9285_1524",
         "material": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-4915_-9285_1524",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 11,
         "vertexCount": 33,
@@ -3317,7 +3317,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/building_template/building_trainstation_template002b_-5124_-9585_138",
         "material": "maps/rp_evocity_v33x/building_template/building_trainstation_template002b_-5124_-9585_138",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 2,
         "vertexCount": 6,

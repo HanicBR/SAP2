@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 526,
     "staticProps": 83,
-    "placeholderWorldFaces": 120,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 1
   },
   "stats": {
@@ -38,7 +38,7 @@
       {
         "materialId": "de_train/train_cement_floor_01",
         "material": "de_train/train_cement_floor_01",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 32,
         "triCount": 126,
         "vertexCount": 378,
@@ -9902,7 +9902,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 37,
         "triCount": 89,
         "vertexCount": 267,
@@ -16118,7 +16118,7 @@
       {
         "materialId": "de_nuke/nukroofa",
         "material": "de_nuke/nukroofa",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 9,
         "vertexCount": 27,
@@ -16265,7 +16265,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/wood/desk02_-7656_-6288_137",
         "material": "maps/rp_evocity_v33x/wood/desk02_-7656_-6288_137",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 4,
         "vertexCount": 12,
@@ -16337,7 +16337,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/wood/desk02_-7467_-7706_137",
         "material": "maps/rp_evocity_v33x/wood/desk02_-7467_-7706_137",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 4,
         "vertexCount": 12,
@@ -16409,7 +16409,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/wood/desk02_-6761_-6297_137",
         "material": "maps/rp_evocity_v33x/wood/desk02_-6761_-6297_137",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 2,
         "vertexCount": 6,
@@ -19256,7 +19256,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-7467_-7706_137",
         "material": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-7467_-7706_137",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 22,
         "triCount": 49,
         "vertexCount": 147,
@@ -20003,7 +20003,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-6595_-7646_137",
         "material": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-6595_-7646_137",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 20,
         "triCount": 50,
         "vertexCount": 150,

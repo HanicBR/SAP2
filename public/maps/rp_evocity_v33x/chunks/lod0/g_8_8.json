@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 94,
     "staticProps": 6,
-    "placeholderWorldFaces": 68,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 2
   },
   "stats": {
@@ -38,7 +38,7 @@
       {
         "materialId": "concrete/concretewall032b",
         "material": "concrete/concretewall032b",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 8,
         "triCount": 26,
         "vertexCount": 78,
@@ -440,7 +440,7 @@
       {
         "materialId": "de_train/train_cement_floor_02",
         "material": "de_train/train_cement_floor_02",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 8,
         "vertexCount": 24,
@@ -572,7 +572,7 @@
       {
         "materialId": "de_nuke/nukroofa",
         "material": "de_nuke/nukroofa",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 7,
         "vertexCount": 21,
@@ -689,7 +689,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 6,
         "triCount": 14,
         "vertexCount": 42,
@@ -911,7 +911,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/brick/brickwall014f_3250_4088_126",
         "material": "maps/rp_evocity_v33x/brick/brickwall014f_3250_4088_126",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 5,
         "triCount": 12,
         "vertexCount": 36,
@@ -1103,7 +1103,7 @@
       {
         "materialId": "brick/brickwall014a",
         "material": "brick/brickwall014a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 5,
         "triCount": 12,
         "vertexCount": 36,
@@ -1295,7 +1295,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/brick/brickwall014f_2484_3199_137",
         "material": "maps/rp_evocity_v33x/brick/brickwall014f_2484_3199_137",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 4,
         "vertexCount": 12,
@@ -1367,7 +1367,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/brick/brickwall014e_3637_3853_126",
         "material": "maps/rp_evocity_v33x/brick/brickwall014e_3637_3853_126",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 4,
         "vertexCount": 12,
@@ -1439,7 +1439,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/brick/brickwall014c_3250_4088_126",
         "material": "maps/rp_evocity_v33x/brick/brickwall014c_3250_4088_126",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 11,
         "vertexCount": 33,
@@ -1616,7 +1616,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/brick/brickwall014e_3250_4088_126",
         "material": "maps/rp_evocity_v33x/brick/brickwall014e_3250_4088_126",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 5,
         "vertexCount": 15,
@@ -1703,7 +1703,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/brick/brickwall014c_2484_3199_137",
         "material": "maps/rp_evocity_v33x/brick/brickwall014c_2484_3199_137",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 8,
         "vertexCount": 24,
@@ -1835,7 +1835,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/brick/brickwall014e_2484_3199_137",
         "material": "maps/rp_evocity_v33x/brick/brickwall014e_2484_3199_137",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 6,
         "vertexCount": 18,
@@ -1937,7 +1937,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/brick/brickwall014b_2484_3199_137",
         "material": "maps/rp_evocity_v33x/brick/brickwall014b_2484_3199_137",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 5,
         "vertexCount": 15,
@@ -2024,7 +2024,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/brick/brickwall014b_3250_4088_126",
         "material": "maps/rp_evocity_v33x/brick/brickwall014b_3250_4088_126",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 4,
         "vertexCount": 12,
@@ -2096,7 +2096,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/brick/brickwall014b_3637_3853_126",
         "material": "maps/rp_evocity_v33x/brick/brickwall014b_3637_3853_126",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 4,
         "vertexCount": 12,
@@ -2168,7 +2168,7 @@
       {
         "materialId": "de_train/train_cement_floor_01",
         "material": "de_train/train_cement_floor_01",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 14,
         "triCount": 31,
         "vertexCount": 93,
@@ -2645,7 +2645,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/brick/brickwall014f_2484_4991_137",
         "material": "maps/rp_evocity_v33x/brick/brickwall014f_2484_4991_137",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 2,
         "vertexCount": 6,
@@ -2687,7 +2687,7 @@
       {
         "materialId": "brick/brickwall014l",
         "material": "brick/brickwall014l",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 2,
         "vertexCount": 6,
@@ -3809,7 +3809,7 @@
       {
         "materialId": "nature/cliffface001a",
         "material": "nature/cliffface001a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 8,
         "vertexCount": 24,

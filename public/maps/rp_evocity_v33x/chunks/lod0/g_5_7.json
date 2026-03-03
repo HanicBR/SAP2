@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 428,
     "staticProps": 37,
-    "placeholderWorldFaces": 215,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 28
   },
   "stats": {
@@ -38,7 +38,7 @@
       {
         "materialId": "metal/metalwall030a",
         "material": "metal/metalwall030a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 108,
         "triCount": 267,
         "vertexCount": 801,
@@ -4055,7 +4055,7 @@
       {
         "materialId": "metal/metaldoor061a",
         "material": "metal/metaldoor061a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 6,
         "triCount": 12,
         "vertexCount": 36,
@@ -4247,7 +4247,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/concrete/concretefloor005a_-2736_126_128",
         "material": "maps/rp_evocity_v33x/concrete/concretefloor005a_-2736_126_128",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 15,
         "triCount": 64,
         "vertexCount": 192,
@@ -5219,7 +5219,7 @@
       {
         "materialId": "tile/tilefloor001a",
         "material": "tile/tilefloor001a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 11,
         "vertexCount": 33,
@@ -5396,7 +5396,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 9,
         "triCount": 22,
         "vertexCount": 66,
@@ -9035,7 +9035,7 @@
       {
         "materialId": "props/tarpaperroof002a",
         "material": "props/tarpaperroof002a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 23,
         "triCount": 66,
         "vertexCount": 198,
@@ -10799,7 +10799,7 @@
       {
         "materialId": "metal/metaltruss024a",
         "material": "metal/metaltruss024a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 48,
         "triCount": 96,
         "vertexCount": 288,
@@ -16988,7 +16988,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/concrete/concretefloor005a_-3504_-65_128",
         "material": "maps/rp_evocity_v33x/concrete/concretefloor005a_-3504_-65_128",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 8,
         "vertexCount": 24,
@@ -17120,7 +17120,7 @@
       {
         "materialId": "nature/cliffface001a",
         "material": "nature/cliffface001a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 4,
         "vertexCount": 12,

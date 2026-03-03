@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 19,
     "staticProps": 0,
-    "placeholderWorldFaces": 8,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 0
   },
   "stats": {
@@ -245,7 +245,7 @@
       {
         "materialId": "concrete/concretewall064a",
         "material": "concrete/concretewall064a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 4,
         "vertexCount": 12,
@@ -317,7 +317,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 5,
         "triCount": 11,
         "vertexCount": 33,
@@ -743,7 +743,7 @@
       {
         "materialId": "nature/cliffface001a",
         "material": "nature/cliffface001a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 4,
         "vertexCount": 12,

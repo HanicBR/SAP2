@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 276,
     "staticProps": 60,
-    "placeholderWorldFaces": 123,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 0
   },
   "stats": {
@@ -1535,7 +1535,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-10400_9333_119",
         "material": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-10400_9333_119",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 26,
         "triCount": 73,
         "vertexCount": 219,
@@ -2642,7 +2642,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-10056_9031_119",
         "material": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-10056_9031_119",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 9,
         "triCount": 24,
         "vertexCount": 72,
@@ -4148,7 +4148,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/tile/yellow04_-10400_9333_119",
         "material": "maps/rp_evocity_v33x/tile/yellow04_-10400_9333_119",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 16,
         "triCount": 83,
         "vertexCount": 249,
@@ -5405,7 +5405,7 @@
       {
         "materialId": "tile/tile_ceiling_01",
         "material": "tile/tile_ceiling_01",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 13,
         "triCount": 45,
         "vertexCount": 135,
@@ -6092,7 +6092,7 @@
       {
         "materialId": "buildings/roof07",
         "material": "buildings/roof07",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 10,
         "triCount": 24,
         "vertexCount": 72,
@@ -6686,7 +6686,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 8,
         "triCount": 16,
         "vertexCount": 48,
@@ -8312,7 +8312,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-10133_9690_119",
         "material": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-10133_9690_119",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 5,
         "triCount": 12,
         "vertexCount": 36,
@@ -8504,7 +8504,7 @@
       {
         "materialId": "wood/urban_woodcabinets02b",
         "material": "wood/urban_woodcabinets02b",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 11,
         "triCount": 22,
         "vertexCount": 66,
@@ -8990,7 +8990,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-10727_9035_119",
         "material": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-10727_9035_119",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 9,
         "triCount": 22,
         "vertexCount": 66,
@@ -9332,7 +9332,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-10715_9682_119",
         "material": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-10715_9682_119",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 7,
         "triCount": 18,
         "vertexCount": 54,
@@ -9614,7 +9614,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-11176_9360_119",
         "material": "maps/rp_evocity_v33x/plaster/urban_plasterwall_05e_-11176_9360_119",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 3,
         "vertexCount": 9,
@@ -9671,7 +9671,7 @@
       {
         "materialId": "wood/cabinets03",
         "material": "wood/cabinets03",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 4,
         "vertexCount": 12,
@@ -9743,7 +9743,7 @@
       {
         "materialId": "wood/cabinets04",
         "material": "wood/cabinets04",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 4,
         "vertexCount": 12,
@@ -11021,7 +11021,7 @@
       {
         "materialId": "nature/cliffface001a",
         "material": "nature/cliffface001a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 8,
         "vertexCount": 24,

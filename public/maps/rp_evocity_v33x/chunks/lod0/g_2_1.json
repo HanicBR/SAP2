@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 264,
     "staticProps": 13,
-    "placeholderWorldFaces": 166,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 2
   },
   "stats": {
@@ -38,7 +38,7 @@
       {
         "materialId": "de_train/train_cement_floor_01",
         "material": "de_train/train_cement_floor_01",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 30,
         "triCount": 75,
         "vertexCount": 225,
@@ -4160,7 +4160,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 23,
         "triCount": 60,
         "vertexCount": 180,
@@ -5072,7 +5072,7 @@
       {
         "materialId": "de_nuke/nukroofa",
         "material": "de_nuke/nukroofa",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 7,
         "vertexCount": 21,
@@ -5189,7 +5189,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/building_template/building_template006b_-8019_-10242_-374",
         "material": "maps/rp_evocity_v33x/building_template/building_template006b_-8019_-10242_-374",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 8,
         "vertexCount": 24,
@@ -5321,7 +5321,7 @@
       {
         "materialId": "metal/metalvent001a",
         "material": "metal/metalvent001a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 5,
         "triCount": 18,
         "vertexCount": 54,
@@ -5603,7 +5603,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/building_template/building_template006b_-10508_-10529_138",
         "material": "maps/rp_evocity_v33x/building_template/building_template006b_-10508_-10529_138",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 12,
         "vertexCount": 36,
@@ -5795,7 +5795,7 @@
       {
         "materialId": "stone/stonewall050d",
         "material": "stone/stonewall050d",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 80,
         "triCount": 180,
         "vertexCount": 540,
@@ -8906,7 +8906,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/building_template/building_template006b_-7041_-12249_125",
         "material": "maps/rp_evocity_v33x/building_template/building_template006b_-7041_-12249_125",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 8,
         "vertexCount": 24,
@@ -9038,7 +9038,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-7041_-12249_125",
         "material": "maps/rp_evocity_v33x/metal/citadel_tilefloor016a_-7041_-12249_125",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 13,
         "vertexCount": 39,
@@ -9809,7 +9809,7 @@
       {
         "materialId": "stone/stonewall015a",
         "material": "stone/stonewall015a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 9,
         "triCount": 18,
         "vertexCount": 54,
@@ -10385,7 +10385,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/buildings/urban_composite_02a_-10508_-10529_138",
         "material": "maps/rp_evocity_v33x/buildings/urban_composite_02a_-10508_-10529_138",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 2,
         "vertexCount": 6,
@@ -10427,7 +10427,7 @@
       {
         "materialId": "props/tarpaperroof002a",
         "material": "props/tarpaperroof002a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 2,
         "vertexCount": 6,
@@ -10469,7 +10469,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/buildings/urban_composite_02a_-7041_-12249_125",
         "material": "maps/rp_evocity_v33x/buildings/urban_composite_02a_-7041_-12249_125",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 2,
         "vertexCount": 6,

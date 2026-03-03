@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 93,
     "staticProps": 13,
-    "placeholderWorldFaces": 54,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 5
   },
   "stats": {
@@ -665,7 +665,7 @@
       {
         "materialId": "metal/citadel_metalwall074a",
         "material": "metal/citadel_metalwall074a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 12,
         "triCount": 26,
         "vertexCount": 78,
@@ -1067,7 +1067,7 @@
       {
         "materialId": "wood/woodwall003a",
         "material": "wood/woodwall003a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 23,
         "triCount": 66,
         "vertexCount": 198,
@@ -2753,7 +2753,7 @@
       {
         "materialId": "concrete/concretewall070a",
         "material": "concrete/concretewall070a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 10,
         "triCount": 20,
         "vertexCount": 60,
@@ -3257,7 +3257,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 4,
         "triCount": 10,
         "vertexCount": 30,
@@ -3461,7 +3461,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/concrete/concretefloor037a_-4032_382_128",
         "material": "maps/rp_evocity_v33x/concrete/concretefloor037a_-4032_382_128",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 6,
         "vertexCount": 18,
@@ -3605,7 +3605,7 @@
       {
         "materialId": "nature/cliffface001a",
         "material": "nature/cliffface001a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 3,
         "triCount": 6,
         "vertexCount": 18,

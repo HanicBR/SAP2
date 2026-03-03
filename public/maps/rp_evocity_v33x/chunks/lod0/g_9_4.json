@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 215,
     "staticProps": 16,
-    "placeholderWorldFaces": 7,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 1
   },
   "stats": {
@@ -6302,7 +6302,7 @@
       {
         "materialId": "building_template/roof_template001a",
         "material": "building_template/roof_template001a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 7,
         "vertexCount": 21,
@@ -7883,7 +7883,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 5,
         "triCount": 12,
         "vertexCount": 36,

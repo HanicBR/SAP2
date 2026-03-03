@@ -17,7 +17,7 @@
   "counts": {
     "worldFaces": 312,
     "staticProps": 53,
-    "placeholderWorldFaces": 26,
+    "placeholderWorldFaces": 0,
     "placeholderStaticProps": 5
   },
   "stats": {
@@ -1175,7 +1175,7 @@
       {
         "materialId": "concrete/concretewall064a",
         "material": "concrete/concretewall064a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 6,
         "triCount": 16,
         "vertexCount": 48,
@@ -6965,7 +6965,7 @@
       {
         "materialId": "de_train/train_cement_floor_01",
         "material": "de_train/train_cement_floor_01",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 5,
         "triCount": 14,
         "vertexCount": 42,
@@ -9443,7 +9443,7 @@
       {
         "materialId": "tools/toolsskybox",
         "material": "tools/toolsskybox",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 5,
         "triCount": 13,
         "vertexCount": 39,
@@ -13799,7 +13799,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/stone/counter01_-8024_-4342_139",
         "material": "maps/rp_evocity_v33x/stone/counter01_-8024_-4342_139",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 2,
         "vertexCount": 6,
@@ -13841,7 +13841,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/stone/counter01_-7256_-9073_-374",
         "material": "maps/rp_evocity_v33x/stone/counter01_-7256_-9073_-374",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 5,
         "vertexCount": 15,
@@ -13928,7 +13928,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/stone/counter01_-7436_-4253_139",
         "material": "maps/rp_evocity_v33x/stone/counter01_-7436_-4253_139",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 4,
         "vertexCount": 12,
@@ -14000,7 +14000,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/stone/counter01_-7605_-4824_139",
         "material": "maps/rp_evocity_v33x/stone/counter01_-7605_-4824_139",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 1,
         "triCount": 2,
         "vertexCount": 6,
@@ -14042,7 +14042,7 @@
       {
         "materialId": "maps/rp_evocity_v33x/stone/counter01_-7725_-4432_139",
         "material": "maps/rp_evocity_v33x/stone/counter01_-7725_-4432_139",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 9,
         "vertexCount": 27,
@@ -14306,7 +14306,7 @@
       {
         "materialId": "nature/cliffface001a",
         "material": "nature/cliffface001a",
-        "placeholderMaterial": true,
+        "placeholderMaterial": false,
         "faceCount": 2,
         "triCount": 4,
         "vertexCount": 12,
