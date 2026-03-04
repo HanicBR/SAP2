@@ -17,6 +17,9 @@ except Exception:
     Image = None
 
 
+_DIR_ENTRIES_CACHE: dict[str, dict[str, str]] = {}
+
+
 def normalize_material_name(raw: str) -> str:
     value = (raw or "").strip().replace("\\", "/").lower()
     value = value.lstrip("./")
@@ -59,6 +62,57 @@ def dedupe_paths(items: list[str]) -> list[Path]:
         seen.add(key)
         out.append(p)
     return out
+
+
+def _dir_entries_ci(directory: Path) -> dict[str, str]:
+    key = str(directory)
+    cached = _DIR_ENTRIES_CACHE.get(key)
+    if cached is not None:
+        return cached
+    out: dict[str, str] = {}
+    try:
+        for item in directory.iterdir():
+            lowered = item.name.lower()
+            if lowered not in out:
+                out[lowered] = item.name
+    except Exception:
+        out = {}
+    _DIR_ENTRIES_CACHE[key] = out
+    return out
+
+
+def resolve_ci_path(root: Path, rel_path: str) -> Optional[Path]:
+    normalized = rel_path.replace("\\", "/").strip().lstrip("/")
+    if not normalized:
+        return None
+    parts = [part for part in normalized.split("/") if part]
+    if not parts:
+        return None
+    current = root
+    for part in parts:
+        exact = current / part
+        if exact.exists():
+            current = exact
+            continue
+        if not current.exists() or not current.is_dir():
+            return None
+        entries = _dir_entries_ci(current)
+        matched = entries.get(part.lower())
+        if not matched:
+            return None
+        current = current / matched
+    if current.exists() and current.is_file():
+        return current
+    return None
+
+
+def resolve_relative_to_root(found: Path, roots: list[Path]) -> Optional[str]:
+    for root in roots:
+        try:
+            return found.relative_to(root).as_posix()
+        except Exception:
+            continue
+    return None
 
 
 def to_rgba8(raw: np.ndarray) -> np.ndarray:
@@ -110,8 +164,8 @@ def find_fs_file(roots: list[Path], rel_path: str) -> Optional[Path]:
     if not normalized:
         return None
     for root in roots:
-        candidate = (root / normalized).resolve()
-        if candidate.exists() and candidate.is_file():
+        candidate = resolve_ci_path(root, normalized)
+        if candidate is not None:
             return candidate
     return None
 
@@ -250,7 +304,7 @@ def main() -> int:
             from SourceIO.library.shared.content_manager import ContentManager
             from SourceIO.library.source1.vmt import VMT
             from SourceIO.library.source1.vtf import load_texture
-            from SourceIO.library.utils import TinyPath
+            from SourceIO.library.utils import FileBuffer, TinyPath
         except Exception as import_err:
             raise RuntimeError(f"sourceio_import_failed:{type(import_err).__name__}:{import_err}") from import_err
 
@@ -286,6 +340,11 @@ def main() -> int:
                 entry["searchedVmt"] = vmt_rel
                 vmt_file = cm.find_file(TinyPath(vmt_rel))
                 vmt_fs_path = find_fs_file(roots, vmt_rel)
+                if vmt_file is None and vmt_fs_path is not None:
+                    rel_vmt_fs = resolve_relative_to_root(vmt_fs_path, roots)
+                    if rel_vmt_fs:
+                        entry["searchedVmtResolved"] = rel_vmt_fs
+                        vmt_file = cm.find_file(TinyPath(rel_vmt_fs))
                 if vmt_file is None and vmt_fs_path is None:
                     if is_special_material(material):
                         entry["status"] = "missing_vmt_special"
@@ -368,8 +427,19 @@ def main() -> int:
                 vtf_rel = f"materials/{base_texture}.vtf"
                 entry["searchedVtf"] = vtf_rel
                 vtf_file = cm.find_file(TinyPath(vtf_rel))
+                vtf_fs = find_fs_file(roots, vtf_rel)
+                if vtf_file is None and vtf_fs is not None:
+                    rel_vtf_fs = resolve_relative_to_root(vtf_fs, roots)
+                    if rel_vtf_fs:
+                        entry["searchedVtfResolved"] = rel_vtf_fs
+                        vtf_file = cm.find_file(TinyPath(rel_vtf_fs))
+                if vtf_file is None and vtf_fs is not None:
+                    try:
+                        entry["searchedVtfResolvedFs"] = str(vtf_fs)
+                        vtf_file = FileBuffer(TinyPath(str(vtf_fs)))
+                    except Exception:
+                        vtf_file = None
                 if vtf_file is None:
-                    vtf_fs = find_fs_file(roots, vtf_rel)
                     if vtf_fs is not None:
                         entry["sourcePath"] = str(vtf_fs)
                     if is_special_material(material):

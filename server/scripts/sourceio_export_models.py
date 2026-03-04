@@ -6,8 +6,12 @@ import sys
 import time
 import traceback
 from pathlib import Path
+from typing import Optional
 
 import numpy as np
+
+
+_DIR_ENTRIES_CACHE: dict[str, dict[str, str]] = {}
 
 
 def normalize_model_name(raw: str) -> str:
@@ -64,6 +68,95 @@ def dedupe_paths(items: list[str]) -> list[Path]:
         seen.add(key)
         out.append(p)
     return out
+
+
+def _dir_entries_ci(directory: Path) -> dict[str, str]:
+    key = str(directory)
+    cached = _DIR_ENTRIES_CACHE.get(key)
+    if cached is not None:
+        return cached
+    out: dict[str, str] = {}
+    try:
+        for item in directory.iterdir():
+            lowered = item.name.lower()
+            if lowered not in out:
+                out[lowered] = item.name
+    except Exception:
+        out = {}
+    _DIR_ENTRIES_CACHE[key] = out
+    return out
+
+
+def resolve_ci_path(root: Path, rel_path: str) -> Optional[Path]:
+    normalized = rel_path.replace("\\", "/").strip().lstrip("/")
+    if not normalized:
+        return None
+    parts = [part for part in normalized.split("/") if part]
+    if not parts:
+        return None
+    current = root
+    for part in parts:
+        exact = current / part
+        if exact.exists():
+            current = exact
+            continue
+        if not current.exists() or not current.is_dir():
+            return None
+        entries = _dir_entries_ci(current)
+        matched = entries.get(part.lower())
+        if not matched:
+            return None
+        current = current / matched
+    if current.exists() and current.is_file():
+        return current
+    return None
+
+
+def find_fs_file(roots: list[Path], rel_path: str) -> Optional[Path]:
+    normalized = rel_path.replace("\\", "/").strip().lstrip("/")
+    if not normalized:
+        return None
+    for root in roots:
+        candidate = resolve_ci_path(root, normalized)
+        if candidate is not None:
+            return candidate
+    return None
+
+
+def resolve_relative_to_root(found: Path, roots: list[Path]) -> Optional[str]:
+    for root in roots:
+        try:
+            return found.relative_to(root).as_posix()
+        except Exception:
+            continue
+    return None
+
+
+def resolve_cm_or_fs_buffer(cm, roots: list[Path], rel_path: str):
+    from SourceIO.library.utils import FileBuffer, TinyPath
+
+    normalized = rel_path.replace("\\", "/").strip().lstrip("/")
+    searched: list[str] = []
+    if normalized:
+        searched.append(normalized)
+
+    buffer = cm.find_file(TinyPath(normalized)) if normalized else None
+    found_fs = find_fs_file(roots, normalized) if normalized else None
+    rel_found = resolve_relative_to_root(found_fs, roots) if found_fs is not None else None
+
+    if rel_found and rel_found not in searched:
+        searched.append(rel_found)
+
+    if buffer is None and rel_found:
+        buffer = cm.find_file(TinyPath(rel_found))
+
+    if buffer is None and found_fs is not None:
+        try:
+            buffer = FileBuffer(TinyPath(str(found_fs)))
+        except Exception:
+            buffer = None
+
+    return buffer, found_fs, searched
 
 
 def sanitize_model_file_name(model: str) -> str:
@@ -184,28 +277,48 @@ def load_mdl_from_buffer(buffer):
     raise RuntimeError(f"unsupported_mdl_version:{version}")
 
 
-def export_model_mesh(model: str, cm, requested_lod: int):
+def export_model_mesh(model: str, cm, roots: list[Path], requested_lod: int):
     from SourceIO.library.models.vtx import open_vtx
     from SourceIO.library.models.vvd import Vvd
     from SourceIO.library.utils.path_utilities import collect_full_material_names, find_vtx_cm
-    from SourceIO.library.utils.tiny_path import TinyPath
+    from SourceIO.library.utils import TinyPath
 
-    model_rel = TinyPath(f"models/{model}.mdl")
-    mdl_buffer = cm.find_file(model_rel)
     searched_mdl = f"models/{model}.mdl"
     searched_vtx = f"models/{model}.dx90.vtx"
     searched_vvd = f"models/{model}.vvd"
+    mdl_buffer, mdl_fs_path, mdl_searched = resolve_cm_or_fs_buffer(cm, roots, searched_mdl)
+    model_rel_path = mdl_searched[-1] if mdl_searched else searched_mdl
+    model_rel = TinyPath(model_rel_path)
     if mdl_buffer is None:
-        return {"status": "missing_mdl", "searchedMdl": searched_mdl}
+        return {
+            "status": "missing_mdl",
+            "searchedMdl": " | ".join(mdl_searched) if mdl_searched else searched_mdl,
+        }
 
     vtx_buffer = find_vtx_cm(model_rel, cm)
-    vvd_buffer = cm.find_file(model_rel.with_suffix(".vvd"))
+    vtx_fs_path = find_fs_file(roots, searched_vtx)
+    vtx_searched = [searched_vtx]
+    if vtx_fs_path is not None:
+        rel_vtx_fs = resolve_relative_to_root(vtx_fs_path, roots)
+        if rel_vtx_fs and rel_vtx_fs not in vtx_searched:
+            vtx_searched.append(rel_vtx_fs)
+    if vtx_buffer is None:
+        vtx_candidate = vtx_searched[-1] if vtx_searched else searched_vtx
+        vtx_buffer = cm.find_file(TinyPath(vtx_candidate))
+    if vtx_buffer is None and vtx_fs_path is not None:
+        try:
+            from SourceIO.library.utils import FileBuffer
+            vtx_buffer = FileBuffer(TinyPath(str(vtx_fs_path)))
+        except Exception:
+            vtx_buffer = None
+
+    vvd_buffer, vvd_fs_path, vvd_searched = resolve_cm_or_fs_buffer(cm, roots, searched_vvd)
     if vtx_buffer is None or vvd_buffer is None:
         return {
             "status": "missing_vtx_or_vvd",
-            "searchedMdl": searched_mdl,
-            "searchedVtx": searched_vtx,
-            "searchedVvd": searched_vvd,
+            "searchedMdl": " | ".join(mdl_searched) if mdl_searched else searched_mdl,
+            "searchedVtx": " | ".join(vtx_searched) if vtx_searched else searched_vtx,
+            "searchedVvd": " | ".join(vvd_searched) if vvd_searched else searched_vvd,
         }
 
     mdl, mdl_version = load_mdl_from_buffer(mdl_buffer)
@@ -216,9 +329,9 @@ def export_model_mesh(model: str, cm, requested_lod: int):
         return {
             "status": "vvd_lod_missing",
             "mdlVersion": mdl_version,
-            "searchedMdl": searched_mdl,
-            "searchedVtx": searched_vtx,
-            "searchedVvd": searched_vvd,
+            "searchedMdl": " | ".join(mdl_searched) if mdl_searched else searched_mdl,
+            "searchedVtx": " | ".join(vtx_searched) if vtx_searched else searched_vtx,
+            "searchedVvd": " | ".join(vvd_searched) if vvd_searched else searched_vvd,
         }
 
     all_vertices = vvd.lod_data[0]
@@ -226,9 +339,9 @@ def export_model_mesh(model: str, cm, requested_lod: int):
         return {
             "status": "vvd_vertices_missing",
             "mdlVersion": mdl_version,
-            "searchedMdl": searched_mdl,
-            "searchedVtx": searched_vtx,
-            "searchedVvd": searched_vvd,
+            "searchedMdl": " | ".join(mdl_searched) if mdl_searched else searched_mdl,
+            "searchedVtx": " | ".join(vtx_searched) if vtx_searched else searched_vtx,
+            "searchedVvd": " | ".join(vvd_searched) if vvd_searched else searched_vvd,
         }
 
     materials = [str(getattr(mat, "name", "") or "") for mat in getattr(mdl, "materials", [])]
@@ -324,8 +437,8 @@ def export_model_mesh(model: str, cm, requested_lod: int):
         return {
             "status": "no_mesh_data",
             "mdlVersion": mdl_version,
-            "searchedMdl": searched_mdl,
-            "searchedVtx": searched_vtx,
+            "searchedMdl": " | ".join(mdl_searched) if mdl_searched else searched_mdl,
+            "searchedVtx": " | ".join(vtx_searched) if vtx_searched else searched_vtx,
         }
 
     sub_meshes = []
@@ -360,8 +473,8 @@ def export_model_mesh(model: str, cm, requested_lod: int):
         return {
             "status": "no_sub_meshes",
             "mdlVersion": mdl_version,
-            "searchedMdl": searched_mdl,
-            "searchedVtx": searched_vtx,
+            "searchedMdl": " | ".join(mdl_searched) if mdl_searched else searched_mdl,
+            "searchedVtx": " | ".join(vtx_searched) if vtx_searched else searched_vtx,
         }
 
     if not np.isfinite(bounds_min).all() or not np.isfinite(bounds_max).all():
@@ -370,9 +483,9 @@ def export_model_mesh(model: str, cm, requested_lod: int):
 
     return {
         "status": "ok",
-        "searchedMdl": searched_mdl,
-        "searchedVtx": searched_vtx,
-        "searchedVvd": searched_vvd,
+        "searchedMdl": " | ".join(mdl_searched) if mdl_searched else searched_mdl,
+        "searchedVtx": " | ".join(vtx_searched) if vtx_searched else searched_vtx,
+        "searchedVvd": " | ".join(vvd_searched) if vvd_searched else searched_vvd,
         "mdlVersion": mdl_version,
         "lodUsed": int(lod_used) if lod_used is not None else int(max(0, requested_lod)),
         "triCount": int(total_triangles),
@@ -453,7 +566,7 @@ def main() -> int:
                 "sourcePath": f"models/{model}.mdl",
             }
             try:
-                exported = export_model_mesh(model, cm, int(args.lod or 0))
+                exported = export_model_mesh(model, cm, roots, int(args.lod or 0))
                 status = str(exported.get("status") or "unknown")
                 entry["status"] = status
                 if status == "ok":
