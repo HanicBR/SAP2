@@ -641,6 +641,13 @@ const normalizeMapName = (raw: string | null): string => {
 };
 
 const VIEWER_RENDER_PROFILE_STORAGE_KEY = 'backstabber_viewer3d_render_profile';
+const VIEWER_MOVE_SPEED_STORAGE_KEY = 'backstabber_viewer3d_move_speed_factor';
+const VIEWER_MOVE_SPEED_MIN = 0.4;
+const VIEWER_MOVE_SPEED_MAX = 6;
+const VIEWER_MOVE_SPEED_DEFAULT = 1.25;
+
+const clampMoveSpeedFactor = (value: number): number =>
+  Math.min(VIEWER_MOVE_SPEED_MAX, Math.max(VIEWER_MOVE_SPEED_MIN, value));
 
 const readInitialRenderProfile = (): ViewerRenderProfile => {
   if (typeof window === 'undefined') return 'simple';
@@ -651,6 +658,17 @@ const readInitialRenderProfile = (): ViewerRenderProfile => {
     // ignore storage errors
   }
   return 'simple';
+};
+
+const readInitialMoveSpeedFactor = (): number => {
+  if (typeof window === 'undefined') return VIEWER_MOVE_SPEED_DEFAULT;
+  try {
+    const raw = Number(window.localStorage.getItem(VIEWER_MOVE_SPEED_STORAGE_KEY) || VIEWER_MOVE_SPEED_DEFAULT);
+    if (Number.isFinite(raw)) return clampMoveSpeedFactor(raw);
+  } catch {
+    // ignore storage errors
+  }
+  return VIEWER_MOVE_SPEED_DEFAULT;
 };
 
 const ServerView3D: React.FC = () => {
@@ -702,6 +720,7 @@ const ServerView3D: React.FC = () => {
   const [manualEnqueueResult, setManualEnqueueResult] = useState<WorkshopManualEnqueueResponse | null>(null);
   const [manifestProbe, setManifestProbe] = useState<ManifestProbe | null>(null);
   const [renderProfile, setRenderProfile] = useState<ViewerRenderProfile>(() => readInitialRenderProfile());
+  const [moveSpeedFactor, setMoveSpeedFactor] = useState<number>(() => readInitialMoveSpeedFactor());
   const [playerAliveFilter, setPlayerAliveFilter] = useState<'all' | 'alive' | 'dead'>('all');
   const [playerTeamFilter, setPlayerTeamFilter] = useState<string>('all');
   const [showPlayerLabels, setShowPlayerLabels] = useState<boolean>(false);
@@ -713,6 +732,7 @@ const ServerView3D: React.FC = () => {
   const playerTeamFilterRef = useRef<string>('all');
   const showPlayerLabelsRef = useRef<boolean>(false);
   const showPlayerHealthInLabelRef = useRef<boolean>(false);
+  const moveSpeedFactorRef = useRef<number>(moveSpeedFactor);
   const viewerActionPollTokenRef = useRef<number>(0);
 
   const viewerPlayers = useMemo(
@@ -781,6 +801,7 @@ const ServerView3D: React.FC = () => {
         .slice(0, 12),
     [mapName, queueSnapshot],
   );
+  const moveSpeedUnitsPerSec = Math.round(CAMERA_MOVE_SPEED * moveSpeedFactor);
 
   const loadQueueSnapshot = useCallback(
     async (silent = true) => {
@@ -1006,6 +1027,16 @@ const ServerView3D: React.FC = () => {
       // ignore storage errors
     }
   }, [renderProfile]);
+
+  useEffect(() => {
+    const next = clampMoveSpeedFactor(moveSpeedFactor);
+    moveSpeedFactorRef.current = next;
+    try {
+      window.localStorage.setItem(VIEWER_MOVE_SPEED_STORAGE_KEY, String(next));
+    } catch {
+      // ignore storage errors
+    }
+  }, [moveSpeedFactor]);
 
   useEffect(() => {
     playerAliveFilterRef.current = playerAliveFilter;
@@ -2184,7 +2215,36 @@ const ServerView3D: React.FC = () => {
       return steamId || null;
     };
 
+    const retargetOrbitAtClientPoint = (clientX: number, clientY: number): boolean => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      const width = Math.max(1, rect.width);
+      const height = Math.max(1, rect.height);
+      pointerNdc.x = ((clientX - rect.left) / width) * 2 - 1;
+      pointerNdc.y = -(((clientY - rect.top) / height) * 2 - 1);
+      raycaster.setFromCamera(pointerNdc, camera);
+
+      const worldHits = raycaster.intersectObjects(chunkRoot.children, true);
+      if (worldHits.length > 0) {
+        controls.target.copy(worldHits[0].point);
+        controls.update();
+        return true;
+      }
+
+      const playerHits = raycaster.intersectObjects(playersRoot.children, true);
+      if (playerHits.length > 0) {
+        controls.target.copy(playerHits[0].point);
+        controls.update();
+        return true;
+      }
+      return false;
+    };
+
     const onCanvasPointerDown = (event: PointerEvent) => {
+      if (event.button === 1) {
+        event.preventDefault();
+        retargetOrbitAtClientPoint(event.clientX, event.clientY);
+        return;
+      }
       if (event.button !== 0) return;
       pointerDown.x = event.clientX;
       pointerDown.y = event.clientY;
@@ -3076,7 +3136,7 @@ const ServerView3D: React.FC = () => {
               if (moveVertical !== 0) moveDelta.addScaledVector(moveUp, moveVertical);
               if (moveDelta.lengthSq() > 1e-8) {
                 moveDelta.normalize();
-                let speed = CAMERA_MOVE_SPEED;
+                let speed = CAMERA_MOVE_SPEED * moveSpeedFactorRef.current;
                 if (movementKeys.fast) speed *= CAMERA_MOVE_FAST_MULTIPLIER;
                 if (movementKeys.slow) speed *= CAMERA_MOVE_SLOW_MULTIPLIER;
                 const distance = speed * dtSec;
@@ -3141,7 +3201,7 @@ const ServerView3D: React.FC = () => {
         );
         appendLog(`world_z_bounds=min:${Math.round(worldMinZ)} max:${Math.round(worldMaxZ)} center:${Math.round(worldCenterZ)}`);
         appendLog(`chunk_lod_bands: ring<=${activeRadius}=lod0 | ring<=${lod1Radius}=lod1 | ring<=${renderRadius}=lod2`);
-        appendLog('controles: WASD voo livre | Q/E ou Space/C desce/sobe | Shift acelera | Ctrl reduz | botao do meio gira camera');
+        appendLog('controles: WASD voo livre | Q/E ou Space/C desce/sobe | LMB gira camera | MMB redefine pivo no clique | Shift acelera | Ctrl reduz');
 
         return () => {
           window.removeEventListener('resize', onResize);
@@ -3258,6 +3318,40 @@ const ServerView3D: React.FC = () => {
           <div className="text-xs text-zinc-400 mt-1">Verifique se os artefatos existem em `public/maps/{mapName}/manifest.json`.</div>
         </div>
       )}
+
+      <div className="rounded border border-zinc-800 bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 px-3 py-3">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-2 text-zinc-200">
+            <Icons.Keyboard className="w-4 h-4 text-cyan-300" />
+            <span className="text-[11px] uppercase font-bold tracking-wide">Velocidade de voo</span>
+          </div>
+          <span className="text-[11px] font-mono text-zinc-300">
+            {moveSpeedFactor.toFixed(2)}x | {moveSpeedUnitsPerSec.toLocaleString('pt-BR')} u/s
+          </span>
+        </div>
+        <div className="mt-2 flex items-center gap-3">
+          <input
+            type="range"
+            min={VIEWER_MOVE_SPEED_MIN}
+            max={VIEWER_MOVE_SPEED_MAX}
+            step={0.05}
+            value={moveSpeedFactor}
+            onChange={(event) =>
+              setMoveSpeedFactor(
+                clampMoveSpeedFactor(Number(event.target.value || VIEWER_MOVE_SPEED_DEFAULT)),
+              )
+            }
+            className="w-full accent-cyan-500"
+          />
+          <button
+            type="button"
+            onClick={() => setMoveSpeedFactor(VIEWER_MOVE_SPEED_DEFAULT)}
+            className="px-2 py-1 rounded border border-zinc-700 bg-zinc-800 text-[10px] text-zinc-300 font-bold uppercase hover:bg-zinc-700"
+          >
+            Reset
+          </button>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         <div className="lg:col-span-3 rounded border border-zinc-800 bg-zinc-950 overflow-hidden relative">
@@ -3637,6 +3731,72 @@ const ServerView3D: React.FC = () => {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded border border-zinc-800 bg-zinc-950 p-3">
+        <div className="flex items-center gap-2 mb-3">
+          <Icons.Book className="w-4 h-4 text-cyan-300" />
+          <p className="text-zinc-300 uppercase font-bold text-[11px] tracking-wide">Tutorial de Controles</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2 text-[11px]">
+          <div className="rounded border border-zinc-800 bg-zinc-900/70 px-3 py-2">
+            <p className="text-zinc-200 font-semibold flex items-center gap-2">
+              <Icons.Crosshair className="w-3.5 h-3.5 text-cyan-300" />
+              Movimento Principal
+            </p>
+            <p className="text-zinc-400 mt-1">
+              <span className="px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono">WASD</span> voo livre seguindo a direcao da camera.
+            </p>
+          </div>
+          <div className="rounded border border-zinc-800 bg-zinc-900/70 px-3 py-2">
+            <p className="text-zinc-200 font-semibold flex items-center gap-2">
+              <Icons.Activity className="w-3.5 h-3.5 text-emerald-300" />
+              Subir e Descer
+            </p>
+            <p className="text-zinc-400 mt-1">
+              <span className="px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono">Q/E</span> ou{' '}
+              <span className="px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono">Space/C</span> para altitude.
+            </p>
+          </div>
+          <div className="rounded border border-zinc-800 bg-zinc-900/70 px-3 py-2">
+            <p className="text-zinc-200 font-semibold flex items-center gap-2">
+              <Icons.Zap className="w-3.5 h-3.5 text-yellow-300" />
+              Velocidade
+            </p>
+            <p className="text-zinc-400 mt-1">
+              <span className="px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono">Shift</span> acelera e{' '}
+              <span className="px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono">Ctrl</span> reduz.
+            </p>
+          </div>
+          <div className="rounded border border-zinc-800 bg-zinc-900/70 px-3 py-2">
+            <p className="text-zinc-200 font-semibold flex items-center gap-2">
+              <Icons.Settings className="w-3.5 h-3.5 text-cyan-300" />
+              Rotacao da Camera
+            </p>
+            <p className="text-zinc-400 mt-1">
+              Arraste com <span className="px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono">Botao Esquerdo</span> para girar livremente.
+            </p>
+          </div>
+          <div className="rounded border border-zinc-800 bg-zinc-900/70 px-3 py-2">
+            <p className="text-zinc-200 font-semibold flex items-center gap-2">
+              <Icons.Crosshair className="w-3.5 h-3.5 text-purple-300" />
+              Pivo por Clique
+            </p>
+            <p className="text-zinc-400 mt-1">
+              Clique com <span className="px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono">Botao do Meio</span> para mudar o pivo no ponto clicado.
+            </p>
+          </div>
+          <div className="rounded border border-zinc-800 bg-zinc-900/70 px-3 py-2">
+            <p className="text-zinc-200 font-semibold flex items-center gap-2">
+              <Icons.Search className="w-3.5 h-3.5 text-zinc-300" />
+              Zoom e Pan
+            </p>
+            <p className="text-zinc-400 mt-1">
+              <span className="px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono">Scroll</span> aproxima/afasta e{' '}
+              <span className="px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono">Botao Direito</span> move lateralmente.
+            </p>
           </div>
         </div>
       </div>
