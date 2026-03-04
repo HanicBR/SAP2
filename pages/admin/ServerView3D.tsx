@@ -654,6 +654,183 @@ const normalizeMapName = (raw: string | null): string => {
   return value.replace(/\.bsp$/i, '');
 };
 
+type WorkshopProgressTone = 'zinc' | 'cyan' | 'amber' | 'emerald' | 'red';
+
+type WorkshopJobProgress = {
+  stageLabel: string;
+  detail: string;
+  percent: number;
+  tone: WorkshopProgressTone;
+};
+
+const isWorkshopJobActive = (job: WorkshopQueueJob): boolean =>
+  job.status === 'queued' || job.status === 'running' || job.status === 'retry_wait';
+
+const formatWorkshopRetryEta = (nextRunInMs: number): string => {
+  const totalSeconds = Math.max(0, Math.ceil(Number(nextRunInMs || 0) / 1000));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  if (minutes > 0) return `${minutes}m ${String(seconds).padStart(2, '0')}s`;
+  return `${seconds}s`;
+};
+
+const getWorkshopProgressToneClasses = (tone: WorkshopProgressTone): { badge: string; bar: string } => {
+  if (tone === 'emerald') {
+    return {
+      badge: 'border-emerald-700 bg-emerald-900/20 text-emerald-300',
+      bar: 'bg-emerald-400',
+    };
+  }
+  if (tone === 'red') {
+    return {
+      badge: 'border-red-700 bg-red-900/20 text-red-300',
+      bar: 'bg-red-400',
+    };
+  }
+  if (tone === 'amber') {
+    return {
+      badge: 'border-amber-700 bg-amber-900/20 text-amber-300',
+      bar: 'bg-amber-400',
+    };
+  }
+  if (tone === 'cyan') {
+    return {
+      badge: 'border-cyan-700 bg-cyan-900/20 text-cyan-300',
+      bar: 'bg-cyan-400',
+    };
+  }
+  return {
+    badge: 'border-zinc-700 bg-zinc-800 text-zinc-300',
+    bar: 'bg-zinc-400',
+  };
+};
+
+const deriveWorkshopJobProgress = (job: WorkshopQueueJob): WorkshopJobProgress => {
+  const attempt = Math.min(job.retryCount + 1, job.maxRetries + 1);
+  const attemptLabel = `tentativa ${attempt}/${job.maxRetries + 1}`;
+  const retryEta =
+    job.status === 'retry_wait'
+      ? `Nova tentativa em ${formatWorkshopRetryEta(job.nextRunInMs)}.`
+      : '';
+  const download = job.reportSummary.download;
+  const extract = job.reportSummary.extract;
+  const process = job.reportSummary.process;
+
+  if (job.status === 'success') {
+    return {
+      stageLabel: 'Concluido',
+      detail: 'Artefatos prontos. O manifest deve ficar disponivel em instantes.',
+      percent: 100,
+      tone: 'emerald',
+    };
+  }
+
+  if (job.status === 'failed') {
+    const errorDetail =
+      job.lastError
+      || process.error
+      || extract.error
+      || download.error
+      || 'Falha no pipeline.';
+    return {
+      stageLabel: 'Falhou',
+      detail: `${errorDetail} (${attemptLabel}).`,
+      percent: 100,
+      tone: 'red',
+    };
+  }
+
+  if (job.status === 'dropped') {
+    return {
+      stageLabel: 'Descartado',
+      detail: 'Job descartado por controle de fila.',
+      percent: 100,
+      tone: 'red',
+    };
+  }
+
+  if (job.status === 'queued') {
+    return {
+      stageLabel: 'Na fila',
+      detail: `Aguardando worker livre (${attemptLabel}).`,
+      percent: 8,
+      tone: 'zinc',
+    };
+  }
+
+  if (process.exists && process.ok === true) {
+    return {
+      stageLabel: 'Finalizando',
+      detail: `Consolidando resultados e gravando manifest. ${retryEta}`.trim(),
+      percent: 96,
+      tone: job.status === 'retry_wait' ? 'amber' : 'cyan',
+    };
+  }
+
+  if (process.exists && process.ok === false) {
+    return {
+      stageLabel: 'Erro no processamento',
+      detail: `${process.error || 'Falha ao processar mapa.'} (${attemptLabel}). ${retryEta}`.trim(),
+      percent: 82,
+      tone: 'red',
+    };
+  }
+
+  if (extract.exists && extract.ok === true) {
+    const materialsText =
+      Number.isFinite(Number(process.materialsTotal)) && Number(process.materialsTotal) > 0
+        ? `materiais ${Number(process.materialsWithTexture || 0)}/${Number(process.materialsTotal || 0)}`
+        : '';
+    const modelsText =
+      Number.isFinite(Number(process.modelsTotal)) && Number(process.modelsTotal) > 0
+        ? `modelos ${Number(process.modelsExported || 0)}/${Number(process.modelsTotal || 0)}`
+        : '';
+    const metrics = [materialsText, modelsText].filter(Boolean).join(' | ');
+    return {
+      stageLabel: job.status === 'retry_wait' ? 'Aguardando retry (pipeline)' : 'Processando mapa',
+      detail: `${metrics ? `${metrics}. ` : ''}Convertendo BSP, materiais e modelos (${attemptLabel}). ${retryEta}`.trim(),
+      percent: job.status === 'retry_wait' ? 72 : 78,
+      tone: job.status === 'retry_wait' ? 'amber' : 'cyan',
+    };
+  }
+
+  if (extract.exists && extract.ok === false) {
+    return {
+      stageLabel: 'Erro na extracao',
+      detail: `${extract.error || 'Falha ao extrair payload do workshop.'} (${attemptLabel}). ${retryEta}`.trim(),
+      percent: 48,
+      tone: 'red',
+    };
+  }
+
+  if (download.exists && download.ok === true) {
+    return {
+      stageLabel: job.status === 'retry_wait' ? 'Aguardando retry (extracao)' : 'Extraindo conteudo',
+      detail: `Download concluido. Extraindo GMA e localizando BSP (${attemptLabel}). ${retryEta}`.trim(),
+      percent: job.status === 'retry_wait' ? 34 : 46,
+      tone: job.status === 'retry_wait' ? 'amber' : 'cyan',
+    };
+  }
+
+  if (download.exists && download.ok === false) {
+    return {
+      stageLabel: 'Erro no download',
+      detail: `${download.error || 'Falha no download do workshop.'} (${attemptLabel}). ${retryEta}`.trim(),
+      percent: 20,
+      tone: 'red',
+    };
+  }
+
+  return {
+    stageLabel: job.status === 'retry_wait' ? 'Aguardando retry (download)' : 'Baixando workshop',
+    detail: `Baixando item do workshop (${attemptLabel}). ${retryEta}`.trim(),
+    percent: job.status === 'retry_wait' ? 14 : 24,
+    tone: job.status === 'retry_wait' ? 'amber' : 'cyan',
+  };
+};
+
 const VIEWER_RENDER_PROFILE_STORAGE_KEY = 'backstabber_viewer3d_render_profile';
 const VIEWER_MOVE_SPEED_STORAGE_KEY = 'backstabber_viewer3d_move_speed_factor';
 const VIEWER_MOVE_SPEED_MIN = 0.4;
@@ -874,6 +1051,15 @@ const ServerView3D: React.FC = () => {
         .slice(0, 12),
     [mapName, queueSnapshot],
   );
+  const activeMapJob = useMemo<WorkshopQueueJob | null>(
+    () => mapQueueJobs.find((job) => isWorkshopJobActive(job)) || null,
+    [mapQueueJobs],
+  );
+  const activeMapJobProgress = useMemo<WorkshopJobProgress | null>(
+    () => (activeMapJob ? deriveWorkshopJobProgress(activeMapJob) : null),
+    [activeMapJob],
+  );
+  const mapHasActiveJob = Boolean(activeMapJob);
   const resolutionCandidates = useMemo(
     () => resolutionSnapshot?.discovery?.candidates || [],
     [resolutionSnapshot],
@@ -1289,6 +1475,18 @@ const ServerView3D: React.FC = () => {
 
   const enqueueManualWorkshopJob = useCallback(async () => {
     if (!mapName) return;
+    if (activeMapJob) {
+      setManualEnqueueResult({
+        ok: false,
+        queued: false,
+        deduped: false,
+        reason: 'map_job_already_active',
+        mapName,
+        workshopId: activeMapJob.workshopId,
+        error: `Ja existe um job ativo (${activeMapJob.id}) para este mapa. Aguarde concluir antes de enfileirar outro.`,
+      });
+      return;
+    }
     setManualEnqueueBusy(true);
     setManualEnqueueResult(null);
     try {
@@ -1311,10 +1509,25 @@ const ServerView3D: React.FC = () => {
     } finally {
       setManualEnqueueBusy(false);
     }
-  }, [loadQueueSnapshot, manualWorkshopId, mapName, serverId]);
+  }, [activeMapJob, loadQueueSnapshot, manualWorkshopId, mapName, serverId]);
 
   const applyWorkshopResolutionSelection = useCallback(async (workshopInput: string) => {
     if (!mapName) return;
+    if (activeMapJob) {
+      setResolutionSelectionResult({
+        ok: false,
+        mapName,
+        workshopId: activeMapJob.workshopId,
+        enqueue: {
+          attempted: false,
+          queued: false,
+          deduped: false,
+          reason: 'map_job_already_active',
+        },
+        error: `Ja existe um job ativo (${activeMapJob.id}) para ${mapName}. Aguarde finalizar para selecionar outro workshop.`,
+      });
+      return;
+    }
     const normalizedInput = String(workshopInput || '').trim();
     if (!normalizedInput) {
       setResolutionSelectionResult({
@@ -1364,7 +1577,7 @@ const ServerView3D: React.FC = () => {
     } finally {
       setResolutionSelectionBusy(false);
     }
-  }, [loadQueueSnapshot, loadResolutionSnapshot, mapName, serverId]);
+  }, [activeMapJob, loadQueueSnapshot, loadResolutionSnapshot, mapName, serverId]);
 
   useEffect(() => {
     void loadQueueSnapshot(false);
@@ -4486,6 +4699,33 @@ const ServerView3D: React.FC = () => {
             )}
             {queueError && <p className="text-red-300 break-words">queueError: {queueError}</p>}
 
+            {activeMapJob && activeMapJobProgress && (() => {
+              const toneClasses = getWorkshopProgressToneClasses(activeMapJobProgress.tone);
+              return (
+                <div className="rounded border border-[#445a84] bg-[#0f1829]/85 px-2.5 py-2 space-y-1.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-zinc-200 uppercase font-bold text-[10px] tracking-[0.08em]">Processamento do mapa</p>
+                    <span className={`px-1.5 py-0.5 rounded border text-[10px] font-bold uppercase ${toneClasses.badge}`}>
+                      {activeMapJobProgress.stageLabel}
+                    </span>
+                  </div>
+                  <p className="text-zinc-300 break-words">{activeMapJobProgress.detail}</p>
+                  <div className="h-2 rounded bg-[#1a253a] overflow-hidden">
+                    <div
+                      className={`h-full ${toneClasses.bar}`}
+                      style={{ width: `${Math.max(4, Math.min(100, activeMapJobProgress.percent))}%` }}
+                    />
+                  </div>
+                  <p className="text-zinc-500 font-mono break-all">
+                    progresso={activeMapJobProgress.percent}% | job={activeMapJob.id} | wid={activeMapJob.workshopId}
+                  </p>
+                  <p className="text-zinc-500">
+                    status={activeMapJob.status} | update={new Date(activeMapJob.updatedAt).toLocaleTimeString('pt-BR')}
+                  </p>
+                </div>
+              );
+            })()}
+
             <div className="rounded border border-[#364561] bg-[#0c1321]/75 px-2 py-2 space-y-1">
               <p className="text-zinc-500 uppercase font-bold text-[10px]">Manifest probe</p>
               {!manifestProbe && <p className="text-zinc-500">Sem probe ainda.</p>}
@@ -4577,6 +4817,18 @@ const ServerView3D: React.FC = () => {
                 </div>
               )}
 
+              {activeMapJob && activeMapJobProgress && (
+                <div className="rounded border border-amber-900/70 bg-amber-950/20 px-2 py-1.5 text-[10px] space-y-0.5">
+                  <p className="text-amber-300 font-semibold uppercase">Job em andamento para este mapa</p>
+                  <p className="text-zinc-200 break-words">
+                    {activeMapJobProgress.stageLabel}: {activeMapJobProgress.detail}
+                  </p>
+                  <p className="text-zinc-500 font-mono break-all">
+                    job={activeMapJob.id} wid={activeMapJob.workshopId} progresso={activeMapJobProgress.percent}%
+                  </p>
+                </div>
+              )}
+
               {resolutionCandidates.length > 0 && (
                 <div className="max-h-[260px] overflow-y-auto admin-scrollbar space-y-1">
                   {resolutionCandidates.slice(0, 12).map((candidate) => (
@@ -4601,10 +4853,10 @@ const ServerView3D: React.FC = () => {
                           onClick={() => {
                             void applyWorkshopResolutionSelection(candidate.workshopId);
                           }}
-                          disabled={resolutionSelectionBusy}
+                          disabled={resolutionSelectionBusy || mapHasActiveJob}
                           className="px-2 py-1 rounded border border-emerald-800 bg-emerald-900/20 text-[10px] uppercase font-bold text-emerald-300 hover:bg-emerald-900/35 disabled:opacity-50"
                         >
-                          {resolutionSelectionBusy ? 'Aplicando...' : 'Usar este'}
+                          {resolutionSelectionBusy ? 'Aplicando...' : mapHasActiveJob ? 'Aguardando job...' : 'Usar este'}
                         </button>
                       </div>
                     </div>
@@ -4627,10 +4879,10 @@ const ServerView3D: React.FC = () => {
                 onClick={() => {
                   void applyWorkshopResolutionSelection(manualResolveWorkshopInput);
                 }}
-                disabled={resolutionSelectionBusy}
+                disabled={resolutionSelectionBusy || mapHasActiveJob}
                 className="w-full px-2 py-1.5 rounded border border-emerald-800 bg-emerald-900/20 text-emerald-300 text-[11px] font-bold uppercase disabled:opacity-50"
               >
-                {resolutionSelectionBusy ? 'Aplicando...' : 'Salvar mapeamento + enfileirar'}
+                {resolutionSelectionBusy ? 'Aplicando...' : mapHasActiveJob ? 'Aguardando job atual...' : 'Salvar mapeamento + enfileirar'}
               </button>
               {resolutionSelectionResult && (
                 <div className="rounded border border-[#364561] bg-[#0f1829]/75 px-2 py-1.5 text-[10px] font-mono space-y-0.5">
@@ -4667,10 +4919,10 @@ const ServerView3D: React.FC = () => {
                 onClick={() => {
                   void enqueueManualWorkshopJob();
                 }}
-                disabled={manualEnqueueBusy}
+                disabled={manualEnqueueBusy || mapHasActiveJob}
                 className="w-full px-2 py-1.5 rounded border border-cyan-800 bg-cyan-900/20 text-cyan-300 text-[11px] font-bold uppercase disabled:opacity-50"
               >
-                {manualEnqueueBusy ? 'Enfileirando...' : 'Enfileirar job de teste'}
+                {manualEnqueueBusy ? 'Enfileirando...' : mapHasActiveJob ? 'Aguardando job atual...' : 'Enfileirar job de teste'}
               </button>
               {manualEnqueueResult && (
                 <div className="rounded border border-[#364561] bg-[#0f1829]/75 px-2 py-1.5 text-[10px] font-mono space-y-0.5">
@@ -4695,50 +4947,66 @@ const ServerView3D: React.FC = () => {
                 </p>
               )}
               <div className="max-h-[280px] overflow-y-auto admin-scrollbar space-y-1">
-                {mapQueueJobs.map((job) => (
-                  <div key={job.id} className="rounded border border-[#364561] bg-[#0f1829]/75 px-2 py-1.5">
-                  <p className="font-mono break-all">{job.id}</p>
-                  <p>
-                    status={job.status} retry={job.retryCount}/{job.maxRetries}
-                  </p>
-                  <p className="text-zinc-500 break-all">wid={job.workshopId} source={job.source}/{job.resolutionSource}</p>
-                  {job.lastError && <p className="text-red-300 break-words">err={job.lastError}</p>}
-                  <p className="text-zinc-500">
-                    next={new Date(job.nextRunAt).toLocaleTimeString('pt-BR')} | update={new Date(job.updatedAt).toLocaleTimeString('pt-BR')}
-                  </p>
-                  <p className="text-zinc-500 break-all">
-                    reports: dl={job.reportSummary.download.status || (job.reportSummary.download.exists ? 'exists' : 'missing')} | ex={job.reportSummary.extract.status || (job.reportSummary.extract.exists ? 'exists' : 'missing')} | pr={job.reportSummary.process.status || (job.reportSummary.process.exists ? 'exists' : 'missing')}
-                  </p>
-                  {(job.reportSummary.process.sourceioEngineUsed || Number.isFinite(Number(job.reportSummary.process.materialsTotal)) || Number.isFinite(Number(job.reportSummary.process.modelsTotal))) && (
-                    <p className="text-zinc-500 break-all">
-                      process: engine={job.reportSummary.process.sourceioEngineUsed || 'n/a'} | materials={Number(job.reportSummary.process.materialsWithTexture || 0)}/{Number(job.reportSummary.process.materialsTotal || 0)} | models={Number(job.reportSummary.process.modelsExported || 0)}/{Number(job.reportSummary.process.modelsTotal || 0)} | warnings={Number(job.reportSummary.process.warningsCount || 0)}
-                    </p>
-                  )}
-                  {(job.reportSummary.download.error || job.reportSummary.extract.error || job.reportSummary.process.error) && (
-                    <div className="rounded border border-red-900/40 bg-red-950/20 px-2 py-1 mt-1 space-y-0.5">
-                      {job.reportSummary.download.error && (
-                        <p className="text-red-300 break-words">download: {job.reportSummary.download.error}</p>
-                      )}
-                      {job.reportSummary.extract.error && (
-                        <p className="text-red-300 break-words">extract: {job.reportSummary.extract.error}</p>
-                      )}
-                      {job.reportSummary.process.error && (
-                        <p className="text-red-300 break-words">process: {job.reportSummary.process.error}</p>
-                      )}
-                    </div>
-                  )}
-                  {Array.isArray(job.outputTail) && job.outputTail.length > 0 && (
-                    <div className="mt-1 rounded border border-[#3d4e70] bg-[#0a1120]/90 px-2 py-1">
-                      <p className="text-zinc-500 uppercase font-bold text-[9px] mb-1">output tail</p>
-                      {job.outputTail.slice(-6).map((line, idx) => (
-                        <p key={`${job.id}_tail_${idx}`} className="text-zinc-400 break-all">
-                          {line}
+                {mapQueueJobs.map((job) => {
+                  const progress = deriveWorkshopJobProgress(job);
+                  const toneClasses = getWorkshopProgressToneClasses(progress.tone);
+                  return (
+                    <div key={job.id} className="rounded border border-[#364561] bg-[#0f1829]/75 px-2 py-1.5 space-y-1">
+                      <p className="font-mono break-all">{job.id}</p>
+                      <div className="flex items-center justify-between gap-2">
+                        <p>
+                          status={job.status} retry={job.retryCount}/{job.maxRetries}
                         </p>
-                      ))}
+                        <span className={`px-1.5 py-0.5 rounded border text-[10px] font-bold uppercase ${toneClasses.badge}`}>
+                          {progress.stageLabel}
+                        </span>
+                      </div>
+                      <div className="h-1.5 rounded bg-[#1a253a] overflow-hidden">
+                        <div
+                          className={`h-full ${toneClasses.bar}`}
+                          style={{ width: `${Math.max(4, Math.min(100, progress.percent))}%` }}
+                        />
+                      </div>
+                      <p className="text-zinc-300 break-words">{progress.detail}</p>
+                      <p className="text-zinc-500 break-all">wid={job.workshopId} source={job.source}/{job.resolutionSource}</p>
+                      {job.lastError && <p className="text-red-300 break-words">err={job.lastError}</p>}
+                      <p className="text-zinc-500">
+                        next={new Date(job.nextRunAt).toLocaleTimeString('pt-BR')} | update={new Date(job.updatedAt).toLocaleTimeString('pt-BR')}
+                      </p>
+                      <p className="text-zinc-500 break-all">
+                        reports: dl={job.reportSummary.download.status || (job.reportSummary.download.exists ? 'exists' : 'missing')} | ex={job.reportSummary.extract.status || (job.reportSummary.extract.exists ? 'exists' : 'missing')} | pr={job.reportSummary.process.status || (job.reportSummary.process.exists ? 'exists' : 'missing')}
+                      </p>
+                      {(job.reportSummary.process.sourceioEngineUsed || Number.isFinite(Number(job.reportSummary.process.materialsTotal)) || Number.isFinite(Number(job.reportSummary.process.modelsTotal))) && (
+                        <p className="text-zinc-500 break-all">
+                          process: engine={job.reportSummary.process.sourceioEngineUsed || 'n/a'} | materials={Number(job.reportSummary.process.materialsWithTexture || 0)}/{Number(job.reportSummary.process.materialsTotal || 0)} | models={Number(job.reportSummary.process.modelsExported || 0)}/{Number(job.reportSummary.process.modelsTotal || 0)} | warnings={Number(job.reportSummary.process.warningsCount || 0)}
+                        </p>
+                      )}
+                      {(job.reportSummary.download.error || job.reportSummary.extract.error || job.reportSummary.process.error) && (
+                        <div className="rounded border border-red-900/40 bg-red-950/20 px-2 py-1 mt-1 space-y-0.5">
+                          {job.reportSummary.download.error && (
+                            <p className="text-red-300 break-words">download: {job.reportSummary.download.error}</p>
+                          )}
+                          {job.reportSummary.extract.error && (
+                            <p className="text-red-300 break-words">extract: {job.reportSummary.extract.error}</p>
+                          )}
+                          {job.reportSummary.process.error && (
+                            <p className="text-red-300 break-words">process: {job.reportSummary.process.error}</p>
+                          )}
+                        </div>
+                      )}
+                      {Array.isArray(job.outputTail) && job.outputTail.length > 0 && (
+                        <div className="mt-1 rounded border border-[#3d4e70] bg-[#0a1120]/90 px-2 py-1">
+                          <p className="text-zinc-500 uppercase font-bold text-[9px] mb-1">output tail</p>
+                          {job.outputTail.slice(-6).map((line, idx) => (
+                            <p key={`${job.id}_tail_${idx}`} className="text-zinc-400 break-all">
+                              {line}
+                            </p>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
             </div>
