@@ -18,6 +18,7 @@ except Exception:
 
 
 _DIR_ENTRIES_CACHE: dict[str, dict[str, str]] = {}
+_ROOT_ASSET_INDEX_CACHE: dict[str, dict[str, str]] = {}
 
 
 def normalize_material_name(raw: str) -> str:
@@ -79,6 +80,59 @@ def _dir_entries_ci(directory: Path) -> dict[str, str]:
         out = {}
     _DIR_ENTRIES_CACHE[key] = out
     return out
+
+
+def _build_root_asset_index(root: Path) -> dict[str, str]:
+    key = str(root)
+    cached = _ROOT_ASSET_INDEX_CACHE.get(key)
+    if cached is not None:
+        return cached
+
+    index: dict[str, str] = {}
+    if not root.exists() or not root.is_dir():
+        _ROOT_ASSET_INDEX_CACHE[key] = index
+        return index
+
+    try:
+        for item in root.rglob("*"):
+            if not item.is_file():
+                continue
+            suffix = item.suffix.lower()
+            if suffix not in (".vmt", ".vtf"):
+                continue
+            try:
+                rel_norm = item.relative_to(root).as_posix().lower()
+            except Exception:
+                continue
+            if not rel_norm:
+                continue
+            if rel_norm not in index:
+                index[rel_norm] = str(item)
+            marker_pos = rel_norm.find("materials/")
+            if marker_pos >= 0:
+                compact = rel_norm[marker_pos:]
+                if compact and compact not in index:
+                    index[compact] = str(item)
+    except Exception:
+        # Best effort index; keep what was indexed so far.
+        pass
+
+    _ROOT_ASSET_INDEX_CACHE[key] = index
+    return index
+
+
+def _resolve_from_root_index(root: Path, rel_path: str) -> Optional[Path]:
+    normalized = rel_path.replace("\\", "/").strip().lstrip("/").lower()
+    if not normalized:
+        return None
+    index = _build_root_asset_index(root)
+    hit = index.get(normalized)
+    if not hit:
+        return None
+    candidate = Path(hit)
+    if candidate.exists() and candidate.is_file():
+        return candidate
+    return None
 
 
 def resolve_ci_path(root: Path, rel_path: str) -> Optional[Path]:
@@ -167,6 +221,9 @@ def find_fs_file(roots: list[Path], rel_path: str) -> Optional[Path]:
         candidate = resolve_ci_path(root, normalized)
         if candidate is not None:
             return candidate
+        fallback = _resolve_from_root_index(root, normalized)
+        if fallback is not None:
+            return fallback
     return None
 
 
