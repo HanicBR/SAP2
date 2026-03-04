@@ -333,6 +333,13 @@ const VIEWER_POLISH_SAO_ENABLED = true;
 const VIEWER_FOG_DENSITY = 0.000022;
 const WATER_NORMAL_SCROLL_X = 0.012;
 const WATER_NORMAL_SCROLL_Y = 0.007;
+const STREAM_UPDATE_INTERVAL_MS = 160;
+const CHUNK_LOAD_MAX_CONCURRENT = 6;
+const CHUNK_LOAD_BURST_PER_TICK = 10;
+const STREAM_RADIUS_BOOST_ACTIVE = 1;
+const STREAM_RADIUS_BOOST_RENDER = 1;
+const STREAM_RADIUS_BOOST_PREFETCH = 2;
+const STREAM_RADIUS_BOOST_DISCARD = 2;
 const PLAYER_MARKER_COLORS = [
   0x22c55e,
   0x38bdf8,
@@ -2333,6 +2340,7 @@ const ServerView3D: React.FC = () => {
     const followDesiredCamera = new THREE.Vector3();
     let lastPlayerSnapshotKey = '';
     const diagnosticsMap = new Map<string, ViewerDiagnostic>();
+    const streamForward = new THREE.Vector3();
 
     const pushDiagnostic = (
       level: 'warn' | 'error',
@@ -3428,9 +3436,6 @@ const ServerView3D: React.FC = () => {
       const existing = chunkRecords.get(entry.id);
       if (existing && existing.lod === lod) return;
       if (loadingChunkIds.has(entry.id)) return;
-      if (existing && existing.lod !== lod) {
-        unloadChunkRecord(entry.id, `lod_switch_${existing.lod}->${lod}`);
-      }
       loadingChunkIds.add(entry.id);
       const chunkUrl = resolveChunkLodUrl(entry, lod);
       try {
@@ -3650,11 +3655,18 @@ const ServerView3D: React.FC = () => {
         }
 
         group.visible = false;
-        chunkRoot.add(group);
-
         const usedModels = Array.from(usedModelsInChunk);
-        addModelUsage(usedModels);
         const statsFromEntry = resolveChunkLodStats(entry, lod);
+        const previousRecord = chunkRecords.get(entry.id);
+
+        chunkRoot.add(group);
+        addModelUsage(usedModels);
+        if (previousRecord) {
+          chunkRoot.remove(previousRecord.group);
+          disposeObject3D(previousRecord.group);
+          releaseModelUsage(previousRecord.usedModels);
+        }
+
         chunkRecords.set(entry.id, {
           entry,
           lod,
@@ -3666,7 +3678,11 @@ const ServerView3D: React.FC = () => {
           usedModels,
         });
 
-        appendLog(`chunk carregado: ${entry.id} (lod${lod})`);
+        if (previousRecord && previousRecord.lod !== lod) {
+          appendLog(`chunk carregado: ${entry.id} (lod${lod}, swap_from_lod${previousRecord.lod})`);
+        } else {
+          appendLog(`chunk carregado: ${entry.id} (lod${lod})`);
+        }
       } catch (loadErr: any) {
         appendLog(`erro ao carregar chunk ${entry.id} (lod${lod}): ${String(loadErr?.message || loadErr)}`);
         pushDiagnostic(
@@ -3828,10 +3844,14 @@ const ServerView3D: React.FC = () => {
         grid.scale.set(gridScale, 1, gridScale);
 
         const chunkSize = Math.max(256, Number(loadedManifest.map.chunkSize || 2048));
-        const activeRadius = Math.max(1, Number(loadedManifest.streaming?.activeRadiusChunks || 1));
-        const renderRadius = Math.max(activeRadius, Number(loadedManifest.streaming?.renderRadiusChunks || activeRadius + 2));
-        const prefetchRadius = Math.max(renderRadius, Number(loadedManifest.streaming?.prefetchRadiusChunks || renderRadius));
-        const discardRadius = Math.max(prefetchRadius, Number(loadedManifest.streaming?.discardRadiusChunks || (prefetchRadius + 1)));
+        const manifestActiveRadius = Math.max(1, Number(loadedManifest.streaming?.activeRadiusChunks || 1));
+        const manifestRenderRadius = Math.max(manifestActiveRadius, Number(loadedManifest.streaming?.renderRadiusChunks || manifestActiveRadius + 2));
+        const manifestPrefetchRadius = Math.max(manifestRenderRadius, Number(loadedManifest.streaming?.prefetchRadiusChunks || manifestRenderRadius));
+        const manifestDiscardRadius = Math.max(manifestPrefetchRadius, Number(loadedManifest.streaming?.discardRadiusChunks || (manifestPrefetchRadius + 1)));
+        const activeRadius = manifestActiveRadius + STREAM_RADIUS_BOOST_ACTIVE;
+        const renderRadius = Math.max(activeRadius, manifestRenderRadius + STREAM_RADIUS_BOOST_RENDER);
+        const prefetchRadius = Math.max(renderRadius, manifestPrefetchRadius + STREAM_RADIUS_BOOST_PREFETCH);
+        const discardRadius = Math.max(prefetchRadius + 1, manifestDiscardRadius + STREAM_RADIUS_BOOST_DISCARD);
         const gracePeriodMs = Math.max(1000, Number(loadedManifest.streaming?.gracePeriodMs || 5000));
         const lod1Radius = Math.max(activeRadius + 1, Math.min(renderRadius - 1, prefetchRadius - 1));
         const resolveDesiredLod = (ring: number): 0 | 1 | 2 => {
@@ -3841,7 +3861,6 @@ const ServerView3D: React.FC = () => {
         };
 
         const entries = chunkIndex.chunks || [];
-        const byId = new Map(entries.map((entry) => [entry.id, entry] as const));
 
         const toBaseCell = (entry: ChunkEntry): { x: number; y: number } => {
           if (entry.baseCell && Number.isFinite(entry.baseCell.x) && Number.isFinite(entry.baseCell.y)) return entry.baseCell;
@@ -3858,17 +3877,34 @@ const ServerView3D: React.FC = () => {
           chunkCells.set(entry.id, toBaseCell(entry));
         }
 
+        type ChunkLoadCandidate = {
+          entry: ChunkEntry;
+          desiredLod: 0 | 1 | 2;
+          ring: number;
+          inActive: boolean;
+          inVisible: boolean;
+          frontScore: number;
+          upgrading: boolean;
+        };
+
         const updateStreaming = () => {
           const now = performance.now();
           const cameraCell = {
             x: Math.floor((camera.position.x - worldMinX) / chunkSize),
             y: Math.floor((camera.position.z - worldMinY) / chunkSize),
           };
+          camera.getWorldDirection(streamForward);
+          streamForward.y = 0;
+          if (streamForward.lengthSq() < 1e-8) {
+            streamForward.set(1, 0, 0);
+          } else {
+            streamForward.normalize();
+          }
 
           const activeIds = new Set<string>();
           const visibleIds = new Set<string>();
           const keepIds = new Set<string>();
-          const desiredLoadByChunk = new Map<string, 0 | 1 | 2>();
+          const loadCandidates: ChunkLoadCandidate[] = [];
 
           for (const entry of entries) {
             const cell = chunkCells.get(entry.id) || { x: 0, y: 0 };
@@ -3876,28 +3912,60 @@ const ServerView3D: React.FC = () => {
             const dy = Math.abs(cell.y - cameraCell.y);
             const ring = Math.max(dx, dy);
             const desiredLod = resolveDesiredLod(ring);
-            if (dx <= activeRadius && dy <= activeRadius) {
+            const inActive = dx <= activeRadius && dy <= activeRadius;
+            const inVisible = dx <= renderRadius && dy <= renderRadius;
+            const inPrefetch = dx <= prefetchRadius && dy <= prefetchRadius;
+            if (inActive) {
               activeIds.add(entry.id);
             }
-            if (dx <= renderRadius && dy <= renderRadius) {
+            if (inVisible) {
               visibleIds.add(entry.id);
             }
-            if (dx <= prefetchRadius && dy <= prefetchRadius) desiredLoadByChunk.set(entry.id, desiredLod);
             if (dx <= discardRadius && dy <= discardRadius) {
               keepIds.add(entry.id);
             }
-          }
-
-          for (const [chunkId, desiredLod] of desiredLoadByChunk.entries()) {
-            const entry = byId.get(chunkId);
-            if (!entry) continue;
-            const current = chunkRecords.get(chunkId);
+            if (!inPrefetch) continue;
+            const current = chunkRecords.get(entry.id);
             if (current) {
               current.touchedAtMs = now;
               // Avoid downgrade thrash: upgrade quality only when needed.
               if (current.lod <= desiredLod) continue;
             }
-            void loadChunkGroup(entry, desiredLod);
+            const deltaCellX = cell.x - cameraCell.x;
+            const deltaCellY = cell.y - cameraCell.y;
+            const frontScore = Math.max(0, (deltaCellX * streamForward.x) + (deltaCellY * streamForward.z));
+            loadCandidates.push({
+              entry,
+              desiredLod,
+              ring,
+              inActive,
+              inVisible,
+              frontScore,
+              upgrading: !!current,
+            });
+          }
+
+          const candidateRank = (item: ChunkLoadCandidate): number => {
+            if (item.inActive) return 0;
+            if (item.inVisible) return 1;
+            return 2;
+          };
+
+          loadCandidates.sort((a, b) => {
+            const rankDiff = candidateRank(a) - candidateRank(b);
+            if (rankDiff !== 0) return rankDiff;
+            if (a.upgrading !== b.upgrading) return a.upgrading ? -1 : 1;
+            if (a.ring !== b.ring) return a.ring - b.ring;
+            if (a.frontScore !== b.frontScore) return b.frontScore - a.frontScore;
+            if (a.desiredLod !== b.desiredLod) return a.desiredLod - b.desiredLod;
+            return a.entry.id.localeCompare(b.entry.id);
+          });
+
+          const availableSlots = Math.max(0, CHUNK_LOAD_MAX_CONCURRENT - loadingChunkIds.size);
+          const launchCount = Math.min(loadCandidates.length, Math.min(availableSlots, CHUNK_LOAD_BURST_PER_TICK));
+          for (let i = 0; i < launchCount; i += 1) {
+            const candidate = loadCandidates[i];
+            void loadChunkGroup(candidate.entry, candidate.desiredLod);
           }
 
           for (const [chunkId, record] of chunkRecords.entries()) {
@@ -4089,7 +4157,7 @@ const ServerView3D: React.FC = () => {
           } else {
             renderer.render(scene, camera);
           }
-          if (now - streamIntervalMs >= 300) {
+          if (now - streamIntervalMs >= STREAM_UPDATE_INTERVAL_MS) {
             streamIntervalMs = now;
             updateStreaming();
           }
@@ -4139,6 +4207,9 @@ const ServerView3D: React.FC = () => {
         );
         appendLog(
           `chunk_count=${entries.length} active=${activeRadius * 2 + 1}x${activeRadius * 2 + 1} render=${renderRadius * 2 + 1}x${renderRadius * 2 + 1} prefetch=${prefetchRadius * 2 + 1}x${prefetchRadius * 2 + 1}`,
+        );
+        appendLog(
+          `stream_tuning: active=${manifestActiveRadius}->${activeRadius} render=${manifestRenderRadius}->${renderRadius} prefetch=${manifestPrefetchRadius}->${prefetchRadius} discard=${manifestDiscardRadius}->${discardRadius} tick=${STREAM_UPDATE_INTERVAL_MS}ms load_max=${CHUNK_LOAD_MAX_CONCURRENT}`,
         );
         appendLog(`world_z_bounds=min:${Math.round(worldMinZ)} max:${Math.round(worldMaxZ)} center:${Math.round(worldCenterZ)}`);
         appendLog(`chunk_lod_bands: ring<=${activeRadius}=lod0 | ring<=${lod1Radius}=lod1 | ring<=${renderRadius}=lod2`);
