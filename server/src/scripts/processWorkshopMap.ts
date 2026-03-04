@@ -3,6 +3,7 @@ import os from 'os';
 import path from 'path';
 import crypto from 'crypto';
 import { spawnSync } from 'child_process';
+import zlib from 'zlib';
 
 type Status = 'success' | 'failed';
 
@@ -38,7 +39,7 @@ type Options = {
 };
 
 type StepResult = {
-  name: 'cache' | 'extract' | 'pipeline';
+  name: 'cache' | 'extract' | 'pak_extract' | 'pipeline';
   ok: boolean;
   durationMs: number;
   exitCode?: number;
@@ -115,6 +116,34 @@ type ProcessCacheEntry = {
 type ProcessCacheFile = {
   version: 1;
   entries: Record<string, ProcessCacheEntry>;
+};
+
+type BspLump = {
+  offset: number;
+  length: number;
+  version: number;
+  fourCC: number;
+};
+
+type PakEntry = {
+  rawName: string;
+  method: number;
+  compressedSize: number;
+  uncompressedSize: number;
+  localHeaderOffset: number;
+};
+
+type PakExtractResult = {
+  ok: boolean;
+  scanned: boolean;
+  pakfileLength: number;
+  entriesTotal: number;
+  extractedFiles: number;
+  extractedBytes: number;
+  skippedUnsafe: number;
+  skippedUnsupported: number;
+  warnings: string[];
+  error?: string;
 };
 
 const PROJECT_SERVER_ROOT = path.resolve(__dirname, '..', '..');
@@ -436,6 +465,173 @@ const tailLines = (raw: string, max = 120): string[] =>
     .filter((line) => line.length > 0)
     .slice(-max);
 
+const fourCC = (value: string): number =>
+  value.charCodeAt(0) | (value.charCodeAt(1) << 8) | (value.charCodeAt(2) << 16) | (value.charCodeAt(3) << 24);
+
+const parseBspLumps = (buffer: Buffer): { version: number; lumps: BspLump[] } => {
+  if (buffer.readInt32LE(0) !== fourCC('VBSP')) throw new Error('invalid_bsp_signature');
+  const version = buffer.readInt32LE(4);
+  const lumps: BspLump[] = [];
+  for (let i = 0; i < 64; i += 1) {
+    const base = 8 + i * 16;
+    lumps.push({
+      offset: buffer.readInt32LE(base),
+      length: buffer.readInt32LE(base + 4),
+      version: buffer.readInt32LE(base + 8),
+      fourCC: buffer.readInt32LE(base + 12),
+    });
+  }
+  return { version, lumps };
+};
+
+const parsePakEntries = (pakData: Buffer): PakEntry[] => {
+  if (pakData.length < 22) throw new Error('pak_zip_too_small');
+  let eocdOffset = -1;
+  const minOffset = Math.max(0, pakData.length - (0xffff + 22));
+  for (let i = pakData.length - 22; i >= minOffset; i -= 1) {
+    if (pakData.readUInt32LE(i) === 0x06054b50) {
+      eocdOffset = i;
+      break;
+    }
+  }
+  if (eocdOffset < 0) throw new Error('pak_eocd_not_found');
+
+  const totalEntries = pakData.readUInt16LE(eocdOffset + 10);
+  const centralDirSize = pakData.readUInt32LE(eocdOffset + 12);
+  const centralDirOffset = pakData.readUInt32LE(eocdOffset + 16);
+  if (centralDirOffset < 0 || centralDirSize < 0 || centralDirOffset + centralDirSize > pakData.length) {
+    throw new Error('pak_central_directory_out_of_bounds');
+  }
+
+  const entries: PakEntry[] = [];
+  let cursor = centralDirOffset;
+  let parsed = 0;
+  while (cursor + 46 <= pakData.length && parsed < totalEntries) {
+    if (pakData.readUInt32LE(cursor) !== 0x02014b50) break;
+    const flags = pakData.readUInt16LE(cursor + 8);
+    const method = pakData.readUInt16LE(cursor + 10);
+    const compressedSize = pakData.readUInt32LE(cursor + 20);
+    const uncompressedSize = pakData.readUInt32LE(cursor + 24);
+    const nameLen = pakData.readUInt16LE(cursor + 28);
+    const extraLen = pakData.readUInt16LE(cursor + 30);
+    const commentLen = pakData.readUInt16LE(cursor + 32);
+    const localHeaderOffset = pakData.readUInt32LE(cursor + 42);
+    const nameStart = cursor + 46;
+    const nameEnd = nameStart + nameLen;
+    if (nameEnd > pakData.length) break;
+    const isUtf8 = (flags & 0x0800) !== 0;
+    const rawName = pakData.subarray(nameStart, nameEnd).toString(isUtf8 ? 'utf8' : 'latin1');
+    entries.push({
+      rawName,
+      method,
+      compressedSize,
+      uncompressedSize,
+      localHeaderOffset,
+    });
+    cursor = nameEnd + extraLen + commentLen;
+    parsed += 1;
+  }
+  return entries;
+};
+
+const sanitizePakEntryPath = (rawPath: string): string | null => {
+  const normalized = String(rawPath || '').trim().replace(/\\/g, '/');
+  if (!normalized) return null;
+  const withoutRoot = normalized.replace(/^\/+/, '');
+  const posixNormalized = path.posix.normalize(withoutRoot);
+  if (!posixNormalized || posixNormalized === '.' || posixNormalized === '..') return null;
+  if (posixNormalized.startsWith('../')) return null;
+  if (posixNormalized.includes(':')) return null;
+  return posixNormalized;
+};
+
+const readPakEntryBuffer = (pakData: Buffer, entry: PakEntry): Buffer | null => {
+  const localOffset = entry.localHeaderOffset;
+  if (localOffset < 0 || localOffset + 30 > pakData.length) return null;
+  if (pakData.readUInt32LE(localOffset) !== 0x04034b50) return null;
+  const localNameLen = pakData.readUInt16LE(localOffset + 26);
+  const localExtraLen = pakData.readUInt16LE(localOffset + 28);
+  const dataStart = localOffset + 30 + localNameLen + localExtraLen;
+  const dataEnd = dataStart + entry.compressedSize;
+  if (dataStart < 0 || dataEnd > pakData.length || dataEnd < dataStart) return null;
+  const compressed = pakData.subarray(dataStart, dataEnd);
+  if (entry.method === 0) return Buffer.from(compressed);
+  if (entry.method === 8) {
+    try {
+      return zlib.inflateRawSync(compressed);
+    } catch {
+      return null;
+    }
+  }
+  return null;
+};
+
+const extractPakfileFromBsp = (bspPath: string, mapRoot: string): PakExtractResult => {
+  const mapRootAbs = path.resolve(mapRoot);
+  const result: PakExtractResult = {
+    ok: true,
+    scanned: false,
+    pakfileLength: 0,
+    entriesTotal: 0,
+    extractedFiles: 0,
+    extractedBytes: 0,
+    skippedUnsafe: 0,
+    skippedUnsupported: 0,
+    warnings: [],
+  };
+
+  try {
+    const bspBuffer = fs.readFileSync(bspPath);
+    const { lumps } = parseBspLumps(bspBuffer);
+    const pakLump = lumps[40];
+    if (!pakLump || pakLump.length <= 0) return result;
+    result.pakfileLength = pakLump.length;
+    if (pakLump.offset < 0 || pakLump.offset + pakLump.length > bspBuffer.length) {
+      return { ...result, ok: false, scanned: false, error: 'pak_lump_out_of_bounds' };
+    }
+
+    const pakData = bspBuffer.subarray(pakLump.offset, pakLump.offset + pakLump.length);
+    const entries = parsePakEntries(pakData);
+    result.scanned = true;
+    result.entriesTotal = entries.length;
+
+    for (const entry of entries) {
+      if (!entry.rawName || entry.rawName.endsWith('/')) continue;
+      const safeRel = sanitizePakEntryPath(entry.rawName);
+      if (!safeRel) {
+        result.skippedUnsafe += 1;
+        continue;
+      }
+      const outputPath = path.resolve(mapRootAbs, safeRel);
+      if (outputPath !== mapRootAbs && !outputPath.startsWith(`${mapRootAbs}${path.sep}`)) {
+        result.skippedUnsafe += 1;
+        continue;
+      }
+      const data = readPakEntryBuffer(pakData, entry);
+      if (!data) {
+        if (entry.method !== 0 && entry.method !== 8) {
+          result.skippedUnsupported += 1;
+          if (result.warnings.length < 50) result.warnings.push(`unsupported_method:${entry.method}:${safeRel}`);
+        } else if (result.warnings.length < 50) {
+          result.warnings.push(`entry_decode_failed:${safeRel}`);
+        }
+        continue;
+      }
+      ensureDir(path.dirname(outputPath));
+      fs.writeFileSync(outputPath, data);
+      result.extractedFiles += 1;
+      result.extractedBytes += data.length;
+    }
+    return result;
+  } catch (error: any) {
+    return {
+      ...result,
+      ok: false,
+      error: `pak_extract_exception:${String(error?.message || error)}`,
+    };
+  }
+};
+
 const acquireLock = (lockPath: string, staleMs: number): { ok: boolean; reason?: string } => {
   ensureDir(path.dirname(lockPath));
   try {
@@ -593,7 +789,7 @@ const computeContentSignature = (contentDir: string, options: Options): string =
   }
   files.sort((a, b) => a.localeCompare(b));
   const hash = crypto.createHash('sha1');
-  hash.update('content-signature-v2\n');
+  hash.update('content-signature-v3\n');
   for (const file of files) {
     let size = 0;
     let mtimeMs = 0;
@@ -888,6 +1084,34 @@ const run = () => {
     selection.selectedBsp = selectedBsp;
     const mapRoot = deriveMapRoot(selectedBsp);
     selection.derivedMapRoot = mapRoot;
+
+    const pakStartedAt = Date.now();
+    const pakResult = extractPakfileFromBsp(selectedBsp, mapRoot);
+    const pakStep: StepResult = {
+      name: 'pak_extract',
+      ok: pakResult.ok,
+      durationMs: Math.max(0, Date.now() - pakStartedAt),
+      command: ['internal:extract_bsp_pakfile', selectedBsp, mapRoot],
+      logTail: [
+        `scanned=${pakResult.scanned ? '1' : '0'}`,
+        `pakfileLength=${pakResult.pakfileLength}`,
+        `entries=${pakResult.entriesTotal}`,
+        `extractedFiles=${pakResult.extractedFiles}`,
+        `extractedBytes=${pakResult.extractedBytes}`,
+        `skippedUnsafe=${pakResult.skippedUnsafe}`,
+        `skippedUnsupported=${pakResult.skippedUnsupported}`,
+        ...pakResult.warnings.slice(0, 20),
+      ],
+      ...(pakResult.error ? { error: pakResult.error } : {}),
+    };
+    steps.push(pakStep);
+    if (!pakStep.ok) {
+      finish('failed', `pak_extract_failed:${pakStep.error || 'unknown'}`);
+      return;
+    }
+    if (pakResult.warnings.length > 0) {
+      warnings.push(...pakResult.warnings.slice(0, 100).map((item) => `pak_extract:${item}`));
+    }
 
     const tsNodeRunner = resolveTsNodeCommand();
     const pipelineArgs = tsNodeRunner.argsPrefix.concat([

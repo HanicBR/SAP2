@@ -172,7 +172,8 @@ Fluxo:
 1. Detecta payload Workshop no item baixado (`.gma`, legado `.bin` LZMA, fallback zip-wrapped).
 2. Extrai payload para `WORKSHOP_ROOT/extracted/<workshopId>/payload_*`.
 3. Encontra `*.bsp` e seleciona o BSP do mapa alvo.
-4. Roda `map:pipeline:build` automaticamente.
+4. Extrai o `PAKFILE` embutido no BSP para o `mapRoot` (materials/models/etc. empacotados no mapa).
+5. Roda `map:pipeline:build` automaticamente.
 
 Garantias de seguranca/robustez:
 

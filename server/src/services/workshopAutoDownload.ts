@@ -656,12 +656,27 @@ const readReportSummary = (
     const errorValue = String(parsed?.error || '').trim();
     const finishedAtValue = String(parsed?.finishedAt || '').trim();
     const okRaw = parsed?.ok;
-    const sourceioEngineUsed = String((parsed as any)?.settings?.sourceioEngineUsed || '').trim();
-    const materialsWithTextureRaw = Number((parsed as any)?.materials?.withTexture);
-    const materialsTotalRaw = Number((parsed as any)?.materials?.total);
-    const modelsExportedRaw = Number((parsed as any)?.models?.exported);
-    const modelsTotalRaw = Number((parsed as any)?.models?.total);
-    const warningsRaw = (parsed as any)?.warnings;
+    let sourceioEngineUsed = String((parsed as any)?.settings?.sourceioEngineUsed || '').trim();
+    let materialsWithTextureRaw = Number((parsed as any)?.materials?.withTexture);
+    let materialsTotalRaw = Number((parsed as any)?.materials?.total);
+    let modelsExportedRaw = Number((parsed as any)?.models?.exported);
+    let modelsTotalRaw = Number((parsed as any)?.models?.total);
+    let warningsRaw = (parsed as any)?.warnings;
+
+    const nestedPipelineReportPath = String((parsed as any)?.paths?.pipelineReportPath || '').trim();
+    if (nestedPipelineReportPath && fs.existsSync(nestedPipelineReportPath)) {
+      try {
+        const pipeline = JSON.parse(fs.readFileSync(nestedPipelineReportPath, 'utf8')) as any;
+        sourceioEngineUsed = String(pipeline?.settings?.sourceioEngineUsed || sourceioEngineUsed || '').trim();
+        if (!Number.isFinite(materialsWithTextureRaw)) materialsWithTextureRaw = Number(pipeline?.materials?.withTexture);
+        if (!Number.isFinite(materialsTotalRaw)) materialsTotalRaw = Number(pipeline?.materials?.total);
+        if (!Number.isFinite(modelsExportedRaw)) modelsExportedRaw = Number(pipeline?.models?.exported);
+        if (!Number.isFinite(modelsTotalRaw)) modelsTotalRaw = Number(pipeline?.models?.total);
+        if (!Array.isArray(warningsRaw) && Array.isArray(pipeline?.warnings)) warningsRaw = pipeline.warnings;
+      } catch {
+        // ignore pipeline summary parsing issues
+      }
+    }
 
     return {
       exists: true,
