@@ -2,8 +2,9 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { spawn } from 'child_process';
+import { prisma } from '../db/client';
 
-type TriggerSource = 'heartbeat' | 'viewer_state' | 'manual';
+type TriggerSource = 'heartbeat' | 'viewer_state' | 'manual' | 'reconcile';
 
 type NotifyInput = {
   serverId: string;
@@ -299,6 +300,8 @@ let autoDiscoveryInFlight = new Map<string, Promise<AutoDiscoveryResult>>();
 let autoDiscoveryLastUnresolvedLogMs = new Map<string, number>();
 let workerPausedUntilMs = 0;
 let lastWorkerPressureLogAtMs = 0;
+let observedMapReconcileTimer: NodeJS.Timeout | null = null;
+let observedMapReconcileInFlight = false;
 let queueStoreLoaded = false;
 let queueStorePathLoaded = '';
 let jobsById = new Map<string, PersistedWorkshopJob>();
@@ -386,6 +389,18 @@ const getAutoDiscoverySettings = () => ({
   maxCandidates: Math.max(
     5,
     Math.min(100, toPositiveInt(process.env.WORKSHOP_AUTO_DISCOVER_MAX_CANDIDATES, 30)),
+  ),
+});
+
+const getObservedMapReconcileSettings = () => ({
+  enabled: parseBool(process.env.WORKSHOP_OBSERVED_MAP_RECONCILE_ENABLED, true),
+  intervalMs: Math.max(
+    15_000,
+    toPositiveInt(process.env.WORKSHOP_OBSERVED_MAP_RECONCILE_INTERVAL_MS, 60_000),
+  ),
+  staleMs: Math.max(
+    60_000,
+    toPositiveInt(process.env.WORKSHOP_OBSERVED_MAP_STALE_MS, 30 * 60 * 1000),
   ),
 });
 
@@ -2140,6 +2155,50 @@ export const notifyMapObservedForWorkshop = (input: NotifyInput) => {
 
 };
 
+const reconcileObservedServerMaps = async () => {
+  if (!started || !runtimeEnabled) return;
+  if (observedMapReconcileInFlight) return;
+
+  const settings = getObservedMapReconcileSettings();
+  if (!settings.enabled) return;
+
+  observedMapReconcileInFlight = true;
+  try {
+    const cutoff = new Date(Date.now() - settings.staleMs);
+    const servers = await prisma.gameServer.findMany({
+      where: {
+        status: 'ONLINE',
+        currentMap: { not: null },
+        lastHeartbeat: { gte: cutoff },
+      },
+      select: {
+        id: true,
+        currentMap: true,
+      },
+      take: 256,
+      orderBy: {
+        lastHeartbeat: 'desc',
+      },
+    });
+
+    for (const server of servers) {
+      const mapName = String(server.currentMap || '').trim();
+      if (!mapName) continue;
+      notifyMapObservedForWorkshop({
+        serverId: server.id,
+        mapName,
+        source: 'reconcile',
+      });
+    }
+  } catch (error: any) {
+    console.warn('[workshop-auto] observed_map_reconcile_failed', JSON.stringify({
+      error: String(error?.message || error),
+    }));
+  } finally {
+    observedMapReconcileInFlight = false;
+  }
+};
+
 export const enqueueWorkshopAutoDownloadManual = (input: {
   serverId?: string;
   mapName: string;
@@ -2363,6 +2422,7 @@ export const startWorkshopAutoDownloadJob = () => {
   workerPausedUntilMs = 0;
   lastWorkerPressureLogAtMs = 0;
   const autoDiscovery = getAutoDiscoverySettings();
+  const observedMapReconcile = getObservedMapReconcileSettings();
   const balancer = getWorkerBalancerSettings();
   const childTuning = getChildExecutionTuning();
 
@@ -2385,6 +2445,9 @@ export const startWorkshopAutoDownloadJob = () => {
     autoDiscoveryTimeoutMs: autoDiscovery.timeoutMs,
     autoDiscoveryMinScore: autoDiscovery.minScore,
     autoDiscoveryMaxCandidates: autoDiscovery.maxCandidates,
+    observedMapReconcileEnabled: observedMapReconcile.enabled,
+    observedMapReconcileIntervalMs: observedMapReconcile.intervalMs,
+    observedMapReconcileStaleMs: observedMapReconcile.staleMs,
     balancerEnabled: balancer.enabled,
     balancerMaxLoadPerCpu: balancer.maxLoadPerCpu,
     balancerMinFreeMemMb: balancer.minFreeMemMb,
@@ -2401,6 +2464,12 @@ export const startWorkshopAutoDownloadJob = () => {
 
   scheduleWakeTimer();
   void processQueue();
+  if (observedMapReconcile.enabled) {
+    void reconcileObservedServerMaps();
+    observedMapReconcileTimer = setInterval(() => {
+      void reconcileObservedServerMaps();
+    }, observedMapReconcile.intervalMs);
+  }
 
   return () => {
     started = false;
@@ -2411,9 +2480,14 @@ export const startWorkshopAutoDownloadJob = () => {
     autoDiscoveryLastUnresolvedLogMs.clear();
     workerPausedUntilMs = 0;
     lastWorkerPressureLogAtMs = 0;
+    observedMapReconcileInFlight = false;
     if (wakeTimer) {
       clearTimeout(wakeTimer);
       wakeTimer = null;
+    }
+    if (observedMapReconcileTimer) {
+      clearInterval(observedMapReconcileTimer);
+      observedMapReconcileTimer = null;
     }
     activeJobIds.clear();
   };
