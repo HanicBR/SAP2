@@ -1403,34 +1403,75 @@ const extractMountedVpkAssets = (options: Options): MountVpkExtractSummary => {
   return summary;
 };
 
+const isProcessAlive = (pid: number): boolean => {
+  if (!Number.isFinite(pid) || pid <= 0) return false;
+  try {
+    process.kill(Math.trunc(pid), 0);
+    return true;
+  } catch (error: any) {
+    // EPERM means process exists but we lack permission.
+    if (String(error?.code || '') === 'EPERM') return true;
+    return false;
+  }
+};
+
 const acquireLock = (lockPath: string, staleMs: number): { ok: boolean; reason?: string } => {
   ensureDir(path.dirname(lockPath));
-  try {
+  const host = os.hostname();
+  const createLock = (extra: Record<string, unknown> = {}): { ok: boolean; reason?: string } => {
     const fd = fs.openSync(lockPath, 'wx');
     fs.writeFileSync(
       fd,
-      JSON.stringify({ pid: process.pid, host: os.hostname(), startedAt: new Date().toISOString() }, null, 2) + '\n',
+      JSON.stringify({ pid: process.pid, host, startedAt: new Date().toISOString(), ...extra }, null, 2) + '\n',
       'utf8',
     );
     fs.closeSync(fd);
     return { ok: true };
+  };
+
+  try {
+    return createLock();
   } catch (error: any) {
     if (error?.code !== 'EEXIST') return { ok: false, reason: String(error?.message || error) };
     try {
       const stat = fs.statSync(lockPath);
-      if (Date.now() - stat.mtimeMs > staleMs) {
+      const ageMs = Math.max(0, Date.now() - stat.mtimeMs);
+      const payload = safeReadJson(lockPath);
+      const lockPid = typeof payload?.pid === 'number' ? Math.trunc(payload.pid) : undefined;
+      const lockHost = typeof payload?.host === 'string' ? payload.host.trim() : '';
+      const lockStartedAt = typeof payload?.startedAt === 'string' ? payload.startedAt.trim() : '';
+      const sameHost = !lockHost || lockHost === host;
+      const pidAlive = typeof lockPid === 'number' && lockPid > 0 && sameHost
+        ? isProcessAlive(lockPid)
+        : undefined;
+
+      const reclaimDeadPid = pidAlive === false;
+      const reclaimStaleAge = ageMs > staleMs && pidAlive !== true;
+      if (reclaimDeadPid || reclaimStaleAge) {
         fs.rmSync(lockPath, { force: true });
-        const fd = fs.openSync(lockPath, 'wx');
-        fs.writeFileSync(
-          fd,
-          JSON.stringify({ pid: process.pid, host: os.hostname(), startedAt: new Date().toISOString(), staleRecovered: true }, null, 2) + '\n',
-          'utf8',
-        );
-        fs.closeSync(fd);
-        return { ok: true };
+        return createLock({
+          staleRecovered: true,
+          recoveredReason: reclaimDeadPid ? 'pid_not_running' : 'stale_lock_age',
+          ...(typeof lockPid === 'number' ? { previousPid: lockPid } : {}),
+          ...(lockHost ? { previousHost: lockHost } : {}),
+          ...(lockStartedAt ? { previousStartedAt: lockStartedAt } : {}),
+          previousAgeMs: Math.floor(ageMs),
+        });
       }
-      return { ok: false, reason: 'lock_in_use' };
+
+      const reasonParts = ['lock_in_use', `ageMs=${Math.floor(ageMs)}`];
+      if (typeof lockPid === 'number' && lockPid > 0) reasonParts.push(`pid=${lockPid}`);
+      if (lockHost) reasonParts.push(`host=${lockHost}`);
+      if (lockStartedAt) reasonParts.push(`startedAt=${lockStartedAt}`);
+      return { ok: false, reason: reasonParts.join(' ') };
     } catch (statError: any) {
+      if (statError?.code === 'ENOENT') {
+        try {
+          return createLock({ staleRecovered: true, recoveredReason: 'lock_race_enoent' });
+        } catch (retryError: any) {
+          return { ok: false, reason: `lock_reacquire_failed:${String(retryError?.message || retryError)}` };
+        }
+      }
       return { ok: false, reason: `lock_stat_failed:${String(statError?.message || statError)}` };
     }
   }
