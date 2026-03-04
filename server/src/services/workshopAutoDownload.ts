@@ -625,6 +625,15 @@ const scoreWorkshopCandidate = (mapName: string, titleRaw: string): number => {
   if (mapSpaced && title.includes(mapSpaced)) score += 120;
   if (mapCompact && titleCompact.includes(mapCompact)) score += 140;
 
+  // Prefer complete bundles when map-only uploads are unavailable.
+  if (/\ball[\s_-]*in[\s_-]*one\b/.test(title) || /\baio\b/.test(title)) score += 60;
+
+  // Penalize common false-positives and split packs that often miss the BSP.
+  if (/\bepisodic\b/.test(title)) score -= 80;
+  if (/\bpart\b/.test(title) || /\bpt\.?\s*\d+\b/.test(title)) score -= 70;
+  if (/\bcontent\b/.test(title)) score -= 30;
+  if (/\b(collection|support|patch|fix(?:es|ed)?|addon)\b/.test(title)) score -= 90;
+
   if (/\bnav[\s_-]*mesh\b/.test(title) || /\bnavmesh\b/.test(title)) score -= 160;
   if (/\b(ai nodes?|nextbot|npc|weapons?|soundpack|playermodel)\b/.test(title)) score -= 60;
 
