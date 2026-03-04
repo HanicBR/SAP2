@@ -721,6 +721,13 @@ const ServerView3D: React.FC = () => {
   const [manifestProbe, setManifestProbe] = useState<ManifestProbe | null>(null);
   const [renderProfile, setRenderProfile] = useState<ViewerRenderProfile>(() => readInitialRenderProfile());
   const [viewerSideTab, setViewerSideTab] = useState<'streaming' | 'players' | 'logs'>('streaming');
+  const [showDevTools, setShowDevTools] = useState<boolean>(false);
+  const [showViewerSettings, setShowViewerSettings] = useState<boolean>(false);
+  const [showViewerHudTopActions, setShowViewerHudTopActions] = useState<boolean>(true);
+  const [showViewerHudLiveChip, setShowViewerHudLiveChip] = useState<boolean>(true);
+  const [showViewerHudFpsChip, setShowViewerHudFpsChip] = useState<boolean>(true);
+  const [showViewerHudSelectedPlayer, setShowViewerHudSelectedPlayer] = useState<boolean>(true);
+  const [shareFeedback, setShareFeedback] = useState<string | null>(null);
   const [moveSpeedFactor, setMoveSpeedFactor] = useState<number>(() => readInitialMoveSpeedFactor());
   const [playerAliveFilter, setPlayerAliveFilter] = useState<'all' | 'alive' | 'dead'>('all');
   const [playerTeamFilter, setPlayerTeamFilter] = useState<string>('all');
@@ -826,6 +833,47 @@ const ServerView3D: React.FC = () => {
   );
   const viewerFpsLabel = hasFreshViewerSnapshot ? '60 FPS' : '-- FPS';
   const moveSpeedUnitsPerSec = Math.round(CAMERA_MOVE_SPEED * moveSpeedFactor);
+
+  const handleShareViewer = useCallback(async () => {
+    const basePath = serverId ? `/admin/servers/${serverId}/view3d` : '/admin/servers';
+    const nextParams = new URLSearchParams();
+    nextParams.set('map', mapName);
+    if (viewerSelectedSteamId) nextParams.set('steamId', viewerSelectedSteamId);
+    const shareUrl = `${window.location.origin}${basePath}?${nextParams.toString()}`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Backstabber Web Viewer 3D',
+          text: `Viewer do mapa ${mapName}`,
+          url: shareUrl,
+        });
+        setShareFeedback('Compartilhado');
+      } else if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+        setShareFeedback('Link copiado');
+      } else {
+        throw new Error('share_unavailable');
+      }
+    } catch {
+      if (navigator.clipboard?.writeText) {
+        try {
+          await navigator.clipboard.writeText(shareUrl);
+          setShareFeedback('Link copiado');
+          return;
+        } catch {
+          // fallback below
+        }
+      }
+      setShareFeedback('Falha ao compartilhar');
+    }
+  }, [mapName, serverId, viewerSelectedSteamId]);
+
+  useEffect(() => {
+    if (!shareFeedback) return undefined;
+    const timer = window.setTimeout(() => setShareFeedback(null), 1800);
+    return () => window.clearTimeout(timer);
+  }, [shareFeedback]);
 
   const loadQueueSnapshot = useCallback(
     async (silent = true) => {
@@ -3320,6 +3368,18 @@ const ServerView3D: React.FC = () => {
             }`}>
               {hasFreshViewerSnapshot ? 'Viewer Online' : 'Viewer Aguardando Frame'}
             </span>
+            <button
+              type="button"
+              onClick={() => setShowDevTools((current) => !current)}
+              className={`px-3 py-1 rounded-full border text-[11px] font-bold uppercase tracking-[0.1em] ${
+                showDevTools
+                  ? 'border-cyan-700 bg-cyan-900/25 text-cyan-300'
+                  : 'border-zinc-700 bg-zinc-900/70 text-zinc-300 hover:bg-zinc-800'
+              }`}
+              title="Mostrar/Ocultar blocos técnicos"
+            >
+              {showDevTools ? 'Dev/Debug ON' : 'Dev/Debug'}
+            </button>
             <div className="rounded-xl border border-[#34415b] bg-[#121b2e] px-3 py-2 text-xs text-zinc-300 font-mono shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
               <div>{status}</div>
               {manifest && <div>manifest v{manifest.version} | chunkSize={manifest.map.chunkSize}</div>}
@@ -3370,41 +3430,54 @@ const ServerView3D: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        <div className="lg:col-span-3 rounded-2xl border border-[#2f3b53] bg-[#060a12] overflow-hidden relative shadow-[0_22px_62px_rgba(0,0,0,0.45)]">
+      <div className="grid grid-cols-1 lg:grid-cols-4 lg:items-start gap-4">
+        <div className="lg:col-span-3 self-start rounded-2xl border border-[#2f3b53] bg-[#060a12] overflow-hidden relative shadow-[0_22px_62px_rgba(0,0,0,0.45)]">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_420px_at_50%_15%,rgba(56,189,248,0.08),transparent_58%)]" />
           <div className="pointer-events-none absolute inset-0 opacity-[0.18] [background:linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:36px_36px]" />
-          <div ref={mountRef} className="relative z-[1] h-[62vh] w-full" />
-          <div className="absolute top-3 right-3 z-[2] flex gap-2">
-            <button
-              type="button"
-              onClick={() => setViewerSideTab('streaming')}
-              className="p-2 bg-black/50 backdrop-blur-md border border-white/10 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-all"
-              title="Abrir streaming stats"
-            >
-              <Icons.Settings className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                void probeManifestWithDetails().catch(() => undefined);
-              }}
-              className="p-2 bg-black/50 backdrop-blur-md border border-white/10 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-all"
-              title="Testar manifest"
-            >
-              <Icons.ExternalLink className="w-4 h-4" />
-            </button>
-          </div>
+          <div ref={mountRef} className="relative z-[1] h-[min(62vh,760px)] min-h-[420px] w-full" />
+          {showViewerHudTopActions && (
+            <div className="absolute top-3 right-3 z-[2] flex flex-col items-end gap-2">
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowViewerSettings(true)}
+                  className="p-2 bg-black/50 backdrop-blur-md border border-white/10 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-all"
+                  title="Configurações do viewer"
+                >
+                  <Icons.Settings className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void handleShareViewer();
+                  }}
+                  className="p-2 bg-black/50 backdrop-blur-md border border-white/10 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-all"
+                  title="Compartilhar viewer"
+                >
+                  <Icons.ExternalLink className="w-4 h-4" />
+                </button>
+              </div>
+              {shareFeedback && (
+                <div className="rounded border border-zinc-700 bg-black/65 px-2 py-1 text-[10px] font-mono text-zinc-200">
+                  {shareFeedback}
+                </div>
+              )}
+            </div>
+          )}
           <div className="absolute bottom-3 left-3 z-[2] flex gap-2">
-            <div className="px-3 py-1.5 bg-black/50 backdrop-blur-md border border-white/10 rounded-lg flex items-center gap-2">
-              <span className={`w-2 h-2 rounded-full ${hasFreshViewerSnapshot ? 'bg-emerald-400' : 'bg-yellow-400'}`} />
-              <span className="text-xs font-mono text-white/90">{hasFreshViewerSnapshot ? 'LIVE FRAME' : 'STALE FRAME'}</span>
-            </div>
-            <div className="px-3 py-1.5 bg-black/50 backdrop-blur-md border border-white/10 rounded-lg text-xs font-mono text-zinc-300">
-              {viewerFpsLabel}
-            </div>
+            {showViewerHudLiveChip && (
+              <div className="px-3 py-1.5 bg-black/50 backdrop-blur-md border border-white/10 rounded-lg flex items-center gap-2">
+                <span className={`w-2 h-2 rounded-full ${hasFreshViewerSnapshot ? 'bg-emerald-400' : 'bg-yellow-400'}`} />
+                <span className="text-xs font-mono text-white/90">{hasFreshViewerSnapshot ? 'LIVE FRAME' : 'STALE FRAME'}</span>
+              </div>
+            )}
+            {showViewerHudFpsChip && (
+              <div className="px-3 py-1.5 bg-black/50 backdrop-blur-md border border-white/10 rounded-lg text-xs font-mono text-zinc-300">
+                {viewerFpsLabel}
+              </div>
+            )}
           </div>
-          {selectedViewerPlayer && (
+          {showViewerHudSelectedPlayer && selectedViewerPlayer && (
             <div className="absolute left-3 bottom-14 z-[2] rounded-xl border border-cyan-800 bg-[#0b1322]/92 px-3 py-2 text-[11px] text-zinc-200 font-mono backdrop-blur max-w-[360px]">
               <p className="text-cyan-300 font-bold truncate max-w-[340px]">
                 {selectedViewerPlayer.name || selectedViewerPlayer.steamId}
@@ -3422,7 +3495,7 @@ const ServerView3D: React.FC = () => {
           )}
         </div>
 
-        <div className="space-y-3">
+        <div className="self-start space-y-3">
           <div className="rounded-2xl border border-[#303d56] bg-[#101a2c]/92 p-3 text-xs text-zinc-300 space-y-2 shadow-[0_12px_30px_rgba(0,0,0,0.28)]">
             <div className="flex items-center justify-between gap-2">
               <p className="text-zinc-500 uppercase font-bold text-[11px] tracking-wide">System Status</p>
@@ -3730,7 +3803,8 @@ const ServerView3D: React.FC = () => {
             </button>
           </div>
 
-          <div className="rounded-2xl border border-[#303d56] bg-[#101a2c]/92 p-3 text-xs text-zinc-300 space-y-2 shadow-[0_12px_30px_rgba(0,0,0,0.28)]">
+          {showDevTools && (
+            <div className="rounded-2xl border border-[#303d56] bg-[#101a2c]/92 p-3 text-xs text-zinc-300 space-y-2 shadow-[0_12px_30px_rgba(0,0,0,0.28)]">
             <div className="flex items-center justify-between gap-2">
               <p className="text-zinc-400 uppercase font-bold text-[11px] tracking-[0.1em]">Pipeline / Workshop</p>
               <div className="flex items-center gap-1">
@@ -3874,7 +3948,8 @@ const ServerView3D: React.FC = () => {
                 ))}
               </div>
             </div>
-          </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -3944,6 +4019,7 @@ const ServerView3D: React.FC = () => {
         </div>
       </div>
 
+      {showDevTools && (
       <div className="rounded-2xl border border-[#2f3b53] bg-[#0d1524]/88 p-3 shadow-[0_12px_30px_rgba(0,0,0,0.28)]">
         <div className="flex items-center justify-between gap-2 mb-2">
           <p className="text-zinc-400 uppercase font-bold text-[11px] tracking-[0.1em]">Diagnostico de assets (missing/errors)</p>
@@ -3979,6 +4055,94 @@ const ServerView3D: React.FC = () => {
           ))}
         </div>
       </div>
+      )}
+
+      {showViewerSettings && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/80"
+            onClick={() => setShowViewerSettings(false)}
+            aria-label="Fechar configurações"
+          />
+          <div className="relative w-full max-w-xl rounded-2xl border border-[#3b4864] bg-[#0e1626] p-4 shadow-[0_24px_64px_rgba(0,0,0,0.5)]">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-zinc-200">Viewer Settings</h3>
+              <button
+                type="button"
+                onClick={() => setShowViewerSettings(false)}
+                className="rounded border border-zinc-700 px-2 py-1 text-[10px] font-bold uppercase text-zinc-300 hover:bg-zinc-800"
+              >
+                Fechar
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <label className="flex items-center justify-between rounded border border-zinc-700 bg-zinc-900/50 px-3 py-2">
+                <span className="text-zinc-300">Mostrar controles no viewport</span>
+                <input
+                  type="checkbox"
+                  checked={showViewerHudTopActions}
+                  onChange={(event) => setShowViewerHudTopActions(event.target.checked)}
+                />
+              </label>
+              <label className="flex items-center justify-between rounded border border-zinc-700 bg-zinc-900/50 px-3 py-2">
+                <span className="text-zinc-300">Badge LIVE FRAME</span>
+                <input
+                  type="checkbox"
+                  checked={showViewerHudLiveChip}
+                  onChange={(event) => setShowViewerHudLiveChip(event.target.checked)}
+                />
+              </label>
+              <label className="flex items-center justify-between rounded border border-zinc-700 bg-zinc-900/50 px-3 py-2">
+                <span className="text-zinc-300">Badge FPS</span>
+                <input
+                  type="checkbox"
+                  checked={showViewerHudFpsChip}
+                  onChange={(event) => setShowViewerHudFpsChip(event.target.checked)}
+                />
+              </label>
+              <label className="flex items-center justify-between rounded border border-zinc-700 bg-zinc-900/50 px-3 py-2">
+                <span className="text-zinc-300">Painel player selecionado</span>
+                <input
+                  type="checkbox"
+                  checked={showViewerHudSelectedPlayer}
+                  onChange={(event) => setShowViewerHudSelectedPlayer(event.target.checked)}
+                />
+              </label>
+              <label className="flex items-center justify-between rounded border border-zinc-700 bg-zinc-900/50 px-3 py-2">
+                <span className="text-zinc-300">Labels 3D</span>
+                <input
+                  type="checkbox"
+                  checked={showPlayerLabels}
+                  onChange={(event) => setShowPlayerLabels(event.target.checked)}
+                />
+              </label>
+              <label className="flex items-center justify-between rounded border border-zinc-700 bg-zinc-900/50 px-3 py-2">
+                <span className="text-zinc-300">HP no label</span>
+                <input
+                  type="checkbox"
+                  checked={showPlayerHealthInLabel}
+                  onChange={(event) => setShowPlayerHealthInLabel(event.target.checked)}
+                  disabled={!showPlayerLabels}
+                />
+              </label>
+              <label className="flex items-center justify-between rounded border border-zinc-700 bg-zinc-900/50 px-3 py-2 sm:col-span-2">
+                <span className="text-zinc-300">Mostrar blocos Dev/Debug</span>
+                <input
+                  type="checkbox"
+                  checked={showDevTools}
+                  onChange={(event) => setShowDevTools(event.target.checked)}
+                />
+              </label>
+            </div>
+
+            <div className="mt-3 rounded border border-zinc-700 bg-zinc-900/40 p-2 text-[11px] text-zinc-400">
+              Dica: o botão Share copia/compartilha um link direto para este viewer com o mapa atual.
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
