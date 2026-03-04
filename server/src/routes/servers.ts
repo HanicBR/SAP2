@@ -156,6 +156,111 @@ const formatIsoFromMs = (value: number | undefined): string => {
   return new Date(Number(value)).toISOString();
 };
 
+const readTailLinesFromFile = (
+  targetPath: string,
+  maxLines: number,
+  maxBytes: number,
+): string[] => {
+  if (!fs.existsSync(targetPath)) return [];
+  try {
+    const stat = fs.statSync(targetPath);
+    const fileSize = Number(stat.size || 0);
+    if (fileSize <= 0) return [];
+    const bytesToRead = Math.max(1, Math.min(maxBytes, fileSize));
+    const start = Math.max(0, fileSize - bytesToRead);
+    const fd = fs.openSync(targetPath, 'r');
+    const buffer = Buffer.alloc(bytesToRead);
+    try {
+      fs.readSync(fd, buffer, 0, bytesToRead, start);
+    } finally {
+      fs.closeSync(fd);
+    }
+    let text = buffer.toString('utf8');
+    if (start > 0) {
+      const newlineIdx = text.indexOf('\n');
+      if (newlineIdx >= 0) {
+        text = text.slice(newlineIdx + 1);
+      }
+    }
+    const lines = text
+      .split(/\r?\n/g)
+      .map((line) => line.trimEnd())
+      .filter((line) => line.length > 0);
+    if (!lines.length) return [];
+    return lines.slice(-Math.max(1, maxLines));
+  } catch (error: any) {
+    return [`tail_read_failed:${path.basename(targetPath)}:${String(error?.message || error)}`];
+  }
+};
+
+type ServiceLogFile = {
+  filePath: string;
+  dir: string;
+  name: string;
+  size: number;
+  mtimeMs: number;
+  score: number;
+};
+
+const scoreServiceLogName = (nameRaw: string): number => {
+  const name = String(nameRaw || '').toLowerCase();
+  let score = 0;
+  if (name.includes('backstabber-api')) score += 120;
+  else if (name.includes('backstabber')) score += 100;
+  else if (name.includes('api')) score += 80;
+  if (name.includes('error')) score += 20;
+  if (name.includes('out')) score += 12;
+  if (name.includes('pm2')) score += 8;
+  if (name.endsWith('.log')) score += 5;
+  return score;
+};
+
+const collectServiceLogFiles = (projectRoot: string): { scannedDirs: string[]; files: ServiceLogFile[] } => {
+  const isLinux = process.platform === 'linux';
+  const pm2Home = path.resolve(
+    String(process.env.PM2_HOME || (isLinux ? '/root/.pm2' : path.join(projectRoot, '.pm2'))),
+  );
+  const candidates = Array.from(new Set([
+    path.join(pm2Home, 'logs'),
+    path.join(projectRoot, 'logs'),
+    path.join(projectRoot, 'server', 'logs'),
+  ]));
+  const out: ServiceLogFile[] = [];
+  for (const dir of candidates) {
+    if (!fs.existsSync(dir)) continue;
+    let entries: fs.Dirent[] = [];
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+    for (const entry of entries) {
+      if (!entry.isFile()) continue;
+      const name = String(entry.name || '').trim();
+      if (!name || !name.toLowerCase().endsWith('.log')) continue;
+      const full = path.join(dir, name);
+      try {
+        const stat = fs.statSync(full);
+        out.push({
+          filePath: full,
+          dir,
+          name,
+          size: Number(stat.size || 0),
+          mtimeMs: Number(stat.mtimeMs || 0),
+          score: scoreServiceLogName(name),
+        });
+      } catch {
+        // ignore stat issues
+      }
+    }
+  }
+  out.sort((a, b) => b.score - a.score || b.mtimeMs - a.mtimeMs || a.name.localeCompare(b.name));
+  return {
+    scannedDirs: candidates,
+    files: out,
+  };
+};
+
 const parseMode = (value: unknown): 'TTT' | 'SANDBOX' | 'MURDER' | undefined => {
   const raw = String(value ?? '')
     .trim()
@@ -770,6 +875,7 @@ router.get('/workshop/diagnostics/report', authMiddleware, requireRole(UserRole.
   const queueStorePath = path.resolve(
     String(process.env.WORKSHOP_QUEUE_STORE_FILE || queueSnapshot?.config?.queueStorePath || path.join(workshopRoot, 'queue', 'workshop-jobs.json')),
   );
+  const logScan = collectServiceLogFiles(projectRoot);
 
   const mapDir = path.join(mapArtifactsDir, mapName);
   const manifestPath = path.join(mapDir, 'manifest.json');
@@ -938,6 +1044,41 @@ router.get('/workshop/diagnostics/report', authMiddleware, requireRole(UserRole.
     add(`lock[${idx}].mtime=${formatIsoFromMs(lock.mtimeMs)}`);
     add(`lock[${idx}].content=${lock.text.replace(/\r?\n/g, ' ')}`);
   });
+
+  addSection('Service Logs');
+  add(`scannedLogDirs: ${logScan.scannedDirs.join(' | ')}`);
+  if (!logScan.files.length) {
+    add('serviceLogFilesFound: 0');
+  } else {
+    add(`serviceLogFilesFound: ${logScan.files.length}`);
+    const focusNeedles = [
+      mapName.toLowerCase(),
+      'workshop-auto',
+      'manifest',
+      'worker_job_',
+      'auto_discovery',
+      'map_without_workshop_mapping',
+      'process_lock_failed',
+    ];
+    logScan.files.slice(0, 3).forEach((logFile, idx) => {
+      const tail = readTailLinesFromFile(logFile.filePath, 120, 512 * 1024);
+      const focused = tail.filter((line) => {
+        const lower = line.toLowerCase();
+        return focusNeedles.some((needle) => lower.includes(needle));
+      });
+      add(`log[${idx}].file=${logFile.filePath}`);
+      add(`log[${idx}].size=${logFile.size} mtime=${formatIsoFromMs(logFile.mtimeMs)} score=${logFile.score}`);
+      add(`log[${idx}].tailLines=${tail.length} focusedLines=${focused.length}`);
+      add(`log[${idx}].tail_start`);
+      tail.forEach((line: string) => add(`  ${line}`));
+      add(`log[${idx}].tail_end`);
+      if (focused.length > 0) {
+        add(`log[${idx}].focused_start`);
+        focused.slice(-80).forEach((line: string) => add(`  ${line}`));
+        add(`log[${idx}].focused_end`);
+      }
+    });
+  }
 
   addSection('WebSocket Snapshot');
   add(`viewerState.available: ${viewerWsState ? 'yes' : 'no'}`);
