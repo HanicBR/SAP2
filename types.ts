@@ -356,6 +356,36 @@ export interface WorkshopResolveSelectionResponse {
   error?: string;
 }
 
+export interface WorkshopResetCacheAndReprocessRequest {
+  mapName: string;
+  workshopInput?: string;
+  workshopId?: string;
+  serverId?: string;
+  refresh?: boolean;
+  clearAllForMap?: boolean;
+}
+
+export interface WorkshopProcessCacheResetSummary {
+  ok: boolean;
+  mapName: string;
+  workshopId?: string;
+  appId: number;
+  cachePath: string;
+  hadCacheFile: boolean;
+  removedKeys: string[];
+  reason: string;
+  error?: string;
+}
+
+export interface WorkshopResetCacheAndReprocessResponse {
+  ok: boolean;
+  mapName: string;
+  workshopId?: string;
+  reset: WorkshopProcessCacheResetSummary;
+  enqueue: WorkshopManualEnqueueResponse;
+  error?: string;
+}
+
 export interface ServerWsLiveStateItem {
   serverId: string;
   transport: 'websocket';

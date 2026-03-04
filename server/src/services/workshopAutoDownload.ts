@@ -2887,6 +2887,133 @@ export const applyWorkshopMapResolutionSelection = (input: {
   };
 };
 
+export const resetWorkshopProcessCacheEntries = (input: {
+  mapName: string;
+  workshopInput?: string;
+  workshopId?: string;
+  clearAllForMap?: boolean;
+}) => {
+  const mapName = sanitizeMapName(String(input.mapName || ''));
+  const workshopInput = String(input.workshopInput || input.workshopId || '').trim();
+  const workshopId = extractWorkshopIdFromInput(workshopInput);
+  const clearAllForMap = parseBool(input.clearAllForMap, true);
+
+  if (!mapName) {
+    return {
+      ok: false,
+      mapName: '',
+      appId: 0,
+      cachePath: '',
+      hadCacheFile: false,
+      removedKeys: [] as string[],
+      reason: 'invalid_map_name',
+      error: 'invalid_map_name',
+    };
+  }
+
+  if (!clearAllForMap && !isWorkshopId(workshopId)) {
+    return {
+      ok: false,
+      mapName,
+      appId: 0,
+      cachePath: '',
+      hadCacheFile: false,
+      removedKeys: [] as string[],
+      reason: 'invalid_workshop_input',
+      error: 'invalid_workshop_input',
+    };
+  }
+
+  const config = readConfig();
+  const cachePath = path.join(config.reportsDir, 'process-cache.json');
+  const appId = config.appId;
+
+  if (!fs.existsSync(cachePath)) {
+    return {
+      ok: true,
+      mapName,
+      ...(isWorkshopId(workshopId) ? { workshopId } : {}),
+      appId,
+      cachePath,
+      hadCacheFile: false,
+      removedKeys: [] as string[],
+      reason: 'cache_file_missing',
+    };
+  }
+
+  let parsed: any = null;
+  try {
+    parsed = JSON.parse(fs.readFileSync(cachePath, 'utf8'));
+  } catch (error: any) {
+    return {
+      ok: false,
+      mapName,
+      ...(isWorkshopId(workshopId) ? { workshopId } : {}),
+      appId,
+      cachePath,
+      hadCacheFile: true,
+      removedKeys: [] as string[],
+      reason: 'invalid_cache_json',
+      error: `invalid_cache_json:${String(error?.message || error)}`,
+    };
+  }
+
+  const payload =
+    parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+      ? parsed as Record<string, any>
+      : {};
+  const entriesRaw = payload.entries;
+  const entries =
+    entriesRaw && typeof entriesRaw === 'object' && !Array.isArray(entriesRaw)
+      ? entriesRaw as Record<string, any>
+      : {};
+
+  const removedKeys: string[] = [];
+  const keys = Object.keys(entries);
+  for (const key of keys) {
+    const parts = String(key || '').split(':');
+    const keyAppId = Number(parts[0] || 0);
+    const keyWorkshopId = String(parts[1] || '').trim();
+    const keyMapName = sanitizeMapName(String(parts[2] || ''));
+    if (!keyMapName || keyMapName !== mapName) continue;
+    if (keyAppId > 0 && keyAppId !== appId) continue;
+    if (!clearAllForMap && isWorkshopId(workshopId) && keyWorkshopId !== workshopId) continue;
+    delete entries[key];
+    removedKeys.push(key);
+  }
+
+  payload.version = Number(payload.version || 1) || 1;
+  payload.updatedAt = nowIso();
+  payload.entries = entries;
+
+  try {
+    writeJsonAtomic(cachePath, payload);
+  } catch (error: any) {
+    return {
+      ok: false,
+      mapName,
+      ...(isWorkshopId(workshopId) ? { workshopId } : {}),
+      appId,
+      cachePath,
+      hadCacheFile: true,
+      removedKeys,
+      reason: 'cache_write_failed',
+      error: `cache_write_failed:${String(error?.message || error)}`,
+    };
+  }
+
+  return {
+    ok: true,
+    mapName,
+    ...(isWorkshopId(workshopId) ? { workshopId } : {}),
+    appId,
+    cachePath,
+    hadCacheFile: true,
+    removedKeys,
+    reason: removedKeys.length > 0 ? 'cache_entries_removed' : 'cache_entries_not_found',
+  };
+};
+
 export const enqueueWorkshopAutoDownloadManual = (input: {
   serverId?: string;
   mapName: string;

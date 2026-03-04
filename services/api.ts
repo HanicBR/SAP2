@@ -1,7 +1,7 @@
 
 
 import { MOCK_SERVERS, MOCK_EVENTS, MOCK_STATS, VIP_PLANS, MOCK_SUSPICIOUS_GROUPS, MOCK_PLAYERS, MOCK_USERS, MOCK_TRANSACTIONS, generateServerAnalytics, DEFAULT_SITE_CONFIG } from '../constants';
-import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionProofUploadResult, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, SiteAuditLogsQueryParams, SiteAuditLogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel, ServerLiveStateResponse, ServerViewerActionDispatchResponse, ServerViewerActionRequest, ServerViewerActionStatusResponse, ServerViewerMapOverlayResponse, ServerViewerStateResponse, ServerWsLiveStateListResponse, ServerWsViewerStateListResponse, PlayerAliasHistoryResponse, PlayerAvatarHistoryResponse, LoadingScreenProfile, LoadingScreensResponse, LoadingMediaUploadResult, LoadingTelemetryRange, LoadingTelemetrySlugsResponse, LoadingTelemetrySummaryResponse, AuthRegisterResponse, WorkshopDiagnosticsReportDownload, WorkshopDiagnosticsReportRequest, WorkshopManualEnqueueRequest, WorkshopManualEnqueueResponse, WorkshopQueueSnapshotResponse, WorkshopResolveSelectionRequest, WorkshopResolveSelectionResponse, WorkshopResolutionOptionsResponse } from '../types';
+import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionProofUploadResult, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, SiteAuditLogsQueryParams, SiteAuditLogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel, ServerLiveStateResponse, ServerViewerActionDispatchResponse, ServerViewerActionRequest, ServerViewerActionStatusResponse, ServerViewerMapOverlayResponse, ServerViewerStateResponse, ServerWsLiveStateListResponse, ServerWsViewerStateListResponse, PlayerAliasHistoryResponse, PlayerAvatarHistoryResponse, LoadingScreenProfile, LoadingScreensResponse, LoadingMediaUploadResult, LoadingTelemetryRange, LoadingTelemetrySlugsResponse, LoadingTelemetrySummaryResponse, AuthRegisterResponse, WorkshopDiagnosticsReportDownload, WorkshopDiagnosticsReportRequest, WorkshopManualEnqueueRequest, WorkshopManualEnqueueResponse, WorkshopQueueSnapshotResponse, WorkshopResolveSelectionRequest, WorkshopResolveSelectionResponse, WorkshopResolutionOptionsResponse, WorkshopResetCacheAndReprocessRequest, WorkshopResetCacheAndReprocessResponse } from '../types';
 
 // Utility to simulate network delay (used as fallback)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -562,6 +562,39 @@ export const ApiService = {
       mapName: String(payload?.mapName || '').trim(),
       enqueue: {
         attempted: false,
+        queued: false,
+        deduped: false,
+        reason: 'api_unavailable',
+      },
+      error: 'API indisponivel no modo mock',
+    };
+  },
+
+  resetWorkshopCacheAndReprocess: async (
+    payload: WorkshopResetCacheAndReprocessRequest,
+  ): Promise<WorkshopResetCacheAndReprocessResponse> => {
+    if (hasApi) {
+      return apiFetch<WorkshopResetCacheAndReprocessResponse>('/servers/workshop/cache/reset-and-reenqueue', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    }
+
+    await delay(120);
+    return {
+      ok: false,
+      mapName: String(payload?.mapName || '').trim(),
+      reset: {
+        ok: false,
+        mapName: String(payload?.mapName || '').trim(),
+        appId: 4000,
+        cachePath: '',
+        hadCacheFile: false,
+        removedKeys: [],
+        reason: 'api_unavailable',
+      },
+      enqueue: {
+        ok: false,
         queued: false,
         deduped: false,
         reason: 'api_unavailable',

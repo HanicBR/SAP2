@@ -16,6 +16,7 @@ import {
   WorkshopManualEnqueueResponse,
   WorkshopQueueJob,
   WorkshopQueueSnapshotResponse,
+  WorkshopResetCacheAndReprocessResponse,
   WorkshopResolveSelectionResponse,
   WorkshopResolutionOptionsResponse,
 } from '../../types';
@@ -930,6 +931,8 @@ const ServerView3D: React.FC = () => {
   const [resolutionError, setResolutionError] = useState<string | null>(null);
   const [resolutionSelectionBusy, setResolutionSelectionBusy] = useState<boolean>(false);
   const [resolutionSelectionResult, setResolutionSelectionResult] = useState<WorkshopResolveSelectionResponse | null>(null);
+  const [cacheResetBusy, setCacheResetBusy] = useState<boolean>(false);
+  const [cacheResetResult, setCacheResetResult] = useState<WorkshopResetCacheAndReprocessResponse | null>(null);
   const [manifestProbe, setManifestProbe] = useState<ManifestProbe | null>(null);
   const [diagBundleBusy, setDiagBundleBusy] = useState<boolean>(false);
   const [diagBundleError, setDiagBundleError] = useState<string | null>(null);
@@ -1579,6 +1582,103 @@ const ServerView3D: React.FC = () => {
     }
   }, [activeMapJob, loadQueueSnapshot, loadResolutionSnapshot, mapName, serverId]);
 
+  const resetWorkshopCacheAndReprocess = useCallback(async () => {
+    if (!mapName) return;
+    if (activeMapJob) {
+      setCacheResetResult({
+        ok: false,
+        mapName,
+        workshopId: activeMapJob.workshopId,
+        reset: {
+          ok: false,
+          mapName,
+          workshopId: activeMapJob.workshopId,
+          appId: Number(queueSnapshot?.config?.appId || 4000),
+          cachePath: '',
+          hadCacheFile: false,
+          removedKeys: [],
+          reason: 'map_job_already_active',
+          error: `Ja existe job ativo (${activeMapJob.id}) para este mapa.`,
+        },
+        enqueue: {
+          ok: false,
+          queued: false,
+          deduped: false,
+          reason: 'map_job_already_active',
+          mapName,
+          workshopId: activeMapJob.workshopId,
+          error: `Aguarde o job ativo (${activeMapJob.id}) concluir antes de limpar cache + reprocessar.`,
+        },
+        error: `Aguarde o job ativo (${activeMapJob.id}) concluir antes de limpar cache + reprocessar.`,
+      });
+      return;
+    }
+
+    const preferredWorkshopInput = String(
+      resolutionSnapshot?.mappedWorkshopId
+      || resolutionSnapshot?.staticWorkshopId
+      || resolutionSnapshot?.runtimeWorkshopId
+      || manualResolveWorkshopInput
+      || manualWorkshopId
+      || '',
+    ).trim();
+
+    setCacheResetBusy(true);
+    setCacheResetResult(null);
+    try {
+      const result = await ApiService.resetWorkshopCacheAndReprocess({
+        mapName,
+        ...(preferredWorkshopInput ? { workshopInput: preferredWorkshopInput } : {}),
+        ...(serverId ? { serverId } : {}),
+        refresh: true,
+        clearAllForMap: true,
+      });
+      setCacheResetResult(result);
+      await loadQueueSnapshot(true);
+      await loadResolutionSnapshot(true);
+    } catch (err: any) {
+      setCacheResetResult({
+        ok: false,
+        mapName,
+        reset: {
+          ok: false,
+          mapName,
+          appId: Number(queueSnapshot?.config?.appId || 4000),
+          cachePath: '',
+          hadCacheFile: false,
+          removedKeys: [],
+          reason: 'request_failed',
+          error: String(err?.message || err),
+        },
+        enqueue: {
+          ok: false,
+          queued: false,
+          deduped: false,
+          reason: 'request_failed',
+          mapName,
+          ...(preferredWorkshopInput ? { workshopId: preferredWorkshopInput } : {}),
+          error: String(err?.message || err),
+        },
+        ...(preferredWorkshopInput ? { workshopId: preferredWorkshopInput } : {}),
+        error: String(err?.message || err),
+      });
+    } finally {
+      setCacheResetBusy(false);
+    }
+  }, [
+    activeMapJob,
+    loadQueueSnapshot,
+    loadResolutionSnapshot,
+    manualResolveWorkshopInput,
+    manualWorkshopId,
+    mapName,
+    queueSnapshot?.config?.appId,
+    resolutionSnapshot?.mappedWorkshopId,
+    resolutionSnapshot?.runtimeWorkshopId,
+    resolutionSnapshot?.staticWorkshopId,
+    serverId,
+  ]);
+
   useEffect(() => {
     void loadQueueSnapshot(false);
     const interval = window.setInterval(() => {
@@ -1597,6 +1697,7 @@ const ServerView3D: React.FC = () => {
     setResolutionError(null);
     setResolutionSnapshot(null);
     setManualResolveWorkshopInput('');
+    setCacheResetResult(null);
     resolutionAutoKeyRef.current = '';
   }, [mapName]);
 
@@ -4725,6 +4826,41 @@ const ServerView3D: React.FC = () => {
                 </div>
               );
             })()}
+
+            <div className="rounded border border-[#364561] bg-[#0c1321]/75 px-2 py-2 space-y-2">
+              <p className="text-zinc-500 uppercase font-bold text-[10px]">Reprocessar mapa (reset de cache)</p>
+              <p className="text-zinc-400 text-[10px] break-words">
+                Remove entradas do <span className="font-mono">process-cache.json</span> deste mapa e enfileira novo processamento.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  void resetWorkshopCacheAndReprocess();
+                }}
+                disabled={cacheResetBusy || mapHasActiveJob}
+                className="w-full px-2 py-1.5 rounded border border-orange-800 bg-orange-900/20 text-orange-300 text-[11px] font-bold uppercase disabled:opacity-50"
+              >
+                {cacheResetBusy ? 'Limpando + reprocessando...' : mapHasActiveJob ? 'Aguardando job atual...' : 'Limpar cache deste mapa + reprocessar'}
+              </button>
+              {cacheResetResult && (
+                <div className="rounded border border-[#364561] bg-[#0f1829]/75 px-2 py-1.5 text-[10px] font-mono space-y-0.5">
+                  <p>ok={cacheResetResult.ok ? 'true' : 'false'} | map={cacheResetResult.mapName} | wid={cacheResetResult.workshopId || cacheResetResult.enqueue.workshopId || 'n/a'}</p>
+                  <p className="break-all">reset: ok={cacheResetResult.reset.ok ? 'true' : 'false'} reason={cacheResetResult.reset.reason} removed={cacheResetResult.reset.removedKeys.length}</p>
+                  <p className="break-all">enqueue: ok={cacheResetResult.enqueue.ok ? 'true' : 'false'} queued={cacheResetResult.enqueue.queued ? 'true' : 'false'} deduped={cacheResetResult.enqueue.deduped ? 'true' : 'false'} reason={cacheResetResult.enqueue.reason}</p>
+                  {cacheResetResult.reset.cachePath && (
+                    <p className="text-zinc-500 break-all">cachePath={cacheResetResult.reset.cachePath}</p>
+                  )}
+                  {cacheResetResult.reset.removedKeys.length > 0 && (
+                    <p className="text-zinc-500 break-all">removedKeys={cacheResetResult.reset.removedKeys.join(' | ')}</p>
+                  )}
+                  {(cacheResetResult.error || cacheResetResult.reset.error || cacheResetResult.enqueue.error) && (
+                    <p className="text-red-300 break-words">
+                      {cacheResetResult.error || cacheResetResult.reset.error || cacheResetResult.enqueue.error}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
 
             <div className="rounded border border-[#364561] bg-[#0c1321]/75 px-2 py-2 space-y-1">
               <p className="text-zinc-500 uppercase font-bold text-[10px]">Manifest probe</p>

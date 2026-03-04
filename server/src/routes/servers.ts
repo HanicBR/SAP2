@@ -28,6 +28,7 @@ import {
   getWorkshopMapResolutionSnapshot,
   getWorkshopAutoDownloadQueueSnapshot,
   notifyMapObservedForWorkshop,
+  resetWorkshopProcessCacheEntries,
 } from '../services/workshopAutoDownload';
 
 const router = Router();
@@ -891,6 +892,115 @@ router.post('/workshop/resolve/select', authMiddleware, requireRole(UserRole.ADM
     return res.status(400).json(result);
   }
   return res.json(result);
+});
+
+// Reset process-cache entries for the current map and re-enqueue processing.
+router.post('/workshop/cache/reset-and-reenqueue', authMiddleware, requireRole(UserRole.ADMIN), async (req, res) => {
+  const body = ((req as any).body && typeof (req as any).body === 'object') ? (req as any).body : {};
+  const mapName = normalizeMapNameForDiagnostics(body?.mapName ?? body?.map);
+  const workshopInputRaw = String(body?.workshopInput || body?.workshopId || '').trim();
+  const refreshRaw = body?.refresh;
+  const refresh = refreshRaw === undefined
+    ? true
+    : (refreshRaw === true || String(refreshRaw || '').trim().toLowerCase() === 'true' || String(refreshRaw || '') === '1');
+  const clearAllRaw = body?.clearAllForMap;
+  const clearAllForMap = clearAllRaw === undefined
+    ? true
+    : (clearAllRaw === true || String(clearAllRaw || '').trim().toLowerCase() === 'true' || String(clearAllRaw || '') === '1');
+  const serverId = String(body?.serverId || 'admin').trim() || 'admin';
+
+  if (!mapName) {
+    return res.status(400).json({
+      ok: false,
+      error: 'mapName is required',
+      mapName: '',
+      reset: {
+        ok: false,
+        mapName: '',
+        appId: 0,
+        cachePath: '',
+        hadCacheFile: false,
+        removedKeys: [],
+        reason: 'invalid_map_name',
+      },
+      enqueue: {
+        ok: false,
+        queued: false,
+        deduped: false,
+        reason: 'invalid_map_name',
+      },
+    });
+  }
+
+  let workshopInput = workshopInputRaw;
+  if (!workshopInput) {
+    const snapshot = await getWorkshopMapResolutionSnapshot({
+      mapName,
+      refreshDiscovery: false,
+    });
+    if (snapshot.ok) {
+      workshopInput =
+        String(snapshot.mappedWorkshopId || '').trim()
+        || String(snapshot.staticWorkshopId || '').trim()
+        || String(snapshot.runtimeWorkshopId || '').trim()
+        || String(snapshot.processReportWorkshopId || '').trim()
+        || '';
+    }
+  }
+
+  const reset = resetWorkshopProcessCacheEntries({
+    mapName,
+    ...(workshopInput ? { workshopInput } : {}),
+    clearAllForMap,
+  });
+
+  if (!workshopInput) {
+    const payload = {
+      ok: false,
+      mapName,
+      reset,
+      enqueue: {
+        ok: false,
+        queued: false,
+        deduped: false,
+        reason: 'workshop_id_not_resolved_for_map',
+      },
+      error: 'workshop_id_not_resolved_for_map',
+    };
+    return res.status(400).json(payload);
+  }
+
+  const enqueue = enqueueWorkshopAutoDownloadManual({
+    serverId,
+    mapName,
+    workshopInput,
+    refresh,
+  });
+  const enqueueWorkshopId = String((enqueue as any)?.workshopId || '').trim();
+  const resetErrorMessage = String((reset as any)?.error || '').trim();
+  const enqueueErrorMessage = String((enqueue as any)?.error || '').trim();
+
+  if (!reset.ok || !enqueue.ok) {
+    const payload = {
+      ok: false,
+      mapName,
+      ...(enqueueWorkshopId ? { workshopId: enqueueWorkshopId } : {}),
+      reset,
+      enqueue,
+      error: !reset.ok
+        ? (resetErrorMessage || String(reset.reason || 'cache_reset_failed'))
+        : (enqueueErrorMessage || String(enqueue.reason || 'enqueue_failed')),
+    };
+    return res.status(400).json(payload);
+  }
+
+  return res.json({
+    ok: true,
+    mapName,
+    ...(enqueueWorkshopId ? { workshopId: enqueueWorkshopId } : {}),
+    reset,
+    enqueue,
+  });
 });
 
 // Consolidated workshop diagnostics for Dev/Debug download (.txt)
