@@ -1,4 +1,5 @@
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import { spawn } from 'child_process';
 
@@ -129,6 +130,20 @@ type AutoDiscoveryCacheEntry = {
   resolutionSource: string;
   reason: string;
   expiresAtMs: number;
+};
+
+type WorkerBalancerSettings = {
+  enabled: boolean;
+  maxLoadPerCpu: number;
+  minFreeMemMb: number;
+  pauseMs: number;
+  logCooldownMs: number;
+};
+
+type ChildExecutionTuning = {
+  maxThreads: number;
+  niceEnabled: boolean;
+  niceValue: number;
 };
 
 type QueueStoreFile = {
@@ -282,6 +297,8 @@ let discoveredFromReportsLoadedAtMs = 0;
 let autoDiscoveryCache = new Map<string, AutoDiscoveryCacheEntry>();
 let autoDiscoveryInFlight = new Map<string, Promise<AutoDiscoveryResult>>();
 let autoDiscoveryLastUnresolvedLogMs = new Map<string, number>();
+let workerPausedUntilMs = 0;
+let lastWorkerPressureLogAtMs = 0;
 let queueStoreLoaded = false;
 let queueStorePathLoaded = '';
 let jobsById = new Map<string, PersistedWorkshopJob>();
@@ -296,6 +313,12 @@ const toInt = (value: unknown, fallback: number): number => {
 const toPositiveInt = (value: unknown, fallback: number): number => {
   const parsed = toInt(value, fallback);
   if (parsed <= 0) return fallback;
+  return parsed;
+};
+
+const toFiniteNumber = (value: unknown, fallback: number): number => {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
   return parsed;
 };
 
@@ -365,6 +388,128 @@ const getAutoDiscoverySettings = () => ({
     Math.min(100, toPositiveInt(process.env.WORKSHOP_AUTO_DISCOVER_MAX_CANDIDATES, 30)),
   ),
 });
+
+const getWorkerBalancerSettings = (): WorkerBalancerSettings => ({
+  enabled: parseBool(process.env.WORKSHOP_BALANCER_ENABLED, true),
+  maxLoadPerCpu: Math.max(
+    0.3,
+    Math.min(4, toFiniteNumber(process.env.WORKSHOP_BALANCER_MAX_LOAD_PER_CPU, 0.9)),
+  ),
+  minFreeMemMb: Math.max(
+    64,
+    Math.min(131_072, toPositiveInt(process.env.WORKSHOP_BALANCER_MIN_FREE_MEM_MB, 512)),
+  ),
+  pauseMs: Math.max(
+    2_000,
+    Math.min(5 * 60 * 1000, toPositiveInt(process.env.WORKSHOP_BALANCER_PAUSE_MS, 20_000)),
+  ),
+  logCooldownMs: Math.max(
+    1_000,
+    Math.min(10 * 60 * 1000, toPositiveInt(process.env.WORKSHOP_BALANCER_LOG_COOLDOWN_MS, 30_000)),
+  ),
+});
+
+const getChildExecutionTuning = (): ChildExecutionTuning => ({
+  maxThreads: Math.max(
+    1,
+    Math.min(32, toPositiveInt(process.env.WORKSHOP_CHILD_MAX_THREADS, 1)),
+  ),
+  niceEnabled: parseBool(process.env.WORKSHOP_CHILD_NICE_ENABLED, process.platform !== 'win32'),
+  niceValue: Math.max(
+    0,
+    Math.min(19, toInt(process.env.WORKSHOP_CHILD_NICE, 10)),
+  ),
+});
+
+const pauseWorkerFor = (delayMs: number) => {
+  const until = Date.now() + Math.max(50, Math.floor(delayMs));
+  if (until > workerPausedUntilMs) workerPausedUntilMs = until;
+};
+
+const getWorkerPressureSnapshot = (settings: WorkerBalancerSettings): {
+  shouldPause: boolean;
+  reason: string;
+  pauseMs: number;
+  details: {
+    cpuCount: number;
+    load1: number;
+    loadPerCpu: number;
+    freeMemMb: number;
+    minFreeMemMb: number;
+    maxLoadPerCpu: number;
+  };
+} => {
+  const cpuCount = Math.max(1, os.cpus().length || 1);
+  const load1 = Number(os.loadavg?.()[0] || 0);
+  const loadPerCpu = load1 / cpuCount;
+  const freeMemMb = Math.floor(os.freemem() / (1024 * 1024));
+
+  if (loadPerCpu > settings.maxLoadPerCpu) {
+    return {
+      shouldPause: true,
+      reason: 'cpu_load_high',
+      pauseMs: settings.pauseMs,
+      details: {
+        cpuCount,
+        load1,
+        loadPerCpu: Number(loadPerCpu.toFixed(3)),
+        freeMemMb,
+        minFreeMemMb: settings.minFreeMemMb,
+        maxLoadPerCpu: settings.maxLoadPerCpu,
+      },
+    };
+  }
+
+  if (freeMemMb < settings.minFreeMemMb) {
+    return {
+      shouldPause: true,
+      reason: 'free_memory_low',
+      pauseMs: settings.pauseMs,
+      details: {
+        cpuCount,
+        load1,
+        loadPerCpu: Number(loadPerCpu.toFixed(3)),
+        freeMemMb,
+        minFreeMemMb: settings.minFreeMemMb,
+        maxLoadPerCpu: settings.maxLoadPerCpu,
+      },
+    };
+  }
+
+  return {
+    shouldPause: false,
+    reason: 'ok',
+    pauseMs: 0,
+    details: {
+      cpuCount,
+      load1,
+      loadPerCpu: Number(loadPerCpu.toFixed(3)),
+      freeMemMb,
+      minFreeMemMb: settings.minFreeMemMb,
+      maxLoadPerCpu: settings.maxLoadPerCpu,
+    },
+  };
+};
+
+const buildChildProcessEnv = (): NodeJS.ProcessEnv => {
+  const tuning = getChildExecutionTuning();
+  const env: NodeJS.ProcessEnv = { ...process.env };
+  const threads = String(tuning.maxThreads);
+
+  const threadVars = [
+    'OMP_NUM_THREADS',
+    'OPENBLAS_NUM_THREADS',
+    'MKL_NUM_THREADS',
+    'NUMEXPR_MAX_THREADS',
+    'BLIS_NUM_THREADS',
+    'VECLIB_MAXIMUM_THREADS',
+    'RAYON_NUM_THREADS',
+  ];
+  for (const name of threadVars) {
+    if (!String(env[name] || '').trim()) env[name] = threads;
+  }
+  return env;
+};
 
 const decodeHtmlEntities = (raw: string): string => {
   const text = String(raw || '');
@@ -1084,11 +1229,21 @@ const runCommandWithTimeout = (
   timeoutMs: number,
 ): Promise<JobRunResult> =>
   new Promise((resolve, reject) => {
+    const childEnv = buildChildProcessEnv();
+    const execTuning = getChildExecutionTuning();
     const child = spawn(command, args, {
       cwd: WORKSPACE_ROOT,
-      env: process.env,
+      env: childEnv,
       stdio: ['ignore', 'pipe', 'pipe'],
     });
+
+    if (execTuning.niceEnabled && typeof child.pid === 'number' && child.pid > 0) {
+      try {
+        os.setPriority(child.pid, execTuning.niceValue);
+      } catch {
+        // best effort: if not allowed, continue with default priority
+      }
+    }
 
     let output = '';
     let timedOut = false;
@@ -1396,7 +1551,9 @@ const scheduleWakeTimer = () => {
   }
 
   if (!Number.isFinite(nextAt)) return;
-  const delay = Math.max(50, nextAt - Date.now());
+  const now = Date.now();
+  const pauseDelay = Math.max(0, workerPausedUntilMs - now);
+  const delay = Math.max(50, nextAt - now, pauseDelay);
   wakeTimer = setTimeout(() => {
     wakeTimer = null;
     void processQueue();
@@ -1586,7 +1743,53 @@ const processQueue = async () => {
     return;
   }
 
+  const now = Date.now();
+  if (workerPausedUntilMs > now) {
+    scheduleWakeTimer();
+    return;
+  }
+
+  const balancer = getWorkerBalancerSettings();
+  if (balancer.enabled) {
+    const pressure = getWorkerPressureSnapshot(balancer);
+    if (pressure.shouldPause) {
+      pauseWorkerFor(pressure.pauseMs);
+      const ts = Date.now();
+      if (ts - lastWorkerPressureLogAtMs >= balancer.logCooldownMs) {
+        lastWorkerPressureLogAtMs = ts;
+        console.warn('[workshop-auto] worker_throttled', JSON.stringify({
+          reason: pressure.reason,
+          pauseMs: pressure.pauseMs,
+          activeJobs: activeJobIds.size,
+          pendingJobs: countPendingJobs(),
+          details: pressure.details,
+        }));
+      }
+      scheduleWakeTimer();
+      return;
+    }
+  }
+
   while (activeJobIds.size < config.workerConcurrency) {
+    if (balancer.enabled) {
+      const pressure = getWorkerPressureSnapshot(balancer);
+      if (pressure.shouldPause) {
+        pauseWorkerFor(pressure.pauseMs);
+        const ts = Date.now();
+        if (ts - lastWorkerPressureLogAtMs >= balancer.logCooldownMs) {
+          lastWorkerPressureLogAtMs = ts;
+          console.warn('[workshop-auto] worker_throttled', JSON.stringify({
+            reason: pressure.reason,
+            pauseMs: pressure.pauseMs,
+            activeJobs: activeJobIds.size,
+            pendingJobs: countPendingJobs(),
+            details: pressure.details,
+          }));
+        }
+        break;
+      }
+    }
+
     const ready = pickReadyJobs();
     const nextJob = ready[0];
     if (!nextJob) break;
@@ -2124,7 +2327,11 @@ export const startWorkshopAutoDownloadJob = () => {
   }
   started = true;
   runtimeEnabled = parseBool(process.env.WORKSHOP_AUTO_DOWNLOAD_ENABLED, true);
+  workerPausedUntilMs = 0;
+  lastWorkerPressureLogAtMs = 0;
   const autoDiscovery = getAutoDiscoverySettings();
+  const balancer = getWorkerBalancerSettings();
+  const childTuning = getChildExecutionTuning();
 
   const config = readConfig();
   loadQueueStoreIfNeeded(config);
@@ -2145,6 +2352,13 @@ export const startWorkshopAutoDownloadJob = () => {
     autoDiscoveryTimeoutMs: autoDiscovery.timeoutMs,
     autoDiscoveryMinScore: autoDiscovery.minScore,
     autoDiscoveryMaxCandidates: autoDiscovery.maxCandidates,
+    balancerEnabled: balancer.enabled,
+    balancerMaxLoadPerCpu: balancer.maxLoadPerCpu,
+    balancerMinFreeMemMb: balancer.minFreeMemMb,
+    balancerPauseMs: balancer.pauseMs,
+    childNiceEnabled: childTuning.niceEnabled,
+    childNiceValue: childTuning.niceValue,
+    childMaxThreads: childTuning.maxThreads,
     queueStorePath: config.queueStorePath,
     reportsDir: config.reportsDir,
     runtimeCachePath: config.runtimeCachePath,
@@ -2162,6 +2376,8 @@ export const startWorkshopAutoDownloadJob = () => {
     autoDiscoveryCache.clear();
     autoDiscoveryInFlight.clear();
     autoDiscoveryLastUnresolvedLogMs.clear();
+    workerPausedUntilMs = 0;
+    lastWorkerPressureLogAtMs = 0;
     if (wakeTimer) {
       clearTimeout(wakeTimer);
       wakeTimer = null;
