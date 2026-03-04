@@ -308,6 +308,7 @@ let queueStoreLoaded = false;
 let queueStorePathLoaded = '';
 let jobsById = new Map<string, PersistedWorkshopJob>();
 let activeJobIds = new Set<string>();
+let rejectedWorkshopIdsByMap = new Map<string, Set<string>>();
 
 const toInt = (value: unknown, fallback: number): number => {
   const parsed = Number(value);
@@ -350,6 +351,36 @@ const sanitizeMapName = (raw: string): string => {
 };
 
 const isWorkshopId = (raw: unknown): raw is string => /^\d+$/.test(String(raw || '').trim());
+
+const COMMON_MODE_PREFIXES = new Set([
+  'rp',
+  'gm',
+  'ttt',
+  'de',
+  'cs',
+  'dod',
+  'surf',
+  'bhop',
+  'kz',
+  'ze',
+  'zm',
+  'zs',
+  'jb',
+  'dr',
+  'mg',
+  'dm',
+  'ctf',
+  'aim',
+]);
+
+const stripCommonModePrefixMapName = (mapName: string): string => {
+  const safeMap = sanitizeMapName(mapName);
+  if (!safeMap || !safeMap.includes('_')) return '';
+  const [prefix, ...rest] = safeMap.split('_');
+  if (!prefix || rest.length === 0) return '';
+  if (!COMMON_MODE_PREFIXES.has(prefix)) return '';
+  return sanitizeMapName(rest.join('_'));
+};
 
 const safeDecodeURIComponent = (value: string): string => {
   try {
@@ -414,6 +445,78 @@ const parseMapHint = (raw: string): MapHint => {
     }
   }
   return { mapName: extractMapNameFromHint(normalizedRaw) };
+};
+
+const buildAutoDiscoverySearchTerms = (mapNameRaw: string): string[] => {
+  const mapName = sanitizeMapName(mapNameRaw);
+  if (!mapName) return [];
+  const terms = new Set<string>([mapName]);
+  const stripped = stripCommonModePrefixMapName(mapName);
+  if (stripped && stripped !== mapName) {
+    terms.add(stripped);
+  }
+  return Array.from(terms.values());
+};
+
+const getRejectedWorkshopIdsForMap = (mapNameRaw: string): Set<string> => {
+  const mapName = sanitizeMapName(mapNameRaw);
+  if (!mapName) return new Set<string>();
+  return rejectedWorkshopIdsByMap.get(mapName) || new Set<string>();
+};
+
+const isWorkshopIdRejectedForMap = (mapNameRaw: string, workshopIdRaw: string): boolean => {
+  const mapName = sanitizeMapName(mapNameRaw);
+  const workshopId = String(workshopIdRaw || '').trim();
+  if (!mapName || !isWorkshopId(workshopId)) return false;
+  const rejected = rejectedWorkshopIdsByMap.get(mapName);
+  return Boolean(rejected && rejected.has(workshopId));
+};
+
+const rememberRejectedWorkshopIdForMap = (
+  mapNameRaw: string,
+  workshopIdRaw: string,
+  reason: string,
+  runtimeCachePath: string,
+) => {
+  const mapName = sanitizeMapName(mapNameRaw);
+  const workshopId = String(workshopIdRaw || '').trim();
+  if (!mapName || !isWorkshopId(workshopId)) return;
+
+  const current = runtimeMapCache.get(mapName);
+  if (current === workshopId) {
+    runtimeMapCache.delete(mapName);
+    try {
+      writeRuntimeCache(runtimeCachePath);
+      console.warn('[workshop-auto] runtime_mapping_removed', JSON.stringify({
+        map: mapName,
+        workshopId,
+        reason,
+      }));
+    } catch (error: any) {
+      console.warn('[workshop-auto] runtime_mapping_remove_failed', JSON.stringify({
+        map: mapName,
+        workshopId,
+        reason,
+        error: String(error?.message || error),
+      }));
+    }
+  }
+
+  autoDiscoveryCache.delete(mapName);
+
+  let rejected = rejectedWorkshopIdsByMap.get(mapName);
+  if (!rejected) {
+    rejected = new Set<string>();
+    rejectedWorkshopIdsByMap.set(mapName, rejected);
+  }
+  if (!rejected.has(workshopId)) {
+    rejected.add(workshopId);
+    console.warn('[workshop-auto] rejected_workshop_candidate', JSON.stringify({
+      map: mapName,
+      workshopId,
+      reason,
+    }));
+  }
 };
 
 const getAutoDiscoverySettings = () => ({
@@ -609,6 +712,9 @@ const scoreWorkshopCandidate = (mapName: string, titleRaw: string): number => {
 
   const mapCompact = normalizeLooseToken(map);
   const mapSpaced = map.replace(/[_-]+/g, ' ');
+  const strippedMap = stripCommonModePrefixMapName(map);
+  const strippedMapCompact = normalizeLooseToken(strippedMap);
+  const strippedMapSpaced = strippedMap.replace(/[_-]+/g, ' ');
   const titleCompact = normalizeLooseToken(title);
   let score = 0;
 
@@ -625,13 +731,31 @@ const scoreWorkshopCandidate = (mapName: string, titleRaw: string): number => {
   if (mapSpaced && title.includes(mapSpaced)) score += 120;
   if (mapCompact && titleCompact.includes(mapCompact)) score += 140;
 
-  // Prefer complete bundles when map-only uploads are unavailable.
+  // Some map uploads omit common mode prefixes in the title (e.g. "EvoCity2_v5p").
+  // Only apply this boost when the full map token is not present to avoid over-favoring content packs.
+  const titleMatchesFullMapToken = title.includes(map) || (mapCompact && titleCompact.includes(mapCompact));
+  if (!titleMatchesFullMapToken && strippedMap) {
+    if (title === strippedMap) score += 560;
+    if (
+      title.startsWith(`${strippedMap} `)
+      || title.startsWith(`${strippedMap}|`)
+      || title.startsWith(`${strippedMap}:`)
+      || title.startsWith(`${strippedMap}-`)
+    ) {
+      score += 260;
+    }
+    if (title.includes(strippedMap)) score += 200;
+    if (strippedMapSpaced && title.includes(strippedMapSpaced)) score += 150;
+    if (strippedMapCompact && titleCompact.includes(strippedMapCompact)) score += 180;
+  }
+
+  // Prefer complete bundles only slightly.
   if (/\ball[\s_-]*in[\s_-]*one\b/.test(title) || /\baio\b/.test(title)) score += 60;
 
   // Penalize common false-positives and split packs that often miss the BSP.
   if (/\bepisodic\b/.test(title)) score -= 80;
   if (/\bpart\b/.test(title) || /\bpt\.?\s*\d+\b/.test(title)) score -= 70;
-  if (/\bcontent\b/.test(title)) score -= 30;
+  if (/\bcontent\b/.test(title)) score -= 120;
   if (/\b(collection|support|patch|fix(?:es|ed)?|addon)\b/.test(title)) score -= 90;
 
   if (/\bnav[\s_-]*mesh\b/.test(title) || /\bnavmesh\b/.test(title)) score -= 160;
@@ -763,6 +887,7 @@ const fetchTextWithTimeout = async (
 
 const querySteamApiCandidates = async (
   mapName: string,
+  searchTerm: string,
   appId: number,
   timeoutMs: number,
   maxCandidates: number,
@@ -773,7 +898,7 @@ const querySteamApiCandidates = async (
   const endpoint = new URL('https://api.steampowered.com/IPublishedFileService/QueryFiles/v1/');
   endpoint.searchParams.set('key', apiKey);
   endpoint.searchParams.set('appid', String(appId));
-  endpoint.searchParams.set('search_text', mapName);
+  endpoint.searchParams.set('search_text', searchTerm);
   endpoint.searchParams.set('actualsort', 'textsearch');
   endpoint.searchParams.set('return_tags', '1');
   endpoint.searchParams.set('return_metadata', '1');
@@ -814,12 +939,13 @@ const querySteamApiCandidates = async (
 
 const querySteamCommunityCandidates = async (
   mapName: string,
+  searchTerm: string,
   appId: number,
   timeoutMs: number,
 ): Promise<WorkshopSearchCandidate[]> => {
   const endpoint = new URL('https://steamcommunity.com/workshop/browse/');
   endpoint.searchParams.set('appid', String(appId));
-  endpoint.searchParams.set('searchtext', mapName);
+  endpoint.searchParams.set('searchtext', searchTerm);
   endpoint.searchParams.set('actualsort', 'textsearch');
   endpoint.searchParams.set('p', '1');
   endpoint.searchParams.set('numperpage', '30');
@@ -910,17 +1036,32 @@ const discoverWorkshopIdForMap = async (
   }
 
   const promise = (async (): Promise<AutoDiscoveryResult> => {
-    const queryOutcomes = await Promise.allSettled([
-      querySteamApiCandidates(mapName, appId, settings.timeoutMs, settings.maxCandidates),
-      querySteamCommunityCandidates(mapName, appId, settings.timeoutMs),
-    ]);
+    const searchTerms = buildAutoDiscoverySearchTerms(mapName);
+    const queryTasks = searchTerms.flatMap((term) => ([
+      querySteamApiCandidates(mapName, term, appId, settings.timeoutMs, settings.maxCandidates),
+      querySteamCommunityCandidates(mapName, term, appId, settings.timeoutMs),
+    ]));
 
-    const apiCandidates =
-      queryOutcomes[0].status === 'fulfilled' ? queryOutcomes[0].value : [];
-    const communityCandidates =
-      queryOutcomes[1].status === 'fulfilled' ? queryOutcomes[1].value : [];
+    const queryOutcomes = await Promise.allSettled(queryTasks);
+    const apiCandidates: WorkshopSearchCandidate[] = [];
+    const communityCandidates: WorkshopSearchCandidate[] = [];
 
-    const combined = mergeWorkshopCandidates(settings.maxCandidates, apiCandidates, communityCandidates);
+    for (const [i, outcome] of queryOutcomes.entries()) {
+      if (outcome.status !== 'fulfilled') continue;
+      if (i % 2 === 0) apiCandidates.push(...outcome.value);
+      else communityCandidates.push(...outcome.value);
+    }
+
+    const mergedCandidates = mergeWorkshopCandidates(
+      Math.max(settings.maxCandidates * 3, settings.maxCandidates),
+      apiCandidates,
+      communityCandidates,
+    );
+    const rejectedIds = getRejectedWorkshopIdsForMap(mapName);
+    const combined = mergedCandidates
+      .filter((candidate) => !rejectedIds.has(candidate.workshopId))
+      .slice(0, settings.maxCandidates);
+
     const top = combined[0];
     const second = combined[1];
     const topIsStrong = Boolean(top && top.score >= settings.minScore);
@@ -968,12 +1109,21 @@ const discoverWorkshopIdForMap = async (
       };
     }
 
-    if (queryOutcomes[0].status === 'rejected' && queryOutcomes[1].status === 'rejected') {
+    if (!queryOutcomes.some((outcome) => outcome.status === 'fulfilled')) {
       return {
         mapName,
         resolutionSource: 'auto_discovery_failed',
-        reason: `all_sources_failed:${String(queryOutcomes[0].reason || queryOutcomes[1].reason || 'unknown')}`,
+        reason: 'all_sources_failed',
         candidates: combined,
+      };
+    }
+
+    if (combined.length === 0 && mergedCandidates.length > 0 && rejectedIds.size > 0) {
+      return {
+        mapName,
+        resolutionSource: 'auto_discovery_not_found',
+        reason: `all_candidates_rejected_for_map:${rejectedIds.size}`,
+        candidates: [],
       };
     }
 
@@ -1116,6 +1266,7 @@ const rememberRuntimeMapping = (
 ) => {
   const safeMap = sanitizeMapName(mapName);
   if (!safeMap || !isWorkshopId(workshopId)) return;
+  if (isWorkshopIdRejectedForMap(safeMap, workshopId)) return;
   const existing = runtimeMapCache.get(safeMap);
   if (existing === workshopId) return;
   runtimeMapCache.set(safeMap, workshopId);
@@ -1290,17 +1441,17 @@ const resolveWorkshopId = (
   const aliasTarget = config.aliases[normalizedMap];
   const mapKey = aliasTarget || normalizedMap;
   const workshopId = config.maps[mapKey];
-  if (workshopId) {
+  if (workshopId && !isWorkshopIdRejectedForMap(mapKey, workshopId)) {
     return { normalizedMap: mapKey, workshopId, resolutionSource: aliasTarget ? 'static_alias' : 'static_map' };
   }
 
   const runtimeId = runtimeMapCache.get(mapKey);
-  if (runtimeId && isWorkshopId(runtimeId)) {
+  if (runtimeId && isWorkshopId(runtimeId) && !isWorkshopIdRejectedForMap(mapKey, runtimeId)) {
     return { normalizedMap: mapKey, workshopId: runtimeId, resolutionSource: 'runtime_cache' };
   }
 
   const discovered = discoverFromProcessReports(config).get(mapKey);
-  if (discovered && isWorkshopId(discovered)) {
+  if (discovered && isWorkshopId(discovered) && !isWorkshopIdRejectedForMap(mapKey, discovered)) {
     rememberRuntimeMapping(mapKey, discovered, 'report_discovery', config.runtimeCachePath);
     return { normalizedMap: mapKey, workshopId: discovered, resolutionSource: 'process_report' };
   }
@@ -1824,6 +1975,8 @@ const processOneJob = async (jobId: string, config: WorkshopMapConfigResolved) =
       return;
     }
 
+    const processReportSummary = readReportSummary(job.processReportPath);
+    const processReportError = String(processReportSummary.error || '').trim();
     const reason = (() => {
       if (downloadError) {
         return `download_error:${String((downloadError as any)?.message || downloadError)}`;
@@ -1841,7 +1994,8 @@ const processOneJob = async (jobId: string, config: WorkshopMapConfigResolved) =
         return `download_exit_${downloadResult.exitCode}${downloadResult.signal ? `_signal_${downloadResult.signal}` : ''}`;
       }
       if (processError) {
-        return `process_error:${String((processError as any)?.message || processError)}`;
+        const base = `process_error:${String((processError as any)?.message || processError)}`;
+        return processReportError ? `${base}|report:${processReportError}` : base;
       }
       if (!processResult) {
         return 'process_result_missing';
@@ -1849,11 +2003,24 @@ const processOneJob = async (jobId: string, config: WorkshopMapConfigResolved) =
       if (processResult.timedOut) {
         return `process_timeout_${processResult.exitCode}${processResult.signal ? `_signal_${processResult.signal}` : ''}`;
       }
+      if (processReportError) {
+        return `process_report_${processReportError}`;
+      }
       return `process_exit_${processResult.exitCode}${processResult.signal ? `_signal_${processResult.signal}` : ''}`;
     })();
 
+    const mapBspMissing = /map_bsp_not_found_for_map:/i.test(reason);
+    if (mapBspMissing) {
+      rememberRejectedWorkshopIdForMap(
+        job.mapName,
+        job.workshopId,
+        reason,
+        config.runtimeCachePath,
+      );
+    }
+
     const nextRetryCount = job.retryCount + 1;
-    const canRetry = nextRetryCount <= job.maxRetries;
+    const canRetry = !mapBspMissing && nextRetryCount <= job.maxRetries;
 
     job.retryCount = nextRetryCount;
     job.lastError = reason;
@@ -1910,6 +2077,22 @@ const processOneJob = async (jobId: string, config: WorkshopMapConfigResolved) =
       ...(downloadResult ? { downloadTimedOut: downloadResult.timedOut } : {}),
       ...(processResult ? { processTimedOut: processResult.timedOut } : {}),
     }));
+
+    if (mapBspMissing) {
+      void autoDiscoverAndEnqueueObservedMap({
+        mapName: job.mapName,
+        serverId: job.serverId,
+        source: 'reconcile',
+        config,
+      }).catch((error: any) => {
+        console.warn('[workshop-auto] auto_discovery_failed', JSON.stringify({
+          map: job.mapName,
+          source: 'reconcile',
+          serverId: job.serverId,
+          error: String(error?.message || error),
+        }));
+      });
+    }
   } finally {
     activeJobIds.delete(jobId);
     scheduleWakeTimer();
@@ -2615,6 +2798,7 @@ export const startWorkshopAutoDownloadJob = () => {
     autoDiscoveryCache.clear();
     autoDiscoveryInFlight.clear();
     autoDiscoveryLastUnresolvedLogMs.clear();
+    rejectedWorkshopIdsByMap.clear();
     workerPausedUntilMs = 0;
     lastWorkerPressureLogAtMs = 0;
     observedMapReconcileInFlight = false;
