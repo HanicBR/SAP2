@@ -661,15 +661,15 @@ const getWorkerBalancerSettings = (): WorkerBalancerSettings => ({
   enabled: parseBool(process.env.WORKSHOP_BALANCER_ENABLED, true),
   maxLoadPerCpu: Math.max(
     0.3,
-    Math.min(4, toFiniteNumber(process.env.WORKSHOP_BALANCER_MAX_LOAD_PER_CPU, 0.9)),
+    Math.min(4, toFiniteNumber(process.env.WORKSHOP_BALANCER_MAX_LOAD_PER_CPU, 1.2)),
   ),
   minFreeMemMb: Math.max(
     64,
-    Math.min(131_072, toPositiveInt(process.env.WORKSHOP_BALANCER_MIN_FREE_MEM_MB, 512)),
+    Math.min(131_072, toPositiveInt(process.env.WORKSHOP_BALANCER_MIN_FREE_MEM_MB, 256)),
   ),
   pauseMs: Math.max(
     2_000,
-    Math.min(5 * 60 * 1000, toPositiveInt(process.env.WORKSHOP_BALANCER_PAUSE_MS, 20_000)),
+    Math.min(5 * 60 * 1000, toPositiveInt(process.env.WORKSHOP_BALANCER_PAUSE_MS, 12_000)),
   ),
   logCooldownMs: Math.max(
     1_000,
@@ -677,17 +677,21 @@ const getWorkerBalancerSettings = (): WorkerBalancerSettings => ({
   ),
 });
 
-const getChildExecutionTuning = (): ChildExecutionTuning => ({
-  maxThreads: Math.max(
-    1,
-    Math.min(32, toPositiveInt(process.env.WORKSHOP_CHILD_MAX_THREADS, 1)),
-  ),
-  niceEnabled: parseBool(process.env.WORKSHOP_CHILD_NICE_ENABLED, process.platform !== 'win32'),
-  niceValue: Math.max(
-    0,
-    Math.min(19, toInt(process.env.WORKSHOP_CHILD_NICE, 10)),
-  ),
-});
+const getChildExecutionTuning = (): ChildExecutionTuning => {
+  const cpuCount = Math.max(1, os.cpus().length || 1);
+  const defaultThreads = cpuCount >= 6 ? 4 : cpuCount >= 3 ? 2 : 1;
+  return {
+    maxThreads: Math.max(
+      1,
+      Math.min(32, toPositiveInt(process.env.WORKSHOP_CHILD_MAX_THREADS, defaultThreads)),
+    ),
+    niceEnabled: parseBool(process.env.WORKSHOP_CHILD_NICE_ENABLED, process.platform !== 'win32'),
+    niceValue: Math.max(
+      0,
+      Math.min(19, toInt(process.env.WORKSHOP_CHILD_NICE, 2)),
+    ),
+  };
+};
 
 const pauseWorkerFor = (delayMs: number) => {
   const until = Date.now() + Math.max(50, Math.floor(delayMs));

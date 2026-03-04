@@ -1357,6 +1357,14 @@ const resolveToktxAvailable = (options: Options): { available: boolean; binary: 
   return { available: false, binary, warning };
 };
 
+const resolveToktxThreads = (): string => {
+  const cpuCount = Math.max(1, os.cpus().length || 1);
+  const fallback = cpuCount >= 8 ? 4 : cpuCount >= 4 ? 2 : 1;
+  const parsed = Number.parseInt(String(process.env.MAP_PIPELINE_TOKTX_THREADS || ''), 10);
+  const value = Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+  return String(Math.max(1, Math.min(16, value)));
+};
+
 const convertPngToKtx2 = (
   toktxBinary: string,
   pngPath: string,
@@ -1368,7 +1376,7 @@ const convertPngToKtx2 = (
     '--t2',
     '--genmipmap',
     '--threads',
-    '1',
+    resolveToktxThreads(),
     '--resize',
     `${resized.width}x${resized.height}`,
     '--assign_oetf',
