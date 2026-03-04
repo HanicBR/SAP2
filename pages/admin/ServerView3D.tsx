@@ -2241,10 +2241,12 @@ const ServerView3D: React.FC = () => {
           return true;
         case 'KeyE':
         case 'PageUp':
+        case 'Space':
           movementKeys.up = active;
           return true;
         case 'KeyQ':
         case 'PageDown':
+        case 'KeyC':
           movementKeys.down = active;
           return true;
         case 'ShiftLeft':
@@ -3065,14 +3067,9 @@ const ServerView3D: React.FC = () => {
             const moveLeftRight = (movementKeys.right ? 1 : 0) + (movementKeys.left ? -1 : 0);
             const moveVertical = (movementKeys.up ? 1 : 0) + (movementKeys.down ? -1 : 0);
             if (moveForwardBack !== 0 || moveLeftRight !== 0 || moveVertical !== 0) {
-              camera.getWorldDirection(moveForward);
-              moveForward.y = 0;
-              if (moveForward.lengthSq() < 1e-6) {
-                moveForward.set(0, 0, -1);
-              } else {
-                moveForward.normalize();
-              }
-              moveRight.crossVectors(moveForward, moveUp).normalize();
+              // Free-fly movement: WASD follows camera pitch/yaw (noclip style).
+              moveForward.set(0, 0, -1).applyQuaternion(camera.quaternion).normalize();
+              moveRight.set(1, 0, 0).applyQuaternion(camera.quaternion).normalize();
               moveDelta.set(0, 0, 0);
               if (moveForwardBack !== 0) moveDelta.addScaledVector(moveForward, moveForwardBack);
               if (moveLeftRight !== 0) moveDelta.addScaledVector(moveRight, moveLeftRight);
@@ -3144,7 +3141,7 @@ const ServerView3D: React.FC = () => {
         );
         appendLog(`world_z_bounds=min:${Math.round(worldMinZ)} max:${Math.round(worldMaxZ)} center:${Math.round(worldCenterZ)}`);
         appendLog(`chunk_lod_bands: ring<=${activeRadius}=lod0 | ring<=${lod1Radius}=lod1 | ring<=${renderRadius}=lod2`);
-        appendLog('controles: WASD movimenta | Q/E desce/sobe | Shift acelera | Ctrl reduz | botao do meio gira camera');
+        appendLog('controles: WASD voo livre | Q/E ou Space/C desce/sobe | Shift acelera | Ctrl reduz | botao do meio gira camera');
 
         return () => {
           window.removeEventListener('resize', onResize);
