@@ -1407,6 +1407,8 @@ const ServerView3D: React.FC = () => {
       backward: false,
       left: false,
       right: false,
+      up: false,
+      down: false,
       fast: false,
       slow: false,
     };
@@ -2204,6 +2206,8 @@ const ServerView3D: React.FC = () => {
       movementKeys.backward = false;
       movementKeys.left = false;
       movementKeys.right = false;
+      movementKeys.up = false;
+      movementKeys.down = false;
       movementKeys.fast = false;
       movementKeys.slow = false;
     };
@@ -2234,6 +2238,14 @@ const ServerView3D: React.FC = () => {
         case 'KeyD':
         case 'ArrowRight':
           movementKeys.right = active;
+          return true;
+        case 'KeyE':
+        case 'PageUp':
+          movementKeys.up = active;
+          return true;
+        case 'KeyQ':
+        case 'PageDown':
+          movementKeys.down = active;
           return true;
         case 'ShiftLeft':
         case 'ShiftRight':
@@ -2807,15 +2819,29 @@ const ServerView3D: React.FC = () => {
 
         const worldMinX = Number(loadedManifest.map.worldBounds.min[0] || 0);
         const worldMinY = Number(loadedManifest.map.worldBounds.min[1] || 0);
+        const worldMinZ = Number(loadedManifest.map.worldBounds.min[2] || 0);
         const worldMaxX = Number(loadedManifest.map.worldBounds.max[0] || 0);
         const worldMaxY = Number(loadedManifest.map.worldBounds.max[1] || 0);
+        const worldMaxZ = Number(loadedManifest.map.worldBounds.max[2] || 0);
         const worldCenterX = (worldMinX + worldMaxX) * 0.5;
         const worldCenterY = (worldMinY + worldMaxY) * 0.5;
-        const worldCenter = sourceToThree(worldCenterX, worldCenterY, 128);
+        const worldCenterZ = (worldMinZ + worldMaxZ) * 0.5;
+        const worldPlanarSpan = Math.max(2048, Math.abs(worldMaxX - worldMinX), Math.abs(worldMaxY - worldMinY));
+        const worldHeightSpan = Math.max(512, Math.abs(worldMaxZ - worldMinZ));
+        const worldOrbitOffset = Math.min(6400, Math.max(2400, worldPlanarSpan * 0.12));
+        const worldCameraHeight = Math.min(9000, Math.max(1200, worldHeightSpan * 0.45));
+        const worldCenter = sourceToThree(worldCenterX, worldCenterY, worldCenterZ);
 
-        camera.position.set(worldCenter.x + 3200, worldCenter.y + 2200, worldCenter.z + 3200);
+        camera.position.set(
+          worldCenter.x + worldOrbitOffset,
+          worldCenter.y + worldCameraHeight,
+          worldCenter.z + worldOrbitOffset,
+        );
         controls.target.copy(worldCenter);
         controls.update();
+        grid.position.y = worldMinZ;
+        const gridScale = Math.max(1, worldPlanarSpan / 36000);
+        grid.scale.set(gridScale, 1, gridScale);
 
         const chunkSize = Math.max(256, Number(loadedManifest.map.chunkSize || 2048));
         const activeRadius = Math.max(1, Number(loadedManifest.streaming?.activeRadiusChunks || 1));
@@ -3037,7 +3063,8 @@ const ServerView3D: React.FC = () => {
           if (shouldManualMove) {
             const moveForwardBack = (movementKeys.forward ? 1 : 0) + (movementKeys.backward ? -1 : 0);
             const moveLeftRight = (movementKeys.right ? 1 : 0) + (movementKeys.left ? -1 : 0);
-            if (moveForwardBack !== 0 || moveLeftRight !== 0) {
+            const moveVertical = (movementKeys.up ? 1 : 0) + (movementKeys.down ? -1 : 0);
+            if (moveForwardBack !== 0 || moveLeftRight !== 0 || moveVertical !== 0) {
               camera.getWorldDirection(moveForward);
               moveForward.y = 0;
               if (moveForward.lengthSq() < 1e-6) {
@@ -3049,6 +3076,7 @@ const ServerView3D: React.FC = () => {
               moveDelta.set(0, 0, 0);
               if (moveForwardBack !== 0) moveDelta.addScaledVector(moveForward, moveForwardBack);
               if (moveLeftRight !== 0) moveDelta.addScaledVector(moveRight, moveLeftRight);
+              if (moveVertical !== 0) moveDelta.addScaledVector(moveUp, moveVertical);
               if (moveDelta.lengthSq() > 1e-8) {
                 moveDelta.normalize();
                 let speed = CAMERA_MOVE_SPEED;
@@ -3114,8 +3142,9 @@ const ServerView3D: React.FC = () => {
         appendLog(
           `chunk_count=${entries.length} active=${activeRadius * 2 + 1}x${activeRadius * 2 + 1} render=${renderRadius * 2 + 1}x${renderRadius * 2 + 1} prefetch=${prefetchRadius * 2 + 1}x${prefetchRadius * 2 + 1}`,
         );
+        appendLog(`world_z_bounds=min:${Math.round(worldMinZ)} max:${Math.round(worldMaxZ)} center:${Math.round(worldCenterZ)}`);
         appendLog(`chunk_lod_bands: ring<=${activeRadius}=lod0 | ring<=${lod1Radius}=lod1 | ring<=${renderRadius}=lod2`);
-        appendLog('controles: WASD movimenta | Shift acelera | Ctrl reduz | botao do meio gira camera');
+        appendLog('controles: WASD movimenta | Q/E desce/sobe | Shift acelera | Ctrl reduz | botao do meio gira camera');
 
         return () => {
           window.removeEventListener('resize', onResize);
