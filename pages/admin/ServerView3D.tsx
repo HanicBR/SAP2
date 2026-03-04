@@ -3269,34 +3269,34 @@ const ServerView3D: React.FC = () => {
   }, [manifestUrl, probeManifestWithDetails, renderProfile]);
 
   return (
-    <div className="space-y-4 pb-8">
-      <div className="rounded-xl border border-zinc-800 bg-[#080b12]/85 backdrop-blur px-4 py-3">
+    <div className="space-y-4 pb-10 animate-fade-in">
+      <div className="rounded-2xl border border-[#2d3850] bg-[#0b1221]/88 px-4 py-3 shadow-[0_18px_48px_rgba(0,0,0,0.35)] backdrop-blur">
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>
             <Link
               to={serverId ? `/admin/servers/${serverId}` : '/admin/servers'}
-              className="text-zinc-500 hover:text-white text-sm font-bold uppercase flex items-center mb-2"
+              className="mb-2 flex items-center text-sm font-bold uppercase text-zinc-500 hover:text-zinc-100"
             >
               <Icons.ArrowLeft className="w-4 h-4 mr-1" /> Voltar para servidor
             </Link>
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tight">
-                Web Viewer 3D <span className="text-zinc-500 font-bold text-xl md:text-2xl">(MVP)</span>
+                Web Viewer 3D <span className="font-bold text-xl md:text-2xl text-zinc-500">(MVP)</span>
               </h1>
-              <span className="px-2 py-0.5 rounded border border-zinc-700 bg-zinc-900 text-[11px] text-zinc-300 font-mono">
+              <span className="rounded-full border border-[#35415b] bg-[#141f34] px-3 py-1 text-[11px] text-zinc-300 font-mono">
                 map={mapName}
               </span>
             </div>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={`px-3 py-1 rounded-full border text-[11px] font-bold uppercase ${
+            <span className={`px-3 py-1 rounded-full border text-[11px] font-bold uppercase tracking-[0.1em] ${
               hasFreshViewerSnapshot
                 ? 'bg-emerald-900/20 text-emerald-300 border-emerald-700'
                 : 'bg-yellow-900/20 text-yellow-300 border-yellow-700'
             }`}>
               {hasFreshViewerSnapshot ? 'Viewer Online' : 'Viewer Aguardando Frame'}
             </span>
-            <div className="bg-zinc-900 border border-zinc-800 rounded px-3 py-2 text-xs text-zinc-300 font-mono">
+            <div className="rounded-xl border border-[#34415b] bg-[#121b2e] px-3 py-2 text-xs text-zinc-300 font-mono shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
               <div>{status}</div>
               {manifest && <div>manifest v{manifest.version} | chunkSize={manifest.map.chunkSize}</div>}
               <div>viewerState: {viewerStatusBadge.label}</div>
@@ -3306,13 +3306,13 @@ const ServerView3D: React.FC = () => {
       </div>
 
       {error && (
-        <div className="rounded border border-red-900/50 bg-red-950/20 px-3 py-2 text-sm text-red-300">
+        <div className="rounded-xl border border-red-900/60 bg-red-950/20 px-3 py-2 text-sm text-red-300">
           Erro: {error}
           <div className="text-xs text-zinc-400 mt-1">Verifique se os artefatos existem em `public/maps/{mapName}/manifest.json`.</div>
         </div>
       )}
 
-      <div className="rounded border border-zinc-800 bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 px-3 py-3">
+      <div className="rounded-xl border border-[#2f3b53] bg-gradient-to-r from-[#111a2b] via-[#151f31] to-[#111a2b] px-3 py-3 shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2 text-zinc-200">
             <Icons.Keyboard className="w-4 h-4 text-cyan-300" />
@@ -3339,7 +3339,7 @@ const ServerView3D: React.FC = () => {
           <button
             type="button"
             onClick={() => setMoveSpeedFactor(VIEWER_MOVE_SPEED_DEFAULT)}
-            className="px-2 py-1 rounded border border-zinc-700 bg-zinc-800 text-[10px] text-zinc-300 font-bold uppercase hover:bg-zinc-700"
+            className="px-2 py-1 rounded border border-[#3d4d6d] bg-[#1a263d] text-[10px] text-zinc-200 font-bold uppercase hover:bg-[#223250]"
           >
             Reset
           </button>
@@ -3347,10 +3347,12 @@ const ServerView3D: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        <div className="lg:col-span-3 rounded border border-zinc-800 bg-zinc-950 overflow-hidden relative">
-          <div ref={mountRef} className="h-[62vh] w-full" />
+        <div className="lg:col-span-3 rounded-2xl border border-[#2f3b53] bg-[#060a12] overflow-hidden relative shadow-[0_22px_62px_rgba(0,0,0,0.45)]">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_420px_at_50%_15%,rgba(56,189,248,0.08),transparent_58%)]" />
+          <div className="pointer-events-none absolute inset-0 opacity-[0.18] [background:linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:36px_36px]" />
+          <div ref={mountRef} className="relative z-[1] h-[62vh] w-full" />
           {selectedViewerPlayer && (
-            <div className="absolute left-3 bottom-3 rounded border border-cyan-800 bg-zinc-950/90 px-3 py-2 text-[11px] text-zinc-200 font-mono backdrop-blur">
+            <div className="absolute left-3 bottom-3 z-[2] rounded-xl border border-cyan-800 bg-[#0b1322]/92 px-3 py-2 text-[11px] text-zinc-200 font-mono backdrop-blur">
               <p className="text-cyan-300 font-bold truncate max-w-[340px]">
                 {selectedViewerPlayer.name || selectedViewerPlayer.steamId}
               </p>
@@ -3368,7 +3370,7 @@ const ServerView3D: React.FC = () => {
         </div>
 
         <div className="space-y-3">
-          <div className="rounded-xl border border-zinc-800 bg-[#0c1018] p-3 text-xs text-zinc-300 space-y-2">
+          <div className="rounded-2xl border border-[#303d56] bg-[#101a2c]/92 p-3 text-xs text-zinc-300 space-y-2 shadow-[0_12px_30px_rgba(0,0,0,0.28)]">
             <div className="flex items-center justify-between gap-2">
               <p className="text-zinc-500 uppercase font-bold text-[11px] tracking-wide">System Status</p>
               <div className="flex items-center gap-1">
@@ -3426,9 +3428,9 @@ const ServerView3D: React.FC = () => {
             </div>
           </div>
 
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-xs text-zinc-300 space-y-2">
+          <div className="rounded-2xl border border-[#303d56] bg-[#101a2c]/92 p-3 text-xs text-zinc-300 space-y-2 shadow-[0_12px_30px_rgba(0,0,0,0.28)]">
             <div className="flex items-center justify-between gap-2">
-              <p className="text-zinc-500 uppercase font-bold text-[11px]">Players (viewer_state)</p>
+              <p className="text-zinc-400 uppercase font-bold text-[11px] tracking-[0.1em]">Players (viewer_state)</p>
               <span className={`px-2 py-0.5 rounded border text-[10px] font-bold uppercase ${viewerStatusBadge.className}`}>
                 {viewerStatusBadge.label}
               </span>
@@ -3445,7 +3447,7 @@ const ServerView3D: React.FC = () => {
                 <select
                   value={playerAliveFilter}
                   onChange={(event) => setPlayerAliveFilter(event.target.value as 'all' | 'alive' | 'dead')}
-                  className="mt-1 w-full rounded border border-zinc-700 bg-zinc-900 px-2 py-1 text-[11px] text-zinc-100"
+                  className="mt-1 w-full rounded border border-[#3a4968] bg-[#0f1829] px-2 py-1 text-[11px] text-zinc-100"
                 >
                   <option value="all">Todos</option>
                   <option value="alive">Vivos</option>
@@ -3457,7 +3459,7 @@ const ServerView3D: React.FC = () => {
                 <select
                   value={playerTeamFilter}
                   onChange={(event) => setPlayerTeamFilter(event.target.value)}
-                  className="mt-1 w-full rounded border border-zinc-700 bg-zinc-900 px-2 py-1 text-[11px] text-zinc-100"
+                  className="mt-1 w-full rounded border border-[#3a4968] bg-[#0f1829] px-2 py-1 text-[11px] text-zinc-100"
                 >
                   <option value="all">Todos</option>
                   {viewerTeamOptions.map((team) => (
@@ -3475,7 +3477,7 @@ const ServerView3D: React.FC = () => {
                   type="checkbox"
                   checked={showPlayerLabels}
                   onChange={(event) => setShowPlayerLabels(event.target.checked)}
-                  className="rounded border-zinc-700 bg-zinc-900"
+                  className="rounded border-zinc-700 bg-[#0f1829]"
                 />
                 Labels 3D
               </label>
@@ -3485,13 +3487,13 @@ const ServerView3D: React.FC = () => {
                   checked={showPlayerHealthInLabel}
                   onChange={(event) => setShowPlayerHealthInLabel(event.target.checked)}
                   disabled={!showPlayerLabels}
-                  className="rounded border-zinc-700 bg-zinc-900 disabled:opacity-40"
+                  className="rounded border-zinc-700 bg-[#0f1829] disabled:opacity-40"
                 />
                 HP no label
               </label>
             </div>
 
-            <div className="max-h-[180px] overflow-y-auto space-y-2 pt-1 border-t border-zinc-800">
+            <div className="max-h-[180px] overflow-y-auto admin-scrollbar space-y-2 pt-1 border-t border-zinc-800">
               {!filteredViewerPlayers.length && <p className="text-zinc-500">Sem players no filtro/frame.</p>}
               {filteredViewerPlayers.map((player) => (
                 <button
@@ -3500,7 +3502,7 @@ const ServerView3D: React.FC = () => {
                   className={`w-full text-left rounded border px-2 py-1.5 transition-colors ${
                     viewerSelectedSteamId === player.steamId
                       ? 'border-cyan-700 bg-cyan-900/20'
-                      : 'border-zinc-800 bg-zinc-900/40 hover:bg-zinc-800/60'
+                      : 'border-zinc-800 bg-[#0b111d]/65 hover:bg-[#182337]'
                   }`}
                 >
                   <p className="text-[12px] text-white font-semibold truncate">{player.name || 'Sem nome'}</p>
@@ -3517,7 +3519,7 @@ const ServerView3D: React.FC = () => {
                   className={`w-full px-2 py-1.5 rounded border text-[11px] font-bold uppercase transition-colors ${
                     viewerFollowSelected
                       ? 'border-cyan-700 bg-cyan-900/25 text-cyan-300'
-                      : 'border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800'
+                      : 'border-zinc-700 bg-[#11192a] text-zinc-300 hover:bg-[#182338]'
                   }`}
                 >
                   {viewerFollowSelected ? 'Follow ON' : 'Follow OFF'}
@@ -3532,7 +3534,7 @@ const ServerView3D: React.FC = () => {
                   maxLength={VIEWER_ACTION_REASON_MAX_LENGTH}
                   onChange={(event) => setViewerActionReason(event.target.value)}
                   placeholder="Acao via painel WebViewer 3D"
-                  className="w-full rounded border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-[11px] text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-700"
+                  className="w-full rounded border border-[#3a4968] bg-[#0f1829] px-2 py-1.5 text-[11px] text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-700"
                 />
 
                 <div className="grid grid-cols-2 gap-2">
@@ -3586,7 +3588,7 @@ const ServerView3D: React.FC = () => {
                 )}
 
                 {viewerActionForSelected && (
-                  <div className="rounded border border-zinc-700 bg-zinc-900/60 px-2 py-2 text-[10px] space-y-1">
+                  <div className="rounded border border-[#3a4864] bg-[#0f1829]/80 px-2 py-2 text-[10px] space-y-1">
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-zinc-400 uppercase font-bold">Status da acao</span>
                       <span
@@ -3613,9 +3615,9 @@ const ServerView3D: React.FC = () => {
             )}
           </div>
 
-          <div className="rounded border border-zinc-800 bg-zinc-900 p-3">
-            <p className="text-zinc-500 uppercase font-bold text-[11px] mb-2">Logs</p>
-            <div className="max-h-[260px] overflow-y-auto space-y-1 text-[11px] font-mono text-zinc-300">
+          <div className="rounded-2xl border border-[#303d56] bg-[#101a2c]/92 p-3 shadow-[0_12px_30px_rgba(0,0,0,0.28)]">
+            <p className="text-zinc-400 uppercase font-bold text-[11px] mb-2 tracking-[0.1em]">Logs</p>
+            <div className="max-h-[260px] overflow-y-auto admin-scrollbar space-y-1 text-[11px] font-mono text-zinc-300">
               {!streamingLogs.length && <p className="text-zinc-500">Sem logs ainda...</p>}
               {streamingLogs.map((line, idx) => (
                 <p key={`${line}_${idx}`}>{line}</p>
@@ -3623,16 +3625,16 @@ const ServerView3D: React.FC = () => {
             </div>
           </div>
 
-          <div className="rounded border border-zinc-800 bg-zinc-900 p-3 text-xs text-zinc-300 space-y-2">
+          <div className="rounded-2xl border border-[#303d56] bg-[#101a2c]/92 p-3 text-xs text-zinc-300 space-y-2 shadow-[0_12px_30px_rgba(0,0,0,0.28)]">
             <div className="flex items-center justify-between gap-2">
-              <p className="text-zinc-500 uppercase font-bold text-[11px]">Pipeline / Workshop</p>
+              <p className="text-zinc-400 uppercase font-bold text-[11px] tracking-[0.1em]">Pipeline / Workshop</p>
               <div className="flex items-center gap-1">
                 <button
                   type="button"
                   onClick={() => {
                     void loadQueueSnapshot(false);
                   }}
-                  className="px-2 py-1 rounded border border-zinc-700 bg-zinc-800 text-[10px] uppercase font-bold hover:bg-zinc-700"
+                  className="px-2 py-1 rounded border border-[#3a4b69] bg-[#182338] text-[10px] uppercase font-bold text-zinc-200 hover:bg-[#22344f]"
                 >
                   {queueLoading ? 'Atualizando...' : 'Atualizar'}
                 </button>
@@ -3641,7 +3643,7 @@ const ServerView3D: React.FC = () => {
                   onClick={() => {
                     void probeManifestWithDetails().catch(() => undefined);
                   }}
-                  className="px-2 py-1 rounded border border-zinc-700 bg-zinc-800 text-[10px] uppercase font-bold hover:bg-zinc-700"
+                  className="px-2 py-1 rounded border border-[#3a4b69] bg-[#182338] text-[10px] uppercase font-bold text-zinc-200 hover:bg-[#22344f]"
                 >
                   Testar manifest
                 </button>
@@ -3658,7 +3660,7 @@ const ServerView3D: React.FC = () => {
             )}
             {queueError && <p className="text-red-300 break-words">queueError: {queueError}</p>}
 
-            <div className="rounded border border-zinc-800 bg-zinc-950/60 px-2 py-2 space-y-1">
+            <div className="rounded border border-[#364561] bg-[#0c1321]/75 px-2 py-2 space-y-1">
               <p className="text-zinc-500 uppercase font-bold text-[10px]">Manifest probe</p>
               {!manifestProbe && <p className="text-zinc-500">Sem probe ainda.</p>}
               {manifestProbe && (
@@ -3677,7 +3679,7 @@ const ServerView3D: React.FC = () => {
               )}
             </div>
 
-            <div className="rounded border border-zinc-800 bg-zinc-950/60 px-2 py-2 space-y-2">
+            <div className="rounded border border-[#364561] bg-[#0c1321]/75 px-2 py-2 space-y-2">
               <p className="text-zinc-500 uppercase font-bold text-[10px]">Teste enqueue manual</p>
               <label className="block text-[10px] text-zinc-500 uppercase font-bold">
                 workshopId (opcional)
@@ -3687,7 +3689,7 @@ const ServerView3D: React.FC = () => {
                 value={manualWorkshopId}
                 onChange={(event) => setManualWorkshopId(event.target.value)}
                 placeholder="ex: 262714246040502603"
-                className="w-full rounded border border-zinc-700 bg-zinc-900 px-2 py-1 text-[11px] text-zinc-100 font-mono"
+                className="w-full rounded border border-[#3a4968] bg-[#0f1829] px-2 py-1 text-[11px] text-zinc-100 font-mono"
               />
               <button
                 type="button"
@@ -3700,7 +3702,7 @@ const ServerView3D: React.FC = () => {
                 {manualEnqueueBusy ? 'Enfileirando...' : 'Enfileirar job de teste'}
               </button>
               {manualEnqueueResult && (
-                <div className="rounded border border-zinc-800 bg-zinc-900/70 px-2 py-1.5 text-[10px] font-mono space-y-0.5">
+                <div className="rounded border border-[#364561] bg-[#0f1829]/75 px-2 py-1.5 text-[10px] font-mono space-y-0.5">
                   <p>ok={manualEnqueueResult.ok ? 'true' : 'false'} | queued={manualEnqueueResult.queued ? 'true' : 'false'} | deduped={manualEnqueueResult.deduped ? 'true' : 'false'}</p>
                   <p className="break-all">reason={manualEnqueueResult.reason}</p>
                   {manualEnqueueResult.error && <p className="text-red-300 break-words">{manualEnqueueResult.error}</p>}
@@ -3711,7 +3713,7 @@ const ServerView3D: React.FC = () => {
               )}
             </div>
 
-            <div className="rounded border border-zinc-800 bg-zinc-950/60 px-2 py-2 space-y-1">
+            <div className="rounded border border-[#364561] bg-[#0c1321]/75 px-2 py-2 space-y-1">
               <p className="text-zinc-500 uppercase font-bold text-[10px]">
                 Jobs do mapa atual ({mapQueueJobs.length})
               </p>
@@ -3720,8 +3722,9 @@ const ServerView3D: React.FC = () => {
                   Nenhum job deste mapa na fila. Se o mapa trocou e nao existe manifest, enfileire manualmente.
                 </p>
               )}
-              {mapQueueJobs.map((job) => (
-                <div key={job.id} className="rounded border border-zinc-800 bg-zinc-900/60 px-2 py-1.5">
+              <div className="max-h-[280px] overflow-y-auto admin-scrollbar space-y-1">
+                {mapQueueJobs.map((job) => (
+                  <div key={job.id} className="rounded border border-[#364561] bg-[#0f1829]/75 px-2 py-1.5">
                   <p className="font-mono break-all">{job.id}</p>
                   <p>
                     status={job.status} retry={job.retryCount}/{job.maxRetries}
@@ -3753,7 +3756,7 @@ const ServerView3D: React.FC = () => {
                     </div>
                   )}
                   {Array.isArray(job.outputTail) && job.outputTail.length > 0 && (
-                    <div className="mt-1 rounded border border-zinc-800 bg-zinc-950/80 px-2 py-1">
+                    <div className="mt-1 rounded border border-[#3d4e70] bg-[#0a1120]/90 px-2 py-1">
                       <p className="text-zinc-500 uppercase font-bold text-[9px] mb-1">output tail</p>
                       {job.outputTail.slice(-6).map((line, idx) => (
                         <p key={`${job.id}_tail_${idx}`} className="text-zinc-400 break-all">
@@ -3763,84 +3766,85 @@ const ServerView3D: React.FC = () => {
                     </div>
                   )}
                 </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="rounded border border-zinc-800 bg-zinc-950 p-3">
+      <div className="rounded-2xl border border-[#2f3b53] bg-[#0d1524]/88 p-3 shadow-[0_12px_30px_rgba(0,0,0,0.28)]">
         <div className="flex items-center gap-2 mb-3">
           <Icons.Book className="w-4 h-4 text-cyan-300" />
-          <p className="text-zinc-300 uppercase font-bold text-[11px] tracking-wide">Tutorial de Controles</p>
+          <p className="text-zinc-300 uppercase font-bold text-[11px] tracking-[0.11em]">Tutorial de Controles</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2 text-[11px]">
-          <div className="rounded border border-zinc-800 bg-zinc-900/70 px-3 py-2">
+          <div className="rounded border border-[#364662] bg-[#111a2b]/80 px-3 py-2">
             <p className="text-zinc-200 font-semibold flex items-center gap-2">
               <Icons.Crosshair className="w-3.5 h-3.5 text-cyan-300" />
               Movimento Principal
             </p>
             <p className="text-zinc-400 mt-1">
-              <span className="px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono">WASD</span> voo livre seguindo a direcao da camera.
+              <span className="px-1.5 py-0.5 rounded bg-[#0e1626] border border-[#33415b] font-mono">WASD</span> voo livre seguindo a direcao da camera.
             </p>
           </div>
-          <div className="rounded border border-zinc-800 bg-zinc-900/70 px-3 py-2">
+          <div className="rounded border border-[#364662] bg-[#111a2b]/80 px-3 py-2">
             <p className="text-zinc-200 font-semibold flex items-center gap-2">
               <Icons.Activity className="w-3.5 h-3.5 text-emerald-300" />
               Subir e Descer
             </p>
             <p className="text-zinc-400 mt-1">
-              <span className="px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono">Q/E</span> ou{' '}
-              <span className="px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono">Space/C</span> para altitude.
+              <span className="px-1.5 py-0.5 rounded bg-[#0e1626] border border-[#33415b] font-mono">Q/E</span> ou{' '}
+              <span className="px-1.5 py-0.5 rounded bg-[#0e1626] border border-[#33415b] font-mono">Space/C</span> para altitude.
             </p>
           </div>
-          <div className="rounded border border-zinc-800 bg-zinc-900/70 px-3 py-2">
+          <div className="rounded border border-[#364662] bg-[#111a2b]/80 px-3 py-2">
             <p className="text-zinc-200 font-semibold flex items-center gap-2">
               <Icons.Zap className="w-3.5 h-3.5 text-yellow-300" />
               Velocidade
             </p>
             <p className="text-zinc-400 mt-1">
-              <span className="px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono">Shift</span> acelera e{' '}
-              <span className="px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono">Ctrl</span> reduz.
+              <span className="px-1.5 py-0.5 rounded bg-[#0e1626] border border-[#33415b] font-mono">Shift</span> acelera e{' '}
+              <span className="px-1.5 py-0.5 rounded bg-[#0e1626] border border-[#33415b] font-mono">Ctrl</span> reduz.
             </p>
           </div>
-          <div className="rounded border border-zinc-800 bg-zinc-900/70 px-3 py-2">
+          <div className="rounded border border-[#364662] bg-[#111a2b]/80 px-3 py-2">
             <p className="text-zinc-200 font-semibold flex items-center gap-2">
               <Icons.Settings className="w-3.5 h-3.5 text-cyan-300" />
               Rotacao da Camera
             </p>
             <p className="text-zinc-400 mt-1">
-              Arraste com <span className="px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono">Botao Esquerdo</span> para girar livremente.
+              Arraste com <span className="px-1.5 py-0.5 rounded bg-[#0e1626] border border-[#33415b] font-mono">Botao Esquerdo</span> para girar livremente.
             </p>
           </div>
-          <div className="rounded border border-zinc-800 bg-zinc-900/70 px-3 py-2">
+          <div className="rounded border border-[#364662] bg-[#111a2b]/80 px-3 py-2">
             <p className="text-zinc-200 font-semibold flex items-center gap-2">
               <Icons.Crosshair className="w-3.5 h-3.5 text-purple-300" />
               Pivo por Clique
             </p>
             <p className="text-zinc-400 mt-1">
-              Clique com <span className="px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono">Botao do Meio</span> para mudar o pivo no ponto clicado.
+              Clique com <span className="px-1.5 py-0.5 rounded bg-[#0e1626] border border-[#33415b] font-mono">Botao do Meio</span> para mudar o pivo no ponto clicado.
             </p>
           </div>
-          <div className="rounded border border-zinc-800 bg-zinc-900/70 px-3 py-2">
+          <div className="rounded border border-[#364662] bg-[#111a2b]/80 px-3 py-2">
             <p className="text-zinc-200 font-semibold flex items-center gap-2">
               <Icons.Search className="w-3.5 h-3.5 text-zinc-300" />
               Zoom e Pan
             </p>
             <p className="text-zinc-400 mt-1">
-              <span className="px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono">Scroll</span> aproxima/afasta e{' '}
-              <span className="px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono">Botao Direito</span> move lateralmente.
+              <span className="px-1.5 py-0.5 rounded bg-[#0e1626] border border-[#33415b] font-mono">Scroll</span> aproxima/afasta e{' '}
+              <span className="px-1.5 py-0.5 rounded bg-[#0e1626] border border-[#33415b] font-mono">Botao Direito</span> move lateralmente.
             </p>
           </div>
         </div>
       </div>
 
-      <div className="rounded border border-zinc-800 bg-zinc-950 p-3">
+      <div className="rounded-2xl border border-[#2f3b53] bg-[#0d1524]/88 p-3 shadow-[0_12px_30px_rgba(0,0,0,0.28)]">
         <div className="flex items-center justify-between gap-2 mb-2">
-          <p className="text-zinc-500 uppercase font-bold text-[11px]">Diagnostico de assets (missing/errors)</p>
+          <p className="text-zinc-400 uppercase font-bold text-[11px] tracking-[0.1em]">Diagnostico de assets (missing/errors)</p>
           <span className="text-[10px] text-zinc-400 font-mono">entries={diagnostics.length}</span>
         </div>
-        <div className="max-h-[280px] overflow-y-auto space-y-2 text-[11px] font-mono">
+        <div className="max-h-[280px] overflow-y-auto admin-scrollbar space-y-2 text-[11px] font-mono">
           {!diagnostics.length && <p className="text-zinc-500">Sem diagnosticos ainda.</p>}
           {diagnostics.map((item) => (
             <div
