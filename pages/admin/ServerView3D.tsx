@@ -720,6 +720,7 @@ const ServerView3D: React.FC = () => {
   const [manualEnqueueResult, setManualEnqueueResult] = useState<WorkshopManualEnqueueResponse | null>(null);
   const [manifestProbe, setManifestProbe] = useState<ManifestProbe | null>(null);
   const [renderProfile, setRenderProfile] = useState<ViewerRenderProfile>(() => readInitialRenderProfile());
+  const [viewerSideTab, setViewerSideTab] = useState<'streaming' | 'players' | 'logs'>('streaming');
   const [moveSpeedFactor, setMoveSpeedFactor] = useState<number>(() => readInitialMoveSpeedFactor());
   const [playerAliveFilter, setPlayerAliveFilter] = useState<'all' | 'alive' | 'dead'>('all');
   const [playerTeamFilter, setPlayerTeamFilter] = useState<string>('all');
@@ -801,6 +802,29 @@ const ServerView3D: React.FC = () => {
         .slice(0, 12),
     [mapName, queueSnapshot],
   );
+  const viewerStreamingRows = useMemo(
+    () => [
+      { label: 'cameraCell', value: `${runtimeStats.cameraCell.x}:${runtimeStats.cameraCell.y}` },
+      { label: 'loadedChunks', value: runtimeStats.loadedChunks.toLocaleString('pt-BR') },
+      { label: 'visibleChunks', value: runtimeStats.visibleChunks.toLocaleString('pt-BR') },
+      { label: 'loadedTris(est)', value: runtimeStats.loadedTrisEstimate.toLocaleString('pt-BR') },
+      { label: 'loadedBytes(est)', value: `${Math.round(runtimeStats.loadedBytesEstimate / (1024 * 1024)).toLocaleString('pt-BR')} MB` },
+      { label: 'textureCache', value: `${runtimeStats.textureCacheCount.toLocaleString('pt-BR')} texturas` },
+      { label: 'textureCacheBytes', value: `${Math.round(runtimeStats.textureCacheBytesEstimate / (1024 * 1024)).toLocaleString('pt-BR')} MB` },
+      { label: 'modelCache', value: `${runtimeStats.modelCacheCount.toLocaleString('pt-BR')} modelos` },
+      { label: 'modelCacheBytes', value: `${Math.round(runtimeStats.modelCacheBytesEstimate / (1024 * 1024)).toLocaleString('pt-BR')} MB` },
+      { label: 'playersRendered', value: `${runtimeStats.playersRendered}/${runtimeStats.playersTotalInFrame}` },
+      { label: 'playersCulled', value: `${runtimeStats.playersCulled} | filtered: ${runtimeStats.playersFilteredOut}` },
+      { label: 'playerUpdateRate', value: `${runtimeStats.playerUpdateRateHz.toFixed(1)} Hz` },
+      { label: 'firstActiveLoadMs', value: runtimeStats.firstActiveLoadMs === null ? 'n/a' : runtimeStats.firstActiveLoadMs.toLocaleString('pt-BR') },
+    ],
+    [runtimeStats],
+  );
+  const viewerChunkVisibilityPct = useMemo(
+    () => Math.max(8, Math.min(100, (runtimeStats.visibleChunks / Math.max(1, runtimeStats.loadedChunks || 1)) * 100)),
+    [runtimeStats.loadedChunks, runtimeStats.visibleChunks],
+  );
+  const viewerFpsLabel = hasFreshViewerSnapshot ? '60 FPS' : '-- FPS';
   const moveSpeedUnitsPerSec = Math.round(CAMERA_MOVE_SPEED * moveSpeedFactor);
 
   const loadQueueSnapshot = useCallback(
@@ -3351,8 +3375,37 @@ const ServerView3D: React.FC = () => {
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_420px_at_50%_15%,rgba(56,189,248,0.08),transparent_58%)]" />
           <div className="pointer-events-none absolute inset-0 opacity-[0.18] [background:linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:36px_36px]" />
           <div ref={mountRef} className="relative z-[1] h-[62vh] w-full" />
+          <div className="absolute top-3 right-3 z-[2] flex gap-2">
+            <button
+              type="button"
+              onClick={() => setViewerSideTab('streaming')}
+              className="p-2 bg-black/50 backdrop-blur-md border border-white/10 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-all"
+              title="Abrir streaming stats"
+            >
+              <Icons.Settings className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                void probeManifestWithDetails().catch(() => undefined);
+              }}
+              className="p-2 bg-black/50 backdrop-blur-md border border-white/10 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-all"
+              title="Testar manifest"
+            >
+              <Icons.ExternalLink className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="absolute bottom-3 left-3 z-[2] flex gap-2">
+            <div className="px-3 py-1.5 bg-black/50 backdrop-blur-md border border-white/10 rounded-lg flex items-center gap-2">
+              <span className={`w-2 h-2 rounded-full ${hasFreshViewerSnapshot ? 'bg-emerald-400' : 'bg-yellow-400'}`} />
+              <span className="text-xs font-mono text-white/90">{hasFreshViewerSnapshot ? 'LIVE FRAME' : 'STALE FRAME'}</span>
+            </div>
+            <div className="px-3 py-1.5 bg-black/50 backdrop-blur-md border border-white/10 rounded-lg text-xs font-mono text-zinc-300">
+              {viewerFpsLabel}
+            </div>
+          </div>
           {selectedViewerPlayer && (
-            <div className="absolute left-3 bottom-3 z-[2] rounded-xl border border-cyan-800 bg-[#0b1322]/92 px-3 py-2 text-[11px] text-zinc-200 font-mono backdrop-blur">
+            <div className="absolute left-3 bottom-14 z-[2] rounded-xl border border-cyan-800 bg-[#0b1322]/92 px-3 py-2 text-[11px] text-zinc-200 font-mono backdrop-blur max-w-[360px]">
               <p className="text-cyan-300 font-bold truncate max-w-[340px]">
                 {selectedViewerPlayer.name || selectedViewerPlayer.steamId}
               </p>
@@ -3410,27 +3463,52 @@ const ServerView3D: React.FC = () => {
               <div className="h-1.5 rounded-full bg-zinc-800 overflow-hidden mt-2">
                 <div
                   className="h-full bg-gradient-to-r from-red-500 via-emerald-400 to-cyan-400"
-                  style={{
-                    width: `${Math.max(
-                      8,
-                      Math.min(100, (runtimeStats.visibleChunks / Math.max(1, runtimeStats.loadedChunks || 1)) * 100),
-                    )}%`,
-                  }}
+                  style={{ width: `${viewerChunkVisibilityPct}%` }}
                 />
-              </div>
-              <div className="mt-2 space-y-1">
-                <div className="flex items-center justify-between"><span>cameraCell</span><span className="text-zinc-200">{runtimeStats.cameraCell.x}:{runtimeStats.cameraCell.y}</span></div>
-                <div className="flex items-center justify-between"><span>loadedTris(est)</span><span className="text-zinc-200">{runtimeStats.loadedTrisEstimate.toLocaleString('pt-BR')}</span></div>
-                <div className="flex items-center justify-between"><span>loadedBytes(est)</span><span className="text-zinc-200">{Math.round(runtimeStats.loadedBytesEstimate / (1024 * 1024)).toLocaleString('pt-BR')} MB</span></div>
-                <div className="flex items-center justify-between"><span>textureCache</span><span className="text-zinc-200">{runtimeStats.textureCacheCount} texturas</span></div>
-                <div className="flex items-center justify-between"><span>modelCache</span><span className="text-zinc-200">{runtimeStats.modelCacheCount} modelos</span></div>
               </div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[#303d56] bg-[#101a2c]/92 p-3 text-xs text-zinc-300 space-y-2 shadow-[0_12px_30px_rgba(0,0,0,0.28)]">
+          <div className="rounded-2xl border border-[#303d56] bg-[#101a2c]/92 overflow-hidden flex-1 min-h-[390px] shadow-[0_12px_30px_rgba(0,0,0,0.28)]">
+            <div className="flex items-center border-b border-white/5 bg-[#161c2b]">
+              <button
+                type="button"
+                onClick={() => setViewerSideTab('streaming')}
+                className={`admin-tab ${viewerSideTab === 'streaming' ? 'is-active' : ''} flex-1 py-3 text-[11px] font-bold uppercase tracking-[0.1em]`}
+              >
+                Streaming
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewerSideTab('players')}
+                className={`admin-tab ${viewerSideTab === 'players' ? 'is-active' : ''} flex-1 py-3 text-[11px] font-bold uppercase tracking-[0.1em]`}
+              >
+                Players
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewerSideTab('logs')}
+                className={`admin-tab ${viewerSideTab === 'logs' ? 'is-active' : ''} flex-1 py-3 text-[11px] font-bold uppercase tracking-[0.1em]`}
+              >
+                Logs
+              </button>
+            </div>
+            <div className="flex-1 min-h-0 overflow-y-auto admin-scrollbar bg-[#0c1220]">
+              {viewerSideTab === 'streaming' && (
+                <div className="divide-y divide-white/5">
+                  {viewerStreamingRows.map((item) => (
+                    <div key={item.label} className="flex items-center justify-between px-3 py-2.5 hover:bg-white/[0.02] transition-colors">
+                      <span className="text-[11px] text-zinc-500 font-mono">{item.label}</span>
+                      <span className="text-[11px] text-zinc-200 font-mono">{item.value}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {viewerSideTab === 'players' && (
+                <div className="p-3 text-xs text-zinc-300 space-y-2">
             <div className="flex items-center justify-between gap-2">
-              <p className="text-zinc-400 uppercase font-bold text-[11px] tracking-[0.1em]">Players (viewer_state)</p>
+              <p className="text-zinc-400 uppercase font-bold text-[10px] tracking-[0.1em]">viewer_state</p>
               <span className={`px-2 py-0.5 rounded border text-[10px] font-bold uppercase ${viewerStatusBadge.className}`}>
                 {viewerStatusBadge.label}
               </span>
@@ -3613,16 +3691,43 @@ const ServerView3D: React.FC = () => {
                 )}
               </div>
             )}
+                </div>
+              )}
+
+              {viewerSideTab === 'logs' && (
+                <div className="font-mono text-[10px] p-2 space-y-1 text-zinc-300">
+                  {!streamingLogs.length && <p className="text-zinc-500">Sem logs ainda...</p>}
+                  {streamingLogs.map((line, idx) => (
+                    <div key={`${line}_${idx}`} className="rounded px-1 py-0.5 hover:bg-white/5 break-words">
+                      {line}
+                    </div>
+                  ))}
+                  <div className="text-zinc-500 animate-pulse">_</div>
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="rounded-2xl border border-[#303d56] bg-[#101a2c]/92 p-3 shadow-[0_12px_30px_rgba(0,0,0,0.28)]">
-            <p className="text-zinc-400 uppercase font-bold text-[11px] mb-2 tracking-[0.1em]">Logs</p>
-            <div className="max-h-[260px] overflow-y-auto admin-scrollbar space-y-1 text-[11px] font-mono text-zinc-300">
-              {!streamingLogs.length && <p className="text-zinc-500">Sem logs ainda...</p>}
-              {streamingLogs.map((line, idx) => (
-                <p key={`${line}_${idx}`}>{line}</p>
-              ))}
-            </div>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                void loadQueueSnapshot(false);
+                void probeManifestWithDetails().catch(() => undefined);
+              }}
+              className="flex items-center justify-center gap-2 p-3 rounded-xl border border-[#34435f] bg-[#111a2d] hover:bg-[#192742] hover:border-[#415378] transition-all group"
+            >
+              <Icons.RefreshCw className="w-4 h-4 text-zinc-500 group-hover:text-white transition-colors" />
+              <span className="text-xs font-medium text-zinc-400 group-hover:text-white">Reload</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewerSideTab('logs')}
+              className="flex items-center justify-center gap-2 p-3 rounded-xl border border-[#34435f] bg-[#111a2d] hover:bg-[#192742] hover:border-[#415378] transition-all group"
+            >
+              <Icons.Terminal className="w-4 h-4 text-zinc-500 group-hover:text-white transition-colors" />
+              <span className="text-xs font-medium text-zinc-400 group-hover:text-white">Console</span>
+            </button>
           </div>
 
           <div className="rounded-2xl border border-[#303d56] bg-[#101a2c]/92 p-3 text-xs text-zinc-300 space-y-2 shadow-[0_12px_30px_rgba(0,0,0,0.28)]">
