@@ -3270,44 +3270,37 @@ const ServerView3D: React.FC = () => {
 
   return (
     <div className="space-y-4 pb-8">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div>
-          <Link
-            to={serverId ? `/admin/servers/${serverId}` : '/admin/servers'}
-            className="text-zinc-500 hover:text-white text-sm font-bold uppercase flex items-center mb-2"
-          >
-            <Icons.ArrowLeft className="w-4 h-4 mr-1" /> Voltar para servidor
-          </Link>
-          <h1 className="text-2xl md:text-3xl font-black text-white uppercase italic tracking-tight">Web Viewer 3D (MVP)</h1>
-          <p className="text-zinc-400 text-sm font-mono">map={mapName}</p>
-        </div>
-        <div className="bg-zinc-900 border border-zinc-800 rounded px-3 py-2 text-xs text-zinc-300 font-mono">
-          <div>{status}</div>
-          {manifest && <div>manifest v{manifest.version} | chunkSize={manifest.map.chunkSize}</div>}
-          <div>viewerState: {viewerStatusBadge.label}</div>
-          <div className="mt-2 flex items-center gap-1">
-            <button
-              type="button"
-              onClick={() => setRenderProfile('simple')}
-              className={`px-2 py-1 rounded border text-[10px] font-bold uppercase transition-colors ${
-                renderProfile === 'simple'
-                  ? 'border-emerald-700 bg-emerald-900/30 text-emerald-300'
-                  : 'border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
-              }`}
+      <div className="rounded-xl border border-zinc-800 bg-[#080b12]/85 backdrop-blur px-4 py-3">
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <Link
+              to={serverId ? `/admin/servers/${serverId}` : '/admin/servers'}
+              className="text-zinc-500 hover:text-white text-sm font-bold uppercase flex items-center mb-2"
             >
-              Simples
-            </button>
-            <button
-              type="button"
-              onClick={() => setRenderProfile('polished')}
-              className={`px-2 py-1 rounded border text-[10px] font-bold uppercase transition-colors ${
-                renderProfile === 'polished'
-                  ? 'border-cyan-700 bg-cyan-900/30 text-cyan-300'
-                  : 'border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
-              }`}
-            >
-              Polish
-            </button>
+              <Icons.ArrowLeft className="w-4 h-4 mr-1" /> Voltar para servidor
+            </Link>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tight">
+                Web Viewer 3D <span className="text-zinc-500 font-bold text-xl md:text-2xl">(MVP)</span>
+              </h1>
+              <span className="px-2 py-0.5 rounded border border-zinc-700 bg-zinc-900 text-[11px] text-zinc-300 font-mono">
+                map={mapName}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className={`px-3 py-1 rounded-full border text-[11px] font-bold uppercase ${
+              hasFreshViewerSnapshot
+                ? 'bg-emerald-900/20 text-emerald-300 border-emerald-700'
+                : 'bg-yellow-900/20 text-yellow-300 border-yellow-700'
+            }`}>
+              {hasFreshViewerSnapshot ? 'Viewer Online' : 'Viewer Aguardando Frame'}
+            </span>
+            <div className="bg-zinc-900 border border-zinc-800 rounded px-3 py-2 text-xs text-zinc-300 font-mono">
+              <div>{status}</div>
+              {manifest && <div>manifest v{manifest.version} | chunkSize={manifest.map.chunkSize}</div>}
+              <div>viewerState: {viewerStatusBadge.label}</div>
+            </div>
           </div>
         </div>
       </div>
@@ -3375,24 +3368,65 @@ const ServerView3D: React.FC = () => {
         </div>
 
         <div className="space-y-3">
-          <div className="rounded border border-zinc-800 bg-zinc-900 p-3 text-xs text-zinc-300 space-y-1">
-            <p className="text-zinc-500 uppercase font-bold text-[11px]">Streaming</p>
-            <p>cameraCell: {runtimeStats.cameraCell.x}:{runtimeStats.cameraCell.y}</p>
-            <p>loadedChunks: {runtimeStats.loadedChunks}</p>
-            <p>visibleChunks: {runtimeStats.visibleChunks}</p>
-            <p>loadedTris(est): {runtimeStats.loadedTrisEstimate.toLocaleString('pt-BR')}</p>
-            <p>loadedBytes(est): {Math.round(runtimeStats.loadedBytesEstimate / (1024 * 1024)).toLocaleString('pt-BR')} MB</p>
-            <p>textureCache: {runtimeStats.textureCacheCount} texturas</p>
-            <p>textureCacheBytes(est): {Math.round(runtimeStats.textureCacheBytesEstimate / (1024 * 1024)).toLocaleString('pt-BR')} MB</p>
-            <p>modelCache: {runtimeStats.modelCacheCount} modelos</p>
-            <p>modelCacheBytes(est): {Math.round(runtimeStats.modelCacheBytesEstimate / (1024 * 1024)).toLocaleString('pt-BR')} MB</p>
-            <p>playersRendered: {runtimeStats.playersRendered}/{runtimeStats.playersTotalInFrame}</p>
-            <p>playersCulled: {runtimeStats.playersCulled} | filtered: {runtimeStats.playersFilteredOut}</p>
-            <p>playerUpdateRate: {runtimeStats.playerUpdateRateHz.toFixed(1)} Hz</p>
-            <p>firstActiveLoadMs: {runtimeStats.firstActiveLoadMs ?? 'pendente'}</p>
+          <div className="rounded-xl border border-zinc-800 bg-[#0c1018] p-3 text-xs text-zinc-300 space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-zinc-500 uppercase font-bold text-[11px] tracking-wide">System Status</p>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setRenderProfile('simple')}
+                  className={`px-2 py-1 rounded border text-[10px] font-bold uppercase transition-colors ${
+                    renderProfile === 'simple'
+                      ? 'border-emerald-700 bg-emerald-900/30 text-emerald-300'
+                      : 'border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+                  }`}
+                >
+                  Simples
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRenderProfile('polished')}
+                  className={`px-2 py-1 rounded border text-[10px] font-bold uppercase transition-colors ${
+                    renderProfile === 'polished'
+                      ? 'border-cyan-700 bg-cyan-900/30 text-cyan-300'
+                      : 'border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+                  }`}
+                >
+                  Polish
+                </button>
+              </div>
+            </div>
+            <div className="space-y-1 text-[11px] font-mono text-zinc-400">
+              <div className="flex items-center justify-between">
+                <span>Chunks</span>
+                <span className="text-zinc-200">{runtimeStats.loadedChunks}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Chunk Size</span>
+                <span className="text-zinc-200">{manifest?.map.chunkSize || 'n/a'}</span>
+              </div>
+              <div className="h-1.5 rounded-full bg-zinc-800 overflow-hidden mt-2">
+                <div
+                  className="h-full bg-gradient-to-r from-red-500 via-emerald-400 to-cyan-400"
+                  style={{
+                    width: `${Math.max(
+                      8,
+                      Math.min(100, (runtimeStats.visibleChunks / Math.max(1, runtimeStats.loadedChunks || 1)) * 100),
+                    )}%`,
+                  }}
+                />
+              </div>
+              <div className="mt-2 space-y-1">
+                <div className="flex items-center justify-between"><span>cameraCell</span><span className="text-zinc-200">{runtimeStats.cameraCell.x}:{runtimeStats.cameraCell.y}</span></div>
+                <div className="flex items-center justify-between"><span>loadedTris(est)</span><span className="text-zinc-200">{runtimeStats.loadedTrisEstimate.toLocaleString('pt-BR')}</span></div>
+                <div className="flex items-center justify-between"><span>loadedBytes(est)</span><span className="text-zinc-200">{Math.round(runtimeStats.loadedBytesEstimate / (1024 * 1024)).toLocaleString('pt-BR')} MB</span></div>
+                <div className="flex items-center justify-between"><span>textureCache</span><span className="text-zinc-200">{runtimeStats.textureCacheCount} texturas</span></div>
+                <div className="flex items-center justify-between"><span>modelCache</span><span className="text-zinc-200">{runtimeStats.modelCacheCount} modelos</span></div>
+              </div>
+            </div>
           </div>
 
-          <div className="rounded border border-zinc-800 bg-zinc-900 p-3 text-xs text-zinc-300 space-y-2">
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-xs text-zinc-300 space-y-2">
             <div className="flex items-center justify-between gap-2">
               <p className="text-zinc-500 uppercase font-bold text-[11px]">Players (viewer_state)</p>
               <span className={`px-2 py-0.5 rounded border text-[10px] font-bold uppercase ${viewerStatusBadge.className}`}>

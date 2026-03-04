@@ -234,76 +234,90 @@ export const AdminLayout: React.FC<{ children: React.ReactNode; userOverride?: U
   };
 
   return (
-    <div className="ui-shell ui-admin min-h-screen bg-zinc-950 flex text-zinc-100">
+    <div className="ui-shell ui-admin relative min-h-screen bg-[#05070d] flex text-zinc-100 overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(1200px_500px_at_-10%_-20%,rgba(185,28,28,0.12),transparent_55%),radial-gradient(1000px_500px_at_110%_120%,rgba(15,23,42,0.8),transparent_60%)]" />
+      <div className="pointer-events-none absolute inset-0 opacity-[0.16] [background:linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] [background-size:48px_48px]" />
+
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/80 z-40 md:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
       <aside
         className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-zinc-900 border-r border-zinc-800 transform transition-transform duration-200 ease-in-out
+        fixed inset-y-0 left-0 z-50 w-[250px] bg-[#090c14]/95 border-r border-zinc-800/80 backdrop-blur-xl transform transition-transform duration-200 ease-in-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         md:translate-x-0 md:static md:inset-auto
       `}
       >
-        <div className="flex items-center justify-center h-16 border-b border-zinc-800 bg-zinc-950/50">
+        <div className="h-20 border-b border-zinc-800/80 bg-black/35 px-5 flex items-center">
           <Link
             to="/"
-            className="text-xl font-black text-white tracking-wider italic hover:opacity-80 transition-opacity flex items-center gap-2"
+            className="group flex items-center gap-2 hover:opacity-90 transition-opacity"
             title="Ir para o site"
           >
             {config.general.logoUrl ? (
-              <img src={config.general.logoUrl} alt="Logo" className="h-8 w-auto max-w-[40px] object-contain" />
+              <img src={config.general.logoUrl} alt="Logo" className="h-9 w-auto max-w-[44px] object-contain" />
             ) : null}
-            <span>
-              {config.general.siteName.toUpperCase()} <span className="text-brand">ADMIN</span>
-            </span>
+            <div className="leading-tight">
+              <p className="text-[22px] font-black tracking-tight uppercase text-white">
+                {config.general.siteName.toUpperCase()}
+              </p>
+              <p className="-mt-1 text-[12px] font-black italic tracking-[0.16em] text-red-500">ADMIN</p>
+            </div>
           </Link>
         </div>
-        <nav className="mt-6 px-4 space-y-2">
+        <nav className="mt-4 px-3 space-y-1.5">
           {visibleNavItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
               onClick={() => setSidebarOpen(false)}
-              className={`flex items-center px-4 py-3 rounded-lg transition-all duration-200 ${
+              className={`group flex items-center px-3 py-2.5 rounded-lg border transition-all duration-200 ${
                 isActive(item.path)
-                  ? 'bg-brand/10 text-brand border border-brand/50'
-                  : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'
+                  ? 'bg-gradient-to-r from-red-950/70 via-red-900/35 to-transparent border-red-900/60 text-red-300'
+                  : 'border-transparent text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/45 hover:border-zinc-700/70'
               }`}
             >
-              <item.icon className={`w-5 h-5 mr-3 ${isActive(item.path) ? 'text-brand' : ''}`} />
-              <span className="font-medium">{item.name}</span>
+              <item.icon className={`w-4 h-4 mr-3 ${isActive(item.path) ? 'text-red-400' : 'text-zinc-500 group-hover:text-zinc-200'}`} />
+              <span className="text-[14px] font-semibold">{item.name}</span>
             </Link>
           ))}
         </nav>
-        <div className="absolute bottom-0 w-full p-4 border-t border-zinc-800">
-          <button onClick={handleLogout} className="flex items-center text-zinc-500 hover:text-white transition-colors w-full">
-            <Icons.LogOut className="w-5 h-5 mr-3" />
-            Sair
-          </button>
+        <div className="absolute bottom-0 w-full p-3 border-t border-zinc-800/80 bg-black/25">
+          <div className="rounded-lg border border-zinc-800 bg-zinc-900/45 px-3 py-2 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-red-700 to-red-500 flex items-center justify-center overflow-hidden ring-2 ring-zinc-800">
+              {user?.avatarUrl ? <img src={user.avatarUrl} alt="Avatar" /> : <span className="text-xs font-black">AD</span>}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold text-zinc-100 truncate">{user?.username || 'Admin'}</p>
+              <p className="text-[10px] uppercase font-bold tracking-wide text-zinc-500 truncate">{user?.role || 'admin'}</p>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="p-2 rounded border border-zinc-700 bg-zinc-800/70 text-zinc-300 hover:text-white hover:bg-zinc-700 transition-colors"
+              title="Sair"
+            >
+              <Icons.LogOut className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="bg-zinc-900 border-b border-zinc-800 h-16 flex items-center justify-between px-4 md:px-8">
+      <div className="relative flex-1 flex flex-col min-w-0 overflow-hidden">
+        <header className="h-16 flex items-center justify-between px-4 md:px-6 border-b border-zinc-800/80 bg-[#090c14]/70 backdrop-blur-xl">
           <button onClick={() => setSidebarOpen(true)} className="md:hidden text-zinc-400 hover:text-white">
             <Icons.Menu />
           </button>
-          <div className="flex items-center ml-auto space-x-4">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-brand to-brand-dark flex items-center justify-center overflow-hidden ring-2 ring-zinc-800">
-                {user?.avatarUrl ? <img src={user.avatarUrl} alt="Avatar" /> : <span className="text-xs font-bold">AD</span>}
-              </div>
-              <div className="hidden md:flex flex-col">
-                <span className="text-sm font-bold text-zinc-200 leading-tight">{user?.username}</span>
-                <span className="text-[10px] uppercase font-bold text-zinc-500">{user?.role}</span>
-              </div>
-            </div>
+          <div className="hidden md:flex items-center gap-2 text-[10px] uppercase tracking-wider font-bold text-zinc-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.9)]" />
+            Admin Panel Online
+          </div>
+          <div className="ml-auto text-[11px] font-mono text-zinc-500 hidden sm:block">
+            {new Date().toLocaleString('pt-BR')}
           </div>
         </header>
 
-        <main className="flex-1 overflow-auto p-4 md:p-8 bg-black/20">{children}</main>
+        <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-7">{children}</main>
       </div>
     </div>
   );
