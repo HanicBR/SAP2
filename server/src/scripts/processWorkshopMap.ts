@@ -38,7 +38,14 @@ type Options = {
   cleanupRetentionDays: number;
 };
 
-type StepName = 'cache' | 'gma_extract' | 'bsp_detect' | 'bsp_pak_extract' | 'assets_written' | 'pipeline';
+type StepName =
+  | 'cache'
+  | 'gma_extract'
+  | 'bsp_detect'
+  | 'bsp_pak_extract'
+  | 'assets_written'
+  | 'mount_vpk_extract'
+  | 'pipeline';
 
 type CanonicalAssetCounts = {
   materials: number;
@@ -57,6 +64,23 @@ type AssetCountSummary = {
   totalFiles: number;
   byTopLevel: Record<string, number>;
   canonical: CanonicalAssetCounts;
+};
+
+type MountVpkExtractSummary = {
+  enabled: boolean;
+  scannedRoots: number;
+  vpkFilesFound: number;
+  vpkFilesProcessed: number;
+  vpkFilesSkippedByCache: number;
+  entriesTotal: number;
+  extractedFiles: number;
+  extractedBytes: number;
+  skippedExisting: number;
+  skippedFiltered: number;
+  skippedUnsafe: number;
+  byTopLevel: Record<string, number>;
+  canonical: CanonicalAssetCounts;
+  errors: string[];
 };
 
 type StepResult = {
@@ -142,6 +166,7 @@ type ProcessReport = {
       byTopLevel: Record<string, number>;
       canonical: CanonicalAssetCounts;
     };
+    mountVpkExtract?: MountVpkExtractSummary;
     assetsWritten?: AssetCountSummary;
   };
   pipeline: {
@@ -216,6 +241,22 @@ type PakExtractResult = {
   canonical: CanonicalAssetCounts;
   warnings: string[];
   error?: string;
+};
+
+type VpkTreeEntry = {
+  rawPath: string;
+  normalizedPath: string;
+  archiveIndex: number;
+  entryOffset: number;
+  entryLength: number;
+  preloadData: Buffer;
+};
+
+type VpkParseResult = {
+  version: number;
+  treeSize: number;
+  dirDataOffset: number;
+  entries: VpkTreeEntry[];
 };
 
 const PROJECT_SERVER_ROOT = path.resolve(__dirname, '..', '..');
@@ -864,7 +905,7 @@ const parsePakEntries = (pakData: Buffer): PakEntry[] => {
   return entries;
 };
 
-const sanitizePakEntryPath = (rawPath: string): string | null => {
+const sanitizeAssetRelativePath = (rawPath: string): string | null => {
   const normalized = String(rawPath || '').trim().replace(/\\/g, '/');
   if (!normalized) return null;
   const withoutRoot = normalized.replace(/^\/+/, '');
@@ -874,6 +915,8 @@ const sanitizePakEntryPath = (rawPath: string): string | null => {
   if (posixNormalized.includes(':')) return null;
   return posixNormalized;
 };
+
+const sanitizePakEntryPath = (rawPath: string): string | null => sanitizeAssetRelativePath(rawPath);
 
 const readPakEntryBuffer = (pakData: Buffer, entry: PakEntry): Buffer | null => {
   const localOffset = entry.localHeaderOffset;
@@ -966,6 +1009,398 @@ const extractPakfileFromBsp = (bspPath: string, mapRoot: string): PakExtractResu
       error: `bsp_pak_extract_exception:${String(error?.message || error)}`,
     };
   }
+};
+
+const parseBoolLike = (raw: string | undefined, fallback: boolean): boolean => {
+  const normalized = String(raw || '').trim().toLowerCase();
+  if (!normalized) return fallback;
+  if (['1', 'true', 'yes', 'on'].includes(normalized)) return true;
+  if (['0', 'false', 'no', 'off'].includes(normalized)) return false;
+  return fallback;
+};
+
+const getVpkExtractTopLevels = (): Set<string> => {
+  const raw = String(
+    process.env.WORKSHOP_VPK_EXTRACT_TOPLEVEL
+      || 'materials,models,sound,sounds,particles,scripts,resource,maps,lua,cfg',
+  )
+    .trim()
+    .toLowerCase();
+  const items = raw
+    .split(/[,\s;:]+/g)
+    .map((item) => item.trim())
+    .filter(Boolean);
+  return new Set(items.length > 0 ? items : ['materials', 'models']);
+};
+
+const loadMountRootsFromConfig = (mountsPath: string): string[] => {
+  if (!fs.existsSync(mountsPath)) return [];
+  try {
+    const parsed = JSON.parse(fs.readFileSync(mountsPath, 'utf8').replace(/^\uFEFF/, '')) as any;
+    const mountsRaw = parsed?.mounts && typeof parsed.mounts === 'object' ? parsed.mounts : parsed;
+    if (!mountsRaw || typeof mountsRaw !== 'object') return [];
+    const roots: string[] = [];
+    for (const value of Object.values(mountsRaw as Record<string, unknown>)) {
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          const rawPath = String(item || '').trim();
+          if (!rawPath) continue;
+          const absolute = path.isAbsolute(rawPath)
+            ? path.resolve(rawPath)
+            : path.resolve(path.dirname(mountsPath), rawPath);
+          roots.push(absolute);
+        }
+      } else if (typeof value === 'string' && value.trim()) {
+        const rawPath = value.trim();
+        const absolute = path.isAbsolute(rawPath)
+          ? path.resolve(rawPath)
+          : path.resolve(path.dirname(mountsPath), rawPath);
+        roots.push(absolute);
+      }
+    }
+    return Array.from(new Set(roots)).sort((a, b) => a.localeCompare(b));
+  } catch {
+    return [];
+  }
+};
+
+const collectVpkScanRoots = (options: Options): string[] => {
+  const roots = new Set<string>();
+  for (const root of loadMountRootsFromConfig(options.mountsPath)) {
+    roots.add(path.resolve(root));
+  }
+
+  if (process.platform !== 'win32') {
+    const contentRoot = path.resolve(String(process.env.MAP_AUDIT_CONTENT_ROOT || '/opt/backstabber/content'));
+    const linuxCandidates = [
+      'gmod-base',
+      'garrysmod',
+      'css-content-gmodcontent',
+      'hl2-content-gmodcontent',
+      'hl2ep1-content-gmodcontent',
+      'hl2ep2-content-gmodcontent',
+      'tf2-content-gmodcontent',
+      'hl1-gmodcontent',
+    ];
+    for (const candidate of linuxCandidates) {
+      roots.add(path.join(contentRoot, candidate));
+    }
+  }
+
+  const expanded = new Set<string>();
+  for (const rawRoot of roots) {
+    const root = path.resolve(rawRoot);
+    expanded.add(root);
+    for (const sub of ['garrysmod', 'hl2', 'cstrike', 'tf']) {
+      expanded.add(path.join(root, sub));
+    }
+  }
+
+  return Array.from(expanded)
+    .map((item) => path.resolve(item))
+    .filter((item) => fs.existsSync(item) && fs.statSync(item).isDirectory())
+    .sort((a, b) => a.localeCompare(b));
+};
+
+const readNullTerminatedString = (
+  buffer: Buffer,
+  cursor: number,
+  maxExclusive: number,
+): { value: string; cursor: number } => {
+  if (cursor < 0 || cursor >= maxExclusive) {
+    throw new Error('vpk_tree_cursor_out_of_bounds');
+  }
+  let end = cursor;
+  while (end < maxExclusive && buffer[end] !== 0) end += 1;
+  if (end >= maxExclusive) {
+    throw new Error('vpk_tree_string_not_terminated');
+  }
+  const value = buffer.subarray(cursor, end).toString('utf8');
+  return { value, cursor: end + 1 };
+};
+
+const parseVpkDirectoryFile = (dirVpkPath: string): VpkParseResult => {
+  const buffer = fs.readFileSync(dirVpkPath);
+  if (buffer.length < 12) throw new Error('vpk_header_too_small');
+  const signature = buffer.readUInt32LE(0);
+  if (signature !== 0x55aa1234) throw new Error('vpk_invalid_signature');
+  const version = buffer.readUInt32LE(4);
+  const treeSize = buffer.readUInt32LE(8);
+  const headerSize = version === 2 ? 28 : 12;
+  if (version !== 1 && version !== 2) throw new Error(`vpk_unsupported_version:${version}`);
+  if (buffer.length < headerSize) throw new Error('vpk_header_out_of_bounds');
+  const treeStart = headerSize;
+  const treeEnd = treeStart + treeSize;
+  if (treeEnd > buffer.length) throw new Error('vpk_tree_out_of_bounds');
+  const dirDataOffset = treeEnd;
+
+  const entries: VpkTreeEntry[] = [];
+  let cursor = treeStart;
+  while (true) {
+    const extNode = readNullTerminatedString(buffer, cursor, treeEnd);
+    cursor = extNode.cursor;
+    const extRaw = String(extNode.value || '');
+    if (!extRaw) break;
+    const ext = extRaw === ' ' ? '' : extRaw;
+
+    while (true) {
+      const dirNode = readNullTerminatedString(buffer, cursor, treeEnd);
+      cursor = dirNode.cursor;
+      const dirRaw = String(dirNode.value || '');
+      if (!dirRaw) break;
+      const dirPart = dirRaw === ' ' ? '' : dirRaw.replace(/\\/g, '/');
+
+      while (true) {
+        const fileNode = readNullTerminatedString(buffer, cursor, treeEnd);
+        cursor = fileNode.cursor;
+        const fileRaw = String(fileNode.value || '');
+        if (!fileRaw) break;
+        if (cursor + 18 > treeEnd) throw new Error('vpk_tree_entry_out_of_bounds');
+
+        const preloadBytes = buffer.readUInt16LE(cursor + 4);
+        const archiveIndex = buffer.readUInt16LE(cursor + 6);
+        const entryOffset = buffer.readUInt32LE(cursor + 8);
+        const entryLength = buffer.readUInt32LE(cursor + 12);
+        const terminator = buffer.readUInt16LE(cursor + 16);
+        cursor += 18;
+        if (terminator !== 0xffff) throw new Error('vpk_tree_entry_terminator_invalid');
+        if (cursor + preloadBytes > treeEnd) throw new Error('vpk_preload_out_of_bounds');
+        const preloadData = Buffer.from(buffer.subarray(cursor, cursor + preloadBytes));
+        cursor += preloadBytes;
+
+        const fileName = ext ? `${fileRaw}.${ext}` : fileRaw;
+        const relRaw = dirPart ? `${dirPart}/${fileName}` : fileName;
+        const normalizedPath = sanitizeAssetRelativePath(relRaw);
+        if (!normalizedPath) continue;
+        entries.push({
+          rawPath: relRaw,
+          normalizedPath,
+          archiveIndex,
+          entryOffset,
+          entryLength,
+          preloadData,
+        });
+      }
+    }
+  }
+
+  return {
+    version,
+    treeSize,
+    dirDataOffset,
+    entries,
+  };
+};
+
+const readVpkEntryData = (
+  entry: VpkTreeEntry,
+  dirBuffer: Buffer,
+  dirDataOffset: number,
+  archivePrefix: string,
+  archiveCache: Map<string, Buffer | null>,
+): Buffer | null => {
+  const parts: Buffer[] = [];
+  let totalSize = 0;
+  if (entry.preloadData.length > 0) {
+    parts.push(entry.preloadData);
+    totalSize += entry.preloadData.length;
+  }
+
+  const needArchiveBytes = entry.entryLength > 0;
+  if (needArchiveBytes) {
+    let sourceBuffer: Buffer | null = null;
+    let sourceOffset = 0;
+    if (entry.archiveIndex === 0x7fff) {
+      sourceBuffer = dirBuffer;
+      sourceOffset = dirDataOffset;
+    } else {
+      const archivePath = `${archivePrefix}_${String(entry.archiveIndex).padStart(3, '0')}.vpk`;
+      if (archiveCache.has(archivePath)) {
+        sourceBuffer = archiveCache.get(archivePath) || null;
+      } else {
+        try {
+          sourceBuffer = fs.readFileSync(archivePath);
+        } catch {
+          sourceBuffer = null;
+        }
+        archiveCache.set(archivePath, sourceBuffer);
+      }
+      sourceOffset = 0;
+    }
+    if (!sourceBuffer) return null;
+    const start = sourceOffset + entry.entryOffset;
+    const end = start + entry.entryLength;
+    if (start < 0 || end > sourceBuffer.length || end < start) return null;
+    const slice = sourceBuffer.subarray(start, end);
+    parts.push(slice);
+    totalSize += slice.length;
+  }
+
+  if (parts.length === 0) return Buffer.alloc(0);
+  if (parts.length === 1) return Buffer.from(parts[0] as Buffer);
+  return Buffer.concat(parts, totalSize);
+};
+
+const createMountVpkExtractSummary = (enabled: boolean): MountVpkExtractSummary => ({
+  enabled,
+  scannedRoots: 0,
+  vpkFilesFound: 0,
+  vpkFilesProcessed: 0,
+  vpkFilesSkippedByCache: 0,
+  entriesTotal: 0,
+  extractedFiles: 0,
+  extractedBytes: 0,
+  skippedExisting: 0,
+  skippedFiltered: 0,
+  skippedUnsafe: 0,
+  byTopLevel: {},
+  canonical: createEmptyCanonicalCounts(),
+  errors: [],
+});
+
+const computeVpkStateKey = (
+  dirVpkPath: string,
+  stat: fs.Stats,
+  topLevelAllow: Set<string>,
+): string => {
+  const hash = crypto.createHash('sha1');
+  hash.update(`vpk_extract_v1|${path.resolve(dirVpkPath)}|${stat.size}|${Math.floor(stat.mtimeMs)}|`);
+  hash.update(Array.from(topLevelAllow).sort((a, b) => a.localeCompare(b)).join(','));
+  return hash.digest('hex');
+};
+
+const extractMountedVpkAssets = (options: Options): MountVpkExtractSummary => {
+  const enabled = parseBoolLike(process.env.WORKSHOP_VPK_EXTRACT_ENABLED, true);
+  const summary = createMountVpkExtractSummary(enabled);
+  if (!enabled) return summary;
+
+  const topLevelAllow = getVpkExtractTopLevels();
+  const stateDir = path.join(options.rootDir, 'cache', 'mount-vpk-extract');
+  ensureDir(stateDir);
+  const scanRoots = collectVpkScanRoots(options);
+  summary.scannedRoots = scanRoots.length;
+
+  for (const scanRoot of scanRoots) {
+    let entries: fs.Dirent[] = [];
+    try {
+      entries = fs.readdirSync(scanRoot, { withFileTypes: true });
+    } catch (error: any) {
+      summary.errors.push(`scan_failed:${scanRoot}:${String(error?.message || error)}`);
+      continue;
+    }
+    const dirVpkFiles = entries
+      .filter((entry) => entry.isFile() && /_dir\.vpk$/i.test(entry.name))
+      .map((entry) => path.join(scanRoot, entry.name))
+      .sort((a, b) => a.localeCompare(b));
+    summary.vpkFilesFound += dirVpkFiles.length;
+
+    for (const dirVpkPath of dirVpkFiles) {
+      let stateKey = '';
+      try {
+        const stat = fs.statSync(dirVpkPath);
+        stateKey = computeVpkStateKey(dirVpkPath, stat, topLevelAllow);
+      } catch (error: any) {
+        summary.errors.push(`stat_failed:${dirVpkPath}:${String(error?.message || error)}`);
+        continue;
+      }
+
+      const statePath = path.join(stateDir, `${stateKey}.json`);
+      if (fs.existsSync(statePath)) {
+        summary.vpkFilesSkippedByCache += 1;
+        try {
+          const state = JSON.parse(fs.readFileSync(statePath, 'utf8')) as any;
+          summary.entriesTotal += Math.max(0, Number(state?.entriesTotal || 0));
+        } catch {
+          // ignore invalid cache state
+        }
+        continue;
+      }
+
+      summary.vpkFilesProcessed += 1;
+      let perFile = {
+        entriesTotal: 0,
+        extractedFiles: 0,
+        extractedBytes: 0,
+        skippedExisting: 0,
+        skippedFiltered: 0,
+        skippedUnsafe: 0,
+        byTopLevel: {} as Record<string, number>,
+      };
+
+      try {
+        const archivePrefix = dirVpkPath.replace(/_dir\.vpk$/i, '');
+        const dirBuffer = fs.readFileSync(dirVpkPath);
+        const parsed = parseVpkDirectoryFile(dirVpkPath);
+        perFile.entriesTotal = parsed.entries.length;
+
+        const archiveCache = new Map<string, Buffer | null>();
+        for (const item of parsed.entries) {
+          const topLevel = topLevelFromAssetPath(item.normalizedPath);
+          if (!topLevelAllow.has(topLevel)) {
+            perFile.skippedFiltered += 1;
+            continue;
+          }
+
+          const outputPath = path.resolve(scanRoot, item.normalizedPath);
+          if (outputPath !== path.resolve(scanRoot) && !outputPath.startsWith(`${path.resolve(scanRoot)}${path.sep}`)) {
+            perFile.skippedUnsafe += 1;
+            continue;
+          }
+
+          try {
+            if (fs.existsSync(outputPath) && fs.statSync(outputPath).isFile()) {
+              perFile.skippedExisting += 1;
+              continue;
+            }
+          } catch {
+            // continue to attempt overwrite/write if stat probing fails
+          }
+
+          const data = readVpkEntryData(item, dirBuffer, parsed.dirDataOffset, archivePrefix, archiveCache);
+          if (!data) {
+            perFile.skippedUnsafe += 1;
+            continue;
+          }
+
+          ensureDir(path.dirname(outputPath));
+          fs.writeFileSync(outputPath, data);
+          perFile.extractedFiles += 1;
+          perFile.extractedBytes += data.length;
+          perFile.byTopLevel[topLevel] = (perFile.byTopLevel[topLevel] || 0) + 1;
+        }
+
+        writeJson(statePath, {
+          ok: true,
+          processedAt: new Date().toISOString(),
+          scanRoot,
+          dirVpkPath,
+          version: parsed.version,
+          treeSize: parsed.treeSize,
+          topLevelAllow: Array.from(topLevelAllow).sort((a, b) => a.localeCompare(b)),
+          ...perFile,
+        });
+      } catch (error: any) {
+        summary.errors.push(`extract_failed:${dirVpkPath}:${String(error?.message || error)}`);
+        continue;
+      }
+
+      summary.entriesTotal += perFile.entriesTotal;
+      summary.extractedFiles += perFile.extractedFiles;
+      summary.extractedBytes += perFile.extractedBytes;
+      summary.skippedExisting += perFile.skippedExisting;
+      summary.skippedFiltered += perFile.skippedFiltered;
+      summary.skippedUnsafe += perFile.skippedUnsafe;
+      for (const [topLevel, count] of Object.entries(perFile.byTopLevel)) {
+        const safeTop = String(topLevel || '').toLowerCase();
+        if (!safeTop || !Number.isFinite(Number(count))) continue;
+        summary.byTopLevel[safeTop] = (summary.byTopLevel[safeTop] || 0) + Number(count);
+      }
+    }
+  }
+
+  summary.byTopLevel = sortNumericRecord(summary.byTopLevel);
+  summary.canonical = canonicalizeAssetCounts(summary.byTopLevel);
+  return summary;
 };
 
 const acquireLock = (lockPath: string, staleMs: number): { ok: boolean; reason?: string } => {
@@ -1250,6 +1685,7 @@ const run = () => {
       byTopLevel: {},
       canonical: createEmptyCanonicalCounts(),
     },
+    mountVpkExtract: createMountVpkExtractSummary(parseBoolLike(process.env.WORKSHOP_VPK_EXTRACT_ENABLED, true)),
   };
   const pipelineState: ProcessReport['pipeline'] = {};
   const cacheKey = `${options.appId}:${options.workshopId}:${options.mapName}`;
@@ -1521,6 +1957,39 @@ const run = () => {
         `canonical=${formatCanonicalCounts(assetsWritten.canonical)}`,
       ],
     });
+
+    const mountVpkExtractStartedAt = Date.now();
+    const mountVpkExtract = extractMountedVpkAssets(options);
+    extractionState.mountVpkExtract = mountVpkExtract;
+    const mountVpkStep: StepResult = {
+      name: 'mount_vpk_extract',
+      ok: mountVpkExtract.errors.length === 0,
+      durationMs: Math.max(0, Date.now() - mountVpkExtractStartedAt),
+      command: ['internal:extract_mount_vpk_assets', options.mountsPath],
+      logTail: [
+        `enabled=${mountVpkExtract.enabled ? '1' : '0'}`,
+        `scannedRoots=${mountVpkExtract.scannedRoots}`,
+        `vpkFilesFound=${mountVpkExtract.vpkFilesFound}`,
+        `vpkFilesProcessed=${mountVpkExtract.vpkFilesProcessed}`,
+        `vpkFilesSkippedByCache=${mountVpkExtract.vpkFilesSkippedByCache}`,
+        `entries=${mountVpkExtract.entriesTotal}`,
+        `extractedFiles=${mountVpkExtract.extractedFiles}`,
+        `extractedBytes=${mountVpkExtract.extractedBytes}`,
+        `skippedExisting=${mountVpkExtract.skippedExisting}`,
+        `skippedFiltered=${mountVpkExtract.skippedFiltered}`,
+        `skippedUnsafe=${mountVpkExtract.skippedUnsafe}`,
+        `byTopLevel=${JSON.stringify(mountVpkExtract.byTopLevel)}`,
+        `canonical=${formatCanonicalCounts(mountVpkExtract.canonical)}`,
+        ...mountVpkExtract.errors.slice(0, 20),
+      ],
+      ...(mountVpkExtract.errors.length > 0
+        ? { error: `mount_vpk_extract_partial_failures:${mountVpkExtract.errors.length}` }
+        : {}),
+    };
+    steps.push(mountVpkStep);
+    if (mountVpkExtract.errors.length > 0) {
+      warnings.push(...mountVpkExtract.errors.slice(0, 100).map((item) => `mount_vpk_extract:${item}`));
+    }
 
     const tsNodeRunner = resolveTsNodeCommand();
     const pipelineArgs = tsNodeRunner.argsPrefix.concat([
