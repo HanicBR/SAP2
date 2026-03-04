@@ -311,6 +311,8 @@ const FOLLOW_CAMERA_SMOOTH_RATE = 6;
 const CAMERA_MOVE_SPEED = 1800;
 const CAMERA_MOVE_FAST_MULTIPLIER = 2.25;
 const CAMERA_MOVE_SLOW_MULTIPLIER = 0.5;
+const CAMERA_FREE_LOOK_SENSITIVITY = 0.0026;
+const CAMERA_FREE_LOOK_MAX_UP_DOT = 0.985;
 const MODEL_CACHE_MAX_BYTES = 220 * 1024 * 1024;
 const MODEL_CACHE_EVICT_GRACE_MS = 18000;
 const MODEL_CACHE_SWEEP_INTERVAL_MS = 1800;
@@ -723,7 +725,6 @@ const ServerView3D: React.FC = () => {
   const [viewerSideTab, setViewerSideTab] = useState<'streaming' | 'players' | 'logs'>('streaming');
   const [showDevTools, setShowDevTools] = useState<boolean>(false);
   const [showViewerSettings, setShowViewerSettings] = useState<boolean>(false);
-  const [showViewerHudTopActions, setShowViewerHudTopActions] = useState<boolean>(true);
   const [showViewerHudLiveChip, setShowViewerHudLiveChip] = useState<boolean>(true);
   const [showViewerHudFpsChip, setShowViewerHudFpsChip] = useState<boolean>(true);
   const [showViewerHudSelectedPlayer, setShowViewerHudSelectedPlayer] = useState<boolean>(true);
@@ -1401,7 +1402,7 @@ const ServerView3D: React.FC = () => {
     controls.mouseButtons = {
       LEFT: THREE.MOUSE.ROTATE,
       MIDDLE: THREE.MOUSE.ROTATE,
-      RIGHT: THREE.MOUSE.PAN,
+      RIGHT: -1,
     };
 
     let composer: EffectComposer | null = null;
@@ -1557,6 +1558,15 @@ const ServerView3D: React.FC = () => {
     const pointerNdc = new THREE.Vector2();
     const pointerDown = { x: 0, y: 0 };
     let pointerDownAt = 0;
+    const freeLook = {
+      active: false,
+      pointerId: -1,
+      lastX: 0,
+      lastY: 0,
+    };
+    const freeLookForward = new THREE.Vector3();
+    const freeLookRightAxis = new THREE.Vector3();
+    const freeLookForwardCandidate = new THREE.Vector3();
     let lastSelectionVisualKey = '__none__';
     const followForward = new THREE.Vector3();
     const followFocus = new THREE.Vector3();
@@ -2311,7 +2321,37 @@ const ServerView3D: React.FC = () => {
       return false;
     };
 
+    const stopFreeLook = (pointerId?: number) => {
+      if (!freeLook.active) return;
+      if (typeof pointerId === 'number' && pointerId !== freeLook.pointerId) return;
+      if (freeLook.pointerId >= 0) {
+        try {
+          renderer.domElement.releasePointerCapture(freeLook.pointerId);
+        } catch {
+          // no-op
+        }
+      }
+      freeLook.active = false;
+      freeLook.pointerId = -1;
+      controls.enabled = true;
+      controls.update();
+    };
+
     const onCanvasPointerDown = (event: PointerEvent) => {
+      if (event.button === 2) {
+        event.preventDefault();
+        freeLook.active = true;
+        freeLook.pointerId = event.pointerId;
+        freeLook.lastX = event.clientX;
+        freeLook.lastY = event.clientY;
+        controls.enabled = false;
+        try {
+          renderer.domElement.setPointerCapture(event.pointerId);
+        } catch {
+          // no-op
+        }
+        return;
+      }
       if (event.button === 1) {
         event.preventDefault();
         retargetOrbitAtClientPoint(event.clientX, event.clientY);
@@ -2323,7 +2363,49 @@ const ServerView3D: React.FC = () => {
       pointerDownAt = performance.now();
     };
 
+    const onCanvasPointerMove = (event: PointerEvent) => {
+      if (!freeLook.active || event.pointerId !== freeLook.pointerId) return;
+      event.preventDefault();
+
+      const deltaX = event.clientX - freeLook.lastX;
+      const deltaY = event.clientY - freeLook.lastY;
+      freeLook.lastX = event.clientX;
+      freeLook.lastY = event.clientY;
+      if (Math.abs(deltaX) < 0.001 && Math.abs(deltaY) < 0.001) return;
+
+      freeLookForward.copy(controls.target).sub(camera.position);
+      const targetDistance = Math.max(120, freeLookForward.length());
+      if (freeLookForward.lengthSq() < 1e-6) {
+        freeLookForward.set(0, 0, -1).applyQuaternion(camera.quaternion);
+      }
+      freeLookForward.normalize();
+
+      const yawDelta = -deltaX * CAMERA_FREE_LOOK_SENSITIVITY;
+      const pitchDelta = -deltaY * CAMERA_FREE_LOOK_SENSITIVITY;
+      if (Math.abs(yawDelta) > 1e-6) {
+        freeLookForward.applyAxisAngle(moveUp, yawDelta).normalize();
+      }
+
+      if (Math.abs(pitchDelta) > 1e-6) {
+        freeLookRightAxis.crossVectors(freeLookForward, moveUp);
+        if (freeLookRightAxis.lengthSq() > 1e-8) {
+          freeLookRightAxis.normalize();
+          freeLookForwardCandidate.copy(freeLookForward).applyAxisAngle(freeLookRightAxis, pitchDelta).normalize();
+          if (Math.abs(freeLookForwardCandidate.dot(moveUp)) <= CAMERA_FREE_LOOK_MAX_UP_DOT) {
+            freeLookForward.copy(freeLookForwardCandidate);
+          }
+        }
+      }
+
+      controls.target.copy(camera.position).addScaledVector(freeLookForward, targetDistance);
+      camera.lookAt(controls.target);
+    };
+
     const onCanvasPointerUp = (event: PointerEvent) => {
+      if (event.button === 2) {
+        stopFreeLook(event.pointerId);
+        return;
+      }
       if (event.button !== 0) return;
       const moved = Math.hypot(event.clientX - pointerDown.x, event.clientY - pointerDown.y);
       const elapsed = performance.now() - pointerDownAt;
@@ -2331,6 +2413,14 @@ const ServerView3D: React.FC = () => {
       const pickedSteamId = pickPlayerSteamIdAtClientPoint(event.clientX, event.clientY);
       if (!pickedSteamId) return;
       setViewerSelectedSteamId(pickedSteamId);
+    };
+
+    const onCanvasPointerCancel = (event: PointerEvent) => {
+      stopFreeLook(event.pointerId);
+    };
+
+    const onCanvasContextMenu = (event: MouseEvent) => {
+      event.preventDefault();
     };
 
     const clearMovementKeys = () => {
@@ -3238,12 +3328,19 @@ const ServerView3D: React.FC = () => {
         };
 
         onResize();
+        const onWindowBlur = () => {
+          clearMovementKeys();
+          stopFreeLook();
+        };
         window.addEventListener('resize', onResize);
         window.addEventListener('keydown', onWindowKeyDown);
         window.addEventListener('keyup', onWindowKeyUp);
-        window.addEventListener('blur', clearMovementKeys);
+        window.addEventListener('blur', onWindowBlur);
         renderer.domElement.addEventListener('pointerdown', onCanvasPointerDown);
+        renderer.domElement.addEventListener('pointermove', onCanvasPointerMove);
         renderer.domElement.addEventListener('pointerup', onCanvasPointerUp);
+        renderer.domElement.addEventListener('pointercancel', onCanvasPointerCancel);
+        renderer.domElement.addEventListener('contextmenu', onCanvasContextMenu);
         if (typeof ResizeObserver !== 'undefined' && mountRef.current) {
           hostResizeObserver = new ResizeObserver(() => {
             onResize();
@@ -3273,16 +3370,20 @@ const ServerView3D: React.FC = () => {
         );
         appendLog(`world_z_bounds=min:${Math.round(worldMinZ)} max:${Math.round(worldMaxZ)} center:${Math.round(worldCenterZ)}`);
         appendLog(`chunk_lod_bands: ring<=${activeRadius}=lod0 | ring<=${lod1Radius}=lod1 | ring<=${renderRadius}=lod2`);
-        appendLog('controles: WASD voo livre | Q/E ou Space/C desce/sobe | LMB gira camera | MMB redefine pivo no clique | Shift acelera | Ctrl reduz');
+        appendLog('controles: WASD voo livre | Q/E ou Space/C desce/sobe | LMB gira camera | RMB gira no proprio eixo | MMB redefine pivo no clique | Shift acelera | Ctrl reduz');
 
         return () => {
           window.removeEventListener('resize', onResize);
           window.removeEventListener('keydown', onWindowKeyDown);
           window.removeEventListener('keyup', onWindowKeyUp);
-          window.removeEventListener('blur', clearMovementKeys);
+          window.removeEventListener('blur', onWindowBlur);
           clearMovementKeys();
+          stopFreeLook();
           renderer.domElement.removeEventListener('pointerdown', onCanvasPointerDown);
+          renderer.domElement.removeEventListener('pointermove', onCanvasPointerMove);
           renderer.domElement.removeEventListener('pointerup', onCanvasPointerUp);
+          renderer.domElement.removeEventListener('pointercancel', onCanvasPointerCancel);
+          renderer.domElement.removeEventListener('contextmenu', onCanvasContextMenu);
           if (hostResizeObserver) {
             hostResizeObserver.disconnect();
             hostResizeObserver = null;
@@ -3435,8 +3536,7 @@ const ServerView3D: React.FC = () => {
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_420px_at_50%_15%,rgba(56,189,248,0.08),transparent_58%)]" />
           <div className="pointer-events-none absolute inset-0 opacity-[0.18] [background:linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:36px_36px]" />
           <div ref={mountRef} className="relative z-[1] h-[min(62vh,760px)] min-h-[420px] w-full" />
-          {showViewerHudTopActions && (
-            <div className="absolute top-3 right-3 z-[2] flex flex-col items-end gap-2">
+          <div className="absolute top-3 right-3 z-[2] flex flex-col items-end gap-2">
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -3462,8 +3562,7 @@ const ServerView3D: React.FC = () => {
                   {shareFeedback}
                 </div>
               )}
-            </div>
-          )}
+          </div>
           <div className="absolute bottom-3 left-3 z-[2] flex gap-2">
             {showViewerHudLiveChip && (
               <div className="px-3 py-1.5 bg-black/50 backdrop-blur-md border border-white/10 rounded-lg flex items-center gap-2">
@@ -4009,11 +4108,11 @@ const ServerView3D: React.FC = () => {
           <div className="rounded border border-[#364662] bg-[#111a2b]/80 px-3 py-2">
             <p className="text-zinc-200 font-semibold flex items-center gap-2">
               <Icons.Search className="w-3.5 h-3.5 text-zinc-300" />
-              Zoom e Pan
+              Zoom e Rotacao Livre
             </p>
             <p className="text-zinc-400 mt-1">
               <span className="px-1.5 py-0.5 rounded bg-[#0e1626] border border-[#33415b] font-mono">Scroll</span> aproxima/afasta e{' '}
-              <span className="px-1.5 py-0.5 rounded bg-[#0e1626] border border-[#33415b] font-mono">Botao Direito</span> move lateralmente.
+              <span className="px-1.5 py-0.5 rounded bg-[#0e1626] border border-[#33415b] font-mono">Botao Direito</span> gira no proprio eixo.
             </p>
           </div>
         </div>
@@ -4078,14 +4177,6 @@ const ServerView3D: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              <label className="flex items-center justify-between rounded border border-zinc-700 bg-zinc-900/50 px-3 py-2">
-                <span className="text-zinc-300">Mostrar controles no viewport</span>
-                <input
-                  type="checkbox"
-                  checked={showViewerHudTopActions}
-                  onChange={(event) => setShowViewerHudTopActions(event.target.checked)}
-                />
-              </label>
               <label className="flex items-center justify-between rounded border border-zinc-700 bg-zinc-900/50 px-3 py-2">
                 <span className="text-zinc-300">Badge LIVE FRAME</span>
                 <input
