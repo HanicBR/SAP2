@@ -398,7 +398,7 @@ const parseArgs = (): Options => {
     sourceioModelScript: resolveWithParentFallback(
       String(map.get('--sourceio-model-script') || 'server/scripts/sourceio_export_models.py'),
     ),
-    sourceioPython: String(map.get('--sourceio-python') || process.env.PYTHON || 'python').trim(),
+    sourceioPython: String(map.get('--sourceio-python') || process.env.PYTHON || (process.platform === 'linux' ? 'python3' : 'python')).trim(),
     modelLod: Math.max(0, Math.floor(toNum(map.get('--model-lod'), 1))),
   };
 };
@@ -417,6 +417,36 @@ const normalizeMaterialName = (value: string): string =>
 
 const normalizeModelName = (value: string): string =>
   normalizeAssetPath(value).replace(/^models\//, '').replace(/\.mdl$/i, '');
+
+const detectPythonModuleHint = (output: string): string | undefined => {
+  const text = String(output || '').toLowerCase();
+  if (text.includes("no module named 'numpy'") || text.includes('no module named "numpy"')) {
+    return 'missing_python_module:numpy';
+  }
+  if (text.includes("no module named 'pil'") || text.includes('no module named "pil"') || text.includes('pillow_not_available')) {
+    return 'missing_python_module:pillow';
+  }
+  if (text.includes("no module named 'sourceio'") || text.includes('no module named "sourceio"')) {
+    return 'missing_python_module:sourceio';
+  }
+  if (text.includes('command not found') || text.includes('not recognized as an internal or external command')) {
+    return 'python_or_binary_not_found';
+  }
+  return undefined;
+};
+
+const buildPythonExecFailureReason = (
+  prefix: string,
+  exec: ReturnType<typeof spawnSync>,
+): string => {
+  const output = `${String(exec?.stdout || '')}\n${String(exec?.stderr || '')}`.trim();
+  const hint = detectPythonModuleHint(output);
+  if (exec?.error) {
+    return `${prefix}:${String(exec.error.message || exec.error)}${hint ? `|${hint}` : ''}`;
+  }
+  const status = typeof exec?.status === 'number' ? String(exec.status) : 'unknown';
+  return `${prefix}:exit_${status}${hint ? `|${hint}` : ''}`;
+};
 
 const readCString = (buffer: Buffer, offset: number, maxLength = 4096): string => {
   if (offset < 0 || offset >= buffer.length) return '';
@@ -770,8 +800,8 @@ const runSourceIO = (options: Options): { data: ImportData | null; warnings: str
     ],
     { encoding: 'utf8', timeout: 10 * 60 * 1000, maxBuffer: 8 * 1024 * 1024 },
   );
-  if (exec.error || !fs.existsSync(tempPath)) {
-    const warning = `sourceio_exec_failed:${exec.error?.message || 'no_output'}`;
+  if (exec.error || exec.status !== 0 || !fs.existsSync(tempPath)) {
+    const warning = buildPythonExecFailureReason('sourceio_exec_failed', exec);
     if (options.sourceioMode === 'required') throw new Error(warning);
     return { data: null, warnings: [warning] };
   }
@@ -896,8 +926,8 @@ const runSourceIOMaterialExport = (
     // no-op
   }
 
-  if (exec.error || !fs.existsSync(outPath)) {
-    warnings.push(`sourceio_material_export_exec_failed:${String(exec.error?.message || 'no_output')}`);
+  if (exec.error || exec.status !== 0 || !fs.existsSync(outPath)) {
+    warnings.push(buildPythonExecFailureReason('sourceio_material_export_exec_failed', exec));
     return { records, warnings, rootsScanned: [] };
   }
 
@@ -1006,8 +1036,8 @@ const runSourceIOModelExport = (
     // no-op
   }
 
-  if (exec.error || !fs.existsSync(outPath)) {
-    warnings.push(`sourceio_model_export_exec_failed:${String(exec.error?.message || 'no_output')}`);
+  if (exec.error || exec.status !== 0 || !fs.existsSync(outPath)) {
+    warnings.push(buildPythonExecFailureReason('sourceio_model_export_exec_failed', exec));
     return { records, warnings, rootsScanned: [] };
   }
 

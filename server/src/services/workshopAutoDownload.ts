@@ -188,6 +188,12 @@ type WorkshopQueueSnapshot = {
         status?: string;
         error?: string;
         finishedAt?: string;
+        sourceioEngineUsed?: string;
+        materialsWithTexture?: number;
+        materialsTotal?: number;
+        modelsExported?: number;
+        modelsTotal?: number;
+        warningsCount?: number;
       };
       extract: {
         exists: boolean;
@@ -632,6 +638,12 @@ const readReportSummary = (
   status?: string;
   error?: string;
   finishedAt?: string;
+  sourceioEngineUsed?: string;
+  materialsWithTexture?: number;
+  materialsTotal?: number;
+  modelsExported?: number;
+  modelsTotal?: number;
+  warningsCount?: number;
 } => {
   const absolute = String(reportPath || '').trim();
   if (!absolute || !fs.existsSync(absolute)) {
@@ -644,6 +656,12 @@ const readReportSummary = (
     const errorValue = String(parsed?.error || '').trim();
     const finishedAtValue = String(parsed?.finishedAt || '').trim();
     const okRaw = parsed?.ok;
+    const sourceioEngineUsed = String((parsed as any)?.settings?.sourceioEngineUsed || '').trim();
+    const materialsWithTextureRaw = Number((parsed as any)?.materials?.withTexture);
+    const materialsTotalRaw = Number((parsed as any)?.materials?.total);
+    const modelsExportedRaw = Number((parsed as any)?.models?.exported);
+    const modelsTotalRaw = Number((parsed as any)?.models?.total);
+    const warningsRaw = (parsed as any)?.warnings;
 
     return {
       exists: true,
@@ -651,6 +669,12 @@ const readReportSummary = (
       ...(statusValue ? { status: statusValue } : {}),
       ...(errorValue ? { error: errorValue } : {}),
       ...(finishedAtValue ? { finishedAt: finishedAtValue } : {}),
+      ...(sourceioEngineUsed ? { sourceioEngineUsed } : {}),
+      ...(Number.isFinite(materialsWithTextureRaw) ? { materialsWithTexture: Math.max(0, Math.floor(materialsWithTextureRaw)) } : {}),
+      ...(Number.isFinite(materialsTotalRaw) ? { materialsTotal: Math.max(0, Math.floor(materialsTotalRaw)) } : {}),
+      ...(Number.isFinite(modelsExportedRaw) ? { modelsExported: Math.max(0, Math.floor(modelsExportedRaw)) } : {}),
+      ...(Number.isFinite(modelsTotalRaw) ? { modelsTotal: Math.max(0, Math.floor(modelsTotalRaw)) } : {}),
+      ...(Array.isArray(warningsRaw) ? { warningsCount: warningsRaw.length } : {}),
     };
   } catch (error: any) {
     return {

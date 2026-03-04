@@ -196,6 +196,12 @@ export interface WorkshopQueueJob {
       status?: string;
       error?: string;
       finishedAt?: string;
+      sourceioEngineUsed?: string;
+      materialsWithTexture?: number;
+      materialsTotal?: number;
+      modelsExported?: number;
+      modelsTotal?: number;
+      warningsCount?: number;
     };
     extract: {
       exists: boolean;

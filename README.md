@@ -184,6 +184,19 @@ Garantias de seguranca/robustez:
   - `buildMapPipeline` (pipeline)
 - erros sempre registrados em report com `step`, `exitCode/signal`, `logTail`.
 
+Pre-requisitos Linux para export de texturas/modelos (SourceIO):
+
+- `python3`
+- `python3-numpy`
+- `python3-pil`
+
+Exemplo Ubuntu/Debian:
+
+```bash
+apt-get update
+apt-get install -y python3 python3-numpy python3-pil
+```
+
 Cache/dedupe de processamento:
 
 - `process-cache.json` (em `WORKSHOP_REPORTS_DIR`) guarda assinatura do payload.

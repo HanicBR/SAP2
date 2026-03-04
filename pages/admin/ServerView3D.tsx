@@ -3580,6 +3580,11 @@ const ServerView3D: React.FC = () => {
                   <p className="text-zinc-500 break-all">
                     reports: dl={job.reportSummary.download.status || (job.reportSummary.download.exists ? 'exists' : 'missing')} | ex={job.reportSummary.extract.status || (job.reportSummary.extract.exists ? 'exists' : 'missing')} | pr={job.reportSummary.process.status || (job.reportSummary.process.exists ? 'exists' : 'missing')}
                   </p>
+                  {(job.reportSummary.process.sourceioEngineUsed || Number.isFinite(Number(job.reportSummary.process.materialsTotal)) || Number.isFinite(Number(job.reportSummary.process.modelsTotal))) && (
+                    <p className="text-zinc-500 break-all">
+                      process: engine={job.reportSummary.process.sourceioEngineUsed || 'n/a'} | materials={Number(job.reportSummary.process.materialsWithTexture || 0)}/{Number(job.reportSummary.process.materialsTotal || 0)} | models={Number(job.reportSummary.process.modelsExported || 0)}/{Number(job.reportSummary.process.modelsTotal || 0)} | warnings={Number(job.reportSummary.process.warningsCount || 0)}
+                    </p>
+                  )}
                   {(job.reportSummary.download.error || job.reportSummary.extract.error || job.reportSummary.process.error) && (
                     <div className="rounded border border-red-900/40 bg-red-950/20 px-2 py-1 mt-1 space-y-0.5">
                       {job.reportSummary.download.error && (

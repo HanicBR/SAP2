@@ -556,7 +556,21 @@ const pickBspForMap = (bspCandidates: string[], mapName: string): string | null 
   return scored[0]?.candidate || null;
 };
 
-const computeContentSignature = (contentDir: string): string => {
+const appendFileFingerprint = (hash: crypto.Hash, label: string, targetPath: string) => {
+  const normalized = path.resolve(targetPath);
+  if (!fs.existsSync(normalized)) {
+    hash.update(`tool:${label}|missing|${normalized}\n`);
+    return;
+  }
+  try {
+    const stat = fs.statSync(normalized);
+    hash.update(`tool:${label}|${normalized}|${stat.size}|${Math.floor(stat.mtimeMs)}\n`);
+  } catch {
+    hash.update(`tool:${label}|stat_failed|${normalized}\n`);
+  }
+};
+
+const computeContentSignature = (contentDir: string, options: Options): string => {
   const files: string[] = [];
   const stack = [contentDir];
   while (stack.length) {
@@ -579,7 +593,7 @@ const computeContentSignature = (contentDir: string): string => {
   }
   files.sort((a, b) => a.localeCompare(b));
   const hash = crypto.createHash('sha1');
-  hash.update('content-signature-v1\n');
+  hash.update('content-signature-v2\n');
   for (const file of files) {
     let size = 0;
     let mtimeMs = 0;
@@ -593,6 +607,14 @@ const computeContentSignature = (contentDir: string): string => {
     const rel = path.relative(contentDir, file).replace(/\\/g, '/');
     hash.update(`${rel}|${size}|${mtimeMs}\n`);
   }
+  hash.update(`mode:${options.pipelineMode.assetResolutionMode}|sourceio:${options.pipelineMode.sourceioMode}|python:${options.pythonBin}\n`);
+  hash.update(`mounts:${options.mountsPath}\n`);
+  appendFileFingerprint(hash, 'processWorkshopMap.ts', __filename);
+  appendFileFingerprint(hash, 'buildMapPipeline.ts', path.join(PROJECT_SERVER_ROOT, 'src', 'scripts', 'buildMapPipeline.ts'));
+  appendFileFingerprint(hash, 'extract_workshop_payload.py', options.extractScriptPath);
+  appendFileFingerprint(hash, 'sourceio_extract_scene.py', path.join(PROJECT_SERVER_ROOT, 'scripts', 'sourceio_extract_scene.py'));
+  appendFileFingerprint(hash, 'sourceio_export_materials.py', path.join(PROJECT_SERVER_ROOT, 'scripts', 'sourceio_export_materials.py'));
+  appendFileFingerprint(hash, 'sourceio_export_models.py', path.join(PROJECT_SERVER_ROOT, 'scripts', 'sourceio_export_models.py'));
   return hash.digest('hex');
 };
 
@@ -678,7 +700,7 @@ const run = () => {
     strategy: 'exact_basename_then_maps_path_then_contains',
   };
   const cacheKey = `${options.appId}:${options.workshopId}:${options.mapName}`;
-  const signature = computeContentSignature(options.contentDir);
+  const signature = computeContentSignature(options.contentDir, options);
   const cacheState: ProcessReport['cache'] = {
     key: cacheKey,
     signature,
@@ -886,6 +908,8 @@ const run = () => {
       options.pipelineMode.assetResolutionMode,
       '--sourceio-mode',
       options.pipelineMode.sourceioMode,
+      '--sourceio-python',
+      options.pythonBin,
     ]);
     const pipelineStep = runStep('pipeline', tsNodeRunner.command, pipelineArgs, options.timeoutPipelineMs, PROJECT_ROOT);
     steps.push(pipelineStep);
