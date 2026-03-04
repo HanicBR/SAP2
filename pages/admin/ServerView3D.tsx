@@ -313,6 +313,8 @@ const CAMERA_MOVE_FAST_MULTIPLIER = 2.25;
 const CAMERA_MOVE_SLOW_MULTIPLIER = 0.5;
 const CAMERA_FREE_LOOK_SENSITIVITY = 0.0026;
 const CAMERA_FREE_LOOK_MAX_UP_DOT = 0.985;
+const CAMERA_TOUCH_LOOK_MULTIPLIER = 1.2;
+const MOBILE_JOYSTICK_DEADZONE = 0.08;
 const MODEL_CACHE_MAX_BYTES = 220 * 1024 * 1024;
 const MODEL_CACHE_EVICT_GRACE_MS = 18000;
 const MODEL_CACHE_SWEEP_INTERVAL_MS = 1800;
@@ -651,6 +653,21 @@ const VIEWER_MOVE_SPEED_DEFAULT = 1.25;
 const clampMoveSpeedFactor = (value: number): number =>
   Math.min(VIEWER_MOVE_SPEED_MAX, Math.max(VIEWER_MOVE_SPEED_MIN, value));
 
+const detectMobileControlsPreferred = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  const smallViewport = window.matchMedia('(max-width: 1024px)').matches;
+  const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
+  const hasTouch = Number(window.navigator.maxTouchPoints || 0) > 0;
+  return smallViewport || coarsePointer || hasTouch;
+};
+
+const applyAnalogDeadzone = (value: number, deadzone: number): number => {
+  const abs = Math.abs(value);
+  if (abs <= deadzone) return 0;
+  const scaled = (abs - deadzone) / (1 - deadzone);
+  return Math.sign(value) * Math.min(1, Math.max(0, scaled));
+};
+
 const readInitialRenderProfile = (): ViewerRenderProfile => {
   if (typeof window === 'undefined') return 'simple';
   try {
@@ -728,6 +745,16 @@ const ServerView3D: React.FC = () => {
   const [showViewerHudLiveChip, setShowViewerHudLiveChip] = useState<boolean>(true);
   const [showViewerHudFpsChip, setShowViewerHudFpsChip] = useState<boolean>(true);
   const [showViewerHudSelectedPlayer, setShowViewerHudSelectedPlayer] = useState<boolean>(true);
+  const [mobileControlsEnabled, setMobileControlsEnabled] = useState<boolean>(() => detectMobileControlsPreferred());
+  const [mobileMoveKnob, setMobileMoveKnob] = useState<{ x: number; y: number; active: boolean }>({
+    x: 0,
+    y: 0,
+    active: false,
+  });
+  const [mobileLookActive, setMobileLookActive] = useState<boolean>(false);
+  const [mobileBoostEnabled, setMobileBoostEnabled] = useState<boolean>(false);
+  const [mobileAscendPressed, setMobileAscendPressed] = useState<boolean>(false);
+  const [mobileDescendPressed, setMobileDescendPressed] = useState<boolean>(false);
   const [shareFeedback, setShareFeedback] = useState<string | null>(null);
   const [moveSpeedFactor, setMoveSpeedFactor] = useState<number>(() => readInitialMoveSpeedFactor());
   const [playerAliveFilter, setPlayerAliveFilter] = useState<'all' | 'alive' | 'dead'>('all');
@@ -743,6 +770,22 @@ const ServerView3D: React.FC = () => {
   const showPlayerHealthInLabelRef = useRef<boolean>(false);
   const moveSpeedFactorRef = useRef<number>(moveSpeedFactor);
   const viewerActionPollTokenRef = useRef<number>(0);
+  const mobileMovePadRef = useRef<HTMLDivElement | null>(null);
+  const mobileMovePointerIdRef = useRef<number | null>(null);
+  const mobileLookPadPointerRef = useRef<{ pointerId: number | null; lastX: number; lastY: number }>({
+    pointerId: null,
+    lastX: 0,
+    lastY: 0,
+  });
+  const mobileAscendPointerIdRef = useRef<number | null>(null);
+  const mobileDescendPointerIdRef = useRef<number | null>(null);
+  const mobileMoveInputRef = useRef<{ x: number; y: number; vertical: number; boost: boolean }>({
+    x: 0,
+    y: 0,
+    vertical: 0,
+    boost: false,
+  });
+  const applyViewerLookDeltaRef = useRef<(deltaX: number, deltaY: number) => void>(() => undefined);
 
   const viewerPlayers = useMemo(
     () =>
@@ -834,6 +877,188 @@ const ServerView3D: React.FC = () => {
   );
   const viewerFpsLabel = hasFreshViewerSnapshot ? '60 FPS' : '-- FPS';
   const moveSpeedUnitsPerSec = Math.round(CAMERA_MOVE_SPEED * moveSpeedFactor);
+
+  const resetMobileMovePad = useCallback(() => {
+    mobileMoveInputRef.current.x = 0;
+    mobileMoveInputRef.current.y = 0;
+    setMobileMoveKnob({ x: 0, y: 0, active: false });
+  }, []);
+
+  const updateMobileMoveFromClientPoint = useCallback((clientX: number, clientY: number) => {
+    const pad = mobileMovePadRef.current;
+    if (!pad) return;
+    const rect = pad.getBoundingClientRect();
+    const centerX = rect.left + rect.width * 0.5;
+    const centerY = rect.top + rect.height * 0.5;
+    const radius = Math.max(26, Math.min(rect.width, rect.height) * 0.36);
+
+    let dx = clientX - centerX;
+    let dy = clientY - centerY;
+    const distance = Math.hypot(dx, dy);
+    if (distance > radius) {
+      const scale = radius / Math.max(distance, 1e-6);
+      dx *= scale;
+      dy *= scale;
+    }
+
+    const rawX = dx / radius;
+    const rawY = dy / radius;
+    mobileMoveInputRef.current.x = applyAnalogDeadzone(rawX, MOBILE_JOYSTICK_DEADZONE);
+    mobileMoveInputRef.current.y = applyAnalogDeadzone(rawY, MOBILE_JOYSTICK_DEADZONE);
+    setMobileMoveKnob({ x: rawX, y: rawY, active: true });
+  }, []);
+
+  const handleMobileMovePadPointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    if (!mobileControlsEnabled) return;
+    if (mobileMovePointerIdRef.current !== null) return;
+    event.preventDefault();
+    mobileMovePointerIdRef.current = event.pointerId;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    updateMobileMoveFromClientPoint(event.clientX, event.clientY);
+  }, [mobileControlsEnabled, updateMobileMoveFromClientPoint]);
+
+  const handleMobileMovePadPointerMove = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    if (mobileMovePointerIdRef.current !== event.pointerId) return;
+    event.preventDefault();
+    updateMobileMoveFromClientPoint(event.clientX, event.clientY);
+  }, [updateMobileMoveFromClientPoint]);
+
+  const handleMobileMovePadPointerEnd = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    if (mobileMovePointerIdRef.current !== event.pointerId) return;
+    event.preventDefault();
+    try {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    } catch {
+      // no-op
+    }
+    mobileMovePointerIdRef.current = null;
+    resetMobileMovePad();
+  }, [resetMobileMovePad]);
+
+  const handleMobileLookPadPointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    if (!mobileControlsEnabled) return;
+    if (mobileLookPadPointerRef.current.pointerId !== null) return;
+    event.preventDefault();
+    mobileLookPadPointerRef.current.pointerId = event.pointerId;
+    mobileLookPadPointerRef.current.lastX = event.clientX;
+    mobileLookPadPointerRef.current.lastY = event.clientY;
+    setMobileLookActive(true);
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }, [mobileControlsEnabled]);
+
+  const handleMobileLookPadPointerMove = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    if (mobileLookPadPointerRef.current.pointerId !== event.pointerId) return;
+    event.preventDefault();
+    const deltaX = event.clientX - mobileLookPadPointerRef.current.lastX;
+    const deltaY = event.clientY - mobileLookPadPointerRef.current.lastY;
+    mobileLookPadPointerRef.current.lastX = event.clientX;
+    mobileLookPadPointerRef.current.lastY = event.clientY;
+    if (Math.abs(deltaX) < 0.001 && Math.abs(deltaY) < 0.001) return;
+    applyViewerLookDeltaRef.current(deltaX * CAMERA_TOUCH_LOOK_MULTIPLIER, deltaY * CAMERA_TOUCH_LOOK_MULTIPLIER);
+  }, []);
+
+  const handleMobileLookPadPointerEnd = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    if (mobileLookPadPointerRef.current.pointerId !== event.pointerId) return;
+    event.preventDefault();
+    try {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    } catch {
+      // no-op
+    }
+    mobileLookPadPointerRef.current.pointerId = null;
+    setMobileLookActive(false);
+  }, []);
+
+  const handleMobileAscendPointerDown = useCallback((event: React.PointerEvent<HTMLButtonElement>) => {
+    if (!mobileControlsEnabled) return;
+    if (mobileAscendPointerIdRef.current !== null) return;
+    event.preventDefault();
+    mobileAscendPointerIdRef.current = event.pointerId;
+    setMobileAscendPressed(true);
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }, [mobileControlsEnabled]);
+
+  const handleMobileAscendPointerEnd = useCallback((event: React.PointerEvent<HTMLButtonElement>) => {
+    if (mobileAscendPointerIdRef.current !== event.pointerId) return;
+    event.preventDefault();
+    try {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    } catch {
+      // no-op
+    }
+    mobileAscendPointerIdRef.current = null;
+    setMobileAscendPressed(false);
+  }, []);
+
+  const handleMobileDescendPointerDown = useCallback((event: React.PointerEvent<HTMLButtonElement>) => {
+    if (!mobileControlsEnabled) return;
+    if (mobileDescendPointerIdRef.current !== null) return;
+    event.preventDefault();
+    mobileDescendPointerIdRef.current = event.pointerId;
+    setMobileDescendPressed(true);
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }, [mobileControlsEnabled]);
+
+  const handleMobileDescendPointerEnd = useCallback((event: React.PointerEvent<HTMLButtonElement>) => {
+    if (mobileDescendPointerIdRef.current !== event.pointerId) return;
+    event.preventDefault();
+    try {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    } catch {
+      // no-op
+    }
+    mobileDescendPointerIdRef.current = null;
+    setMobileDescendPressed(false);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const viewportQuery = window.matchMedia('(max-width: 1024px)');
+    const coarseQuery = window.matchMedia('(pointer: coarse)');
+    const sync = () => {
+      const hasTouch = Number(window.navigator.maxTouchPoints || 0) > 0;
+      setMobileControlsEnabled(viewportQuery.matches || coarseQuery.matches || hasTouch);
+    };
+    sync();
+
+    const listen = (query: MediaQueryList) => {
+      if (typeof query.addEventListener === 'function') {
+        query.addEventListener('change', sync);
+        return () => query.removeEventListener('change', sync);
+      }
+      query.addListener(sync);
+      return () => query.removeListener(sync);
+    };
+
+    const unlistenViewport = listen(viewportQuery);
+    const unlistenCoarse = listen(coarseQuery);
+    return () => {
+      unlistenViewport();
+      unlistenCoarse();
+    };
+  }, []);
+
+  useEffect(() => {
+    mobileMoveInputRef.current.boost = mobileBoostEnabled;
+  }, [mobileBoostEnabled]);
+
+  useEffect(() => {
+    const vertical = (mobileAscendPressed ? 1 : 0) + (mobileDescendPressed ? -1 : 0);
+    mobileMoveInputRef.current.vertical = vertical;
+  }, [mobileAscendPressed, mobileDescendPressed]);
+
+  useEffect(() => {
+    if (mobileControlsEnabled) return;
+    mobileMovePointerIdRef.current = null;
+    mobileLookPadPointerRef.current.pointerId = null;
+    mobileAscendPointerIdRef.current = null;
+    mobileDescendPointerIdRef.current = null;
+    setMobileLookActive(false);
+    setMobileBoostEnabled(false);
+    setMobileAscendPressed(false);
+    setMobileDescendPressed(false);
+    resetMobileMovePad();
+  }, [mobileControlsEnabled, resetMobileMovePad]);
 
   const handleShareViewer = useCallback(async () => {
     const basePath = serverId ? `/admin/servers/${serverId}/view3d` : '/admin/servers';
@@ -1400,9 +1625,9 @@ const ServerView3D: React.FC = () => {
     controls.zoomSpeed = 1;
     controls.panSpeed = 0.55;
     controls.mouseButtons = {
-      LEFT: THREE.MOUSE.ROTATE,
+      LEFT: -1,
       MIDDLE: THREE.MOUSE.ROTATE,
-      RIGHT: -1,
+      RIGHT: THREE.MOUSE.PAN,
     };
 
     let composer: EffectComposer | null = null;
@@ -2337,40 +2562,7 @@ const ServerView3D: React.FC = () => {
       controls.update();
     };
 
-    const onCanvasPointerDown = (event: PointerEvent) => {
-      if (event.button === 2) {
-        event.preventDefault();
-        freeLook.active = true;
-        freeLook.pointerId = event.pointerId;
-        freeLook.lastX = event.clientX;
-        freeLook.lastY = event.clientY;
-        controls.enabled = false;
-        try {
-          renderer.domElement.setPointerCapture(event.pointerId);
-        } catch {
-          // no-op
-        }
-        return;
-      }
-      if (event.button === 1) {
-        event.preventDefault();
-        retargetOrbitAtClientPoint(event.clientX, event.clientY);
-        return;
-      }
-      if (event.button !== 0) return;
-      pointerDown.x = event.clientX;
-      pointerDown.y = event.clientY;
-      pointerDownAt = performance.now();
-    };
-
-    const onCanvasPointerMove = (event: PointerEvent) => {
-      if (!freeLook.active || event.pointerId !== freeLook.pointerId) return;
-      event.preventDefault();
-
-      const deltaX = event.clientX - freeLook.lastX;
-      const deltaY = event.clientY - freeLook.lastY;
-      freeLook.lastX = event.clientX;
-      freeLook.lastY = event.clientY;
+    const applyViewerLookDelta = (deltaX: number, deltaY: number) => {
       if (Math.abs(deltaX) < 0.001 && Math.abs(deltaY) < 0.001) return;
 
       freeLookForward.copy(controls.target).sub(camera.position);
@@ -2401,12 +2593,45 @@ const ServerView3D: React.FC = () => {
       camera.lookAt(controls.target);
     };
 
-    const onCanvasPointerUp = (event: PointerEvent) => {
-      if (event.button === 2) {
-        stopFreeLook(event.pointerId);
+    applyViewerLookDeltaRef.current = applyViewerLookDelta;
+
+    const onCanvasPointerDown = (event: PointerEvent) => {
+      if (event.button === 1) {
+        event.preventDefault();
+        retargetOrbitAtClientPoint(event.clientX, event.clientY);
         return;
       }
       if (event.button !== 0) return;
+      event.preventDefault();
+      pointerDown.x = event.clientX;
+      pointerDown.y = event.clientY;
+      pointerDownAt = performance.now();
+      freeLook.active = true;
+      freeLook.pointerId = event.pointerId;
+      freeLook.lastX = event.clientX;
+      freeLook.lastY = event.clientY;
+      controls.enabled = false;
+      try {
+        renderer.domElement.setPointerCapture(event.pointerId);
+      } catch {
+        // no-op
+      }
+    };
+
+    const onCanvasPointerMove = (event: PointerEvent) => {
+      if (!freeLook.active || event.pointerId !== freeLook.pointerId) return;
+      event.preventDefault();
+
+      const deltaX = event.clientX - freeLook.lastX;
+      const deltaY = event.clientY - freeLook.lastY;
+      freeLook.lastX = event.clientX;
+      freeLook.lastY = event.clientY;
+      applyViewerLookDelta(deltaX, deltaY);
+    };
+
+    const onCanvasPointerUp = (event: PointerEvent) => {
+      if (event.button !== 0) return;
+      stopFreeLook(event.pointerId);
       const moved = Math.hypot(event.clientX - pointerDown.x, event.clientY - pointerDown.y);
       const elapsed = performance.now() - pointerDownAt;
       if (moved > 8 || elapsed > 450) return;
@@ -3285,10 +3510,18 @@ const ServerView3D: React.FC = () => {
 
           const shouldManualMove = !(viewerFollowSelectedRef.current && selectedSteamId);
           if (shouldManualMove) {
-            const moveForwardBack = (movementKeys.forward ? 1 : 0) + (movementKeys.backward ? -1 : 0);
-            const moveLeftRight = (movementKeys.right ? 1 : 0) + (movementKeys.left ? -1 : 0);
-            const moveVertical = (movementKeys.up ? 1 : 0) + (movementKeys.down ? -1 : 0);
-            if (moveForwardBack !== 0 || moveLeftRight !== 0 || moveVertical !== 0) {
+            const touchMove = mobileMoveInputRef.current;
+            const moveForwardBack =
+              (movementKeys.forward ? 1 : 0) + (movementKeys.backward ? -1 : 0) + -touchMove.y;
+            const moveLeftRight =
+              (movementKeys.right ? 1 : 0) + (movementKeys.left ? -1 : 0) + touchMove.x;
+            const moveVertical =
+              (movementKeys.up ? 1 : 0) + (movementKeys.down ? -1 : 0) + touchMove.vertical;
+            if (
+              Math.abs(moveForwardBack) > 0.001
+              || Math.abs(moveLeftRight) > 0.001
+              || Math.abs(moveVertical) > 0.001
+            ) {
               // Free-fly movement: WASD follows camera pitch/yaw (noclip style).
               moveForward.set(0, 0, -1).applyQuaternion(camera.quaternion).normalize();
               moveRight.set(1, 0, 0).applyQuaternion(camera.quaternion).normalize();
@@ -3299,7 +3532,7 @@ const ServerView3D: React.FC = () => {
               if (moveDelta.lengthSq() > 1e-8) {
                 moveDelta.normalize();
                 let speed = CAMERA_MOVE_SPEED * moveSpeedFactorRef.current;
-                if (movementKeys.fast) speed *= CAMERA_MOVE_FAST_MULTIPLIER;
+                if (movementKeys.fast || touchMove.boost) speed *= CAMERA_MOVE_FAST_MULTIPLIER;
                 if (movementKeys.slow) speed *= CAMERA_MOVE_SLOW_MULTIPLIER;
                 const distance = speed * dtSec;
                 camera.position.addScaledVector(moveDelta, distance);
@@ -3331,6 +3564,10 @@ const ServerView3D: React.FC = () => {
         const onWindowBlur = () => {
           clearMovementKeys();
           stopFreeLook();
+          resetMobileMovePad();
+          setMobileLookActive(false);
+          setMobileAscendPressed(false);
+          setMobileDescendPressed(false);
         };
         window.addEventListener('resize', onResize);
         window.addEventListener('keydown', onWindowKeyDown);
@@ -3370,7 +3607,7 @@ const ServerView3D: React.FC = () => {
         );
         appendLog(`world_z_bounds=min:${Math.round(worldMinZ)} max:${Math.round(worldMaxZ)} center:${Math.round(worldCenterZ)}`);
         appendLog(`chunk_lod_bands: ring<=${activeRadius}=lod0 | ring<=${lod1Radius}=lod1 | ring<=${renderRadius}=lod2`);
-        appendLog('controles: WASD voo livre | Q/E ou Space/C desce/sobe | LMB gira camera | RMB gira no proprio eixo | MMB redefine pivo no clique | Shift acelera | Ctrl reduz');
+        appendLog('controles: WASD voo livre | Q/E ou Space/C desce/sobe | LMB gira no proprio eixo | RMB pan | MMB redefine pivo no clique | Shift acelera | Ctrl reduz');
 
         return () => {
           window.removeEventListener('resize', onResize);
@@ -3379,6 +3616,7 @@ const ServerView3D: React.FC = () => {
           window.removeEventListener('blur', onWindowBlur);
           clearMovementKeys();
           stopFreeLook();
+          applyViewerLookDeltaRef.current = () => undefined;
           renderer.domElement.removeEventListener('pointerdown', onCanvasPointerDown);
           renderer.domElement.removeEventListener('pointermove', onCanvasPointerMove);
           renderer.domElement.removeEventListener('pointerup', onCanvasPointerUp);
@@ -3409,6 +3647,7 @@ const ServerView3D: React.FC = () => {
 
     return () => {
       cancelled = true;
+      applyViewerLookDeltaRef.current = () => undefined;
       if (animationFrameId) {
         window.cancelAnimationFrame(animationFrameId);
       }
@@ -3590,6 +3829,92 @@ const ServerView3D: React.FC = () => {
                 {selectedViewerPlayer.alive === false ? 'Morto' : 'Vivo'}
                 {selectedViewerPlayer.teamName ? ` | ${selectedViewerPlayer.teamName}` : ''}
               </p>
+            </div>
+          )}
+          {mobileControlsEnabled && (
+            <div className="pointer-events-none absolute inset-0 z-[3] lg:hidden">
+              <div className="absolute inset-x-2 bottom-2 flex items-end justify-between gap-2">
+                <div className="pointer-events-auto flex items-end gap-2">
+                  <div
+                    ref={mobileMovePadRef}
+                    className="relative h-28 w-28 rounded-full border border-cyan-700/60 bg-[#0b1322]/70 shadow-[0_6px_20px_rgba(0,0,0,0.35)] backdrop-blur select-none touch-none"
+                    onPointerDown={handleMobileMovePadPointerDown}
+                    onPointerMove={handleMobileMovePadPointerMove}
+                    onPointerUp={handleMobileMovePadPointerEnd}
+                    onPointerCancel={handleMobileMovePadPointerEnd}
+                  >
+                    <div className="pointer-events-none absolute inset-3 rounded-full border border-cyan-500/30" />
+                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-[10px] font-bold uppercase tracking-[0.14em] text-cyan-200/70">
+                      Move
+                    </div>
+                    <div
+                      className={`pointer-events-none absolute left-1/2 top-1/2 h-11 w-11 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-400/70 bg-cyan-500/35 shadow-[0_0_18px_rgba(34,211,238,0.35)] transition-colors ${
+                        mobileMoveKnob.active ? 'border-cyan-300 bg-cyan-400/45' : ''
+                      }`}
+                      style={{
+                        transform: `translate(calc(-50% + ${(mobileMoveKnob.x * 34).toFixed(1)}px), calc(-50% + ${(mobileMoveKnob.y * 34).toFixed(1)}px))`,
+                      }}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <button
+                      type="button"
+                      className={`touch-none rounded-lg border px-2 py-1 text-[10px] font-bold uppercase tracking-wide ${
+                        mobileAscendPressed
+                          ? 'border-emerald-500 bg-emerald-500/25 text-emerald-200'
+                          : 'border-[#415272] bg-[#0f1829]/85 text-zinc-200'
+                      }`}
+                      onPointerDown={handleMobileAscendPointerDown}
+                      onPointerUp={handleMobileAscendPointerEnd}
+                      onPointerCancel={handleMobileAscendPointerEnd}
+                      onPointerLeave={handleMobileAscendPointerEnd}
+                    >
+                      Up
+                    </button>
+                    <button
+                      type="button"
+                      className={`touch-none rounded-lg border px-2 py-1 text-[10px] font-bold uppercase tracking-wide ${
+                        mobileDescendPressed
+                          ? 'border-orange-500 bg-orange-500/25 text-orange-100'
+                          : 'border-[#415272] bg-[#0f1829]/85 text-zinc-200'
+                      }`}
+                      onPointerDown={handleMobileDescendPointerDown}
+                      onPointerUp={handleMobileDescendPointerEnd}
+                      onPointerCancel={handleMobileDescendPointerEnd}
+                      onPointerLeave={handleMobileDescendPointerEnd}
+                    >
+                      Down
+                    </button>
+                  </div>
+                </div>
+
+                <div className="pointer-events-auto flex items-end gap-2">
+                  <button
+                    type="button"
+                    className={`touch-none rounded-lg border px-2 py-1.5 text-[10px] font-bold uppercase tracking-wide ${
+                      mobileBoostEnabled
+                        ? 'border-cyan-400 bg-cyan-500/25 text-cyan-100'
+                        : 'border-[#415272] bg-[#0f1829]/85 text-zinc-200'
+                    }`}
+                    onClick={() => setMobileBoostEnabled((current) => !current)}
+                  >
+                    Boost
+                  </button>
+                  <div
+                    className={`relative h-24 w-28 rounded-2xl border bg-[#0b1322]/70 shadow-[0_6px_20px_rgba(0,0,0,0.35)] backdrop-blur select-none touch-none ${
+                      mobileLookActive ? 'border-cyan-400/80' : 'border-cyan-700/60'
+                    }`}
+                    onPointerDown={handleMobileLookPadPointerDown}
+                    onPointerMove={handleMobileLookPadPointerMove}
+                    onPointerUp={handleMobileLookPadPointerEnd}
+                    onPointerCancel={handleMobileLookPadPointerEnd}
+                  >
+                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-[10px] font-bold uppercase tracking-[0.14em] text-cyan-200/70">
+                      Look
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -4093,7 +4418,7 @@ const ServerView3D: React.FC = () => {
               Rotacao da Camera
             </p>
             <p className="text-zinc-400 mt-1">
-              Arraste com <span className="px-1.5 py-0.5 rounded bg-[#0e1626] border border-[#33415b] font-mono">Botao Esquerdo</span> para girar livremente.
+              Arraste com <span className="px-1.5 py-0.5 rounded bg-[#0e1626] border border-[#33415b] font-mono">Botao Esquerdo</span> para girar no proprio eixo.
             </p>
           </div>
           <div className="rounded border border-[#364662] bg-[#111a2b]/80 px-3 py-2">
@@ -4108,11 +4433,21 @@ const ServerView3D: React.FC = () => {
           <div className="rounded border border-[#364662] bg-[#111a2b]/80 px-3 py-2">
             <p className="text-zinc-200 font-semibold flex items-center gap-2">
               <Icons.Search className="w-3.5 h-3.5 text-zinc-300" />
-              Zoom e Rotacao Livre
+              Zoom e Pan
             </p>
             <p className="text-zinc-400 mt-1">
               <span className="px-1.5 py-0.5 rounded bg-[#0e1626] border border-[#33415b] font-mono">Scroll</span> aproxima/afasta e{' '}
-              <span className="px-1.5 py-0.5 rounded bg-[#0e1626] border border-[#33415b] font-mono">Botao Direito</span> gira no proprio eixo.
+              <span className="px-1.5 py-0.5 rounded bg-[#0e1626] border border-[#33415b] font-mono">Botao Direito</span> move lateralmente.
+            </p>
+          </div>
+          <div className="rounded border border-[#364662] bg-[#111a2b]/80 px-3 py-2 lg:hidden">
+            <p className="text-zinc-200 font-semibold flex items-center gap-2">
+              <Icons.Crosshair className="w-3.5 h-3.5 text-cyan-300" />
+              Mobile
+            </p>
+            <p className="text-zinc-400 mt-1">
+              Joystick esquerdo move, LOOK gira camera, <span className="font-mono">UP/DOWN</span> controla altitude e{' '}
+              <span className="font-mono">BOOST</span> acelera.
             </p>
           </div>
         </div>
@@ -4216,6 +4551,14 @@ const ServerView3D: React.FC = () => {
                   checked={showPlayerHealthInLabel}
                   onChange={(event) => setShowPlayerHealthInLabel(event.target.checked)}
                   disabled={!showPlayerLabels}
+                />
+              </label>
+              <label className="flex items-center justify-between rounded border border-zinc-700 bg-zinc-900/50 px-3 py-2 sm:col-span-2">
+                <span className="text-zinc-300">Controles mobile (joystick/look)</span>
+                <input
+                  type="checkbox"
+                  checked={mobileControlsEnabled}
+                  onChange={(event) => setMobileControlsEnabled(event.target.checked)}
                 />
               </label>
               <label className="flex items-center justify-between rounded border border-zinc-700 bg-zinc-900/50 px-3 py-2 sm:col-span-2">
