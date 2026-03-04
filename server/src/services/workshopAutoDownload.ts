@@ -568,6 +568,14 @@ const scoreWorkshopCandidate = (mapName: string, titleRaw: string): number => {
   return score;
 };
 
+const isExactMapTitleCandidate = (mapName: string, candidate: WorkshopSearchCandidate): boolean =>
+  sanitizeMapName(candidate.title) === mapName;
+
+const pickSmallestWorkshopId = (candidates: WorkshopSearchCandidate[]): WorkshopSearchCandidate | undefined =>
+  candidates
+    .slice()
+    .sort((a, b) => Number(a.workshopId) - Number(b.workshopId))[0];
+
 const fetchTextWithTimeout = async (
   url: string,
   timeoutMs: number,
@@ -772,6 +780,21 @@ const discoverWorkshopIdForMap = async (
         && top.workshopId !== second.workshopId
         && top.score - second.score < 25,
     );
+    const exactTitleTopTieBreak = (
+      ambiguous
+      && top
+      && second
+      && top.score === second.score
+      && isExactMapTitleCandidate(mapName, top)
+      && isExactMapTitleCandidate(mapName, second)
+    )
+      ? pickSmallestWorkshopId(
+        combined.filter((candidate) => (
+          candidate.score === top.score
+          && isExactMapTitleCandidate(mapName, candidate)
+        )),
+      )
+      : undefined;
 
     if (topIsStrong && top && !ambiguous) {
       return {
@@ -779,6 +802,16 @@ const discoverWorkshopIdForMap = async (
         workshopId: top.workshopId,
         resolutionSource: `auto_discovery_${top.source}`,
         reason: `resolved_score_${top.score}`,
+        candidates: combined,
+      };
+    }
+
+    if (exactTitleTopTieBreak) {
+      return {
+        mapName,
+        workshopId: exactTitleTopTieBreak.workshopId,
+        resolutionSource: `auto_discovery_exact_title_tiebreak_${exactTitleTopTieBreak.source}`,
+        reason: `resolved_exact_title_tiebreak_smallest_id:${exactTitleTopTieBreak.workshopId}`,
         candidates: combined,
       };
     }

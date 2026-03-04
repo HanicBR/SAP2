@@ -1,0 +1,5 @@
+﻿const map='gm_genesis';
+const titles=['gm_genesis','gm_genesis NAVMESH','gm_genesis_edit','gm_genesis nav file reupload'];
+const normalizeLooseToken=(raw)=>String(raw||'').toLowerCase().replace(/[^a-z0-9]+/g,'');
+const score=(mapName,titleRaw)=>{const map=String(mapName||'').trim().toLowerCase();const title=String(titleRaw||'').trim().toLowerCase();if(!map||!title)return -1000;const mapCompact=normalizeLooseToken(map);const mapSpaced=map.replace(/[_-]+/g,' ');const titleCompact=normalizeLooseToken(title);let s=0;if(title===map)s+=260;if(title.startsWith(`${map} `)||title.startsWith(`${map}|`)||title.startsWith(`${map}:`)||title.startsWith(`${map}-`))s+=220;if(title.includes(map))s+=170;if(mapSpaced&&title.includes(mapSpaced))s+=120;if(mapCompact&&titleCompact.includes(mapCompact))s+=140;if(/\bnav[\s_-]*mesh\b/.test(title)||/\bnavmesh\b/.test(title))s-=160;if(/\b(ai nodes?|nextbot|npc|weapons?|soundpack|playermodel)\b/.test(title))s-=60;return s;};
+for (const t of titles) console.log(t, score(map,t));
