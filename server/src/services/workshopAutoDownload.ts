@@ -1,4 +1,6 @@
 import fs from 'fs';
+import http from 'http';
+import https from 'https';
 import os from 'os';
 import path from 'path';
 import { spawn } from 'child_process';
@@ -349,6 +351,52 @@ const sanitizeMapName = (raw: string): string => {
 
 const isWorkshopId = (raw: unknown): raw is string => /^\d+$/.test(String(raw || '').trim());
 
+const safeDecodeURIComponent = (value: string): string => {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+};
+
+const extractMapNameFromHint = (normalizedRaw: string): string => {
+  const direct = sanitizeMapName(normalizedRaw);
+  if (direct) return direct;
+
+  const candidates: string[] = [];
+  const pushCandidate = (rawValue: unknown) => {
+    const value = String(rawValue || '').trim();
+    if (!value) return;
+    candidates.push(value);
+  };
+
+  const queryPattern = /(?:^|[?&#])(?:map|mapname|level)=([^&#]+)/gi;
+  let queryMatch: RegExpExecArray | null = null;
+  while ((queryMatch = queryPattern.exec(normalizedRaw)) !== null) {
+    pushCandidate(queryMatch[1]);
+  }
+
+  const labelledPattern = /(?:^|[\s,;|])(?:map|mapname|level)\s*[:=]\s*([a-z0-9._/%+-]+)/gi;
+  let labelledMatch: RegExpExecArray | null = null;
+  while ((labelledMatch = labelledPattern.exec(normalizedRaw)) !== null) {
+    pushCandidate(labelledMatch[1]);
+  }
+
+  const plusMapPattern = /(?:^|[\s,;|])\+map\s+([a-z0-9._/%+-]+)/gi;
+  let plusMapMatch: RegExpExecArray | null = null;
+  while ((plusMapMatch = plusMapPattern.exec(normalizedRaw)) !== null) {
+    pushCandidate(plusMapMatch[1]);
+  }
+
+  for (const rawCandidate of candidates) {
+    const decoded = safeDecodeURIComponent(rawCandidate.replace(/\+/g, ' '));
+    const mapName = sanitizeMapName(decoded);
+    if (mapName) return mapName;
+  }
+
+  return '';
+};
+
 const parseMapHint = (raw: string): MapHint => {
   const normalizedRaw = String(raw || '')
     .trim()
@@ -365,7 +413,7 @@ const parseMapHint = (raw: string): MapHint => {
       };
     }
   }
-  return { mapName: sanitizeMapName(normalizedRaw) };
+  return { mapName: extractMapNameFromHint(normalizedRaw) };
 };
 
 const getAutoDiscoverySettings = () => ({
@@ -591,13 +639,93 @@ const pickSmallestWorkshopId = (candidates: WorkshopSearchCandidate[]): Workshop
     .slice()
     .sort((a, b) => Number(a.workshopId) - Number(b.workshopId))[0];
 
+const requestTextViaNodeHttp = (
+  rawUrl: string,
+  timeoutMs: number,
+  redirectDepth = 0,
+): Promise<{ ok: boolean; status: number; body: string }> =>
+  new Promise((resolve, reject) => {
+    if (redirectDepth > 5) {
+      reject(new Error('redirect_limit_exceeded'));
+      return;
+    }
+
+    let parsedUrl: URL;
+    try {
+      parsedUrl = new URL(rawUrl);
+    } catch (error: any) {
+      reject(new Error(`invalid_url:${String(error?.message || error)}`));
+      return;
+    }
+
+    const isHttps = parsedUrl.protocol === 'https:';
+    if (!isHttps && parsedUrl.protocol !== 'http:') {
+      reject(new Error(`unsupported_protocol:${parsedUrl.protocol}`));
+      return;
+    }
+
+    const transport = isHttps ? https : http;
+    const req = transport.request(
+      {
+        protocol: parsedUrl.protocol,
+        hostname: parsedUrl.hostname,
+        port: parsedUrl.port || undefined,
+        path: `${parsedUrl.pathname}${parsedUrl.search}`,
+        method: 'GET',
+        headers: {
+          'User-Agent': 'backstabber-workshop-auto/1.0',
+          Accept: 'application/json,text/html;q=0.9,*/*;q=0.5',
+          'Accept-Encoding': 'identity',
+        },
+      },
+      (res) => {
+        const status = Number(res.statusCode || 0);
+        const location = String(res.headers.location || '').trim();
+        if (
+          [301, 302, 303, 307, 308].includes(status)
+          && location
+        ) {
+          const nextUrl = new URL(location, parsedUrl).toString();
+          res.resume();
+          requestTextViaNodeHttp(nextUrl, timeoutMs, redirectDepth + 1)
+            .then(resolve)
+            .catch(reject);
+          return;
+        }
+
+        let body = '';
+        res.setEncoding('utf8');
+        res.on('data', (chunk: string) => {
+          if (!chunk) return;
+          body += chunk;
+          if (body.length > 2 * 1024 * 1024) {
+            body = body.slice(body.length - 2 * 1024 * 1024);
+          }
+        });
+        res.on('end', () => {
+          resolve({
+            ok: status >= 200 && status < 300,
+            status,
+            body,
+          });
+        });
+      },
+    );
+
+    req.setTimeout(Math.max(1_000, timeoutMs), () => {
+      req.destroy(new Error('request_timeout'));
+    });
+    req.on('error', reject);
+    req.end();
+  });
+
 const fetchTextWithTimeout = async (
   url: string,
   timeoutMs: number,
 ): Promise<{ ok: boolean; status: number; body: string }> => {
   const fetchFn = (globalThis as any)?.fetch;
   if (typeof fetchFn !== 'function') {
-    throw new Error('fetch_unavailable');
+    return requestTextViaNodeHttp(url, timeoutMs);
   }
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
