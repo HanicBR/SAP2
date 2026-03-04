@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import { Request, Router } from 'express';
 import { prisma } from '../db/client';
 import { GameMode, ServerStatus, UserRole } from '../domain';
@@ -118,6 +120,40 @@ const sanitizeShortText = (value: unknown, maxLength: number): string | undefine
   if (!raw) return undefined;
   if (raw.length <= maxLength) return raw;
   return raw.slice(0, maxLength);
+};
+
+const normalizeMapNameForDiagnostics = (value: unknown): string => {
+  const raw = String(value ?? '')
+    .trim()
+    .toLowerCase()
+    .replace(/\\/g, '/');
+  if (!raw) return '';
+  const base = raw.includes('/') ? raw.slice(raw.lastIndexOf('/') + 1) : raw;
+  const withoutExt = base.endsWith('.bsp') ? base.slice(0, -4) : base;
+  return /^[a-z0-9][a-z0-9_-]{1,127}$/.test(withoutExt) ? withoutExt : '';
+};
+
+const safeReadJsonFile = (targetPath: string): Record<string, any> | null => {
+  try {
+    return JSON.parse(fs.readFileSync(targetPath, 'utf8')) as Record<string, any>;
+  } catch {
+    return null;
+  }
+};
+
+const safeReadTextFile = (targetPath: string, maxChars: number): string => {
+  try {
+    const text = fs.readFileSync(targetPath, 'utf8');
+    if (text.length <= maxChars) return text;
+    return `${text.slice(0, maxChars)}\n...[truncated ${text.length - maxChars} chars]`;
+  } catch (error: any) {
+    return `read_failed:${String(error?.message || error)}`;
+  }
+};
+
+const formatIsoFromMs = (value: number | undefined): string => {
+  if (!Number.isFinite(Number(value))) return 'n/a';
+  return new Date(Number(value)).toISOString();
 };
 
 const parseMode = (value: unknown): 'TTT' | 'SANDBOX' | 'MURDER' | undefined => {
@@ -690,6 +726,263 @@ router.post('/workshop/queue/enqueue', authMiddleware, requireRole(UserRole.ADMI
     });
   }
   return res.json(result);
+});
+
+// Consolidated workshop diagnostics for Dev/Debug download (.txt)
+router.get('/workshop/diagnostics/report', authMiddleware, requireRole(UserRole.ADMIN), async (req, res) => {
+  const query = (req.query || {}) as Record<string, unknown>;
+  const mapName = normalizeMapNameForDiagnostics(query.mapName ?? query.map);
+  const requestedServerId = sanitizeShortText(query.serverId, 96);
+  const reason = sanitizeShortText(query.reason, 240);
+
+  if (!mapName) {
+    return res.status(400).json({ error: 'mapName is required (normalized map key)' });
+  }
+
+  const queueSnapshot = getWorkshopAutoDownloadQueueSnapshot(500) as any;
+  const allJobs = Array.isArray(queueSnapshot?.jobs) ? queueSnapshot.jobs : [];
+  const mapJobs = allJobs.filter((job: any) => String(job?.mapName || '').trim().toLowerCase() === mapName);
+  const latestMapJob = mapJobs[0] || null;
+  const selectedServerId =
+    requestedServerId
+    || (latestMapJob && String(latestMapJob.serverId || '').trim() ? String(latestMapJob.serverId).trim() : '')
+    || undefined;
+
+  const projectRoot = path.resolve(__dirname, '..', '..', '..');
+  const isLinux = process.platform === 'linux';
+  const workshopRoot = path.resolve(
+    String(process.env.WORKSHOP_ROOT || (isLinux ? '/opt/backstabber/workshop' : path.join(projectRoot, 'sandbox', 'workshop'))),
+  );
+  const mapArtifactsDir = path.resolve(String(process.env.MAP_ARTIFACTS_DIR || path.join(projectRoot, 'public', 'maps')));
+  const configPath = path.resolve(
+    String(process.env.WORKSHOP_MAPS_FILE || queueSnapshot?.config?.configPath || path.join(projectRoot, 'server', 'config', 'workshop-maps.json')),
+  );
+  const runtimeCachePath = path.resolve(
+    String(
+      process.env.WORKSHOP_RUNTIME_MAPS_FILE
+      || queueSnapshot?.config?.runtimeCachePath
+      || path.join(projectRoot, 'server', 'config', 'workshop-maps.runtime.json'),
+    ),
+  );
+  const reportsDir = path.resolve(
+    String(process.env.WORKSHOP_REPORTS_DIR || queueSnapshot?.config?.reportsDir || path.join(workshopRoot, 'reports')),
+  );
+  const queueStorePath = path.resolve(
+    String(process.env.WORKSHOP_QUEUE_STORE_FILE || queueSnapshot?.config?.queueStorePath || path.join(workshopRoot, 'queue', 'workshop-jobs.json')),
+  );
+
+  const mapDir = path.join(mapArtifactsDir, mapName);
+  const manifestPath = path.join(mapDir, 'manifest.json');
+  const manifestExists = fs.existsSync(manifestPath);
+  const manifestStat = manifestExists ? fs.statSync(manifestPath) : null;
+
+  const configJson = safeReadJsonFile(configPath) || {};
+  const configMaps = configJson && typeof configJson.maps === 'object' ? configJson.maps as Record<string, unknown> : {};
+  const configAliases = configJson && typeof configJson.aliases === 'object' ? configJson.aliases as Record<string, unknown> : {};
+  const aliasTarget = String(configAliases[mapName] || '').trim().toLowerCase();
+  const staticMapWorkshopId = String(configMaps[aliasTarget || mapName] || '').trim();
+
+  const runtimeJson = safeReadJsonFile(runtimeCachePath) || {};
+  const runtimeMappings =
+    runtimeJson && typeof runtimeJson.mappings === 'object'
+      ? runtimeJson.mappings as Record<string, unknown>
+      : {};
+  const runtimeWorkshopId = String(runtimeMappings[aliasTarget || mapName] || '').trim();
+
+  const processReports: Array<{ file: string; mtimeMs: number; data: Record<string, any> | null }> = [];
+  const extractReports: Array<{ file: string; mtimeMs: number; data: Record<string, any> | null }> = [];
+  if (fs.existsSync(reportsDir)) {
+    try {
+      const entries = fs.readdirSync(reportsDir, { withFileTypes: true });
+      for (const entry of entries) {
+        if (!entry.isFile()) continue;
+        const full = path.join(reportsDir, entry.name);
+        const lower = entry.name.toLowerCase();
+        if (lower.endsWith(`.${mapName}.process.json`)) {
+          const stat = fs.statSync(full);
+          processReports.push({ file: full, mtimeMs: stat.mtimeMs, data: safeReadJsonFile(full) });
+        } else if (lower.endsWith(`.${mapName}.extract.json`)) {
+          const stat = fs.statSync(full);
+          extractReports.push({ file: full, mtimeMs: stat.mtimeMs, data: safeReadJsonFile(full) });
+        }
+      }
+    } catch {
+      // ignore directory read failures in diagnostics rendering
+    }
+  }
+  processReports.sort((a, b) => b.mtimeMs - a.mtimeMs);
+  extractReports.sort((a, b) => b.mtimeMs - a.mtimeMs);
+
+  const lockDir = path.join(workshopRoot, 'locks');
+  const lockCandidates: Array<{ file: string; mtimeMs: number; text: string }> = [];
+  if (fs.existsSync(lockDir)) {
+    try {
+      const entries = fs.readdirSync(lockDir, { withFileTypes: true });
+      for (const entry of entries) {
+        if (!entry.isFile()) continue;
+        const lower = entry.name.toLowerCase();
+        if (!lower.endsWith(`_${mapName}.lock`)) continue;
+        const full = path.join(lockDir, entry.name);
+        const stat = fs.statSync(full);
+        lockCandidates.push({
+          file: full,
+          mtimeMs: stat.mtimeMs,
+          text: safeReadTextFile(full, 1200),
+        });
+      }
+    } catch {
+      // ignore lock scan failures
+    }
+  }
+  lockCandidates.sort((a, b) => b.mtimeMs - a.mtimeMs);
+
+  const viewerWsState = selectedServerId ? getServerWsViewerState(selectedServerId) : null;
+  const liveWsState = selectedServerId ? getServerWsLiveState(selectedServerId) : null;
+
+  const generatedAt = new Date().toISOString();
+  const lines: string[] = [];
+  const add = (line = '') => lines.push(line);
+  const addSection = (title: string) => {
+    add('');
+    add(`=== ${title} ===`);
+  };
+
+  add('Backstabber Workshop Diagnostic Report');
+  add(`generatedAt: ${generatedAt}`);
+  add(`mapName: ${mapName}`);
+  add(`serverId: ${selectedServerId || 'n/a'}`);
+  add(`reason: ${reason || 'n/a'}`);
+
+  addSection('Manifest');
+  add(`apiPath: /api/maps/${mapName}/manifest.json`);
+  add(`mapArtifactsDir: ${mapArtifactsDir}`);
+  add(`mapDir: ${mapDir}`);
+  add(`mapDirExists: ${fs.existsSync(mapDir) ? 'yes' : 'no'}`);
+  add(`manifestPath: ${manifestPath}`);
+  add(`manifestExists: ${manifestExists ? 'yes' : 'no'}`);
+  if (manifestStat) {
+    add(`manifestSizeBytes: ${manifestStat.size}`);
+    add(`manifestMtime: ${new Date(manifestStat.mtimeMs).toISOString()}`);
+  }
+  if (manifestExists) {
+    const manifestPreview = safeReadTextFile(manifestPath, 1800).replace(/\r?\n/g, ' ');
+    add(`manifestPreview: ${manifestPreview}`);
+  }
+
+  addSection('Mapping');
+  add(`configPath: ${configPath}`);
+  add(`configExists: ${fs.existsSync(configPath) ? 'yes' : 'no'}`);
+  add(`runtimeCachePath: ${runtimeCachePath}`);
+  add(`runtimeCacheExists: ${fs.existsSync(runtimeCachePath) ? 'yes' : 'no'}`);
+  add(`aliasTarget: ${aliasTarget || 'n/a'}`);
+  add(`staticMapWorkshopId: ${staticMapWorkshopId || 'n/a'}`);
+  add(`runtimeWorkshopId: ${runtimeWorkshopId || 'n/a'}`);
+
+  addSection('Queue Snapshot');
+  add(`runtimeEnabled: ${queueSnapshot?.runtimeEnabled ? 'true' : 'false'}`);
+  add(`initialized: ${queueSnapshot?.initialized ? 'true' : 'false'}`);
+  add(`config.enabled: ${queueSnapshot?.config?.enabled ? 'true' : 'false'}`);
+  add(`worker.activeJobs: ${Number(queueSnapshot?.worker?.activeJobs || 0)}`);
+  add(
+    `counts: pending=${Number(queueSnapshot?.counts?.pending || 0)} queued=${Number(queueSnapshot?.counts?.queued || 0)} running=${Number(queueSnapshot?.counts?.running || 0)} retry=${Number(queueSnapshot?.counts?.retry_wait || 0)} success=${Number(queueSnapshot?.counts?.success || 0)} failed=${Number(queueSnapshot?.counts?.failed || 0)} dropped=${Number(queueSnapshot?.counts?.dropped || 0)}`,
+  );
+  add(`queueStorePath: ${queueStorePath}`);
+  add(`reportsDir: ${reportsDir}`);
+  add(`mapJobs: ${mapJobs.length}`);
+
+  mapJobs.slice(0, 10).forEach((job: any, idx: number) => {
+    add(`job[${idx}].id=${String(job?.id || '')}`);
+    add(`job[${idx}].status=${String(job?.status || '')} retry=${Number(job?.retryCount || 0)}/${Number(job?.maxRetries || 0)} runCount=${Number(job?.runCount || 0)}`);
+    add(`job[${idx}].wid=${String(job?.workshopId || '')} source=${String(job?.source || '')}/${String(job?.resolutionSource || '')}`);
+    add(`job[${idx}].updatedAt=${String(job?.updatedAt || '')} nextRunAt=${String(job?.nextRunAt || '')}`);
+    if (String(job?.lastError || '').trim()) add(`job[${idx}].lastError=${String(job.lastError)}`);
+    if (Array.isArray(job?.outputTail) && job.outputTail.length > 0) {
+      const tail: string[] = job.outputTail
+        .slice(-6)
+        .map((line: unknown) => String(line || '').trim())
+        .filter((line: string) => line.length > 0);
+      if (tail.length) {
+        add(`job[${idx}].outputTail:`);
+        tail.forEach((line: string) => add(`  ${line}`));
+      }
+    }
+  });
+
+  addSection('Reports');
+  add(`processReportsFound: ${processReports.length}`);
+  processReports.slice(0, 5).forEach((entry, idx) => {
+    const status = String(entry.data?.status || '').trim() || 'n/a';
+    const err = String(entry.data?.error || '').trim() || 'n/a';
+    const durationMs = Number(entry.data?.durationMs || 0);
+    add(`process[${idx}].file=${entry.file}`);
+    add(`process[${idx}].mtime=${formatIsoFromMs(entry.mtimeMs)} status=${status} durationMs=${durationMs}`);
+    add(`process[${idx}].error=${err}`);
+  });
+
+  add(`extractReportsFound: ${extractReports.length}`);
+  extractReports.slice(0, 5).forEach((entry, idx) => {
+    const ok = entry.data?.ok === true ? 'true' : 'false';
+    const err = String(entry.data?.error || '').trim() || 'n/a';
+    const payloads = Array.isArray(entry.data?.payloads) ? entry.data?.payloads.length : 0;
+    const bspFiles = Array.isArray(entry.data?.bspFiles) ? entry.data?.bspFiles.length : 0;
+    add(`extract[${idx}].file=${entry.file}`);
+    add(`extract[${idx}].mtime=${formatIsoFromMs(entry.mtimeMs)} ok=${ok} payloads=${payloads} bspFiles=${bspFiles}`);
+    add(`extract[${idx}].error=${err}`);
+  });
+
+  addSection('Locks');
+  add(`lockDir: ${lockDir}`);
+  add(`lockFilesForMap: ${lockCandidates.length}`);
+  lockCandidates.slice(0, 5).forEach((lock, idx) => {
+    add(`lock[${idx}].file=${lock.file}`);
+    add(`lock[${idx}].mtime=${formatIsoFromMs(lock.mtimeMs)}`);
+    add(`lock[${idx}].content=${lock.text.replace(/\r?\n/g, ' ')}`);
+  });
+
+  addSection('WebSocket Snapshot');
+  add(`viewerState.available: ${viewerWsState ? 'yes' : 'no'}`);
+  if (viewerWsState) {
+    add(`viewerState.receivedAt: ${String((viewerWsState as any).receivedAt || 'n/a')}`);
+    add(`viewerState.map: ${String((viewerWsState as any).map || 'n/a')}`);
+    add(`viewerState.playerCount: ${Number((viewerWsState as any).playerCount || 0)}`);
+  }
+  add(`liveState.available: ${liveWsState ? 'yes' : 'no'}`);
+  if (liveWsState) {
+    add(`liveState.receivedAt: ${String((liveWsState as any).receivedAt || 'n/a')}`);
+    add(`liveState.map: ${String((liveWsState as any).map || 'n/a')}`);
+    add(`liveState.playerCount: ${Number((liveWsState as any).playerCount || 0)}`);
+  }
+
+  addSection('Quick Hints');
+  if (!manifestExists && mapJobs.length === 0) {
+    if (!staticMapWorkshopId && !runtimeWorkshopId) {
+      add('No manifest + no queue jobs + no static/runtime mapping for this map.');
+      add('Likely cause: map unresolved in workshop mapping/auto-discovery.');
+    } else {
+      add('No manifest + no active jobs, but mapping exists.');
+      add('Likely cause: reconcile/observer did not enqueue yet, or worker disabled.');
+    }
+  }
+  if (latestMapJob && String(latestMapJob?.lastError || '').includes('lock_in_use')) {
+    add('Latest map job indicates process lock contention (lock_in_use).');
+  }
+  if (latestMapJob && String(latestMapJob?.lastError || '').includes('map_bsp_not_found_for_map')) {
+    add('Latest map job indicates wrong workshop candidate (map BSP not found).');
+  }
+
+  const reportText = `${lines.join('\n')}\n`;
+  const debugDir = path.join(reportsDir, 'debug');
+  fs.mkdirSync(debugDir, { recursive: true });
+  const latestDebugPath = path.join(debugDir, `${mapName}.latest-diagnostic.txt`);
+  fs.writeFileSync(latestDebugPath, reportText, 'utf8');
+
+  const safeTimestamp = generatedAt.replace(/[:.]/g, '-');
+  const filename = `workshop-diagnostic-${mapName}-${safeTimestamp}.txt`;
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  res.setHeader('X-Diagnostic-Generated-At', generatedAt);
+  res.setHeader('X-Diagnostic-Path', latestDebugPath);
+  return res.status(200).send(reportText);
 });
 
 // Live state from WebSocket snapshots (PR-03 near-real-time players/activity)

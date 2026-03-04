@@ -288,6 +288,19 @@ export interface WorkshopManualEnqueueResponse {
   error?: string;
 }
 
+export interface WorkshopDiagnosticsReportRequest {
+  mapName: string;
+  serverId?: string;
+  reason?: string;
+}
+
+export interface WorkshopDiagnosticsReportDownload {
+  blob: Blob;
+  filename: string;
+  generatedAt: string;
+  diagnosticsPath?: string;
+}
+
 export interface ServerWsLiveStateItem {
   serverId: string;
   transport: 'websocket';

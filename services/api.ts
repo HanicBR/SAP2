@@ -1,7 +1,7 @@
 
 
 import { MOCK_SERVERS, MOCK_EVENTS, MOCK_STATS, VIP_PLANS, MOCK_SUSPICIOUS_GROUPS, MOCK_PLAYERS, MOCK_USERS, MOCK_TRANSACTIONS, generateServerAnalytics, DEFAULT_SITE_CONFIG } from '../constants';
-import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionProofUploadResult, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, SiteAuditLogsQueryParams, SiteAuditLogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel, ServerLiveStateResponse, ServerViewerActionDispatchResponse, ServerViewerActionRequest, ServerViewerActionStatusResponse, ServerViewerMapOverlayResponse, ServerViewerStateResponse, ServerWsLiveStateListResponse, ServerWsViewerStateListResponse, PlayerAliasHistoryResponse, PlayerAvatarHistoryResponse, LoadingScreenProfile, LoadingScreensResponse, LoadingMediaUploadResult, LoadingTelemetryRange, LoadingTelemetrySlugsResponse, LoadingTelemetrySummaryResponse, AuthRegisterResponse, WorkshopManualEnqueueRequest, WorkshopManualEnqueueResponse, WorkshopQueueSnapshotResponse } from '../types';
+import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionProofUploadResult, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, SiteAuditLogsQueryParams, SiteAuditLogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel, ServerLiveStateResponse, ServerViewerActionDispatchResponse, ServerViewerActionRequest, ServerViewerActionStatusResponse, ServerViewerMapOverlayResponse, ServerViewerStateResponse, ServerWsLiveStateListResponse, ServerWsViewerStateListResponse, PlayerAliasHistoryResponse, PlayerAvatarHistoryResponse, LoadingScreenProfile, LoadingScreensResponse, LoadingMediaUploadResult, LoadingTelemetryRange, LoadingTelemetrySlugsResponse, LoadingTelemetrySummaryResponse, AuthRegisterResponse, WorkshopDiagnosticsReportDownload, WorkshopDiagnosticsReportRequest, WorkshopManualEnqueueRequest, WorkshopManualEnqueueResponse, WorkshopQueueSnapshotResponse } from '../types';
 
 // Utility to simulate network delay (used as fallback)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -519,6 +519,70 @@ export const ApiService = {
       deduped: false,
       reason: 'api_unavailable',
       error: 'API indisponivel no modo mock',
+    };
+  },
+
+  getWorkshopDiagnosticsReport: async (
+    payload: WorkshopDiagnosticsReportRequest,
+  ): Promise<WorkshopDiagnosticsReportDownload> => {
+    const mapName = String(payload?.mapName || '').trim();
+    if (!mapName) {
+      throw new Error('mapName is required');
+    }
+
+    if (!hasApi || !API_BASE_URL) {
+      throw new Error('API indisponivel no modo mock');
+    }
+
+    const params = new URLSearchParams();
+    params.set('mapName', mapName);
+    if (String(payload?.serverId || '').trim()) params.set('serverId', String(payload.serverId).trim());
+    if (String(payload?.reason || '').trim()) params.set('reason', String(payload.reason).trim());
+
+    const headers: HeadersInit = {};
+    const token = getAuthToken();
+    if (token) {
+      (headers as any).Authorization = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${API_BASE_URL}/servers/workshop/diagnostics/report?${params.toString()}`, {
+      method: 'GET',
+      headers,
+    });
+
+    if (!response.ok) {
+      let message = `HTTP ${response.status}`;
+      try {
+        const data = await response.json();
+        if (data && typeof data.error === 'string') {
+          message = data.error;
+        }
+      } catch {
+        try {
+          const text = await response.text();
+          if (text) message = text;
+        } catch {
+          // ignore read errors
+        }
+      }
+      throw new Error(message);
+    }
+
+    const blob = await response.blob();
+    const contentDisposition = String(response.headers.get('content-disposition') || '').trim();
+    const filenameMatch = /filename\*?=(?:UTF-8''|\"?)([^\";]+)/i.exec(contentDisposition);
+    const fallbackName = `workshop-diagnostic-${mapName}-${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
+    const filename = filenameMatch && filenameMatch[1]
+      ? decodeURIComponent(filenameMatch[1].replace(/^\"|\"$/g, ''))
+      : fallbackName;
+    const generatedAt = String(response.headers.get('x-diagnostic-generated-at') || '').trim() || new Date().toISOString();
+    const diagnosticsPath = String(response.headers.get('x-diagnostic-path') || '').trim() || undefined;
+
+    return {
+      blob,
+      filename,
+      generatedAt,
+      ...(diagnosticsPath ? { diagnosticsPath } : {}),
     };
   },
 

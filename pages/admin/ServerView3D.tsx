@@ -288,6 +288,14 @@ type ManifestProbe = {
   error?: string;
 };
 
+type WorkshopDiagnosticsBundle = {
+  objectUrl: string;
+  filename: string;
+  generatedAt: string;
+  reason: string;
+  diagnosticsPath?: string;
+};
+
 type ViewerWsStatus = 'idle' | 'connecting' | 'connected' | 'subscribed' | 'error';
 type ViewerRenderProfile = 'simple' | 'polished';
 
@@ -738,6 +746,9 @@ const ServerView3D: React.FC = () => {
   const [manualEnqueueBusy, setManualEnqueueBusy] = useState<boolean>(false);
   const [manualEnqueueResult, setManualEnqueueResult] = useState<WorkshopManualEnqueueResponse | null>(null);
   const [manifestProbe, setManifestProbe] = useState<ManifestProbe | null>(null);
+  const [diagBundleBusy, setDiagBundleBusy] = useState<boolean>(false);
+  const [diagBundleError, setDiagBundleError] = useState<string | null>(null);
+  const [diagBundle, setDiagBundle] = useState<WorkshopDiagnosticsBundle | null>(null);
   const [renderProfile, setRenderProfile] = useState<ViewerRenderProfile>(() => readInitialRenderProfile());
   const [viewerSideTab, setViewerSideTab] = useState<'streaming' | 'players' | 'logs'>('streaming');
   const [showDevTools, setShowDevTools] = useState<boolean>(false);
@@ -770,6 +781,7 @@ const ServerView3D: React.FC = () => {
   const showPlayerHealthInLabelRef = useRef<boolean>(false);
   const moveSpeedFactorRef = useRef<number>(moveSpeedFactor);
   const viewerActionPollTokenRef = useRef<number>(0);
+  const diagAutoKeyRef = useRef<string>('');
   const mobileMovePadRef = useRef<HTMLDivElement | null>(null);
   const mobileMovePointerIdRef = useRef<number | null>(null);
   const mobileLookPadPointerRef = useRef<{ pointerId: number | null; lastX: number; lastY: number }>({
@@ -1101,6 +1113,64 @@ const ServerView3D: React.FC = () => {
     return () => window.clearTimeout(timer);
   }, [shareFeedback]);
 
+  useEffect(() => {
+    return () => {
+      if (diagBundle?.objectUrl) {
+        URL.revokeObjectURL(diagBundle.objectUrl);
+      }
+    };
+  }, [diagBundle?.objectUrl]);
+
+  const triggerDownloadFromBundle = useCallback((bundle: WorkshopDiagnosticsBundle | null) => {
+    if (!bundle) return;
+    const anchor = document.createElement('a');
+    anchor.href = bundle.objectUrl;
+    anchor.download = bundle.filename;
+    anchor.style.display = 'none';
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+  }, []);
+
+  const generateDiagnosticsBundle = useCallback(async (
+    options?: {
+      reason?: string;
+      downloadAfterCreate?: boolean;
+    },
+  ) => {
+    if (!mapName) return;
+    setDiagBundleBusy(true);
+    setDiagBundleError(null);
+    try {
+      const result = await ApiService.getWorkshopDiagnosticsReport({
+        mapName,
+        ...(serverId ? { serverId } : {}),
+        ...(String(options?.reason || '').trim() ? { reason: String(options?.reason).trim() } : {}),
+      });
+      const objectUrl = URL.createObjectURL(result.blob);
+      const nextBundle: WorkshopDiagnosticsBundle = {
+        objectUrl,
+        filename: result.filename,
+        generatedAt: result.generatedAt,
+        reason: String(options?.reason || 'manual').trim() || 'manual',
+        ...(result.diagnosticsPath ? { diagnosticsPath: result.diagnosticsPath } : {}),
+      };
+      setDiagBundle((current) => {
+        if (current?.objectUrl) {
+          URL.revokeObjectURL(current.objectUrl);
+        }
+        return nextBundle;
+      });
+      if (options?.downloadAfterCreate) {
+        triggerDownloadFromBundle(nextBundle);
+      }
+    } catch (err: any) {
+      setDiagBundleError(String(err?.message || err));
+    } finally {
+      setDiagBundleBusy(false);
+    }
+  }, [mapName, serverId, triggerDownloadFromBundle]);
+
   const loadQueueSnapshot = useCallback(
     async (silent = true) => {
       if (silent) {
@@ -1216,6 +1286,30 @@ const ServerView3D: React.FC = () => {
     }, 8000);
     return () => window.clearInterval(interval);
   }, [loadQueueSnapshot]);
+
+  useEffect(() => {
+    if (!mapName) return;
+    const activeFailure = (() => {
+      if (error) return error;
+      if (manifestProbe && !manifestProbe.ok) return manifestProbe.error || `manifest_probe_failed:${manifestProbe.httpStatus || 'unknown'}`;
+      return '';
+    })();
+    if (!activeFailure) return;
+    const key = `${mapName}|${activeFailure}`;
+    if (diagAutoKeyRef.current === key) return;
+    diagAutoKeyRef.current = key;
+    void generateDiagnosticsBundle({
+      reason: `auto:${activeFailure}`,
+      downloadAfterCreate: false,
+    });
+  }, [error, generateDiagnosticsBundle, manifestProbe, mapName]);
+
+  useEffect(() => {
+    if (!mapName) return;
+    if (!error && (!manifestProbe || manifestProbe.ok)) {
+      diagAutoKeyRef.current = '';
+    }
+  }, [error, manifestProbe, mapName]);
 
   const pollViewerActionStatus = useCallback(
     async (actionId: string, pollToken: number) => {
@@ -4280,6 +4374,41 @@ const ServerView3D: React.FC = () => {
                   )}
                 </>
               )}
+            </div>
+
+            <div className="rounded border border-[#364561] bg-[#0c1321]/75 px-2 py-2 space-y-2">
+              <p className="text-zinc-500 uppercase font-bold text-[10px]">Diagnostico consolidado (.txt)</p>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    void generateDiagnosticsBundle({
+                      reason: `manual:${manifestProbe?.error || error || 'viewer_debug'}`,
+                      downloadAfterCreate: true,
+                    });
+                  }}
+                  disabled={diagBundleBusy}
+                  className="px-2 py-1 rounded border border-[#3a4b69] bg-[#182338] text-[10px] uppercase font-bold text-zinc-200 hover:bg-[#22344f] disabled:opacity-50"
+                >
+                  {diagBundleBusy ? 'Gerando...' : 'Gerar + baixar'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => triggerDownloadFromBundle(diagBundle)}
+                  disabled={!diagBundle}
+                  className="px-2 py-1 rounded border border-[#3a4b69] bg-[#182338] text-[10px] uppercase font-bold text-zinc-200 hover:bg-[#22344f] disabled:opacity-50"
+                >
+                  Baixar ultimo
+                </button>
+              </div>
+              {diagBundle && (
+                <div className="rounded border border-[#364561] bg-[#0f1829]/75 px-2 py-1.5 text-[10px] font-mono space-y-0.5">
+                  <p className="break-all">file={diagBundle.filename}</p>
+                  <p>generated={new Date(diagBundle.generatedAt).toLocaleTimeString('pt-BR')} | reason={diagBundle.reason}</p>
+                  {diagBundle.diagnosticsPath && <p className="text-zinc-500 break-all">savedAt={diagBundle.diagnosticsPath}</p>}
+                </div>
+              )}
+              {diagBundleError && <p className="text-red-300 break-words">{diagBundleError}</p>}
             </div>
 
             <div className="rounded border border-[#364561] bg-[#0c1321]/75 px-2 py-2 space-y-2">
