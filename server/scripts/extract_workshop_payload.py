@@ -74,8 +74,8 @@ def looks_like_gma(path: Path) -> bool:
 
 def try_decompress_lzma_alone(src_path: Path, tmp_root: Path) -> Optional[Path]:
     target = tmp_root / f"{src_path.name}.decompressed.gma"
+    written = 0
     try:
-        written = 0
         with lzma.open(src_path, "rb", format=lzma.FORMAT_ALONE) as src, target.open("wb") as dst:
             while True:
                 chunk = src.read(1024 * 1024)
@@ -84,11 +84,19 @@ def try_decompress_lzma_alone(src_path: Path, tmp_root: Path) -> Optional[Path]:
                 dst.write(chunk)
                 written += len(chunk)
     except Exception:
+        # Legacy .bin payloads can contain LZMA data that Python's streaming
+        # ALONE reader rejects near EOF; retry with FORMAT_AUTO on full bytes.
         try:
-            target.unlink(missing_ok=True)  # type: ignore[arg-type]
+            raw = src_path.read_bytes()
+            data = lzma.decompress(raw, format=lzma.FORMAT_AUTO)
+            target.write_bytes(data)
+            written = len(data)
         except Exception:
-            pass
-        return None
+            try:
+                target.unlink(missing_ok=True)  # type: ignore[arg-type]
+            except Exception:
+                pass
+            return None
 
     if written <= 0:
         try:
@@ -227,8 +235,9 @@ def discover_candidates(input_dir: Path) -> List[Path]:
     all_files = [p for p in input_dir.rglob("*") if p.is_file()]
     gma_files = [p for p in all_files if p.suffix.lower() == ".gma"]
     bin_files = [p for p in all_files if p.suffix.lower() == ".bin"]
+    zip_files = [p for p in all_files if p.suffix.lower() == ".zip"]
     extless_files = [p for p in all_files if p.suffix == ""]
-    ordered = sorted(gma_files) + sorted(bin_files) + sorted(extless_files)
+    ordered = sorted(gma_files) + sorted(bin_files) + sorted(zip_files) + sorted(extless_files)
     unique: List[Path] = []
     seen = set()
     for p in ordered:
@@ -253,6 +262,50 @@ def resolve_gma_source(candidate: Path, tmp_root: Path) -> Tuple[Optional[Path],
         return zip_out, "legacy_zip_wrapped", None
 
     return None, "unsupported", "candidate_not_gma_lzma_or_zip"
+
+
+def discover_direct_bsp(input_dir: Path) -> List[Path]:
+    out: List[Path] = []
+    for p in input_dir.rglob("*"):
+        if not p.is_file():
+            continue
+        if p.suffix.lower() != ".bsp":
+            continue
+        out.append(p.resolve())
+    return sorted(out)
+
+
+def extract_zip_payload(src_path: Path, out_dir: Path) -> Tuple[Dict, List[str]]:
+    result = {
+        "filesExtracted": 0,
+        "bytesExtracted": 0,
+        "bspFiles": [],
+    }
+    warnings: List[str] = []
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    with zipfile.ZipFile(src_path, "r") as zf:
+        members = [name for name in zf.namelist() if not name.endswith("/")]
+        for member in members:
+            safe_rel = sanitize_rel_path(member)
+            if not safe_rel:
+                warnings.append(f"zip_skipped_unsafe_path:{member}")
+                continue
+
+            target = out_dir / safe_rel
+            target.parent.mkdir(parents=True, exist_ok=True)
+            with zf.open(member, "r") as src, target.open("wb") as dst:
+                shutil.copyfileobj(src, dst, 1024 * 1024)
+            result["filesExtracted"] += 1
+            try:
+                result["bytesExtracted"] += int(target.stat().st_size)
+            except Exception:
+                pass
+            if safe_rel.lower().endswith(".bsp"):
+                result["bspFiles"].append(safe_rel)
+
+    result["bspFiles"] = sorted(result["bspFiles"])
+    return result, warnings
 
 
 def main() -> int:
@@ -349,7 +402,79 @@ def main() -> int:
             payload_report["bspFiles"] = sorted(extracted_bsp)
             payload_report["warnings"] = sorted(all_warnings)
             if not extracted_any:
-                raise RuntimeError("no_extractable_payload_found")
+                zip_candidates = [c for c in candidates if zipfile.is_zipfile(c)]
+                for candidate in zip_candidates:
+                    payload_index += 1
+                    target_root = out_dir / f"payload_{payload_index:03d}"
+                    try:
+                        extract_result, extract_warnings = extract_zip_payload(candidate, target_root)
+                        if not extract_result.get("bspFiles"):
+                            payload_report["payloads"].append(
+                                {
+                                    "candidate": str(candidate),
+                                    "status": "skipped",
+                                    "sourceType": "direct_zip_payload",
+                                    "extractRoot": str(target_root),
+                                    "error": "zip_without_bsp",
+                                }
+                            )
+                            all_warnings.extend(extract_warnings)
+                            continue
+
+                        extracted_any = True
+                        for rel_bsp in extract_result["bspFiles"]:
+                            extracted_bsp.append(str((target_root / rel_bsp).resolve()))
+                        payload_report["payloads"].append(
+                            {
+                                "candidate": str(candidate),
+                                "status": "ok",
+                                "sourceType": "direct_zip_payload",
+                                "extractRoot": str(target_root),
+                                "extractSummary": extract_result,
+                            }
+                        )
+                        all_warnings.extend(extract_warnings)
+                    except Exception as ex:
+                        payload_report["payloads"].append(
+                            {
+                                "candidate": str(candidate),
+                                "status": "failed",
+                                "sourceType": "direct_zip_payload",
+                                "extractRoot": str(target_root),
+                                "error": str(ex),
+                            }
+                        )
+
+                payload_report["bspFiles"] = sorted(extracted_bsp)
+                payload_report["warnings"] = sorted(all_warnings)
+
+            if not extracted_any:
+                direct_bsp = discover_direct_bsp(input_dir)
+                if direct_bsp:
+                    payload_report["payloads"].append(
+                        {
+                            "candidate": str(input_dir),
+                            "status": "ok",
+                            "sourceType": "direct_bsp_fallback",
+                            "extractRoot": str(input_dir),
+                            "extractSummary": {
+                                "header": {
+                                    "mode": "direct_bsp_fallback",
+                                    "entriesCount": len(direct_bsp),
+                                },
+                                "filesExtracted": 0,
+                                "bytesExtracted": 0,
+                                "bspFiles": [
+                                    str(p.relative_to(input_dir)).replace("\\", "/")
+                                    for p in direct_bsp
+                                ],
+                            },
+                        }
+                    )
+                    payload_report["bspFiles"] = sorted([str(p) for p in direct_bsp])
+                    payload_report["warnings"] = sorted(all_warnings + ["direct_bsp_fallback_used"])
+                else:
+                    raise RuntimeError("no_extractable_payload_found")
 
         payload_report["ok"] = True
         return 0
