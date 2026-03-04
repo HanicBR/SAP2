@@ -28,7 +28,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Extract Source1 BSP scene summary using SourceIO")
     parser.add_argument("--map-bsp", required=True, dest="map_bsp")
     parser.add_argument("--map-root", required=False, dest="map_root")
-    parser.add_argument("--sourceio-root", required=True, dest="sourceio_root")
+    parser.add_argument("--sourceio-root", required=False, dest="sourceio_root")
     parser.add_argument("--out", required=True, dest="out")
     return parser.parse_args()
 
@@ -39,9 +39,15 @@ def main() -> int:
     started = time.time()
 
     try:
-        sourceio_root = Path(args.sourceio_root).resolve()
-        if not sourceio_root.exists():
-            raise RuntimeError(f"sourceio_root_not_found: {sourceio_root}")
+        sourceio_root_path = None
+        sourceio_import_mode = "python_env"
+        sourceio_root_raw = str(args.sourceio_root or "").strip()
+        if sourceio_root_raw:
+            sourceio_root_path = Path(sourceio_root_raw).resolve()
+            if not sourceio_root_path.exists():
+                raise RuntimeError(f"sourceio_root_not_found: {sourceio_root_path}")
+            sys.path.insert(0, str(sourceio_root_path.parent))
+            sourceio_import_mode = "sourceio_root_path"
 
         map_bsp_path = Path(args.map_bsp).resolve()
         if not map_bsp_path.exists():
@@ -51,13 +57,14 @@ def main() -> int:
         if not map_root_path.exists():
             raise RuntimeError(f"map_root_not_found: {map_root_path}")
 
-        sys.path.insert(0, str(sourceio_root.parent))
-
         # Register Source1 lump classes before opening BSP.
-        import SourceIO.library.source1.bsp.lumps  # noqa: F401
-        from SourceIO.library.shared.content_manager import ContentManager
-        from SourceIO.library.source1.bsp.bsp_file import open_bsp
-        from SourceIO.library.utils import FileBuffer, TinyPath
+        try:
+            import SourceIO.library.source1.bsp.lumps  # noqa: F401
+            from SourceIO.library.shared.content_manager import ContentManager
+            from SourceIO.library.source1.bsp.bsp_file import open_bsp
+            from SourceIO.library.utils import FileBuffer, TinyPath
+        except Exception as import_err:
+            raise RuntimeError(f"sourceio_import_failed:{type(import_err).__name__}:{import_err}") from import_err
 
         cm = ContentManager()
         cm.scan_for_content(TinyPath(str(map_root_path)))
@@ -199,6 +206,10 @@ def main() -> int:
             "engine": "sourceio",
             "generatedAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             "durationMs": int((time.time() - started) * 1000),
+            "sourceio": {
+                "importMode": sourceio_import_mode,
+                **({"rootPath": str(sourceio_root_path)} if sourceio_root_path is not None else {}),
+            },
             "map": {
                 "bspPath": str(map_bsp_path),
                 "mapRoot": str(map_root_path),

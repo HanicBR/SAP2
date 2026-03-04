@@ -175,6 +175,14 @@ Fluxo:
 4. Extrai o `PAKFILE` embutido no BSP para o `mapRoot` (materials/models/etc. empacotados no mapa).
 5. Roda `map:pipeline:build` automaticamente.
 
+Etapas reportadas em `*.process.json`:
+
+- `gma_extract`: extracao do payload Workshop (`.gma`/legacy).
+- `bsp_detect`: selecao do BSP alvo com base no mapa.
+- `bsp_pak_extract`: extracao do pak/zip interno do BSP (com suporte Zip64).
+- `assets_written`: contagem de arquivos escritos no `mapRoot` por tipo (`materials/models/sounds/etc`).
+- `pipeline`: build final para viewer web.
+
 Garantias de seguranca/robustez:
 
 - `workshopId` sempre validado como numerico.

@@ -267,6 +267,26 @@ const parseArgs = (): Options => {
     return fromEnv !== undefined ? String(fromEnv) : undefined;
   };
 
+  const resolveSourceioRoot = (): string => {
+    const explicit = String(map.get('--sourceio-root') || '').trim();
+    const envCandidate = String(process.env.SOURCEIO_ROOT || '').trim();
+    const fallbackDefault = 'sandbox/_techrefs/SourceIO';
+    const defaults = [
+      fallbackDefault,
+      '_techrefs/SourceIO',
+      'server/_techrefs/SourceIO',
+      'server/sandbox/_techrefs/SourceIO',
+    ];
+    const candidates = [explicit, envCandidate].concat(defaults).filter((item) => item.length > 0);
+    for (const candidate of candidates) {
+      const resolved = resolveWithParentFallback(candidate);
+      if (fs.existsSync(resolved) && fs.statSync(resolved).isDirectory()) {
+        return resolved;
+      }
+    }
+    return resolveWithParentFallback(explicit || envCandidate || fallbackDefault);
+  };
+
   return {
     mapBsp,
     mapRoot,
@@ -390,7 +410,7 @@ const parseArgs = (): Options => {
     ).trim(),
     assetResolutionMode,
     sourceioMode,
-    sourceioRoot: resolveWithParentFallback(String(map.get('--sourceio-root') || 'sandbox/_techrefs/SourceIO')),
+    sourceioRoot: resolveSourceioRoot(),
     sourceioScript: resolveWithParentFallback(String(map.get('--sourceio-script') || 'server/scripts/sourceio_extract_scene.py')),
     sourceioMaterialScript: resolveWithParentFallback(
       String(map.get('--sourceio-material-script') || 'server/scripts/sourceio_export_materials.py'),
@@ -778,26 +798,32 @@ const parseStaticPropsFallback = (buffer: Buffer, gameLump: BspLump): PropInstan
 const runSourceIO = (options: Options): { data: ImportData | null; warnings: string[] } => {
   const warnings: string[] = [];
   if (options.sourceioMode === 'off') return { data: null, warnings: ['sourceio_disabled_by_option'] };
-  if (!fs.existsSync(options.sourceioScript) || !fs.existsSync(options.sourceioRoot)) {
-    const warning = 'sourceio_paths_missing';
+  if (!fs.existsSync(options.sourceioScript)) {
+    const warning = 'sourceio_scene_script_missing';
     if (options.sourceioMode === 'required') throw new Error(warning);
     return { data: null, warnings: [warning] };
   }
+  const sourceioRootAvailable = fs.existsSync(options.sourceioRoot) && fs.statSync(options.sourceioRoot).isDirectory();
+  if (!sourceioRootAvailable) {
+    warnings.push(`sourceio_root_not_found_using_python_env:${options.sourceioRoot}`);
+  }
 
   const tempPath = path.join(os.tmpdir(), `sap2-sourceio-${process.pid}-${Date.now()}.json`);
+  const sourceioArgs = [
+    options.sourceioScript,
+    '--map-bsp',
+    options.mapBsp,
+    '--map-root',
+    options.mapRoot,
+    '--out',
+    tempPath,
+  ];
+  if (sourceioRootAvailable) {
+    sourceioArgs.push('--sourceio-root', options.sourceioRoot);
+  }
   const exec = spawnSync(
     options.sourceioPython,
-    [
-      options.sourceioScript,
-      '--map-bsp',
-      options.mapBsp,
-      '--map-root',
-      options.mapRoot,
-      '--sourceio-root',
-      options.sourceioRoot,
-      '--out',
-      tempPath,
-    ],
+    sourceioArgs,
     { encoding: 'utf8', timeout: 10 * 60 * 1000, maxBuffer: 8 * 1024 * 1024 },
   );
   if (exec.error || exec.status !== 0 || !fs.existsSync(tempPath)) {
@@ -874,9 +900,13 @@ const runSourceIOMaterialExport = (
   const warnings: string[] = [];
   if (materials.length === 0) return { records, warnings, rootsScanned: [] };
 
-  if (!fs.existsSync(options.sourceioMaterialScript) || !fs.existsSync(options.sourceioRoot)) {
-    warnings.push('sourceio_material_export_paths_missing');
+  if (!fs.existsSync(options.sourceioMaterialScript)) {
+    warnings.push('sourceio_material_export_script_missing');
     return { records, warnings, rootsScanned: [] };
+  }
+  const sourceioRootAvailable = fs.existsSync(options.sourceioRoot) && fs.statSync(options.sourceioRoot).isDirectory();
+  if (!sourceioRootAvailable) {
+    warnings.push(`sourceio_material_export_root_not_found_using_python_env:${options.sourceioRoot}`);
   }
 
   const materialListPath = path.join(os.tmpdir(), `sap2-material-list-${process.pid}-${Date.now()}.json`);
@@ -897,8 +927,6 @@ const runSourceIOMaterialExport = (
   ).sort((a, b) => a.localeCompare(b));
   const args: string[] = [
     options.sourceioMaterialScript,
-    '--sourceio-root',
-    options.sourceioRoot,
     '--materials-json',
     materialListPath,
     '--map-root',
@@ -910,6 +938,9 @@ const runSourceIOMaterialExport = (
     '--max-size',
     String(Math.max(256, Math.floor(maxTextureSize || 1024))),
   ];
+  if (sourceioRootAvailable) {
+    args.push('--sourceio-root', options.sourceioRoot);
+  }
   for (const root of uniqueRoots) {
     args.push('--content-root', root);
   }
@@ -984,9 +1015,13 @@ const runSourceIOModelExport = (
   const warnings: string[] = [];
   if (models.length === 0) return { records, warnings, rootsScanned: [] };
 
-  if (!fs.existsSync(options.sourceioModelScript) || !fs.existsSync(options.sourceioRoot)) {
-    warnings.push('sourceio_model_export_paths_missing');
+  if (!fs.existsSync(options.sourceioModelScript)) {
+    warnings.push('sourceio_model_export_script_missing');
     return { records, warnings, rootsScanned: [] };
+  }
+  const sourceioRootAvailable = fs.existsSync(options.sourceioRoot) && fs.statSync(options.sourceioRoot).isDirectory();
+  if (!sourceioRootAvailable) {
+    warnings.push(`sourceio_model_export_root_not_found_using_python_env:${options.sourceioRoot}`);
   }
 
   const modelListPath = path.join(os.tmpdir(), `sap2-model-list-${process.pid}-${Date.now()}.json`);
@@ -1007,8 +1042,6 @@ const runSourceIOModelExport = (
   ).sort((a, b) => a.localeCompare(b));
   const args: string[] = [
     options.sourceioModelScript,
-    '--sourceio-root',
-    options.sourceioRoot,
     '--models-json',
     modelListPath,
     '--map-root',
@@ -1020,6 +1053,9 @@ const runSourceIOModelExport = (
     '--lod',
     String(options.modelLod),
   ];
+  if (sourceioRootAvailable) {
+    args.push('--sourceio-root', options.sourceioRoot);
+  }
   for (const root of uniqueRoots) {
     args.push('--content-root', root);
   }

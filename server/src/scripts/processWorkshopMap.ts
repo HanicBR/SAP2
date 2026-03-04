@@ -38,8 +38,29 @@ type Options = {
   cleanupRetentionDays: number;
 };
 
+type StepName = 'cache' | 'gma_extract' | 'bsp_detect' | 'bsp_pak_extract' | 'assets_written' | 'pipeline';
+
+type CanonicalAssetCounts = {
+  materials: number;
+  models: number;
+  sounds: number;
+  particles: number;
+  scripts: number;
+  resource: number;
+  maps: number;
+  lua: number;
+  cfg: number;
+  other: number;
+};
+
+type AssetCountSummary = {
+  totalFiles: number;
+  byTopLevel: Record<string, number>;
+  canonical: CanonicalAssetCounts;
+};
+
 type StepResult = {
-  name: 'cache' | 'extract' | 'pak_extract' | 'pipeline';
+  name: StepName;
   ok: boolean;
   durationMs: number;
   exitCode?: number;
@@ -56,6 +77,25 @@ type ExtractReport = {
   warnings?: string[];
   payloads?: Array<Record<string, unknown>>;
   error?: string;
+};
+
+type GmaExtractSummary = {
+  payloadsOk: number;
+  payloadsFailed: number;
+  filesExtracted: number;
+  bytesExtracted: number;
+  bspDetected: number;
+};
+
+type PipelineSummary = {
+  sourceioEngineUsed?: string;
+  materialsTotal?: number;
+  materialsWithTexture?: number;
+  materialsPlaceholder?: number;
+  modelsTotal?: number;
+  modelsExported?: number;
+  warningsCount?: number;
+  warningSample: string[];
 };
 
 type ProcessReport = {
@@ -82,6 +122,36 @@ type ProcessReport = {
     derivedMapRoot?: string;
     candidates: string[];
     strategy: string;
+  };
+  extraction: {
+    gmaExtract: {
+      payloadsOk: number;
+      payloadsFailed: number;
+      filesExtracted: number;
+      bytesExtracted: number;
+      bspDetected: number;
+    };
+    bspPakExtract: {
+      scanned: boolean;
+      pakfileLength: number;
+      entriesTotal: number;
+      extractedFiles: number;
+      extractedBytes: number;
+      skippedUnsafe: number;
+      skippedUnsupported: number;
+      byTopLevel: Record<string, number>;
+      canonical: CanonicalAssetCounts;
+    };
+    assetsWritten?: AssetCountSummary;
+  };
+  pipeline: {
+    sourceioEngineUsed?: string;
+    materialsTotal?: number;
+    materialsWithTexture?: number;
+    materialsPlaceholder?: number;
+    modelsTotal?: number;
+    modelsExported?: number;
+    warningsCount?: number;
   };
   steps: StepResult[];
   cache: {
@@ -142,6 +212,8 @@ type PakExtractResult = {
   extractedBytes: number;
   skippedUnsafe: number;
   skippedUnsupported: number;
+  byTopLevel: Record<string, number>;
+  canonical: CanonicalAssetCounts;
   warnings: string[];
   error?: string;
 };
@@ -176,6 +248,86 @@ const normalizeMapName = (raw: string): string => {
   const base = value.includes('/') ? value.slice(value.lastIndexOf('/') + 1) : value;
   return base.endsWith('.bsp') ? base.slice(0, -4) : base;
 };
+
+const createEmptyCanonicalCounts = (): CanonicalAssetCounts => ({
+  materials: 0,
+  models: 0,
+  sounds: 0,
+  particles: 0,
+  scripts: 0,
+  resource: 0,
+  maps: 0,
+  lua: 0,
+  cfg: 0,
+  other: 0,
+});
+
+const topLevelFromAssetPath = (rawPath: string): string => {
+  const normalized = String(rawPath || '')
+    .trim()
+    .replace(/\\/g, '/')
+    .replace(/^\/+/, '');
+  if (!normalized) return '_root';
+  const first = normalized.split('/')[0] || '';
+  return first ? first.toLowerCase() : '_root';
+};
+
+const sortNumericRecord = (input: Record<string, number>): Record<string, number> =>
+  Object.fromEntries(
+    Object.entries(input)
+      .filter(([, value]) => Number.isFinite(value) && value > 0)
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])),
+  );
+
+const canonicalizeAssetCounts = (byTopLevel: Record<string, number>): CanonicalAssetCounts => {
+  const out = createEmptyCanonicalCounts();
+  for (const [rawKey, rawValue] of Object.entries(byTopLevel)) {
+    const value = Number(rawValue);
+    if (!Number.isFinite(value) || value <= 0) continue;
+    const key = rawKey.toLowerCase();
+    if (key === 'materials') {
+      out.materials += value;
+      continue;
+    }
+    if (key === 'models') {
+      out.models += value;
+      continue;
+    }
+    if (key === 'sound' || key === 'sounds') {
+      out.sounds += value;
+      continue;
+    }
+    if (key === 'particle' || key === 'particles') {
+      out.particles += value;
+      continue;
+    }
+    if (key === 'scripts') {
+      out.scripts += value;
+      continue;
+    }
+    if (key === 'resource' || key === 'resources') {
+      out.resource += value;
+      continue;
+    }
+    if (key === 'maps') {
+      out.maps += value;
+      continue;
+    }
+    if (key === 'lua') {
+      out.lua += value;
+      continue;
+    }
+    if (key === 'cfg' || key === 'config' || key === 'configs') {
+      out.cfg += value;
+      continue;
+    }
+    out.other += value;
+  }
+  return out;
+};
+
+const formatCanonicalCounts = (counts: CanonicalAssetCounts): string =>
+  `materials=${counts.materials}, models=${counts.models}, sounds=${counts.sounds}, particles=${counts.particles}, scripts=${counts.scripts}, resource=${counts.resource}, maps=${counts.maps}, lua=${counts.lua}, cfg=${counts.cfg}, other=${counts.other}`;
 
 const parseArgs = (): Map<string, string> => {
   const map = new Map<string, string>();
@@ -446,6 +598,91 @@ const safeReadJson = (target: string): any | null => {
   }
 };
 
+const summarizeGmaExtract = (extractReport: ExtractReport | null): GmaExtractSummary => {
+  const payloads = Array.isArray(extractReport?.payloads) ? extractReport?.payloads || [] : [];
+  let payloadsOk = 0;
+  let payloadsFailed = 0;
+  let filesExtracted = 0;
+  let bytesExtracted = 0;
+  for (const payload of payloads) {
+    const status = String((payload as any)?.status || '').trim().toLowerCase();
+    if (status === 'ok') payloadsOk += 1;
+    else if (status === 'failed') payloadsFailed += 1;
+    filesExtracted += Math.max(0, Number((payload as any)?.extractSummary?.filesExtracted || 0));
+    bytesExtracted += Math.max(0, Number((payload as any)?.extractSummary?.bytesExtracted || 0));
+  }
+  const bspDetected = Array.isArray(extractReport?.bspFiles) ? extractReport?.bspFiles?.length || 0 : 0;
+  return {
+    payloadsOk,
+    payloadsFailed,
+    filesExtracted,
+    bytesExtracted,
+    bspDetected,
+  };
+};
+
+const summarizeWrittenAssets = (mapRoot: string): AssetCountSummary => {
+  const mapRootAbs = path.resolve(mapRoot);
+  if (!fs.existsSync(mapRootAbs) || !fs.statSync(mapRootAbs).isDirectory()) {
+    return { totalFiles: 0, byTopLevel: {}, canonical: createEmptyCanonicalCounts() };
+  }
+  const byTopLevel: Record<string, number> = {};
+  let totalFiles = 0;
+  const stack = [mapRootAbs];
+  while (stack.length) {
+    const current = stack.pop();
+    if (!current) continue;
+    let entries: fs.Dirent[] = [];
+    try {
+      entries = fs.readdirSync(current, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+    for (const entry of entries) {
+      const absolute = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(absolute);
+        continue;
+      }
+      if (!entry.isFile()) continue;
+      totalFiles += 1;
+      const rel = path.relative(mapRootAbs, absolute).replace(/\\/g, '/');
+      const top = topLevelFromAssetPath(rel);
+      byTopLevel[top] = (byTopLevel[top] || 0) + 1;
+    }
+  }
+  const sorted = sortNumericRecord(byTopLevel);
+  return {
+    totalFiles,
+    byTopLevel: sorted,
+    canonical: canonicalizeAssetCounts(sorted),
+  };
+};
+
+const readPipelineSummary = (pipelineReportPath: string): PipelineSummary | null => {
+  const parsed = safeReadJson(pipelineReportPath);
+  if (!parsed || typeof parsed !== 'object') return null;
+  const sourceioEngineUsedRaw = String((parsed as any)?.settings?.sourceioEngineUsed || '').trim();
+  const materialsTotalRaw = Number((parsed as any)?.metrics?.materials?.total);
+  const materialsWithTextureRaw = Number((parsed as any)?.metrics?.materials?.withTexture);
+  const materialsPlaceholderRaw = Number((parsed as any)?.metrics?.materials?.placeholder);
+  const modelsTotalRaw = Number((parsed as any)?.metrics?.models?.total);
+  const modelsExportedRaw = Number((parsed as any)?.metrics?.models?.exported);
+  const warningItems = Array.isArray((parsed as any)?.warnings)
+    ? ((parsed as any).warnings as unknown[]).map((item) => String(item || '')).filter(Boolean)
+    : [];
+  return {
+    ...(sourceioEngineUsedRaw ? { sourceioEngineUsed: sourceioEngineUsedRaw } : {}),
+    ...(Number.isFinite(materialsTotalRaw) ? { materialsTotal: Math.max(0, Math.floor(materialsTotalRaw)) } : {}),
+    ...(Number.isFinite(materialsWithTextureRaw) ? { materialsWithTexture: Math.max(0, Math.floor(materialsWithTextureRaw)) } : {}),
+    ...(Number.isFinite(materialsPlaceholderRaw) ? { materialsPlaceholder: Math.max(0, Math.floor(materialsPlaceholderRaw)) } : {}),
+    ...(Number.isFinite(modelsTotalRaw) ? { modelsTotal: Math.max(0, Math.floor(modelsTotalRaw)) } : {}),
+    ...(Number.isFinite(modelsExportedRaw) ? { modelsExported: Math.max(0, Math.floor(modelsExportedRaw)) } : {}),
+    warningsCount: warningItems.length,
+    warningSample: warningItems.slice(0, 20),
+  };
+};
+
 const readProcessCache = (cachePath: string): ProcessCacheFile => {
   const parsed = safeReadJson(cachePath);
   if (!parsed || typeof parsed !== 'object') return { version: 1, entries: {} };
@@ -484,6 +721,50 @@ const parseBspLumps = (buffer: Buffer): { version: number; lumps: BspLump[] } =>
   return { version, lumps };
 };
 
+const readUInt64LEAsNumber = (buffer: Buffer, offset: number): number => {
+  if (offset < 0 || offset + 8 > buffer.length) throw new Error('u64_out_of_bounds');
+  const value = buffer.readBigUInt64LE(offset);
+  if (value > BigInt(Number.MAX_SAFE_INTEGER)) throw new Error('u64_exceeds_safe_integer');
+  return Number(value);
+};
+
+const resolveZip64ExtraFields = (
+  extraData: Buffer,
+  needsUncompressed: boolean,
+  needsCompressed: boolean,
+  needsOffset: boolean,
+): { uncompressedSize?: number; compressedSize?: number; localHeaderOffset?: number } => {
+  let cursor = 0;
+  while (cursor + 4 <= extraData.length) {
+    const headerId = extraData.readUInt16LE(cursor);
+    const dataSize = extraData.readUInt16LE(cursor + 2);
+    const dataStart = cursor + 4;
+    const dataEnd = dataStart + dataSize;
+    if (dataEnd > extraData.length) break;
+    if (headerId === 0x0001) {
+      let zip64Cursor = dataStart;
+      const out: { uncompressedSize?: number; compressedSize?: number; localHeaderOffset?: number } = {};
+      if (needsUncompressed) {
+        if (zip64Cursor + 8 > dataEnd) return out;
+        out.uncompressedSize = readUInt64LEAsNumber(extraData, zip64Cursor);
+        zip64Cursor += 8;
+      }
+      if (needsCompressed) {
+        if (zip64Cursor + 8 > dataEnd) return out;
+        out.compressedSize = readUInt64LEAsNumber(extraData, zip64Cursor);
+        zip64Cursor += 8;
+      }
+      if (needsOffset) {
+        if (zip64Cursor + 8 > dataEnd) return out;
+        out.localHeaderOffset = readUInt64LEAsNumber(extraData, zip64Cursor);
+      }
+      return out;
+    }
+    cursor = dataEnd;
+  }
+  return {};
+};
+
 const parsePakEntries = (pakData: Buffer): PakEntry[] => {
   if (pakData.length < 22) throw new Error('pak_zip_too_small');
   let eocdOffset = -1;
@@ -496,9 +777,36 @@ const parsePakEntries = (pakData: Buffer): PakEntry[] => {
   }
   if (eocdOffset < 0) throw new Error('pak_eocd_not_found');
 
-  const totalEntries = pakData.readUInt16LE(eocdOffset + 10);
-  const centralDirSize = pakData.readUInt32LE(eocdOffset + 12);
-  const centralDirOffset = pakData.readUInt32LE(eocdOffset + 16);
+  let totalEntries = pakData.readUInt16LE(eocdOffset + 10);
+  let centralDirSize = pakData.readUInt32LE(eocdOffset + 12);
+  let centralDirOffset = pakData.readUInt32LE(eocdOffset + 16);
+
+  const zip64Required =
+    totalEntries === 0xffff
+    || centralDirSize === 0xffffffff
+    || centralDirOffset === 0xffffffff;
+  if (zip64Required) {
+    let locatorOffset = -1;
+    const locatorSearchStart = Math.max(0, eocdOffset - 1024 * 1024);
+    for (let i = eocdOffset - 20; i >= locatorSearchStart; i -= 1) {
+      if (i + 20 <= pakData.length && pakData.readUInt32LE(i) === 0x07064b50) {
+        locatorOffset = i;
+        break;
+      }
+    }
+    if (locatorOffset < 0) throw new Error('pak_zip64_locator_not_found');
+    const zip64EocdOffset = readUInt64LEAsNumber(pakData, locatorOffset + 8);
+    if (zip64EocdOffset < 0 || zip64EocdOffset + 56 > pakData.length) {
+      throw new Error('pak_zip64_eocd_out_of_bounds');
+    }
+    if (pakData.readUInt32LE(zip64EocdOffset) !== 0x06064b50) {
+      throw new Error('pak_zip64_eocd_signature_invalid');
+    }
+    totalEntries = readUInt64LEAsNumber(pakData, zip64EocdOffset + 32);
+    centralDirSize = readUInt64LEAsNumber(pakData, zip64EocdOffset + 40);
+    centralDirOffset = readUInt64LEAsNumber(pakData, zip64EocdOffset + 48);
+  }
+
   if (centralDirOffset < 0 || centralDirSize < 0 || centralDirOffset + centralDirSize > pakData.length) {
     throw new Error('pak_central_directory_out_of_bounds');
   }
@@ -510,15 +818,37 @@ const parsePakEntries = (pakData: Buffer): PakEntry[] => {
     if (pakData.readUInt32LE(cursor) !== 0x02014b50) break;
     const flags = pakData.readUInt16LE(cursor + 8);
     const method = pakData.readUInt16LE(cursor + 10);
-    const compressedSize = pakData.readUInt32LE(cursor + 20);
-    const uncompressedSize = pakData.readUInt32LE(cursor + 24);
+    let compressedSize = pakData.readUInt32LE(cursor + 20);
+    let uncompressedSize = pakData.readUInt32LE(cursor + 24);
     const nameLen = pakData.readUInt16LE(cursor + 28);
     const extraLen = pakData.readUInt16LE(cursor + 30);
     const commentLen = pakData.readUInt16LE(cursor + 32);
-    const localHeaderOffset = pakData.readUInt32LE(cursor + 42);
+    let localHeaderOffset = pakData.readUInt32LE(cursor + 42);
     const nameStart = cursor + 46;
     const nameEnd = nameStart + nameLen;
-    if (nameEnd > pakData.length) break;
+    const extraEnd = nameEnd + extraLen;
+    if (nameEnd > pakData.length || extraEnd > pakData.length) break;
+
+    const needsUncompressed = uncompressedSize === 0xffffffff;
+    const needsCompressed = compressedSize === 0xffffffff;
+    const needsOffset = localHeaderOffset === 0xffffffff;
+    if (needsUncompressed || needsCompressed || needsOffset) {
+      const extraData = pakData.subarray(nameEnd, extraEnd);
+      const resolved = resolveZip64ExtraFields(extraData, needsUncompressed, needsCompressed, needsOffset);
+      if (needsUncompressed) {
+        if (!Number.isFinite(resolved.uncompressedSize)) break;
+        uncompressedSize = Number(resolved.uncompressedSize);
+      }
+      if (needsCompressed) {
+        if (!Number.isFinite(resolved.compressedSize)) break;
+        compressedSize = Number(resolved.compressedSize);
+      }
+      if (needsOffset) {
+        if (!Number.isFinite(resolved.localHeaderOffset)) break;
+        localHeaderOffset = Number(resolved.localHeaderOffset);
+      }
+    }
+
     const isUtf8 = (flags & 0x0800) !== 0;
     const rawName = pakData.subarray(nameStart, nameEnd).toString(isUtf8 ? 'utf8' : 'latin1');
     entries.push({
@@ -528,7 +858,7 @@ const parsePakEntries = (pakData: Buffer): PakEntry[] => {
       uncompressedSize,
       localHeaderOffset,
     });
-    cursor = nameEnd + extraLen + commentLen;
+    cursor = extraEnd + commentLen;
     parsed += 1;
   }
   return entries;
@@ -577,6 +907,8 @@ const extractPakfileFromBsp = (bspPath: string, mapRoot: string): PakExtractResu
     extractedBytes: 0,
     skippedUnsafe: 0,
     skippedUnsupported: 0,
+    byTopLevel: {},
+    canonical: createEmptyCanonicalCounts(),
     warnings: [],
   };
 
@@ -621,13 +953,17 @@ const extractPakfileFromBsp = (bspPath: string, mapRoot: string): PakExtractResu
       fs.writeFileSync(outputPath, data);
       result.extractedFiles += 1;
       result.extractedBytes += data.length;
+      const topLevel = topLevelFromAssetPath(safeRel);
+      result.byTopLevel[topLevel] = (result.byTopLevel[topLevel] || 0) + 1;
     }
+    result.byTopLevel = sortNumericRecord(result.byTopLevel);
+    result.canonical = canonicalizeAssetCounts(result.byTopLevel);
     return result;
   } catch (error: any) {
     return {
       ...result,
       ok: false,
-      error: `pak_extract_exception:${String(error?.message || error)}`,
+      error: `bsp_pak_extract_exception:${String(error?.message || error)}`,
     };
   }
 };
@@ -895,6 +1231,27 @@ const run = () => {
     candidates: [],
     strategy: 'exact_basename_then_maps_path_then_contains',
   };
+  const extractionState: ProcessReport['extraction'] = {
+    gmaExtract: {
+      payloadsOk: 0,
+      payloadsFailed: 0,
+      filesExtracted: 0,
+      bytesExtracted: 0,
+      bspDetected: 0,
+    },
+    bspPakExtract: {
+      scanned: false,
+      pakfileLength: 0,
+      entriesTotal: 0,
+      extractedFiles: 0,
+      extractedBytes: 0,
+      skippedUnsafe: 0,
+      skippedUnsupported: 0,
+      byTopLevel: {},
+      canonical: createEmptyCanonicalCounts(),
+    },
+  };
+  const pipelineState: ProcessReport['pipeline'] = {};
   const cacheKey = `${options.appId}:${options.workshopId}:${options.mapName}`;
   const signature = computeContentSignature(options.contentDir, options);
   const cacheState: ProcessReport['cache'] = {
@@ -958,6 +1315,8 @@ const run = () => {
       lockPath: options.lockPath,
     },
     selection,
+    extraction: extractionState,
+    pipeline: pipelineState,
     steps,
     cache: cacheState,
     cleanup: cleanupState,
@@ -1054,7 +1413,7 @@ const run = () => {
       options.extractReportPath,
       ...(options.cleanExtractDir ? ['--clean-out-dir'] : []),
     ];
-    const extractStep = runStep('extract', options.pythonBin, extractArgs, options.timeoutExtractMs, PROJECT_ROOT);
+    const extractStep = runStep('gma_extract', options.pythonBin, extractArgs, options.timeoutExtractMs, PROJECT_ROOT);
     steps.push(extractStep);
     if (!extractStep.ok) {
       finish('failed', `extract_step_failed:${extractStep.error || 'unknown'}`);
@@ -1069,7 +1428,17 @@ const run = () => {
     if (Array.isArray(extractReport.warnings) && extractReport.warnings.length) {
       warnings.push(...extractReport.warnings.slice(0, 200).map((w) => String(w)));
     }
+    const gmaSummary = summarizeGmaExtract(extractReport);
+    extractionState.gmaExtract = gmaSummary;
+    extractStep.logTail.push(
+      `payloadsOk=${gmaSummary.payloadsOk}`,
+      `payloadsFailed=${gmaSummary.payloadsFailed}`,
+      `filesExtracted=${gmaSummary.filesExtracted}`,
+      `bytesExtracted=${gmaSummary.bytesExtracted}`,
+      `bspDetected=${gmaSummary.bspDetected}`,
+    );
 
+    const bspDetectStartedAt = Date.now();
     const bspCandidates = Array.isArray(extractReport.bspFiles)
       ? extractReport.bspFiles
           .map((entry) => String(entry || '').trim())
@@ -1077,18 +1446,41 @@ const run = () => {
       : [];
     selection.candidates = bspCandidates.slice();
     const selectedBsp = pickBspForMap(bspCandidates, options.mapName);
+    const mapRoot = selectedBsp ? deriveMapRoot(selectedBsp) : '';
+    const bspDetectStep: StepResult = {
+      name: 'bsp_detect',
+      ok: !!selectedBsp,
+      durationMs: Math.max(0, Date.now() - bspDetectStartedAt),
+      command: ['internal:bsp_detect', options.mapName, options.extractReportPath],
+      logTail: [
+        `bspCandidates=${bspCandidates.length}`,
+        ...(selectedBsp ? [`selectedBsp=${selectedBsp}`] : ['selectedBsp=<none>']),
+        ...(mapRoot ? [`derivedMapRoot=${mapRoot}`] : []),
+      ],
+    };
+    steps.push(bspDetectStep);
     if (!selectedBsp) {
       finish('failed', `map_bsp_not_found_for_map:${options.mapName}`);
       return;
     }
     selection.selectedBsp = selectedBsp;
-    const mapRoot = deriveMapRoot(selectedBsp);
     selection.derivedMapRoot = mapRoot;
 
     const pakStartedAt = Date.now();
     const pakResult = extractPakfileFromBsp(selectedBsp, mapRoot);
+    extractionState.bspPakExtract = {
+      scanned: pakResult.scanned,
+      pakfileLength: pakResult.pakfileLength,
+      entriesTotal: pakResult.entriesTotal,
+      extractedFiles: pakResult.extractedFiles,
+      extractedBytes: pakResult.extractedBytes,
+      skippedUnsafe: pakResult.skippedUnsafe,
+      skippedUnsupported: pakResult.skippedUnsupported,
+      byTopLevel: pakResult.byTopLevel,
+      canonical: pakResult.canonical,
+    };
     const pakStep: StepResult = {
-      name: 'pak_extract',
+      name: 'bsp_pak_extract',
       ok: pakResult.ok,
       durationMs: Math.max(0, Date.now() - pakStartedAt),
       command: ['internal:extract_bsp_pakfile', selectedBsp, mapRoot],
@@ -1100,18 +1492,35 @@ const run = () => {
         `extractedBytes=${pakResult.extractedBytes}`,
         `skippedUnsafe=${pakResult.skippedUnsafe}`,
         `skippedUnsupported=${pakResult.skippedUnsupported}`,
+        `byTopLevel=${JSON.stringify(pakResult.byTopLevel)}`,
+        `canonical=${formatCanonicalCounts(pakResult.canonical)}`,
         ...pakResult.warnings.slice(0, 20),
       ],
       ...(pakResult.error ? { error: pakResult.error } : {}),
     };
     steps.push(pakStep);
     if (!pakStep.ok) {
-      finish('failed', `pak_extract_failed:${pakStep.error || 'unknown'}`);
+      finish('failed', `bsp_pak_extract_failed:${pakStep.error || 'unknown'}`);
       return;
     }
     if (pakResult.warnings.length > 0) {
-      warnings.push(...pakResult.warnings.slice(0, 100).map((item) => `pak_extract:${item}`));
+      warnings.push(...pakResult.warnings.slice(0, 100).map((item) => `bsp_pak_extract:${item}`));
     }
+
+    const assetsWrittenStartedAt = Date.now();
+    const assetsWritten = summarizeWrittenAssets(mapRoot);
+    extractionState.assetsWritten = assetsWritten;
+    steps.push({
+      name: 'assets_written',
+      ok: true,
+      durationMs: Math.max(0, Date.now() - assetsWrittenStartedAt),
+      command: ['internal:scan_assets_written', mapRoot],
+      logTail: [
+        `totalFiles=${assetsWritten.totalFiles}`,
+        `byTopLevel=${JSON.stringify(assetsWritten.byTopLevel)}`,
+        `canonical=${formatCanonicalCounts(assetsWritten.canonical)}`,
+      ],
+    });
 
     const tsNodeRunner = resolveTsNodeCommand();
     const pipelineArgs = tsNodeRunner.argsPrefix.concat([
@@ -1140,6 +1549,45 @@ const run = () => {
     if (!pipelineStep.ok) {
       finish('failed', `pipeline_step_failed:${pipelineStep.error || 'unknown'}`);
       return;
+    }
+    const pipelineSummary = readPipelineSummary(options.pipelineReportPath);
+    if (pipelineSummary) {
+      if (pipelineSummary.sourceioEngineUsed !== undefined) pipelineState.sourceioEngineUsed = pipelineSummary.sourceioEngineUsed;
+      if (pipelineSummary.materialsTotal !== undefined) pipelineState.materialsTotal = pipelineSummary.materialsTotal;
+      if (pipelineSummary.materialsWithTexture !== undefined) pipelineState.materialsWithTexture = pipelineSummary.materialsWithTexture;
+      if (pipelineSummary.materialsPlaceholder !== undefined) pipelineState.materialsPlaceholder = pipelineSummary.materialsPlaceholder;
+      if (pipelineSummary.modelsTotal !== undefined) pipelineState.modelsTotal = pipelineSummary.modelsTotal;
+      if (pipelineSummary.modelsExported !== undefined) pipelineState.modelsExported = pipelineSummary.modelsExported;
+      if (pipelineSummary.warningsCount !== undefined) pipelineState.warningsCount = pipelineSummary.warningsCount;
+      if (Number.isFinite(pipelineSummary.materialsTotal) && Number.isFinite(pipelineSummary.materialsWithTexture)) {
+        pipelineStep.logTail.push(
+          `materialsWithTexture=${pipelineSummary.materialsWithTexture}/${pipelineSummary.materialsTotal}`,
+        );
+      }
+      if (Number.isFinite(pipelineSummary.modelsTotal) && Number.isFinite(pipelineSummary.modelsExported)) {
+        pipelineStep.logTail.push(
+          `modelsExported=${pipelineSummary.modelsExported}/${pipelineSummary.modelsTotal}`,
+        );
+      }
+      if (pipelineSummary.sourceioEngineUsed) {
+        pipelineStep.logTail.push(`sourceioEngineUsed=${pipelineSummary.sourceioEngineUsed}`);
+      }
+      if (pipelineSummary.warningSample.length > 0) {
+        warnings.push(...pipelineSummary.warningSample.map((item) => `pipeline:${item}`));
+      }
+      if (
+        options.pipelineMode.sourceioMode !== 'off'
+        && Number.isFinite(pipelineSummary.materialsTotal)
+        && Number.isFinite(pipelineSummary.materialsWithTexture)
+        && Number(pipelineSummary.materialsTotal) >= 50
+        && Number(pipelineSummary.materialsWithTexture) <= 1
+      ) {
+        finish(
+          'failed',
+          `pipeline_material_texture_coverage_low:${pipelineSummary.materialsWithTexture}/${pipelineSummary.materialsTotal}:sourceio=${pipelineSummary.sourceioEngineUsed || 'unknown'}`,
+        );
+        return;
+      }
     }
 
     cacheFile.entries[cacheKey] = {

@@ -38,7 +38,7 @@ def normalize_material_name(raw: str) -> str:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Export Source1 prop model meshes via SourceIO")
-    parser.add_argument("--sourceio-root", required=True, dest="sourceio_root")
+    parser.add_argument("--sourceio-root", required=False, dest="sourceio_root")
     parser.add_argument("--models-json", required=True, dest="models_json")
     parser.add_argument("--map-root", required=False, dest="map_root")
     parser.add_argument("--content-root", action="append", dest="content_roots", default=[])
@@ -394,9 +394,15 @@ def main() -> int:
     started = time.time()
 
     try:
-        sourceio_root = Path(args.sourceio_root).resolve()
-        if not sourceio_root.exists():
-            raise RuntimeError(f"sourceio_root_not_found: {sourceio_root}")
+        sourceio_root = None
+        sourceio_import_mode = "python_env"
+        sourceio_root_raw = str(args.sourceio_root or "").strip()
+        if sourceio_root_raw:
+            sourceio_root = Path(sourceio_root_raw).resolve()
+            if not sourceio_root.exists():
+                raise RuntimeError(f"sourceio_root_not_found: {sourceio_root}")
+            sys.path.insert(0, str(sourceio_root.parent))
+            sourceio_import_mode = "sourceio_root_path"
 
         models_path = Path(args.models_json).resolve()
         if not models_path.exists():
@@ -418,10 +424,11 @@ def main() -> int:
             }
         )
 
-        sys.path.insert(0, str(sourceio_root.parent))
-
-        from SourceIO.library.shared.content_manager import ContentManager
-        from SourceIO.library.utils import TinyPath
+        try:
+            from SourceIO.library.shared.content_manager import ContentManager
+            from SourceIO.library.utils import TinyPath
+        except Exception as import_err:
+            raise RuntimeError(f"sourceio_import_failed:{type(import_err).__name__}:{import_err}") from import_err
 
         cm = ContentManager()
         roots_raw: list[str] = []
@@ -502,6 +509,10 @@ def main() -> int:
             "ok": True,
             "generatedAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             "durationMs": int((time.time() - started) * 1000),
+            "sourceio": {
+                "importMode": sourceio_import_mode,
+                **({"rootPath": str(sourceio_root)} if sourceio_root is not None else {}),
+            },
             "rootsScanned": [str(root) for root in roots],
             "modelsRequested": len(requested_models),
             "modelsExported": sum(1 for item in results if item.get("status") == "ok"),
