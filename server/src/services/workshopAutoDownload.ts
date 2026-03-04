@@ -107,6 +107,30 @@ type MapHint = {
   workshopId?: string;
 };
 
+type WorkshopSearchSource = 'steam_api_queryfiles' | 'steamcommunity_browse';
+
+type WorkshopSearchCandidate = {
+  workshopId: string;
+  title: string;
+  source: WorkshopSearchSource;
+  score: number;
+};
+
+type AutoDiscoveryResult = {
+  mapName: string;
+  workshopId?: string;
+  resolutionSource: string;
+  reason: string;
+  candidates: WorkshopSearchCandidate[];
+};
+
+type AutoDiscoveryCacheEntry = {
+  workshopId?: string;
+  resolutionSource: string;
+  reason: string;
+  expiresAtMs: number;
+};
+
 type QueueStoreFile = {
   version: 1;
   updatedAt: string;
@@ -255,6 +279,9 @@ let runtimeMapCache = new Map<string, string>();
 let runtimeMapCacheLoaded = false;
 let discoveredFromReports = new Map<string, string>();
 let discoveredFromReportsLoadedAtMs = 0;
+let autoDiscoveryCache = new Map<string, AutoDiscoveryCacheEntry>();
+let autoDiscoveryInFlight = new Map<string, Promise<AutoDiscoveryResult>>();
+let autoDiscoveryLastUnresolvedLogMs = new Map<string, number>();
 let queueStoreLoaded = false;
 let queueStorePathLoaded = '';
 let jobsById = new Map<string, PersistedWorkshopJob>();
@@ -313,6 +340,343 @@ const parseMapHint = (raw: string): MapHint => {
     }
   }
   return { mapName: sanitizeMapName(normalizedRaw) };
+};
+
+const getAutoDiscoverySettings = () => ({
+  enabled: parseBool(process.env.WORKSHOP_AUTO_DISCOVER_ENABLED, true),
+  timeoutMs: Math.max(
+    2_000,
+    toPositiveInt(process.env.WORKSHOP_AUTO_DISCOVER_TIMEOUT_MS, 12_000),
+  ),
+  positiveTtlMs: Math.max(
+    60_000,
+    toPositiveInt(process.env.WORKSHOP_AUTO_DISCOVER_POSITIVE_TTL_MS, 12 * 60 * 60 * 1000),
+  ),
+  negativeTtlMs: Math.max(
+    30_000,
+    toPositiveInt(process.env.WORKSHOP_AUTO_DISCOVER_NEGATIVE_TTL_MS, 5 * 60 * 1000),
+  ),
+  minScore: Math.max(
+    1,
+    Math.min(1_000, toPositiveInt(process.env.WORKSHOP_AUTO_DISCOVER_MIN_SCORE, 180)),
+  ),
+  maxCandidates: Math.max(
+    5,
+    Math.min(100, toPositiveInt(process.env.WORKSHOP_AUTO_DISCOVER_MAX_CANDIDATES, 30)),
+  ),
+});
+
+const decodeHtmlEntities = (raw: string): string => {
+  const text = String(raw || '');
+  return text.replace(/&(#x?[0-9a-f]+|[a-z]+);/gi, (_m, token: string) => {
+    const key = String(token || '').toLowerCase();
+    if (key === 'amp') return '&';
+    if (key === 'lt') return '<';
+    if (key === 'gt') return '>';
+    if (key === 'quot') return '"';
+    if (key === 'apos' || key === '#39') return "'";
+    if (key === 'nbsp') return ' ';
+    if (key.startsWith('#x')) {
+      const code = Number.parseInt(key.slice(2), 16);
+      if (Number.isFinite(code)) return String.fromCharCode(code);
+      return '';
+    }
+    if (key.startsWith('#')) {
+      const code = Number.parseInt(key.slice(1), 10);
+      if (Number.isFinite(code)) return String.fromCharCode(code);
+      return '';
+    }
+    return '';
+  });
+};
+
+const stripHtmlTags = (raw: string): string => String(raw || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+
+const normalizeLooseToken = (raw: string): string => String(raw || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+
+const scoreWorkshopCandidate = (mapName: string, titleRaw: string): number => {
+  const map = String(mapName || '').trim().toLowerCase();
+  const title = String(titleRaw || '').trim().toLowerCase();
+  if (!map || !title) return -1_000;
+
+  const mapCompact = normalizeLooseToken(map);
+  const mapSpaced = map.replace(/[_-]+/g, ' ');
+  const titleCompact = normalizeLooseToken(title);
+  let score = 0;
+
+  if (title === map) score += 260;
+  if (
+    title.startsWith(`${map} `)
+    || title.startsWith(`${map}|`)
+    || title.startsWith(`${map}:`)
+    || title.startsWith(`${map}-`)
+  ) {
+    score += 220;
+  }
+  if (title.includes(map)) score += 170;
+  if (mapSpaced && title.includes(mapSpaced)) score += 120;
+  if (mapCompact && titleCompact.includes(mapCompact)) score += 140;
+
+  if (/\bnav[\s_-]*mesh\b/.test(title) || /\bnavmesh\b/.test(title)) score -= 160;
+  if (/\b(ai nodes?|nextbot|npc|weapons?|soundpack|playermodel)\b/.test(title)) score -= 60;
+
+  return score;
+};
+
+const fetchTextWithTimeout = async (
+  url: string,
+  timeoutMs: number,
+): Promise<{ ok: boolean; status: number; body: string }> => {
+  const fetchFn = (globalThis as any)?.fetch;
+  if (typeof fetchFn !== 'function') {
+    throw new Error('fetch_unavailable');
+  }
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  timer.unref?.();
+
+  try {
+    const response = await fetchFn(url, {
+      method: 'GET',
+      redirect: 'follow',
+      headers: {
+        'User-Agent': 'backstabber-workshop-auto/1.0',
+        Accept: 'application/json,text/html;q=0.9,*/*;q=0.5',
+      },
+      signal: controller.signal,
+    });
+    const body = await response.text();
+    return {
+      ok: Boolean(response?.ok),
+      status: Number(response?.status || 0),
+      body: String(body || ''),
+    };
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
+const querySteamApiCandidates = async (
+  mapName: string,
+  appId: number,
+  timeoutMs: number,
+  maxCandidates: number,
+): Promise<WorkshopSearchCandidate[]> => {
+  const apiKey = String(process.env.STEAM_API_KEY || '').trim();
+  if (!apiKey) return [];
+
+  const endpoint = new URL('https://api.steampowered.com/IPublishedFileService/QueryFiles/v1/');
+  endpoint.searchParams.set('key', apiKey);
+  endpoint.searchParams.set('appid', String(appId));
+  endpoint.searchParams.set('search_text', mapName);
+  endpoint.searchParams.set('actualsort', 'textsearch');
+  endpoint.searchParams.set('return_tags', '1');
+  endpoint.searchParams.set('return_metadata', '1');
+  endpoint.searchParams.set('numperpage', String(Math.max(1, Math.min(100, maxCandidates))));
+  endpoint.searchParams.set('page', '1');
+
+  const response = await fetchTextWithTimeout(endpoint.toString(), timeoutMs);
+  if (!response.ok) {
+    throw new Error(`steam_api_http_${response.status || 0}`);
+  }
+
+  let parsed: any = null;
+  try {
+    parsed = JSON.parse(response.body);
+  } catch {
+    throw new Error('steam_api_invalid_json');
+  }
+
+  const details = Array.isArray(parsed?.response?.publishedfiledetails)
+    ? (parsed.response.publishedfiledetails as any[])
+    : [];
+
+  const out: WorkshopSearchCandidate[] = [];
+  for (const item of details) {
+    const workshopId = String(item?.publishedfileid || '').trim();
+    if (!isWorkshopId(workshopId)) continue;
+    const title = String(item?.title || '').trim();
+    const score = scoreWorkshopCandidate(mapName, title);
+    out.push({
+      workshopId,
+      title,
+      source: 'steam_api_queryfiles',
+      score,
+    });
+  }
+  return out;
+};
+
+const querySteamCommunityCandidates = async (
+  mapName: string,
+  appId: number,
+  timeoutMs: number,
+): Promise<WorkshopSearchCandidate[]> => {
+  const endpoint = new URL('https://steamcommunity.com/workshop/browse/');
+  endpoint.searchParams.set('appid', String(appId));
+  endpoint.searchParams.set('searchtext', mapName);
+  endpoint.searchParams.set('actualsort', 'textsearch');
+  endpoint.searchParams.set('p', '1');
+  endpoint.searchParams.set('numperpage', '30');
+
+  const response = await fetchTextWithTimeout(endpoint.toString(), timeoutMs);
+  if (!response.ok) {
+    throw new Error(`steamcommunity_http_${response.status || 0}`);
+  }
+
+  const html = String(response.body || '');
+  const regex = /data-publishedfileid="(\d+)"[\s\S]{0,1800}?<div class="workshopItemTitle ellipsis">([\s\S]*?)<\/div>/gi;
+  const out: WorkshopSearchCandidate[] = [];
+  let match: RegExpExecArray | null = null;
+
+  while ((match = regex.exec(html)) !== null) {
+    const workshopId = String(match[1] || '').trim();
+    if (!isWorkshopId(workshopId)) continue;
+    const title = decodeHtmlEntities(stripHtmlTags(String(match[2] || '')));
+    const score = scoreWorkshopCandidate(mapName, title);
+    out.push({
+      workshopId,
+      title,
+      source: 'steamcommunity_browse',
+      score,
+    });
+  }
+
+  return out;
+};
+
+const mergeWorkshopCandidates = (
+  maxCandidates: number,
+  ...collections: WorkshopSearchCandidate[][]
+): WorkshopSearchCandidate[] => {
+  const byId = new Map<string, WorkshopSearchCandidate>();
+  for (const list of collections) {
+    for (const candidate of list) {
+      const existing = byId.get(candidate.workshopId);
+      if (!existing || candidate.score > existing.score) {
+        byId.set(candidate.workshopId, candidate);
+      }
+    }
+  }
+  return Array.from(byId.values())
+    .sort((a, b) => b.score - a.score || Number(b.workshopId) - Number(a.workshopId))
+    .slice(0, maxCandidates);
+};
+
+const discoverWorkshopIdForMap = async (
+  mapNameRaw: string,
+  appId: number,
+): Promise<AutoDiscoveryResult> => {
+  const mapName = sanitizeMapName(mapNameRaw);
+  if (!mapName) {
+    return {
+      mapName: '',
+      resolutionSource: 'auto_discovery_invalid_map',
+      reason: 'invalid_map_name',
+      candidates: [],
+    };
+  }
+
+  const settings = getAutoDiscoverySettings();
+  if (!settings.enabled) {
+    return {
+      mapName,
+      resolutionSource: 'auto_discovery_disabled',
+      reason: 'disabled_by_env',
+      candidates: [],
+    };
+  }
+
+  const now = Date.now();
+  const cached = autoDiscoveryCache.get(mapName);
+  if (cached && cached.expiresAtMs > now) {
+    return {
+      mapName,
+      ...(cached.workshopId ? { workshopId: cached.workshopId } : {}),
+      resolutionSource: cached.resolutionSource,
+      reason: cached.reason,
+      candidates: [],
+    };
+  }
+
+  const existingPromise = autoDiscoveryInFlight.get(mapName);
+  if (existingPromise) {
+    return existingPromise;
+  }
+
+  const promise = (async (): Promise<AutoDiscoveryResult> => {
+    const queryOutcomes = await Promise.allSettled([
+      querySteamApiCandidates(mapName, appId, settings.timeoutMs, settings.maxCandidates),
+      querySteamCommunityCandidates(mapName, appId, settings.timeoutMs),
+    ]);
+
+    const apiCandidates =
+      queryOutcomes[0].status === 'fulfilled' ? queryOutcomes[0].value : [];
+    const communityCandidates =
+      queryOutcomes[1].status === 'fulfilled' ? queryOutcomes[1].value : [];
+
+    const combined = mergeWorkshopCandidates(settings.maxCandidates, apiCandidates, communityCandidates);
+    const top = combined[0];
+    const second = combined[1];
+    const topIsStrong = Boolean(top && top.score >= settings.minScore);
+    const ambiguous = Boolean(
+      top
+        && second
+        && top.score >= settings.minScore
+        && second.score >= settings.minScore
+        && top.workshopId !== second.workshopId
+        && top.score - second.score < 25,
+    );
+
+    if (topIsStrong && top && !ambiguous) {
+      return {
+        mapName,
+        workshopId: top.workshopId,
+        resolutionSource: `auto_discovery_${top.source}`,
+        reason: `resolved_score_${top.score}`,
+        candidates: combined,
+      };
+    }
+
+    if (queryOutcomes[0].status === 'rejected' && queryOutcomes[1].status === 'rejected') {
+      return {
+        mapName,
+        resolutionSource: 'auto_discovery_failed',
+        reason: `all_sources_failed:${String(queryOutcomes[0].reason || queryOutcomes[1].reason || 'unknown')}`,
+        candidates: combined,
+      };
+    }
+
+    if (ambiguous) {
+      return {
+        mapName,
+        resolutionSource: 'auto_discovery_ambiguous',
+        reason: 'ambiguous_top_candidates',
+        candidates: combined,
+      };
+    }
+
+    return {
+      mapName,
+      resolutionSource: 'auto_discovery_not_found',
+      reason: top ? `top_score_too_low:${top.score}` : 'no_candidates',
+      candidates: combined,
+    };
+  })();
+
+  autoDiscoveryInFlight.set(mapName, promise);
+  try {
+    const result = await promise;
+    autoDiscoveryCache.set(mapName, {
+      ...(result.workshopId ? { workshopId: result.workshopId } : {}),
+      resolutionSource: result.resolutionSource,
+      reason: result.reason,
+      expiresAtMs: Date.now() + (result.workshopId ? settings.positiveTtlMs : settings.negativeTtlMs),
+    });
+    return result;
+  } finally {
+    autoDiscoveryInFlight.delete(mapName);
+  }
 };
 
 const parseMapTable = (input: unknown): Record<string, string> => {
@@ -1382,6 +1746,89 @@ const enqueueJob = (
   };
 };
 
+const autoDiscoverAndEnqueueObservedMap = async (input: {
+  mapName: string;
+  serverId: string;
+  source: TriggerSource;
+  config: WorkshopMapConfigResolved;
+}) => {
+  const mapName = sanitizeMapName(input.mapName);
+  if (!mapName) return;
+
+  const discovery = await discoverWorkshopIdForMap(mapName, input.config.appId);
+  if (!discovery.workshopId) {
+    const now = Date.now();
+    const lastLogAt = autoDiscoveryLastUnresolvedLogMs.get(mapName) || 0;
+    if (now - lastLogAt >= 5 * 60 * 1000) {
+      autoDiscoveryLastUnresolvedLogMs.set(mapName, now);
+      const topCandidates = discovery.candidates.slice(0, 3).map((candidate) => ({
+        workshopId: candidate.workshopId,
+        title: candidate.title,
+        source: candidate.source,
+        score: candidate.score,
+      }));
+      console.warn('[workshop-auto] auto_discovery_unresolved', JSON.stringify({
+        map: mapName,
+        source: input.source,
+        serverId: input.serverId,
+        reason: discovery.reason,
+        resolutionSource: discovery.resolutionSource,
+        candidates: topCandidates,
+      }));
+    }
+    return;
+  }
+
+  const config = readConfig();
+  loadQueueStoreIfNeeded(config);
+  if (!config.enabled) return;
+
+  let workshopId = discovery.workshopId;
+  let resolutionSource = discovery.resolutionSource;
+  const resolvedNow = resolveWorkshopId({ mapName }, config);
+  if (resolvedNow.workshopId) {
+    workshopId = resolvedNow.workshopId;
+    resolutionSource = resolvedNow.resolutionSource;
+  } else {
+    rememberRuntimeMapping(mapName, workshopId, resolutionSource, config.runtimeCachePath);
+  }
+
+  warnedMissingMap.delete(mapName);
+
+  const key = `${config.appId}:${workshopId}:${mapName}`;
+  const recentSuccessTs = recentSuccessByKey.get(key);
+  if (
+    typeof recentSuccessTs === 'number'
+    && config.successCooldownMs > 0
+    && Date.now() - recentSuccessTs < config.successCooldownMs
+  ) {
+    return;
+  }
+
+  const enqueue = enqueueJob(
+    mapName,
+    workshopId,
+    input.serverId,
+    input.source,
+    resolutionSource,
+    false,
+    config,
+  );
+
+  console.log('[workshop-auto] auto_discovery_enqueue', JSON.stringify({
+    map: mapName,
+    workshopId,
+    source: input.source,
+    serverId: input.serverId,
+    resolutionSource,
+    queued: enqueue.queued,
+    deduped: enqueue.deduped,
+    reason: enqueue.reason,
+    ...(enqueue.droppedOldestJobId ? { droppedOldestJobId: enqueue.droppedOldestJobId } : {}),
+    ...(enqueue.job ? { jobId: enqueue.job.id } : {}),
+  }));
+};
+
 export const notifyMapObservedForWorkshop = (input: NotifyInput) => {
   if (!started || !runtimeEnabled) return;
 
@@ -1412,6 +1859,21 @@ export const notifyMapObservedForWorkshop = (input: NotifyInput) => {
         configPath: config.configPath,
       }));
     }
+    // Allow periodic retries for the same map when discovery cache expires.
+    serverLastMap.delete(serverId);
+    void autoDiscoverAndEnqueueObservedMap({
+      mapName: resolved.normalizedMap,
+      serverId,
+      source: input.source,
+      config,
+    }).catch((error: any) => {
+      console.warn('[workshop-auto] auto_discovery_failed', JSON.stringify({
+        map: resolved.normalizedMap,
+        source: input.source,
+        serverId,
+        error: String(error?.message || error),
+      }));
+    });
     return;
   }
 
@@ -1662,6 +2124,7 @@ export const startWorkshopAutoDownloadJob = () => {
   }
   started = true;
   runtimeEnabled = parseBool(process.env.WORKSHOP_AUTO_DOWNLOAD_ENABLED, true);
+  const autoDiscovery = getAutoDiscoverySettings();
 
   const config = readConfig();
   loadQueueStoreIfNeeded(config);
@@ -1678,6 +2141,10 @@ export const startWorkshopAutoDownloadJob = () => {
     mappedMaps: Object.keys(config.maps).length,
     runtimeMappedMaps: runtimeMapCache.size,
     aliases: Object.keys(config.aliases).length,
+    autoDiscoveryEnabled: autoDiscovery.enabled,
+    autoDiscoveryTimeoutMs: autoDiscovery.timeoutMs,
+    autoDiscoveryMinScore: autoDiscovery.minScore,
+    autoDiscoveryMaxCandidates: autoDiscovery.maxCandidates,
     queueStorePath: config.queueStorePath,
     reportsDir: config.reportsDir,
     runtimeCachePath: config.runtimeCachePath,
@@ -1692,6 +2159,9 @@ export const startWorkshopAutoDownloadJob = () => {
     started = false;
     serverLastMap.clear();
     warnedMissingMap.clear();
+    autoDiscoveryCache.clear();
+    autoDiscoveryInFlight.clear();
+    autoDiscoveryLastUnresolvedLogMs.clear();
     if (wakeTimer) {
       clearTimeout(wakeTimer);
       wakeTimer = null;
