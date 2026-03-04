@@ -128,6 +128,58 @@ type AutoDiscoveryResult = {
   candidates: WorkshopSearchCandidate[];
 };
 
+type WorkshopResolutionCandidate = {
+  workshopId: string;
+  title: string;
+  source: WorkshopSearchSource;
+  score: number;
+  exactTitle: boolean;
+  rejected: boolean;
+};
+
+type WorkshopMapResolutionSnapshotOk = {
+  ok: true;
+  requestedMapName: string;
+  resolvedMapName: string;
+  aliasTarget?: string;
+  staticWorkshopId?: string;
+  runtimeWorkshopId?: string;
+  processReportWorkshopId?: string;
+  mappedWorkshopId?: string;
+  mappedSource: string;
+  discovery: {
+    resolutionSource: string;
+    reason: string;
+    workshopId?: string;
+    candidates: WorkshopResolutionCandidate[];
+  };
+};
+
+type WorkshopMapResolutionSnapshotError = {
+  ok: false;
+  requestedMapName: string;
+  error: string;
+};
+
+type WorkshopMapResolutionSnapshot = WorkshopMapResolutionSnapshotOk | WorkshopMapResolutionSnapshotError;
+
+type WorkshopMapSelectionApplyResult = {
+  ok: boolean;
+  mapName: string;
+  workshopId?: string;
+  persistMode?: 'static' | 'runtime';
+  persisted?: boolean;
+  persistedTo?: string;
+  enqueue: {
+    attempted: boolean;
+    queued: boolean;
+    deduped: boolean;
+    reason: string;
+    jobId?: string;
+  };
+  error?: string;
+};
+
 type AutoDiscoveryCacheEntry = {
   workshopId?: string;
   resolutionSource: string;
@@ -447,6 +499,37 @@ const parseMapHint = (raw: string): MapHint => {
   return { mapName: extractMapNameFromHint(normalizedRaw) };
 };
 
+const extractWorkshopIdFromInput = (rawInput: unknown): string => {
+  const raw = String(rawInput || '').trim();
+  if (!raw) return '';
+  if (isWorkshopId(raw)) return raw;
+
+  const decoded = safeDecodeURIComponent(raw);
+  const normalized = decoded.replace(/\\/g, '/');
+
+  const queryMatch = /(?:^|[?&#])(id|workshopid|publishedfileid)=(\d+)/i.exec(normalized);
+  if (queryMatch && queryMatch[2] && isWorkshopId(queryMatch[2])) {
+    return queryMatch[2];
+  }
+
+  const workshopPathMatch = /\/workshop\/(\d+)(?:\/|$)/i.exec(normalized);
+  if (workshopPathMatch && workshopPathMatch[1] && isWorkshopId(workshopPathMatch[1])) {
+    return workshopPathMatch[1];
+  }
+
+  const genericPathMatch = /\/sharedfiles\/filedetails\/\?id=(\d+)/i.exec(normalized);
+  if (genericPathMatch && genericPathMatch[1] && isWorkshopId(genericPathMatch[1])) {
+    return genericPathMatch[1];
+  }
+
+  const looseDigits = /(?:^|[^0-9])(\d{8,})(?:[^0-9]|$)/.exec(normalized);
+  if (looseDigits && looseDigits[1] && isWorkshopId(looseDigits[1])) {
+    return looseDigits[1];
+  }
+
+  return '';
+};
+
 const buildAutoDiscoverySearchTerms = (mapNameRaw: string): string[] => {
   const mapName = sanitizeMapName(mapNameRaw);
   if (!mapName) return [];
@@ -517,6 +600,25 @@ const rememberRejectedWorkshopIdForMap = (
       reason,
     }));
   }
+};
+
+const clearRejectedWorkshopIdsForMap = (mapNameRaw: string, workshopIdRaw?: string) => {
+  const mapName = sanitizeMapName(mapNameRaw);
+  if (!mapName) return;
+
+  if (workshopIdRaw) {
+    const workshopId = String(workshopIdRaw || '').trim();
+    if (!isWorkshopId(workshopId)) return;
+    const rejected = rejectedWorkshopIdsByMap.get(mapName);
+    if (!rejected) return;
+    rejected.delete(workshopId);
+    if (rejected.size === 0) {
+      rejectedWorkshopIdsByMap.delete(mapName);
+    }
+    return;
+  }
+
+  rejectedWorkshopIdsByMap.delete(mapName);
 };
 
 const getAutoDiscoverySettings = () => ({
@@ -1425,6 +1527,53 @@ const readConfig = (): WorkshopMapConfigResolved => {
   loadRuntimeCache(resolved.runtimeCachePath);
   discoverFromProcessReports(resolved);
   return resolved;
+};
+
+const persistStaticWorkshopMapping = (
+  mapNameRaw: string,
+  workshopIdRaw: string,
+  configPath: string,
+): { mapName: string; workshopId: string; configPath: string } => {
+  const mapName = sanitizeMapName(mapNameRaw);
+  const workshopId = String(workshopIdRaw || '').trim();
+  if (!mapName) {
+    throw new Error('invalid_map_name');
+  }
+  if (!isWorkshopId(workshopId)) {
+    throw new Error('invalid_workshop_id');
+  }
+
+  let payload: Record<string, any> = {};
+  if (fs.existsSync(configPath)) {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(configPath, 'utf8')) as Record<string, any>;
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        payload = parsed;
+      } else {
+        throw new Error('config_root_not_object');
+      }
+    } catch (error: any) {
+      throw new Error(`invalid_config_json:${String(error?.message || error)}`);
+    }
+  }
+
+  if (!payload.maps || typeof payload.maps !== 'object' || Array.isArray(payload.maps)) {
+    payload.maps = {};
+  }
+  payload.maps[mapName] = workshopId;
+  writeJsonAtomic(configPath, payload);
+
+  cachedConfig = null;
+  cachedConfigMtimeMs = -1;
+  warnedMissingMap.delete(mapName);
+  autoDiscoveryCache.delete(mapName);
+  autoDiscoveryLastUnresolvedLogMs.delete(mapName);
+
+  return {
+    mapName,
+    workshopId,
+    configPath,
+  };
 };
 
 const resolveWorkshopId = (
@@ -2519,15 +2668,235 @@ const reconcileObservedServerMaps = async () => {
   }
 };
 
+export const getWorkshopMapResolutionSnapshot = async (input: {
+  mapName: string;
+  refreshDiscovery?: boolean;
+}): Promise<WorkshopMapResolutionSnapshot> => {
+  const requestedMapName = sanitizeMapName(String(input.mapName || ''));
+  if (!requestedMapName) {
+    return {
+      ok: false,
+      requestedMapName: '',
+      error: 'invalid_map_name',
+    };
+  }
+
+  const config = readConfig();
+  loadQueueStoreIfNeeded(config);
+
+  const aliasTarget = config.aliases[requestedMapName];
+  const resolvedMapName = aliasTarget || requestedMapName;
+  const resolved = resolveWorkshopId({ mapName: requestedMapName }, config);
+
+  if (parseBool(input.refreshDiscovery, false)) {
+    autoDiscoveryCache.delete(resolvedMapName);
+  }
+
+  const discovery = await discoverWorkshopIdForMap(resolvedMapName, config.appId);
+  const rejectedIds = getRejectedWorkshopIdsForMap(resolvedMapName);
+  const processReportWorkshopId = discoverFromProcessReports(config).get(resolvedMapName);
+  const staticWorkshopId = config.maps[resolvedMapName];
+  const runtimeWorkshopId = runtimeMapCache.get(resolvedMapName);
+
+  return {
+    ok: true,
+    requestedMapName,
+    resolvedMapName,
+    ...(aliasTarget ? { aliasTarget } : {}),
+    ...(staticWorkshopId ? { staticWorkshopId } : {}),
+    ...(runtimeWorkshopId ? { runtimeWorkshopId } : {}),
+    ...(processReportWorkshopId ? { processReportWorkshopId } : {}),
+    ...(resolved.workshopId ? { mappedWorkshopId: resolved.workshopId } : {}),
+    mappedSource: resolved.resolutionSource,
+    discovery: {
+      resolutionSource: discovery.resolutionSource,
+      reason: discovery.reason,
+      ...(discovery.workshopId ? { workshopId: discovery.workshopId } : {}),
+      candidates: discovery.candidates.map((candidate) => ({
+        workshopId: candidate.workshopId,
+        title: candidate.title,
+        source: candidate.source,
+        score: candidate.score,
+        exactTitle: isExactMapTitleCandidate(resolvedMapName, candidate),
+        rejected: rejectedIds.has(candidate.workshopId),
+      })),
+    },
+  };
+};
+
+export const applyWorkshopMapResolutionSelection = (input: {
+  mapName: string;
+  workshopInput: string;
+  serverId?: string;
+  persistMode?: 'static' | 'runtime';
+  enqueue?: boolean;
+  refresh?: boolean;
+}): WorkshopMapSelectionApplyResult => {
+  const requestedMapName = sanitizeMapName(String(input.mapName || ''));
+  const workshopInput = String(input.workshopInput || '').trim();
+  const workshopId = extractWorkshopIdFromInput(workshopInput);
+  const persistMode: 'static' | 'runtime' = input.persistMode === 'runtime' ? 'runtime' : 'static';
+
+  if (!requestedMapName) {
+    return {
+      ok: false,
+      mapName: '',
+      enqueue: {
+        attempted: false,
+        queued: false,
+        deduped: false,
+        reason: 'invalid_map_name',
+      },
+      error: 'invalid_map_name',
+    };
+  }
+
+  if (!isWorkshopId(workshopId)) {
+    return {
+      ok: false,
+      mapName: requestedMapName,
+      enqueue: {
+        attempted: false,
+        queued: false,
+        deduped: false,
+        reason: 'invalid_workshop_input',
+      },
+      error: 'invalid_workshop_input',
+    };
+  }
+
+  const config = readConfig();
+  loadQueueStoreIfNeeded(config);
+  const aliasTarget = config.aliases[requestedMapName];
+  const mapName = aliasTarget || requestedMapName;
+
+  clearRejectedWorkshopIdsForMap(mapName, workshopId);
+  clearRejectedWorkshopIdsForMap(requestedMapName, workshopId);
+  autoDiscoveryCache.delete(mapName);
+  autoDiscoveryLastUnresolvedLogMs.delete(mapName);
+  warnedMissingMap.delete(mapName);
+
+  let persistedTo = config.runtimeCachePath;
+  if (persistMode === 'static') {
+    try {
+      const persisted = persistStaticWorkshopMapping(mapName, workshopId, config.configPath);
+      persistedTo = persisted.configPath;
+    } catch (error: any) {
+      return {
+        ok: false,
+        mapName,
+        workshopId,
+        persistMode,
+        enqueue: {
+          attempted: false,
+          queued: false,
+          deduped: false,
+          reason: 'mapping_persist_failed',
+        },
+        error: String(error?.message || error),
+      };
+    }
+  }
+
+  rememberRuntimeMapping(
+    mapName,
+    workshopId,
+    persistMode === 'static' ? 'manual_resolution_static' : 'manual_resolution_runtime',
+    config.runtimeCachePath,
+  );
+
+  const shouldEnqueue = parseBool(input.enqueue, true);
+  if (!shouldEnqueue) {
+    return {
+      ok: true,
+      mapName,
+      workshopId,
+      persistMode,
+      persisted: true,
+      persistedTo,
+      enqueue: {
+        attempted: false,
+        queued: false,
+        deduped: false,
+        reason: 'enqueue_skipped',
+      },
+    };
+  }
+
+  if (!started || !runtimeEnabled) {
+    return {
+      ok: true,
+      mapName,
+      workshopId,
+      persistMode,
+      persisted: true,
+      persistedTo,
+      enqueue: {
+        attempted: true,
+        queued: false,
+        deduped: false,
+        reason: 'worker_not_running',
+      },
+    };
+  }
+
+  const refreshedConfig = readConfig();
+  loadQueueStoreIfNeeded(refreshedConfig);
+  if (!refreshedConfig.enabled) {
+    return {
+      ok: true,
+      mapName,
+      workshopId,
+      persistMode,
+      persisted: true,
+      persistedTo,
+      enqueue: {
+        attempted: true,
+        queued: false,
+        deduped: false,
+        reason: 'worker_disabled_by_config',
+      },
+    };
+  }
+
+  const serverId = String(input.serverId || 'admin').trim() || 'admin';
+  const enqueue = enqueueJob(
+    mapName,
+    workshopId,
+    serverId,
+    'manual',
+    persistMode === 'static' ? 'manual_resolution_static' : 'manual_resolution_runtime',
+    parseBool(input.refresh, false),
+    refreshedConfig,
+  );
+
+  return {
+    ok: true,
+    mapName,
+    workshopId,
+    persistMode,
+    persisted: true,
+    persistedTo,
+    enqueue: {
+      attempted: true,
+      queued: enqueue.queued,
+      deduped: enqueue.deduped,
+      reason: enqueue.reason,
+      ...(enqueue.job ? { jobId: enqueue.job.id } : {}),
+    },
+  };
+};
+
 export const enqueueWorkshopAutoDownloadManual = (input: {
   serverId?: string;
   mapName: string;
+  workshopInput?: string;
   workshopId?: string;
   refresh?: boolean;
 }) => {
   const serverId = String(input.serverId || 'admin').trim() || 'admin';
   const rawMap = String(input.mapName || '').trim();
-  const rawWorkshopId = String(input.workshopId || '').trim();
+  const rawWorkshopInput = String(input.workshopInput || input.workshopId || '').trim();
   const refresh = parseBool(input.refresh, false);
 
   if (!started || !runtimeEnabled) {
@@ -2562,8 +2931,9 @@ export const enqueueWorkshopAutoDownloadManual = (input: {
 
   let workshopId = '';
   let resolutionSource = 'manual_input';
-  if (rawWorkshopId) {
-    if (!isWorkshopId(rawWorkshopId)) {
+  if (rawWorkshopInput) {
+    const parsedWorkshopId = extractWorkshopIdFromInput(rawWorkshopInput);
+    if (!isWorkshopId(parsedWorkshopId)) {
       return {
         ok: false,
         queued: false,
@@ -2571,7 +2941,7 @@ export const enqueueWorkshopAutoDownloadManual = (input: {
         reason: 'invalid_workshop_id',
       };
     }
-    workshopId = rawWorkshopId;
+    workshopId = parsedWorkshopId;
   } else {
     const resolved = resolveWorkshopId({ mapName }, config);
     if (!resolved.workshopId) {

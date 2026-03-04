@@ -16,6 +16,8 @@ import {
   WorkshopManualEnqueueResponse,
   WorkshopQueueJob,
   WorkshopQueueSnapshotResponse,
+  WorkshopResolveSelectionResponse,
+  WorkshopResolutionOptionsResponse,
 } from '../../types';
 
 type Bounds = {
@@ -743,8 +745,14 @@ const ServerView3D: React.FC = () => {
   const [queueError, setQueueError] = useState<string | null>(null);
   const [queueLoading, setQueueLoading] = useState<boolean>(false);
   const [manualWorkshopId, setManualWorkshopId] = useState<string>('');
+  const [manualResolveWorkshopInput, setManualResolveWorkshopInput] = useState<string>('');
   const [manualEnqueueBusy, setManualEnqueueBusy] = useState<boolean>(false);
   const [manualEnqueueResult, setManualEnqueueResult] = useState<WorkshopManualEnqueueResponse | null>(null);
+  const [resolutionSnapshot, setResolutionSnapshot] = useState<WorkshopResolutionOptionsResponse | null>(null);
+  const [resolutionLoading, setResolutionLoading] = useState<boolean>(false);
+  const [resolutionError, setResolutionError] = useState<string | null>(null);
+  const [resolutionSelectionBusy, setResolutionSelectionBusy] = useState<boolean>(false);
+  const [resolutionSelectionResult, setResolutionSelectionResult] = useState<WorkshopResolveSelectionResponse | null>(null);
   const [manifestProbe, setManifestProbe] = useState<ManifestProbe | null>(null);
   const [diagBundleBusy, setDiagBundleBusy] = useState<boolean>(false);
   const [diagBundleError, setDiagBundleError] = useState<string | null>(null);
@@ -782,6 +790,7 @@ const ServerView3D: React.FC = () => {
   const moveSpeedFactorRef = useRef<number>(moveSpeedFactor);
   const viewerActionPollTokenRef = useRef<number>(0);
   const diagAutoKeyRef = useRef<string>('');
+  const resolutionAutoKeyRef = useRef<string>('');
   const mobileMovePadRef = useRef<HTMLDivElement | null>(null);
   const mobileMovePointerIdRef = useRef<number | null>(null);
   const mobileLookPadPointerRef = useRef<{ pointerId: number | null; lastX: number; lastY: number }>({
@@ -864,6 +873,14 @@ const ServerView3D: React.FC = () => {
         .filter((job) => String(job.mapName || '').trim().toLowerCase() === mapName.toLowerCase())
         .slice(0, 12),
     [mapName, queueSnapshot],
+  );
+  const resolutionCandidates = useMemo(
+    () => resolutionSnapshot?.discovery?.candidates || [],
+    [resolutionSnapshot],
+  );
+  const resolutionNeedsManualSelection = useMemo(
+    () => !resolutionSnapshot?.mappedWorkshopId && resolutionSnapshot?.discovery?.reason === 'ambiguous_top_candidates',
+    [resolutionSnapshot],
   );
   const viewerStreamingRows = useMemo(
     () => [
@@ -1191,6 +1208,23 @@ const ServerView3D: React.FC = () => {
     [],
   );
 
+  const loadResolutionSnapshot = useCallback(async (refresh = false) => {
+    if (!mapName) return;
+    setResolutionLoading(true);
+    if (refresh) {
+      setResolutionSelectionResult(null);
+    }
+    try {
+      const response = await ApiService.getWorkshopResolutionOptions(mapName, { refresh });
+      setResolutionSnapshot(response);
+      setResolutionError(null);
+    } catch (err: any) {
+      setResolutionError(String(err?.message || err));
+    } finally {
+      setResolutionLoading(false);
+    }
+  }, [mapName]);
+
   const probeManifestWithDetails = useCallback(async (): Promise<Manifest> => {
     const checkedAt = new Date().toISOString();
     try {
@@ -1260,7 +1294,7 @@ const ServerView3D: React.FC = () => {
     try {
       const payload = {
         mapName,
-        ...(String(manualWorkshopId || '').trim() ? { workshopId: String(manualWorkshopId).trim() } : {}),
+        ...(String(manualWorkshopId || '').trim() ? { workshopInput: String(manualWorkshopId).trim() } : {}),
         ...(serverId ? { serverId } : {}),
       };
       const response = await ApiService.enqueueWorkshopJobManual(payload);
@@ -1279,6 +1313,59 @@ const ServerView3D: React.FC = () => {
     }
   }, [loadQueueSnapshot, manualWorkshopId, mapName, serverId]);
 
+  const applyWorkshopResolutionSelection = useCallback(async (workshopInput: string) => {
+    if (!mapName) return;
+    const normalizedInput = String(workshopInput || '').trim();
+    if (!normalizedInput) {
+      setResolutionSelectionResult({
+        ok: false,
+        mapName,
+        enqueue: {
+          attempted: false,
+          queued: false,
+          deduped: false,
+          reason: 'invalid_workshop_input',
+        },
+        error: 'Informe um Workshop ID ou link valido.',
+      });
+      return;
+    }
+
+    setResolutionSelectionBusy(true);
+    setResolutionSelectionResult(null);
+    try {
+      const result = await ApiService.applyWorkshopResolutionSelection({
+        mapName,
+        workshopInput: normalizedInput,
+        persistMode: 'static',
+        enqueue: true,
+        refresh: true,
+        ...(serverId ? { serverId } : {}),
+      });
+      setResolutionSelectionResult(result);
+      if (result.ok && result.workshopId) {
+        setManualWorkshopId(result.workshopId);
+        setManualResolveWorkshopInput(result.workshopId);
+      }
+      await loadQueueSnapshot(true);
+      await loadResolutionSnapshot(true);
+    } catch (err: any) {
+      setResolutionSelectionResult({
+        ok: false,
+        mapName,
+        enqueue: {
+          attempted: false,
+          queued: false,
+          deduped: false,
+          reason: 'request_failed',
+        },
+        error: String(err?.message || err),
+      });
+    } finally {
+      setResolutionSelectionBusy(false);
+    }
+  }, [loadQueueSnapshot, loadResolutionSnapshot, mapName, serverId]);
+
   useEffect(() => {
     void loadQueueSnapshot(false);
     const interval = window.setInterval(() => {
@@ -1286,6 +1373,19 @@ const ServerView3D: React.FC = () => {
     }, 8000);
     return () => window.clearInterval(interval);
   }, [loadQueueSnapshot]);
+
+  useEffect(() => {
+    if (!showDevTools || !mapName) return;
+    void loadResolutionSnapshot(false);
+  }, [loadResolutionSnapshot, mapName, showDevTools]);
+
+  useEffect(() => {
+    setResolutionSelectionResult(null);
+    setResolutionError(null);
+    setResolutionSnapshot(null);
+    setManualResolveWorkshopInput('');
+    resolutionAutoKeyRef.current = '';
+  }, [mapName]);
 
   useEffect(() => {
     if (!mapName) return;
@@ -1310,6 +1410,33 @@ const ServerView3D: React.FC = () => {
       diagAutoKeyRef.current = '';
     }
   }, [error, manifestProbe, mapName]);
+
+  useEffect(() => {
+    if (!showDevTools || !mapName || !manifestProbe || manifestProbe.ok) return;
+    const probeError = String(manifestProbe.error || '').toLowerCase();
+    if (!probeError.includes('manifest_http_404')) return;
+    const key = `${mapName}|${probeError}`;
+    if (resolutionAutoKeyRef.current === key) return;
+    resolutionAutoKeyRef.current = key;
+    void loadResolutionSnapshot(true);
+  }, [loadResolutionSnapshot, manifestProbe, mapName, showDevTools]);
+
+  useEffect(() => {
+    if (!showDevTools || !mapName || !error) return;
+    const runtimeError = String(error || '').toLowerCase();
+    if (!runtimeError.includes('manifest_http_404')) return;
+    const key = `${mapName}|runtime:${runtimeError}`;
+    if (resolutionAutoKeyRef.current === key) return;
+    resolutionAutoKeyRef.current = key;
+    void loadResolutionSnapshot(true);
+  }, [error, loadResolutionSnapshot, mapName, showDevTools]);
+
+  useEffect(() => {
+    if (!mapName) return;
+    if (manifestProbe?.ok) {
+      resolutionAutoKeyRef.current = '';
+    }
+  }, [manifestProbe?.ok, mapName]);
 
   const pollViewerActionStatus = useCallback(
     async (actionId: string, pollToken: number) => {
@@ -4304,6 +4431,7 @@ const ServerView3D: React.FC = () => {
               type="button"
               onClick={() => {
                 void loadQueueSnapshot(false);
+                void loadResolutionSnapshot(false);
                 void probeManifestWithDetails().catch(() => undefined);
               }}
               className="flex items-center justify-center gap-2 p-3 rounded-xl border border-[#34435f] bg-[#111a2d] hover:bg-[#192742] hover:border-[#415378] transition-all group"
@@ -4330,6 +4458,7 @@ const ServerView3D: React.FC = () => {
                   type="button"
                   onClick={() => {
                     void loadQueueSnapshot(false);
+                    void loadResolutionSnapshot(false);
                   }}
                   className="px-2 py-1 rounded border border-[#3a4b69] bg-[#182338] text-[10px] uppercase font-bold text-zinc-200 hover:bg-[#22344f]"
                 >
@@ -4412,15 +4541,125 @@ const ServerView3D: React.FC = () => {
             </div>
 
             <div className="rounded border border-[#364561] bg-[#0c1321]/75 px-2 py-2 space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-zinc-500 uppercase font-bold text-[10px]">Resolucao assistida de ambiguidade</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void loadResolutionSnapshot(true);
+                  }}
+                  disabled={resolutionLoading}
+                  className="px-2 py-1 rounded border border-[#3a4b69] bg-[#182338] text-[10px] uppercase font-bold text-zinc-200 hover:bg-[#22344f] disabled:opacity-50"
+                >
+                  {resolutionLoading ? 'Buscando...' : 'Buscar opcoes'}
+                </button>
+              </div>
+
+              {!resolutionSnapshot && !resolutionLoading && (
+                <p className="text-zinc-500">Sem snapshot ainda. Clique em "Buscar opcoes".</p>
+              )}
+
+              {resolutionSnapshot && (
+                <div className="rounded border border-[#364561] bg-[#0f1829]/75 px-2 py-1.5 text-[10px] font-mono space-y-0.5">
+                  <p className="break-all">mapped={resolutionSnapshot.mappedWorkshopId || 'n/a'} source={resolutionSnapshot.mappedSource || 'n/a'}</p>
+                  <p className="break-all">static={resolutionSnapshot.staticWorkshopId || 'n/a'} runtime={resolutionSnapshot.runtimeWorkshopId || 'n/a'} report={resolutionSnapshot.processReportWorkshopId || 'n/a'}</p>
+                  {resolutionSnapshot.aliasTarget && <p className="break-all">aliasTarget={resolutionSnapshot.aliasTarget}</p>}
+                  {resolutionSnapshot.discovery && (
+                    <p className="break-all">
+                      discovery={resolutionSnapshot.discovery.resolutionSource} reason={resolutionSnapshot.discovery.reason} candidates={resolutionSnapshot.discovery.candidates.length}
+                    </p>
+                  )}
+                  {resolutionNeedsManualSelection && (
+                    <p className="text-amber-300 break-words">
+                      Ambiguidade detectada: selecione um candidato abaixo para salvar e processar.
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {resolutionCandidates.length > 0 && (
+                <div className="max-h-[260px] overflow-y-auto admin-scrollbar space-y-1">
+                  {resolutionCandidates.slice(0, 12).map((candidate) => (
+                    <div key={`cand_${candidate.workshopId}`} className="rounded border border-[#3a4b69] bg-[#0f1829]/80 px-2 py-1.5 space-y-1">
+                      <p className="text-zinc-100 text-[11px] break-words">{candidate.title || `Workshop ${candidate.workshopId}`}</p>
+                      <p className="font-mono text-[10px] text-zinc-400 break-all">
+                        wid={candidate.workshopId} | score={candidate.score} | source={candidate.source}
+                        {candidate.exactTitle ? ' | exact' : ''}
+                        {candidate.rejected ? ' | rejected' : ''}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <a
+                          href={`https://steamcommunity.com/sharedfiles/filedetails/?id=${candidate.workshopId}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-1 rounded border border-[#3a4b69] bg-[#182338] text-[10px] uppercase font-bold text-zinc-300 hover:bg-[#22344f]"
+                        >
+                          Abrir
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            void applyWorkshopResolutionSelection(candidate.workshopId);
+                          }}
+                          disabled={resolutionSelectionBusy}
+                          className="px-2 py-1 rounded border border-emerald-800 bg-emerald-900/20 text-[10px] uppercase font-bold text-emerald-300 hover:bg-emerald-900/35 disabled:opacity-50"
+                        >
+                          {resolutionSelectionBusy ? 'Aplicando...' : 'Usar este'}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <label className="block text-[10px] text-zinc-500 uppercase font-bold">
+                Entrada manual (Workshop ID ou link)
+              </label>
+              <input
+                type="text"
+                value={manualResolveWorkshopInput}
+                onChange={(event) => setManualResolveWorkshopInput(event.target.value)}
+                placeholder="ex: 105982362 ou https://steamcommunity.com/sharedfiles/filedetails/?id=..."
+                className="w-full rounded border border-[#3a4968] bg-[#0f1829] px-2 py-1 text-[11px] text-zinc-100 font-mono"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  void applyWorkshopResolutionSelection(manualResolveWorkshopInput);
+                }}
+                disabled={resolutionSelectionBusy}
+                className="w-full px-2 py-1.5 rounded border border-emerald-800 bg-emerald-900/20 text-emerald-300 text-[11px] font-bold uppercase disabled:opacity-50"
+              >
+                {resolutionSelectionBusy ? 'Aplicando...' : 'Salvar mapeamento + enfileirar'}
+              </button>
+              {resolutionSelectionResult && (
+                <div className="rounded border border-[#364561] bg-[#0f1829]/75 px-2 py-1.5 text-[10px] font-mono space-y-0.5">
+                  <p>ok={resolutionSelectionResult.ok ? 'true' : 'false'} | mode={resolutionSelectionResult.persistMode || 'n/a'}</p>
+                  <p className="break-all">
+                    enqueue: attempted={resolutionSelectionResult.enqueue.attempted ? 'true' : 'false'} queued={resolutionSelectionResult.enqueue.queued ? 'true' : 'false'} deduped={resolutionSelectionResult.enqueue.deduped ? 'true' : 'false'} reason={resolutionSelectionResult.enqueue.reason}
+                  </p>
+                  {resolutionSelectionResult.workshopId && (
+                    <p className="text-zinc-500 break-all">wid={resolutionSelectionResult.workshopId} map={resolutionSelectionResult.mapName}</p>
+                  )}
+                  {resolutionSelectionResult.persistedTo && (
+                    <p className="text-zinc-500 break-all">persistedTo={resolutionSelectionResult.persistedTo}</p>
+                  )}
+                  {resolutionSelectionResult.error && <p className="text-red-300 break-words">{resolutionSelectionResult.error}</p>}
+                </div>
+              )}
+              {resolutionError && <p className="text-red-300 break-words">{resolutionError}</p>}
+            </div>
+
+            <div className="rounded border border-[#364561] bg-[#0c1321]/75 px-2 py-2 space-y-2">
               <p className="text-zinc-500 uppercase font-bold text-[10px]">Teste enqueue manual</p>
               <label className="block text-[10px] text-zinc-500 uppercase font-bold">
-                workshopId (opcional)
+                workshopId ou link (opcional)
               </label>
               <input
                 type="text"
                 value={manualWorkshopId}
                 onChange={(event) => setManualWorkshopId(event.target.value)}
-                placeholder="ex: 262714246040502603"
+                placeholder="ex: 262714246040502603 ou link Steam Workshop"
                 className="w-full rounded border border-[#3a4968] bg-[#0f1829] px-2 py-1 text-[11px] text-zinc-100 font-mono"
               />
               <button
@@ -4437,6 +4676,7 @@ const ServerView3D: React.FC = () => {
                 <div className="rounded border border-[#364561] bg-[#0f1829]/75 px-2 py-1.5 text-[10px] font-mono space-y-0.5">
                   <p>ok={manualEnqueueResult.ok ? 'true' : 'false'} | queued={manualEnqueueResult.queued ? 'true' : 'false'} | deduped={manualEnqueueResult.deduped ? 'true' : 'false'}</p>
                   <p className="break-all">reason={manualEnqueueResult.reason}</p>
+                  {manualEnqueueResult.workshopId && <p className="text-zinc-500 break-all">wid={manualEnqueueResult.workshopId}</p>}
                   {manualEnqueueResult.error && <p className="text-red-300 break-words">{manualEnqueueResult.error}</p>}
                   {manualEnqueueResult.job && (
                     <p className="text-zinc-500 break-all">job={manualEnqueueResult.job.id} status={manualEnqueueResult.job.status}</p>

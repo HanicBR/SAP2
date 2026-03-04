@@ -23,7 +23,9 @@ import {
 import { getPlayerPulseSettings } from '../services/playtimePulse';
 import { ingestPlayerPulse, PlayerPulseIngestError } from '../services/playerPulseIngest';
 import {
+  applyWorkshopMapResolutionSelection,
   enqueueWorkshopAutoDownloadManual,
+  getWorkshopMapResolutionSnapshot,
   getWorkshopAutoDownloadQueueSnapshot,
   notifyMapObservedForWorkshop,
 } from '../services/workshopAutoDownload';
@@ -808,7 +810,7 @@ router.get('/workshop/queue', authMiddleware, requireRole(UserRole.ADMIN), async
 router.post('/workshop/queue/enqueue', authMiddleware, requireRole(UserRole.ADMIN), async (req, res) => {
   const body = ((req as any).body && typeof (req as any).body === 'object') ? (req as any).body : {};
   const mapName = String(body?.mapName || '').trim();
-  const workshopId = String(body?.workshopId || '').trim();
+  const workshopInput = String(body?.workshopInput || body?.workshopId || '').trim();
   const refreshRaw = body?.refresh;
   const refresh = refreshRaw === true || String(refreshRaw || '').trim().toLowerCase() === 'true' || String(refreshRaw || '') === '1';
   const serverId = String(body?.serverId || 'admin').trim() || 'admin';
@@ -820,7 +822,7 @@ router.post('/workshop/queue/enqueue', authMiddleware, requireRole(UserRole.ADMI
   const result = enqueueWorkshopAutoDownloadManual({
     serverId,
     mapName,
-    ...(workshopId ? { workshopId } : {}),
+    ...(workshopInput ? { workshopInput } : {}),
     refresh,
   });
 
@@ -829,6 +831,64 @@ router.post('/workshop/queue/enqueue', authMiddleware, requireRole(UserRole.ADMI
       ...result,
       error: result.reason,
     });
+  }
+  return res.json(result);
+});
+
+// Inspect map resolution candidates/mapping to assist manual ambiguity handling.
+router.get('/workshop/resolve/options', authMiddleware, requireRole(UserRole.ADMIN), async (req, res) => {
+  const query = (req.query || {}) as Record<string, unknown>;
+  const mapName = normalizeMapNameForDiagnostics(query.mapName ?? query.map);
+  const refreshRaw = String(query.refresh || '').trim().toLowerCase();
+  const refreshDiscovery = refreshRaw === '1' || refreshRaw === 'true' || refreshRaw === 'yes';
+
+  if (!mapName) {
+    return res.status(400).json({ ok: false, error: 'mapName is required' });
+  }
+
+  const snapshot = await getWorkshopMapResolutionSnapshot({
+    mapName,
+    refreshDiscovery,
+  });
+
+  if (!snapshot.ok) {
+    return res.status(400).json(snapshot);
+  }
+  return res.json(snapshot);
+});
+
+// Apply manual workshop selection (ID or URL), persist mapping and optionally enqueue processing.
+router.post('/workshop/resolve/select', authMiddleware, requireRole(UserRole.ADMIN), async (req, res) => {
+  const body = ((req as any).body && typeof (req as any).body === 'object') ? (req as any).body : {};
+  const mapName = normalizeMapNameForDiagnostics(body?.mapName ?? body?.map);
+  const workshopInput = String(body?.workshopInput || body?.workshopId || '').trim();
+  const persistMode = String(body?.persistMode || 'static').trim().toLowerCase() === 'runtime' ? 'runtime' : 'static';
+  const enqueueRaw = body?.enqueue;
+  const enqueue = enqueueRaw === undefined
+    ? true
+    : (enqueueRaw === true || String(enqueueRaw || '').trim().toLowerCase() === 'true' || String(enqueueRaw || '') === '1');
+  const refreshRaw = body?.refresh;
+  const refresh = refreshRaw === true || String(refreshRaw || '').trim().toLowerCase() === 'true' || String(refreshRaw || '') === '1';
+  const serverId = String(body?.serverId || 'admin').trim() || 'admin';
+
+  if (!mapName) {
+    return res.status(400).json({ ok: false, error: 'mapName is required' });
+  }
+  if (!workshopInput) {
+    return res.status(400).json({ ok: false, error: 'workshopInput is required' });
+  }
+
+  const result = applyWorkshopMapResolutionSelection({
+    mapName,
+    workshopInput,
+    serverId,
+    persistMode,
+    enqueue,
+    refresh,
+  });
+
+  if (!result.ok) {
+    return res.status(400).json(result);
   }
   return res.json(result);
 });

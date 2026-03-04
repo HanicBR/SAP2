@@ -164,7 +164,7 @@ export interface WorkshopQueueJob {
   workshopId: string;
   mapName: string;
   serverId: string;
-  source: 'heartbeat' | 'viewer_state' | 'manual';
+  source: 'heartbeat' | 'viewer_state' | 'manual' | 'reconcile';
   resolutionSource: string;
   refresh: boolean;
   retryCount: number;
@@ -258,6 +258,7 @@ export interface WorkshopQueueSnapshotResponse {
 
 export interface WorkshopManualEnqueueRequest {
   mapName: string;
+  workshopInput?: string;
   workshopId?: string;
   refresh?: boolean;
   serverId?: string;
@@ -299,6 +300,60 @@ export interface WorkshopDiagnosticsReportDownload {
   filename: string;
   generatedAt: string;
   diagnosticsPath?: string;
+}
+
+export interface WorkshopResolutionCandidate {
+  workshopId: string;
+  title: string;
+  source: 'steam_api_queryfiles' | 'steamcommunity_browse';
+  score: number;
+  exactTitle: boolean;
+  rejected: boolean;
+}
+
+export interface WorkshopResolutionOptionsResponse {
+  ok: boolean;
+  requestedMapName?: string;
+  resolvedMapName?: string;
+  aliasTarget?: string;
+  staticWorkshopId?: string;
+  runtimeWorkshopId?: string;
+  processReportWorkshopId?: string;
+  mappedWorkshopId?: string;
+  mappedSource?: string;
+  discovery?: {
+    resolutionSource: string;
+    reason: string;
+    workshopId?: string;
+    candidates: WorkshopResolutionCandidate[];
+  };
+  error?: string;
+}
+
+export interface WorkshopResolveSelectionRequest {
+  mapName: string;
+  workshopInput: string;
+  serverId?: string;
+  persistMode?: 'static' | 'runtime';
+  enqueue?: boolean;
+  refresh?: boolean;
+}
+
+export interface WorkshopResolveSelectionResponse {
+  ok: boolean;
+  mapName: string;
+  workshopId?: string;
+  persistMode?: 'static' | 'runtime';
+  persisted?: boolean;
+  persistedTo?: string;
+  enqueue: {
+    attempted: boolean;
+    queued: boolean;
+    deduped: boolean;
+    reason: string;
+    jobId?: string;
+  };
+  error?: string;
 }
 
 export interface ServerWsLiveStateItem {
