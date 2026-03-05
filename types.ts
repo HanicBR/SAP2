@@ -587,6 +587,9 @@ export interface VipAutomationActionItem {
   serverId?: string;
   command?: string;
   reason?: string;
+  trigger?: string;
+  actor?: string;
+  transactionId?: string;
   queuedActionId?: string;
   retryOfActionId?: string;
   retriedAt?: string;

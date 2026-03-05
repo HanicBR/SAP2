@@ -88,6 +88,25 @@ const parseVipAutomationStatus = (value: unknown): 'ALL' | VipAutomationActionSt
   return 'ALL';
 };
 
+const parseActionMetadata = (
+  value: unknown,
+): { trigger?: string; actor?: string; transactionId?: string } => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return {};
+  }
+
+  const metadata = value as Record<string, unknown>;
+  const trigger = String(metadata.trigger || '').trim();
+  const actor = String(metadata.actor || '').trim();
+  const transactionId = String(metadata.transactionId || '').trim();
+
+  return {
+    ...(trigger ? { trigger } : {}),
+    ...(actor ? { actor } : {}),
+    ...(transactionId ? { transactionId } : {}),
+  };
+};
+
 const toVipActionRow = (row: {
   id: string;
   createdAt: Date;
@@ -100,11 +119,14 @@ const toVipActionRow = (row: {
   serverId: string | null;
   command: string | null;
   reason: string | null;
+  metadata: unknown;
   queuedActionId: string | null;
   retryOfActionId: string | null;
   retriedAt: Date | null;
   retries: number;
-}) => ({
+}) => {
+  const metadata = parseActionMetadata(row.metadata);
+  return {
   id: row.id,
   createdAt: row.createdAt.toISOString(),
   updatedAt: row.updatedAt.toISOString(),
@@ -116,11 +138,15 @@ const toVipActionRow = (row: {
   serverId: row.serverId || undefined,
   command: row.command || undefined,
   reason: row.reason || undefined,
+  ...(metadata.trigger ? { trigger: metadata.trigger } : {}),
+  ...(metadata.actor ? { actor: metadata.actor } : {}),
+  ...(metadata.transactionId ? { transactionId: metadata.transactionId } : {}),
   queuedActionId: row.queuedActionId || undefined,
   retryOfActionId: row.retryOfActionId || undefined,
   retriedAt: toIso(row.retriedAt),
   retries: row.retries,
-});
+  };
+};
 
 router.get('/', async (req, res) => {
   const search = String(req.query.search || '').trim();

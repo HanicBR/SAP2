@@ -34,6 +34,36 @@ const automationStatusLabel = (status: VipAutomationActionStatus) => {
 const automationActionLabel = (action: 'GRANT' | 'REVOKE') =>
   action === 'GRANT' ? 'Conceder' : 'Revogar';
 
+const automationOperationLabel = (item: VipAutomationActionItem) => {
+  if (item.action === 'REVOKE') return 'Retirado';
+  if (item.trigger === 'vip_admin_extend') return 'Acrescentado';
+  return 'Adicionado';
+};
+
+const automationSourceLabel = (trigger?: string) => {
+  const code = String(trigger || '').trim();
+  if (!code) return 'Origem nao informada';
+  const known: Record<string, string> = {
+    transaction_create: 'Financeiro (venda VIP)',
+    vip_admin_grant: 'VIP manual (conceder)',
+    vip_admin_extend: 'VIP manual (estender)',
+    vip_admin_revoke: 'VIP manual (revogar)',
+    vip_admin_retry: 'Retry manual da auditoria',
+    vip_admin_reconcile_expired: 'Reconcilia expirados (manual)',
+    vip_expiry_reconciler: 'Rotina automatica de expiracao',
+    vip_expiry_reconciler_job: 'Job automatico de expiracao',
+  };
+  return known[code] || code;
+};
+
+const automationContextLabel = (item: VipAutomationActionItem) => {
+  const parts: string[] = [];
+  if (item.actor) parts.push(`ator: ${item.actor}`);
+  if (item.transactionId) parts.push(`tx: ${item.transactionId}`);
+  if (item.retryOfActionId) parts.push(`retryDe: ${item.retryOfActionId}`);
+  return parts.join(' | ');
+};
+
 const automationReasonLabel = (reason?: string) => {
   const code = String(reason || '').trim();
   if (!code) return '-';
@@ -1085,6 +1115,7 @@ const Vips: React.FC = () => {
                   <tr>
                     <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Quando</th>
                     <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Acao</th>
+                    <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Operacao / Origem</th>
                     <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">SteamID</th>
                     <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Status</th>
                     <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Motivo</th>
@@ -1095,13 +1126,13 @@ const Vips: React.FC = () => {
                 <tbody className="divide-y divide-zinc-800">
                   {actionsLoading ? (
                     <tr>
-                      <td colSpan={7} className="px-4 py-10 text-center text-zinc-500">
+                      <td colSpan={8} className="px-4 py-10 text-center text-zinc-500">
                         Carregando auditoria...
                       </td>
                     </tr>
                   ) : actions.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-4 py-10 text-center text-zinc-500">
+                      <td colSpan={8} className="px-4 py-10 text-center text-zinc-500">
                         Nenhuma acao encontrada.
                       </td>
                     </tr>
@@ -1110,6 +1141,13 @@ const Vips: React.FC = () => {
                       <tr key={action.id} className="hover:bg-zinc-800/40">
                         <td className="px-4 py-3 text-xs text-zinc-300">{formatDateTime(action.createdAt)}</td>
                         <td className="px-4 py-3 text-xs text-zinc-300">{automationActionLabel(action.action)}</td>
+                        <td className="px-4 py-3 text-xs">
+                          <p className="font-bold text-zinc-200">{automationOperationLabel(action)}</p>
+                          <p className="text-zinc-500">{automationSourceLabel(action.trigger)}</p>
+                          {automationContextLabel(action) ? (
+                            <p className="mt-1 text-[11px] text-zinc-600">{automationContextLabel(action)}</p>
+                          ) : null}
+                        </td>
                         <td className="px-4 py-3 text-xs text-zinc-400 font-mono">{action.steamId}</td>
                         <td className="px-4 py-3">
                           <span
