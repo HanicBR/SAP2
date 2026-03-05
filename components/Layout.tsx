@@ -201,7 +201,7 @@ const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
     subtitle: 'Painel e observabilidade',
     items: [
       { key: 'dashboard', name: 'Dashboard', path: '/admin/dashboard', icon: Icons.BarChart, chipClass: 'border-cyan-700/70 bg-cyan-500/15 text-cyan-300' },
-      { key: 'servers', name: 'Servidores', path: '/admin/servers', icon: Icons.Server, chipClass: 'border-emerald-700/70 bg-emerald-500/15 text-emerald-300' },
+      { key: 'logs', name: 'Logs e Eventos', path: '/admin/logs', icon: Icons.List, chipClass: 'border-fuchsia-700/70 bg-fuchsia-500/15 text-fuchsia-300' },
       { key: 'webViewer', name: 'Web Viewer', path: '/admin/web-viewer', icon: Icons.Map, chipClass: 'border-sky-700/70 bg-sky-500/15 text-sky-300' },
       { key: 'financial', name: 'Financeiro', path: '/admin/financial', icon: Icons.DollarSign, chipClass: 'border-lime-700/70 bg-lime-500/15 text-lime-300' },
       { key: 'loadingScreens', name: 'Telas de Loading', path: '/admin/loading-screens', icon: Icons.Image, chipClass: 'border-blue-700/70 bg-blue-500/15 text-blue-300' },
@@ -214,7 +214,6 @@ const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
     items: [
       { key: 'players', name: 'Jogadores', path: '/admin/players', icon: Icons.UserGroup, chipClass: 'border-indigo-700/70 bg-indigo-500/15 text-indigo-300' },
       { key: 'vips', name: 'VIPs', path: '/admin/vips', icon: Icons.Crown, chipClass: 'border-amber-700/70 bg-amber-500/15 text-amber-300' },
-      { key: 'logs', name: 'Logs e Eventos', path: '/admin/logs', icon: Icons.List, chipClass: 'border-fuchsia-700/70 bg-fuchsia-500/15 text-fuchsia-300' },
       { key: 'duplicates', name: 'Deteccao de Duplicatas', path: '/admin/duplicates', icon: Icons.Fingerprint, chipClass: 'border-rose-700/70 bg-rose-500/15 text-rose-300' },
     ],
   },
@@ -223,6 +222,7 @@ const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
     title: 'Operacao',
     subtitle: 'Ferramentas do servidor',
     items: [
+      { key: 'servers', name: 'Servidores', path: '/admin/servers', icon: Icons.Server, chipClass: 'border-emerald-700/70 bg-emerald-500/15 text-emerald-300' },
       { key: 'addonCommands', name: 'Comandos Addon', path: '/admin/addon-commands', icon: Icons.Terminal, chipClass: 'border-violet-700/70 bg-violet-500/15 text-violet-300' },
     ],
   },
