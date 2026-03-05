@@ -97,7 +97,13 @@ const parseVipAutomationStatus = (value: unknown): 'ALL' | VipAutomationActionSt
 
 const parseActionMetadata = (
   value: unknown,
-): { trigger?: string; actor?: string; transactionId?: string; vipDurationDays?: number } => {
+): {
+  trigger?: string;
+  actor?: string;
+  transactionId?: string;
+  vipDurationDays?: number;
+  vipDurationDaysRequested?: number;
+} => {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     return {};
   }
@@ -107,12 +113,14 @@ const parseActionMetadata = (
   const actor = String(metadata.actor || '').trim();
   const transactionId = String(metadata.transactionId || '').trim();
   const vipDurationDays = parseOptionalPositiveInt(metadata.vipDurationDays);
+  const vipDurationDaysRequested = parseOptionalPositiveInt(metadata.vipDurationDaysRequested);
 
   return {
     ...(trigger ? { trigger } : {}),
     ...(actor ? { actor } : {}),
     ...(transactionId ? { transactionId } : {}),
     ...(vipDurationDays ? { vipDurationDays } : {}),
+    ...(vipDurationDaysRequested ? { vipDurationDaysRequested } : {}),
   };
 };
 
@@ -151,6 +159,9 @@ const toVipActionRow = (row: {
   ...(metadata.actor ? { actor: metadata.actor } : {}),
   ...(metadata.transactionId ? { transactionId: metadata.transactionId } : {}),
   ...(metadata.vipDurationDays ? { vipDurationDays: metadata.vipDurationDays } : {}),
+  ...(metadata.vipDurationDaysRequested
+    ? { vipDurationDaysRequested: metadata.vipDurationDaysRequested }
+    : {}),
   queuedActionId: row.queuedActionId || undefined,
   retryOfActionId: row.retryOfActionId || undefined,
   retriedAt: toIso(row.retriedAt),
@@ -319,7 +330,18 @@ router.post('/grant', async (req, res) => {
     }
   }
 
-  const expiry = explicitExpiry || new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000);
+  const existingPlayer = await prisma.playerProfile.findUnique({
+    where: { steamId: parsedSteamId },
+    select: { vipExpiry: true },
+  });
+  const now = new Date();
+  const expiryBase =
+    !explicitExpiry &&
+    existingPlayer?.vipExpiry &&
+    existingPlayer.vipExpiry.getTime() > now.getTime()
+      ? existingPlayer.vipExpiry
+      : now;
+  const expiry = explicitExpiry || new Date(expiryBase.getTime() + durationDays * 24 * 60 * 60 * 1000);
 
   const updated = await prisma.playerProfile.upsert({
     where: { steamId: parsedSteamId },

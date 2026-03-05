@@ -60,7 +60,13 @@ const automationContextLabel = (item: VipAutomationActionItem) => {
   const parts: string[] = [];
   if (item.actor) parts.push(`ator: ${item.actor}`);
   if (item.transactionId) parts.push(`tx: ${item.transactionId}`);
-  if (item.vipDurationDays) parts.push(`duracao: ${item.vipDurationDays}d`);
+  if (item.vipDurationDays) {
+    if (item.vipDurationDaysRequested && item.vipDurationDaysRequested !== item.vipDurationDays) {
+      parts.push(`duracao total: ${item.vipDurationDays}d (solicitado: ${item.vipDurationDaysRequested}d)`);
+    } else {
+      parts.push(`duracao: ${item.vipDurationDays}d`);
+    }
+  }
   if (item.retryOfActionId) parts.push(`retryDe: ${item.retryOfActionId}`);
   return parts.join(' | ');
 };
@@ -1370,6 +1376,9 @@ const Vips: React.FC = () => {
                             <p className="uppercase text-zinc-500">Tempo VIP</p>
                             <p className="mt-1 text-zinc-300">
                               {action.vipDurationDays ? `${action.vipDurationDays}d` : '-'}
+                              {action.vipDurationDays && action.vipDurationDaysRequested && action.vipDurationDaysRequested !== action.vipDurationDays
+                                ? ` (solicitado ${action.vipDurationDaysRequested}d)`
+                                : ''}
                               {action.vipExpiry ? ` | expira ${formatDateTime(action.vipExpiry)}` : ''}
                             </p>
                           </div>
@@ -1438,7 +1447,12 @@ const Vips: React.FC = () => {
                             <p className="font-bold text-zinc-200">{automationOperationLabel(action)}</p>
                             <p className="text-zinc-500">{automationSourceLabel(action.trigger)}</p>
                             {action.vipDurationDays ? (
-                              <p className="mt-1 text-[11px] text-cyan-300">tempo: {action.vipDurationDays}d</p>
+                              <p className="mt-1 text-[11px] text-cyan-300">
+                                tempo: {action.vipDurationDays}d
+                                {action.vipDurationDaysRequested && action.vipDurationDaysRequested !== action.vipDurationDays
+                                  ? ` (solicitado ${action.vipDurationDaysRequested}d)`
+                                  : ''}
+                              </p>
                             ) : null}
                             {context ? <p className="mt-1 text-[11px] text-zinc-600">{context}</p> : null}
                           </td>

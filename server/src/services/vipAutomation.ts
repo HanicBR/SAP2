@@ -173,6 +173,30 @@ const parseDurationDays = (raw: number | string | null | undefined): number | nu
   return parsed;
 };
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+const resolveGrantDurationDays = (input: VipAutomationBuildInput): { total: number | null; requested: number | null } => {
+  const requested = parseDurationDays(input.vipDurationDays);
+  if (input.action !== 'GRANT') {
+    return { total: requested, requested };
+  }
+
+  const vipExpiry = parseExpiry(input.vipExpiry);
+  if (!vipExpiry) {
+    return { total: requested, requested };
+  }
+
+  const remainingMs = vipExpiry.getTime() - Date.now();
+  if (!Number.isFinite(remainingMs) || remainingMs <= 0) {
+    return { total: requested, requested };
+  }
+
+  // Duration tokens for GRANT must reflect the full remaining VIP window
+  // so server-side setrank commands do not truncate existing time.
+  const totalFromExpiry = Math.max(1, Math.ceil(remainingMs / DAY_MS));
+  return { total: totalFromExpiry, requested };
+};
+
 const mapVipPlanToServerGroup = (vipPlan: string): string => {
   const plan = String(vipPlan || '').trim();
   const normalized = plan.toLowerCase();
@@ -204,6 +228,7 @@ const templateHasDurationTokens = (template: string) =>
 const renderTemplate = (
   template: string,
   input: VipAutomationBuildInput,
+  resolvedDuration?: { total: number | null },
 ): { ok: true; command: string } | { ok: false; reason: string } => {
   const steamId = String(input.steamId || '').trim();
   if (!steamId) {
@@ -214,7 +239,7 @@ const renderTemplate = (
   const vipPlan = String(input.vipPlan || '').trim();
   const vipPlanServer = mapVipPlanToServerGroup(vipPlan);
   const vipExpiry = parseExpiry(input.vipExpiry);
-  const vipDurationDays = parseDurationDays(input.vipDurationDays);
+  const vipDurationDays = resolvedDuration?.total ?? resolveGrantDurationDays(input).total;
   const vipDurationText = vipDurationDays ? `${vipDurationDays}d` : '';
   const expiryIso = vipExpiry ? vipExpiry.toISOString() : '';
   const expiryUnix = vipExpiry ? Math.floor(vipExpiry.getTime() / 1000) : 0;
@@ -455,6 +480,7 @@ const buildVipAutomation = async (
   input: VipAutomationBuildInput,
   options: VipAutomationBuildOptions,
 ): Promise<VipAutomationBuildResult> => {
+  const resolvedDuration = resolveGrantDurationDays(input);
   const config = await getRuntimeConfig();
   if (!config.enabled) {
     return {
@@ -490,7 +516,7 @@ const buildVipAutomation = async (
     }
   }
 
-  const renderResult = renderTemplate(template, input);
+  const renderResult = renderTemplate(template, input, { total: resolvedDuration.total });
   if (!renderResult.ok) {
     return {
       ok: false,
@@ -528,7 +554,8 @@ const buildVipAutomation = async (
       action: input.action,
       steamId: String(input.steamId || '').trim(),
       vipPlan: String(input.vipPlan || '').trim() || undefined,
-      vipDurationDays: parseDurationDays(input.vipDurationDays) || undefined,
+      vipDurationDays: resolvedDuration.total || undefined,
+      vipDurationDaysRequested: resolvedDuration.requested || undefined,
     },
   };
 };
