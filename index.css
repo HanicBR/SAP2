@@ -15,6 +15,10 @@
   --ui-text-2: #d0d6df;
   --ui-text-3: #8f99aa;
   --ui-focus: color-mix(in srgb, var(--brand-color) 55%, #22d3ee 45%);
+  --ui-accent-red: #ef4444;
+  --ui-accent-cyan: #06b6d4;
+  --ui-accent-emerald: #10b981;
+  --ui-accent-blue: #3b82f6;
 }
 
 html,
@@ -83,12 +87,14 @@ body {
 }
 
 .ui-shell :where(input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']), select, textarea) {
-  border: 1px solid var(--ui-border) !important;
-  background: linear-gradient(180deg, #141a27 0%, #0f1420 100%) !important;
+  border: 1px solid #2a2d37 !important;
+  background: linear-gradient(180deg, #121217 0%, #0b0c10 100%) !important;
   color: var(--ui-text-1) !important;
   border-radius: var(--ui-radius-sm) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
-  transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    0 0 0 1px rgba(255, 255, 255, 0.015);
+  transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease, filter 140ms ease;
 }
 
 .ui-shell :where(input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']), select) {
@@ -112,10 +118,16 @@ body {
   color: #747f92 !important;
 }
 
+.ui-shell :where(input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']), select, textarea):hover {
+  border-color: color-mix(in srgb, #3f4658 70%, var(--brand-color) 30%) !important;
+}
+
 .ui-shell :where(input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']), select, textarea):focus-visible {
   outline: none !important;
   border-color: var(--ui-focus) !important;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-focus) 22%, transparent) !important;
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--ui-focus) 26%, transparent),
+    0 0 20px -8px color-mix(in srgb, var(--ui-focus) 58%, transparent) !important;
 }
 
 .ui-shell :where(input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']), select, textarea):disabled {
@@ -131,12 +143,14 @@ body {
 
 .ui-shell button {
   border-radius: var(--ui-radius-sm);
+  box-shadow: 0 10px 24px -20px rgba(0, 0, 0, 0.9);
   transition: transform 120ms ease, filter 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
 }
 
 .ui-shell button:not(:disabled):hover {
   transform: translateY(-1px);
-  filter: brightness(1.05);
+  filter: brightness(1.07);
+  box-shadow: 0 14px 28px -18px rgba(0, 0, 0, 0.85);
 }
 
 .ui-shell button:not(:disabled):active {
@@ -154,6 +168,32 @@ body {
   opacity: 0.55;
   cursor: not-allowed;
   transform: none;
+}
+
+.ui-shell button[class*='bg-red-'],
+.ui-shell button[class*='bg-brand'] {
+  box-shadow:
+    0 14px 30px -18px color-mix(in srgb, var(--ui-accent-red) 58%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.ui-shell button[class*='bg-emerald-'] {
+  box-shadow:
+    0 14px 30px -18px color-mix(in srgb, var(--ui-accent-emerald) 62%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.ui-shell button[class*='bg-blue-'],
+.ui-shell button[class*='bg-cyan-'] {
+  box-shadow:
+    0 14px 30px -18px color-mix(in srgb, var(--ui-accent-cyan) 58%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.ui-shell button[class*='bg-yellow-'] {
+  box-shadow:
+    0 14px 30px -18px rgba(245, 158, 11, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .ui-shell .ui-page {

@@ -313,14 +313,14 @@ const Vips: React.FC = () => {
   const operationEnqueue = applyVipOnServer;
   const isFeedbackError = /erro|falhou|invalido|invalid/i.test(feedback);
   const surfaceClass =
-    'rounded-2xl border border-zinc-800/80 bg-zinc-900/80 backdrop-blur-sm shadow-[0_10px_40px_-24px_rgba(0,0,0,0.9)]';
+    'rounded-xl border border-white/5 bg-[#121214] shadow-[inset_0_1px_0_rgba(255,255,255,0.02),0_22px_48px_-30px_rgba(0,0,0,0.92)]';
   const inputClass =
-    'w-full bg-zinc-950/90 border border-zinc-700/80 rounded-lg px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-brand/60 focus:border-brand/60 transition';
+    'w-full rounded-lg border border-zinc-800 bg-[#09090b] px-3 py-2.5 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-brand/55 focus:border-brand/65 transition';
   const inputMonoClass = `${inputClass} font-mono`;
   const subtleButtonClass =
-    'inline-flex items-center justify-center rounded-lg border border-zinc-700/80 bg-zinc-900/70 px-3 py-2 text-xs font-bold uppercase tracking-wide text-zinc-200 hover:bg-zinc-800/90 hover:border-zinc-500 transition disabled:opacity-60 disabled:cursor-not-allowed';
+    'inline-flex items-center justify-center rounded-lg border border-zinc-800 bg-[#09090b] px-3 py-2 text-xs font-bold uppercase tracking-wide text-zinc-200 hover:bg-zinc-900 hover:border-zinc-700 transition disabled:opacity-60 disabled:cursor-not-allowed';
   const primaryButtonClass =
-    'inline-flex items-center justify-center rounded-lg bg-brand hover:bg-brand-dark px-4 py-2 text-sm font-bold uppercase tracking-wide text-white transition disabled:opacity-60 disabled:cursor-not-allowed';
+    'inline-flex items-center justify-center rounded-lg border border-red-500/45 bg-red-600 hover:bg-red-700 px-4 py-2 text-sm font-bold uppercase tracking-wide text-white shadow-lg shadow-red-950/35 transition disabled:opacity-60 disabled:cursor-not-allowed';
 
   const handleGrant = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -480,17 +480,17 @@ const Vips: React.FC = () => {
   };
 
   return (
-    <div className="relative space-y-6 animate-fade-in">
+    <div className="relative space-y-8 animate-fade-in">
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-20 right-0 h-72 w-72 rounded-full bg-brand/10 blur-3xl" />
-        <div className="absolute top-1/3 -left-16 h-64 w-64 rounded-full bg-cyan-500/10 blur-3xl" />
+        <div className="absolute -top-24 right-0 h-80 w-80 rounded-full bg-red-500/10 blur-3xl" />
+        <div className="absolute top-1/3 -left-16 h-64 w-64 rounded-full bg-cyan-500/8 blur-3xl" />
       </div>
 
       <div className={`${surfaceClass} overflow-hidden`}>
-        <div className="border-b border-zinc-800/80 bg-gradient-to-r from-zinc-900/90 via-zinc-900/75 to-zinc-900/55 p-4 sm:p-5">
+        <div className="border-b border-white/5 bg-gradient-to-r from-[#0b0b0e] via-[#0e1015] to-[#10121a] p-4 sm:p-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-brand/40 bg-brand/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-brand">
+              <div className="inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-red-400">
                 <Icons.Crown className="h-3.5 w-3.5" />
                 Modulo VIP
               </div>
@@ -516,14 +516,14 @@ const Vips: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveTab('overview')}
-            className={`group rounded-xl border px-3 py-3 text-left transition-all ${
+            className={`group relative overflow-hidden rounded-xl border px-3 py-3 text-left transition-all ${
               activeTab === 'overview'
-                ? 'border-brand/60 bg-gradient-to-r from-brand/25 to-red-900/15 shadow-lg shadow-brand/10'
-                : 'border-zinc-700/80 bg-zinc-950/65 hover:border-zinc-500'
+                ? 'border-red-500/45 bg-[#121214] shadow-[0_0_30px_-14px_rgba(239,68,68,0.25)]'
+                : 'border-white/5 bg-[#0c0c0e] hover:border-white/10 hover:bg-[#121214]'
             }`}
           >
             <div className="flex items-center gap-2">
-              <Icons.BarChart className={`h-4 w-4 ${activeTab === 'overview' ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
+              <Icons.BarChart className={`h-4 w-4 ${activeTab === 'overview' ? 'text-red-400' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
               <span className={`text-xs font-bold uppercase tracking-wider ${activeTab === 'overview' ? 'text-white' : 'text-zinc-300'}`}>
                 Visao geral
               </span>
@@ -531,18 +531,19 @@ const Vips: React.FC = () => {
             <p className={`mt-1 text-[11px] ${activeTab === 'overview' ? 'text-zinc-200' : 'text-zinc-500'}`}>
               Lista de VIPs e filtros rapidos
             </p>
+            {activeTab === 'overview' ? <span className="absolute left-0 top-0 h-full w-1 bg-red-500" /> : null}
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('operations')}
-            className={`group rounded-xl border px-3 py-3 text-left transition-all ${
+            className={`group relative overflow-hidden rounded-xl border px-3 py-3 text-left transition-all ${
               activeTab === 'operations'
-                ? 'border-blue-700/70 bg-gradient-to-r from-blue-900/30 to-cyan-900/20 shadow-lg shadow-blue-900/10'
-                : 'border-zinc-700/80 bg-zinc-950/65 hover:border-zinc-500'
+                ? 'border-red-500/45 bg-[#121214] shadow-[0_0_30px_-14px_rgba(239,68,68,0.25)]'
+                : 'border-white/5 bg-[#0c0c0e] hover:border-white/10 hover:bg-[#121214]'
             }`}
           >
             <div className="flex items-center gap-2">
-              <Icons.Settings className={`h-4 w-4 ${activeTab === 'operations' ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
+              <Icons.Settings className={`h-4 w-4 ${activeTab === 'operations' ? 'text-red-400' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
               <span className={`text-xs font-bold uppercase tracking-wider ${activeTab === 'operations' ? 'text-white' : 'text-zinc-300'}`}>
                 Operacoes
               </span>
@@ -550,6 +551,7 @@ const Vips: React.FC = () => {
             <p className={`mt-1 text-[11px] ${activeTab === 'operations' ? 'text-zinc-200' : 'text-zinc-500'}`}>
               Conceder, estender, revogar e reconciliar
             </p>
+            {activeTab === 'operations' ? <span className="absolute left-0 top-0 h-full w-1 bg-red-500" /> : null}
           </button>
           <button
             type="button"
@@ -557,14 +559,14 @@ const Vips: React.FC = () => {
               setShowAutomationConfig(false);
               setActiveTab('automation');
             }}
-            className={`group rounded-xl border px-3 py-3 text-left transition-all ${
+            className={`group relative overflow-hidden rounded-xl border px-3 py-3 text-left transition-all ${
               activeTab === 'automation'
-                ? 'border-emerald-700/70 bg-gradient-to-r from-emerald-900/30 to-green-900/20 shadow-lg shadow-emerald-900/10'
-                : 'border-zinc-700/80 bg-zinc-950/65 hover:border-zinc-500'
+                ? 'border-red-500/45 bg-[#121214] shadow-[0_0_30px_-14px_rgba(239,68,68,0.25)]'
+                : 'border-white/5 bg-[#0c0c0e] hover:border-white/10 hover:bg-[#121214]'
             }`}
           >
             <div className="flex items-center gap-2">
-              <Icons.Activity className={`h-4 w-4 ${activeTab === 'automation' ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
+              <Icons.Activity className={`h-4 w-4 ${activeTab === 'automation' ? 'text-red-400' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
               <span className={`text-xs font-bold uppercase tracking-wider ${activeTab === 'automation' ? 'text-white' : 'text-zinc-300'}`}>
                 Automacao
               </span>
@@ -572,6 +574,7 @@ const Vips: React.FC = () => {
             <p className={`mt-1 text-[11px] ${activeTab === 'automation' ? 'text-zinc-200' : 'text-zinc-500'}`}>
               Configuracao e auditoria de comandos
             </p>
+            {activeTab === 'automation' ? <span className="absolute left-0 top-0 h-full w-1 bg-red-500" /> : null}
           </button>
         </div>
       </div>
@@ -589,53 +592,59 @@ const Vips: React.FC = () => {
       ) : null}
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
-        <div className={`${surfaceClass} p-3`}>
+        <div className={`${surfaceClass} group relative overflow-hidden p-3`}>
           <div className="flex items-center justify-between">
             <p className="text-[11px] font-bold uppercase text-zinc-500">Total VIPs</p>
-            <Icons.Crown className="h-4 w-4 text-brand" />
+            <Icons.Crown className="h-4 w-4 text-red-500/70 transition-opacity group-hover:text-red-400" />
           </div>
-          <p className="mt-1 text-xl font-black text-white">{summary.totalVips}</p>
+          <p className="mt-1 text-xl font-black text-red-400">{summary.totalVips}</p>
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-red-500/30" />
         </div>
-        <div className={`${surfaceClass} p-3`}>
+        <div className={`${surfaceClass} group relative overflow-hidden p-3`}>
           <div className="flex items-center justify-between">
             <p className="text-[11px] font-bold uppercase text-zinc-500">Ativos</p>
-            <Icons.Check className="h-4 w-4 text-green-400" />
+            <Icons.Check className="h-4 w-4 text-emerald-500/70 transition-opacity group-hover:text-emerald-400" />
           </div>
           <p className="mt-1 text-xl font-black text-green-400">{summary.activeCount}</p>
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-emerald-500/30" />
         </div>
-        <div className={`${surfaceClass} p-3`}>
+        <div className={`${surfaceClass} group relative overflow-hidden p-3`}>
           <div className="flex items-center justify-between">
             <p className="text-[11px] font-bold uppercase text-zinc-500">Expirados</p>
-            <Icons.Clock className="h-4 w-4 text-yellow-400" />
+            <Icons.Clock className="h-4 w-4 text-amber-500/70 transition-opacity group-hover:text-amber-400" />
           </div>
           <p className="mt-1 text-xl font-black text-yellow-400">{summary.expiredCount}</p>
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-amber-500/30" />
         </div>
-        <div className={`${surfaceClass} p-3`}>
+        <div className={`${surfaceClass} group relative overflow-hidden p-3`}>
           <div className="flex items-center justify-between">
             <p className="text-[11px] font-bold uppercase text-zinc-500">Inativos</p>
-            <Icons.Users className="h-4 w-4 text-zinc-400" />
+            <Icons.Users className="h-4 w-4 text-zinc-500/80 transition-opacity group-hover:text-zinc-300" />
           </div>
           <p className="mt-1 text-xl font-black text-zinc-400">{summary.inactiveCount}</p>
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-zinc-500/25" />
         </div>
-        <div className={`${surfaceClass} p-3`}>
+        <div className={`${surfaceClass} group relative overflow-hidden p-3`}>
           <div className="flex items-center justify-between">
             <p className="text-[11px] font-bold uppercase text-zinc-500">Fila auto</p>
-            <Icons.Activity className="h-4 w-4 text-cyan-400" />
+            <Icons.Activity className="h-4 w-4 text-cyan-500/70 transition-opacity group-hover:text-cyan-400" />
           </div>
           <p className="mt-1 text-xl font-black text-cyan-400">{summary.queuedCount}</p>
           <p className="mt-1 text-[10px] text-zinc-500">
             falhou {summary.failedCount} | ignorou {summary.skippedCount}
           </p>
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-cyan-500/30" />
         </div>
-        <div className={`${surfaceClass} p-3`}>
+        <div className={`${surfaceClass} group relative overflow-hidden p-3`}>
           <div className="flex items-center justify-between">
             <p className="text-[11px] font-bold uppercase text-zinc-500">Sandbox</p>
-            <Icons.Server className="h-4 w-4 text-zinc-200" />
+            <Icons.Server className="h-4 w-4 text-zinc-300/70 transition-opacity group-hover:text-zinc-200" />
           </div>
           <p className="mt-1 text-xl font-black text-white">{summary.sandboxCount}</p>
           <p className={`mt-1 text-[10px] ${summary.automationEnabled ? 'text-green-400' : 'text-zinc-500'}`}>
             auto {summary.automationEnabled ? 'ativa' : 'desativada'}
           </p>
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-zinc-300/20" />
         </div>
       </div>
 
@@ -761,7 +770,7 @@ const Vips: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => handleRevoke(item.steamId)}
-                        className="flex-1 rounded-md border border-red-700/70 bg-red-900/60 px-3 py-2 text-xs font-bold text-white transition hover:bg-red-700"
+                        className="flex-1 rounded-md border border-red-600/55 bg-red-900/60 px-3 py-2 text-xs font-bold text-white transition hover:bg-red-700 shadow-lg shadow-red-950/30"
                         disabled={busy}
                       >
                         Revogar
@@ -873,7 +882,7 @@ const Vips: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => handleRevoke(item.steamId)}
-                            className="inline-flex items-center rounded-md border border-red-700/70 bg-red-900/60 px-3 py-1 text-xs font-bold text-white transition hover:bg-red-700"
+                            className="inline-flex items-center rounded-md border border-red-600/55 bg-red-900/60 px-3 py-1 text-xs font-bold text-white transition hover:bg-red-700 shadow-lg shadow-red-950/30"
                             disabled={busy}
                           >
                             Revogar
@@ -1006,7 +1015,7 @@ const Vips: React.FC = () => {
               <button
                 type="submit"
                 disabled={busy}
-                className="inline-flex items-center justify-center rounded-lg bg-emerald-700 px-4 py-2 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-emerald-600 disabled:opacity-60"
+                className="inline-flex items-center justify-center rounded-lg border border-emerald-500/45 bg-emerald-600 px-4 py-2 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-emerald-700 shadow-lg shadow-emerald-950/35 disabled:opacity-60"
               >
                 <Icons.Crown className="mr-2 h-4 w-4" />
                 Conceder
@@ -1121,7 +1130,7 @@ const Vips: React.FC = () => {
                 <button
                   type="submit"
                   disabled={busy}
-                  className="inline-flex items-center justify-center rounded-lg bg-blue-700 px-4 py-2 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-blue-600 disabled:opacity-60"
+                  className="inline-flex items-center justify-center rounded-lg border border-blue-500/45 bg-blue-600 px-4 py-2 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-blue-700 shadow-lg shadow-blue-950/35 disabled:opacity-60"
                 >
                   <Icons.Plus className="mr-2 h-4 w-4" />
                   Estender
@@ -1130,7 +1139,7 @@ const Vips: React.FC = () => {
                   type="button"
                   onClick={() => handleRevoke(extendSteamId.trim(), { enqueue: operationEnqueue })}
                   disabled={busy || !extendSteamId.trim()}
-                  className="inline-flex items-center justify-center rounded-lg bg-red-700 px-4 py-2 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-red-600 disabled:opacity-60"
+                  className="inline-flex items-center justify-center rounded-lg border border-red-500/45 bg-red-600 px-4 py-2 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-red-700 shadow-lg shadow-red-950/35 disabled:opacity-60"
                 >
                   <Icons.Trash className="mr-2 h-4 w-4" />
                   Revogar
@@ -1159,7 +1168,7 @@ const Vips: React.FC = () => {
                 type="button"
                 onClick={() => handleReconcileExpired(false)}
                 disabled={reconcileBusy}
-                className="inline-flex items-center justify-center rounded-lg bg-yellow-700 px-3 py-2 text-xs font-bold uppercase tracking-wide text-white transition hover:bg-yellow-600 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="inline-flex items-center justify-center rounded-lg border border-yellow-500/45 bg-yellow-600 px-3 py-2 text-xs font-bold uppercase tracking-wide text-zinc-950 transition hover:bg-yellow-500 shadow-lg shadow-yellow-950/35 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 Processar agora
               </button>
