@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { KTX2Loader } from 'three/examples/jsm/loaders/KTX2Loader.js';
@@ -911,9 +911,13 @@ const readInitialMoveSpeedFactor = (): number => {
 
 const ServerView3D: React.FC = () => {
   const { serverId } = useParams<{ serverId: string }>();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const mapName = useMemo(() => normalizeMapName(searchParams.get('map')), [searchParams]);
   const manifestUrl = useMemo(() => `/api/maps/${encodeURIComponent(mapName)}/manifest.json`, [mapName]);
+  const openedFromWebViewer = location.pathname.startsWith('/admin/web-viewer/');
+  const backPath = openedFromWebViewer ? '/admin/web-viewer' : (serverId ? `/admin/servers/${serverId}` : '/admin/servers');
+  const backLabel = openedFromWebViewer ? 'Voltar para Web Viewer' : 'Voltar para servidor';
   const mountRef = useRef<HTMLDivElement | null>(null);
   const viewerSocketRef = useRef<WebSocket | null>(null);
   const viewerPingTimerRef = useRef<number | null>(null);
@@ -1310,7 +1314,9 @@ const ServerView3D: React.FC = () => {
   }, [mobileControlsEnabled, resetMobileMovePad]);
 
   const handleShareViewer = useCallback(async () => {
-    const basePath = serverId ? `/admin/servers/${serverId}/view3d` : '/admin/servers';
+    const basePath = openedFromWebViewer
+      ? (serverId ? `/admin/web-viewer/${serverId}/view3d` : '/admin/web-viewer')
+      : (serverId ? `/admin/servers/${serverId}/view3d` : '/admin/servers');
     const nextParams = new URLSearchParams();
     nextParams.set('map', mapName);
     if (viewerSelectedSteamId) nextParams.set('steamId', viewerSelectedSteamId);
@@ -1342,7 +1348,7 @@ const ServerView3D: React.FC = () => {
       }
       setShareFeedback('Falha ao compartilhar');
     }
-  }, [mapName, serverId, viewerSelectedSteamId]);
+  }, [mapName, openedFromWebViewer, serverId, viewerSelectedSteamId]);
 
   useEffect(() => {
     if (!shareFeedback) return undefined;
@@ -4342,10 +4348,10 @@ const ServerView3D: React.FC = () => {
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>
             <Link
-              to={serverId ? `/admin/servers/${serverId}` : '/admin/servers'}
+              to={backPath}
               className="mb-2 flex items-center text-sm font-bold uppercase text-zinc-500 hover:text-zinc-100"
             >
-              <Icons.ArrowLeft className="w-4 h-4 mr-1" /> Voltar para servidor
+              <Icons.ArrowLeft className="w-4 h-4 mr-1" /> {backLabel}
             </Link>
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tight">

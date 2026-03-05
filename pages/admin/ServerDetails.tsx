@@ -926,10 +926,10 @@ const ServerDetails: React.FC = () => {
 
         <div className="flex items-center gap-2 flex-wrap">
           <Link
-            to={`/admin/servers/${server.id}/view3d?map=${encodeURIComponent(displayMap === 'Desconhecido' ? 'rp_evocity_v33x' : displayMap)}`}
+            to={`/admin/web-viewer?serverId=${encodeURIComponent(server.id)}`}
             className="px-3 py-2 rounded border border-cyan-800 bg-cyan-900/20 text-cyan-300 text-xs font-bold uppercase tracking-wider hover:bg-cyan-800/30 transition-colors flex items-center"
           >
-            <Icons.Box className="w-4 h-4 mr-1" /> Viewer 3D
+            <Icons.Box className="w-4 h-4 mr-1" /> Web Viewer
           </Link>
           <div className="bg-zinc-900 p-1 rounded border border-zinc-800 flex">
           {(['24h', '7d', '30d'] as RangeKey[]).map((r) => (

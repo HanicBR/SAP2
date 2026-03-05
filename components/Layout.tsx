@@ -193,6 +193,7 @@ const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   { key: 'players', name: 'Jogadores', path: '/admin/players', icon: Icons.UserGroup },
   { key: 'logs', name: 'Logs e Eventos', path: '/admin/logs', icon: Icons.List },
   { key: 'servers', name: 'Servidores', path: '/admin/servers', icon: Icons.Server },
+  { key: 'webViewer', name: 'Web Viewer', path: '/admin/web-viewer', icon: Icons.Map },
   { key: 'duplicates', name: 'Deteccao de Duplicatas', path: '/admin/duplicates', icon: Icons.Fingerprint },
   { key: 'addonCommands', name: 'Comandos Addon', path: '/admin/addon-commands', icon: Icons.Terminal },
   { key: 'settings', name: 'Configuracoes Site', path: '/admin/settings', icon: Icons.Settings },
