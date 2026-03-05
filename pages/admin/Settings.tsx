@@ -44,6 +44,27 @@ const parseIntSafe = (value: string, fallback = 0): number => {
   return Number.isFinite(parsed) ? parsed : fallback;
 };
 
+const normalizeVipAutomationServerTemplates = (
+  value: unknown,
+): Record<string, { grantTemplate?: string; revokeTemplate?: string }> | undefined => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+  const source = value as Record<string, unknown>;
+  const next: Record<string, { grantTemplate?: string; revokeTemplate?: string }> = {};
+  Object.entries(source).forEach(([serverId, raw]) => {
+    const id = String(serverId || '').trim();
+    if (!id || !raw || typeof raw !== 'object' || Array.isArray(raw)) return;
+    const row = raw as Record<string, unknown>;
+    const grantTemplate = String(row.grantTemplate || '').trim();
+    const revokeTemplate = String(row.revokeTemplate || '').trim();
+    if (!grantTemplate && !revokeTemplate) return;
+    next[id] = {
+      ...(grantTemplate ? { grantTemplate } : {}),
+      ...(revokeTemplate ? { revokeTemplate } : {}),
+    };
+  });
+  return Object.keys(next).length ? next : undefined;
+};
+
 const noticeClass = (tone: NoticeTone): string => {
   if (tone === 'success') return 'border-emerald-900/40 bg-emerald-900/10 text-emerald-300';
   if (tone === 'error') return 'border-red-900/40 bg-red-900/10 text-red-300';
@@ -164,6 +185,9 @@ const normalizeConfig = (raw: SiteConfig): SiteConfig => {
       sandboxServerId: String(source.vipAutomation?.sandboxServerId || '').trim(),
       grantTemplate: String(source.vipAutomation?.grantTemplate || '').trim(),
       revokeTemplate: String(source.vipAutomation?.revokeTemplate || '').trim(),
+      ...(normalizeVipAutomationServerTemplates(source.vipAutomation?.serverTemplates)
+        ? { serverTemplates: normalizeVipAutomationServerTemplates(source.vipAutomation?.serverTemplates) }
+        : {}),
     },
     viewerMapOverlays,
   };
@@ -188,6 +212,9 @@ const buildPayload = (
       : {}),
     grantTemplate: String(draft.vipAutomation?.grantTemplate || '').trim(),
     revokeTemplate: String(draft.vipAutomation?.revokeTemplate || '').trim(),
+    ...(normalizeVipAutomationServerTemplates(draft.vipAutomation?.serverTemplates)
+      ? { serverTemplates: normalizeVipAutomationServerTemplates(draft.vipAutomation?.serverTemplates) }
+      : {}),
   },
   viewerMapOverlays: (draft.viewerMapOverlays || [])
     .map((entry) => ({
@@ -298,6 +325,9 @@ const Settings: React.FC = () => {
         sandboxServerId: String(prev.vipAutomation?.sandboxServerId || ''),
         grantTemplate: String(prev.vipAutomation?.grantTemplate || ''),
         revokeTemplate: String(prev.vipAutomation?.revokeTemplate || ''),
+        ...(normalizeVipAutomationServerTemplates(prev.vipAutomation?.serverTemplates)
+          ? { serverTemplates: normalizeVipAutomationServerTemplates(prev.vipAutomation?.serverTemplates) }
+          : {}),
         ...patch,
       },
     }));

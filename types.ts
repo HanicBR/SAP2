@@ -625,11 +625,17 @@ export interface VipReconcileResponse {
   items: VipReconcileItem[];
 }
 
+export interface VipAutomationServerTemplateConfig {
+  grantTemplate?: string;
+  revokeTemplate?: string;
+}
+
 export interface VipAutomationConfig {
   enabled: boolean;
   sandboxServerId?: string;
   grantTemplate: string;
   revokeTemplate: string;
+  serverTemplates?: Record<string, VipAutomationServerTemplateConfig>;
   source?: 'env' | 'site_config';
 }
 
@@ -1173,6 +1179,7 @@ export interface SiteConfig {
     sandboxServerId?: string;
     grantTemplate: string;
     revokeTemplate: string;
+    serverTemplates?: Record<string, VipAutomationServerTemplateConfig>;
   };
   viewerMapOverlays?: ViewerMapOverlayConfig[];
 }

@@ -80,6 +80,12 @@ const automationReasonLabel = (reason?: string) => {
   if (code.startsWith('unknown_template_token:')) {
     return `Token de template desconhecido: ${code.slice('unknown_template_token:'.length)}`;
   }
+  if (code.startsWith('raw_tokens_not_allowed_in_dispatch:')) {
+    return `Token raw nao permitido no template do servidor ${code.slice('raw_tokens_not_allowed_in_dispatch:'.length)}`;
+  }
+  if (code.startsWith('template_contains_newline:')) {
+    return `Template com quebra de linha no servidor ${code.slice('template_contains_newline:'.length)}`;
+  }
   const known: Record<string, string> = {
     vip_automation_disabled: 'Automacao VIP desativada',
     missing_grant_template: 'Template de concessao ausente',
@@ -131,6 +137,7 @@ const Vips: React.FC = () => {
     enabled: false,
     grantTemplate: '',
     revokeTemplate: '',
+    serverTemplates: {},
     source: 'env',
   });
 
@@ -310,6 +317,25 @@ const Vips: React.FC = () => {
   };
 
   const sanitizeDaysInput = (value: string) => value.replace(/[^0-9]/g, '');
+  const updateServerTemplate = (
+    serverId: string,
+    field: 'grantTemplate' | 'revokeTemplate',
+    value: string,
+  ) => {
+    setAutomationConfig((prev) => {
+      const current = { ...(prev.serverTemplates || {}) };
+      const row = { ...(current[serverId] || {}) };
+      row[field] = value;
+      const grantTemplate = String(row.grantTemplate || '').trim();
+      const revokeTemplate = String(row.revokeTemplate || '').trim();
+      if (!grantTemplate && !revokeTemplate) {
+        delete current[serverId];
+      } else {
+        current[serverId] = row;
+      }
+      return { ...prev, serverTemplates: current };
+    });
+  };
   const operationEnqueue = applyVipOnServer;
   const isFeedbackError = /erro|falhou|invalido|invalid/i.test(feedback);
   const surfaceClass =
@@ -469,6 +495,7 @@ const Vips: React.FC = () => {
         sandboxServerId: automationConfig.sandboxServerId?.trim() || undefined,
         grantTemplate: automationConfig.grantTemplate,
         revokeTemplate: automationConfig.revokeTemplate,
+        serverTemplates: automationConfig.serverTemplates,
       });
       setAutomationConfig(updated);
       setFeedback('Configuracao da automacao VIP salva.');
@@ -1283,6 +1310,54 @@ const Vips: React.FC = () => {
                     placeholder='Template REVOKE. Ex: sam setrank {{steamId}} "user"'
                     rows={2}
                   />
+                  <div className="rounded-lg border border-zinc-800 bg-zinc-950/60 p-3 md:col-span-2">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-wide text-zinc-300">
+                          Templates por servidor
+                        </p>
+                        <p className="mt-1 text-[11px] text-zinc-500">
+                          Opcional. Se vazio, o servidor usa os templates globais acima.
+                        </p>
+                      </div>
+                      <span className="rounded-md border border-zinc-700/70 bg-zinc-900/70 px-2 py-0.5 text-[10px] font-bold uppercase text-zinc-400">
+                        {serversLoading ? 'carregando...' : `${servers.length} servidor(es)`}
+                      </span>
+                    </div>
+                    {servers.length === 0 ? (
+                      <p className="mt-3 text-xs text-zinc-500">Nenhum servidor cadastrado para configurar override.</p>
+                    ) : (
+                      <div className="mt-3 space-y-3">
+                        {servers.map((server) => {
+                          const row = automationConfig.serverTemplates?.[server.id];
+                          return (
+                            <div key={`tpl-${server.id}`} className="rounded-lg border border-zinc-800 bg-zinc-950/70 p-3">
+                              <p className="text-xs font-bold text-zinc-200">
+                                {server.name}
+                                <span className="ml-2 font-mono text-[10px] text-zinc-500">{server.id}</span>
+                              </p>
+                              <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2">
+                                <textarea
+                                  value={row?.grantTemplate || ''}
+                                  onChange={(e) => updateServerTemplate(server.id, 'grantTemplate', e.target.value)}
+                                  className={`${inputMonoClass} min-h-[72px]`}
+                                  placeholder='GRANT override (opcional) para este servidor'
+                                  rows={2}
+                                />
+                                <textarea
+                                  value={row?.revokeTemplate || ''}
+                                  onChange={(e) => updateServerTemplate(server.id, 'revokeTemplate', e.target.value)}
+                                  className={`${inputMonoClass} min-h-[72px]`}
+                                  placeholder='REVOKE override (opcional) para este servidor'
+                                  rows={2}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                   <div className="rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 py-2 text-xs text-zinc-500 md:col-span-2">
                     Tokens permitidos: {'{{steamId}}'}, {'{{vipPlanServer}}'}, {'{{vipExpiryUnix}}'},
                     {' {{vipDuration}}'}, {'{{vipDurationRaw}}'}, {'{{vipDurationDays}}'}

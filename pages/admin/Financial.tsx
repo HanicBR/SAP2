@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 import { ApiService } from '../../services/api';
 import {
+  GameServer,
   Transaction,
   TransactionCategory,
   TransactionType,
@@ -113,7 +114,9 @@ const Financial: React.FC = () => {
   const [steamId, setSteamId] = useState('');
   const [vipPlan, setVipPlan] = useState('');
   const [vipDuration, setVipDuration] = useState('');
+  const [vipAutomationServerId, setVipAutomationServerId] = useState('');
   const [applyVipOnServer, setApplyVipOnServer] = useState(true);
+  const [servers, setServers] = useState<GameServer[]>([]);
 
   const currentUser = useMemo(() => {
     try {
@@ -158,6 +161,7 @@ const Financial: React.FC = () => {
     setSteamId('');
     setVipPlan(vipPlanOptions[0] || 'VIP');
     setVipDuration(vipDurationSuggestions[0]?.value || '30');
+    setVipAutomationServerId('');
     setApplyVipOnServer(true);
     setTxType(isSuperAdmin ? TransactionType.EXPENSE : TransactionType.INCOME);
     setCategory(TransactionCategory.OTHER);
@@ -203,6 +207,22 @@ const Financial: React.FC = () => {
   useEffect(() => {
     void loadTransactions();
   }, [loadTransactions]);
+
+  useEffect(() => {
+    let active = true;
+    ApiService.getServers()
+      .then((result) => {
+        if (!active) return;
+        setServers(result);
+      })
+      .catch(() => {
+        if (!active) return;
+        setServers([]);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!vipPlanOptions.includes(vipPlan)) {
@@ -349,11 +369,12 @@ const Financial: React.FC = () => {
     setDescription(tx.description);
     setCategory(tx.category);
     setProofUrl(tx.proofUrl || '');
-    setSteamId(tx.relatedSteamId || '');
-    setVipPlan(tx.vipPlan || vipPlanOptions[0] || 'VIP');
-    setVipDuration((tx.vipDurationDays || Number(vipDurationSuggestions[0]?.value || 30)).toString());
-    setApplyVipOnServer(true);
-    setIsModalOpen(true);
+      setSteamId(tx.relatedSteamId || '');
+      setVipPlan(tx.vipPlan || vipPlanOptions[0] || 'VIP');
+      setVipDuration((tx.vipDurationDays || Number(vipDurationSuggestions[0]?.value || 30)).toString());
+      setVipAutomationServerId('');
+      setApplyVipOnServer(true);
+      setIsModalOpen(true);
   };
 
   const handleDelete = async (tx: Transaction) => {
@@ -427,6 +448,15 @@ const Financial: React.FC = () => {
         setFormError('Informe um numero de dias valido para o VIP.');
         return;
       }
+      if (
+        !editingTx &&
+        txType === TransactionType.INCOME &&
+        applyVipOnServer &&
+        !String(vipAutomationServerId || '').trim()
+      ) {
+        setFormError('Selecione o servidor para envio do comando VIP.');
+        return;
+      }
       if (normalizedProofUrl && !isAllowedProofUrl(normalizedProofUrl)) {
         setFormError('URL do comprovante deve ser http(s) ou arquivo enviado pelo sistema.');
         return;
@@ -451,6 +481,8 @@ const Financial: React.FC = () => {
         await ApiService.createTransaction({
           ...payload,
           enqueue: txType === TransactionType.INCOME ? applyVipOnServer : undefined,
+          vipAutomationServerId:
+            txType === TransactionType.INCOME ? String(vipAutomationServerId || '').trim() || undefined : undefined,
         });
       }
 
@@ -938,6 +970,28 @@ const Financial: React.FC = () => {
                             />
                           </div>
                         </div>
+                        {!editingTx ? (
+                          <div>
+                            <label className="block text-xs font-bold text-zinc-500 uppercase mb-1">
+                              Servidor para automacao VIP
+                            </label>
+                            <select
+                              className="w-full bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm focus:border-emerald-500 focus:outline-none"
+                              value={vipAutomationServerId}
+                              onChange={(event) => setVipAutomationServerId(event.target.value)}
+                            >
+                              <option value="">Selecione o servidor de destino</option>
+                              {servers.map((server) => (
+                                <option key={`financial-vip-server-${server.id}`} value={server.id}>
+                                  {server.name} ({server.mode})
+                                </option>
+                              ))}
+                            </select>
+                            <p className="mt-1 text-[11px] text-zinc-500">
+                              O comando VIP sera enviado para este servidor.
+                            </p>
+                          </div>
+                        ) : null}
                         <p className="text-[11px] text-zinc-500">
                           Dias do VIP (manual). Aceita qualquer valor inteiro positivo.
                         </p>

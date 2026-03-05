@@ -1743,11 +1743,38 @@ export const ApiService = {
 
     await delay(100);
     const local = siteConfigDb.vipAutomation;
+    const parsedServerTemplates =
+      local?.serverTemplates && typeof local.serverTemplates === 'object' && !Array.isArray(local.serverTemplates)
+        ? Object.fromEntries(
+            Object.entries(local.serverTemplates)
+              .map(([serverId, raw]) => {
+                const id = String(serverId || '').trim();
+                if (!id || !raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+                const row = raw as Record<string, unknown>;
+                const grantTemplate = String(row.grantTemplate || '').trim();
+                const revokeTemplate = String(row.revokeTemplate || '').trim();
+                if (!grantTemplate && !revokeTemplate) return null;
+                return [
+                  id,
+                  {
+                    ...(grantTemplate ? { grantTemplate } : {}),
+                    ...(revokeTemplate ? { revokeTemplate } : {}),
+                  },
+                ] as const;
+              })
+              .filter((entry): entry is readonly [string, { grantTemplate?: string; revokeTemplate?: string }] =>
+                Array.isArray(entry),
+              ),
+          )
+        : undefined;
     return {
       enabled: local?.enabled === true,
       sandboxServerId: local?.sandboxServerId,
       grantTemplate: local?.grantTemplate || '',
       revokeTemplate: local?.revokeTemplate || '',
+      ...(parsedServerTemplates && Object.keys(parsedServerTemplates).length
+        ? { serverTemplates: parsedServerTemplates }
+        : {}),
       source: 'site_config',
     };
   },
@@ -1757,6 +1784,7 @@ export const ApiService = {
     sandboxServerId?: string;
     grantTemplate: string;
     revokeTemplate: string;
+    serverTemplates?: Record<string, { grantTemplate?: string; revokeTemplate?: string }>;
   }): Promise<VipAutomationConfig> => {
     if (hasApi) {
       return apiFetch<VipAutomationConfig>('/vips/automation-config', {
@@ -1775,6 +1803,30 @@ export const ApiService = {
           : {}),
         grantTemplate: String(data.grantTemplate || ''),
         revokeTemplate: String(data.revokeTemplate || ''),
+        ...(data.serverTemplates && Object.keys(data.serverTemplates).length > 0
+          ? {
+              serverTemplates: Object.fromEntries(
+                Object.entries(data.serverTemplates)
+                  .map(([serverId, raw]) => {
+                    const id = String(serverId || '').trim();
+                    if (!id || !raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+                    const grantTemplate = String((raw as any).grantTemplate || '').trim();
+                    const revokeTemplate = String((raw as any).revokeTemplate || '').trim();
+                    if (!grantTemplate && !revokeTemplate) return null;
+                    return [
+                      id,
+                      {
+                        ...(grantTemplate ? { grantTemplate } : {}),
+                        ...(revokeTemplate ? { revokeTemplate } : {}),
+                      },
+                    ] as const;
+                  })
+                  .filter((entry): entry is readonly [string, { grantTemplate?: string; revokeTemplate?: string }] =>
+                    Array.isArray(entry),
+                  ),
+              ),
+            }
+          : {}),
       },
     };
     try {
@@ -2459,6 +2511,7 @@ export const ApiService = {
     data: Omit<Transaction, 'id' | 'createdBy' | 'createdAt' | 'createdByName'> & {
       createdBy?: string;
       enqueue?: boolean;
+      vipAutomationServerId?: string;
     },
   ): Promise<Transaction> => {
     if (hasApi) {
@@ -2474,7 +2527,7 @@ export const ApiService = {
     }
 
     await delay(600);
-    const { enqueue: _enqueue, ...persistedData } = data;
+    const { enqueue: _enqueue, vipAutomationServerId: _vipAutomationServerId, ...persistedData } = data as any;
     const newTx: Transaction = {
       ...persistedData,
       id: `tx_${Date.now()}`,

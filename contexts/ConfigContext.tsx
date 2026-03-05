@@ -90,10 +90,34 @@ const normalizeViewerMapOverlays = (
     .filter((entry): entry is NonNullable<SiteConfig['viewerMapOverlays']>[number] => Boolean(entry));
 };
 
+const normalizeVipAutomationServerTemplates = (
+  value: unknown,
+): Record<string, { grantTemplate?: string; revokeTemplate?: string }> | undefined => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+  const source = value as Record<string, unknown>;
+  const next: Record<string, { grantTemplate?: string; revokeTemplate?: string }> = {};
+  Object.entries(source).forEach(([serverId, raw]) => {
+    const id = String(serverId || '').trim();
+    if (!id || !raw || typeof raw !== 'object' || Array.isArray(raw)) return;
+    const row = raw as Record<string, unknown>;
+    const grantTemplate = String(row.grantTemplate || '').trim();
+    const revokeTemplate = String(row.revokeTemplate || '').trim();
+    if (!grantTemplate && !revokeTemplate) return;
+    next[id] = {
+      ...(grantTemplate ? { grantTemplate } : {}),
+      ...(revokeTemplate ? { revokeTemplate } : {}),
+    };
+  });
+  return Object.keys(next).length ? next : undefined;
+};
+
 const normalizeSiteConfig = (raw?: Partial<SiteConfig>): SiteConfig => {
   const next = (raw || {}) as Partial<SiteConfig>;
   const nextVip = (next.vip || {}) as Partial<SiteConfig['vip']>;
   const nextVipAutomation = next.vipAutomation;
+  const normalizedVipAutomationServerTemplates = normalizeVipAutomationServerTemplates(
+    nextVipAutomation?.serverTemplates,
+  );
   const defaultVip = DEFAULT_SITE_CONFIG.vip;
   const normalizedPlans = normalizeVipPlans(toArrayOrFallback(nextVip.plans, defaultVip.plans));
   const normalizedUltimateBenefits = toArrayOrFallback(
@@ -146,6 +170,9 @@ const normalizeSiteConfig = (raw?: Partial<SiteConfig>): SiteConfig => {
               : {}),
             grantTemplate: String(nextVipAutomation.grantTemplate || '').trim(),
             revokeTemplate: String(nextVipAutomation.revokeTemplate || '').trim(),
+            ...(normalizedVipAutomationServerTemplates
+              ? { serverTemplates: normalizedVipAutomationServerTemplates }
+              : {}),
           },
         }
       : {}),

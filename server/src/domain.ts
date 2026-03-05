@@ -240,6 +240,13 @@ export interface SiteConfig {
     sandboxServerId?: string;
     grantTemplate: string;
     revokeTemplate: string;
+    serverTemplates?: Record<
+      string,
+      {
+        grantTemplate?: string;
+        revokeTemplate?: string;
+      }
+    >;
   };
   viewerMapOverlays?: ViewerMapOverlayConfig[];
 }

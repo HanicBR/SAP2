@@ -68,6 +68,27 @@ const parseStringArray = (value: unknown, maxItems: number): string[] | undefine
   return next;
 };
 
+const parseServerTemplateOverrides = (
+  value: unknown,
+): Record<string, { grantTemplate?: string; revokeTemplate?: string }> | undefined => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+  const source = value as Record<string, unknown>;
+  const next: Record<string, { grantTemplate?: string; revokeTemplate?: string }> = {};
+  Object.entries(source).forEach(([serverId, raw]) => {
+    const normalizedId = String(serverId || '').trim();
+    if (!normalizedId || !raw || typeof raw !== 'object' || Array.isArray(raw)) return;
+    const row = raw as Record<string, unknown>;
+    const grantTemplate = String(row.grantTemplate || '').trim();
+    const revokeTemplate = String(row.revokeTemplate || '').trim();
+    if (!grantTemplate && !revokeTemplate) return;
+    next[normalizedId] = {
+      ...(grantTemplate ? { grantTemplate } : {}),
+      ...(revokeTemplate ? { revokeTemplate } : {}),
+    };
+  });
+  return Object.keys(next).length ? next : undefined;
+};
+
 const toDispatchPayload = (dispatch: {
   queued: boolean;
   skipped?: boolean;
@@ -259,12 +280,27 @@ router.put('/automation-config', async (req, res) => {
     const grantTemplate = String(body.grantTemplate || '').trim();
     const revokeTemplate = String(body.revokeTemplate || '').trim();
     const sandboxServerId = String(body.sandboxServerId || '').trim() || undefined;
+    const serverTemplates = parseServerTemplateOverrides(body.serverTemplates);
+
+    if (serverTemplates) {
+      const templateServerIds = Object.keys(serverTemplates);
+      const validServers = await prisma.gameServer.findMany({
+        where: { id: { in: templateServerIds } },
+        select: { id: true },
+      });
+      const validIds = new Set(validServers.map((entry) => entry.id));
+      const invalidIds = templateServerIds.filter((entry) => !validIds.has(entry));
+      if (invalidIds.length > 0) {
+        return res.status(400).json({ error: `Invalid serverTemplates serverIds: ${invalidIds.join(', ')}` });
+      }
+    }
 
     const updated = await setVipAutomationAdminConfig({
       enabled,
       grantTemplate,
       revokeTemplate,
       ...(sandboxServerId ? { sandboxServerId } : {}),
+      ...(serverTemplates ? { serverTemplates } : {}),
     });
     return res.json(updated);
   } catch (err: any) {

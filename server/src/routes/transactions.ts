@@ -145,6 +145,7 @@ router.post('/', async (req, res) => {
     relatedPlayerName,
     vipPlan,
     vipDurationDays,
+    vipAutomationServerId,
     enqueue,
   } = req.body as {
     date?: string;
@@ -157,6 +158,7 @@ router.post('/', async (req, res) => {
     relatedPlayerName?: string;
     vipPlan?: string;
     vipDurationDays?: number | string | null;
+    vipAutomationServerId?: string | null;
     enqueue?: boolean | string | number;
   };
 
@@ -181,9 +183,20 @@ router.post('/', async (req, res) => {
   const normalizedSteamId = String(relatedSteamId || '').trim();
   const normalizedPlayerName = String(relatedPlayerName || '').trim();
   const normalizedVipPlan = String(vipPlan || '').trim();
+  const normalizedVipAutomationServerId = String(vipAutomationServerId || '').trim();
   const parsedVipDurationDays = parsePositiveInt(vipDurationDays);
   const shouldEnqueueVipAutomation = parseBoolean(enqueue, true);
   const isVipSale = type === TransactionType.INCOME && !!normalizedSteamId && !!normalizedVipPlan;
+
+  if (normalizedVipAutomationServerId) {
+    const targetServer = await prisma.gameServer.findUnique({
+      where: { id: normalizedVipAutomationServerId },
+      select: { id: true },
+    });
+    if (!targetServer) {
+      return res.status(400).json({ error: 'vipAutomationServerId is invalid' });
+    }
+  }
 
   if (
     vipDurationDays !== undefined &&
@@ -292,6 +305,7 @@ router.post('/', async (req, res) => {
           vipPlan: normalizedVipPlan,
           vipExpiry: expiry,
           vipDurationDays: resolvedVipDurationDays,
+          ...(normalizedVipAutomationServerId ? { serverId: normalizedVipAutomationServerId } : {}),
           metadata: {
             trigger: 'transaction_create',
             transactionId: tx.id,

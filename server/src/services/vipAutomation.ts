@@ -38,13 +38,22 @@ type VipAutomationEnvConfig = {
   sandboxServerId: string | undefined;
   grantTemplate: string | undefined;
   revokeTemplate: string | undefined;
+  serverTemplates: VipAutomationServerTemplateMap | undefined;
 };
+
+type VipAutomationServerTemplate = {
+  grantTemplate?: string;
+  revokeTemplate?: string;
+};
+
+type VipAutomationServerTemplateMap = Record<string, VipAutomationServerTemplate>;
 
 export interface VipAutomationAdminConfig {
   enabled: boolean;
   sandboxServerId?: string;
   grantTemplate: string;
   revokeTemplate: string;
+  serverTemplates?: VipAutomationServerTemplateMap;
   source: 'env' | 'site_config';
 }
 
@@ -79,6 +88,27 @@ const parseBoolUnknown = (value: unknown): boolean | undefined => {
   return undefined;
 };
 
+const parseServerTemplates = (value: unknown): VipAutomationServerTemplateMap | undefined => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+  const source = value as Record<string, unknown>;
+  const next: VipAutomationServerTemplateMap = {};
+
+  Object.entries(source).forEach(([serverId, raw]) => {
+    const id = String(serverId || '').trim();
+    if (!id || !raw || typeof raw !== 'object' || Array.isArray(raw)) return;
+    const row = raw as Record<string, unknown>;
+    const grantTemplate = String(row.grantTemplate || '').trim();
+    const revokeTemplate = String(row.revokeTemplate || '').trim();
+    if (!grantTemplate && !revokeTemplate) return;
+    next[id] = {
+      ...(grantTemplate ? { grantTemplate } : {}),
+      ...(revokeTemplate ? { revokeTemplate } : {}),
+    };
+  });
+
+  return Object.keys(next).length ? next : undefined;
+};
+
 const quoteConsoleArg = (value: string) => {
   const raw = String(value || '');
   return `"${raw.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
@@ -107,6 +137,7 @@ const getEnvConfig = (): VipAutomationEnvConfig => {
     sandboxServerId,
     grantTemplate,
     revokeTemplate,
+    serverTemplates: undefined,
   };
 };
 
@@ -130,12 +161,14 @@ const readSiteVipAutomationOverride = async (): Promise<Partial<VipAutomationEnv
   const sandboxServerId = String(data.sandboxServerId || '').trim() || undefined;
   const grantTemplate = String(data.grantTemplate || '').trim() || undefined;
   const revokeTemplate = String(data.revokeTemplate || '').trim() || undefined;
+  const serverTemplates = parseServerTemplates(data.serverTemplates);
 
   return {
     ...(enabled !== undefined ? { enabled } : {}),
     ...(sandboxServerId ? { sandboxServerId } : {}),
     ...(grantTemplate ? { grantTemplate } : {}),
     ...(revokeTemplate ? { revokeTemplate } : {}),
+    ...(serverTemplates ? { serverTemplates } : {}),
   };
 };
 
@@ -151,6 +184,7 @@ const getRuntimeConfig = async (): Promise<VipAutomationEnvConfig & { source: 'e
       sandboxServerId: override.sandboxServerId ?? env.sandboxServerId,
       grantTemplate: override.grantTemplate ?? env.grantTemplate,
       revokeTemplate: override.revokeTemplate ?? env.revokeTemplate,
+      serverTemplates: override.serverTemplates ?? env.serverTemplates,
       source: 'site_config',
     };
   } catch (err: any) {
@@ -312,10 +346,9 @@ const resolveSandboxServerId = async (
   if (explicit) {
     const server = await prisma.gameServer.findUnique({
       where: { id: explicit },
-      select: { id: true, mode: true },
+      select: { id: true },
     });
     if (!server) return { ok: false, reason: 'sandbox_server_not_found' };
-    if (server.mode !== 'SANDBOX') return { ok: false, reason: 'sandbox_server_invalid_mode' };
     return { ok: true, serverId: server.id };
   }
 
@@ -335,6 +368,18 @@ const resolveSandboxServerId = async (
   });
   if (!fallbackSandbox) return { ok: false, reason: 'sandbox_server_missing' };
   return { ok: true, serverId: fallbackSandbox.id };
+};
+
+const resolveTemplateForServer = (
+  config: VipAutomationEnvConfig,
+  action: VipAutomationActionType,
+  serverId: string,
+): string | undefined => {
+  const override = config.serverTemplates?.[serverId];
+  if (action === 'REVOKE') {
+    return String(override?.revokeTemplate || config.revokeTemplate || '').trim() || undefined;
+  }
+  return String(override?.grantTemplate || config.grantTemplate || '').trim() || undefined;
 };
 
 type VipAutomationAuditInput = {
@@ -410,6 +455,7 @@ export const getVipAutomationAdminConfig = async (): Promise<VipAutomationAdminC
     ...(config.sandboxServerId ? { sandboxServerId: config.sandboxServerId } : {}),
     grantTemplate: config.grantTemplate || '',
     revokeTemplate: config.revokeTemplate || '',
+    ...(config.serverTemplates ? { serverTemplates: config.serverTemplates } : {}),
     source: config.source,
   };
 };
@@ -419,13 +465,20 @@ export const setVipAutomationAdminConfig = async (input: {
   sandboxServerId?: string | null;
   grantTemplate: string;
   revokeTemplate: string;
+  serverTemplates?: VipAutomationServerTemplateMap;
 }): Promise<VipAutomationAdminConfig> => {
   const enabled = input.enabled === true;
   const sandboxServerId = String(input.sandboxServerId || '').trim() || undefined;
   const grantTemplate = String(input.grantTemplate || '').trim();
   const revokeTemplate = String(input.revokeTemplate || '').trim();
+  const serverTemplates = parseServerTemplates(input.serverTemplates);
+  const hasGlobalTemplatePair = !!grantTemplate && !!revokeTemplate;
+  const hasAnyServerTemplatePair = !!serverTemplates &&
+    Object.values(serverTemplates).some(
+      (row) => String(row.grantTemplate || '').trim() && String(row.revokeTemplate || '').trim(),
+    );
 
-  if (enabled && (!grantTemplate || !revokeTemplate)) {
+  if (enabled && !hasGlobalTemplatePair && !hasAnyServerTemplatePair) {
     throw new Error('missing_template_when_enabled');
   }
 
@@ -435,6 +488,19 @@ export const setVipAutomationAdminConfig = async (input: {
 
   if (/[\r\n]/.test(grantTemplate) || /[\r\n]/.test(revokeTemplate)) {
     throw new Error('template_contains_newline');
+  }
+
+  if (serverTemplates) {
+    Object.entries(serverTemplates).forEach(([serverId, row]) => {
+      const grant = String(row.grantTemplate || '').trim();
+      const revoke = String(row.revokeTemplate || '').trim();
+      if (templateHasRawTokens(grant) || templateHasRawTokens(revoke)) {
+        throw new Error(`raw_tokens_not_allowed_in_dispatch:${serverId}`);
+      }
+      if (/[\r\n]/.test(grant) || /[\r\n]/.test(revoke)) {
+        throw new Error(`template_contains_newline:${serverId}`);
+      }
+    });
   }
 
   const existing = await prisma.siteConfig.findUnique({
@@ -455,6 +521,9 @@ export const setVipAutomationAdminConfig = async (input: {
   if (sandboxServerId) {
     nextVipAutomation.sandboxServerId = sandboxServerId;
   }
+  if (serverTemplates) {
+    nextVipAutomation.serverTemplates = serverTemplates;
+  }
 
   const nextData: Record<string, unknown> = {
     ...root,
@@ -472,6 +541,7 @@ export const setVipAutomationAdminConfig = async (input: {
     ...(sandboxServerId ? { sandboxServerId } : {}),
     grantTemplate,
     revokeTemplate,
+    ...(serverTemplates ? { serverTemplates } : {}),
     source: 'site_config',
   };
 };
@@ -490,10 +560,16 @@ const buildVipAutomation = async (
     };
   }
 
-  const template =
-    input.action === 'REVOKE'
-      ? config.revokeTemplate
-      : config.grantTemplate;
+  const serverResolution = await resolveSandboxServerId(input.serverId, config);
+  if (!serverResolution.ok) {
+    return {
+      ok: false,
+      skipped: false,
+      reason: serverResolution.reason,
+    };
+  }
+
+  const template = resolveTemplateForServer(config, input.action, serverResolution.serverId);
 
   if (!template) {
     bumpCommandBuildFailure('missing_template');
@@ -531,15 +607,6 @@ const buildVipAutomation = async (
       ok: false,
       skipped: false,
       reason: 'command_contains_newline',
-    };
-  }
-
-  const serverResolution = await resolveSandboxServerId(input.serverId, config);
-  if (!serverResolution.ok) {
-    return {
-      ok: false,
-      skipped: false,
-      reason: serverResolution.reason,
     };
   }
 
