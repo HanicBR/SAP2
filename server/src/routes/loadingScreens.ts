@@ -164,6 +164,18 @@ const allowedLoadingMediaMimeTypes = new Set([
 const processableAudioMimeTypes = new Set(['audio/mpeg', 'audio/mp3', 'audio/ogg', 'audio/wav', 'audio/x-wav']);
 const processableAudioExtensions = new Set(['.mp3', '.ogg', '.wav']);
 const ffmpegBinary = String(process.env.FFMPEG_PATH || 'ffmpeg').trim() || 'ffmpeg';
+const ffmpegBinaryCandidates = (() => {
+  const source = [ffmpegBinary, 'ffmpeg', '/usr/bin/ffmpeg', '/usr/local/bin/ffmpeg'];
+  const seen = new Set<string>();
+  const next: string[] = [];
+  source.forEach((entry) => {
+    const normalized = String(entry || '').trim();
+    if (!normalized || seen.has(normalized)) return;
+    seen.add(normalized);
+    next.push(normalized);
+  });
+  return next.length > 0 ? next : ['ffmpeg'];
+})();
 
 fs.mkdirSync(loadingMediaUploadDir, { recursive: true });
 
@@ -247,10 +259,54 @@ const isProcessableAudioUpload = (file: Express.Multer.File): boolean => {
   return processableAudioMimeTypes.has(mime) || processableAudioExtensions.has(extension);
 };
 
-const buildAudioCodecArgs = (extension: string): string[] => {
-  if (extension === '.mp3') return ['-codec:a', 'libmp3lame', '-q:a', '2'];
-  if (extension === '.wav') return ['-codec:a', 'pcm_s16le'];
-  return ['-codec:a', 'libvorbis', '-q:a', '5'];
+type FfmpegExecutionError = Error & {
+  code?: string;
+  stderr?: string;
+  binary?: string;
+};
+
+const buildAudioCodecArgsCandidates = (extension: string): string[][] => {
+  if (extension === '.mp3') {
+    return [['-codec:a', 'libmp3lame', '-q:a', '2'], ['-codec:a', 'mp3'], []];
+  }
+  if (extension === '.wav') {
+    return [['-codec:a', 'pcm_s16le'], []];
+  }
+  return [
+    ['-codec:a', 'libopus', '-b:a', '160k'],
+    ['-codec:a', 'libvorbis', '-q:a', '5'],
+    [],
+  ];
+};
+
+const runFfmpeg = async (binary: string, args: string[]): Promise<void> => {
+  await new Promise<void>((resolve, reject) => {
+    const child = spawn(binary, args, { windowsHide: true });
+    let stderr = '';
+    child.stderr.on('data', (chunk) => {
+      stderr += String(chunk || '');
+    });
+    child.on('error', (err: any) => {
+      const wrapped = new Error(err?.message || 'ffmpeg_spawn_failed') as FfmpegExecutionError;
+      wrapped.code = String(err?.code || '');
+      wrapped.stderr = stderr;
+      wrapped.binary = binary;
+      reject(wrapped);
+    });
+    child.on('close', (code) => {
+      if (code === 0) {
+        resolve();
+        return;
+      }
+      const wrapped = new Error(
+        stderr.trim() || `ffmpeg exited with code ${code ?? 'unknown'}`,
+      ) as FfmpegExecutionError;
+      wrapped.code = String(code ?? '');
+      wrapped.stderr = stderr;
+      wrapped.binary = binary;
+      reject(wrapped);
+    });
+  });
 };
 
 const transcodeUploadedAudioVolume = async (
@@ -260,47 +316,51 @@ const transcodeUploadedAudioVolume = async (
   const extension = processableAudioExtensions.has(resolveUploadExtension(file))
     ? resolveUploadExtension(file)
     : '.ogg';
-  const tempOutputPath = `${file.path}.volume-tmp${extension}`;
   const gainFactor = Math.max(0.05, Math.min(1, targetPct / 100));
-  const codecArgs = buildAudioCodecArgs(extension);
-  const ffmpegArgs = [
-    '-y',
-    '-hide_banner',
-    '-loglevel',
-    'error',
-    '-i',
-    file.path,
-    '-vn',
-    '-filter:a',
-    `volume=${gainFactor.toFixed(4)}`,
-    ...codecArgs,
-    tempOutputPath,
-  ];
+  const codecArgCandidates = buildAudioCodecArgsCandidates(extension);
+  let sawBinaryNotFound = false;
+  let lastError: FfmpegExecutionError | undefined;
 
-  try {
-    await new Promise<void>((resolve, reject) => {
-      const child = spawn(ffmpegBinary, ffmpegArgs, { windowsHide: true });
-      let stderr = '';
-      child.stderr.on('data', (chunk) => {
-        stderr += String(chunk || '');
-      });
-      child.on('error', (err) => {
-        reject(err);
-      });
-      child.on('close', (code) => {
-        if (code === 0) {
-          resolve();
-          return;
+  for (const ffmpegBinaryCandidate of ffmpegBinaryCandidates) {
+    for (let attempt = 0; attempt < codecArgCandidates.length; attempt += 1) {
+      const codecArgs = codecArgCandidates[attempt] || [];
+      const tempOutputPath = `${file.path}.volume-tmp-${attempt}${extension}`;
+      const ffmpegArgs = [
+        '-y',
+        '-hide_banner',
+        '-loglevel',
+        'error',
+        '-i',
+        file.path,
+        '-vn',
+        '-filter:a',
+        `volume=${gainFactor.toFixed(4)}`,
+        ...codecArgs,
+        tempOutputPath,
+      ];
+
+      try {
+        await runFfmpeg(ffmpegBinaryCandidate, ffmpegArgs);
+        await fs.promises.rename(tempOutputPath, file.path);
+        return;
+      } catch (err: any) {
+        await fs.promises.unlink(tempOutputPath).catch(() => undefined);
+        const executionError = err as FfmpegExecutionError;
+        if (String(executionError.code || '').toUpperCase() === 'ENOENT') {
+          sawBinaryNotFound = true;
         }
-        reject(new Error(stderr.trim() || `ffmpeg exited with code ${code ?? 'unknown'}`));
-      });
-    });
-
-    await fs.promises.rename(tempOutputPath, file.path);
-  } catch (err) {
-    await fs.promises.unlink(tempOutputPath).catch(() => undefined);
-    throw err;
+        lastError = executionError;
+      }
+    }
   }
+
+  if (sawBinaryNotFound) {
+    const notFoundErr = new Error('ffmpeg_not_found') as FfmpegExecutionError;
+    notFoundErr.code = 'ENOENT';
+    throw notFoundErr;
+  }
+
+  throw lastError || new Error('ffmpeg_processing_failed');
 };
 
 const removeUploadedFileSafe = async (filePath: string): Promise<void> => {
@@ -1312,7 +1372,21 @@ router.post('/media-upload', authMiddleware, requireRole(UserRole.SUPERADMIN), (
       } catch (processingError: any) {
         console.error('loading music volume processing failed', processingError);
         await removeUploadedFileSafe(file.path);
-        return res.status(500).json({ error: 'Failed to process uploaded audio volume' });
+        const errorCode = String(processingError?.code || '')
+          .trim()
+          .toUpperCase();
+        const detail = String(processingError?.message || processingError || '')
+          .trim()
+          .replace(/\s+/g, ' ')
+          .slice(0, 240);
+        if (errorCode === 'ENOENT' || detail === 'ffmpeg_not_found') {
+          return res.status(500).json({
+            error: 'Failed to process uploaded audio volume: ffmpeg not found on server',
+          });
+        }
+        return res.status(500).json({
+          error: `Failed to process uploaded audio volume${detail ? `: ${detail}` : ''}`,
+        });
       }
     }
 
