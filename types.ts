@@ -1246,6 +1246,14 @@ export interface LoadingScreensResponse {
   profiles: LoadingScreenProfile[];
 }
 
+export interface LoadingScreenSyncedVipsResponse {
+  slug: string;
+  mode: LoadingScreenMode;
+  total: number;
+  items: LoadingScreenVipEntry[];
+  generatedAt: string;
+}
+
 export interface LoadingMediaUploadResult {
   url: string;
   filename: string;

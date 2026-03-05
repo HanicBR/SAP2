@@ -1,5 +1,6 @@
 import { prisma } from '../db/client';
 import { dispatchVipAutomationAction } from './vipAutomation';
+import { bumpVipSyncRevision } from './vipSyncRevision';
 
 export interface VipExpiryReconcileOptions {
   dryRun?: boolean;
@@ -138,6 +139,10 @@ export const reconcileExpiredVips = async (
     }
 
     items.push(item);
+  }
+
+  if (!dryRun && updatedCount > 0) {
+    bumpVipSyncRevision();
   }
 
   return {

@@ -10,6 +10,7 @@ import { TransactionType, TransactionCategory } from '@prisma/client';
 import { dispatchVipAutomationAction } from '../services/vipAutomation';
 import { sendTransactionalEmail } from '../services/email';
 import { buildVipPurchaseReceiptTemplate } from '../services/emailTemplates';
+import { bumpVipSyncRevision } from '../services/vipSyncRevision';
 
 const router = Router();
 const proofUploadDir =
@@ -184,6 +185,7 @@ router.post('/', async (req, res) => {
   const normalizedPlayerName = String(relatedPlayerName || '').trim();
   const normalizedVipPlan = String(vipPlan || '').trim();
   const normalizedVipAutomationServerId = String(vipAutomationServerId || '').trim();
+  const nextVipServerIds = normalizedVipAutomationServerId ? [normalizedVipAutomationServerId] : undefined;
   const parsedVipDurationDays = parsePositiveInt(vipDurationDays);
   const shouldEnqueueVipAutomation = parseBoolean(enqueue, true);
   const isVipSale = type === TransactionType.INCOME && !!normalizedSteamId && !!normalizedVipPlan;
@@ -288,14 +290,17 @@ router.post('/', async (req, res) => {
         isVip: true,
         vipPlan: normalizedVipPlan,
         vipExpiry: expiry,
+        vipServerIds: nextVipServerIds || [],
       },
       update: {
         ...(normalizedPlayerName ? { name: normalizedPlayerName } : {}),
         isVip: true,
         vipPlan: normalizedVipPlan,
         vipExpiry: expiry,
+        ...(nextVipServerIds ? { vipServerIds: nextVipServerIds } : {}),
       },
     });
+    bumpVipSyncRevision();
 
     if (shouldEnqueueVipAutomation) {
       try {

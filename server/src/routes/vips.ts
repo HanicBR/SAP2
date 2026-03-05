@@ -9,6 +9,7 @@ import {
   setVipAutomationAdminConfig,
 } from '../services/vipAutomation';
 import { reconcileExpiredVips } from '../services/vipExpiryReconciler';
+import { bumpVipSyncRevision } from '../services/vipSyncRevision';
 
 const router = Router();
 
@@ -402,6 +403,7 @@ router.post('/grant', async (req, res) => {
       ...(parsedVipServerIds !== undefined ? { vipServerIds: parsedVipServerIds } : {}),
     },
   });
+  bumpVipSyncRevision();
 
   let dispatch:
     | {
@@ -493,6 +495,7 @@ router.post('/extend', async (req, res) => {
       ...(parsedVipServerIds !== undefined ? { vipServerIds: parsedVipServerIds } : {}),
     },
   });
+  bumpVipSyncRevision();
 
   let dispatch:
     | {
@@ -557,6 +560,7 @@ router.post('/revoke', async (req, res) => {
       vipExpiry: null,
     },
   });
+  bumpVipSyncRevision();
 
   let dispatch:
     | {

@@ -245,6 +245,38 @@ const LoadingScreens: React.FC = () => {
   const [telemetryError, setTelemetryError] = useState<string | null>(null);
   const [telemetrySlugs, setTelemetrySlugs] = useState<LoadingTelemetrySlugsResponse | null>(null);
   const [telemetrySummary, setTelemetrySummary] = useState<LoadingTelemetrySummaryResponse | null>(null);
+  const [syncedVipPlayers, setSyncedVipPlayers] = useState<LoadingScreenVipEntry[]>([]);
+  const [syncedVipLoading, setSyncedVipLoading] = useState(false);
+  const [syncedVipError, setSyncedVipError] = useState<string | null>(null);
+  const [syncedVipGeneratedAt, setSyncedVipGeneratedAt] = useState<string | null>(null);
+
+  const loadSyncedVipsPreview = async (slug: string, options?: { silent?: boolean }) => {
+    const safeSlug = normalizeSlug(slug);
+    if (!safeSlug) {
+      setSyncedVipPlayers([]);
+      setSyncedVipError(null);
+      setSyncedVipGeneratedAt(null);
+      return;
+    }
+
+    const silent = options?.silent === true;
+    if (!silent) setSyncedVipLoading(true);
+    setSyncedVipError(null);
+
+    try {
+      const response = await ApiService.getLoadingScreenSyncedVips(safeSlug);
+      setSyncedVipPlayers(response.items || []);
+      setSyncedVipGeneratedAt(response.generatedAt || null);
+    } catch (error: any) {
+      setSyncedVipPlayers([]);
+      setSyncedVipGeneratedAt(null);
+      setSyncedVipError(
+        error?.message ? String(error.message) : 'Falha ao carregar VIPs sincronizados.',
+      );
+    } finally {
+      if (!silent) setSyncedVipLoading(false);
+    }
+  };
 
   const hydrateDraftInputs = (profile: LoadingScreenProfile) => {
     setBackgroundLinkInput('');
@@ -353,6 +385,19 @@ const LoadingScreens: React.FC = () => {
     if (activeMainTab !== 'telemetry') return;
     void loadTelemetry();
   }, [activeMainTab, telemetryRange, telemetrySlug]);
+
+  useEffect(() => {
+    if (activeEditorTab !== 'vip') return;
+    if (isNewDraft || !selectedSlug) {
+      setSyncedVipPlayers([]);
+      setSyncedVipError(null);
+      setSyncedVipGeneratedAt(null);
+      setSyncedVipLoading(false);
+      return;
+    }
+
+    void loadSyncedVipsPreview(selectedSlug);
+  }, [activeEditorTab, isNewDraft, selectedSlug]);
 
   const draftSignature = useMemo(() => JSON.stringify(draft), [draft]);
   const hasChanges = Boolean(draft) && draftSignature !== savedSignature;
@@ -624,6 +669,7 @@ const LoadingScreens: React.FC = () => {
       const fresh = sorted.find((entry) => entry.slug === payload.slug) || sorted[0];
       if (fresh) {
         applyDraft(fresh, false);
+        void loadSyncedVipsPreview(fresh.slug, { silent: true });
       }
       setIsNewDraft(false);
       setNotice({ tone: 'success', message: 'Loading screen salva com sucesso.' });
@@ -1471,6 +1517,64 @@ const LoadingScreens: React.FC = () => {
             <p className="mt-2 text-xs text-zinc-400">
               A tela publica usa VIPs ativos da aba VIPs (filtrando por modo/servidor). A lista abaixo entra como fallback/complemento.
             </p>
+
+            <div className="mt-3 rounded border border-fuchsia-900/30 bg-zinc-950/70 p-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-[11px] font-bold uppercase tracking-wide text-fuchsia-300">
+                  VIPs ativos sincronizados agora: {formatNumber(syncedVipPlayers.length)}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => void loadSyncedVipsPreview(draft.slug)}
+                  disabled={syncedVipLoading || isNewDraft}
+                  className="rounded border border-zinc-700 bg-zinc-900 px-2 py-1 text-[11px] font-bold uppercase text-zinc-200 disabled:opacity-50"
+                >
+                  {syncedVipLoading ? 'Atualizando...' : 'Atualizar sync'}
+                </button>
+              </div>
+              <p className="mt-1 text-[11px] text-zinc-500">
+                {isNewDraft
+                  ? 'Salve a loading screen primeiro para visualizar os VIPs sincronizados.'
+                  : `Ultima sync: ${formatDateTime(syncedVipGeneratedAt)}`}
+              </p>
+
+              {syncedVipError ? (
+                <div className="mt-2 rounded border border-red-900/40 bg-red-900/10 px-3 py-2 text-xs text-red-300">
+                  {syncedVipError}
+                </div>
+              ) : null}
+
+              {!isNewDraft && !syncedVipError && !syncedVipLoading && syncedVipPlayers.length === 0 ? (
+                <div className="mt-2 rounded border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs text-zinc-500">
+                  Nenhum VIP ativo sincronizado para este modo/escopo.
+                </div>
+              ) : null}
+
+              {!isNewDraft && syncedVipPlayers.length > 0 ? (
+                <div className="mt-2 space-y-2">
+                  {syncedVipPlayers.map((vip, index) => (
+                    <div
+                      key={`${vip.steamId || vip.name}-${index}`}
+                      className="grid items-center gap-2 rounded border border-zinc-800 bg-zinc-900/70 p-2 md:grid-cols-[auto_1fr_auto]"
+                    >
+                      <img
+                        src={vip.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(vip.steamId || vip.name)}`}
+                        alt={vip.name}
+                        className="h-8 w-8 rounded border border-zinc-700 bg-zinc-950 object-cover"
+                        loading="lazy"
+                      />
+                      <div className="min-w-0">
+                        <div className="truncate text-xs font-bold text-zinc-200">{vip.name}</div>
+                        <div className="truncate font-mono text-[11px] text-zinc-500">{vip.steamId || '-'}</div>
+                      </div>
+                      <span className="rounded border border-fuchsia-900/50 bg-fuchsia-900/20 px-2 py-1 text-[10px] font-bold uppercase text-fuchsia-200">
+                        {vip.vipPlan || 'VIP'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </div>
 
             <div className="mt-3">
               <label className={LABEL_CLASS}>Titulo da secao</label>

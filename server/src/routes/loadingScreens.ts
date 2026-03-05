@@ -13,6 +13,7 @@ import {
   isLoadingTelemetryTokenRequired,
   issueLoadingTelemetryToken,
 } from '../services/loadingTelemetryAuth';
+import { getVipSyncRevision } from '../services/vipSyncRevision';
 
 const router = Router();
 
@@ -374,6 +375,7 @@ type SteamSummary = {
 
 type PublicLoadingProfileCacheEntry = {
   expiresAt: number;
+  vipSyncRevision: number;
   payload: PublicLoadingProfileResponse;
 };
 
@@ -995,7 +997,7 @@ const uploadLoadingMedia = multer({
   },
 });
 
-const buildSyncedVipPlayers = async (profile: LoadingScreenProfile): Promise<LoadingScreenVipEntry[]> => {
+const buildActiveVipPlayers = async (profile: LoadingScreenProfile): Promise<LoadingScreenVipEntry[]> => {
   const now = new Date();
   const mode = profile.mode;
   const modeFilterEnabled = mode === 'TTT' || mode === 'SANDBOX' || mode === 'MURDER';
@@ -1007,6 +1009,9 @@ const buildSyncedVipPlayers = async (profile: LoadingScreenProfile): Promise<Loa
       select: { id: true },
     });
     modeServerIds = uniqueStrings(modeServers.map((entry) => entry.id));
+    if (modeServerIds.length === 0) {
+      return [];
+    }
   }
 
   const where: any = {
@@ -1078,6 +1083,11 @@ const buildSyncedVipPlayers = async (profile: LoadingScreenProfile): Promise<Loa
     };
   });
 
+  return synced;
+};
+
+const buildSyncedVipPlayers = async (profile: LoadingScreenProfile): Promise<LoadingScreenVipEntry[]> => {
+  const synced = await buildActiveVipPlayers(profile);
   const manualFallback = sanitizeVipPlayers(profile.vipPlayers, []);
   return mergeAndDedupeVipEntries(synced, manualFallback);
 };
@@ -1152,6 +1162,29 @@ router.get('/', authMiddleware, requireRole(UserRole.SUPERADMIN), async (_req, r
   return respondStore(res, store, siteConfig.updatedAt);
 });
 
+router.get('/:slug/synced-vips', authMiddleware, requireRole(UserRole.SUPERADMIN), async (req, res) => {
+  const slug = sanitizeSlug(req.params.slug);
+  if (!slug) {
+    return res.status(400).json({ error: 'Invalid slug' });
+  }
+
+  const siteConfig = await ensureSiteConfig();
+  const store = loadStoreFromSiteConfig(siteConfig.data);
+  const profile = store.profiles.find((entry) => entry.slug === slug);
+  if (!profile) {
+    return res.status(404).json({ error: 'Loading screen not found' });
+  }
+
+  const items = await buildActiveVipPlayers(profile);
+  return res.json({
+    slug: profile.slug,
+    mode: profile.mode,
+    total: items.length,
+    items,
+    generatedAt: new Date().toISOString(),
+  });
+});
+
 router.get('/public/:slug', async (req, res) => {
   const slug = sanitizeSlug(req.params.slug);
   if (!slug) {
@@ -1160,7 +1193,8 @@ router.get('/public/:slug', async (req, res) => {
 
   pruneExpiredPublicLoadingProfileCache();
   const cached = publicLoadingProfileCache.get(slug);
-  if (cached && cached.expiresAt > Date.now()) {
+  const vipSyncRevision = getVipSyncRevision();
+  if (cached && cached.expiresAt > Date.now() && cached.vipSyncRevision === vipSyncRevision) {
     setPublicLoadingResponseHeaders(res);
     return res.json(cached.payload);
   }
@@ -1189,6 +1223,7 @@ router.get('/public/:slug', async (req, res) => {
   };
   publicLoadingProfileCache.set(slug, {
     expiresAt: Date.now() + LOADING_PUBLIC_CACHE_TTL_MS,
+    vipSyncRevision,
     payload,
   });
   setPublicLoadingResponseHeaders(res);
