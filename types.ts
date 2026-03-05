@@ -1224,6 +1224,7 @@ export interface LoadingScreenProfile {
   slug: string;
   name: string;
   mode: LoadingScreenMode;
+  serverId?: string;
   enabled: boolean;
   routePath: string;
   accentColor: string;

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Icons } from '../../components/Icon';
 import { ApiService } from '../../services/api';
 import {
+  GameServer,
   LoadingScreenBackgroundItem,
   LoadingScreenMusicTrackItem,
   LoadingScreenMode,
@@ -142,6 +143,7 @@ const makeDraft = (base?: LoadingScreenProfile): LoadingScreenProfile => {
     slug,
     name: base?.name || 'Nova loading screen',
     mode: base?.mode || 'CUSTOM',
+    ...(base?.serverId ? { serverId: base.serverId } : {}),
     enabled: base?.enabled ?? true,
     routePath: `/${slug}`,
     accentColor: base?.accentColor || '#be1b3c',
@@ -223,6 +225,7 @@ const LoadingScreens: React.FC = () => {
   const [notice, setNotice] = useState<Notice | null>(null);
 
   const [profiles, setProfiles] = useState<LoadingScreenProfile[]>([]);
+  const [servers, setServers] = useState<GameServer[]>([]);
   const [selectedSlug, setSelectedSlug] = useState('');
   const [draft, setDraft] = useState<LoadingScreenProfile | null>(null);
   const [isNewDraft, setIsNewDraft] = useState(false);
@@ -300,7 +303,14 @@ const LoadingScreens: React.FC = () => {
     setLoading(true);
     setNotice(null);
     try {
-      const result = await ApiService.getLoadingScreens();
+      const [result, serverList] = await Promise.all([
+        ApiService.getLoadingScreens(),
+        ApiService.getServers().catch(() => [] as GameServer[]),
+      ]);
+      const sortedServers = [...(serverList || [])].sort((a, b) =>
+        String(a.name || '').localeCompare(String(b.name || ''), 'pt-BR', { sensitivity: 'base' }),
+      );
+      setServers(sortedServers);
       const sorted = sortProfiles(result.profiles || []);
       setProfiles(sorted);
       const initial = sorted[0];
@@ -1085,7 +1095,7 @@ const LoadingScreens: React.FC = () => {
           {activeEditorTab === 'identity' ? (
             <div className={`${CARD_CLASS} border-red-900/25 bg-zinc-900/90`}>
             <h3 className="text-sm font-black uppercase tracking-wide text-white">Identificacao</h3>
-            <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
               <div>
                 <label className={LABEL_CLASS}>Nome</label>
                 <input
@@ -1120,6 +1130,28 @@ const LoadingScreens: React.FC = () => {
                   <option value="MURDER">Murder</option>
                   <option value="CUSTOM">Custom</option>
                 </select>
+              </div>
+              <div>
+                <label className={LABEL_CLASS}>Servidor vinculado (sync VIP)</label>
+                <select
+                  value={draft.serverId || ''}
+                  onChange={(event) =>
+                    updateDraft({
+                      serverId: String(event.target.value || '').trim() || undefined,
+                    })
+                  }
+                  className={INPUT_CLASS}
+                >
+                  <option value="">Todos do modo (padrao)</option>
+                  {servers.map((server) => (
+                    <option key={server.id} value={server.id}>
+                      {server.name} ({server.mode})
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-[11px] text-zinc-500">
+                  Se definido, o sync VIP usa este servidor. Se vazio, usa o filtro por modo.
+                </p>
               </div>
               <div>
                 <label className={LABEL_CLASS}>Cor destaque</label>

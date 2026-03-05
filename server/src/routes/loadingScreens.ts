@@ -57,6 +57,7 @@ type LoadingScreenProfile = {
   slug: string;
   name: string;
   mode: LoadingScreenMode;
+  serverId?: string;
   enabled: boolean;
   routePath: string;
   accentColor: string;
@@ -801,6 +802,9 @@ const normalizeProfile = (input: unknown, fallback?: LoadingScreenProfile): Load
 
   const inferredName = trimTo(record.name, 80, base.name);
   const slug = sanitizeSlug(record.slug) || sanitizeSlug(base.slug) || sanitizeSlugFromName(inferredName);
+  const fallbackServerId = trimTo(base.serverId, 64, '');
+  const serverId =
+    record.serverId === undefined ? fallbackServerId : trimTo(record.serverId, 64, '');
 
   const fallbackBackgroundItems = Array.isArray(base.backgroundImageItems)
     ? base.backgroundImageItems
@@ -872,6 +876,7 @@ const normalizeProfile = (input: unknown, fallback?: LoadingScreenProfile): Load
     slug,
     name: inferredName,
     mode: parseMode(record.mode, base.mode),
+    ...(serverId ? { serverId } : {}),
     enabled: parseBool(record.enabled, base.enabled),
     routePath: `/${slug}`,
     accentColor: sanitizeColor(record.accentColor, base.accentColor),
@@ -999,17 +1004,29 @@ const uploadLoadingMedia = multer({
 
 const buildActiveVipPlayers = async (profile: LoadingScreenProfile): Promise<LoadingScreenVipEntry[]> => {
   const now = new Date();
+  const selectedServerId = trimTo(profile.serverId, 64, '');
   const mode = profile.mode;
   const modeFilterEnabled = mode === 'TTT' || mode === 'SANDBOX' || mode === 'MURDER';
-  let modeServerIds: string[] = [];
+  let targetServerIds: string[] = [];
 
-  if (modeFilterEnabled) {
+  if (selectedServerId) {
+    const targetServer = await prisma.gameServer.findUnique({
+      where: { id: selectedServerId },
+      select: { id: true },
+    });
+    if (!targetServer) {
+      return [];
+    }
+    targetServerIds = [targetServer.id];
+  }
+
+  if (!selectedServerId && modeFilterEnabled) {
     const modeServers = await prisma.gameServer.findMany({
       where: { mode: mode as any },
       select: { id: true },
     });
-    modeServerIds = uniqueStrings(modeServers.map((entry) => entry.id));
-    if (modeServerIds.length === 0) {
+    targetServerIds = uniqueStrings(modeServers.map((entry) => entry.id));
+    if (targetServerIds.length === 0) {
       return [];
     }
   }
@@ -1023,9 +1040,9 @@ const buildActiveVipPlayers = async (profile: LoadingScreenProfile): Promise<Loa
     ],
   };
 
-  if (modeFilterEnabled && modeServerIds.length > 0) {
+  if (targetServerIds.length > 0) {
     where.AND.push({
-      OR: [{ vipServerIds: { isEmpty: true } }, { vipServerIds: { hasSome: modeServerIds } }],
+      OR: [{ vipServerIds: { isEmpty: true } }, { vipServerIds: { hasSome: targetServerIds } }],
     });
   }
 
@@ -1253,6 +1270,15 @@ router.post('/', authMiddleware, requireRole(UserRole.SUPERADMIN), async (req, r
     },
     fallback,
   );
+  if (nextProfile.serverId) {
+    const targetServer = await prisma.gameServer.findUnique({
+      where: { id: nextProfile.serverId },
+      select: { id: true },
+    });
+    if (!targetServer) {
+      return res.status(400).json({ error: 'Invalid serverId' });
+    }
+  }
 
   const nextStore: LoadingScreensStore = {
     profiles: dedupeProfiles([...store.profiles, nextProfile]),
@@ -1300,6 +1326,15 @@ router.put('/:slug', authMiddleware, requireRole(UserRole.SUPERADMIN), async (re
     },
     fallback,
   );
+  if (nextProfile.serverId) {
+    const targetServer = await prisma.gameServer.findUnique({
+      where: { id: nextProfile.serverId },
+      select: { id: true },
+    });
+    if (!targetServer) {
+      return res.status(400).json({ error: 'Invalid serverId' });
+    }
+  }
 
   const nextProfiles = [...store.profiles];
   if (currentIndex >= 0) {
