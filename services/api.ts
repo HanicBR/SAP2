@@ -2458,6 +2458,7 @@ export const ApiService = {
   createTransaction: async (
     data: Omit<Transaction, 'id' | 'createdBy' | 'createdAt' | 'createdByName'> & {
       createdBy?: string;
+      enqueue?: boolean;
     },
   ): Promise<Transaction> => {
     if (hasApi) {
@@ -2473,10 +2474,11 @@ export const ApiService = {
     }
 
     await delay(600);
+    const { enqueue: _enqueue, ...persistedData } = data;
     const newTx: Transaction = {
-      ...data,
+      ...persistedData,
       id: `tx_${Date.now()}`,
-      createdBy: data.createdBy || getStoredUsername() || 'system',
+      createdBy: persistedData.createdBy || getStoredUsername() || 'system',
       createdByName: getStoredUsername() || undefined,
       createdAt: new Date().toISOString(),
     };
@@ -2485,8 +2487,17 @@ export const ApiService = {
     // SIDE EFFECT: If it's a VIP sale, update the player in our mock DB
     if (newTx.type === TransactionType.INCOME && newTx.relatedSteamId && newTx.vipPlan) {
        const playerIndex = playersDb.findIndex(p => p.steamId === newTx.relatedSteamId);
-       
-       const expiryDate = new Date();
+
+       const nowMs = Date.now();
+       let expiryBaseMs = nowMs;
+       if (playerIndex !== -1 && playersDb[playerIndex].vipExpiry) {
+         const currentExpiryMs = new Date(playersDb[playerIndex].vipExpiry as string).getTime();
+         if (Number.isFinite(currentExpiryMs) && currentExpiryMs > nowMs) {
+           expiryBaseMs = currentExpiryMs;
+         }
+       }
+
+       const expiryDate = new Date(expiryBaseMs);
        expiryDate.setDate(expiryDate.getDate() + (newTx.vipDurationDays || 30));
 
        if (playerIndex !== -1) {

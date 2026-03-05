@@ -113,6 +113,7 @@ const Financial: React.FC = () => {
   const [steamId, setSteamId] = useState('');
   const [vipPlan, setVipPlan] = useState('');
   const [vipDuration, setVipDuration] = useState('');
+  const [applyVipOnServer, setApplyVipOnServer] = useState(true);
 
   const currentUser = useMemo(() => {
     try {
@@ -135,19 +136,19 @@ const Financial: React.FC = () => {
     return unique.length > 0 ? unique : ['VIP'];
   }, [config.vip.plans, config.vip.ultimatePlan.enabled, config.vip.ultimatePlan.name]);
 
-  const vipDurationOptions = useMemo(() => {
+  const vipDurationSuggestions = useMemo(() => {
     const options = (config.vip.billingOptions || []).map((cycle) => {
       const months = Math.max(1, Math.floor(Number(cycle.months) || 1));
       const days = months * 30;
       return {
         value: String(days),
-        label: `${days} days (${cycle.label || `${months} months`})`,
+        label: `${days} dias (${cycle.label || `${months} meses`})`,
       };
     });
     const uniqueByDays = options.filter(
       (option, index, array) => array.findIndex((item) => item.value === option.value) === index,
     );
-    return uniqueByDays.length > 0 ? uniqueByDays : [{ value: '30', label: '30 days (Monthly)' }];
+    return uniqueByDays.length > 0 ? uniqueByDays : [{ value: '30', label: '30 dias (Mensal)' }];
   }, [config.vip.billingOptions]);
 
   const resetForm = useCallback(() => {
@@ -156,13 +157,14 @@ const Financial: React.FC = () => {
     setProofUrl('');
     setSteamId('');
     setVipPlan(vipPlanOptions[0] || 'VIP');
-    setVipDuration(vipDurationOptions[0]?.value || '30');
+    setVipDuration(vipDurationSuggestions[0]?.value || '30');
+    setApplyVipOnServer(true);
     setTxType(isSuperAdmin ? TransactionType.EXPENSE : TransactionType.INCOME);
     setCategory(TransactionCategory.OTHER);
     setIsUploadingProof(false);
     setEditingTx(null);
     setFormError(null);
-  }, [isSuperAdmin, vipDurationOptions, vipPlanOptions]);
+  }, [isSuperAdmin, vipDurationSuggestions, vipPlanOptions]);
 
   const loadTransactions = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
@@ -207,12 +209,6 @@ const Financial: React.FC = () => {
       setVipPlan(vipPlanOptions[0] || 'VIP');
     }
   }, [vipPlan, vipPlanOptions]);
-
-  useEffect(() => {
-    if (!vipDurationOptions.some((option) => option.value === vipDuration)) {
-      setVipDuration(vipDurationOptions[0]?.value || '30');
-    }
-  }, [vipDuration, vipDurationOptions]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -355,7 +351,8 @@ const Financial: React.FC = () => {
     setProofUrl(tx.proofUrl || '');
     setSteamId(tx.relatedSteamId || '');
     setVipPlan(tx.vipPlan || vipPlanOptions[0] || 'VIP');
-    setVipDuration((tx.vipDurationDays || Number(vipDurationOptions[0]?.value || 30)).toString());
+    setVipDuration((tx.vipDurationDays || Number(vipDurationSuggestions[0]?.value || 30)).toString());
+    setApplyVipOnServer(true);
     setIsModalOpen(true);
   };
 
@@ -393,6 +390,8 @@ const Financial: React.FC = () => {
     }
   };
 
+  const sanitizeDaysInput = (value: string) => value.replace(/[^0-9]/g, '');
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsSubmitting(true);
@@ -403,7 +402,7 @@ const Financial: React.FC = () => {
       const normalizedProofUrl = proofUrl.trim();
       const normalizedSteamId = steamId.trim();
       const parsedAmount = Number(amount);
-      const parsedVipDuration = Math.max(1, Number(vipDuration));
+      const parsedVipDuration = Number.parseInt(vipDuration, 10);
 
       if (!normalizedDescription) {
         setFormError('Descricao obrigatoria.');
@@ -419,6 +418,13 @@ const Financial: React.FC = () => {
       }
       if (txType === TransactionType.INCOME && !normalizedSteamId) {
         setFormError('SteamID e obrigatorio para venda VIP.');
+        return;
+      }
+      if (
+        txType === TransactionType.INCOME &&
+        (!Number.isFinite(parsedVipDuration) || parsedVipDuration <= 0)
+      ) {
+        setFormError('Informe um numero de dias valido para o VIP.');
         return;
       }
       if (normalizedProofUrl && !isAllowedProofUrl(normalizedProofUrl)) {
@@ -442,13 +448,22 @@ const Financial: React.FC = () => {
       if (editingTx) {
         await ApiService.updateTransaction(editingTx.id, payload);
       } else {
-        await ApiService.createTransaction(payload);
+        await ApiService.createTransaction({
+          ...payload,
+          enqueue: txType === TransactionType.INCOME ? applyVipOnServer : undefined,
+        });
       }
 
       const actionLabel = editingTx ? 'atualizada' : 'criada';
       setIsModalOpen(false);
       resetForm();
-      setFeedback({ tone: 'success', text: `Transacao ${actionLabel}.` });
+      setFeedback({
+        tone: 'success',
+        text:
+          !editingTx && txType === TransactionType.INCOME && !applyVipOnServer
+            ? 'Transacao criada. VIP registrado no painel sem envio automatico ao servidor.'
+            : `Transacao ${actionLabel}.`,
+      });
       await loadTransactions(true);
     } catch (error: any) {
       setFormError(error?.message || 'Falha ao salvar transacao.');
@@ -872,6 +887,13 @@ const Financial: React.FC = () => {
 
                     {txType === TransactionType.INCOME ? (
                       <div className="bg-emerald-900/10 p-4 rounded border border-emerald-900/20 space-y-3">
+                        <datalist id="financial-vip-duration-suggestions">
+                          {vipDurationSuggestions.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </datalist>
                         <p className="text-xs font-bold text-emerald-400 uppercase flex items-center gap-1">
                           <Icons.Crown className="w-3 h-3" />
                           Dados VIP
@@ -904,19 +926,43 @@ const Financial: React.FC = () => {
                           </div>
                           <div>
                             <label className="block text-xs font-bold text-zinc-500 uppercase mb-1">Duracao</label>
-                            <select
+                            <input
+                              required
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              list="financial-vip-duration-suggestions"
                               className="w-full bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm focus:border-emerald-500 focus:outline-none"
                               value={vipDuration}
-                              onChange={(event) => setVipDuration(event.target.value)}
-                            >
-                              {vipDurationOptions.map((option) => (
-                                <option key={option.value} value={option.value}>
-                                  {option.label}
-                                </option>
-                              ))}
-                            </select>
+                              onChange={(event) => setVipDuration(sanitizeDaysInput(event.target.value))}
+                              placeholder="Dias (ex: 47)"
+                            />
                           </div>
                         </div>
+                        <p className="text-[11px] text-zinc-500">
+                          Dias do VIP (manual). Aceita qualquer valor inteiro positivo.
+                        </p>
+                        {!editingTx ? (
+                          <label className="flex items-center justify-between rounded border border-zinc-700 bg-zinc-950/70 px-3 py-2">
+                            <div>
+                              <p className="text-xs font-bold uppercase tracking-wide text-zinc-200">
+                                Aplicar VIP automaticamente no servidor
+                              </p>
+                              <p className="text-[11px] text-zinc-500">
+                                Desmarcado: registra no painel VIP, mas nao envia comando para o servidor.
+                              </p>
+                            </div>
+                            <span className="relative inline-flex items-center">
+                              <input
+                                type="checkbox"
+                                checked={applyVipOnServer}
+                                onChange={(e) => setApplyVipOnServer(e.target.checked)}
+                                className="peer sr-only"
+                              />
+                              <span className="h-6 w-11 rounded-full bg-zinc-700 transition peer-checked:bg-emerald-600" />
+                              <span className="pointer-events-none absolute left-1 top-1 h-4 w-4 rounded-full bg-white transition peer-checked:translate-x-5" />
+                            </span>
+                          </label>
+                        ) : null}
                       </div>
                     ) : null}
 

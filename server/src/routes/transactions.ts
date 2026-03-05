@@ -67,6 +67,24 @@ const serializeTransaction = (t: any) => {
   };
 };
 
+const parseBoolean = (value: unknown, fallback: boolean): boolean => {
+  if (typeof value === 'boolean') return value;
+  const normalized = String(value ?? '')
+    .trim()
+    .toLowerCase();
+  if (!normalized) return fallback;
+  if (['1', 'true', 'yes', 'on'].includes(normalized)) return true;
+  if (['0', 'false', 'no', 'off'].includes(normalized)) return false;
+  return fallback;
+};
+
+const parsePositiveInt = (value: unknown): number | null => {
+  if (value === undefined || value === null || value === '') return null;
+  const parsed = Number.parseInt(String(value), 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) return null;
+  return parsed;
+};
+
 router.use(authMiddleware);
 router.use(requireRole(UserRole.SUPERADMIN));
 
@@ -127,6 +145,7 @@ router.post('/', async (req, res) => {
     relatedPlayerName,
     vipPlan,
     vipDurationDays,
+    enqueue,
   } = req.body as {
     date?: string;
     amount?: number;
@@ -137,7 +156,8 @@ router.post('/', async (req, res) => {
     relatedSteamId?: string;
     relatedPlayerName?: string;
     vipPlan?: string;
-    vipDurationDays?: number;
+    vipDurationDays?: number | string | null;
+    enqueue?: boolean | string | number;
   };
 
   if (
@@ -157,6 +177,24 @@ router.post('/', async (req, res) => {
   if (!Object.values(TransactionCategory).includes(category)) {
     return res.status(400).json({ error: 'Invalid category' });
   }
+
+  const normalizedSteamId = String(relatedSteamId || '').trim();
+  const normalizedPlayerName = String(relatedPlayerName || '').trim();
+  const normalizedVipPlan = String(vipPlan || '').trim();
+  const parsedVipDurationDays = parsePositiveInt(vipDurationDays);
+  const shouldEnqueueVipAutomation = parseBoolean(enqueue, true);
+  const isVipSale = type === TransactionType.INCOME && !!normalizedSteamId && !!normalizedVipPlan;
+
+  if (
+    vipDurationDays !== undefined &&
+    vipDurationDays !== null &&
+    vipDurationDays !== '' &&
+    parsedVipDurationDays === null
+  ) {
+    return res.status(400).json({ error: 'vipDurationDays must be a positive integer' });
+  }
+
+  const resolvedVipDurationDays = isVipSale ? parsedVipDurationDays || 30 : parsedVipDurationDays;
 
   // Only SUPERADMIN can create expenses
   if (type === 'EXPENSE' && req.user?.role !== UserRole.SUPERADMIN) {
@@ -181,10 +219,10 @@ router.post('/', async (req, res) => {
       category,
       description,
       proofUrl: proofUrl || null,
-      relatedSteamId: relatedSteamId || null,
-      relatedPlayerName: relatedPlayerName || null,
-      vipPlan: vipPlan || null,
-      vipDurationDays: vipDurationDays || null,
+      relatedSteamId: normalizedSteamId || null,
+      relatedPlayerName: normalizedPlayerName || null,
+      vipPlan: normalizedVipPlan || null,
+      vipDurationDays: resolvedVipDurationDays,
       createdBy,
     },
     include: {
@@ -208,59 +246,78 @@ router.post('/', async (req, res) => {
     | undefined;
 
   // Se for venda de VIP, marca player como VIP
-  if (type === 'INCOME' && relatedSteamId && vipPlan) {
-    const expiry = new Date();
-    expiry.setDate(expiry.getDate() + (vipDurationDays || 30));
+  if (isVipSale) {
+    const existingPlayer = await prisma.playerProfile.findUnique({
+      where: { steamId: normalizedSteamId },
+      select: { vipExpiry: true },
+    });
+    const now = new Date();
+    const expiryBase =
+      existingPlayer?.vipExpiry && existingPlayer.vipExpiry.getTime() > now.getTime()
+        ? existingPlayer.vipExpiry
+        : now;
+    const expiry = new Date(
+      expiryBase.getTime() + Number(resolvedVipDurationDays || 30) * 24 * 60 * 60 * 1000,
+    );
+
     await prisma.playerProfile.upsert({
-      where: { steamId: relatedSteamId },
+      where: { steamId: normalizedSteamId },
       create: {
-        steamId: relatedSteamId,
-        name: relatedPlayerName || relatedSteamId,
+        steamId: normalizedSteamId,
+        name: normalizedPlayerName || normalizedSteamId,
         avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(
-          relatedSteamId,
+          normalizedSteamId,
         )}`,
         firstSeen: new Date(),
         lastSeen: new Date(),
         totalConnections: 0,
         playTimeHours: 0,
         isVip: true,
-        vipPlan,
+        vipPlan: normalizedVipPlan,
         vipExpiry: expiry,
       },
       update: {
-        ...(relatedPlayerName ? { name: relatedPlayerName } : {}),
+        ...(normalizedPlayerName ? { name: normalizedPlayerName } : {}),
         isVip: true,
-        vipPlan,
+        vipPlan: normalizedVipPlan,
         vipExpiry: expiry,
       },
     });
 
-    try {
-      const dispatch = await dispatchVipAutomationAction({
-        action: 'GRANT',
-        steamId: relatedSteamId,
-        vipPlan,
-        vipExpiry: expiry,
-        metadata: {
-          trigger: 'transaction_create',
-          transactionId: tx.id,
-          category,
-        },
-      });
+    if (shouldEnqueueVipAutomation) {
+      try {
+        const dispatch = await dispatchVipAutomationAction({
+          action: 'GRANT',
+          steamId: normalizedSteamId,
+          vipPlan: normalizedVipPlan,
+          vipExpiry: expiry,
+          metadata: {
+            trigger: 'transaction_create',
+            transactionId: tx.id,
+            category,
+          },
+        });
 
-      vipDispatch = {
-        queued: dispatch.queued,
-        ...(dispatch.skipped ? { skipped: true } : {}),
-        ...(dispatch.reason ? { reason: dispatch.reason } : {}),
-        ...(dispatch.serverId ? { serverId: dispatch.serverId } : {}),
-        ...(dispatch.actionId ? { actionId: dispatch.actionId } : {}),
-        ...(dispatch.vipActionId ? { vipActionId: dispatch.vipActionId } : {}),
-      };
-    } catch (err: any) {
-      console.error('VIP automation dispatch failed', err);
+        vipDispatch = {
+          queued: dispatch.queued,
+          ...(dispatch.skipped ? { skipped: true } : {}),
+          ...(dispatch.reason ? { reason: dispatch.reason } : {}),
+          ...(dispatch.serverId ? { serverId: dispatch.serverId } : {}),
+          ...(dispatch.actionId ? { actionId: dispatch.actionId } : {}),
+          ...(dispatch.vipActionId ? { vipActionId: dispatch.vipActionId } : {}),
+        };
+      } catch (err: any) {
+        console.error('VIP automation dispatch failed', err);
+        vipDispatch = {
+          queued: false,
+          reason: 'dispatch_error',
+        };
+      }
+    } else {
       vipDispatch = {
         queued: false,
-        reason: 'dispatch_error',
+        skipped: true,
+        reason: 'manual_enqueue_disabled',
       };
     }
   }
@@ -281,17 +338,17 @@ router.post('/', async (req, res) => {
           `Valor: R$ ${Number(tx.amount).toFixed(2)}`,
           `Descricao: ${tx.description}`,
           `Data: ${tx.date.toISOString()}`,
-          relatedSteamId ? `SteamID relacionado: ${relatedSteamId}` : 'SteamID relacionado: -',
-          relatedPlayerName ? `Jogador relacionado: ${relatedPlayerName}` : 'Jogador relacionado: -',
+          normalizedSteamId ? `SteamID relacionado: ${normalizedSteamId}` : 'SteamID relacionado: -',
+          normalizedPlayerName ? `Jogador relacionado: ${normalizedPlayerName}` : 'Jogador relacionado: -',
         ].join('\n'),
       }),
     );
   }
 
-  if (type === 'INCOME' && relatedSteamId && vipPlan) {
+  if (isVipSale) {
     const linkedUser = await prisma.user.findFirst({
       where: {
-        steamId64: relatedSteamId,
+        steamId64: normalizedSteamId,
       },
       select: {
         email: true,
@@ -302,8 +359,8 @@ router.post('/', async (req, res) => {
     if (linkedUser?.email) {
       const receipt = buildVipPurchaseReceiptTemplate({
         username: linkedUser.username,
-        plan: String(vipPlan),
-        ...(vipDurationDays ? { durationDays: Number(vipDurationDays) } : {}),
+        plan: normalizedVipPlan,
+        ...(resolvedVipDurationDays ? { durationDays: Number(resolvedVipDurationDays) } : {}),
         amount: Number(tx.amount),
         transactionDateIso: tx.date.toISOString(),
       });
