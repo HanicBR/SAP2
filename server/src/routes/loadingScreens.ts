@@ -2,6 +2,7 @@ import { Router } from 'express';
 import path from 'path';
 import crypto from 'crypto';
 import fs from 'fs';
+import { spawn } from 'child_process';
 import multer from 'multer';
 import { prisma } from '../db/client';
 import { UserRole } from '../domain';
@@ -150,6 +151,9 @@ const allowedLoadingMediaMimeTypes = new Set([
   'audio/aac',
   'audio/flac',
 ]);
+const processableAudioMimeTypes = new Set(['audio/mpeg', 'audio/mp3', 'audio/ogg', 'audio/wav', 'audio/x-wav']);
+const processableAudioExtensions = new Set(['.mp3', '.ogg', '.wav']);
+const ffmpegBinary = String(process.env.FFMPEG_PATH || 'ffmpeg').trim() || 'ffmpeg';
 
 fs.mkdirSync(loadingMediaUploadDir, { recursive: true });
 
@@ -209,6 +213,84 @@ const parseBoolLoose = (value: unknown, fallback: boolean): boolean => {
     .toLowerCase();
   if (!normalized) return fallback;
   return ['1', 'true', 'yes', 'on'].includes(normalized);
+};
+
+type AudioUploadVolumeMode = 'KEEP' | 'REDUCE';
+
+const parseAudioUploadVolumeMode = (value: unknown): AudioUploadVolumeMode => {
+  const normalized = String(value ?? '')
+    .trim()
+    .toLowerCase();
+  if (normalized === 'reduce' || normalized === 'lower' || normalized === 'down') return 'REDUCE';
+  return 'KEEP';
+};
+
+const parseAudioUploadTargetPct = (value: unknown): number =>
+  clampInt(value, 70, 5, 100);
+
+const resolveUploadExtension = (file: Express.Multer.File): string =>
+  String(path.extname(String(file.originalname || file.filename || '')).toLowerCase() || '');
+
+const isProcessableAudioUpload = (file: Express.Multer.File): boolean => {
+  const mime = String(file.mimetype || '').toLowerCase();
+  const extension = resolveUploadExtension(file);
+  return processableAudioMimeTypes.has(mime) || processableAudioExtensions.has(extension);
+};
+
+const buildAudioCodecArgs = (extension: string): string[] => {
+  if (extension === '.mp3') return ['-codec:a', 'libmp3lame', '-q:a', '2'];
+  if (extension === '.wav') return ['-codec:a', 'pcm_s16le'];
+  return ['-codec:a', 'libvorbis', '-q:a', '5'];
+};
+
+const transcodeUploadedAudioVolume = async (
+  file: Express.Multer.File,
+  targetPct: number,
+): Promise<void> => {
+  const extension = processableAudioExtensions.has(resolveUploadExtension(file))
+    ? resolveUploadExtension(file)
+    : '.ogg';
+  const tempOutputPath = `${file.path}.volume-tmp${extension}`;
+  const gainFactor = Math.max(0.05, Math.min(1, targetPct / 100));
+  const codecArgs = buildAudioCodecArgs(extension);
+  const ffmpegArgs = [
+    '-y',
+    '-hide_banner',
+    '-loglevel',
+    'error',
+    '-i',
+    file.path,
+    '-vn',
+    '-filter:a',
+    `volume=${gainFactor.toFixed(4)}`,
+    ...codecArgs,
+    tempOutputPath,
+  ];
+
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const child = spawn(ffmpegBinary, ffmpegArgs, { windowsHide: true });
+      let stderr = '';
+      child.stderr.on('data', (chunk) => {
+        stderr += String(chunk || '');
+      });
+      child.on('error', (err) => {
+        reject(err);
+      });
+      child.on('close', (code) => {
+        if (code === 0) {
+          resolve();
+          return;
+        }
+        reject(new Error(stderr.trim() || `ffmpeg exited with code ${code ?? 'unknown'}`));
+      });
+    });
+
+    await fs.promises.rename(tempOutputPath, file.path);
+  } catch (err) {
+    await fs.promises.unlink(tempOutputPath).catch(() => undefined);
+    throw err;
+  }
 };
 
 const sanitizeBackgroundImageItems = (
@@ -682,7 +764,7 @@ const buildDefaultProfiles = (): LoadingScreenProfile[] => {
           enabled: true,
         },
       ],
-      musicVolumePct: 25,
+      musicVolumePct: 100,
       hero: {
         badge: 'TTT',
         title: 'Trouble in Terrorist Town',
@@ -750,7 +832,7 @@ const buildDefaultProfiles = (): LoadingScreenProfile[] => {
           enabled: true,
         },
       ],
-      musicVolumePct: 25,
+      musicVolumePct: 100,
       hero: {
         badge: 'SANDBOX',
         title: 'Backstabber Sandbox',
@@ -841,12 +923,7 @@ const normalizeProfile = (input: unknown, fallback?: LoadingScreenProfile): Load
   const activeMusicTracks = musicTrackItems
     .filter((entry) => entry.enabled)
     .map((entry) => entry.url);
-  const musicVolumePct = clampInt(
-    record.musicVolumePct,
-    base.musicVolumePct || 25,
-    MIN_MUSIC_VOLUME_PCT,
-    MAX_MUSIC_VOLUME_PCT,
-  );
+  const musicVolumePct = 100;
 
   const heroRecord = isRecord(record.hero) ? record.hero : {};
   const noticeRecord = isRecord(record.notice) ? record.notice : {};
@@ -970,7 +1047,13 @@ const loadingMediaStorage = multer.diskStorage({
     const safeOriginal = path.basename(file.originalname || '').toLowerCase();
     const originalExt = path.extname(safeOriginal).replace(/[^a-z0-9.]/g, '');
     const normalizedMime = String(file.mimetype || '').toLowerCase();
-    const fallbackExt = normalizedMime.startsWith('audio/')
+    const fallbackExt = normalizedMime === 'audio/mpeg' || normalizedMime === 'audio/mp3'
+      ? '.mp3'
+      : normalizedMime === 'audio/ogg'
+      ? '.ogg'
+      : normalizedMime === 'audio/wav' || normalizedMime === 'audio/x-wav'
+      ? '.wav'
+      : normalizedMime.startsWith('audio/')
       ? '.ogg'
       : normalizedMime === 'image/png'
       ? '.png'
@@ -1144,7 +1227,7 @@ const invalidatePublicLoadingProfileCache = (slug?: string) => {
 };
 
 router.post('/media-upload', authMiddleware, requireRole(UserRole.SUPERADMIN), (req, res) => {
-  uploadLoadingMedia.single('file')(req as any, res as any, (err: any) => {
+  uploadLoadingMedia.single('file')(req as any, res as any, async (err: any) => {
     if (err) {
       if (err?.code === 'LIMIT_FILE_SIZE') {
         return res
@@ -1164,11 +1247,42 @@ router.post('/media-upload', authMiddleware, requireRole(UserRole.SUPERADMIN), (
       return res.status(400).json({ error: 'Missing file' });
     }
 
+    const body = isRecord((req as any).body) ? ((req as any).body as Record<string, unknown>) : {};
+    const volumeMode = parseAudioUploadVolumeMode(body.audioVolumeMode);
+    const targetPct = parseAudioUploadTargetPct(body.audioVolumePct);
+    const isAudioUpload = String(file.mimetype || '')
+      .toLowerCase()
+      .startsWith('audio/');
+
+    if (volumeMode === 'REDUCE' && isAudioUpload && !isProcessableAudioUpload(file)) {
+      return res
+        .status(400)
+        .json({ error: 'Audio volume processing supports only mp3, ogg or wav uploads' });
+    }
+
+    if (volumeMode === 'REDUCE' && isAudioUpload && isProcessableAudioUpload(file)) {
+      try {
+        await transcodeUploadedAudioVolume(file, targetPct);
+      } catch (processingError: any) {
+        console.error('loading music volume processing failed', processingError);
+        return res.status(500).json({ error: 'Failed to process uploaded audio volume' });
+      }
+    }
+
+    let finalSize = file.size;
+    try {
+      const stat = await fs.promises.stat(file.path);
+      finalSize = Number(stat.size || finalSize);
+    } catch {
+      // keep original size
+    }
+
     return res.status(201).json({
       url: `/api/uploads/loading-media/${encodeURIComponent(file.filename)}`,
       filename: file.filename,
-      size: file.size,
+      size: finalSize,
       mime: file.mimetype,
+      ...(volumeMode === 'REDUCE' && isAudioUpload ? { audioVolumeReducedToPct: targetPct } : {}),
     });
   });
 });

@@ -10,7 +10,7 @@
       backgroundImages: ['https://i.imgur.com/HnZfcKR.jpeg'],
       backgroundRotationSec: 12,
       musicTracks: ['https://raw.githubusercontent.com/HanicBR/backtttloading/main/assets/music/gtavicecity.ogg'],
-      musicVolumePct: 25,
+      musicVolumePct: 100,
       hero: {
         badge: 'TTT',
         title: 'Trouble in Terrorist Town',
@@ -56,7 +56,7 @@
       backgroundImages: ['https://i.imgur.com/HnZfcKR.jpeg'],
       backgroundRotationSec: 12,
       musicTracks: ['https://raw.githubusercontent.com/HanicBR/backtttloading/main/assets/music/gtavicecity.ogg'],
-      musicVolumePct: 25,
+      musicVolumePct: 100,
       hero: {
         badge: 'SANDBOX',
         title: 'Backstabber Sandbox',
@@ -506,9 +506,7 @@
         clampNumber(source.backgroundRotationSec, Number(base.backgroundRotationSec || 12), 3, 120),
       ),
       musicTracks: safeMusicUrls(source.musicTrackItems, source.musicTracks || base.musicTracks),
-      musicVolumePct: Math.round(
-        clampNumber(source.musicVolumePct, Number(base.musicVolumePct || 25), 0, 300),
-      ),
+      musicVolumePct: 100,
       hero: {
         badge: String(hero.badge || base.hero.badge || 'BACKSTABBER').trim(),
         title: String(hero.title || base.hero.title || 'Loading Screen').trim(),
@@ -654,7 +652,7 @@
     renderVips(profile.vipTitle, profile.vipPlayers);
 
     startBackgroundRotation(profile.backgroundImages || [], profile.backgroundRotationSec || 12);
-    initMusic(profile.musicTracks || [], profile.musicVolumePct || 25);
+    initMusic(profile.musicTracks || [], 100);
 
     if (dom.serverName) dom.serverName.textContent = profile.name || 'Backstabber Brasil';
     if (dom.serverSub) dom.serverSub.textContent = 'Conectando ao servidor...';
@@ -692,7 +690,7 @@
   }
 
   function applyMusicVolume(volumePct) {
-    var safePct = clampNumber(volumePct, 25, 0, 300);
+    var safePct = clampNumber(volumePct, 100, 0, 300);
     var gainValue = safePct / 100;
     if (!state.audio) return;
 
@@ -744,7 +742,7 @@
     if (!state.audio) {
       state.audio = new Audio();
       state.audio.preload = 'auto';
-      state.audio.volume = 0.25;
+      state.audio.volume = 1;
       state.audio.addEventListener('ended', function () {
         if (!state.tracks.length) return;
         state.trackIndex = pickRandomTrackIndex(state.tracks.length, state.trackIndex);

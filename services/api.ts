@@ -966,10 +966,23 @@ export const ApiService = {
     return config;
   },
 
-  uploadLoadingMedia: async (file: File): Promise<LoadingMediaUploadResult> => {
+  uploadLoadingMedia: async (
+    file: File,
+    options?: {
+      audioVolumeMode?: 'keep' | 'reduce';
+      audioVolumePct?: number;
+    },
+  ): Promise<LoadingMediaUploadResult> => {
     if (hasApi && API_BASE_URL) {
       const formData = new FormData();
       formData.append('file', file);
+      const mode = String(options?.audioVolumeMode || '').trim().toLowerCase();
+      if (mode === 'reduce' || mode === 'keep') {
+        formData.append('audioVolumeMode', mode);
+      }
+      if (mode === 'reduce' && Number.isFinite(Number(options?.audioVolumePct))) {
+        formData.append('audioVolumePct', String(Math.round(Number(options?.audioVolumePct))));
+      }
 
       const headers: HeadersInit = {};
       const token = getAuthToken();

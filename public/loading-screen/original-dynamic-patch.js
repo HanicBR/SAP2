@@ -440,7 +440,7 @@
     });
 
     var trackIndex = tracks.length > 1 ? pickRandomIndex(tracks.length, -1) : 0;
-    var safeVolumePct = clampNumber(volumePct, 25, 0, 300);
+    var safeVolumePct = clampNumber(volumePct, 100, 0, 300);
     var gainValue = safeVolumePct / 100;
     var audioContext = null;
     var gainNode = null;
@@ -510,7 +510,7 @@
       backgroundImages: extractEnabledBackgroundUrls(source.backgroundImageItems, fallbackBackgrounds),
       backgroundRotationSec: Math.round(clampNumber(source.backgroundRotationSec, 12, 3, 120)),
       musicTracks: extractEnabledMusicUrls(source.musicTrackItems, source.musicTracks),
-      musicVolumePct: Math.round(clampNumber(source.musicVolumePct, 25, 0, 300)),
+      musicVolumePct: 100,
       hero: source.hero && typeof source.hero === 'object' ? source.hero : {},
       notice: source.notice && typeof source.notice === 'object' ? source.notice : {},
       rules: safeArray(source.rules),
@@ -536,7 +536,7 @@
     applyRules(profile.rules);
     applyVip(profile.vipTitle, profile.vipPlayers);
     applyBackground(profile.backgroundImages, profile.backgroundRotationSec);
-    applyMusic(profile.musicTracks, profile.musicVolumePct);
+    applyMusic(profile.musicTracks, 100);
   }
 
   function initLoadingTelemetry(telemetryMeta) {

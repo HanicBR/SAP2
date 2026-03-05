@@ -152,7 +152,7 @@ const makeDraft = (base?: LoadingScreenProfile): LoadingScreenProfile => {
     backgroundRotationSec: Math.round(clampNumber(Number(base?.backgroundRotationSec ?? 12), 12, 3, 120)),
     musicTracks,
     musicTrackItems,
-    musicVolumePct: Math.round(clampNumber(Number(base?.musicVolumePct ?? 25), 25, 0, 300)),
+    musicVolumePct: 100,
     hero: {
       badge: base?.hero.badge || 'BACKSTABBER',
       title: base?.hero.title || 'Loading Screen',
@@ -234,6 +234,8 @@ const LoadingScreens: React.FC = () => {
   const [backgroundLinkInput, setBackgroundLinkInput] = useState('');
   const [compressImagesOnUpload, setCompressImagesOnUpload] = useState(true);
   const [musicLinkInput, setMusicLinkInput] = useState('');
+  const [musicUploadVolumeMode, setMusicUploadVolumeMode] = useState<'keep' | 'reduce'>('keep');
+  const [musicUploadTargetPct, setMusicUploadTargetPct] = useState(70);
   const [heroDescInput, setHeroDescInput] = useState('');
   const [noticeLinesInput, setNoticeLinesInput] = useState('');
   const [rulesInput, setRulesInput] = useState('');
@@ -552,7 +554,7 @@ const LoadingScreens: React.FC = () => {
       ),
       musicTrackItems: nextMusicTrackItems,
       musicTracks: activeMusicUrls(nextMusicTrackItems),
-      musicVolumePct: Math.round(clampNumber(Number(draft.musicVolumePct ?? 25), 25, 0, 300)),
+      musicVolumePct: 100,
       hero: {
         ...draft.hero,
         descriptionLines: parseLineInput(heroDescInput),
@@ -860,15 +862,22 @@ const LoadingScreens: React.FC = () => {
     setMediaUploading('music');
     setNotice(null);
     try {
+      const reduceOnUpload = musicUploadVolumeMode === 'reduce';
+      const targetPct = Math.round(clampNumber(Number(musicUploadTargetPct), 70, 5, 100));
       const uploadedUrls: string[] = [];
       for (const file of Array.from(files)) {
-        const result = await ApiService.uploadLoadingMedia(file);
+        const result = await ApiService.uploadLoadingMedia(file, {
+          audioVolumeMode: reduceOnUpload ? 'reduce' : 'keep',
+          ...(reduceOnUpload ? { audioVolumePct: targetPct } : {}),
+        });
         uploadedUrls.push(result.url);
       }
       uploadedUrls.forEach((url) => addMusicTrackUrl(url));
       setNotice({
         tone: 'success',
-        message: `${uploadedUrls.length} faixa(s) enviada(s) com sucesso.`,
+        message: `${uploadedUrls.length} faixa(s) enviada(s) com sucesso${
+          reduceOnUpload ? ` (volume reduzido para ${targetPct}%)` : ''
+        }.`,
       });
     } catch (error: any) {
       setNotice({
@@ -1430,7 +1439,7 @@ const LoadingScreens: React.FC = () => {
                   <label className="flex cursor-pointer items-center justify-center rounded border border-cyan-800/60 bg-cyan-900/20 px-3 py-2 text-xs font-bold uppercase tracking-wide text-cyan-200 hover:bg-cyan-900/30">
                     <input
                       type="file"
-                      accept="audio/*"
+                      accept=".mp3,.ogg,.wav,audio/mpeg,audio/mp3,audio/ogg,audio/wav,audio/x-wav"
                       multiple
                       className="hidden"
                       onChange={(event) => {
@@ -1441,6 +1450,55 @@ const LoadingScreens: React.FC = () => {
                     />
                     {mediaUploading === 'music' ? 'Enviando...' : 'Fazer upload de audio'}
                   </label>
+                </div>
+                <div className="mb-2 rounded border border-zinc-800 bg-zinc-950/80 p-3">
+                  <p className="text-[11px] font-bold uppercase tracking-wide text-zinc-400">
+                    Processamento no upload (mp3/ogg/wav)
+                  </p>
+                  <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                    <button
+                      type="button"
+                      onClick={() => setMusicUploadVolumeMode('keep')}
+                      className={`rounded border px-3 py-2 text-xs font-bold uppercase ${
+                        musicUploadVolumeMode === 'keep'
+                          ? 'border-emerald-700 bg-emerald-900/25 text-emerald-200'
+                          : 'border-zinc-700 bg-zinc-900 text-zinc-300'
+                      }`}
+                    >
+                      Manter intacto
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMusicUploadVolumeMode('reduce')}
+                      className={`rounded border px-3 py-2 text-xs font-bold uppercase ${
+                        musicUploadVolumeMode === 'reduce'
+                          ? 'border-amber-700 bg-amber-900/25 text-amber-200'
+                          : 'border-zinc-700 bg-zinc-900 text-zinc-300'
+                      }`}
+                    >
+                      Reduzir volume
+                    </button>
+                  </div>
+                  {musicUploadVolumeMode === 'reduce' ? (
+                    <div className="mt-2 grid gap-2 sm:grid-cols-[1fr_auto] sm:items-end">
+                      <div>
+                        <label className={LABEL_CLASS}>Volume final do arquivo (%)</label>
+                        <input
+                          type="number"
+                          min={5}
+                          max={100}
+                          value={Number(musicUploadTargetPct)}
+                          onChange={(event) =>
+                            setMusicUploadTargetPct(
+                              Math.round(clampNumber(Number(event.target.value), 70, 5, 100)),
+                            )
+                          }
+                          className={INPUT_CLASS}
+                        />
+                      </div>
+                      <div className="text-[11px] text-zinc-500">100 = sem reducao</div>
+                    </div>
+                  ) : null}
                 </div>
                 <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
                   <input
@@ -1460,26 +1518,6 @@ const LoadingScreens: React.FC = () => {
                   >
                     Adicionar
                   </button>
-                </div>
-                <div className="mt-2">
-                  <label className={LABEL_CLASS}>Volume da playlist (%)</label>
-                  <input
-                    type="number"
-                    min={0}
-                    max={300}
-                    value={Number(draft.musicVolumePct ?? 25)}
-                    onChange={(event) =>
-                      updateDraft({
-                        musicVolumePct: Math.round(
-                          clampNumber(Number(event.target.value), 25, 0, 300),
-                        ),
-                      })
-                    }
-                    className={INPUT_CLASS}
-                  />
-                  <p className="mt-1 text-[11px] text-zinc-500">
-                    100 = volume normal. Pode aumentar acima de 100 em navegadores compatíveis com ganho.
-                  </p>
                 </div>
                 <p className="mt-2 text-[11px] text-zinc-500">
                   Toca uma faixa aleatoria ao carregar e escolhe outra aleatoria quando acabar.
