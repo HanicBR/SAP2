@@ -156,14 +156,12 @@
     setText('.card-ttt .ttt-subtitle', hero.subtitle || 'Conectando...');
 
     var lines = safeArray(hero.descriptionLines);
-    if (lines.length > 0) {
-      var html = lines
-        .map(function (line) {
-          return '<div class="role-line">' + escapeHtml(line) + '</div>';
-        })
-        .join('');
-      setHtml('.card-ttt .ttt-text', html);
-    }
+    var html = lines
+      .map(function (line) {
+        return '<div class="role-line">' + escapeHtml(line) + '</div>';
+      })
+      .join('');
+    setHtml('.card-ttt .ttt-text', html);
   }
 
   function applyNotice(notice) {
@@ -176,16 +174,14 @@
 
     if (document.querySelector('.maps-fix-card')) {
       setText('.maps-fix-title', notice.title || 'Aviso');
-      if (lines.length > 0) {
-        setHtml(
-          '.maps-fix-text',
-          lines
-            .map(function (line) {
-              return '<div>' + escapeHtml(line) + '</div>';
-            })
-            .join('')
-        );
-      }
+      setHtml(
+        '.maps-fix-text',
+        lines
+          .map(function (line) {
+            return '<div>' + escapeHtml(line) + '</div>';
+          })
+          .join('')
+      );
 
       var link = document.querySelector('.maps-fix-linkbig');
       if (link) {
@@ -202,6 +198,7 @@
       if (hint) {
         if (lines.length > 1) {
           hint.textContent = lines[1];
+          hint.style.display = '';
         } else {
           hint.style.display = 'none';
         }
@@ -247,9 +244,9 @@
     if (!list) return;
 
     var items = safeArray(rules);
+    list.innerHTML = '';
     if (!items.length) return;
 
-    list.innerHTML = '';
     items.forEach(function (rule, index) {
       var row = document.createElement('div');
       row.className = 'rule-item';
@@ -920,6 +917,24 @@
   }
 
   async function boot() {
+    applyProfile(
+      normalizeProfile({
+        hero: {
+          badge: 'BACK',
+          title: 'Sincronizando dados',
+          subtitle: 'Aguarde...',
+          descriptionLines: [],
+        },
+        notice: {
+          title: 'Sincronizando',
+          lines: [],
+        },
+        rules: [],
+        vipTitle: 'Sincronizando VIPs',
+        vipPlayers: [],
+      })
+    );
+
     var telemetryMeta = await fetchAndApply();
     initLoadingTelemetry(telemetryMeta);
   }
