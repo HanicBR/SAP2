@@ -295,6 +295,16 @@ const Vips: React.FC = () => {
 
   const sanitizeDaysInput = (value: string) => value.replace(/[^0-9]/g, '');
   const operationEnqueue = applyVipOnServer;
+  const isFeedbackError = /erro|falhou|invalido|invalid/i.test(feedback);
+  const surfaceClass =
+    'rounded-2xl border border-zinc-800/80 bg-zinc-900/80 backdrop-blur-sm shadow-[0_10px_40px_-24px_rgba(0,0,0,0.9)]';
+  const inputClass =
+    'w-full bg-zinc-950/90 border border-zinc-700/80 rounded-lg px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-brand/60 focus:border-brand/60 transition';
+  const inputMonoClass = `${inputClass} font-mono`;
+  const subtleButtonClass =
+    'inline-flex items-center justify-center rounded-lg border border-zinc-700/80 bg-zinc-900/70 px-3 py-2 text-xs font-bold uppercase tracking-wide text-zinc-200 hover:bg-zinc-800/90 hover:border-zinc-500 transition disabled:opacity-60 disabled:cursor-not-allowed';
+  const primaryButtonClass =
+    'inline-flex items-center justify-center rounded-lg bg-brand hover:bg-brand-dark px-4 py-2 text-sm font-bold uppercase tracking-wide text-white transition disabled:opacity-60 disabled:cursor-not-allowed';
 
   const handleGrant = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -454,40 +464,50 @@ const Vips: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="bg-zinc-900 border border-zinc-800 rounded p-4 sm:p-5">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-white flex items-center">
-              <Icons.Crown className="w-6 h-6 mr-3 text-brand" />
-              VIPs
-            </h1>
-            <p className="text-xs text-zinc-500 mt-1">
-              Painel reorganizado por fluxo: visao geral, operacoes e automacao.
-            </p>
+    <div className="relative space-y-6 animate-fade-in">
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute -top-20 right-0 h-72 w-72 rounded-full bg-brand/10 blur-3xl" />
+        <div className="absolute top-1/3 -left-16 h-64 w-64 rounded-full bg-cyan-500/10 blur-3xl" />
+      </div>
+
+      <div className={`${surfaceClass} overflow-hidden`}>
+        <div className="border-b border-zinc-800/80 bg-gradient-to-r from-zinc-900/90 via-zinc-900/75 to-zinc-900/55 p-4 sm:p-5">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-brand/40 bg-brand/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-brand">
+                <Icons.Crown className="h-3.5 w-3.5" />
+                Modulo VIP
+              </div>
+              <h1 className="mt-3 flex items-center text-2xl font-black text-white">
+                VIPs
+              </h1>
+              <p className="mt-1 text-xs text-zinc-400">
+                Gestao centralizada de beneficios, expiracao e automacao em servidor.
+              </p>
+            </div>
+            <button
+              onClick={refreshAll}
+              className={`${primaryButtonClass} min-w-[170px]`}
+              disabled={isRefreshingAll}
+            >
+              <Icons.RefreshCw className={`mr-2 h-4 w-4 ${isRefreshingAll ? 'animate-spin' : ''}`} />
+              Atualizar tudo
+            </button>
           </div>
-          <button
-            onClick={refreshAll}
-            className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-4 py-2 rounded text-sm font-bold uppercase tracking-wider flex items-center justify-center"
-            disabled={isRefreshingAll}
-          >
-            <Icons.RefreshCw className={`w-4 h-4 mr-2 ${isRefreshingAll ? 'animate-spin' : ''}`} />
-            Atualizar tudo
-          </button>
         </div>
 
-        <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 gap-2 p-3 sm:grid-cols-3">
           <button
             type="button"
             onClick={() => setActiveTab('overview')}
-            className={`group text-left p-3 rounded-lg border transition-all ${
+            className={`group rounded-xl border px-3 py-3 text-left transition-all ${
               activeTab === 'overview'
-                ? 'bg-gradient-to-r from-brand/30 to-red-900/20 border-brand/60 shadow-lg shadow-brand/10'
-                : 'bg-zinc-950 border-zinc-700 hover:border-zinc-500'
+                ? 'border-brand/60 bg-gradient-to-r from-brand/25 to-red-900/15 shadow-lg shadow-brand/10'
+                : 'border-zinc-700/80 bg-zinc-950/65 hover:border-zinc-500'
             }`}
           >
             <div className="flex items-center gap-2">
-              <Icons.BarChart className={`w-4 h-4 ${activeTab === 'overview' ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
+              <Icons.BarChart className={`h-4 w-4 ${activeTab === 'overview' ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
               <span className={`text-xs font-bold uppercase tracking-wider ${activeTab === 'overview' ? 'text-white' : 'text-zinc-300'}`}>
                 Visao geral
               </span>
@@ -499,14 +519,14 @@ const Vips: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveTab('operations')}
-            className={`group text-left p-3 rounded-lg border transition-all ${
+            className={`group rounded-xl border px-3 py-3 text-left transition-all ${
               activeTab === 'operations'
-                ? 'bg-gradient-to-r from-blue-900/30 to-cyan-900/20 border-blue-700/70 shadow-lg shadow-blue-900/10'
-                : 'bg-zinc-950 border-zinc-700 hover:border-zinc-500'
+                ? 'border-blue-700/70 bg-gradient-to-r from-blue-900/30 to-cyan-900/20 shadow-lg shadow-blue-900/10'
+                : 'border-zinc-700/80 bg-zinc-950/65 hover:border-zinc-500'
             }`}
           >
             <div className="flex items-center gap-2">
-              <Icons.Settings className={`w-4 h-4 ${activeTab === 'operations' ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
+              <Icons.Settings className={`h-4 w-4 ${activeTab === 'operations' ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
               <span className={`text-xs font-bold uppercase tracking-wider ${activeTab === 'operations' ? 'text-white' : 'text-zinc-300'}`}>
                 Operacoes
               </span>
@@ -521,14 +541,14 @@ const Vips: React.FC = () => {
               setShowAutomationConfig(false);
               setActiveTab('automation');
             }}
-            className={`group text-left p-3 rounded-lg border transition-all ${
+            className={`group rounded-xl border px-3 py-3 text-left transition-all ${
               activeTab === 'automation'
-                ? 'bg-gradient-to-r from-emerald-900/30 to-green-900/20 border-emerald-700/70 shadow-lg shadow-emerald-900/10'
-                : 'bg-zinc-950 border-zinc-700 hover:border-zinc-500'
+                ? 'border-emerald-700/70 bg-gradient-to-r from-emerald-900/30 to-green-900/20 shadow-lg shadow-emerald-900/10'
+                : 'border-zinc-700/80 bg-zinc-950/65 hover:border-zinc-500'
             }`}
           >
             <div className="flex items-center gap-2">
-              <Icons.Activity className={`w-4 h-4 ${activeTab === 'automation' ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
+              <Icons.Activity className={`h-4 w-4 ${activeTab === 'automation' ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
               <span className={`text-xs font-bold uppercase tracking-wider ${activeTab === 'automation' ? 'text-white' : 'text-zinc-300'}`}>
                 Automacao
               </span>
@@ -541,37 +561,63 @@ const Vips: React.FC = () => {
       </div>
 
       {feedback ? (
-        <div className="bg-zinc-900 border border-zinc-700 rounded p-3 text-sm text-zinc-300">{feedback}</div>
+        <div
+          className={`rounded-xl border px-4 py-3 text-sm ${
+            isFeedbackError
+              ? 'border-red-900/60 bg-red-900/20 text-red-200'
+              : 'border-emerald-900/60 bg-emerald-900/20 text-emerald-200'
+          }`}
+        >
+          {feedback}
+        </div>
       ) : null}
 
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
-        <div className="bg-zinc-900 border border-zinc-800 rounded p-3">
-          <p className="text-[11px] uppercase text-zinc-500 font-bold">Total VIPs</p>
-          <p className="text-xl font-black text-white mt-1">{summary.totalVips}</p>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+        <div className={`${surfaceClass} p-3`}>
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] font-bold uppercase text-zinc-500">Total VIPs</p>
+            <Icons.Crown className="h-4 w-4 text-brand" />
+          </div>
+          <p className="mt-1 text-xl font-black text-white">{summary.totalVips}</p>
         </div>
-        <div className="bg-zinc-900 border border-zinc-800 rounded p-3">
-          <p className="text-[11px] uppercase text-zinc-500 font-bold">Ativos</p>
-          <p className="text-xl font-black text-green-400 mt-1">{summary.activeCount}</p>
+        <div className={`${surfaceClass} p-3`}>
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] font-bold uppercase text-zinc-500">Ativos</p>
+            <Icons.Check className="h-4 w-4 text-green-400" />
+          </div>
+          <p className="mt-1 text-xl font-black text-green-400">{summary.activeCount}</p>
         </div>
-        <div className="bg-zinc-900 border border-zinc-800 rounded p-3">
-          <p className="text-[11px] uppercase text-zinc-500 font-bold">Expirados</p>
-          <p className="text-xl font-black text-yellow-400 mt-1">{summary.expiredCount}</p>
+        <div className={`${surfaceClass} p-3`}>
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] font-bold uppercase text-zinc-500">Expirados</p>
+            <Icons.Clock className="h-4 w-4 text-yellow-400" />
+          </div>
+          <p className="mt-1 text-xl font-black text-yellow-400">{summary.expiredCount}</p>
         </div>
-        <div className="bg-zinc-900 border border-zinc-800 rounded p-3">
-          <p className="text-[11px] uppercase text-zinc-500 font-bold">Inativos</p>
-          <p className="text-xl font-black text-zinc-400 mt-1">{summary.inactiveCount}</p>
+        <div className={`${surfaceClass} p-3`}>
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] font-bold uppercase text-zinc-500">Inativos</p>
+            <Icons.Users className="h-4 w-4 text-zinc-400" />
+          </div>
+          <p className="mt-1 text-xl font-black text-zinc-400">{summary.inactiveCount}</p>
         </div>
-        <div className="bg-zinc-900 border border-zinc-800 rounded p-3">
-          <p className="text-[11px] uppercase text-zinc-500 font-bold">Fila auto</p>
-          <p className="text-xl font-black text-cyan-400 mt-1">{summary.queuedCount}</p>
-          <p className="text-[10px] text-zinc-500 mt-1">
+        <div className={`${surfaceClass} p-3`}>
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] font-bold uppercase text-zinc-500">Fila auto</p>
+            <Icons.Activity className="h-4 w-4 text-cyan-400" />
+          </div>
+          <p className="mt-1 text-xl font-black text-cyan-400">{summary.queuedCount}</p>
+          <p className="mt-1 text-[10px] text-zinc-500">
             falhou {summary.failedCount} | ignorou {summary.skippedCount}
           </p>
         </div>
-        <div className="bg-zinc-900 border border-zinc-800 rounded p-3">
-          <p className="text-[11px] uppercase text-zinc-500 font-bold">Sandbox</p>
-          <p className="text-xl font-black text-white mt-1">{summary.sandboxCount}</p>
-          <p className={`text-[10px] mt-1 ${summary.automationEnabled ? 'text-green-400' : 'text-zinc-500'}`}>
+        <div className={`${surfaceClass} p-3`}>
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] font-bold uppercase text-zinc-500">Sandbox</p>
+            <Icons.Server className="h-4 w-4 text-zinc-200" />
+          </div>
+          <p className="mt-1 text-xl font-black text-white">{summary.sandboxCount}</p>
+          <p className={`mt-1 text-[10px] ${summary.automationEnabled ? 'text-green-400' : 'text-zinc-500'}`}>
             auto {summary.automationEnabled ? 'ativa' : 'desativada'}
           </p>
         </div>
@@ -579,20 +625,20 @@ const Vips: React.FC = () => {
 
       {activeTab === 'overview' ? (
         <>
-          <div className="bg-zinc-900 border border-zinc-800 rounded p-4">
+          <div className={`${surfaceClass} p-4`}>
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-              <h2 className="text-sm uppercase font-bold text-zinc-300">VIPs registrados</h2>
-              <div className="flex flex-col sm:flex-row gap-2">
+              <h2 className="text-sm uppercase font-bold tracking-wide text-zinc-200">VIPs registrados</h2>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(220px,1fr)_170px_auto]">
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="bg-zinc-950 border border-zinc-700 rounded px-3 py-2 text-white text-sm"
+                  className={inputClass}
                   placeholder="Buscar por SteamID ou nome"
                 />
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value as 'ALL' | 'ACTIVE' | 'EXPIRED')}
-                  className="bg-zinc-950 border border-zinc-700 rounded px-3 py-2 text-white text-sm"
+                  className={inputClass}
                 >
                   <option value="ALL">Todos</option>
                   <option value="ACTIVE">Ativos</option>
@@ -601,18 +647,19 @@ const Vips: React.FC = () => {
                 <button
                   type="button"
                   onClick={loadData}
-                  className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3 py-2 rounded text-sm font-bold uppercase"
+                  className={subtleButtonClass}
                 >
+                  <Icons.Search className="mr-2 h-3.5 w-3.5" />
                   Buscar
                 </button>
               </div>
             </div>
           </div>
 
-          <div className="bg-zinc-900 border border-zinc-800 rounded overflow-hidden">
+          <div className={`${surfaceClass} overflow-hidden`}>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-zinc-800">
-                <thead className="bg-zinc-950/50">
+                <thead className="bg-zinc-950/75 backdrop-blur">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Jogador</th>
                     <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">SteamID</th>
@@ -623,7 +670,7 @@ const Vips: React.FC = () => {
                     <th className="px-4 py-3 text-right text-xs uppercase text-zinc-500">Acoes</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-800">
+                <tbody className="divide-y divide-zinc-800/80">
                   {loading ? (
                     <tr>
                       <td colSpan={7} className="px-4 py-10 text-center text-zinc-500">
@@ -638,13 +685,17 @@ const Vips: React.FC = () => {
                     </tr>
                   ) : (
                     items.map((item) => (
-                      <tr key={item.steamId} className="hover:bg-zinc-800/40">
+                      <tr key={item.steamId} className="transition-colors hover:bg-zinc-800/45">
                         <td className="px-4 py-3 text-sm text-white">
                           <div className="flex items-center gap-3">
                             {item.avatarUrl ? (
-                              <img src={item.avatarUrl} alt={item.name} className="w-8 h-8 rounded border border-zinc-700" />
+                              <img
+                                src={item.avatarUrl}
+                                alt={item.name}
+                                className="h-9 w-9 rounded-lg border border-zinc-700 object-cover"
+                              />
                             ) : (
-                              <div className="w-8 h-8 rounded border border-zinc-700 bg-zinc-800" />
+                              <div className="h-9 w-9 rounded-lg border border-zinc-700 bg-zinc-800" />
                             )}
                             <div className="min-w-0">
                               <p className="text-white font-semibold truncate">{item.name || item.steamId}</p>
@@ -698,14 +749,14 @@ const Vips: React.FC = () => {
                               setExtendServerIds(item.vipServerIds || []);
                               setActiveTab('operations');
                             }}
-                            className="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3 py-1 rounded mr-2"
+                            className="mr-2 inline-flex items-center rounded-md border border-zinc-700/80 bg-zinc-900/70 px-3 py-1 text-xs font-bold text-zinc-200 transition hover:bg-zinc-800"
                           >
                             Operar
                           </button>
                           <button
                             type="button"
                             onClick={() => handleRevoke(item.steamId)}
-                            className="text-xs bg-red-800 hover:bg-red-700 text-white px-3 py-1 rounded"
+                            className="inline-flex items-center rounded-md border border-red-700/70 bg-red-900/60 px-3 py-1 text-xs font-bold text-white transition hover:bg-red-700"
                             disabled={busy}
                           >
                             Revogar
@@ -731,51 +782,68 @@ const Vips: React.FC = () => {
             ))}
           </datalist>
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <form onSubmit={handleGrant} className="bg-zinc-900 border border-zinc-800 rounded p-4 space-y-3">
-              <h2 className="text-sm uppercase font-bold text-zinc-300">Conceder VIP</h2>
+            <form onSubmit={handleGrant} className={`${surfaceClass} p-5 space-y-4`}>
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-sm uppercase font-bold tracking-wide text-zinc-200">Conceder VIP</h2>
+                <span className="rounded-full border border-emerald-700/60 bg-emerald-900/20 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-300">
+                  Grant
+                </span>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input
-                  required
-                  value={grantSteamId}
-                  onChange={(e) => setGrantSteamId(e.target.value)}
-                  className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm font-mono"
-                  placeholder="SteamID"
-                />
-                <input
-                  value={grantName}
-                  onChange={(e) => setGrantName(e.target.value)}
-                  className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm"
-                  placeholder="Nome (opcional)"
-                />
-                <select
-                  value={grantPlan}
-                  onChange={(e) => setGrantPlan(e.target.value)}
-                  className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm"
-                >
-                  {planOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  required
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  list="vip-duration-suggestions"
-                  value={grantDurationDays}
-                  onChange={(e) => setGrantDurationDays(sanitizeDaysInput(e.target.value))}
-                  className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm"
-                  placeholder="Dias (ex: 30)"
-                />
+                <label className="space-y-1.5">
+                  <span className="text-[11px] uppercase font-bold text-zinc-500">SteamID</span>
+                  <input
+                    required
+                    value={grantSteamId}
+                    onChange={(e) => setGrantSteamId(e.target.value)}
+                    className={inputMonoClass}
+                    placeholder="STEAM_0:1:123456"
+                  />
+                </label>
+                <label className="space-y-1.5">
+                  <span className="text-[11px] uppercase font-bold text-zinc-500">Nome (opcional)</span>
+                  <input
+                    value={grantName}
+                    onChange={(e) => setGrantName(e.target.value)}
+                    className={inputClass}
+                    placeholder="Nome do jogador"
+                  />
+                </label>
+                <label className="space-y-1.5">
+                  <span className="text-[11px] uppercase font-bold text-zinc-500">Plano</span>
+                  <select
+                    value={grantPlan}
+                    onChange={(e) => setGrantPlan(e.target.value)}
+                    className={inputClass}
+                  >
+                    {planOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="space-y-1.5">
+                  <span className="text-[11px] uppercase font-bold text-zinc-500">Duracao em dias</span>
+                  <input
+                    required
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    list="vip-duration-suggestions"
+                    value={grantDurationDays}
+                    onChange={(e) => setGrantDurationDays(sanitizeDaysInput(e.target.value))}
+                    className={inputClass}
+                    placeholder="Ex: 30"
+                  />
+                </label>
               </div>
               <p className="text-[11px] text-zinc-500">Dias do VIP (manual). Use qualquer valor inteiro positivo.</p>
-              <div className="rounded border border-zinc-800 bg-zinc-950/60 p-3">
+              <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-3">
                 <p className="text-[11px] uppercase font-bold text-zinc-500">Escopo de servidores VIP</p>
                 <p className="mt-1 text-xs text-zinc-400">
                   Se nada for marcado, vale para todos os servidores.
                 </p>
-                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="mt-2 grid max-h-56 grid-cols-1 gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
                   {servers.map((server) => {
                     const checked = grantServerIds.includes(server.id);
                     return (
@@ -798,7 +866,7 @@ const Vips: React.FC = () => {
                   })}
                 </div>
               </div>
-              <label className="flex items-center justify-between rounded border border-zinc-700 bg-zinc-950/70 px-3 py-2">
+              <label className="flex items-center justify-between rounded-xl border border-zinc-700 bg-zinc-950/70 px-3 py-2">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wide text-zinc-200">
                     Aplicar VIP no servidor
@@ -821,57 +889,75 @@ const Vips: React.FC = () => {
               <button
                 type="submit"
                 disabled={busy}
-                className="bg-green-700 hover:bg-green-600 text-white px-4 py-2 rounded text-sm font-bold uppercase disabled:opacity-60"
+                className="inline-flex items-center justify-center rounded-lg bg-emerald-700 px-4 py-2 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-emerald-600 disabled:opacity-60"
               >
+                <Icons.Crown className="mr-2 h-4 w-4" />
                 Conceder
               </button>
             </form>
 
-            <form onSubmit={handleExtend} className="bg-zinc-900 border border-zinc-800 rounded p-4 space-y-3">
-              <h2 className="text-sm uppercase font-bold text-zinc-300">Estender ou revogar</h2>
+            <form onSubmit={handleExtend} className={`${surfaceClass} p-5 space-y-4`}>
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-sm uppercase font-bold tracking-wide text-zinc-200">Estender ou revogar</h2>
+                <span className="rounded-full border border-cyan-700/60 bg-cyan-900/20 px-2 py-0.5 text-[10px] font-bold uppercase text-cyan-300">
+                  Manage
+                </span>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input
-                  required
-                  value={extendSteamId}
-                  onChange={(e) => setExtendSteamId(e.target.value)}
-                  className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm font-mono"
-                  placeholder="SteamID"
-                />
-                <input
-                  value={revokeReason}
-                  onChange={(e) => setRevokeReason(e.target.value)}
-                  className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm"
-                  placeholder="Motivo de revogacao (opcional)"
-                />
-                <select
-                  value={extendPlan}
-                  onChange={(e) => setExtendPlan(e.target.value)}
-                  className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm"
-                >
-                  {planOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  required
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  list="vip-duration-suggestions"
-                  value={extendDurationDays}
-                  onChange={(e) => setExtendDurationDays(sanitizeDaysInput(e.target.value))}
-                  className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm"
-                  placeholder="Dias (ex: 30)"
-                />
+                <label className="space-y-1.5">
+                  <span className="text-[11px] uppercase font-bold text-zinc-500">SteamID</span>
+                  <input
+                    required
+                    value={extendSteamId}
+                    onChange={(e) => setExtendSteamId(e.target.value)}
+                    className={inputMonoClass}
+                    placeholder="STEAM_0:1:123456"
+                  />
+                </label>
+                <label className="space-y-1.5">
+                  <span className="text-[11px] uppercase font-bold text-zinc-500">Motivo da revogacao</span>
+                  <input
+                    value={revokeReason}
+                    onChange={(e) => setRevokeReason(e.target.value)}
+                    className={inputClass}
+                    placeholder="Opcional"
+                  />
+                </label>
+                <label className="space-y-1.5">
+                  <span className="text-[11px] uppercase font-bold text-zinc-500">Plano</span>
+                  <select
+                    value={extendPlan}
+                    onChange={(e) => setExtendPlan(e.target.value)}
+                    className={inputClass}
+                  >
+                    {planOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="space-y-1.5">
+                  <span className="text-[11px] uppercase font-bold text-zinc-500">Dias para estender</span>
+                  <input
+                    required
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    list="vip-duration-suggestions"
+                    value={extendDurationDays}
+                    onChange={(e) => setExtendDurationDays(sanitizeDaysInput(e.target.value))}
+                    className={inputClass}
+                    placeholder="Ex: 30"
+                  />
+                </label>
               </div>
               <p className="text-[11px] text-zinc-500">Dias para estender (manual). Use qualquer valor inteiro positivo.</p>
-              <div className="rounded border border-zinc-800 bg-zinc-950/60 p-3">
+              <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-3">
                 <p className="text-[11px] uppercase font-bold text-zinc-500">Atualizar escopo de servidores</p>
                 <p className="mt-1 text-xs text-zinc-400">
                   Marque os servidores onde esse VIP vale. Deixe vazio para todos.
                 </p>
-                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="mt-2 grid max-h-56 grid-cols-1 gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
                   {servers.map((server) => {
                     const checked = extendServerIds.includes(server.id);
                     return (
@@ -894,7 +980,7 @@ const Vips: React.FC = () => {
                   })}
                 </div>
               </div>
-              <label className="flex items-center justify-between rounded border border-zinc-700 bg-zinc-950/70 px-3 py-2">
+              <label className="flex items-center justify-between rounded-xl border border-zinc-700 bg-zinc-950/70 px-3 py-2">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wide text-zinc-200">
                     Aplicar VIP no servidor
@@ -918,26 +1004,28 @@ const Vips: React.FC = () => {
                 <button
                   type="submit"
                   disabled={busy}
-                  className="bg-blue-700 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm font-bold uppercase disabled:opacity-60"
+                  className="inline-flex items-center justify-center rounded-lg bg-blue-700 px-4 py-2 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-blue-600 disabled:opacity-60"
                 >
+                  <Icons.Plus className="mr-2 h-4 w-4" />
                   Estender
                 </button>
                 <button
                   type="button"
                   onClick={() => handleRevoke(extendSteamId.trim(), { enqueue: operationEnqueue })}
                   disabled={busy || !extendSteamId.trim()}
-                  className="bg-red-700 hover:bg-red-600 text-white px-4 py-2 rounded text-sm font-bold uppercase disabled:opacity-60"
+                  className="inline-flex items-center justify-center rounded-lg bg-red-700 px-4 py-2 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-red-600 disabled:opacity-60"
                 >
+                  <Icons.Trash className="mr-2 h-4 w-4" />
                   Revogar
                 </button>
               </div>
             </form>
           </div>
 
-          <div className="bg-zinc-900 border border-zinc-800 rounded p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className={`${surfaceClass} p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3`}>
             <div>
-              <h3 className="text-sm uppercase font-bold text-zinc-300">Conciliar expirados</h3>
-              <p className="text-xs text-zinc-500 mt-1">
+              <h3 className="text-sm uppercase font-bold tracking-wide text-zinc-200">Conciliar expirados</h3>
+              <p className="mt-1 text-xs text-zinc-500">
                 Remove VIP vencido no painel e dispara REVOKE para o servidor.
               </p>
             </div>
@@ -946,7 +1034,7 @@ const Vips: React.FC = () => {
                 type="button"
                 onClick={() => handleReconcileExpired(true)}
                 disabled={reconcileBusy}
-                className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3 py-2 rounded text-xs font-bold uppercase disabled:opacity-60"
+                className={subtleButtonClass}
               >
                 Simular
               </button>
@@ -954,7 +1042,7 @@ const Vips: React.FC = () => {
                 type="button"
                 onClick={() => handleReconcileExpired(false)}
                 disabled={reconcileBusy}
-                className="bg-yellow-700 hover:bg-yellow-600 text-white px-3 py-2 rounded text-xs font-bold uppercase disabled:opacity-60"
+                className="inline-flex items-center justify-center rounded-lg bg-yellow-700 px-3 py-2 text-xs font-bold uppercase tracking-wide text-white transition hover:bg-yellow-600 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 Processar agora
               </button>
@@ -965,32 +1053,36 @@ const Vips: React.FC = () => {
 
       {activeTab === 'automation' ? (
         <>
-          <div className="bg-zinc-900 border border-zinc-800 rounded overflow-hidden">
+          <div className={`${surfaceClass} overflow-hidden`}>
             <button
               type="button"
               onClick={() => setShowAutomationConfig((prev) => !prev)}
-              className="w-full p-4 bg-zinc-950/40 border-b border-zinc-800 flex items-center justify-between text-left"
+              className="w-full border-b border-zinc-800/80 bg-gradient-to-r from-zinc-950/80 to-zinc-900/60 p-4 text-left"
             >
-              <div>
-                <h2 className="text-sm uppercase font-bold text-zinc-300">Config da automacao VIP</h2>
-                <p className="text-xs text-zinc-500 mt-1">
-                  Painel recolhido por seguranca. Expanda apenas quando for editar.
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] text-zinc-500">source={automationConfig.source || 'env'}</span>
-                <span
-                  className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                    automationConfig.enabled
-                      ? 'bg-green-900/30 text-green-400 border border-green-800'
-                      : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
-                  }`}
-                >
-                  {automationConfig.enabled ? 'ativa' : 'desativada'}
-                </span>
-                <span className="text-zinc-300 text-xs font-bold uppercase">
-                  {showAutomationConfig ? 'ocultar' : 'expandir'}
-                </span>
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-sm uppercase font-bold tracking-wide text-zinc-200">Config da automacao VIP</h2>
+                  <p className="mt-1 text-xs text-zinc-500">
+                    Painel recolhido por seguranca. Expanda apenas quando for editar.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="rounded-md border border-zinc-700/70 bg-zinc-900/70 px-2 py-0.5 text-[11px] text-zinc-400">
+                    source={automationConfig.source || 'env'}
+                  </span>
+                  <span
+                    className={`rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase ${
+                      automationConfig.enabled
+                        ? 'border-green-800 bg-green-900/30 text-green-400'
+                        : 'border-zinc-700 bg-zinc-800 text-zinc-400'
+                    }`}
+                  >
+                    {automationConfig.enabled ? 'ativa' : 'desativada'}
+                  </span>
+                  <span className="text-xs font-bold uppercase text-zinc-300">
+                    {showAutomationConfig ? 'ocultar' : 'expandir'}
+                  </span>
+                </div>
               </div>
             </button>
 
@@ -999,7 +1091,7 @@ const Vips: React.FC = () => {
                 onSubmit={handleSaveAutomationConfig}
                 className="p-4 space-y-4"
               >
-                <label className="flex items-center gap-2 text-sm text-zinc-300">
+                <label className="flex items-center gap-2 rounded-lg border border-zinc-700/70 bg-zinc-950/60 px-3 py-2 text-sm text-zinc-300">
                   <input
                     type="checkbox"
                     checked={automationConfig.enabled}
@@ -1021,7 +1113,7 @@ const Vips: React.FC = () => {
                         sandboxServerId: e.target.value || undefined,
                       }))
                     }
-                    className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm font-mono"
+                    className={inputMonoClass}
                     disabled={serversLoading}
                   >
                     <option value="">Automatico (primeiro Sandbox online)</option>
@@ -1036,7 +1128,7 @@ const Vips: React.FC = () => {
                       </option>
                     ) : null}
                   </select>
-                  <div className="text-xs text-zinc-500 flex items-center">
+                  <div className="flex items-center rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 text-xs text-zinc-500">
                     {serversLoading
                       ? 'Carregando servidores...'
                       : `${sandboxServers.length} servidor(es) Sandbox disponivel(is)`}
@@ -1049,7 +1141,7 @@ const Vips: React.FC = () => {
                         grantTemplate: e.target.value,
                       }))
                     }
-                    className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm font-mono md:col-span-2"
+                    className={`${inputMonoClass} min-h-[76px] md:col-span-2`}
                     placeholder='Template GRANT. Ex: sam setrankid {{steamId}} {{vipPlanServer}} {{vipDuration}}'
                     rows={2}
                   />
@@ -1061,16 +1153,16 @@ const Vips: React.FC = () => {
                         revokeTemplate: e.target.value,
                       }))
                     }
-                    className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm font-mono md:col-span-2"
+                    className={`${inputMonoClass} min-h-[76px] md:col-span-2`}
                     placeholder='Template REVOKE. Ex: sam setrank {{steamId}} "user"'
                     rows={2}
                   />
-                  <div className="text-xs text-zinc-500 md:col-span-2">
+                  <div className="rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 py-2 text-xs text-zinc-500 md:col-span-2">
                     Tokens permitidos: {'{{steamId}}'}, {'{{vipPlanServer}}'}, {'{{vipExpiryUnix}}'},
                     {' {{vipDuration}}'}, {'{{vipDurationRaw}}'}, {'{{vipDurationDays}}'}
                   </div>
                   {!grantTemplateHasDurationToken ? (
-                    <div className="text-xs text-amber-400 md:col-span-2">
+                    <div className="rounded-lg border border-amber-900/70 bg-amber-900/20 px-3 py-2 text-xs text-amber-300 md:col-span-2">
                       Aviso: o template GRANT atual nao tem token de duracao. Sem {'{{vipDuration}}'} o comando sera enviado sem tempo (ex.: 30d).
                     </div>
                   ) : null}
@@ -1078,7 +1170,7 @@ const Vips: React.FC = () => {
                 <button
                   type="submit"
                   disabled={automationSaving}
-                  className="bg-brand hover:bg-brand-dark text-white px-4 py-2 rounded text-sm font-bold uppercase disabled:opacity-60"
+                  className={primaryButtonClass}
                 >
                   Salvar automacao
                 </button>
@@ -1090,20 +1182,21 @@ const Vips: React.FC = () => {
             )}
           </div>
 
-          <div className="bg-zinc-900 border border-zinc-800 rounded overflow-hidden">
-            <div className="p-4 border-b border-zinc-800 bg-zinc-950/40 flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between">
-              <h2 className="text-sm uppercase font-bold text-zinc-300">Auditoria da automacao VIP</h2>
-              <div className="flex flex-col sm:flex-row gap-2">
+          <div className={`${surfaceClass} overflow-hidden`}>
+            <div className="border-b border-zinc-800/80 bg-gradient-to-r from-zinc-950/80 to-zinc-900/60 p-4">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <h2 className="text-sm uppercase font-bold tracking-wide text-zinc-200">Auditoria da automacao VIP</h2>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(220px,1fr)_170px_auto]">
                 <input
                   value={actionSteamId}
                   onChange={(e) => setActionSteamId(e.target.value)}
-                  className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm"
+                  className={inputClass}
                   placeholder="Filtrar SteamID"
                 />
                 <select
                   value={actionStatus}
                   onChange={(e) => setActionStatus(e.target.value as 'ALL' | VipAutomationActionStatus)}
-                  className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm"
+                  className={inputClass}
                 >
                   <option value="ALL">Todos</option>
                   <option value="QUEUED">Enfileirado</option>
@@ -1113,16 +1206,18 @@ const Vips: React.FC = () => {
                 <button
                   type="button"
                   onClick={loadActions}
-                  className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3 rounded text-sm font-bold uppercase"
+                  className={subtleButtonClass}
                 >
+                  <Icons.Search className="mr-2 h-3.5 w-3.5" />
                   Buscar
                 </button>
+                </div>
               </div>
             </div>
 
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-zinc-800">
-                <thead className="bg-zinc-950/50">
+                <thead className="bg-zinc-950/75 backdrop-blur">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Quando</th>
                     <th className="px-4 py-3 text-left text-xs uppercase text-zinc-500">Acao</th>
@@ -1134,7 +1229,7 @@ const Vips: React.FC = () => {
                     <th className="px-4 py-3 text-right text-xs uppercase text-zinc-500">Acoes</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-800">
+                <tbody className="divide-y divide-zinc-800/80">
                   {actionsLoading ? (
                     <tr>
                       <td colSpan={8} className="px-4 py-10 text-center text-zinc-500">
@@ -1149,7 +1244,7 @@ const Vips: React.FC = () => {
                     </tr>
                   ) : (
                     actions.map((action) => (
-                      <tr key={action.id} className="hover:bg-zinc-800/40">
+                      <tr key={action.id} className="transition-colors hover:bg-zinc-800/45">
                         <td className="px-4 py-3 text-xs text-zinc-300">{formatDateTime(action.createdAt)}</td>
                         <td className="px-4 py-3 text-xs text-zinc-300">{automationActionLabel(action.action)}</td>
                         <td className="px-4 py-3 text-xs">
@@ -1180,7 +1275,7 @@ const Vips: React.FC = () => {
                             type="button"
                             onClick={() => handleRetryAction(action.id)}
                             disabled={busy || action.status === 'QUEUED'}
-                            className="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3 py-1 rounded disabled:opacity-60"
+                            className="inline-flex items-center rounded-md border border-zinc-700/80 bg-zinc-900/70 px-3 py-1 text-xs font-bold text-zinc-200 transition hover:bg-zinc-800 disabled:opacity-60"
                           >
                             Tentar novamente
                           </button>
