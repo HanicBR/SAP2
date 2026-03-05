@@ -110,9 +110,9 @@ const Vips: React.FC = () => {
   const [actions, setActions] = useState<VipAutomationActionItem[]>([]);
   const [servers, setServers] = useState<GameServer[]>([]);
   const [loading, setLoading] = useState(true);
-  const [actionsLoading, setActionsLoading] = useState(true);
-  const [automationLoading, setAutomationLoading] = useState(true);
-  const [serversLoading, setServersLoading] = useState(true);
+  const [actionsLoading, setActionsLoading] = useState(false);
+  const [automationLoading, setAutomationLoading] = useState(false);
+  const [serversLoading, setServersLoading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [reconcileBusy, setReconcileBusy] = useState(false);
   const [automationSaving, setAutomationSaving] = useState(false);
@@ -256,7 +256,14 @@ const Vips: React.FC = () => {
   };
 
   const refreshAll = async () => {
-    await Promise.all([loadData(), loadActions(), loadAutomationConfig(), loadServers()]);
+    const tasks: Promise<any>[] = [loadData()];
+    if (activeTab === 'operations' || activeTab === 'automation') {
+      tasks.push(loadServers());
+    }
+    if (activeTab === 'automation') {
+      tasks.push(loadActions(), loadAutomationConfig());
+    }
+    await Promise.all(tasks);
   };
 
   useEffect(() => {
@@ -269,16 +276,19 @@ const Vips: React.FC = () => {
   }, [status]);
 
   useEffect(() => {
+    if (activeTab !== 'automation') return;
     loadActions();
-  }, [actionStatus]);
+  }, [activeTab, actionStatus]);
 
   useEffect(() => {
+    if (activeTab !== 'automation') return;
     loadAutomationConfig();
-  }, []);
+  }, [activeTab]);
 
   useEffect(() => {
+    if (activeTab !== 'operations' && activeTab !== 'automation') return;
     loadServers();
-  }, []);
+  }, [activeTab]);
 
   const toggleServerSelection = (
     serverId: string,
@@ -572,7 +582,7 @@ const Vips: React.FC = () => {
         </div>
       ) : null}
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
         <div className={`${surfaceClass} p-3`}>
           <div className="flex items-center justify-between">
             <p className="text-[11px] font-bold uppercase text-zinc-500">Total VIPs</p>
@@ -657,7 +667,106 @@ const Vips: React.FC = () => {
           </div>
 
           <div className={`${surfaceClass} overflow-hidden`}>
-            <div className="overflow-x-auto">
+            <div className="lg:hidden space-y-3 p-3">
+              {loading ? (
+                <div className="rounded-lg border border-zinc-800 bg-zinc-950/60 p-6 text-center text-sm text-zinc-500">
+                  Carregando VIPs...
+                </div>
+              ) : items.length === 0 ? (
+                <div className="rounded-lg border border-zinc-800 bg-zinc-950/60 p-6 text-center text-sm text-zinc-500">
+                  Nenhum VIP encontrado.
+                </div>
+              ) : (
+                items.map((item) => (
+                  <article key={`mobile-${item.steamId}`} className="rounded-xl border border-zinc-800 bg-zinc-950/50 p-3">
+                    <div className="flex items-start gap-3">
+                      {item.avatarUrl ? (
+                        <img
+                          src={item.avatarUrl}
+                          alt={item.name}
+                          loading="lazy"
+                          decoding="async"
+                          className="h-10 w-10 rounded-lg border border-zinc-700 object-cover"
+                        />
+                      ) : (
+                        <div className="h-10 w-10 rounded-lg border border-zinc-700 bg-zinc-800" />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-white">{item.name || item.steamId}</p>
+                        <p className="mt-0.5 break-all font-mono text-[11px] text-zinc-400">{item.steamId}</p>
+                      </div>
+                      <span
+                        className={`shrink-0 rounded px-2 py-0.5 text-[10px] font-bold uppercase ${
+                          item.vipStatus === 'ACTIVE'
+                            ? 'border border-green-800 bg-green-900/30 text-green-400'
+                            : item.vipStatus === 'EXPIRED'
+                            ? 'border border-yellow-800 bg-yellow-900/30 text-yellow-400'
+                            : 'border border-zinc-700 bg-zinc-800 text-zinc-400'
+                        }`}
+                      >
+                        {item.vipStatus || 'INACTIVE'}
+                      </span>
+                    </div>
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                      <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-2">
+                        <p className="uppercase text-zinc-500">Plano</p>
+                        <p className="mt-1 text-zinc-200">{item.vipPlan || '-'}</p>
+                      </div>
+                      <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-2">
+                        <p className="uppercase text-zinc-500">Expira</p>
+                        <p className="mt-1 text-zinc-200">{formatDateTime(item.vipExpiry)}</p>
+                      </div>
+                    </div>
+                    <div className="mt-2">
+                      <p className="text-[11px] uppercase text-zinc-500">Servidores VIP</p>
+                      {!item.vipServerIds || item.vipServerIds.length === 0 ? (
+                        <span className="mt-1 inline-flex rounded border border-emerald-800/60 bg-emerald-900/20 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-300">
+                          Todos os servidores
+                        </span>
+                      ) : (
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {(item.vipServerNames && item.vipServerNames.length > 0
+                            ? item.vipServerNames
+                            : item.vipServerIds
+                          ).map((name) => (
+                            <span
+                              key={`mobile-${item.steamId}-${name}`}
+                              className="inline-flex rounded border border-zinc-700 bg-zinc-800 px-2 py-0.5 text-[10px] font-bold uppercase text-zinc-300"
+                            >
+                              {name}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="mt-3 flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setExtendSteamId(item.steamId);
+                          setExtendPlan(item.vipPlan || planOptions[0]);
+                          setExtendServerIds(item.vipServerIds || []);
+                          setActiveTab('operations');
+                        }}
+                        className="flex-1 rounded-md border border-zinc-700/80 bg-zinc-900/70 px-3 py-2 text-xs font-bold text-zinc-200 transition hover:bg-zinc-800"
+                      >
+                        Operar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRevoke(item.steamId)}
+                        className="flex-1 rounded-md border border-red-700/70 bg-red-900/60 px-3 py-2 text-xs font-bold text-white transition hover:bg-red-700"
+                        disabled={busy}
+                      >
+                        Revogar
+                      </button>
+                    </div>
+                  </article>
+                ))
+              )}
+            </div>
+
+            <div className="hidden overflow-x-auto lg:block">
               <table className="min-w-full divide-y divide-zinc-800">
                 <thead className="bg-zinc-950/75 backdrop-blur">
                   <tr>
@@ -692,6 +801,8 @@ const Vips: React.FC = () => {
                               <img
                                 src={item.avatarUrl}
                                 alt={item.name}
+                                loading="lazy"
+                                decoding="async"
                                 className="h-9 w-9 rounded-lg border border-zinc-700 object-cover"
                               />
                             ) : (
@@ -1215,7 +1326,81 @@ const Vips: React.FC = () => {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="lg:hidden space-y-3 p-3">
+              {actionsLoading ? (
+                <div className="rounded-lg border border-zinc-800 bg-zinc-950/60 p-6 text-center text-sm text-zinc-500">
+                  Carregando auditoria...
+                </div>
+              ) : actions.length === 0 ? (
+                <div className="rounded-lg border border-zinc-800 bg-zinc-950/60 p-6 text-center text-sm text-zinc-500">
+                  Nenhuma acao encontrada.
+                </div>
+              ) : (
+                actions.map((action) => {
+                  const context = automationContextLabel(action);
+                  return (
+                    <article key={`mobile-action-${action.id}`} className="rounded-xl border border-zinc-800 bg-zinc-950/50 p-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="text-[11px] text-zinc-400">{formatDateTime(action.createdAt)}</p>
+                          <p className="mt-1 text-sm font-semibold text-zinc-100">
+                            {automationActionLabel(action.action)} | {automationOperationLabel(action)}
+                          </p>
+                          <p className="text-[11px] text-zinc-500">{automationSourceLabel(action.trigger)}</p>
+                        </div>
+                        <span
+                          className={`shrink-0 rounded px-2 py-0.5 text-[10px] font-bold uppercase ${
+                            action.status === 'QUEUED'
+                              ? 'border border-green-800 bg-green-900/30 text-green-400'
+                              : action.status === 'FAILED'
+                              ? 'border border-red-800 bg-red-900/30 text-red-400'
+                              : 'border border-yellow-800 bg-yellow-900/30 text-yellow-400'
+                          }`}
+                        >
+                          {automationStatusLabel(action.status)}
+                        </span>
+                      </div>
+                      <div className="mt-3 grid grid-cols-1 gap-2 text-xs">
+                        <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-2">
+                          <p className="uppercase text-zinc-500">SteamID</p>
+                          <p className="mt-1 break-all font-mono text-zinc-300">{action.steamId}</p>
+                        </div>
+                        {(action.vipDurationDays || action.vipExpiry) ? (
+                          <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-2">
+                            <p className="uppercase text-zinc-500">Tempo VIP</p>
+                            <p className="mt-1 text-zinc-300">
+                              {action.vipDurationDays ? `${action.vipDurationDays}d` : '-'}
+                              {action.vipExpiry ? ` | expira ${formatDateTime(action.vipExpiry)}` : ''}
+                            </p>
+                          </div>
+                        ) : null}
+                        <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-2">
+                          <p className="uppercase text-zinc-500">Motivo</p>
+                          <p className="mt-1 text-zinc-300">{automationReasonLabel(action.reason)}</p>
+                        </div>
+                        <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-2">
+                          <p className="uppercase text-zinc-500">Comando</p>
+                          <p className="mt-1 break-all font-mono text-zinc-300">{formatCommand(action.command)}</p>
+                        </div>
+                      </div>
+                      {context ? <p className="mt-2 text-[11px] text-zinc-500">{context}</p> : null}
+                      <div className="mt-3">
+                        <button
+                          type="button"
+                          onClick={() => handleRetryAction(action.id)}
+                          disabled={busy || action.status === 'QUEUED'}
+                          className="w-full rounded-md border border-zinc-700/80 bg-zinc-900/70 px-3 py-2 text-xs font-bold text-zinc-200 transition hover:bg-zinc-800 disabled:opacity-60"
+                        >
+                          Tentar novamente
+                        </button>
+                      </div>
+                    </article>
+                  );
+                })
+              )}
+            </div>
+
+            <div className="hidden overflow-x-auto lg:block">
               <table className="min-w-full divide-y divide-zinc-800">
                 <thead className="bg-zinc-950/75 backdrop-blur">
                   <tr>
@@ -1243,45 +1428,49 @@ const Vips: React.FC = () => {
                       </td>
                     </tr>
                   ) : (
-                    actions.map((action) => (
-                      <tr key={action.id} className="transition-colors hover:bg-zinc-800/45">
-                        <td className="px-4 py-3 text-xs text-zinc-300">{formatDateTime(action.createdAt)}</td>
-                        <td className="px-4 py-3 text-xs text-zinc-300">{automationActionLabel(action.action)}</td>
-                        <td className="px-4 py-3 text-xs">
-                          <p className="font-bold text-zinc-200">{automationOperationLabel(action)}</p>
-                          <p className="text-zinc-500">{automationSourceLabel(action.trigger)}</p>
-                          {automationContextLabel(action) ? (
-                            <p className="mt-1 text-[11px] text-zinc-600">{automationContextLabel(action)}</p>
-                          ) : null}
-                        </td>
-                        <td className="px-4 py-3 text-xs text-zinc-400 font-mono">{action.steamId}</td>
-                        <td className="px-4 py-3">
-                          <span
-                            className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                              action.status === 'QUEUED'
-                                ? 'bg-green-900/30 text-green-400 border border-green-800'
-                                : action.status === 'FAILED'
-                                ? 'bg-red-900/30 text-red-400 border border-red-800'
-                                : 'bg-yellow-900/30 text-yellow-400 border border-yellow-800'
-                            }`}
-                          >
-                            {automationStatusLabel(action.status)}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-xs text-zinc-400">{automationReasonLabel(action.reason)}</td>
-                        <td className="px-4 py-3 text-xs text-zinc-400 font-mono">{formatCommand(action.command)}</td>
-                        <td className="px-4 py-3 text-right">
-                          <button
-                            type="button"
-                            onClick={() => handleRetryAction(action.id)}
-                            disabled={busy || action.status === 'QUEUED'}
-                            className="inline-flex items-center rounded-md border border-zinc-700/80 bg-zinc-900/70 px-3 py-1 text-xs font-bold text-zinc-200 transition hover:bg-zinc-800 disabled:opacity-60"
-                          >
-                            Tentar novamente
-                          </button>
-                        </td>
-                      </tr>
-                    ))
+                    actions.map((action) => {
+                      const context = automationContextLabel(action);
+                      return (
+                        <tr key={action.id} className="transition-colors hover:bg-zinc-800/45">
+                          <td className="px-4 py-3 text-xs text-zinc-300">{formatDateTime(action.createdAt)}</td>
+                          <td className="px-4 py-3 text-xs text-zinc-300">{automationActionLabel(action.action)}</td>
+                          <td className="px-4 py-3 text-xs">
+                            <p className="font-bold text-zinc-200">{automationOperationLabel(action)}</p>
+                            <p className="text-zinc-500">{automationSourceLabel(action.trigger)}</p>
+                            {action.vipDurationDays ? (
+                              <p className="mt-1 text-[11px] text-cyan-300">tempo: {action.vipDurationDays}d</p>
+                            ) : null}
+                            {context ? <p className="mt-1 text-[11px] text-zinc-600">{context}</p> : null}
+                          </td>
+                          <td className="px-4 py-3 text-xs text-zinc-400 font-mono">{action.steamId}</td>
+                          <td className="px-4 py-3">
+                            <span
+                              className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                                action.status === 'QUEUED'
+                                  ? 'bg-green-900/30 text-green-400 border border-green-800'
+                                  : action.status === 'FAILED'
+                                  ? 'bg-red-900/30 text-red-400 border border-red-800'
+                                  : 'bg-yellow-900/30 text-yellow-400 border border-yellow-800'
+                              }`}
+                            >
+                              {automationStatusLabel(action.status)}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-xs text-zinc-400">{automationReasonLabel(action.reason)}</td>
+                          <td className="px-4 py-3 text-xs text-zinc-400 font-mono">{formatCommand(action.command)}</td>
+                          <td className="px-4 py-3 text-right">
+                            <button
+                              type="button"
+                              onClick={() => handleRetryAction(action.id)}
+                              disabled={busy || action.status === 'QUEUED'}
+                              className="inline-flex items-center rounded-md border border-zinc-700/80 bg-zinc-900/70 px-3 py-1 text-xs font-bold text-zinc-200 transition hover:bg-zinc-800 disabled:opacity-60"
+                            >
+                              Tentar novamente
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
               </table>
