@@ -448,15 +448,6 @@ const Financial: React.FC = () => {
         setFormError('Informe um numero de dias valido para o VIP.');
         return;
       }
-      if (
-        !editingTx &&
-        txType === TransactionType.INCOME &&
-        applyVipOnServer &&
-        !String(vipAutomationServerId || '').trim()
-      ) {
-        setFormError('Selecione o servidor para envio do comando VIP.');
-        return;
-      }
       if (normalizedProofUrl && !isAllowedProofUrl(normalizedProofUrl)) {
         setFormError('URL do comprovante deve ser http(s) ou arquivo enviado pelo sistema.');
         return;
@@ -980,7 +971,7 @@ const Financial: React.FC = () => {
                               value={vipAutomationServerId}
                               onChange={(event) => setVipAutomationServerId(event.target.value)}
                             >
-                              <option value="">Selecione o servidor de destino</option>
+                              <option value="">Opcional: usar fallback da automacao</option>
                               {servers.map((server) => (
                                 <option key={`financial-vip-server-${server.id}`} value={server.id}>
                                   {server.name} ({server.mode})
@@ -988,7 +979,7 @@ const Financial: React.FC = () => {
                               ))}
                             </select>
                             <p className="mt-1 text-[11px] text-zinc-500">
-                              O comando VIP sera enviado para este servidor.
+                              Serve para registrar origem e direcionar envio. Se vazio, usa fallback da automacao.
                             </p>
                           </div>
                         ) : null}
