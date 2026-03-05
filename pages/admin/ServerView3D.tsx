@@ -343,6 +343,12 @@ const VIEWER_POLISH_MATERIAL_ROUGHNESS = 0.86;
 const VIEWER_POLISH_MATERIAL_ENV_INTENSITY = 0.62;
 const VIEWER_POLISH_MATERIAL_EMISSIVE_INTENSITY = 0.065;
 const VIEWER_POLISH_WATER_ENV_INTENSITY = 1.02;
+const VIEWER_POLISH_BASE_AMBIENT_INTENSITY = 0.2;
+const VIEWER_POLISH_UNDERLIGHT_INTENSITY = 0.56;
+const VIEWER_POLISH_UNDERLIGHT_START_OFFSET = 280;
+const VIEWER_POLISH_UNDERLIGHT_FADE_RANGE = 1700;
+const VIEWER_POLISH_EXPOSURE_UNDER_BOOST = 0.22;
+const VIEWER_POLISH_SAO_UNDER_FADE = 0.82;
 const WATER_NORMAL_SCROLL_X = 0.012;
 const WATER_NORMAL_SCROLL_Y = 0.007;
 const STREAM_UPDATE_INTERVAL_MS = 160;
@@ -2157,6 +2163,8 @@ const ServerView3D: React.FC = () => {
     let skyTexture: THREE.CanvasTexture | null = null;
     let pmrem: THREE.PMREMGenerator | null = null;
     let skyEnvironment: THREE.WebGLRenderTarget | null = null;
+    let polishAmbient: THREE.AmbientLight | null = null;
+    let polishUnderLight: THREE.DirectionalLight | null = null;
     if (polishEnabled) {
       skyTexture = createSkyGradientTexture();
       scene.background = skyTexture;
@@ -2165,14 +2173,17 @@ const ServerView3D: React.FC = () => {
       skyEnvironment = pmrem.fromEquirectangular(skyTexture);
       scene.environment = skyEnvironment.texture;
 
-      const ambient = new THREE.HemisphereLight(0xd8e9ff, 0x59616a, 1.34);
+      const ambient = new THREE.HemisphereLight(0xe2efff, 0x8a97a5, 1.42);
       const sun = new THREE.DirectionalLight(0xfff4d7, 1.58);
       sun.position.set(-0.42, 1.28, 0.31).multiplyScalar(6200);
       const fill = new THREE.DirectionalLight(0xa8c9ff, 0.56);
       fill.position.set(0.64, 0.46, -0.52).multiplyScalar(4200);
       const bounce = new THREE.DirectionalLight(0xffeac4, 0.24);
       bounce.position.set(0.14, 0.34, 0.76).multiplyScalar(3600);
-      scene.add(ambient, sun, fill, bounce);
+      polishAmbient = new THREE.AmbientLight(0xc9d9ee, VIEWER_POLISH_BASE_AMBIENT_INTENSITY);
+      polishUnderLight = new THREE.DirectionalLight(0xbdd6ff, 0);
+      polishUnderLight.position.set(0.18, -1.08, -0.22).multiplyScalar(5200);
+      scene.add(ambient, sun, fill, bounce, polishAmbient, polishUnderLight);
     } else {
       const ambient = new THREE.HemisphereLight(0x8aa2ff, 0x101010, 0.95);
       const dir = new THREE.DirectionalLight(0xffffff, 0.65);
@@ -4169,6 +4180,21 @@ const ServerView3D: React.FC = () => {
           }
 
           controls.update();
+          if (polishEnabled) {
+            const underStartY = worldMinZ + VIEWER_POLISH_UNDERLIGHT_START_OFFSET;
+            const belowAmount = Math.max(0, underStartY - camera.position.y);
+            const underFactor = Math.min(1, belowAmount / VIEWER_POLISH_UNDERLIGHT_FADE_RANGE);
+            renderer.toneMappingExposure = VIEWER_POLISH_TONE_EXPOSURE * (1 + (VIEWER_POLISH_EXPOSURE_UNDER_BOOST * underFactor));
+            if (polishAmbient) {
+              polishAmbient.intensity = VIEWER_POLISH_BASE_AMBIENT_INTENSITY + (0.12 * underFactor);
+            }
+            if (polishUnderLight) {
+              polishUnderLight.intensity = VIEWER_POLISH_UNDERLIGHT_INTENSITY * underFactor;
+            }
+            if (saoPass) {
+              saoPass.params.saoIntensity = VIEWER_POLISH_SAO_INTENSITY * (1 - (VIEWER_POLISH_SAO_UNDER_FADE * underFactor));
+            }
+          }
           if (polishEnabled && waterNormalTexture) {
             waterNormalPhase += dtSec;
             waterNormalTexture.offset.set(
@@ -4226,7 +4252,7 @@ const ServerView3D: React.FC = () => {
         appendLog(`manifest carregado: ${loadedManifest.map.name}`);
         appendLog(
           polishEnabled
-            ? `visual profile=polished sky=on water=on sao=${saoPass?.enabled ? 'on' : 'off'} fog=on exposure=${VIEWER_POLISH_TONE_EXPOSURE}`
+            ? `visual profile=polished sky=on water=on sao=${saoPass?.enabled ? 'on' : 'off'} fog=on exposure=${VIEWER_POLISH_TONE_EXPOSURE} underlight=adaptive`
             : 'visual profile=simple (legacy)',
         );
         appendLog(
