@@ -203,6 +203,8 @@ const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
       { key: 'dashboard', name: 'Dashboard', path: '/admin/dashboard', icon: Icons.BarChart, chipClass: 'border-cyan-700/70 bg-cyan-500/15 text-cyan-300' },
       { key: 'servers', name: 'Servidores', path: '/admin/servers', icon: Icons.Server, chipClass: 'border-emerald-700/70 bg-emerald-500/15 text-emerald-300' },
       { key: 'webViewer', name: 'Web Viewer', path: '/admin/web-viewer', icon: Icons.Map, chipClass: 'border-sky-700/70 bg-sky-500/15 text-sky-300' },
+      { key: 'financial', name: 'Financeiro', path: '/admin/financial', icon: Icons.DollarSign, chipClass: 'border-lime-700/70 bg-lime-500/15 text-lime-300' },
+      { key: 'loadingScreens', name: 'Telas de Loading', path: '/admin/loading-screens', icon: Icons.Image, chipClass: 'border-blue-700/70 bg-blue-500/15 text-blue-300' },
     ],
   },
   {
@@ -221,9 +223,7 @@ const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
     title: 'Operacao',
     subtitle: 'Ferramentas do servidor',
     items: [
-      { key: 'financial', name: 'Financeiro', path: '/admin/financial', icon: Icons.DollarSign, chipClass: 'border-lime-700/70 bg-lime-500/15 text-lime-300' },
       { key: 'addonCommands', name: 'Comandos Addon', path: '/admin/addon-commands', icon: Icons.Terminal, chipClass: 'border-violet-700/70 bg-violet-500/15 text-violet-300' },
-      { key: 'loadingScreens', name: 'Telas de Loading', path: '/admin/loading-screens', icon: Icons.Image, chipClass: 'border-blue-700/70 bg-blue-500/15 text-blue-300' },
     ],
   },
   {
