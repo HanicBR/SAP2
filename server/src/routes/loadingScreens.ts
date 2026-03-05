@@ -131,7 +131,17 @@ const STEAM_SYNC_XML_FALLBACK_MAX = Math.min(
   parsePositiveIntEnv(process.env.LOADING_STEAM_SYNC_XML_FALLBACK_MAX, 4),
 );
 
-const maxLoadingMediaUploadMb = Math.max(1, Number(process.env.LOADING_MEDIA_UPLOAD_MAX_MB || 25));
+const maxLoadingMediaImageUploadMb = Math.max(
+  1,
+  Number(process.env.LOADING_MEDIA_UPLOAD_MAX_IMAGE_MB || process.env.LOADING_MEDIA_UPLOAD_MAX_MB || 25),
+);
+const maxLoadingMediaAudioUploadMb = Math.max(
+  1,
+  Number(process.env.LOADING_MEDIA_UPLOAD_MAX_AUDIO_MB || process.env.LOADING_MEDIA_UPLOAD_MAX_MB || 80),
+);
+const maxLoadingMediaUploadMb = Math.max(maxLoadingMediaImageUploadMb, maxLoadingMediaAudioUploadMb);
+const maxLoadingMediaImageUploadBytes = Math.round(maxLoadingMediaImageUploadMb * 1024 * 1024);
+const maxLoadingMediaAudioUploadBytes = Math.round(maxLoadingMediaAudioUploadMb * 1024 * 1024);
 const loadingMediaUploadDir =
   process.env.LOADING_MEDIA_UPLOAD_DIR || path.resolve(process.cwd(), 'uploads', 'loading-media');
 const allowedLoadingMediaMimeTypes = new Set([
@@ -290,6 +300,16 @@ const transcodeUploadedAudioVolume = async (
   } catch (err) {
     await fs.promises.unlink(tempOutputPath).catch(() => undefined);
     throw err;
+  }
+};
+
+const removeUploadedFileSafe = async (filePath: string): Promise<void> => {
+  const safePath = String(filePath || '').trim();
+  if (!safePath) return;
+  try {
+    await fs.promises.unlink(safePath);
+  } catch {
+    // ignore cleanup errors
   }
 };
 
@@ -1232,7 +1252,9 @@ router.post('/media-upload', authMiddleware, requireRole(UserRole.SUPERADMIN), (
       if (err?.code === 'LIMIT_FILE_SIZE') {
         return res
           .status(413)
-          .json({ error: `Loading media exceeds ${maxLoadingMediaUploadMb}MB limit` });
+          .json({
+            error: `Loading media exceeds hard upload limit (${maxLoadingMediaUploadMb}MB).`,
+          });
       }
       if (err?.message === 'INVALID_LOADING_MEDIA_TYPE') {
         return res
@@ -1253,8 +1275,32 @@ router.post('/media-upload', authMiddleware, requireRole(UserRole.SUPERADMIN), (
     const isAudioUpload = String(file.mimetype || '')
       .toLowerCase()
       .startsWith('audio/');
+    const maxAllowedBytes = isAudioUpload
+      ? maxLoadingMediaAudioUploadBytes
+      : maxLoadingMediaImageUploadBytes;
+    const maxAllowedMb = isAudioUpload
+      ? maxLoadingMediaAudioUploadMb
+      : maxLoadingMediaImageUploadMb;
+
+    let initialSize = file.size;
+    try {
+      const stat = await fs.promises.stat(file.path);
+      initialSize = Number(stat.size || initialSize);
+    } catch {
+      // keep original size
+    }
+
+    if (initialSize > maxAllowedBytes) {
+      await removeUploadedFileSafe(file.path);
+      return res.status(413).json({
+        error: isAudioUpload
+          ? `Audio exceeds ${maxAllowedMb}MB upload limit`
+          : `Image exceeds ${maxAllowedMb}MB upload limit`,
+      });
+    }
 
     if (volumeMode === 'REDUCE' && isAudioUpload && !isProcessableAudioUpload(file)) {
+      await removeUploadedFileSafe(file.path);
       return res
         .status(400)
         .json({ error: 'Audio volume processing supports only mp3, ogg or wav uploads' });
@@ -1265,16 +1311,26 @@ router.post('/media-upload', authMiddleware, requireRole(UserRole.SUPERADMIN), (
         await transcodeUploadedAudioVolume(file, targetPct);
       } catch (processingError: any) {
         console.error('loading music volume processing failed', processingError);
+        await removeUploadedFileSafe(file.path);
         return res.status(500).json({ error: 'Failed to process uploaded audio volume' });
       }
     }
 
-    let finalSize = file.size;
+    let finalSize = initialSize;
     try {
       const stat = await fs.promises.stat(file.path);
       finalSize = Number(stat.size || finalSize);
     } catch {
       // keep original size
+    }
+
+    if (finalSize > maxAllowedBytes) {
+      await removeUploadedFileSafe(file.path);
+      return res.status(413).json({
+        error: isAudioUpload
+          ? `Audio exceeds ${maxAllowedMb}MB upload limit`
+          : `Image exceeds ${maxAllowedMb}MB upload limit`,
+      });
     }
 
     return res.status(201).json({

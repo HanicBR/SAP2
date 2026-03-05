@@ -1004,7 +1004,9 @@ export const ApiService = {
             message = body.error;
           }
         } catch {
-          // ignore parse error
+          if (response.status === 413) {
+            message = 'Upload muito grande (HTTP 413). Reduza o arquivo ou aumente o limite no proxy/API.';
+          }
         }
         throw new Error(message);
       }
