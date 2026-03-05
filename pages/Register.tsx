@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ApiService } from '../services/api';
 import { Icons } from '../components/Icon';
+import { useConfig } from '../contexts/ConfigContext';
 
 const Register: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -13,6 +14,7 @@ const Register: React.FC = () => {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { config } = useConfig();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,14 +60,20 @@ const Register: React.FC = () => {
       
       <div className="max-w-md w-full space-y-8 bg-zinc-900 p-10 rounded shadow-2xl border border-zinc-800 relative z-10">
         <div className="text-center">
-          <div className="mx-auto h-16 w-16 bg-red-700 rounded flex items-center justify-center text-white shadow-[0_0_20px_rgba(185,28,28,0.4)] mb-6">
-            <Icons.Users className="w-8 h-8" />
-          </div>
+          {config.general.logoUrl ? (
+            <div className="mx-auto mb-6 flex h-16 items-center justify-center">
+              <img src={config.general.logoUrl} alt={config.general.siteName} className="h-16 w-auto object-contain" />
+            </div>
+          ) : (
+            <div className="mx-auto h-16 w-16 bg-red-700 rounded flex items-center justify-center text-white shadow-[0_0_20px_rgba(185,28,28,0.4)] mb-6">
+              <Icons.Users className="w-8 h-8" />
+            </div>
+          )}
           <h2 className="text-3xl font-black text-white uppercase italic tracking-wide">
             Criar Conta
           </h2>
           <p className="mt-2 text-sm text-zinc-500">
-            Junte-se à comunidade <span className="text-red-600 font-bold">Backstabber Brasil</span>
+            Junte-se à comunidade <span className="text-red-600 font-bold">{config.general.siteName}</span>
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleRegister}>

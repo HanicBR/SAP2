@@ -3,6 +3,7 @@ import { DEFAULT_SITE_CONFIG } from '../../constants';
 import { Icons } from '../../components/Icon';
 import { useConfig } from '../../contexts/ConfigContext';
 import { GameMode, SiteConfig, VipBillingOptionConfig, VipFaqItemConfig, VipPlanConfig } from '../../types';
+import { ApiService } from '../../services/api';
 
 type TabId = 'branding' | 'home' | 'vip' | 'ops';
 type NoticeTone = 'success' | 'error' | 'info';
@@ -266,6 +267,7 @@ const Settings: React.FC = () => {
   const [selectedVipPlanIndex, setSelectedVipPlanIndex] = useState(0);
   const [selectedVipMode, setSelectedVipMode] = useState<GameMode>(GameMode.TTT);
   const [isSaving, setIsSaving] = useState(false);
+  const [logoUploading, setLogoUploading] = useState(false);
   const [notice, setNotice] = useState<Notice | null>(null);
   const [savedSignature, setSavedSignature] = useState('');
   const [showAutomationAdvanced, setShowAutomationAdvanced] = useState(false);
@@ -356,14 +358,24 @@ const Settings: React.FC = () => {
     }));
   };
 
-  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setGeneral({ logoUrl: String(reader.result || '') });
-    };
-    reader.readAsDataURL(file);
+    setLogoUploading(true);
+    setNotice(null);
+    try {
+      const uploaded = await ApiService.uploadSiteLogo(file);
+      setGeneral({ logoUrl: uploaded.url });
+      setNotice({ tone: 'success', message: 'Logo enviada com sucesso. Clique em salvar para persistir.' });
+    } catch (error: any) {
+      setNotice({
+        tone: 'error',
+        message: error?.message ? String(error.message) : 'Nao foi possivel enviar a logo.',
+      });
+    } finally {
+      setLogoUploading(false);
+      event.target.value = '';
+    }
   };
 
   const updateSubtitleSegment = (
@@ -539,8 +551,16 @@ const Settings: React.FC = () => {
             <label className={LABEL_CLASS}>Upload</label>
             <label className="flex cursor-pointer items-center justify-center rounded border border-dashed border-zinc-700 bg-zinc-950 px-3 py-2 text-xs font-bold uppercase text-zinc-400 hover:border-zinc-500">
               <Icons.Upload className="mr-2 h-4 w-4" />
-              Selecionar imagem
-              <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
+              {logoUploading ? 'Enviando...' : 'Selecionar imagem'}
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/jpg,image/webp,image/gif,image/svg+xml,image/x-icon,image/vnd.microsoft.icon"
+                className="hidden"
+                onChange={(event) => {
+                  void handleLogoUpload(event);
+                }}
+                disabled={logoUploading}
+              />
             </label>
             <div>
               <label className={LABEL_CLASS}>URL da imagem</label>

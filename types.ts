@@ -1262,6 +1262,13 @@ export interface LoadingMediaUploadResult {
   mime: string;
 }
 
+export interface SiteLogoUploadResult {
+  url: string;
+  filename: string;
+  size: number;
+  mime: string;
+}
+
 export type LoadingTelemetryRange = '24h' | '7d' | '30d';
 
 export interface LoadingTelemetrySlugItem {

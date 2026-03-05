@@ -1,7 +1,7 @@
 
 
 import { MOCK_SERVERS, MOCK_EVENTS, MOCK_STATS, VIP_PLANS, MOCK_SUSPICIOUS_GROUPS, MOCK_PLAYERS, MOCK_USERS, MOCK_TRANSACTIONS, generateServerAnalytics, DEFAULT_SITE_CONFIG } from '../constants';
-import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionProofUploadResult, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, SiteAuditLogsQueryParams, SiteAuditLogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel, ServerLiveStateResponse, ServerViewerActionDispatchResponse, ServerViewerActionRequest, ServerViewerActionStatusResponse, ServerViewerMapOverlayResponse, ServerViewerStateResponse, ServerWsLiveStateListResponse, ServerWsViewerStateListResponse, PlayerAliasHistoryResponse, PlayerAvatarHistoryResponse, LoadingScreenProfile, LoadingScreensResponse, LoadingScreenSyncedVipsResponse, LoadingMediaUploadResult, LoadingTelemetryRange, LoadingTelemetrySlugsResponse, LoadingTelemetrySummaryResponse, AuthRegisterResponse, WorkshopDiagnosticsReportDownload, WorkshopDiagnosticsReportRequest, WorkshopManualEnqueueRequest, WorkshopManualEnqueueResponse, WorkshopQueueSnapshotResponse, WorkshopResolveSelectionRequest, WorkshopResolveSelectionResponse, WorkshopResolutionOptionsResponse, WorkshopResetCacheAndReprocessRequest, WorkshopResetCacheAndReprocessResponse } from '../types';
+import { GameServer, ServerEvent, DailyStats, VipPlan, SuspiciousGroup, Player, User, UserRole, LiveActivityItem, MapStats, FinancialStats, DashboardData, Transaction, TransactionProofUploadResult, TransactionType, ServerAnalytics, GameMode, ServerStatus, SiteConfig, PunishmentType, Punishment, LegacyImportSummary, LogsQueryParams, LogsQueryResponse, SiteAuditLogsQueryParams, SiteAuditLogsQueryResponse, VipAdminItem, VipAdminListResponse, VipDispatchInfo, VipAutomationActionListResponse, VipAutomationActionStatus, VipReconcileResponse, VipAutomationConfig, PlayerIpHistoryResponseV2, RelatedAccountsResponseV2, SuspiciousGroupV2, DuplicateConfidence, SuspicionLevel, ServerLiveStateResponse, ServerViewerActionDispatchResponse, ServerViewerActionRequest, ServerViewerActionStatusResponse, ServerViewerMapOverlayResponse, ServerViewerStateResponse, ServerWsLiveStateListResponse, ServerWsViewerStateListResponse, PlayerAliasHistoryResponse, PlayerAvatarHistoryResponse, LoadingScreenProfile, LoadingScreensResponse, LoadingScreenSyncedVipsResponse, LoadingMediaUploadResult, SiteLogoUploadResult, LoadingTelemetryRange, LoadingTelemetrySlugsResponse, LoadingTelemetrySummaryResponse, AuthRegisterResponse, WorkshopDiagnosticsReportDownload, WorkshopDiagnosticsReportRequest, WorkshopManualEnqueueRequest, WorkshopManualEnqueueResponse, WorkshopQueueSnapshotResponse, WorkshopResolveSelectionRequest, WorkshopResolveSelectionResponse, WorkshopResolutionOptionsResponse, WorkshopResetCacheAndReprocessRequest, WorkshopResetCacheAndReprocessResponse } from '../types';
 
 // Utility to simulate network delay (used as fallback)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -964,6 +964,50 @@ export const ApiService = {
       // ignore storage errors
     }
     return config;
+  },
+
+  uploadSiteLogo: async (file: File): Promise<SiteLogoUploadResult> => {
+    if (hasApi && API_BASE_URL) {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const headers: HeadersInit = {};
+      const token = getAuthToken();
+      if (token) {
+        (headers as any).Authorization = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/site-config/logo-upload`, {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+
+      if (!response.ok) {
+        let message = `HTTP ${response.status}`;
+        try {
+          const body = await response.json();
+          if (body && typeof body.error === 'string') {
+            message = body.error;
+          }
+        } catch {
+          if (response.status === 413) {
+            message = 'Logo muito grande (HTTP 413). Reduza o arquivo.';
+          }
+        }
+        throw new Error(message);
+      }
+
+      return (await response.json()) as SiteLogoUploadResult;
+    }
+
+    const dataUrl = await fileToDataUrl(file);
+    return {
+      url: dataUrl,
+      filename: file.name,
+      size: file.size,
+      mime: file.type || 'application/octet-stream',
+    };
   },
 
   uploadLoadingMedia: async (

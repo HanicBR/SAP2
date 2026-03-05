@@ -4,6 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ApiService } from '../services/api';
 import { Icons } from '../components/Icon';
 import { User, UserRole } from '../types';
+import { useConfig } from '../contexts/ConfigContext';
 
 const Login: React.FC = () => {
   const [emailOrUser, setEmailOrUser] = useState('');
@@ -18,6 +19,7 @@ const Login: React.FC = () => {
   const [notice, setNotice] = useState('');
   const [resendingVerification, setResendingVerification] = useState(false);
   const navigate = useNavigate();
+  const { config } = useConfig();
 
   // Se já estiver logado e exigir troca de senha, abre modal ao carregar a página
   useEffect(() => {
@@ -79,14 +81,20 @@ const Login: React.FC = () => {
       
       <div className="max-w-md w-full space-y-8 bg-zinc-900 p-10 rounded shadow-2xl border border-zinc-800 relative z-10">
         <div className="text-center">
-          <div className="mx-auto h-16 w-16 bg-red-700 rounded flex items-center justify-center text-white shadow-[0_0_20px_rgba(185,28,28,0.4)] mb-6">
-            <Icons.Shield className="w-8 h-8" />
-          </div>
+          {config.general.logoUrl ? (
+            <div className="mx-auto mb-6 flex h-16 items-center justify-center">
+              <img src={config.general.logoUrl} alt={config.general.siteName} className="h-16 w-auto object-contain" />
+            </div>
+          ) : (
+            <div className="mx-auto h-16 w-16 bg-red-700 rounded flex items-center justify-center text-white shadow-[0_0_20px_rgba(185,28,28,0.4)] mb-6">
+              <Icons.Shield className="w-8 h-8" />
+            </div>
+          )}
           <h2 className="text-3xl font-black text-white uppercase italic tracking-wide">
             Área Restrita
           </h2>
           <p className="mt-2 text-sm text-zinc-500">
-            Acesso exclusivo para staff do <span className="text-red-600 font-bold">Backstabber Brasil</span>
+            Acesso exclusivo para staff do <span className="text-red-600 font-bold">{config.general.siteName}</span>
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleLogin}>

@@ -37,7 +37,17 @@ const Home: React.FC = () => {
         
         <div className="relative max-w-7xl mx-auto py-24 px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
           <div className="mb-6 animate-bounce">
-            <Icons.Shield className="w-16 h-16 text-brand drop-shadow-[0_0_15px_var(--brand-color)]" />
+            {config.general.logoUrl ? (
+              <img
+                src={config.general.logoUrl}
+                alt={config.general.siteName}
+                className="h-16 w-auto object-contain drop-shadow-[0_0_15px_var(--brand-color)]"
+                loading="lazy"
+                decoding="async"
+              />
+            ) : (
+              <Icons.Shield className="w-16 h-16 text-brand drop-shadow-[0_0_15px_var(--brand-color)]" />
+            )}
           </div>
           <h1 className="text-5xl md:text-7xl font-black tracking-tight text-white mb-6 uppercase italic">
             {config.home.heroTitle} <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-brand-dark drop-shadow-lg">{config.home.heroTitleHighlight}</span>

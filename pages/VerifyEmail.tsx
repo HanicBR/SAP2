@@ -2,9 +2,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ApiService } from '../services/api';
 import { Icons } from '../components/Icon';
+import { useConfig } from '../contexts/ConfigContext';
 
 const VerifyEmail: React.FC = () => {
   const location = useLocation();
+  const { config } = useConfig();
   const token = useMemo(() => {
     const params = new URLSearchParams(location.search);
     return String(params.get('token') || '').trim();
@@ -50,9 +52,15 @@ const VerifyEmail: React.FC = () => {
 
       <div className="max-w-md w-full space-y-8 bg-zinc-900 p-10 rounded shadow-2xl border border-zinc-800 relative z-10">
         <div className="text-center">
-          <div className="mx-auto h-16 w-16 bg-red-700 rounded flex items-center justify-center text-white shadow-[0_0_20px_rgba(185,28,28,0.4)] mb-6">
-            {loading ? <Icons.Activity className="w-8 h-8 animate-spin" /> : success ? <Icons.Check className="w-8 h-8" /> : <Icons.AlertTriangle className="w-8 h-8" />}
-          </div>
+          {config.general.logoUrl ? (
+            <div className="mx-auto mb-6 flex h-16 items-center justify-center">
+              <img src={config.general.logoUrl} alt={config.general.siteName} className="h-16 w-auto object-contain" />
+            </div>
+          ) : (
+            <div className="mx-auto h-16 w-16 bg-red-700 rounded flex items-center justify-center text-white shadow-[0_0_20px_rgba(185,28,28,0.4)] mb-6">
+              {loading ? <Icons.Activity className="w-8 h-8 animate-spin" /> : success ? <Icons.Check className="w-8 h-8" /> : <Icons.AlertTriangle className="w-8 h-8" />}
+            </div>
+          )}
           <h2 className="text-3xl font-black text-white uppercase italic tracking-wide">
             Confirmacao de E-mail
           </h2>
