@@ -95,6 +95,15 @@ body {
   min-height: 40px;
 }
 
+.ui-shell :where(select) {
+  color-scheme: dark;
+}
+
+.ui-shell :where(select option, select optgroup) {
+  background-color: #121214 !important;
+  color: var(--ui-text-1) !important;
+}
+
 .ui-shell :where(textarea) {
   min-height: 92px;
 }
