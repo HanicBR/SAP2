@@ -597,6 +597,7 @@ router.post('/actions/vip/preview', authMiddleware, requireRole(UserRole.ADMIN),
       steamId,
       vipPlan,
       vipExpiry,
+      vipDurationDays,
       serverId,
     } = (req as any).body || {};
 
@@ -610,6 +611,7 @@ router.post('/actions/vip/preview', authMiddleware, requireRole(UserRole.ADMIN),
       steamId: String(steamId || '').trim(),
       ...(vipPlan !== undefined ? { vipPlan: String(vipPlan) } : {}),
       ...(vipExpiry !== undefined ? { vipExpiry } : {}),
+      ...(vipDurationDays !== undefined ? { vipDurationDays } : {}),
       ...(serverId !== undefined ? { serverId: String(serverId) } : {}),
     };
 

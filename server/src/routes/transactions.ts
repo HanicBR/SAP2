@@ -291,6 +291,7 @@ router.post('/', async (req, res) => {
           steamId: normalizedSteamId,
           vipPlan: normalizedVipPlan,
           vipExpiry: expiry,
+          vipDurationDays: resolvedVipDurationDays,
           metadata: {
             trigger: 'transaction_create',
             transactionId: tx.id,

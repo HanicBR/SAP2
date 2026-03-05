@@ -60,9 +60,13 @@ const automationContextLabel = (item: VipAutomationActionItem) => {
   const parts: string[] = [];
   if (item.actor) parts.push(`ator: ${item.actor}`);
   if (item.transactionId) parts.push(`tx: ${item.transactionId}`);
+  if (item.vipDurationDays) parts.push(`duracao: ${item.vipDurationDays}d`);
   if (item.retryOfActionId) parts.push(`retryDe: ${item.retryOfActionId}`);
   return parts.join(' | ');
 };
+
+const hasVipDurationToken = (template: string): boolean =>
+  /\{\{\s*(vipDuration|vipDurationRaw|vipDurationDays)\s*\}\}/.test(String(template || ''));
 
 const automationReasonLabel = (reason?: string) => {
   const code = String(reason || '').trim();
@@ -193,6 +197,7 @@ const Vips: React.FC = () => {
   }, [actions, automationConfig.enabled, items, sandboxServers.length]);
 
   const isRefreshingAll = loading || actionsLoading || automationLoading || serversLoading;
+  const grantTemplateHasDurationToken = hasVipDurationToken(automationConfig.grantTemplate);
 
   const loadData = async () => {
     setLoading(true);
@@ -1045,7 +1050,7 @@ const Vips: React.FC = () => {
                       }))
                     }
                     className="bg-zinc-950 border border-zinc-700 rounded p-2 text-white text-sm font-mono md:col-span-2"
-                    placeholder='Template GRANT. Ex: sam setrank {{steamId}} {{vipPlanServer}}'
+                    placeholder='Template GRANT. Ex: sam setrankid {{steamId}} {{vipPlanServer}} {{vipDuration}}'
                     rows={2}
                   />
                   <textarea
@@ -1061,8 +1066,14 @@ const Vips: React.FC = () => {
                     rows={2}
                   />
                   <div className="text-xs text-zinc-500 md:col-span-2">
-                    Tokens permitidos: {'{{steamId}}'}, {'{{vipPlanServer}}'}, {'{{vipExpiryUnix}}'}
+                    Tokens permitidos: {'{{steamId}}'}, {'{{vipPlanServer}}'}, {'{{vipExpiryUnix}}'},
+                    {' {{vipDuration}}'}, {'{{vipDurationRaw}}'}, {'{{vipDurationDays}}'}
                   </div>
+                  {!grantTemplateHasDurationToken ? (
+                    <div className="text-xs text-amber-400 md:col-span-2">
+                      Aviso: o template GRANT atual nao tem token de duracao. Sem {'{{vipDuration}}'} o comando sera enviado sem tempo (ex.: 30d).
+                    </div>
+                  ) : null}
                 </div>
                 <button
                   type="submit"

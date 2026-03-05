@@ -12,6 +12,7 @@ export interface VipAutomationBuildInput {
   steamId: string;
   vipPlan?: string | null;
   vipExpiry?: Date | string | null;
+  vipDurationDays?: number | string | null;
   serverId?: string | null;
   retryOfActionId?: string | null;
   metadata?: Record<string, unknown>;
@@ -165,6 +166,13 @@ const parseExpiry = (raw: Date | string | null | undefined): Date | null => {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 };
 
+const parseDurationDays = (raw: number | string | null | undefined): number | null => {
+  if (raw === undefined || raw === null || raw === '') return null;
+  const parsed = Number.parseInt(String(raw), 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) return null;
+  return parsed;
+};
+
 const mapVipPlanToServerGroup = (vipPlan: string): string => {
   const plan = String(vipPlan || '').trim();
   const normalized = plan.toLowerCase();
@@ -188,6 +196,11 @@ const extractTemplateTokens = (template: string): string[] => {
 const templateHasRawTokens = (template: string) =>
   extractTemplateTokens(template).some((token) => /raw$/i.test(token));
 
+const templateHasDurationTokens = (template: string) =>
+  extractTemplateTokens(template).some((token) =>
+    ['vipDuration', 'vipDurationRaw', 'vipDurationDays'].includes(String(token)),
+  );
+
 const renderTemplate = (
   template: string,
   input: VipAutomationBuildInput,
@@ -201,6 +214,8 @@ const renderTemplate = (
   const vipPlan = String(input.vipPlan || '').trim();
   const vipPlanServer = mapVipPlanToServerGroup(vipPlan);
   const vipExpiry = parseExpiry(input.vipExpiry);
+  const vipDurationDays = parseDurationDays(input.vipDurationDays);
+  const vipDurationText = vipDurationDays ? `${vipDurationDays}d` : '';
   const expiryIso = vipExpiry ? vipExpiry.toISOString() : '';
   const expiryUnix = vipExpiry ? Math.floor(vipExpiry.getTime() / 1000) : 0;
   const action = String(input.action || '').trim().toLowerCase();
@@ -208,7 +223,9 @@ const renderTemplate = (
   // Supported template tokens:
   // {{steamId}}, {{steamIdRaw}}, {{vipPlan}}, {{vipPlanRaw}},
   // {{vipPlanServer}}, {{vipPlanServerRaw}},
-  // {{vipExpiryIso}}, {{vipExpiryIsoRaw}}, {{vipExpiryUnix}}, {{action}}
+  // {{vipExpiryIso}}, {{vipExpiryIsoRaw}}, {{vipExpiryUnix}},
+  // {{vipDuration}}, {{vipDurationRaw}}, {{vipDurationDays}},
+  // {{action}}
   const tokenMap: Record<string, string> = {
     steamId: quoteConsoleArg(steamId),
     steamIdRaw: steamId,
@@ -219,6 +236,9 @@ const renderTemplate = (
     vipExpiryIso: quoteConsoleArg(expiryIso),
     vipExpiryIsoRaw: expiryIso,
     vipExpiryUnix: expiryUnix > 0 ? String(expiryUnix) : '',
+    vipDuration: quoteConsoleArg(vipDurationText),
+    vipDurationRaw: vipDurationText,
+    vipDurationDays: vipDurationDays ? String(vipDurationDays) : '',
     action,
   };
 
@@ -242,7 +262,21 @@ const renderTemplate = (
     return { ok: false, reason: 'empty_command' };
   }
 
-  return { ok: true, command: parsedCommand };
+  let finalCommand = parsedCommand;
+
+  // Backward compatibility for legacy template:
+  // sam setrankid {{steamId}} {{vipPlanServer}}
+  // If duration tokens are absent, append "<N>d" automatically on GRANT.
+  if (
+    input.action === 'GRANT' &&
+    vipDurationText &&
+    !templateHasDurationTokens(template) &&
+    /^sam\s+setrankid\b/i.test(parsedCommand)
+  ) {
+    finalCommand = `${parsedCommand} ${quoteConsoleArg(vipDurationText)}`;
+  }
+
+  return { ok: true, command: finalCommand };
 };
 
 const resolveSandboxServerId = async (
@@ -494,6 +528,7 @@ const buildVipAutomation = async (
       action: input.action,
       steamId: String(input.steamId || '').trim(),
       vipPlan: String(input.vipPlan || '').trim() || undefined,
+      vipDurationDays: parseDurationDays(input.vipDurationDays) || undefined,
     },
   };
 };

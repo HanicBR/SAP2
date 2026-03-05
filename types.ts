@@ -590,6 +590,7 @@ export interface VipAutomationActionItem {
   trigger?: string;
   actor?: string;
   transactionId?: string;
+  vipDurationDays?: number;
   queuedActionId?: string;
   retryOfActionId?: string;
   retriedAt?: string;

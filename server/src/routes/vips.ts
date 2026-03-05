@@ -41,6 +41,13 @@ const parseBoolean = (value: unknown, fallback: boolean): boolean => {
   return fallback;
 };
 
+const parseOptionalPositiveInt = (value: unknown): number | undefined => {
+  if (value === undefined || value === null || value === '') return undefined;
+  const parsed = Number.parseInt(String(value), 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) return undefined;
+  return parsed;
+};
+
 const parseStringArray = (value: unknown, maxItems: number): string[] | undefined => {
   if (value === undefined) return undefined;
   const source = Array.isArray(value)
@@ -90,7 +97,7 @@ const parseVipAutomationStatus = (value: unknown): 'ALL' | VipAutomationActionSt
 
 const parseActionMetadata = (
   value: unknown,
-): { trigger?: string; actor?: string; transactionId?: string } => {
+): { trigger?: string; actor?: string; transactionId?: string; vipDurationDays?: number } => {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     return {};
   }
@@ -99,11 +106,13 @@ const parseActionMetadata = (
   const trigger = String(metadata.trigger || '').trim();
   const actor = String(metadata.actor || '').trim();
   const transactionId = String(metadata.transactionId || '').trim();
+  const vipDurationDays = parseOptionalPositiveInt(metadata.vipDurationDays);
 
   return {
     ...(trigger ? { trigger } : {}),
     ...(actor ? { actor } : {}),
     ...(transactionId ? { transactionId } : {}),
+    ...(vipDurationDays ? { vipDurationDays } : {}),
   };
 };
 
@@ -141,6 +150,7 @@ const toVipActionRow = (row: {
   ...(metadata.trigger ? { trigger: metadata.trigger } : {}),
   ...(metadata.actor ? { actor: metadata.actor } : {}),
   ...(metadata.transactionId ? { transactionId: metadata.transactionId } : {}),
+  ...(metadata.vipDurationDays ? { vipDurationDays: metadata.vipDurationDays } : {}),
   queuedActionId: row.queuedActionId || undefined,
   retryOfActionId: row.retryOfActionId || undefined,
   retriedAt: toIso(row.retriedAt),
@@ -352,6 +362,7 @@ router.post('/grant', async (req, res) => {
       steamId: parsedSteamId,
       vipPlan: parsedPlan,
       vipExpiry: expiry,
+      vipDurationDays: durationDays,
       ...(parsedServerId ? { serverId: parsedServerId } : {}),
       metadata: {
         trigger: 'vip_admin_grant',
@@ -442,6 +453,7 @@ router.post('/extend', async (req, res) => {
       steamId: parsedSteamId,
       vipPlan: nextPlan,
       vipExpiry: nextExpiry,
+      vipDurationDays: durationDays,
       ...(parsedServerId ? { serverId: parsedServerId } : {}),
       metadata: {
         trigger: 'vip_admin_extend',
@@ -546,12 +558,14 @@ router.post('/actions/:id/retry', async (req, res) => {
     action.metadata && typeof action.metadata === 'object' && !Array.isArray(action.metadata)
       ? (action.metadata as Record<string, unknown>)
       : {};
+  const retryDurationDays = parseOptionalPositiveInt(metadataSource.vipDurationDays);
 
   const dispatch = await dispatchVipAutomationAction({
     action: action.action === 'REVOKE' ? 'REVOKE' : 'GRANT',
     steamId: action.steamId,
     ...(action.vipPlan ? { vipPlan: action.vipPlan } : {}),
     ...(action.vipExpiry ? { vipExpiry: action.vipExpiry } : {}),
+    ...(retryDurationDays ? { vipDurationDays: retryDurationDays } : {}),
     ...((overrideServerId || action.serverId) ? { serverId: overrideServerId || action.serverId } : {}),
     retryOfActionId: action.id,
     metadata: {
