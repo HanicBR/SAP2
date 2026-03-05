@@ -184,21 +184,57 @@ type AdminNavItem = {
   name: string;
   path: string;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  chipClass: string;
 };
 
-const ADMIN_NAV_ITEMS: AdminNavItem[] = [
-  { key: 'dashboard', name: 'Dashboard', path: '/admin/dashboard', icon: Icons.BarChart },
-  { key: 'financial', name: 'Financeiro', path: '/admin/financial', icon: Icons.DollarSign },
-  { key: 'vips', name: 'VIPs', path: '/admin/vips', icon: Icons.Crown },
-  { key: 'players', name: 'Jogadores', path: '/admin/players', icon: Icons.UserGroup },
-  { key: 'logs', name: 'Logs e Eventos', path: '/admin/logs', icon: Icons.List },
-  { key: 'servers', name: 'Servidores', path: '/admin/servers', icon: Icons.Server },
-  { key: 'webViewer', name: 'Web Viewer', path: '/admin/web-viewer', icon: Icons.Map },
-  { key: 'duplicates', name: 'Deteccao de Duplicatas', path: '/admin/duplicates', icon: Icons.Fingerprint },
-  { key: 'addonCommands', name: 'Comandos Addon', path: '/admin/addon-commands', icon: Icons.Terminal },
-  { key: 'settings', name: 'Configuracoes Site', path: '/admin/settings', icon: Icons.Settings },
-  { key: 'loadingScreens', name: 'Telas de Loading', path: '/admin/loading-screens', icon: Icons.Image },
-  { key: 'users', name: 'Usuarios do Sistema', path: '/admin/users', icon: Icons.Users },
+type AdminNavSection = {
+  id: string;
+  title: string;
+  subtitle: string;
+  items: AdminNavItem[];
+};
+
+const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
+  {
+    id: 'overview',
+    title: 'Visao Geral',
+    subtitle: 'Painel e observabilidade',
+    items: [
+      { key: 'dashboard', name: 'Dashboard', path: '/admin/dashboard', icon: Icons.BarChart, chipClass: 'border-cyan-700/70 bg-cyan-500/15 text-cyan-300' },
+      { key: 'servers', name: 'Servidores', path: '/admin/servers', icon: Icons.Server, chipClass: 'border-emerald-700/70 bg-emerald-500/15 text-emerald-300' },
+      { key: 'webViewer', name: 'Web Viewer', path: '/admin/web-viewer', icon: Icons.Map, chipClass: 'border-sky-700/70 bg-sky-500/15 text-sky-300' },
+    ],
+  },
+  {
+    id: 'community',
+    title: 'Comunidade',
+    subtitle: 'Jogadores e moderacao',
+    items: [
+      { key: 'players', name: 'Jogadores', path: '/admin/players', icon: Icons.UserGroup, chipClass: 'border-indigo-700/70 bg-indigo-500/15 text-indigo-300' },
+      { key: 'vips', name: 'VIPs', path: '/admin/vips', icon: Icons.Crown, chipClass: 'border-amber-700/70 bg-amber-500/15 text-amber-300' },
+      { key: 'logs', name: 'Logs e Eventos', path: '/admin/logs', icon: Icons.List, chipClass: 'border-fuchsia-700/70 bg-fuchsia-500/15 text-fuchsia-300' },
+      { key: 'duplicates', name: 'Deteccao de Duplicatas', path: '/admin/duplicates', icon: Icons.Fingerprint, chipClass: 'border-rose-700/70 bg-rose-500/15 text-rose-300' },
+    ],
+  },
+  {
+    id: 'operations',
+    title: 'Operacao',
+    subtitle: 'Ferramentas do servidor',
+    items: [
+      { key: 'financial', name: 'Financeiro', path: '/admin/financial', icon: Icons.DollarSign, chipClass: 'border-lime-700/70 bg-lime-500/15 text-lime-300' },
+      { key: 'addonCommands', name: 'Comandos Addon', path: '/admin/addon-commands', icon: Icons.Terminal, chipClass: 'border-violet-700/70 bg-violet-500/15 text-violet-300' },
+      { key: 'loadingScreens', name: 'Telas de Loading', path: '/admin/loading-screens', icon: Icons.Image, chipClass: 'border-blue-700/70 bg-blue-500/15 text-blue-300' },
+    ],
+  },
+  {
+    id: 'system',
+    title: 'Sistema',
+    subtitle: 'Configuracoes e acesso',
+    items: [
+      { key: 'settings', name: 'Configuracoes Site', path: '/admin/settings', icon: Icons.Settings, chipClass: 'border-teal-700/70 bg-teal-500/15 text-teal-300' },
+      { key: 'users', name: 'Usuarios do Sistema', path: '/admin/users', icon: Icons.Users, chipClass: 'border-orange-700/70 bg-orange-500/15 text-orange-300' },
+    ],
+  },
 ];
 
 export const AdminLayout: React.FC<{ children: React.ReactNode; userOverride?: User | null }> = ({
@@ -235,7 +271,13 @@ export const AdminLayout: React.FC<{ children: React.ReactNode; userOverride?: U
     setSidebarOpen(false);
   }, [location.pathname]);
 
-  const visibleNavItems = ADMIN_NAV_ITEMS.filter((item) => canAccessAdminPage(user?.role, item.key));
+  const visibleNavSections = ADMIN_NAV_SECTIONS
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => canAccessAdminPage(user?.role, item.key)),
+    }))
+    .filter((section) => section.items.length > 0);
+  const visibleNavItems = visibleNavSections.flatMap((section) => section.items);
   const isActive = (path: string) => (
     location.pathname === path || location.pathname.startsWith(`${path}/`)
   );
@@ -286,29 +328,48 @@ export const AdminLayout: React.FC<{ children: React.ReactNode; userOverride?: U
           </Link>
         </div>
         <div className="h-[calc(100%-80px)] overflow-y-auto admin-scrollbar px-3 pb-24 pt-4">
-          <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Navigation</p>
-          <nav className="space-y-1.5">
-            {visibleNavItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                onClick={() => setSidebarOpen(false)}
-                className={`group relative flex items-center rounded-xl border px-3 py-2.5 transition-all duration-200 ${
-                  isActive(item.path)
-                    ? 'border-red-700/55 bg-gradient-to-r from-red-900/30 via-red-900/10 to-transparent text-red-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]'
-                    : 'border-transparent text-zinc-400 hover:border-[#31405a] hover:bg-[#151d2c] hover:text-zinc-100'
-                }`}
+          <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Navegacao</p>
+          <div className="space-y-3">
+            {visibleNavSections.map((section) => (
+              <section
+                key={section.id}
+                className="rounded-xl border border-[#273248]/80 bg-[#0f1728]/65 px-2.5 py-2.5"
               >
-                <span
-                  className={`absolute left-0 top-2.5 h-6 w-[3px] rounded-r ${
-                    isActive(item.path) ? 'bg-red-400' : 'bg-transparent'
-                  }`}
-                />
-                <item.icon className={`mr-3 w-4 h-4 ${isActive(item.path) ? 'text-red-300' : 'text-zinc-500 group-hover:text-zinc-200'}`} />
-                <span className="text-[13px] font-semibold">{item.name}</span>
-              </Link>
+                <div className="px-1.5 pb-1.5">
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-zinc-300">{section.title}</p>
+                  <p className="text-[10px] text-zinc-500">{section.subtitle}</p>
+                </div>
+                <nav className="space-y-1">
+                  {section.items.map((item) => (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      onClick={() => setSidebarOpen(false)}
+                      className={`group relative flex items-center rounded-xl border px-2.5 py-2.5 transition-all duration-200 ${
+                        isActive(item.path)
+                          ? 'border-red-700/55 bg-gradient-to-r from-red-900/30 via-red-900/10 to-transparent text-red-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]'
+                          : 'border-transparent text-zinc-400 hover:border-[#31405a] hover:bg-[#151d2c] hover:text-zinc-100'
+                      }`}
+                    >
+                      <span
+                        className={`absolute left-0 top-2.5 h-6 w-[3px] rounded-r ${
+                          isActive(item.path) ? 'bg-red-400' : 'bg-transparent'
+                        }`}
+                      />
+                      <span
+                        className={`mr-3 flex h-8 w-8 items-center justify-center rounded-lg border ${item.chipClass} ${
+                          isActive(item.path) ? 'shadow-[0_0_0_1px_rgba(255,255,255,0.12)]' : ''
+                        }`}
+                      >
+                        <item.icon className="h-4 w-4" />
+                      </span>
+                      <span className="text-[13px] font-semibold leading-tight">{item.name}</span>
+                    </Link>
+                  ))}
+                </nav>
+              </section>
             ))}
-          </nav>
+          </div>
         </div>
 
         <div className="absolute bottom-0 w-full border-t border-[#2a3347]/85 bg-black/30 p-3">
