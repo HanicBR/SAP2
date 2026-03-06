@@ -126,6 +126,14 @@ const WebViewer: React.FC = () => {
     setRefreshing(false);
   }, [loadLiveState, loadServers]);
 
+  const sortedServers = useMemo(
+    () =>
+      [...servers].sort((left, right) =>
+        String(left.name || '').toLowerCase().localeCompare(String(right.name || '').toLowerCase()),
+      ),
+    [servers],
+  );
+
   useEffect(() => {
     void Promise.all([loadServers(), loadLiveState()]);
     const timer = window.setInterval(() => {
@@ -135,15 +143,19 @@ const WebViewer: React.FC = () => {
   }, [loadLiveState, loadServers]);
 
   useEffect(() => {
-    const fromQuery = String(searchParams.get('serverId') || '').trim();
-    if (fromQuery && servers.some((item) => item.id === fromQuery)) {
-      setSelectedServerId(fromQuery);
+    if (!sortedServers.length) {
+      setSelectedServerId('');
       return;
     }
-    if (!selectedServerId && servers.length > 0) {
-      setSelectedServerId(servers[0].id);
+
+    const fromQuery = String(searchParams.get('serverId') || '').trim();
+    if (fromQuery && sortedServers.some((item) => item.id === fromQuery)) {
+      setSelectedServerId((current) => (current === fromQuery ? current : fromQuery));
+      return;
     }
-  }, [searchParams, selectedServerId, servers]);
+
+    setSelectedServerId((current) => (current && sortedServers.some((item) => item.id === current) ? current : sortedServers[0].id));
+  }, [searchParams, sortedServers]);
 
   useEffect(() => {
     if (!selectedServerId) return;
@@ -153,14 +165,6 @@ const WebViewer: React.FC = () => {
     nextParams.set('serverId', selectedServerId);
     setSearchParams(nextParams, { replace: true });
   }, [searchParams, selectedServerId, setSearchParams]);
-
-  const sortedServers = useMemo(
-    () =>
-      [...servers].sort((left, right) =>
-        String(left.name || '').toLowerCase().localeCompare(String(right.name || '').toLowerCase()),
-      ),
-    [servers],
-  );
 
   const selectedServer = useMemo(
     () => sortedServers.find((item) => item.id === selectedServerId) || null,
