@@ -753,6 +753,9 @@ const uniqueStrings = (values: string[]): string[] => {
   return next;
 };
 
+const isManualVipPlaceholder = (name: string, steamId: string, avatarUrl: string): boolean =>
+  name.trim().toLowerCase() === 'novo destaque' && !steamId && !avatarUrl;
+
 const sanitizeVipPlayers = (value: unknown, fallback: LoadingScreenVipEntry[]): LoadingScreenVipEntry[] => {
   if (!Array.isArray(value)) return fallback;
 
@@ -767,6 +770,7 @@ const sanitizeVipPlayers = (value: unknown, fallback: LoadingScreenVipEntry[]): 
     const steamId = trimTo(entry.steamId, 80, '');
     const avatarUrl = sanitizeUrl(entry.avatarUrl);
     const vipPlan = trimTo(entry.vipPlan, 32, '');
+    if (isManualVipPlaceholder(name, steamId, avatarUrl)) return;
 
     const normalized: LoadingScreenVipEntry = {
       name,
@@ -778,7 +782,7 @@ const sanitizeVipPlayers = (value: unknown, fallback: LoadingScreenVipEntry[]): 
     next.push(normalized);
   });
 
-  return next.length > 0 ? next : fallback;
+  return next;
 };
 
 const mergeAndDedupeVipEntries = (

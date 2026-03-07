@@ -120,13 +120,6 @@ const toMusicTrackItems = (
 const activeMusicUrls = (items: LoadingScreenMusicTrackItem[]): string[] =>
   items.filter((entry) => entry.enabled !== false).map((entry) => entry.url);
 
-const makeVip = (): LoadingScreenVipEntry => ({
-  name: 'Novo destaque',
-  steamId: '',
-  avatarUrl: '',
-  vipPlan: 'VIP',
-});
-
 const makeDraft = (base?: LoadingScreenProfile): LoadingScreenProfile => {
   const slug = base?.slug || `loading-${Date.now()}`;
   const backgroundImageItems = toBackgroundItems(
@@ -170,7 +163,7 @@ const makeDraft = (base?: LoadingScreenProfile): LoadingScreenProfile => {
     },
     rules: base?.rules?.length ? [...base.rules] : ['Regra 1', 'Regra 2', 'Regra 3'],
     vipTitle: base?.vipTitle || 'Destaques da comunidade',
-    vipPlayers: base?.vipPlayers?.length ? clone(base.vipPlayers) : [makeVip()],
+    vipPlayers: [],
     updatedAt: nowIso(),
   };
 };
@@ -732,42 +725,6 @@ const LoadingScreens: React.FC = () => {
     } finally {
       setSaving(false);
     }
-  };
-
-  const updateVip = (index: number, patch: Partial<LoadingScreenVipEntry>) => {
-    setDraft((prev) => {
-      if (!prev) return prev;
-      const next = [...prev.vipPlayers];
-      next[index] = {
-        ...next[index],
-        ...patch,
-      };
-      return {
-        ...prev,
-        vipPlayers: next,
-      };
-    });
-  };
-
-  const addVip = () => {
-    setDraft((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        vipPlayers: [...prev.vipPlayers, makeVip()],
-      };
-    });
-  };
-
-  const removeVip = (index: number) => {
-    setDraft((prev) => {
-      if (!prev) return prev;
-      const next = prev.vipPlayers.filter((_, idx) => idx !== index);
-      return {
-        ...prev,
-        vipPlayers: next.length ? next : [makeVip()],
-      };
-    });
   };
 
   const copyPublicUrl = async () => {
@@ -1575,17 +1532,10 @@ const LoadingScreens: React.FC = () => {
           {activeEditorTab === 'vip' ? (
             <div className={`${CARD_CLASS} border-fuchsia-900/25 bg-zinc-900/90`}>
             <div className="flex items-center justify-between gap-2">
-              <h3 className="text-sm font-black uppercase tracking-wide text-white">VIPs sincronizados + fallback manual</h3>
-              <button
-                type="button"
-                onClick={addVip}
-                className="rounded border border-zinc-700 bg-zinc-950 px-3 py-1 text-xs font-bold uppercase text-zinc-200"
-              >
-                + VIP
-              </button>
+              <h3 className="text-sm font-black uppercase tracking-wide text-white">VIPs sincronizados</h3>
             </div>
             <p className="mt-2 text-xs text-zinc-400">
-              A tela publica usa VIPs ativos da aba VIPs (filtrando por modo/servidor). A lista abaixo entra como fallback/complemento.
+              A tela publica usa apenas os VIPs ativos da aba VIPs, filtrando por modo e servidor. O titulo da secao e o fallback manual ficam ocultos.
             </p>
 
             <div className="mt-3 rounded border border-fuchsia-900/30 bg-zinc-950/70 p-3">
@@ -1645,71 +1595,8 @@ const LoadingScreens: React.FC = () => {
                 </div>
               ) : null}
             </div>
-
-            <div className="mt-3">
-              <label className={LABEL_CLASS}>Titulo da secao</label>
-              <input
-                type="text"
-                value={draft.vipTitle}
-                onChange={(event) => updateDraft({ vipTitle: event.target.value })}
-                className={INPUT_CLASS}
-              />
-            </div>
-
-            <div className="mt-3 space-y-2">
-              {draft.vipPlayers.map((vip, index) => (
-                <div key={`${vip.name}-${index}`} className="grid gap-2 rounded border border-zinc-800 bg-zinc-950 p-3 md:grid-cols-12">
-                  <div className="md:col-span-4">
-                    <label className={LABEL_CLASS}>Nome</label>
-                    <input
-                      type="text"
-                      value={vip.name}
-                      onChange={(event) => updateVip(index, { name: event.target.value })}
-                      className={INPUT_CLASS}
-                    />
-                  </div>
-                  <div className="md:col-span-3">
-                    <label className={LABEL_CLASS}>SteamID (opcional)</label>
-                    <input
-                      type="text"
-                      value={vip.steamId || ''}
-                      onChange={(event) => updateVip(index, { steamId: event.target.value })}
-                      className={`${INPUT_CLASS} font-mono`}
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className={LABEL_CLASS}>Plano VIP</label>
-                    <select
-                      value={vip.vipPlan || 'VIP'}
-                      onChange={(event) => updateVip(index, { vipPlan: event.target.value })}
-                      className={INPUT_CLASS}
-                    >
-                      <option value="VIP">VIP</option>
-                      <option value="VIP+">VIP+</option>
-                      <option value="VIP++">VIP++</option>
-                    </select>
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className={LABEL_CLASS}>Avatar URL</label>
-                    <input
-                      type="text"
-                      value={vip.avatarUrl || ''}
-                      onChange={(event) => updateVip(index, { avatarUrl: event.target.value })}
-                      className={INPUT_CLASS}
-                      placeholder="https://..."
-                    />
-                  </div>
-                  <div className="md:col-span-1 flex items-end justify-end">
-                    <button
-                      type="button"
-                      onClick={() => removeVip(index)}
-                      className="h-10 w-10 rounded border border-red-900/60 bg-red-900/20 text-red-300"
-                    >
-                      <Icons.Trash className="mx-auto h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
+            <div className="mt-3 rounded border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs text-zinc-500">
+              A configuracao manual de destaque VIP foi ocultada. Os VIPs da loading agora sao preenchidos automaticamente pelo modulo VIP do site.
             </div>
             </div>
           ) : null}
