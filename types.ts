@@ -1190,6 +1190,7 @@ export interface LoadingScreenBackgroundItem {
   id: string;
   url: string;
   enabled: boolean;
+  zoomPct?: number;
 }
 
 export interface LoadingScreenMusicTrackItem {

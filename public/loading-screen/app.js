@@ -1,4 +1,8 @@
 (function () {
+  var DEFAULT_BG_ZOOM_PCT = 105;
+  var MIN_BG_ZOOM_PCT = 80;
+  var MAX_BG_ZOOM_PCT = 140;
+
   var FALLBACKS = {
     tttloading: {
       slug: 'tttloading',
@@ -440,9 +444,13 @@
     return parsed;
   }
 
-  function safeBackgroundUrls(source, fallback) {
+  function normalizeBackgroundZoom(value) {
+    return Math.round(clampNumber(value, DEFAULT_BG_ZOOM_PCT, MIN_BG_ZOOM_PCT, MAX_BG_ZOOM_PCT));
+  }
+
+  function safeBackgroundItems(source, fallback) {
     var items = Array.isArray(source) ? source : [];
-    var urls = [];
+    var next = [];
     var seen = Object.create(null);
     items.forEach(function (entry) {
       if (!entry || typeof entry !== 'object') return;
@@ -451,10 +459,24 @@
       if (!url) return;
       if (seen[url]) return;
       seen[url] = true;
-      urls.push(url);
+      next.push({
+        url: url,
+        zoomPct: normalizeBackgroundZoom(entry.zoomPct),
+      });
     });
-    if (urls.length > 0) return urls;
-    return safeLines(fallback, []);
+    if (next.length > 0) return next;
+    return safeLines(fallback, []).map(function (url) {
+      return {
+        url: url,
+        zoomPct: DEFAULT_BG_ZOOM_PCT,
+      };
+    });
+  }
+
+  function safeBackgroundUrls(source, fallback) {
+    return safeBackgroundItems(source, fallback).map(function (entry) {
+      return entry.url;
+    });
   }
 
   function safeMusicUrls(source, fallback) {
@@ -501,6 +523,7 @@
       enabled: source.enabled !== false,
       routePath: String(source.routePath || '/' + slug),
       accentColor: sanitizeColor(source.accentColor || base.accentColor),
+      backgroundImageItems: safeBackgroundItems(source.backgroundImageItems, source.backgroundImages || base.backgroundImages),
       backgroundImages: safeBackgroundUrls(source.backgroundImageItems, source.backgroundImages || base.backgroundImages),
       backgroundRotationSec: Math.round(
         clampNumber(source.backgroundRotationSec, Number(base.backgroundRotationSec || 12), 3, 120),
@@ -651,7 +674,7 @@
     renderLines(dom.rulesList, profile.rules, true);
     renderVips(profile.vipTitle, profile.vipPlayers);
 
-    startBackgroundRotation(profile.backgroundImages || [], profile.backgroundRotationSec || 12);
+    startBackgroundRotation(profile.backgroundImageItems || [], profile.backgroundRotationSec || 12);
     initMusic(profile.musicTracks || [], 100);
 
     if (dom.serverName) dom.serverName.textContent = profile.name || 'Backstabber Brasil';
@@ -660,7 +683,16 @@
     if (dom.infoMode) dom.infoMode.textContent = 'modo: ' + (profile.mode || '-');
   }
 
-  function startBackgroundRotation(images, intervalSec) {
+  function applyBackgroundFrame(item) {
+    if (!dom.bgLayer) return;
+    var entry = item && typeof item === 'object' ? item : { url: '', zoomPct: DEFAULT_BG_ZOOM_PCT };
+    var url = String(entry.url || '').trim();
+    if (!url) return;
+    dom.bgLayer.style.backgroundImage = 'url("' + url + '")';
+    dom.bgLayer.style.transform = 'scale(' + (normalizeBackgroundZoom(entry.zoomPct) / 100).toFixed(2) + ')';
+  }
+
+  function startBackgroundRotation(items, intervalSec) {
     if (state.bgTimer) {
       window.clearInterval(state.bgTimer);
       state.bgTimer = null;
@@ -668,24 +700,22 @@
 
     if (!dom.bgLayer) return;
 
-    var list = (images || []).filter(Boolean);
+    var list = Array.isArray(items) ? items.filter(Boolean) : [];
     if (!list.length) {
       dom.bgLayer.style.backgroundImage = '';
       return;
     }
 
     state.bgIndex = 0;
-
-    var apply = function () {
-      dom.bgLayer.style.backgroundImage = 'url("' + list[state.bgIndex] + '")';
-      state.bgIndex = (state.bgIndex + 1) % list.length;
-    };
-
-    apply();
+    applyBackgroundFrame(list[state.bgIndex]);
+    state.bgIndex = (state.bgIndex + 1) % list.length;
 
     if (list.length > 1) {
       var intervalMs = Math.round(clampNumber(intervalSec, 12, 3, 120) * 1000);
-      state.bgTimer = window.setInterval(apply, intervalMs);
+      state.bgTimer = window.setInterval(function () {
+        applyBackgroundFrame(list[state.bgIndex]);
+        state.bgIndex = (state.bgIndex + 1) % list.length;
+      }, intervalMs);
     }
   }
 

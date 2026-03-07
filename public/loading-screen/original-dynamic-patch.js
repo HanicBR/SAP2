@@ -1,4 +1,8 @@
 (function () {
+  var DEFAULT_BG_ZOOM_PCT = 105;
+  var MIN_BG_ZOOM_PCT = 80;
+  var MAX_BG_ZOOM_PCT = 140;
+
   function getSlug() {
     var fromGlobal = String(window.BSB_LOADING_SLUG || '').trim().toLowerCase();
     if (fromGlobal) return fromGlobal;
@@ -53,9 +57,20 @@
     return parsed;
   }
 
-  function extractEnabledBackgroundUrls(items, fallback) {
-    if (!Array.isArray(items) || items.length === 0) return safeArray(fallback);
-    var urls = [];
+  function normalizeBackgroundZoom(value) {
+    return Math.round(clampNumber(value, DEFAULT_BG_ZOOM_PCT, MIN_BG_ZOOM_PCT, MAX_BG_ZOOM_PCT));
+  }
+
+  function extractEnabledBackgroundItems(items, fallback) {
+    if (!Array.isArray(items) || items.length === 0) {
+      return safeArray(fallback).map(function (url) {
+        return {
+          url: url,
+          zoomPct: DEFAULT_BG_ZOOM_PCT,
+        };
+      });
+    }
+    var next = [];
     var seen = Object.create(null);
     items.forEach(function (entry) {
       if (!entry || typeof entry !== 'object') return;
@@ -64,9 +79,25 @@
       if (!url) return;
       if (seen[url]) return;
       seen[url] = true;
-      urls.push(url);
+      next.push({
+        url: url,
+        zoomPct: normalizeBackgroundZoom(entry.zoomPct),
+      });
     });
-    return urls.length > 0 ? urls : safeArray(fallback);
+    return next.length > 0
+      ? next
+      : safeArray(fallback).map(function (url) {
+          return {
+            url: url,
+            zoomPct: DEFAULT_BG_ZOOM_PCT,
+          };
+        });
+  }
+
+  function extractEnabledBackgroundUrls(items, fallback) {
+    return extractEnabledBackgroundItems(items, fallback).map(function (entry) {
+      return entry.url;
+    });
   }
 
   function extractEnabledMusicUrls(items, fallback) {
@@ -386,22 +417,33 @@
   }
 
   function applyBackground(backgroundImages, rotationSec) {
-    var images = safeArray(backgroundImages);
+    var images = Array.isArray(backgroundImages) ? backgroundImages.filter(Boolean) : [];
     if (!images.length) return;
 
     if (window.LOADING_CONFIG && typeof window.LOADING_CONFIG === 'object') {
-      window.LOADING_CONFIG.backgroundImages = images;
+      window.LOADING_CONFIG.backgroundImages = images.map(function (entry) {
+        return entry.url;
+      });
     }
 
     var layer = document.getElementById('bg-layer');
-    if (layer) {
-      layer.style.backgroundImage = "url('" + images[0] + "')";
+    var bgImg = document.getElementById('bg-img');
+
+    function applyFrame(entry) {
+      var safeEntry = entry && typeof entry === 'object' ? entry : { url: '', zoomPct: DEFAULT_BG_ZOOM_PCT };
+      var url = String(safeEntry.url || '').trim();
+      if (!url) return;
+      var scale = (normalizeBackgroundZoom(safeEntry.zoomPct) / 100).toFixed(2);
+      if (layer) {
+        layer.style.backgroundImage = "url('" + url + "')";
+      }
+      if (bgImg) {
+        bgImg.setAttribute('src', url);
+        bgImg.style.transform = 'scale(' + scale + ')';
+      }
     }
 
-    var bgImg = document.getElementById('bg-img');
-    if (bgImg) {
-      bgImg.setAttribute('src', images[0]);
-    }
+    applyFrame(images[0]);
 
     if (window.__bsbBgRotateTimer) {
       clearInterval(window.__bsbBgRotateTimer);
@@ -413,12 +455,7 @@
       var intervalMs = Math.round(clampNumber(rotationSec, 12, 3, 120) * 1000);
       window.__bsbBgRotateTimer = setInterval(function () {
         idx = (idx + 1) % images.length;
-        if (layer) {
-          layer.style.backgroundImage = "url('" + images[idx] + "')";
-        }
-        if (bgImg) {
-          bgImg.setAttribute('src', images[idx]);
-        }
+        applyFrame(images[idx]);
       }, intervalMs);
     }
   }
@@ -507,6 +544,7 @@
     var fallbackBackgrounds = safeArray(source.backgroundImages);
     return {
       accentColor: String(source.accentColor || ''),
+      backgroundImageItems: extractEnabledBackgroundItems(source.backgroundImageItems, fallbackBackgrounds),
       backgroundImages: extractEnabledBackgroundUrls(source.backgroundImageItems, fallbackBackgrounds),
       backgroundRotationSec: Math.round(clampNumber(source.backgroundRotationSec, 12, 3, 120)),
       musicTracks: extractEnabledMusicUrls(source.musicTrackItems, source.musicTracks),
@@ -535,7 +573,7 @@
     applyNotice(profile.notice);
     applyRules(profile.rules);
     applyVip(profile.vipTitle, profile.vipPlayers);
-    applyBackground(profile.backgroundImages, profile.backgroundRotationSec);
+    applyBackground(profile.backgroundImageItems, profile.backgroundRotationSec);
     applyMusic(profile.musicTracks, 100);
   }
 

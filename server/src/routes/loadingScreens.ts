@@ -24,6 +24,7 @@ type LoadingScreenBackgroundItem = {
   id: string;
   url: string;
   enabled: boolean;
+  zoomPct?: number;
 };
 
 type LoadingScreenMusicTrackItem = {
@@ -100,6 +101,9 @@ const MAX_PUBLIC_VIPS = 80;
 const STEAM_ID64_BASE = BigInt('76561197960265728');
 const MIN_BG_ROTATION_SEC = 3;
 const MAX_BG_ROTATION_SEC = 120;
+const DEFAULT_BG_ZOOM_PCT = 105;
+const MIN_BG_ZOOM_PCT = 80;
+const MAX_BG_ZOOM_PCT = 140;
 const MIN_MUSIC_VOLUME_PCT = 0;
 const MAX_MUSIC_VOLUME_PCT = 300;
 
@@ -387,10 +391,12 @@ const sanitizeBackgroundImageItems = (
     let idRaw = '';
     let urlRaw: unknown;
     let enabledRaw: unknown = true;
+    let zoomPctRaw: unknown = DEFAULT_BG_ZOOM_PCT;
     if (isRecord(entry)) {
       idRaw = trimTo(entry.id, 80, '');
       urlRaw = entry.url;
       enabledRaw = entry.enabled;
+      zoomPctRaw = entry.zoomPct;
     } else {
       urlRaw = entry;
       enabledRaw = true;
@@ -404,6 +410,7 @@ const sanitizeBackgroundImageItems = (
       id: idRaw || createBackgroundItemId(url),
       url,
       enabled: parseBoolLoose(enabledRaw, true),
+      zoomPct: clampInt(zoomPctRaw, DEFAULT_BG_ZOOM_PCT, MIN_BG_ZOOM_PCT, MAX_BG_ZOOM_PCT),
     });
   });
 
@@ -753,8 +760,11 @@ const uniqueStrings = (values: string[]): string[] => {
   return next;
 };
 
-const isManualVipPlaceholder = (name: string, steamId: string, avatarUrl: string): boolean =>
-  name.trim().toLowerCase() === 'novo destaque' && !steamId && !avatarUrl;
+const isManualVipPlaceholder = (
+  name: string,
+  steamId?: string | null,
+  avatarUrl?: string | null,
+): boolean => name.trim().toLowerCase() === 'novo destaque' && !steamId && !avatarUrl;
 
 const sanitizeVipPlayers = (value: unknown, fallback: LoadingScreenVipEntry[]): LoadingScreenVipEntry[] => {
   if (!Array.isArray(value)) return fallback;
@@ -837,6 +847,7 @@ const buildDefaultProfiles = (): LoadingScreenProfile[] => {
           id: 'ttt-bg-1',
           url: 'https://i.imgur.com/HnZfcKR.jpeg',
           enabled: true,
+          zoomPct: DEFAULT_BG_ZOOM_PCT,
         },
       ],
       backgroundRotationSec: 12,
@@ -905,6 +916,7 @@ const buildDefaultProfiles = (): LoadingScreenProfile[] => {
           id: 'sandbox-bg-1',
           url: 'https://i.imgur.com/HnZfcKR.jpeg',
           enabled: true,
+          zoomPct: DEFAULT_BG_ZOOM_PCT,
         },
       ],
       backgroundRotationSec: 12,
@@ -978,6 +990,7 @@ const normalizeProfile = (input: unknown, fallback?: LoadingScreenProfile): Load
         id: `bg_fallback_${idx + 1}`,
         url,
         enabled: true,
+        zoomPct: DEFAULT_BG_ZOOM_PCT,
       }));
   const backgroundImageItems = sanitizeBackgroundImageItems(
     record.backgroundImageItems || record.backgroundImages,

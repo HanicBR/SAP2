@@ -30,6 +30,9 @@ const CARD_CLASS = 'rounded-xl border border-zinc-800 bg-zinc-900/80 p-4 md:p-5'
 const clone = <T,>(value: T): T => JSON.parse(JSON.stringify(value));
 
 const nowIso = (): string => new Date().toISOString();
+const DEFAULT_BG_ZOOM_PCT = 105;
+const MIN_BG_ZOOM_PCT = 80;
+const MAX_BG_ZOOM_PCT = 140;
 
 const normalizeSlug = (value: string): string =>
   String(value || '')
@@ -83,6 +86,14 @@ const toBackgroundItems = (
       id: String(entry?.id || '').trim() || createBackgroundItemId(),
       url,
       enabled: entry?.enabled !== false,
+      zoomPct: Math.round(
+        clampNumber(
+          Number(entry?.zoomPct ?? DEFAULT_BG_ZOOM_PCT),
+          DEFAULT_BG_ZOOM_PCT,
+          MIN_BG_ZOOM_PCT,
+          MAX_BG_ZOOM_PCT,
+        ),
+      ),
     });
   });
   return next;
@@ -470,6 +481,27 @@ const LoadingScreens: React.FC = () => {
       if (!prev) return prev;
       const nextItems = (prev.backgroundImageItems || []).map((item) =>
         item.id === id ? { ...item, enabled } : item,
+      );
+      return {
+        ...prev,
+        backgroundImageItems: nextItems,
+        backgroundImages: activeBackgroundUrls(nextItems),
+      };
+    });
+  };
+
+  const updateBackgroundItemZoom = (id: string, zoomPct: number) => {
+    setDraft((prev) => {
+      if (!prev) return prev;
+      const nextItems = (prev.backgroundImageItems || []).map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              zoomPct: Math.round(
+                clampNumber(Number(zoomPct), DEFAULT_BG_ZOOM_PCT, MIN_BG_ZOOM_PCT, MAX_BG_ZOOM_PCT),
+              ),
+            }
+          : item,
       );
       return {
         ...prev,
@@ -1347,7 +1379,7 @@ const LoadingScreens: React.FC = () => {
                     (draft.backgroundImageItems || []).map((item) => (
                       <div
                         key={item.id}
-                        className="grid items-center gap-2 rounded border border-zinc-800 bg-zinc-950 p-2 sm:grid-cols-[56px_1fr_auto_auto_auto]"
+                        className="grid items-center gap-2 rounded border border-zinc-800 bg-zinc-950 p-2 sm:grid-cols-[56px_minmax(0,1fr)_180px_auto_auto_auto]"
                       >
                         <img
                           src={item.url}
@@ -1358,7 +1390,53 @@ const LoadingScreens: React.FC = () => {
                         <div className="min-w-0">
                           <div className="truncate text-xs text-zinc-300">{item.url}</div>
                           <div className="mt-1 text-[10px] uppercase tracking-wide text-zinc-500">
-                            {item.enabled ? 'Ativa' : 'Desativada'}
+                            {item.enabled ? 'Ativa' : 'Desativada'} • Zoom {Math.round(
+                              clampNumber(
+                                Number(item.zoomPct ?? DEFAULT_BG_ZOOM_PCT),
+                                DEFAULT_BG_ZOOM_PCT,
+                                MIN_BG_ZOOM_PCT,
+                                MAX_BG_ZOOM_PCT,
+                              ),
+                            )}
+                            %
+                          </div>
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-zinc-500">
+                            Zoom
+                          </label>
+                          <input
+                            type="range"
+                            min={MIN_BG_ZOOM_PCT}
+                            max={MAX_BG_ZOOM_PCT}
+                            step={1}
+                            value={Math.round(
+                              clampNumber(
+                                Number(item.zoomPct ?? DEFAULT_BG_ZOOM_PCT),
+                                DEFAULT_BG_ZOOM_PCT,
+                                MIN_BG_ZOOM_PCT,
+                                MAX_BG_ZOOM_PCT,
+                              ),
+                            )}
+                            onChange={(event) =>
+                              updateBackgroundItemZoom(item.id, Number(event.target.value))
+                            }
+                            className="w-full accent-red-600"
+                          />
+                          <div className="mt-1 flex items-center justify-between text-[10px] uppercase tracking-wide text-zinc-500">
+                            <span>Mais longe</span>
+                            <span>
+                              {Math.round(
+                                clampNumber(
+                                  Number(item.zoomPct ?? DEFAULT_BG_ZOOM_PCT),
+                                  DEFAULT_BG_ZOOM_PCT,
+                                  MIN_BG_ZOOM_PCT,
+                                  MAX_BG_ZOOM_PCT,
+                                ),
+                              )}
+                              %
+                            </span>
+                            <span>Mais perto</span>
                           </div>
                         </div>
                         <label className="inline-flex items-center gap-1 rounded border border-zinc-700 bg-zinc-900 px-2 py-1 text-[11px] text-zinc-300">
