@@ -1,7 +1,7 @@
 (function () {
-  var DEFAULT_BG_ZOOM_PCT = 105;
-  var MIN_BG_ZOOM_PCT = 80;
-  var MAX_BG_ZOOM_PCT = 140;
+  var DEFAULT_BG_ZOOM_PCT = 7;
+  var MIN_BG_ZOOM_PCT = -500;
+  var MAX_BG_ZOOM_PCT = 500;
 
   function getSlug() {
     var fromGlobal = String(window.BSB_LOADING_SLUG || '').trim().toLowerCase();
@@ -59,6 +59,10 @@
 
   function normalizeBackgroundZoom(value) {
     return Math.round(clampNumber(value, DEFAULT_BG_ZOOM_PCT, MIN_BG_ZOOM_PCT, MAX_BG_ZOOM_PCT));
+  }
+
+  function backgroundZoomScale(value) {
+    return Math.max(0.01, Math.pow(2, normalizeBackgroundZoom(value) / 100));
   }
 
   function extractEnabledBackgroundItems(items, fallback) {
@@ -169,6 +173,15 @@
     if (!isHexColor(color)) return;
     document.documentElement.style.setProperty('--red', color);
     document.documentElement.style.setProperty('--red-soft', hexToRgba(color, 0.1));
+  }
+
+  function applyBackgroundColor(color) {
+    if (!isHexColor(color)) return;
+    document.documentElement.style.setProperty('--bg', color);
+    var layer = document.getElementById('bg-layer');
+    if (layer) {
+      layer.style.backgroundColor = color;
+    }
   }
 
   function applyHero(hero) {
@@ -433,9 +446,9 @@
       var safeEntry = entry && typeof entry === 'object' ? entry : { url: '', zoomPct: DEFAULT_BG_ZOOM_PCT };
       var url = String(safeEntry.url || '').trim();
       if (!url) return;
-      var scale = (normalizeBackgroundZoom(safeEntry.zoomPct) / 100).toFixed(2);
+      var scale = backgroundZoomScale(safeEntry.zoomPct).toFixed(2);
       if (layer) {
-        layer.style.backgroundImage = "url('" + url + "')";
+        layer.style.backgroundImage = bgImg ? '' : "url('" + url + "')";
       }
       if (bgImg) {
         bgImg.setAttribute('src', url);
@@ -544,6 +557,7 @@
     var fallbackBackgrounds = safeArray(source.backgroundImages);
     return {
       accentColor: String(source.accentColor || ''),
+      backgroundColor: String(source.backgroundColor || ''),
       backgroundImageItems: extractEnabledBackgroundItems(source.backgroundImageItems, fallbackBackgrounds),
       backgroundImages: extractEnabledBackgroundUrls(source.backgroundImageItems, fallbackBackgrounds),
       backgroundRotationSec: Math.round(clampNumber(source.backgroundRotationSec, 12, 3, 120)),
@@ -569,6 +583,7 @@
 
   function applyProfile(profile) {
     applyAccent(profile.accentColor);
+    applyBackgroundColor(profile.backgroundColor);
     applyHero(profile.hero);
     applyNotice(profile.notice);
     applyRules(profile.rules);

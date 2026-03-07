@@ -30,9 +30,9 @@ const CARD_CLASS = 'rounded-xl border border-zinc-800 bg-zinc-900/80 p-4 md:p-5'
 const clone = <T,>(value: T): T => JSON.parse(JSON.stringify(value));
 
 const nowIso = (): string => new Date().toISOString();
-const DEFAULT_BG_ZOOM_PCT = 105;
-const MIN_BG_ZOOM_PCT = 80;
-const MAX_BG_ZOOM_PCT = 140;
+const DEFAULT_BG_ZOOM_PCT = 7;
+const MIN_BG_ZOOM_PCT = -500;
+const MAX_BG_ZOOM_PCT = 500;
 
 const normalizeSlug = (value: string): string =>
   String(value || '')
@@ -151,6 +151,7 @@ const makeDraft = (base?: LoadingScreenProfile): LoadingScreenProfile => {
     enabled: base?.enabled ?? true,
     routePath: `/${slug}`,
     accentColor: base?.accentColor || '#be1b3c',
+    backgroundColor: base?.backgroundColor || '#2a3145',
     backgroundImages: backgroundImages.length > 0 ? backgroundImages : ['https://i.imgur.com/HnZfcKR.jpeg'],
     backgroundImageItems,
     backgroundRotationSec: Math.round(clampNumber(Number(base?.backgroundRotationSec ?? 12), 12, 3, 120)),
@@ -1168,6 +1169,23 @@ const LoadingScreens: React.FC = () => {
                   />
                 </div>
               </div>
+              <div>
+                <label className={LABEL_CLASS}>Cor de fundo</label>
+                <div className="flex gap-2">
+                  <input
+                    type="color"
+                    value={draft.backgroundColor}
+                    onChange={(event) => updateDraft({ backgroundColor: event.target.value })}
+                    className="h-10 w-14 rounded border border-zinc-700 bg-zinc-950"
+                  />
+                  <input
+                    type="text"
+                    value={draft.backgroundColor}
+                    onChange={(event) => updateDraft({ backgroundColor: event.target.value })}
+                    className={`${INPUT_CLASS} font-mono uppercase`}
+                  />
+                </div>
+              </div>
             </div>
             <label className="mt-3 inline-flex items-center gap-2 rounded border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-300">
               <input
@@ -1406,6 +1424,24 @@ const LoadingScreens: React.FC = () => {
                             Zoom
                           </label>
                           <input
+                            type="number"
+                            min={MIN_BG_ZOOM_PCT}
+                            max={MAX_BG_ZOOM_PCT}
+                            step={1}
+                            value={Math.round(
+                              clampNumber(
+                                Number(item.zoomPct ?? DEFAULT_BG_ZOOM_PCT),
+                                DEFAULT_BG_ZOOM_PCT,
+                                MIN_BG_ZOOM_PCT,
+                                MAX_BG_ZOOM_PCT,
+                              ),
+                            )}
+                            onChange={(event) =>
+                              updateBackgroundItemZoom(item.id, Number(event.target.value))
+                            }
+                            className={`${INPUT_CLASS} mb-2 text-xs`}
+                          />
+                          <input
                             type="range"
                             min={MIN_BG_ZOOM_PCT}
                             max={MAX_BG_ZOOM_PCT}
@@ -1424,7 +1460,7 @@ const LoadingScreens: React.FC = () => {
                             className="w-full accent-red-600"
                           />
                           <div className="mt-1 flex items-center justify-between text-[10px] uppercase tracking-wide text-zinc-500">
-                            <span>Mais longe</span>
+                            <span>-500%</span>
                             <span>
                               {Math.round(
                                 clampNumber(
@@ -1436,7 +1472,7 @@ const LoadingScreens: React.FC = () => {
                               )}
                               %
                             </span>
-                            <span>Mais perto</span>
+                            <span>500%</span>
                           </div>
                         </div>
                         <label className="inline-flex items-center gap-1 rounded border border-zinc-700 bg-zinc-900 px-2 py-1 text-[11px] text-zinc-300">

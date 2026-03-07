@@ -63,6 +63,7 @@ type LoadingScreenProfile = {
   enabled: boolean;
   routePath: string;
   accentColor: string;
+  backgroundColor: string;
   backgroundImages: string[];
   backgroundImageItems: LoadingScreenBackgroundItem[];
   backgroundRotationSec: number;
@@ -101,9 +102,9 @@ const MAX_PUBLIC_VIPS = 80;
 const STEAM_ID64_BASE = BigInt('76561197960265728');
 const MIN_BG_ROTATION_SEC = 3;
 const MAX_BG_ROTATION_SEC = 120;
-const DEFAULT_BG_ZOOM_PCT = 105;
-const MIN_BG_ZOOM_PCT = 80;
-const MAX_BG_ZOOM_PCT = 140;
+const DEFAULT_BG_ZOOM_PCT = 7;
+const MIN_BG_ZOOM_PCT = -500;
+const MAX_BG_ZOOM_PCT = 500;
 const MIN_MUSIC_VOLUME_PCT = 0;
 const MAX_MUSIC_VOLUME_PCT = 300;
 
@@ -841,6 +842,7 @@ const buildDefaultProfiles = (): LoadingScreenProfile[] => {
       enabled: true,
       routePath: '/tttloading',
       accentColor: '#be1b3c',
+      backgroundColor: '#2a3145',
       backgroundImages: ['https://i.imgur.com/HnZfcKR.jpeg'],
       backgroundImageItems: [
         {
@@ -910,6 +912,7 @@ const buildDefaultProfiles = (): LoadingScreenProfile[] => {
       enabled: true,
       routePath: '/sandboxloading',
       accentColor: '#be1b3c',
+      backgroundColor: '#2a3145',
       backgroundImages: ['https://i.imgur.com/HnZfcKR.jpeg'],
       backgroundImageItems: [
         {
@@ -1054,6 +1057,7 @@ const normalizeProfile = (input: unknown, fallback?: LoadingScreenProfile): Load
     enabled: parseBool(record.enabled, base.enabled),
     routePath: `/${slug}`,
     accentColor: sanitizeColor(record.accentColor, base.accentColor),
+    backgroundColor: sanitizeColor(record.backgroundColor, base.backgroundColor || '#2a3145'),
     backgroundImages: activeBackgroundImages,
     backgroundImageItems,
     backgroundRotationSec,

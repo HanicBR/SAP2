@@ -1,7 +1,7 @@
 (function () {
-  var DEFAULT_BG_ZOOM_PCT = 105;
-  var MIN_BG_ZOOM_PCT = 80;
-  var MAX_BG_ZOOM_PCT = 140;
+  var DEFAULT_BG_ZOOM_PCT = 7;
+  var MIN_BG_ZOOM_PCT = -500;
+  var MAX_BG_ZOOM_PCT = 500;
 
   var FALLBACKS = {
     tttloading: {
@@ -11,6 +11,7 @@
       enabled: true,
       routePath: '/tttloading',
       accentColor: '#be1b3c',
+      backgroundColor: '#2a3145',
       backgroundImages: ['https://i.imgur.com/HnZfcKR.jpeg'],
       backgroundRotationSec: 12,
       musicTracks: ['https://raw.githubusercontent.com/HanicBR/backtttloading/main/assets/music/gtavicecity.ogg'],
@@ -57,6 +58,7 @@
       enabled: true,
       routePath: '/sandboxloading',
       accentColor: '#be1b3c',
+      backgroundColor: '#2a3145',
       backgroundImages: ['https://i.imgur.com/HnZfcKR.jpeg'],
       backgroundRotationSec: 12,
       musicTracks: ['https://raw.githubusercontent.com/HanicBR/backtttloading/main/assets/music/gtavicecity.ogg'],
@@ -448,6 +450,10 @@
     return Math.round(clampNumber(value, DEFAULT_BG_ZOOM_PCT, MIN_BG_ZOOM_PCT, MAX_BG_ZOOM_PCT));
   }
 
+  function backgroundZoomScale(value) {
+    return Math.max(0.01, Math.pow(2, normalizeBackgroundZoom(value) / 100));
+  }
+
   function safeBackgroundItems(source, fallback) {
     var items = Array.isArray(source) ? source : [];
     var next = [];
@@ -523,6 +529,7 @@
       enabled: source.enabled !== false,
       routePath: String(source.routePath || '/' + slug),
       accentColor: sanitizeColor(source.accentColor || base.accentColor),
+      backgroundColor: sanitizeColor(source.backgroundColor || base.backgroundColor || '#2a3145'),
       backgroundImageItems: safeBackgroundItems(source.backgroundImageItems, source.backgroundImages || base.backgroundImages),
       backgroundImages: safeBackgroundUrls(source.backgroundImageItems, source.backgroundImages || base.backgroundImages),
       backgroundRotationSec: Math.round(
@@ -561,6 +568,13 @@
 
   function setAccent(color) {
     document.documentElement.style.setProperty('--accent', sanitizeColor(color));
+  }
+
+  function setBackgroundColor(color) {
+    document.documentElement.style.setProperty('--bg', sanitizeColor(color));
+    if (dom.bgLayer) {
+      dom.bgLayer.style.backgroundColor = sanitizeColor(color);
+    }
   }
 
   function renderLines(target, lines, ordered) {
@@ -639,6 +653,7 @@
     state.profile = profile;
 
     setAccent(profile.accentColor);
+    setBackgroundColor(profile.backgroundColor);
     document.title = profile.name ? profile.name + ' - Loading' : 'Backstabber Loading';
 
     if (dom.heroBadge) dom.heroBadge.textContent = profile.hero.badge || profile.mode || 'BACK';
@@ -689,7 +704,7 @@
     var url = String(entry.url || '').trim();
     if (!url) return;
     dom.bgLayer.style.backgroundImage = 'url("' + url + '")';
-    dom.bgLayer.style.transform = 'scale(' + (normalizeBackgroundZoom(entry.zoomPct) / 100).toFixed(2) + ')';
+    dom.bgLayer.style.transform = 'scale(' + backgroundZoomScale(entry.zoomPct).toFixed(2) + ')';
   }
 
   function startBackgroundRotation(items, intervalSec) {

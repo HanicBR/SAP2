@@ -1229,6 +1229,7 @@ export interface LoadingScreenProfile {
   enabled: boolean;
   routePath: string;
   accentColor: string;
+  backgroundColor: string;
   backgroundImages: string[];
   backgroundImageItems?: LoadingScreenBackgroundItem[];
   backgroundRotationSec?: number;
