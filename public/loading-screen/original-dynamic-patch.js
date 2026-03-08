@@ -41,6 +41,21 @@
     return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
   }
 
+  function darkenHexColor(hex, factor) {
+    var safe = String(hex || '').replace('#', '');
+    if (safe.length !== 6) return '#2a3145';
+    var ratio = clampNumber(factor, 0.7, 0, 1);
+    var r = Math.max(0, Math.min(255, Math.round(parseInt(safe.substring(0, 2), 16) * ratio)));
+    var g = Math.max(0, Math.min(255, Math.round(parseInt(safe.substring(2, 4), 16) * ratio)));
+    var b = Math.max(0, Math.min(255, Math.round(parseInt(safe.substring(4, 6), 16) * ratio)));
+    return (
+      '#' +
+      r.toString(16).padStart(2, '0') +
+      g.toString(16).padStart(2, '0') +
+      b.toString(16).padStart(2, '0')
+    );
+  }
+
   function safeArray(value) {
     if (!Array.isArray(value)) return [];
     return value
@@ -218,6 +233,7 @@
     var layer = document.getElementById('bg-layer');
     if (layer) {
       layer.style.backgroundColor = color;
+      layer.setAttribute('data-bsb-bg-base', color);
     }
   }
 
@@ -253,6 +269,12 @@
         '), rgba(0,0,0,' +
         linearBottom.toFixed(3) +
         '))';
+    }
+
+    var layer = document.getElementById('bg-layer') || document.querySelector('.bg-layer');
+    if (layer) {
+      var baseColor = String(layer.getAttribute('data-bsb-bg-base') || '#2a3145').trim();
+      layer.style.backgroundColor = darkenHexColor(baseColor, Math.max(0.16, 1 - safe * 0.006));
     }
 
     var bgImg = document.getElementById('bg-img');

@@ -593,6 +593,16 @@ type SteamSummary = {
   avatarUrl?: string;
 };
 
+type PlayerVipIdentityRow = {
+  steamId: string;
+  name: string;
+  avatarUrl: string | null;
+  vipPlan: string | null;
+  firstSeen: Date | null;
+  aliases: { name: string }[];
+  avatarHistory: { avatarUrl: string }[];
+};
+
 type PublicLoadingProfileCacheEntry = {
   expiresAt: number;
   vipSyncRevision: number;
@@ -728,6 +738,67 @@ const toLighterAvatarUrl = (value: string | undefined): string | undefined => {
   const sanitized = sanitizeUrl(value);
   if (!sanitized) return undefined;
   return sanitized.replace(/_full(\.(?:jpg|jpeg|png|webp))$/i, '_medium$1');
+};
+
+const pickBestVipName = (
+  row: Pick<PlayerVipIdentityRow, 'steamId' | 'name' | 'aliases'>,
+  steamSummary?: SteamSummary,
+): string => {
+  const summaryName = trimTo(steamSummary?.personaName, 80, '');
+  if (summaryName) return summaryName;
+
+  const profileName = trimTo(row.name, 80, '');
+  if (profileName && profileName.toUpperCase() !== row.steamId.toUpperCase()) return profileName;
+
+  const aliasName = trimTo(row.aliases?.[0]?.name, 80, '');
+  if (aliasName && aliasName.toUpperCase() !== row.steamId.toUpperCase()) return aliasName;
+
+  if (profileName) return profileName;
+  return row.steamId;
+};
+
+const pickBestVipAvatar = (
+  row: Pick<PlayerVipIdentityRow, 'avatarUrl' | 'avatarHistory'>,
+  steamSummary?: SteamSummary,
+): string | undefined => {
+  return (
+    toLighterAvatarUrl(steamSummary?.avatarUrl) ||
+    toLighterAvatarUrl(row.avatarUrl || undefined) ||
+    toLighterAvatarUrl(row.avatarHistory?.[0]?.avatarUrl)
+  );
+};
+
+const persistSteamIdentityForVipRows = async (
+  rows: PlayerVipIdentityRow[],
+  steamSummaryBy64: Map<string, SteamSummary>,
+  steamId64BySteam2: Map<string, string>,
+) => {
+  const updates = rows
+    .map((row) => {
+      const steamId64 = steamId64BySteam2.get(row.steamId);
+      if (!steamId64) return null;
+      const summary = steamSummaryBy64.get(steamId64);
+      if (!summary) return null;
+
+      const nextName = trimTo(summary.personaName, 80, '');
+      const nextAvatarUrl = toLighterAvatarUrl(summary.avatarUrl);
+      const data: { name?: string; avatarUrl?: string } = {};
+
+      if (nextName && nextName !== row.name) data.name = nextName;
+      if (nextAvatarUrl && nextAvatarUrl !== String(row.avatarUrl || '').trim()) {
+        data.avatarUrl = nextAvatarUrl;
+      }
+
+      if (Object.keys(data).length === 0) return null;
+      return prisma.playerProfile.update({
+        where: { steamId: row.steamId },
+        data,
+      });
+    })
+    .filter(Boolean);
+
+  if (updates.length === 0) return;
+  await Promise.allSettled(updates);
 };
 
 const runSteamSummaryRefreshWorkers = () => {
@@ -1299,6 +1370,16 @@ const buildActiveVipPlayers = async (profile: LoadingScreenProfile): Promise<Loa
       avatarUrl: true,
       vipPlan: true,
       firstSeen: true,
+      aliases: {
+        orderBy: [{ lastSeen: 'desc' }, { firstSeen: 'desc' }],
+        take: 1,
+        select: { name: true },
+      },
+      avatarHistory: {
+        orderBy: [{ lastSeen: 'desc' }, { firstSeen: 'desc' }],
+        take: 1,
+        select: { avatarUrl: true },
+      },
     },
     take: MAX_PUBLIC_VIPS,
   });
@@ -1332,12 +1413,14 @@ const buildActiveVipPlayers = async (profile: LoadingScreenProfile): Promise<Loa
     enqueueSteamSummaryRefresh(remainingMissingSteamIds64);
   }
 
+  void persistSteamIdentityForVipRows(sortedRows, steamSummariesBy64, steamId64BySteam2);
+
   const synced = sortedRows.map((row) => {
     const steamId64 = steamId64BySteam2.get(row.steamId);
     const steamSummary = steamId64 ? steamSummariesBy64.get(steamId64) : undefined;
-    const candidateAvatar = toLighterAvatarUrl(steamSummary?.avatarUrl || row.avatarUrl || undefined);
+    const candidateAvatar = pickBestVipAvatar(row, steamSummary);
     return {
-      name: trimTo(steamSummary?.personaName || row.name, 80, row.steamId),
+      name: pickBestVipName(row, steamSummary),
       steamId: row.steamId,
       ...(candidateAvatar ? { avatarUrl: candidateAvatar } : {}),
       vipPlan: normalizeVipPlanForTier(row.vipPlan),
