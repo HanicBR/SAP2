@@ -463,6 +463,50 @@ const sanitizeMusicTrackItems = (
   return [];
 };
 
+const sanitizeRichText = (value: unknown, fallback = ''): string => {
+  const raw = trimTo(value, MAX_LONG_TEXT_LENGTH, '');
+  if (!raw) return fallback;
+
+  const cleaned = raw
+    .replace(/\r\n/g, '\n')
+    .replace(/<\/(div|p|h[1-6]|li)>/gi, '<br>')
+    .replace(/<(div|p|h[1-6]|li)(\s[^>]*)?>/gi, '')
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/\son\w+\s*=\s*(['"]).*?\1/gi, '')
+    .replace(/\son\w+\s*=\s*[^\s>]+/gi, '')
+    .replace(/\sstyle\s*=\s*(['"]).*?\1/gi, '')
+    .replace(/\sstyle\s*=\s*[^\s>]+/gi, '')
+    .replace(/javascript:/gi, '');
+
+  const normalized = cleaned
+    .replace(/<\/?([a-z0-9]+)([^>]*)>/gi, (match, tagName, attrs) => {
+      const tag = String(tagName || '').toLowerCase();
+      const closing = match.startsWith('</');
+      if (tag === 'br') return closing ? '' : '<br>';
+      if (['b', 'strong', 'i', 'em', 'u', 's', 'code'].includes(tag)) {
+        return closing ? `</${tag}>` : `<${tag}>`;
+      }
+      if (tag === 'a') {
+        if (closing) return '</a>';
+        const hrefMatch =
+          String(attrs || '').match(/href\s*=\s*"([^"]+)"/i) ||
+          String(attrs || '').match(/href\s*=\s*'([^']+)'/i) ||
+          String(attrs || '').match(/href\s*=\s*([^\s>]+)/i);
+        const href = sanitizeUrl(hrefMatch?.[1]);
+        if (!href) return '';
+        return `<a href="${href}" target="_blank" rel="noreferrer">`;
+      }
+      return '';
+    })
+    .replace(/(<br>\s*){3,}/gi, '<br><br>')
+    .replace(/^(<br>\s*)+|(<br>\s*)+$/gi, '')
+    .trim();
+
+  return normalized || fallback;
+};
+
 const toLines = (value: unknown, maxItems: number, fallback: string[]): string[] => {
   const source = Array.isArray(value)
     ? value
@@ -473,7 +517,7 @@ const toLines = (value: unknown, maxItems: number, fallback: string[]): string[]
 
   const lines: string[] = [];
   source.forEach((entry) => {
-    const text = trimTo(entry, MAX_LONG_TEXT_LENGTH, '');
+    const text = sanitizeRichText(entry, '');
     if (!text) return;
     if (lines.length >= maxItems) return;
     lines.push(text);
@@ -1036,8 +1080,8 @@ const normalizeProfile = (input: unknown, fallback?: LoadingScreenProfile): Load
 
   const hero: LoadingScreenHero = {
     badge: trimTo(heroRecord.badge, 32, base.hero.badge),
-    title: trimTo(heroRecord.title, 120, base.hero.title),
-    subtitle: trimTo(heroRecord.subtitle, 160, base.hero.subtitle),
+    title: sanitizeRichText(heroRecord.title, base.hero.title),
+    subtitle: sanitizeRichText(heroRecord.subtitle, base.hero.subtitle),
     descriptionLines: toLines(heroRecord.descriptionLines, 8, base.hero.descriptionLines),
   };
 
@@ -1046,7 +1090,7 @@ const normalizeProfile = (input: unknown, fallback?: LoadingScreenProfile): Load
   const qrImageUrl = sanitizeUrl(noticeRecord.qrImageUrl);
 
   const notice: LoadingScreenNotice = {
-    title: trimTo(noticeRecord.title, 120, base.notice.title),
+    title: sanitizeRichText(noticeRecord.title, base.notice.title),
     lines: toLines(noticeRecord.lines, 8, base.notice.lines),
     ...(ctaLabel ? { ctaLabel } : {}),
     ...(ctaUrl ? { ctaUrl } : {}),

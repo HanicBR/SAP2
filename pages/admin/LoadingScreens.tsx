@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Icons } from '../../components/Icon';
+import RichTextEditor from '../../components/RichTextEditor';
 import { ApiService } from '../../services/api';
 import {
   GameServer,
@@ -22,8 +23,6 @@ type Notice = {
 
 const INPUT_CLASS =
   'w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-red-600 focus:outline-none';
-const TEXTAREA_CLASS =
-  'w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-red-600 focus:outline-none';
 const LABEL_CLASS = 'mb-1 block text-[11px] font-bold uppercase tracking-wide text-zinc-500';
 const CARD_CLASS = 'rounded-xl border border-zinc-800 bg-zinc-900/80 p-4 md:p-5';
 
@@ -45,18 +44,6 @@ const normalizeSlug = (value: string): string =>
     .replace(/-{2,}/g, '-')
     .replace(/^-+|-+$/g, '')
     .slice(0, 64);
-
-const toLineInput = (items: string[] | undefined): string => (items || []).join('\n');
-
-const parseLineInput = (value: string): string[] =>
-  Array.from(
-    new Set(
-      String(value || '')
-        .split('\n')
-        .map((item) => item.trim())
-        .filter(Boolean),
-    ),
-  );
 
 const createBackgroundItemId = (): string =>
   `bg_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
@@ -235,6 +222,67 @@ const formatDateTime = (iso: string | null | undefined): string => {
   return parsed.toLocaleString('pt-BR');
 };
 
+type RichTextListEditorProps = {
+  label: string;
+  items: string[];
+  onChange: (items: string[]) => void;
+  addLabel: string;
+};
+
+const RichTextListEditor: React.FC<RichTextListEditorProps> = ({
+  label,
+  items,
+  onChange,
+  addLabel,
+}) => {
+  const safeItems = items.length > 0 ? items : [''];
+
+  const updateItem = (index: number, value: string) => {
+    const next = [...safeItems];
+    next[index] = value;
+    onChange(next);
+  };
+
+  const removeItem = (index: number) => {
+    const next = safeItems.filter((_, itemIndex) => itemIndex !== index);
+    onChange(next.length > 0 ? next : ['']);
+  };
+
+  return (
+    <div className="mt-3">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <label className={LABEL_CLASS}>{label}</label>
+        <button
+          type="button"
+          onClick={() => onChange([...safeItems, ''])}
+          className="rounded border border-zinc-700 bg-zinc-950 px-2 py-1 text-[11px] font-bold uppercase text-zinc-200"
+        >
+          {addLabel}
+        </button>
+      </div>
+      <div className="space-y-3">
+        {safeItems.map((item, index) => (
+          <div key={`${label}-${index}`} className="rounded border border-zinc-800 bg-zinc-950/60 p-3">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <span className="text-[11px] font-bold uppercase tracking-wide text-zinc-500">
+                Item {index + 1}
+              </span>
+              <button
+                type="button"
+                onClick={() => removeItem(index)}
+                className="rounded border border-red-900/60 bg-red-900/20 px-2 py-1 text-[11px] font-bold uppercase text-red-300"
+              >
+                Remover
+              </button>
+            </div>
+            <RichTextEditor value={item} onChange={(value) => updateItem(index, value)} minHeight={88} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const LoadingScreens: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -252,9 +300,6 @@ const LoadingScreens: React.FC = () => {
   const [musicLinkInput, setMusicLinkInput] = useState('');
   const [musicUploadVolumeMode, setMusicUploadVolumeMode] = useState<'keep' | 'reduce'>('keep');
   const [musicUploadTargetPct, setMusicUploadTargetPct] = useState(70);
-  const [heroDescInput, setHeroDescInput] = useState('');
-  const [noticeLinesInput, setNoticeLinesInput] = useState('');
-  const [rulesInput, setRulesInput] = useState('');
   const [activeEditorTab, setActiveEditorTab] = useState<'identity' | 'content' | 'media' | 'vip'>(
     'identity',
   );
@@ -302,9 +347,6 @@ const LoadingScreens: React.FC = () => {
   const hydrateDraftInputs = (profile: LoadingScreenProfile) => {
     setBackgroundLinkInput('');
     setMusicLinkInput('');
-    setHeroDescInput(toLineInput(profile.hero.descriptionLines));
-    setNoticeLinesInput(toLineInput(profile.notice.lines));
-    setRulesInput(toLineInput(profile.rules));
   };
 
   const applyDraft = (profile: LoadingScreenProfile, nextIsNew = false) => {
@@ -592,15 +634,6 @@ const LoadingScreens: React.FC = () => {
       musicTrackItems: nextMusicTrackItems,
       musicTracks: activeMusicUrls(nextMusicTrackItems),
       musicVolumePct: 100,
-      hero: {
-        ...draft.hero,
-        descriptionLines: parseLineInput(heroDescInput),
-      },
-      notice: {
-        ...draft.notice,
-        lines: parseLineInput(noticeLinesInput),
-      },
-      rules: parseLineInput(rulesInput),
     } as LoadingScreenProfile;
   };
 
@@ -1282,35 +1315,27 @@ const LoadingScreens: React.FC = () => {
               </div>
               <div>
                 <label className={LABEL_CLASS}>Titulo</label>
-                <input
-                  type="text"
+                <RichTextEditor
                   value={draft.hero.title}
-                  onChange={(event) => updateHero({ title: event.target.value })}
-                  className={INPUT_CLASS}
+                  onChange={(value) => updateHero({ title: value })}
+                  minHeight={72}
                 />
               </div>
               <div>
                 <label className={LABEL_CLASS}>Subtitulo</label>
-                <input
-                  type="text"
+                <RichTextEditor
                   value={draft.hero.subtitle}
-                  onChange={(event) => updateHero({ subtitle: event.target.value })}
-                  className={INPUT_CLASS}
+                  onChange={(value) => updateHero({ subtitle: value })}
+                  minHeight={72}
                 />
               </div>
             </div>
-            <div className="mt-3">
-              <label className={LABEL_CLASS}>Descricao (1 linha por item)</label>
-              <textarea
-                rows={4}
-                value={heroDescInput}
-                onChange={(event) => {
-                  setHeroDescInput(event.target.value);
-                  updateHero({ descriptionLines: parseLineInput(event.target.value) });
-                }}
-                className={TEXTAREA_CLASS}
-              />
-            </div>
+            <RichTextListEditor
+              label="Descricao"
+              items={draft.hero.descriptionLines}
+              onChange={(items) => updateHero({ descriptionLines: items })}
+              addLabel="+ Linha"
+            />
             </div>
           ) : null}
 
@@ -1320,11 +1345,10 @@ const LoadingScreens: React.FC = () => {
             <div className="mt-4 grid gap-3 md:grid-cols-2">
               <div>
                 <label className={LABEL_CLASS}>Titulo do aviso</label>
-                <input
-                  type="text"
+                <RichTextEditor
                   value={draft.notice.title}
-                  onChange={(event) => updateNotice({ title: event.target.value })}
-                  className={INPUT_CLASS}
+                  onChange={(value) => updateNotice({ title: value })}
+                  minHeight={72}
                 />
               </div>
               <div>
@@ -1357,34 +1381,24 @@ const LoadingScreens: React.FC = () => {
                 />
               </div>
             </div>
-            <div className="mt-3">
-              <label className={LABEL_CLASS}>Linhas do aviso</label>
-              <textarea
-                rows={4}
-                value={noticeLinesInput}
-                onChange={(event) => {
-                  setNoticeLinesInput(event.target.value);
-                  updateNotice({ lines: parseLineInput(event.target.value) });
-                }}
-                className={TEXTAREA_CLASS}
-              />
-            </div>
+            <RichTextListEditor
+              label="Linhas do aviso"
+              items={draft.notice.lines}
+              onChange={(items) => updateNotice({ lines: items })}
+              addLabel="+ Linha"
+            />
             </div>
           ) : null}
 
           {activeEditorTab === 'content' ? (
             <div className={`${CARD_CLASS} border-violet-900/25 bg-zinc-900/90`}>
             <h3 className="text-sm font-black uppercase tracking-wide text-white">Regras / dicas</h3>
-            <label className={`${LABEL_CLASS} mt-4`}>Uma linha por item</label>
-            <textarea
-              rows={5}
-              value={rulesInput}
-              onChange={(event) => {
-                setRulesInput(event.target.value);
-                updateDraft({ rules: parseLineInput(event.target.value) });
-              }}
-                className={TEXTAREA_CLASS}
-              />
+            <RichTextListEditor
+              label="Itens da lista"
+              items={draft.rules}
+              onChange={(items) => updateDraft({ rules: items })}
+              addLabel="+ Regra"
+            />
             </div>
           ) : null}
 

@@ -593,6 +593,47 @@
     document.documentElement.style.setProperty('--bg-overlay-opacity', (safe / 100).toFixed(2));
   }
 
+  function sanitizeRichTextHtml(value) {
+    return String(value || '')
+      .replace(/<\/(div|p|h[1-6]|li)>/gi, '<br>')
+      .replace(/<(div|p|h[1-6]|li)(\s[^>]*)?>/gi, '')
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/<style[\s\S]*?<\/style>/gi, '')
+      .replace(/<!--[\s\S]*?-->/g, '')
+      .replace(/\son\w+\s*=\s*(['"]).*?\1/gi, '')
+      .replace(/\son\w+\s*=\s*[^\s>]+/gi, '')
+      .replace(/\sstyle\s*=\s*(['"]).*?\1/gi, '')
+      .replace(/\sstyle\s*=\s*[^\s>]+/gi, '')
+      .replace(/javascript:/gi, '')
+      .replace(/<\/?([a-z0-9]+)([^>]*)>/gi, function (match, tagName, attrs) {
+        var tag = String(tagName || '').toLowerCase();
+        var closing = match.indexOf('</') === 0;
+        if (tag === 'br') return closing ? '' : '<br>';
+        if (['b', 'strong', 'i', 'em', 'u', 's', 'code'].indexOf(tag) !== -1) {
+          return closing ? '</' + tag + '>' : '<' + tag + '>';
+        }
+        if (tag === 'a') {
+          if (closing) return '</a>';
+          var hrefMatch =
+            String(attrs || '').match(/href\s*=\s*"([^"]+)"/i) ||
+            String(attrs || '').match(/href\s*=\s*'([^']+)'/i) ||
+            String(attrs || '').match(/href\s*=\s*([^\s>]+)/i);
+          var href = hrefMatch && hrefMatch[1] ? String(hrefMatch[1]).trim() : '';
+          if (!/^https?:\/\//i.test(href)) return '';
+          return '<a href="' + href + '" target="_blank" rel="noreferrer">';
+        }
+        return '';
+      })
+      .replace(/(<br>\s*){3,}/gi, '<br><br>')
+      .replace(/^(<br>\s*)+|(<br>\s*)+$/gi, '')
+      .trim();
+  }
+
+  function renderRichText(target, value, fallback) {
+    if (!target) return;
+    target.innerHTML = sanitizeRichTextHtml(value || fallback || '');
+  }
+
   function renderLines(target, lines, ordered) {
     if (!target) return;
     target.innerHTML = '';
@@ -606,12 +647,12 @@
         marker.textContent = String(index + 1);
 
         var text = document.createElement('span');
-        text.textContent = String(line);
+        text.innerHTML = sanitizeRichTextHtml(line);
 
         item.appendChild(marker);
         item.appendChild(text);
       } else {
-        item.textContent = String(line);
+        item.innerHTML = sanitizeRichTextHtml(line);
       }
       fragment.appendChild(item);
     });
@@ -674,12 +715,12 @@
     document.title = profile.name ? profile.name + ' - Loading' : 'Backstabber Loading';
 
     if (dom.heroBadge) dom.heroBadge.textContent = profile.hero.badge || profile.mode || 'BACK';
-    if (dom.heroTitle) dom.heroTitle.textContent = profile.hero.title || profile.name;
-    if (dom.heroSubtitle) dom.heroSubtitle.textContent = profile.hero.subtitle || 'Conectando...';
+    renderRichText(dom.heroTitle, profile.hero.title, profile.name);
+    renderRichText(dom.heroSubtitle, profile.hero.subtitle, 'Conectando...');
 
     renderLines(dom.heroList, profile.hero.descriptionLines, false);
 
-    if (dom.noticeTitle) dom.noticeTitle.textContent = profile.notice.title || 'Aviso';
+    renderRichText(dom.noticeTitle, profile.notice.title, 'Aviso');
     renderLines(dom.noticeLines, profile.notice.lines, false);
 
     if (dom.noticeCta) {

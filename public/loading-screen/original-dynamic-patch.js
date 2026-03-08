@@ -170,6 +170,42 @@
     el.innerHTML = html;
   }
 
+  function sanitizeRichTextHtml(value) {
+    return String(value || '')
+      .replace(/<\/(div|p|h[1-6]|li)>/gi, '<br>')
+      .replace(/<(div|p|h[1-6]|li)(\s[^>]*)?>/gi, '')
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/<style[\s\S]*?<\/style>/gi, '')
+      .replace(/<!--[\s\S]*?-->/g, '')
+      .replace(/\son\w+\s*=\s*(['"]).*?\1/gi, '')
+      .replace(/\son\w+\s*=\s*[^\s>]+/gi, '')
+      .replace(/\sstyle\s*=\s*(['"]).*?\1/gi, '')
+      .replace(/\sstyle\s*=\s*[^\s>]+/gi, '')
+      .replace(/javascript:/gi, '')
+      .replace(/<\/?([a-z0-9]+)([^>]*)>/gi, function (match, tagName, attrs) {
+        var tag = String(tagName || '').toLowerCase();
+        var closing = match.indexOf('</') === 0;
+        if (tag === 'br') return closing ? '' : '<br>';
+        if (['b', 'strong', 'i', 'em', 'u', 's', 'code'].indexOf(tag) !== -1) {
+          return closing ? '</' + tag + '>' : '<' + tag + '>';
+        }
+        if (tag === 'a') {
+          if (closing) return '</a>';
+          var hrefMatch =
+            String(attrs || '').match(/href\s*=\s*"([^"]+)"/i) ||
+            String(attrs || '').match(/href\s*=\s*'([^']+)'/i) ||
+            String(attrs || '').match(/href\s*=\s*([^\s>]+)/i);
+          var href = hrefMatch && hrefMatch[1] ? String(hrefMatch[1]).trim() : '';
+          if (!/^https?:\/\//i.test(href)) return '';
+          return '<a href="' + href + '" target="_blank" rel="noreferrer">';
+        }
+        return '';
+      })
+      .replace(/(<br>\s*){3,}/gi, '<br><br>')
+      .replace(/^(<br>\s*)+|(<br>\s*)+$/gi, '')
+      .trim();
+  }
+
   function applyAccent(color) {
     if (!isHexColor(color)) return;
     document.documentElement.style.setProperty('--red', color);
@@ -210,16 +246,16 @@
     if (header) {
       var titleTarget = header.querySelector('span:not(.ttt-badge)');
       if (titleTarget) {
-        titleTarget.textContent = String(hero.title || 'Loading');
+        titleTarget.innerHTML = sanitizeRichTextHtml(hero.title || 'Loading');
       }
     }
 
-    setText('.card-ttt .ttt-subtitle', hero.subtitle || 'Conectando...');
+    setHtml('.card-ttt .ttt-subtitle', sanitizeRichTextHtml(hero.subtitle || 'Conectando...'));
 
     var lines = safeArray(hero.descriptionLines);
     var html = lines
       .map(function (line) {
-        return '<div class="role-line">' + escapeHtml(line) + '</div>';
+        return '<div class="role-line">' + sanitizeRichTextHtml(line) + '</div>';
       })
       .join('');
     setHtml('.card-ttt .ttt-text', html);
@@ -234,12 +270,12 @@
     var qrImageUrl = String(notice.qrImageUrl || '').trim();
 
     if (document.querySelector('.maps-fix-card')) {
-      setText('.maps-fix-title', notice.title || 'Aviso');
+      setHtml('.maps-fix-title', sanitizeRichTextHtml(notice.title || 'Aviso'));
       setHtml(
         '.maps-fix-text',
         lines
           .map(function (line) {
-            return '<div>' + escapeHtml(line) + '</div>';
+            return '<div>' + sanitizeRichTextHtml(line) + '</div>';
           })
           .join('')
       );
@@ -278,12 +314,12 @@
       return;
     }
 
-    setText('.vip-club-title', notice.title || 'Aviso');
+    setHtml('.vip-club-title', sanitizeRichTextHtml(notice.title || 'Aviso'));
     var sandboxText = document.querySelector('.vip-club-text');
     if (sandboxText) {
       var textHtml = lines
         .map(function (line) {
-          return '<div>' + escapeHtml(line) + '</div>';
+          return '<div>' + sanitizeRichTextHtml(line) + '</div>';
         })
         .join('<br>');
 
@@ -317,7 +353,7 @@
       num.textContent = String(index + 1);
 
       var text = document.createElement('div');
-      text.textContent = rule;
+      text.innerHTML = sanitizeRichTextHtml(rule);
 
       row.appendChild(num);
       row.appendChild(text);
