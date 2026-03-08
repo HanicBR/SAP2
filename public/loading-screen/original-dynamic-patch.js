@@ -184,6 +184,17 @@
     }
   }
 
+  function ensureNeutralBackgroundStyles() {
+    if (document.getElementById('bsb-bg-neutral-style')) return;
+    var style = document.createElement('style');
+    style.id = 'bsb-bg-neutral-style';
+    style.textContent =
+      '.bg-layer::before{background:none !important}' +
+      '.bg-layer img{filter:none !important}' +
+      '#bg-layer{filter:none !important}';
+    document.head.appendChild(style);
+  }
+
   function applyHero(hero) {
     if (!hero || typeof hero !== 'object') return;
 
@@ -582,6 +593,7 @@
   }
 
   function applyProfile(profile) {
+    ensureNeutralBackgroundStyles();
     applyAccent(profile.accentColor);
     applyBackgroundColor(profile.backgroundColor);
     applyHero(profile.hero);
