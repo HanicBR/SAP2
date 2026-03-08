@@ -256,8 +256,6 @@
   function applyBackgroundOverlayOpacity(value) {
     var safe = Math.round(clampNumber(value, DEFAULT_BG_OVERLAY_OPACITY_PCT, 0, 100));
     var brightness = Math.max(0.48, 1 - safe * 0.00515);
-    var filterValue =
-      'brightness(' + brightness.toFixed(3) + ') saturate(1.02) contrast(1.00)';
     var overlay = ensureBackgroundOverlayLayer();
     if (overlay) {
       var intensity = safe / DEFAULT_BG_OVERLAY_OPACITY_PCT;
@@ -277,13 +275,13 @@
     var layer = document.getElementById('bg-layer') || document.querySelector('.bg-layer');
     if (layer) {
       var baseColor = String(layer.getAttribute('data-bsb-bg-base') || '#2a3145').trim();
-      layer.style.backgroundColor = baseColor;
-      layer.style.filter = filterValue;
+      layer.style.backgroundColor = darkenHexColor(baseColor, brightness);
     }
 
     var bgImg = document.getElementById('bg-img');
     if (bgImg && bgImg.style) {
-      bgImg.style.filter = 'none';
+      bgImg.style.filter =
+        'brightness(' + brightness.toFixed(3) + ') saturate(1.02) contrast(1.00)';
     }
   }
 
