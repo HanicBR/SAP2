@@ -239,10 +239,27 @@
 
   function applyBackgroundOverlayOpacity(value) {
     var safe = Math.round(clampNumber(value, DEFAULT_BG_OVERLAY_OPACITY_PCT, 0, 100));
-    document.documentElement.style.setProperty('--bsb-bg-overlay-opacity', (safe / 100).toFixed(2));
     var overlay = ensureBackgroundOverlayLayer();
     if (overlay) {
-      overlay.style.backgroundColor = 'rgba(0,0,0,' + (safe / 100).toFixed(2) + ')';
+      var intensity = safe / DEFAULT_BG_OVERLAY_OPACITY_PCT;
+      var radialEnd = Math.min(0.15 * intensity, 0.55);
+      var linearTop = Math.min(0.09 * intensity, 0.4);
+      var linearBottom = Math.min(0.18 * intensity, 0.72);
+      overlay.style.background =
+        'radial-gradient(circle at 50% 30%, rgba(0,0,0,0.02), rgba(0,0,0,' +
+        radialEnd.toFixed(3) +
+        ') 70%), linear-gradient(180deg, rgba(0,0,0,' +
+        linearTop.toFixed(3) +
+        '), rgba(0,0,0,' +
+        linearBottom.toFixed(3) +
+        '))';
+    }
+
+    var bgImg = document.getElementById('bg-img');
+    if (bgImg && bgImg.style) {
+      var brightness = Math.max(0.48, 1 - safe * 0.00515);
+      bgImg.style.filter =
+        'brightness(' + brightness.toFixed(3) + ') saturate(1.02) contrast(1.00)';
     }
   }
 
@@ -251,8 +268,8 @@
     var style = document.createElement('style');
     style.id = 'bsb-bg-neutral-style';
     style.textContent =
-      '.bsb-bg-overlay{position:absolute;inset:0;z-index:1;pointer-events:none;background:rgba(0,0,0,0.35) !important}' +
-      '.bg-layer img{filter:none !important}' +
+      '.bg-layer::before{opacity:0 !important}' +
+      '.bsb-bg-overlay{position:absolute;inset:0;z-index:1;pointer-events:none}' +
       '#bg-layer{filter:none !important}';
     document.head.appendChild(style);
   }
