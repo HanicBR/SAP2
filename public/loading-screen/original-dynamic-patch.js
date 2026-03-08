@@ -255,6 +255,7 @@
 
   function applyBackgroundOverlayOpacity(value) {
     var safe = Math.round(clampNumber(value, DEFAULT_BG_OVERLAY_OPACITY_PCT, 0, 100));
+    var brightness = Math.max(0.48, 1 - safe * 0.00515);
     var overlay = ensureBackgroundOverlayLayer();
     if (overlay) {
       var intensity = safe / DEFAULT_BG_OVERLAY_OPACITY_PCT;
@@ -274,12 +275,11 @@
     var layer = document.getElementById('bg-layer') || document.querySelector('.bg-layer');
     if (layer) {
       var baseColor = String(layer.getAttribute('data-bsb-bg-base') || '#2a3145').trim();
-      layer.style.backgroundColor = darkenHexColor(baseColor, Math.max(0.16, 1 - safe * 0.006));
+      layer.style.backgroundColor = darkenHexColor(baseColor, brightness);
     }
 
     var bgImg = document.getElementById('bg-img');
     if (bgImg && bgImg.style) {
-      var brightness = Math.max(0.48, 1 - safe * 0.00515);
       bgImg.style.filter =
         'brightness(' + brightness.toFixed(3) + ') saturate(1.02) contrast(1.00)';
     }
@@ -472,6 +472,9 @@
     var style = document.createElement('style');
     style.id = 'bsb-vip-tier-style';
     style.textContent =
+      '.vip-list{grid-auto-columns:minmax(0,1fr) !important;align-items:stretch !important}' +
+      '.vip-card{width:100% !important;min-width:0 !important}' +
+      '.bsb-vip-info{flex:1 1 auto;min-width:0}' +
       '.bsb-vip-tier{margin-left:8px;display:inline-flex;align-items:center;justify-content:center;min-width:56px;padding:3px 8px;border-radius:999px;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;border:1px solid rgba(15,23,42,.18);background:rgba(15,23,42,.06);color:#0f172a;white-space:nowrap}' +
       '.bsb-vip-tier--plus{background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.35);color:#1e3a8a}' +
       '.bsb-vip-tier--plusplus{background:rgba(234,179,8,.16);border-color:rgba(234,179,8,.4);color:#854d0e}';
