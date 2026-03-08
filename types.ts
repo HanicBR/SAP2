@@ -1230,6 +1230,7 @@ export interface LoadingScreenProfile {
   routePath: string;
   accentColor: string;
   backgroundColor: string;
+  backgroundOverlayOpacityPct?: number;
   backgroundImages: string[];
   backgroundImageItems?: LoadingScreenBackgroundItem[];
   backgroundRotationSec?: number;

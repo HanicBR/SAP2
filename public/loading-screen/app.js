@@ -2,6 +2,7 @@
   var DEFAULT_BG_ZOOM_PCT = 7;
   var MIN_BG_ZOOM_PCT = -500;
   var MAX_BG_ZOOM_PCT = 500;
+  var DEFAULT_BG_OVERLAY_OPACITY_PCT = 35;
 
   var FALLBACKS = {
     tttloading: {
@@ -12,6 +13,7 @@
       routePath: '/tttloading',
       accentColor: '#be1b3c',
       backgroundColor: '#2a3145',
+      backgroundOverlayOpacityPct: DEFAULT_BG_OVERLAY_OPACITY_PCT,
       backgroundImages: ['https://i.imgur.com/HnZfcKR.jpeg'],
       backgroundRotationSec: 12,
       musicTracks: ['https://raw.githubusercontent.com/HanicBR/backtttloading/main/assets/music/gtavicecity.ogg'],
@@ -59,6 +61,7 @@
       routePath: '/sandboxloading',
       accentColor: '#be1b3c',
       backgroundColor: '#2a3145',
+      backgroundOverlayOpacityPct: DEFAULT_BG_OVERLAY_OPACITY_PCT,
       backgroundImages: ['https://i.imgur.com/HnZfcKR.jpeg'],
       backgroundRotationSec: 12,
       musicTracks: ['https://raw.githubusercontent.com/HanicBR/backtttloading/main/assets/music/gtavicecity.ogg'],
@@ -530,6 +533,14 @@
       routePath: String(source.routePath || '/' + slug),
       accentColor: sanitizeColor(source.accentColor || base.accentColor),
       backgroundColor: sanitizeColor(source.backgroundColor || base.backgroundColor || '#2a3145'),
+      backgroundOverlayOpacityPct: Math.round(
+        clampNumber(
+          source.backgroundOverlayOpacityPct,
+          Number(base.backgroundOverlayOpacityPct || DEFAULT_BG_OVERLAY_OPACITY_PCT),
+          0,
+          100,
+        ),
+      ),
       backgroundImageItems: safeBackgroundItems(source.backgroundImageItems, source.backgroundImages || base.backgroundImages),
       backgroundImages: safeBackgroundUrls(source.backgroundImageItems, source.backgroundImages || base.backgroundImages),
       backgroundRotationSec: Math.round(
@@ -575,6 +586,11 @@
     if (dom.bgLayer) {
       dom.bgLayer.style.backgroundColor = sanitizeColor(color);
     }
+  }
+
+  function setBackgroundOverlayOpacity(value) {
+    var safe = Math.round(clampNumber(value, DEFAULT_BG_OVERLAY_OPACITY_PCT, 0, 100));
+    document.documentElement.style.setProperty('--bg-overlay-opacity', (safe / 100).toFixed(2));
   }
 
   function renderLines(target, lines, ordered) {
@@ -654,6 +670,7 @@
 
     setAccent(profile.accentColor);
     setBackgroundColor(profile.backgroundColor);
+    setBackgroundOverlayOpacity(profile.backgroundOverlayOpacityPct);
     document.title = profile.name ? profile.name + ' - Loading' : 'Backstabber Loading';
 
     if (dom.heroBadge) dom.heroBadge.textContent = profile.hero.badge || profile.mode || 'BACK';

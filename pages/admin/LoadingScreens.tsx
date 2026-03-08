@@ -33,6 +33,9 @@ const nowIso = (): string => new Date().toISOString();
 const DEFAULT_BG_ZOOM_PCT = 7;
 const MIN_BG_ZOOM_PCT = -500;
 const MAX_BG_ZOOM_PCT = 500;
+const DEFAULT_BG_OVERLAY_OPACITY_PCT = 35;
+const MIN_BG_OVERLAY_OPACITY_PCT = 0;
+const MAX_BG_OVERLAY_OPACITY_PCT = 100;
 
 const normalizeSlug = (value: string): string =>
   String(value || '')
@@ -152,6 +155,14 @@ const makeDraft = (base?: LoadingScreenProfile): LoadingScreenProfile => {
     routePath: `/${slug}`,
     accentColor: base?.accentColor || '#be1b3c',
     backgroundColor: base?.backgroundColor || '#2a3145',
+    backgroundOverlayOpacityPct: Math.round(
+      clampNumber(
+        Number(base?.backgroundOverlayOpacityPct ?? DEFAULT_BG_OVERLAY_OPACITY_PCT),
+        DEFAULT_BG_OVERLAY_OPACITY_PCT,
+        MIN_BG_OVERLAY_OPACITY_PCT,
+        MAX_BG_OVERLAY_OPACITY_PCT,
+      ),
+    ),
     backgroundImages: backgroundImages.length > 0 ? backgroundImages : ['https://i.imgur.com/HnZfcKR.jpeg'],
     backgroundImageItems,
     backgroundRotationSec: Math.round(clampNumber(Number(base?.backgroundRotationSec ?? 12), 12, 3, 120)),
@@ -1185,6 +1196,64 @@ const LoadingScreens: React.FC = () => {
                     className={`${INPUT_CLASS} font-mono uppercase`}
                   />
                 </div>
+              </div>
+              <div>
+                <label className={LABEL_CLASS}>Escurecimento do fundo</label>
+                <input
+                  type="number"
+                  min={MIN_BG_OVERLAY_OPACITY_PCT}
+                  max={MAX_BG_OVERLAY_OPACITY_PCT}
+                  step={1}
+                  value={Math.round(
+                    clampNumber(
+                      Number(draft.backgroundOverlayOpacityPct ?? DEFAULT_BG_OVERLAY_OPACITY_PCT),
+                      DEFAULT_BG_OVERLAY_OPACITY_PCT,
+                      MIN_BG_OVERLAY_OPACITY_PCT,
+                      MAX_BG_OVERLAY_OPACITY_PCT,
+                    ),
+                  )}
+                  onChange={(event) =>
+                    updateDraft({
+                      backgroundOverlayOpacityPct: Math.round(
+                        clampNumber(
+                          Number(event.target.value),
+                          DEFAULT_BG_OVERLAY_OPACITY_PCT,
+                          MIN_BG_OVERLAY_OPACITY_PCT,
+                          MAX_BG_OVERLAY_OPACITY_PCT,
+                        ),
+                      ),
+                    })
+                  }
+                  className={`${INPUT_CLASS} text-xs`}
+                />
+                <input
+                  type="range"
+                  min={MIN_BG_OVERLAY_OPACITY_PCT}
+                  max={MAX_BG_OVERLAY_OPACITY_PCT}
+                  step={1}
+                  value={Math.round(
+                    clampNumber(
+                      Number(draft.backgroundOverlayOpacityPct ?? DEFAULT_BG_OVERLAY_OPACITY_PCT),
+                      DEFAULT_BG_OVERLAY_OPACITY_PCT,
+                      MIN_BG_OVERLAY_OPACITY_PCT,
+                      MAX_BG_OVERLAY_OPACITY_PCT,
+                    ),
+                  )}
+                  onChange={(event) =>
+                    updateDraft({
+                      backgroundOverlayOpacityPct: Math.round(
+                        clampNumber(
+                          Number(event.target.value),
+                          DEFAULT_BG_OVERLAY_OPACITY_PCT,
+                          MIN_BG_OVERLAY_OPACITY_PCT,
+                          MAX_BG_OVERLAY_OPACITY_PCT,
+                        ),
+                      ),
+                    })
+                  }
+                  className="mt-2 w-full accent-red-600"
+                />
+                <p className="mt-1 text-[11px] text-zinc-500">0 = sem escurecer, 100 = fundo totalmente preto.</p>
               </div>
             </div>
             <label className="mt-3 inline-flex items-center gap-2 rounded border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-300">

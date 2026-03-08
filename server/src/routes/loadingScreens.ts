@@ -64,6 +64,7 @@ type LoadingScreenProfile = {
   routePath: string;
   accentColor: string;
   backgroundColor: string;
+  backgroundOverlayOpacityPct: number;
   backgroundImages: string[];
   backgroundImageItems: LoadingScreenBackgroundItem[];
   backgroundRotationSec: number;
@@ -105,6 +106,9 @@ const MAX_BG_ROTATION_SEC = 120;
 const DEFAULT_BG_ZOOM_PCT = 7;
 const MIN_BG_ZOOM_PCT = -500;
 const MAX_BG_ZOOM_PCT = 500;
+const DEFAULT_BG_OVERLAY_OPACITY_PCT = 35;
+const MIN_BG_OVERLAY_OPACITY_PCT = 0;
+const MAX_BG_OVERLAY_OPACITY_PCT = 100;
 const MIN_MUSIC_VOLUME_PCT = 0;
 const MAX_MUSIC_VOLUME_PCT = 300;
 
@@ -843,6 +847,7 @@ const buildDefaultProfiles = (): LoadingScreenProfile[] => {
       routePath: '/tttloading',
       accentColor: '#be1b3c',
       backgroundColor: '#2a3145',
+      backgroundOverlayOpacityPct: DEFAULT_BG_OVERLAY_OPACITY_PCT,
       backgroundImages: ['https://i.imgur.com/HnZfcKR.jpeg'],
       backgroundImageItems: [
         {
@@ -913,6 +918,7 @@ const buildDefaultProfiles = (): LoadingScreenProfile[] => {
       routePath: '/sandboxloading',
       accentColor: '#be1b3c',
       backgroundColor: '#2a3145',
+      backgroundOverlayOpacityPct: DEFAULT_BG_OVERLAY_OPACITY_PCT,
       backgroundImages: ['https://i.imgur.com/HnZfcKR.jpeg'],
       backgroundImageItems: [
         {
@@ -1058,6 +1064,12 @@ const normalizeProfile = (input: unknown, fallback?: LoadingScreenProfile): Load
     routePath: `/${slug}`,
     accentColor: sanitizeColor(record.accentColor, base.accentColor),
     backgroundColor: sanitizeColor(record.backgroundColor, base.backgroundColor || '#2a3145'),
+    backgroundOverlayOpacityPct: clampInt(
+      record.backgroundOverlayOpacityPct,
+      base.backgroundOverlayOpacityPct ?? DEFAULT_BG_OVERLAY_OPACITY_PCT,
+      MIN_BG_OVERLAY_OPACITY_PCT,
+      MAX_BG_OVERLAY_OPACITY_PCT,
+    ),
     backgroundImages: activeBackgroundImages,
     backgroundImageItems,
     backgroundRotationSec,
