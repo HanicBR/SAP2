@@ -53,12 +53,13 @@ body::before {
   filter: none;
 }
 
-#bg-layer::after {
-  content: '';
+#bg-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, var(--bg-overlay-opacity));
+  z-index: 1;
+  background: rgba(0, 0, 0, 0.35);
   pointer-events: none;
+  transition: background-color 180ms ease;
 }
 
 #root {

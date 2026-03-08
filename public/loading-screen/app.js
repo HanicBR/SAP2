@@ -591,9 +591,24 @@
     }
   }
 
+  function ensureBackgroundOverlayLayer() {
+    if (!dom.bgLayer) return null;
+    var existing = document.getElementById('bg-overlay');
+    if (existing) return existing;
+
+    var overlay = document.createElement('div');
+    overlay.id = 'bg-overlay';
+    dom.bgLayer.appendChild(overlay);
+    return overlay;
+  }
+
   function setBackgroundOverlayOpacity(value) {
     var safe = Math.round(clampNumber(value, DEFAULT_BG_OVERLAY_OPACITY_PCT, 0, 100));
     document.documentElement.style.setProperty('--bg-overlay-opacity', (safe / 100).toFixed(2));
+    var overlay = ensureBackgroundOverlayLayer();
+    if (overlay) {
+      overlay.style.backgroundColor = 'rgba(0, 0, 0, ' + (safe / 100).toFixed(2) + ')';
+    }
   }
 
   function sanitizeRichTextHtml(value) {

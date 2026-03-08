@@ -221,9 +221,29 @@
     }
   }
 
+  function ensureBackgroundOverlayLayer() {
+    var layer = document.getElementById('bg-layer') || document.querySelector('.bg-layer');
+    if (!layer) return null;
+
+    var existing =
+      document.getElementById('bsb-bg-overlay') ||
+      layer.querySelector('.bsb-bg-overlay');
+    if (existing) return existing;
+
+    var overlay = document.createElement('div');
+    overlay.id = 'bsb-bg-overlay';
+    overlay.className = 'bsb-bg-overlay';
+    layer.appendChild(overlay);
+    return overlay;
+  }
+
   function applyBackgroundOverlayOpacity(value) {
     var safe = Math.round(clampNumber(value, DEFAULT_BG_OVERLAY_OPACITY_PCT, 0, 100));
     document.documentElement.style.setProperty('--bsb-bg-overlay-opacity', (safe / 100).toFixed(2));
+    var overlay = ensureBackgroundOverlayLayer();
+    if (overlay) {
+      overlay.style.backgroundColor = 'rgba(0,0,0,' + (safe / 100).toFixed(2) + ')';
+    }
   }
 
   function ensureNeutralBackgroundStyles() {
@@ -231,7 +251,7 @@
     var style = document.createElement('style');
     style.id = 'bsb-bg-neutral-style';
     style.textContent =
-      '.bg-layer::before{background:rgba(0,0,0,var(--bsb-bg-overlay-opacity,0.35)) !important}' +
+      '.bsb-bg-overlay{position:absolute;inset:0;z-index:1;pointer-events:none;background:rgba(0,0,0,0.35) !important}' +
       '.bg-layer img{filter:none !important}' +
       '#bg-layer{filter:none !important}';
     document.head.appendChild(style);
