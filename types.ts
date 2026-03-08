@@ -1241,6 +1241,7 @@ export interface LoadingScreenProfile {
   notice: LoadingScreenNotice;
   rules: string[];
   vipTitle: string;
+  showVipSteamIds?: boolean;
   vipPlayers: LoadingScreenVipEntry[];
   updatedAt: string;
 }

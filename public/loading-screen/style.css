@@ -251,11 +251,16 @@ body::before {
   display: grid;
   grid-template-columns: 38px 1fr auto;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.04);
   padding: 7px;
+}
+
+.vip-info {
+  min-width: 0;
+  padding-left: 2px;
 }
 
 .vip-avatar {
@@ -274,7 +279,7 @@ body::before {
 }
 
 .vip-steam {
-  margin-top: 3px;
+  margin-top: 5px;
   font-size: 11px;
   color: var(--muted);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;

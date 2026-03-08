@@ -45,6 +45,7 @@
         'Use !discord para entrar no Discord da rede.',
       ],
       vipTitle: 'Destaques da comunidade',
+      showVipSteamIds: false,
       vipPlayers: [
         {
           name: 'Mr.B-O-M-B-A-S-T-I-C',
@@ -90,6 +91,7 @@
         'Use !steam para entrar no grupo Steam.',
       ],
       vipTitle: 'Jogadores em destaque',
+      showVipSteamIds: false,
       vipPlayers: [
         {
           name: 'Sheva',
@@ -563,6 +565,7 @@
       },
       rules: safeLines(source.rules, base.rules),
       vipTitle: String(source.vipTitle || base.vipTitle || 'Destaques').trim(),
+      showVipSteamIds: source.showVipSteamIds === true,
       vipPlayers: safePlayers(source.vipPlayers || base.vipPlayers),
     };
   }
@@ -659,7 +662,7 @@
     target.appendChild(fragment);
   }
 
-  function renderVips(title, players) {
+  function renderVips(title, players, showSteamIds) {
     if (dom.vipTitle) dom.vipTitle.textContent = title || 'Destaques';
     if (!dom.vipList) return;
 
@@ -679,17 +682,19 @@
         ('https://api.dicebear.com/7.x/bottts/svg?seed=' + encodeURIComponent(player.name || 'vip'));
 
       var info = document.createElement('div');
+      info.className = 'vip-info';
       info.style.minWidth = '0';
       var name = document.createElement('div');
       name.className = 'vip-name';
       name.textContent = player.name || 'Jogador';
 
-      var steam = document.createElement('div');
-      steam.className = 'vip-steam';
-      steam.textContent = player.steamId || '';
-
       info.appendChild(name);
-      info.appendChild(steam);
+      if (showSteamIds && player.steamId) {
+        var steam = document.createElement('div');
+        steam.className = 'vip-steam';
+        steam.textContent = player.steamId;
+        info.appendChild(steam);
+      }
 
       var tier = document.createElement('span');
       var plan = normalizeVipPlan(player.vipPlan);
@@ -745,7 +750,7 @@
     }
 
     renderLines(dom.rulesList, profile.rules, true);
-    renderVips(profile.vipTitle, profile.vipPlayers);
+    renderVips(profile.vipTitle, profile.vipPlayers, profile.showVipSteamIds === true);
 
     startBackgroundRotation(profile.backgroundImageItems || [], profile.backgroundRotationSec || 12);
     initMusic(profile.musicTracks || [], 100);

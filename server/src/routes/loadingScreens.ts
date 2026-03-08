@@ -75,6 +75,7 @@ type LoadingScreenProfile = {
   notice: LoadingScreenNotice;
   rules: string[];
   vipTitle: string;
+  showVipSteamIds: boolean;
   vipPlayers: LoadingScreenVipEntry[];
   updatedAt: string;
 };
@@ -938,6 +939,7 @@ const buildDefaultProfiles = (): LoadingScreenProfile[] => {
         'Use !discord para entrar no Discord da rede.',
       ],
       vipTitle: 'Destaques da comunidade',
+      showVipSteamIds: false,
       vipPlayers: [
         {
           name: 'Mr.B-O-M-B-A-S-T-I-C',
@@ -1006,6 +1008,7 @@ const buildDefaultProfiles = (): LoadingScreenProfile[] => {
         'Use !steam para entrar no grupo Steam.',
       ],
       vipTitle: 'Jogadores em destaque',
+      showVipSteamIds: false,
       vipPlayers: [
         {
           name: 'Sheva',
@@ -1124,6 +1127,7 @@ const normalizeProfile = (input: unknown, fallback?: LoadingScreenProfile): Load
     notice,
     rules: toLines(record.rules, MAX_RULES, base.rules).map((item) => item.slice(0, MAX_LINE_LENGTH)),
     vipTitle: trimTo(record.vipTitle, 120, base.vipTitle),
+    showVipSteamIds: parseBool(record.showVipSteamIds, base.showVipSteamIds),
     vipPlayers: sanitizeVipPlayers(record.vipPlayers, base.vipPlayers),
     updatedAt: trimTo(record.updatedAt, 40, nowIso),
   };

@@ -173,6 +173,7 @@ const makeDraft = (base?: LoadingScreenProfile): LoadingScreenProfile => {
     },
     rules: base?.rules?.length ? [...base.rules] : ['Regra 1', 'Regra 2', 'Regra 3'],
     vipTitle: base?.vipTitle || 'Destaques da comunidade',
+    showVipSteamIds: base?.showVipSteamIds === true,
     vipPlayers: [],
     updatedAt: nowIso(),
   };
@@ -1685,7 +1686,7 @@ const LoadingScreens: React.FC = () => {
                     (draft.musicTrackItems || []).map((item) => (
                       <div
                         key={item.id}
-                        className="grid items-center gap-2 rounded border border-zinc-800 bg-zinc-950 p-2 sm:grid-cols-[1fr_auto_auto_auto]"
+                        className="grid items-center gap-2 rounded border border-zinc-800 bg-zinc-950 p-2 xl:grid-cols-[minmax(0,1fr)_220px_auto_auto_auto]"
                       >
                         <div className="min-w-0">
                           <div className="truncate text-xs text-zinc-300">{item.url}</div>
@@ -1693,6 +1694,14 @@ const LoadingScreens: React.FC = () => {
                             {item.enabled ? 'Ativa' : 'Desativada'}
                           </div>
                         </div>
+                        <audio
+                          controls
+                          preload="none"
+                          src={item.url}
+                          className="h-9 w-full min-w-0 rounded border border-zinc-800 bg-zinc-900"
+                        >
+                          Seu navegador nao suporta audio.
+                        </audio>
                         <label className="inline-flex items-center gap-1 rounded border border-zinc-700 bg-zinc-900 px-2 py-1 text-[11px] text-zinc-300">
                           <input
                             type="checkbox"
@@ -1772,7 +1781,7 @@ const LoadingScreens: React.FC = () => {
                   {syncedVipPlayers.map((vip, index) => (
                     <div
                       key={`${vip.steamId || vip.name}-${index}`}
-                      className="grid items-center gap-2 rounded border border-zinc-800 bg-zinc-900/70 p-2 md:grid-cols-[auto_1fr_auto]"
+                      className="grid items-center gap-3 rounded border border-zinc-800 bg-zinc-900/70 p-2 md:grid-cols-[auto_1fr_auto]"
                     >
                       <img
                         src={vip.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(vip.steamId || vip.name)}`}
@@ -1782,7 +1791,9 @@ const LoadingScreens: React.FC = () => {
                       />
                       <div className="min-w-0">
                         <div className="truncate text-xs font-bold text-zinc-200">{vip.name}</div>
-                        <div className="truncate font-mono text-[11px] text-zinc-500">{vip.steamId || '-'}</div>
+                        {draft.showVipSteamIds ? (
+                          <div className="truncate pt-0.5 font-mono text-[11px] text-zinc-500">{vip.steamId || '-'}</div>
+                        ) : null}
                       </div>
                       <span className="rounded border border-fuchsia-900/50 bg-fuchsia-900/20 px-2 py-1 text-[10px] font-bold uppercase text-fuchsia-200">
                         {vip.vipPlan || 'VIP'}
@@ -1791,6 +1802,14 @@ const LoadingScreens: React.FC = () => {
                   ))}
                 </div>
               ) : null}
+              <label className="mt-3 inline-flex items-center gap-2 rounded border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs text-zinc-300">
+                <input
+                  type="checkbox"
+                  checked={draft.showVipSteamIds === true}
+                  onChange={(event) => updateDraft({ showVipSteamIds: event.target.checked })}
+                />
+                Mostrar SteamID na loading
+              </label>
             </div>
             <div className="mt-3 rounded border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs text-zinc-500">
               A configuracao manual de destaque VIP foi ocultada. Os VIPs da loading agora sao preenchidos automaticamente pelo modulo VIP do site.

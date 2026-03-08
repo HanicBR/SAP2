@@ -361,7 +361,7 @@
     });
   }
 
-  function renderVipFallback(players) {
+  function renderVipFallback(players, showSteamIds) {
     var list = document.querySelector('.vip-list');
     if (!list) return;
 
@@ -379,17 +379,19 @@
         'https://api.dicebear.com/7.x/bottts/svg?seed=' + encodeURIComponent(player.name || 'vip');
 
       var textWrap = document.createElement('div');
+      textWrap.className = 'bsb-vip-info';
       textWrap.style.minWidth = '0';
       var name = document.createElement('div');
       name.className = 'vip-name rainbow-text';
       name.textContent = player.name;
 
-      var steam = document.createElement('div');
-      steam.className = 'vip-id';
-      steam.textContent = player.steamId || '';
-
       textWrap.appendChild(name);
-      textWrap.appendChild(steam);
+      if (showSteamIds && player.steamId) {
+        var steam = document.createElement('div');
+        steam.className = 'vip-id';
+        steam.textContent = player.steamId;
+        textWrap.appendChild(steam);
+      }
 
       var tier = document.createElement('span');
       tier.className = 'bsb-vip-tier';
@@ -417,7 +419,7 @@
     document.head.appendChild(style);
   }
 
-  function decorateVipCardsFromList(mappedPlayers) {
+  function decorateVipCardsFromList(mappedPlayers, showSteamIds) {
     ensureVipTierStyles();
     var list = document.querySelector('.vip-list');
     if (!list) return;
@@ -431,12 +433,23 @@
       card.style.display = 'grid';
       card.style.gridTemplateColumns = '40px minmax(0,1fr) auto';
       card.style.alignItems = 'center';
-      card.style.columnGap = '10px';
+      card.style.columnGap = '14px';
 
       var infoWrap = card.children && card.children[1];
       if (infoWrap && infoWrap.style) {
         infoWrap.style.minWidth = '0';
         infoWrap.style.textAlign = 'left';
+        infoWrap.style.paddingLeft = '2px';
+      }
+
+      var steam = card.querySelector('.vip-id');
+      if (steam) {
+        if (showSteamIds && player.steamId) {
+          steam.textContent = player.steamId;
+          steam.style.display = '';
+        } else {
+          steam.remove();
+        }
       }
 
       var existing = card.querySelector('.bsb-vip-tier');
@@ -452,12 +465,12 @@
     });
   }
 
-  function applyVip(vipTitle, players) {
+  function applyVip(vipTitle, players, showSteamIds) {
     setText('.vip-title', vipTitle || 'Jogadores em destaque');
 
     var mapped = players.map(function (entry) {
       return {
-        steamId: entry.steamId || '',
+        steamId: showSteamIds ? entry.steamId || '' : '',
         name: entry.name,
         avatar: entry.avatarUrl || '',
         vipPlan: normalizeVipPlan(entry.vipPlan),
@@ -475,11 +488,11 @@
 
     if (typeof window.renderVips === 'function') {
       window.renderVips();
-      decorateVipCardsFromList(mapped);
+      decorateVipCardsFromList(mapped, showSteamIds);
       return;
     }
 
-    renderVipFallback(players);
+    renderVipFallback(players, showSteamIds);
   }
 
   function applyBackground(backgroundImages, rotationSec) {
@@ -628,6 +641,7 @@
       notice: source.notice && typeof source.notice === 'object' ? source.notice : {},
       rules: safeArray(source.rules),
       vipTitle: String(source.vipTitle || ''),
+      showVipSteamIds: source.showVipSteamIds === true,
       vipPlayers: safePlayers(source.vipPlayers),
     };
   }
@@ -650,7 +664,7 @@
     applyHero(profile.hero);
     applyNotice(profile.notice);
     applyRules(profile.rules);
-    applyVip(profile.vipTitle, profile.vipPlayers);
+    applyVip(profile.vipTitle, profile.vipPlayers, profile.showVipSteamIds === true);
     applyBackground(profile.backgroundImageItems, profile.backgroundRotationSec);
     applyMusic(profile.musicTracks, 100);
   }
