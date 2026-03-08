@@ -11,6 +11,12 @@
   --radius-lg: 24px;
   --radius-md: 16px;
   --radius-sm: 12px;
+  --page-gap: clamp(10px, 1vw, 14px);
+  --page-pad-x: clamp(8px, 1.2vw, 16px);
+  --page-pad-top: clamp(6px, 0.9vw, 14px);
+  --page-pad-bottom: clamp(8px, 1vw, 16px);
+  --card-pad: clamp(12px, 1.3vw, 18px);
+  --section-gap: clamp(10px, 1vw, 12px);
 }
 
 * {
@@ -62,14 +68,14 @@ body::before {
   height: 100%;
   display: grid;
   grid-template-rows: auto 1fr auto;
-  gap: 14px;
-  padding: clamp(8px, 1.2vw, 16px);
+  gap: var(--page-gap);
+  padding: var(--page-pad-top) var(--page-pad-x) var(--page-pad-bottom);
 }
 
 .top-grid {
   display: grid;
   grid-template-columns: 1.15fr 1fr 1fr;
-  gap: 12px;
+  gap: var(--section-gap);
   min-height: 0;
 }
 
@@ -80,7 +86,7 @@ body::before {
   border: 1px solid var(--border);
   background: var(--glass);
   box-shadow: var(--shadow);
-  padding: clamp(12px, 1.3vw, 18px);
+  padding: var(--card-pad);
 }
 
 .card::after {
@@ -115,7 +121,7 @@ body::before {
 
 .title {
   margin: 0;
-  font-size: clamp(18px, 1.7vw, 26px);
+  font-size: clamp(20px, 1.7vw, 26px);
   font-weight: 900;
   letter-spacing: 0.02em;
 }
@@ -147,7 +153,7 @@ body::before {
 
 .notice-title {
   margin: 0;
-  font-size: clamp(18px, 1.6vw, 25px);
+  font-size: clamp(20px, 1.6vw, 25px);
   font-weight: 900;
 }
 
@@ -224,7 +230,7 @@ body::before {
   border: 1px solid var(--border);
   background: var(--glass-strong);
   box-shadow: var(--shadow);
-  padding: 12px;
+  padding: var(--card-pad);
   min-height: 0;
 }
 
@@ -319,7 +325,7 @@ body::before {
   border: 1px solid var(--border);
   background: var(--glass-strong);
   box-shadow: var(--shadow);
-  padding: 12px;
+  padding: var(--card-pad);
   display: grid;
   gap: 10px;
 }
@@ -405,12 +411,20 @@ body::before {
 }
 
 @media (max-width: 1200px) {
+  :root {
+    --page-gap: 10px;
+    --page-pad-top: 8px;
+    --page-pad-bottom: 10px;
+    --card-pad: 14px;
+    --section-gap: 10px;
+  }
+
   .top-grid {
     grid-template-columns: 1fr;
   }
 
   .scroll-area {
-    max-height: 170px;
+    max-height: 210px;
   }
 
   .vip-list {
@@ -429,8 +443,42 @@ body::before {
     height: auto;
   }
 
+  :root {
+    --page-gap: 8px;
+    --page-pad-x: 8px;
+    --page-pad-top: 6px;
+    --page-pad-bottom: 10px;
+    --card-pad: 11px;
+    --section-gap: 8px;
+    --radius-lg: 20px;
+  }
+
+  .card-title-row {
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .title {
+    font-size: clamp(20px, 4.8vw, 24px);
+  }
+
+  .notice-title {
+    font-size: clamp(19px, 4.5vw, 23px);
+  }
+
+  .list,
+  .notice-lines,
+  .status {
+    font-size: 14px;
+  }
+
   .server-name {
+    font-size: clamp(24px, 7vw, 32px);
     letter-spacing: 0.08em;
+  }
+
+  .progress-percent {
+    font-size: clamp(22px, 6vw, 28px);
   }
 
   .footer-bottom {
@@ -439,5 +487,77 @@ body::before {
 
   .mini {
     text-align: left;
+  }
+}
+
+@media (max-height: 860px) {
+  html,
+  body {
+    overflow: auto;
+  }
+
+  #root {
+    min-height: 100vh;
+    height: auto;
+  }
+
+  :root {
+    --page-gap: 8px;
+    --page-pad-top: 5px;
+    --page-pad-bottom: 8px;
+    --card-pad: 11px;
+    --section-gap: 8px;
+  }
+
+  .card-title-row {
+    margin-bottom: 8px;
+  }
+
+  .scroll-area {
+    max-height: 210px;
+  }
+
+  .notice-cta {
+    margin-top: 10px;
+    padding: 9px 11px;
+  }
+
+  .vip-list {
+    max-height: 160px;
+  }
+}
+
+@media (max-height: 720px) {
+  :root {
+    --page-gap: 6px;
+    --page-pad-top: 4px;
+    --page-pad-bottom: 8px;
+    --card-pad: 10px;
+    --section-gap: 6px;
+    --radius-lg: 18px;
+  }
+
+  .card-title-row {
+    margin-bottom: 6px;
+  }
+
+  .list,
+  .notice-lines,
+  .rules-list {
+    gap: 6px;
+  }
+
+  .notice-cta {
+    margin-top: 8px;
+    padding: 8px 10px;
+  }
+
+  .vip-list {
+    margin-top: 8px;
+    max-height: 140px;
+  }
+
+  .footer-card {
+    gap: 8px;
   }
 }
